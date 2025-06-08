@@ -1023,6 +1023,7 @@ class _ChatScreenBody extends StatelessWidget {
                     child: TextField(
                       controller: messageController,
                       enabled: !isApiLoading,
+                      textCapitalization: TextCapitalization.sentences,
                       decoration: const InputDecoration(
                         hintText: 'Write a message',
                         border: InputBorder.none,
