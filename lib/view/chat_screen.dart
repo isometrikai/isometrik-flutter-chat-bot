@@ -100,44 +100,6 @@ class _ChatScreenState extends State<ChatScreen> {
     _scrollToBottom();
   }
 
-  // void _handleChatResponse(ChatResponse response) {
-  //   final messageId = DateTime.now().millisecondsSinceEpoch.toString();
-  //   ChatWidget? storesWidget;
-  //   ChatWidget? productsWidget; // Add this
-  //
-  //   try {
-  //     storesWidget = response.widgets.firstWhere((widget) => widget.isStoresWidget);
-  //   } catch (e) {
-  //     storesWidget = null;
-  //   }
-  //
-  //   try {
-  //     productsWidget = response.widgets.firstWhere((widget) => widget.isProductsWidget);
-  //   } catch (e) {
-  //     productsWidget = null;
-  //   }
-  //
-  //   setState(() {
-  //     messages.add(ChatMessage(
-  //       id: messageId,
-  //       text: response.response,
-  //       isBot: true,
-  //       showAvatar: true,
-  //       hasFoodCards: false,
-  //       hasRestaurantCards: false,
-  //       hasStoreCards: storesWidget != null,
-  //       hasProductCards: productsWidget != null, // Add this
-  //       hasOptionButtons: response.hasWidgets && response.optionsWidgets.isNotEmpty,
-  //       optionButtons: response.hasWidgets && response.optionsWidgets.isNotEmpty
-  //           ? response.optionsWidgets.first.options
-  //           : [],
-  //       stores: storesWidget?.stores ?? [],
-  //       products: productsWidget?.products ?? [], // Add this
-  //     ));
-  //   });
-  //   _scrollToBottom();
-  // }
-
   void _scrollToBottom() {
     Future.delayed(const Duration(milliseconds: 100), () {
       if (_scrollController.hasClients) {
@@ -179,7 +141,7 @@ class _ChatScreenState extends State<ChatScreen> {
     }
   }
 
-  void _testChatAPI() {
+  void _restartChatAPI() {
     setState(() {
       // Clear all messages except welcome message
       messages = [
@@ -226,7 +188,7 @@ class _ChatScreenState extends State<ChatScreen> {
         onHandleChatResponse: _handleChatResponse,
         onScrollToBottom: _scrollToBottom,
         onLoadChatbotData: _loadChatbotData,
-        onTestChatAPI: _testChatAPI,
+        onRestartChatAPI: _restartChatAPI,
         onUpdateSelectedOptions: (Set<String> newSet) {
           setState(() {
             _selectedOptionMessages = newSet;
@@ -256,7 +218,7 @@ class _ChatScreenBody extends StatelessWidget {
   final Function(ChatResponse) onHandleChatResponse;
   final VoidCallback onScrollToBottom;
   final VoidCallback onLoadChatbotData;
-  final VoidCallback onTestChatAPI;
+  final VoidCallback onRestartChatAPI;
   final Function(Set<String>) onUpdateSelectedOptions;
   final Function(List<ChatMessage>) onUpdateMessages;
   final String? pendingMessage;
@@ -274,7 +236,7 @@ class _ChatScreenBody extends StatelessWidget {
     required this.onHandleChatResponse,
     required this.onScrollToBottom,
     required this.onLoadChatbotData,
-    required this.onTestChatAPI,
+    required this.onRestartChatAPI,
     required this.onUpdateSelectedOptions,
     required this.onUpdateMessages,
     required this.pendingMessage,
@@ -346,13 +308,13 @@ class _ChatScreenBody extends StatelessWidget {
                                     bottomLeft: Radius.circular(0) ,
                                     bottomRight: Radius.circular(8) ,
                                   ),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withOpacity(0.05),
-                                    blurRadius: 5,
-                                    offset: const Offset(0, 2),
-                                  ),
-                                ],
+                                // boxShadow: [
+                                //   BoxShadow(
+                                //     color: Colors.black.withOpacity(0.05),
+                                //     blurRadius: 5,
+                                //     offset: const Offset(0, 2),
+                                //   ),
+                                // ],
                                   border: Border.all(
                                     color: Colors.grey.shade300, // light gray
                                     width: 0.5,
@@ -550,7 +512,7 @@ class _ChatScreenBody extends StatelessWidget {
                     child: TextButton(
                       onPressed: () {
                         Navigator.of(context).pop();
-                        onTestChatAPI();
+                        onRestartChatAPI();
                       },
                       style: TextButton.styleFrom(
                         backgroundColor: Colors.black,
@@ -725,13 +687,13 @@ class _ChatScreenBody extends StatelessWidget {
                           color: Colors.grey.shade300, // light gray
                           width: 0.5,
                         ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.05),
-                            blurRadius: 5,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
+                        // boxShadow: [
+                        //   BoxShadow(
+                        //     color: Colors.black.withOpacity(0.05),
+                        //     blurRadius: 5,
+                        //     offset: const Offset(0, 2),
+                        //   ),
+                        // ],
                       ),
                       child: Text(
                         message.text,
@@ -838,13 +800,17 @@ class _ChatScreenBody extends StatelessWidget {
                         end: Alignment.bottomRight,
                       ),
                       borderRadius: BorderRadius.circular(8),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.1),
-                          blurRadius: 10,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
+                      border: Border.all(
+                        color: Colors.grey.shade300,
+                        width: 0.5,
+                      )
+                      // boxShadow: [
+                      //   BoxShadow(
+                      //     color: Colors.black.withOpacity(0.1),
+                      //     blurRadius: 10,
+                      //     offset: const Offset(0, 4),
+                      //   ),
+                      // ],
                     ),
                     child: RichText(
                       text: TextSpan(
@@ -1002,13 +968,16 @@ class _ChatScreenBody extends StatelessWidget {
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
             color: Colors.white,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.05),
-                blurRadius: 5,
-                offset: const Offset(0, -2),
-              ),
-            ],
+            border: Border(
+              top: BorderSide(color: Colors.grey.shade300, width: 0.5),
+            )
+            // boxShadow: [
+            //   BoxShadow(
+            //     color: Colors.black.withOpacity(0.05),
+            //     blurRadius: 5,
+            //     offset: const Offset(0, -2),
+            //   ),
+            // ],
           ),
           child: SafeArea(
             child: Row(
@@ -1059,13 +1028,12 @@ class _ChatScreenBody extends StatelessWidget {
     );
   }
 
-  // Revert _buildStoreCards method back to the separated version
   Widget _buildStoreCards(List<Store> stores) {
     return SizedBox(
-      height: 290, // Increased from 280 to 320 to accommodate larger image
+      height: 290,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.only(left: 70),
+        padding: const EdgeInsets.only(left: 65), // Changed from left: 70
         clipBehavior: Clip.none,
         itemCount: stores.length,
         separatorBuilder: (context, index) => const SizedBox(width: 12),
@@ -1086,13 +1054,17 @@ class _ChatScreenBody extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(8),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.08),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        border: Border.all(
+          color: Colors.grey.shade300,
+          width: 0.5,
+        )
+        // boxShadow: [
+        //   BoxShadow(
+        //     color: Colors.black.withOpacity(0.08),
+        //     blurRadius: 8,
+        //     offset: const Offset(0, 2),
+        //   ),
+        // ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1101,15 +1073,15 @@ class _ChatScreenBody extends StatelessWidget {
           Stack(
             children: [
               Container(
-                height: 160, // Increased from 120 to 160
+                height: 160,
                 width: double.infinity,
                 decoration: BoxDecoration(
                   borderRadius: const BorderRadius.vertical(top: Radius.circular(8)),
-                  gradient: const LinearGradient(
-                    colors: [Color(0xFF4A90E2), Color(0xFF7ED321)],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
+                  // gradient: const LinearGradient(
+                  //   colors: [Color(0xFF4A90E2), Color(0xFF7ED321)],
+                  //   begin: Alignment.topLeft,
+                  //   end: Alignment.bottomRight,
+                  // ),
                 ),
                 child: ClipRRect(
                   borderRadius: const BorderRadius.vertical(top: Radius.circular(8)),
@@ -1124,38 +1096,36 @@ class _ChatScreenBody extends StatelessWidget {
                 ),
               ),
               // Rating badge
-              Positioned(
-                top: 12,
-                left: 12,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(12),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.1),
-                        blurRadius: 4,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(Icons.star, color: Colors.black, size: 14),
-                      const SizedBox(width: 4),
-                      Text(
-                        store.avgRating.toStringAsFixed(1),
-                        style: const TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
+              if (store.avgRating > 0)
+                Positioned(
+                  top: 12,
+                  left: 12,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: Colors.grey.shade300,
+                        width: 0.5,
+                      )
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.star, color: Colors.black, size: 14),
+                        const SizedBox(width: 4),
+                        Text(
+                          store.avgRating.toStringAsFixed(1),
+                          style: const TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
-              ),
               // Service icons
               Positioned(
                 bottom: 12,
@@ -1180,7 +1150,7 @@ class _ChatScreenBody extends StatelessWidget {
           ),
           // Store Details - Reduced padding to accommodate larger image
           Padding(
-            padding: const EdgeInsets.all(12), // Reduced from 16 to 12
+            padding: const EdgeInsets.all(12),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -1332,13 +1302,17 @@ class _ChatScreenBody extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(8),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.08),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        border: Border.all(
+          color: Colors.grey.shade300,
+          width: 0.5,
+        ),
+        // boxShadow: [
+        //   BoxShadow(
+        //     color: Colors.black.withOpacity(0.08),
+        //     blurRadius: 8,
+        //     offset: const Offset(0, 2),
+        //   ),
+        // ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1382,7 +1356,7 @@ class _ChatScreenBody extends StatelessWidget {
                           fontWeight: FontWeight.w600,
                           color: Colors.black,
                         ),
-                        maxLines: 2,
+                        maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
                       const SizedBox(height: 4), // Reduced spacing
@@ -1391,6 +1365,7 @@ class _ChatScreenBody extends StatelessWidget {
                         children: [
                           Text(
                             "${product.currency.toUpperCase()} ${product.finalPrice.toStringAsFixed(2)}",
+                            maxLines: 1,
                             style: const TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.w400,
