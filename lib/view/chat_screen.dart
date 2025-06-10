@@ -7,7 +7,7 @@ import 'package:chat_bot/model/chat_message.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lottie/lottie.dart';
-import '../widgets/food_card_widget.dart';
+import '../services/callback_manage.dart';
 import '../services/api_service.dart';
 
 class ChatScreen extends StatefulWidget {
@@ -154,6 +154,7 @@ class _ChatScreenState extends State<ChatScreen> {
   void dispose() {
     _messageController.dispose();
     _scrollController.dispose();
+    OrderService().clearCallback();
     super.dispose();
   }
 
@@ -1040,204 +1041,211 @@ class _ChatScreenBody extends StatelessWidget {
 
   // Add this method to build individual store card
   Widget _buildStoreCard(Store store) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(
-          color: Colors.grey.shade300,
-          width: 0.5,
-        )
-        // boxShadow: [
-        //   BoxShadow(
-        //     color: Colors.black.withOpacity(0.08),
-        //     blurRadius: 8,
-        //     offset: const Offset(0, 2),
-        //   ),
-        // ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Store Image with Rating - Increased height
-          Stack(
-            children: [
-              Container(
-                height: 160,
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(8)),
-                  // gradient: const LinearGradient(
-                  //   colors: [Color(0xFF4A90E2), Color(0xFF7ED321)],
-                  //   begin: Alignment.topLeft,
-                  //   end: Alignment.bottomRight,
-                  // ),
-                ),
-                child: ClipRRect(
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(8)),
-                  child: store.storeImage.isNotEmpty
-                      ? Image.network(
-                          store.storeImage,
-                          fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) =>
-                              _buildDefaultStoreImage(),
-                        )
-                      : _buildDefaultStoreImage(),
-                ),
-              ),
-              // Rating badge
-              if (store.avgRating > 0)
-                Positioned(
-                  top: 12,
-                  left: 12,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: Colors.grey.shade300,
-                        width: 0.5,
-                      )
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Icon(Icons.star, color: Colors.black, size: 14),
-                        const SizedBox(width: 4),
-                        Text(
-                          store.avgRating.toStringAsFixed(1),
-                          style: const TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              // Service icons
-              Positioned(
-                bottom: 12,
-                right: 12,
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    if (store.supportedOrderTypes == 3) ...[
-                         _buildCustomServiceIcon('assets/images/ic_delivery.png'),
-                          const SizedBox(width: 8),
-                          _buildCustomServiceIcon('assets/images/ic_pickup.png'),
-                    ]else ...[
-                           _buildCustomServiceIcon('assets/images/ic_pickup.png'),
-                    ],
-                    const SizedBox(width: 8),
-                    if (store.tableReservations)
-                      _buildCustomServiceIcon('assets/images/ic_dinein.png'),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          // Store Details - Reduced padding to accommodate larger image
-          Padding(
-            padding: const EdgeInsets.all(12),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+    return InkWell(
+      onTap: () {
+        print('Store clicked: ${store.storename}');
+        OrderService().triggerStoreOrder(store);
+        // Handle store card tap
+      },
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+            color: Colors.grey.shade300,
+            width: 0.5,
+          )
+          // boxShadow: [
+          //   BoxShadow(
+          //     color: Colors.black.withOpacity(0.08),
+          //     blurRadius: 8,
+          //     offset: const Offset(0, 2),
+          //   ),
+          // ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Store Image with Rating - Increased height
+            Stack(
               children: [
-                Text(
-                  store.storename,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
+                Container(
+                  height: 160,
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    borderRadius: const BorderRadius.vertical(top: Radius.circular(8)),
+                    // gradient: const LinearGradient(
+                    //   colors: [Color(0xFF4A90E2), Color(0xFF7ED321)],
+                    //   begin: Alignment.topLeft,
+                    //   end: Alignment.bottomRight,
+                    // ),
                   ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+                  child: ClipRRect(
+                    borderRadius: const BorderRadius.vertical(top: Radius.circular(8)),
+                    child: store.storeImage.isNotEmpty
+                        ? Image.network(
+                            store.storeImage,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) =>
+                                _buildDefaultStoreImage(),
+                          )
+                        : _buildDefaultStoreImage(),
+                  ),
                 ),
-                const SizedBox(height: 4),
-                Row(
-                  children: [
-                    const Icon(Icons.location_on, size: 14, color: Colors.grey),
-                    const SizedBox(width: 4),
-                    Expanded(
-                      child: Text(
-                        "${store.address.city} • ${store.distanceKm.toStringAsFixed(1)} km",
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: Colors.grey,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                // Price and Status row
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        "${store.currencyCode} ${store.averageCostForMealForTwo} for Two",
-                        style: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ),
-                    // Status indicator moved here
-                    Container(
+                // Rating badge
+                if (store.avgRating > 0)
+                  Positioned(
+                    top: 12,
+                    left: 12,
+                    child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
-                        color: store.storeIsOpen ? Colors.green[50] : Colors.blue[50],
-                        borderRadius: BorderRadius.circular(8),
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: Colors.grey.shade300,
+                          width: 0.5,
+                        )
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          // Container(
-                          //   width: 6,
-                          //   height: 6,
-                            // decoration: BoxDecoration(
-                            //   color: store.storeIsOpen ? Colors.green : Colors.blue,
-                            //   shape: BoxShape.circle,
-                            //
-                            // ),
-                          // ),
-                          Icon(
-                            Icons.access_time_rounded, // Built-in Material icon
-                            size: 12,
-                            color: store.storeIsOpen ? Colors.green : Colors.blue,
-                          ),
-                          const SizedBox(width: 6),
+                          const Icon(Icons.star, color: Colors.black, size: 14),
+                          const SizedBox(width: 4),
                           Text(
-                            store.storeIsOpen ? "Open" : store.storeTag.isNotEmpty ? store.storeTag.replaceAll("Next At", "") : "Closed",
-                            style: TextStyle(
-                              fontSize: 11,
-                              color: store.storeIsOpen ? Colors.green[700] : Colors.blue[700],
-                              fontWeight: FontWeight.w500,
+                            store.avgRating.toStringAsFixed(1),
+                            style: const TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
                             ),
                           ),
                         ],
                       ),
                     ),
-                  ],
+                  ),
+                // Service icons
+                Positioned(
+                  bottom: 12,
+                  right: 12,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (store.supportedOrderTypes == 3) ...[
+                           _buildCustomServiceIcon('assets/images/ic_delivery.png'),
+                            const SizedBox(width: 8),
+                            _buildCustomServiceIcon('assets/images/ic_pickup.png'),
+                      ]else ...[
+                             _buildCustomServiceIcon('assets/images/ic_pickup.png'),
+                      ],
+                      const SizedBox(width: 8),
+                      if (store.tableReservations)
+                        _buildCustomServiceIcon('assets/images/ic_dinein.png'),
+                    ],
+                  ),
                 ),
-                if (store.cuisineDetails.isNotEmpty) ...[
-                  const SizedBox(height: 4),
+              ],
+            ),
+            // Store Details - Reduced padding to accommodate larger image
+            Padding(
+              padding: const EdgeInsets.all(12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
                   Text(
-                    store.cuisineDetails,
+                    store.storename,
                     style: const TextStyle(
-                      fontSize: 12,
-                      color: Colors.grey,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
+                  const SizedBox(height: 4),
+                  Row(
+                    children: [
+                      const Icon(Icons.location_on, size: 14, color: Colors.grey),
+                      const SizedBox(width: 4),
+                      Expanded(
+                        child: Text(
+                          "${store.address.city} • ${store.distanceKm.toStringAsFixed(1)} km",
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  // Price and Status row
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          "${store.currencyCode} ${store.averageCostForMealForTwo} for Two",
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                      // Status indicator moved here
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: store.storeIsOpen ? Colors.green[50] : Colors.blue[50],
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            // Container(
+                            //   width: 6,
+                            //   height: 6,
+                              // decoration: BoxDecoration(
+                              //   color: store.storeIsOpen ? Colors.green : Colors.blue,
+                              //   shape: BoxShape.circle,
+                              //
+                              // ),
+                            // ),
+                            Icon(
+                              Icons.access_time_rounded, // Built-in Material icon
+                              size: 12,
+                              color: store.storeIsOpen ? Colors.green : Colors.blue,
+                            ),
+                            const SizedBox(width: 6),
+                            Text(
+                              store.storeIsOpen ? "Open" : store.storeTag.isNotEmpty ? store.storeTag.replaceAll("Next At", "") : "Closed",
+                              style: TextStyle(
+                                fontSize: 11,
+                                color: store.storeIsOpen ? Colors.green[700] : Colors.blue[700],
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  if (store.cuisineDetails.isNotEmpty) ...[
+                    const SizedBox(height: 4),
+                    Text(
+                      store.cuisineDetails,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
                 ],
-              ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -1384,6 +1392,7 @@ class _ChatScreenBody extends StatelessWidget {
                     child: ElevatedButton(
                       onPressed: () {
                         print('Product URL: ${product.url}');
+                        OrderService().triggerProductOrder(product);
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.blue[50],
