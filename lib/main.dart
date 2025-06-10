@@ -1,14 +1,10 @@
+import 'package:chat_bot/view/launch_screen.dart';
 import 'package:flutter/material.dart';
 import 'services/api_service.dart';
 import 'view/chat_screen.dart';
 import 'model/chat_message.dart';
 
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  
-  // Initialize API service to load saved token
-  await ApiService.initialize();
-  
+void main() {
   runApp(const MyApp());
 }
 
@@ -23,7 +19,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
-      home:  ChatScreen(),
+      home:  LaunchScreen(),//ChatScreen(),
       debugShowCheckedModeBanner: false,
     );
   }

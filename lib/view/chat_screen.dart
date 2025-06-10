@@ -11,7 +11,8 @@ import '../widgets/food_card_widget.dart';
 import '../services/api_service.dart';
 
 class ChatScreen extends StatefulWidget {
-  const ChatScreen({super.key});
+  final MyGPTsResponse chatbotData;
+  const ChatScreen({super.key, required this.chatbotData});
 
   @override
   State<ChatScreen> createState() => _ChatScreenState();
@@ -20,22 +21,11 @@ class ChatScreen extends StatefulWidget {
 class _ChatScreenState extends State<ChatScreen> {
   final TextEditingController _messageController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
-  MyGPTsResponse? _chatbotData;
-  bool _isLoadingData = false;
   Set<String> _selectedOptionMessages = {};
   String? _pendingMessage;
-  String _sessionId = ""; // Add session ID variable
+  String _sessionId = "";
 
-  List<ChatMessage> messages = [
-    ChatMessage(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
-      text: "Meet IsometrikChatBot\nWelcome to Eazy! How can I help you today?",
-      isBot: true,
-      showAvatar: false,
-      hasQuickReplies: false,
-      isWelcomeMessage: true,
-    ),
-  ];
+  List<ChatMessage> messages = [];
 
   void _sendMessage(String text) {
     if (text.trim().isEmpty) return;
@@ -115,39 +105,38 @@ class _ChatScreenState extends State<ChatScreen> {
   @override
   void initState() {
     super.initState();
-    _loadChatbotData();
-    _initializeSession(); // Initialize session when chat starts
+    _initializeSession();
+    _setupWelcomeMessage();
   }
 
   void _initializeSession() {
     _sessionId = "${DateTime.now().millisecondsSinceEpoch ~/ 1000}";
   }
 
-  Future<void> _loadChatbotData() async {
+  void _setupWelcomeMessage() {
     setState(() {
-      _isLoadingData = true;
+      messages = [
+        ChatMessage(
+          id: DateTime
+              .now()
+              .millisecondsSinceEpoch
+              .toString(),
+          text: "Meet ${widget.chatbotData.data.first.name}\n${widget
+              .chatbotData.data.first.uiPreferences.launcherWelcomeMessage}",
+          isBot: true,
+          showAvatar: false,
+          hasQuickReplies: false,
+          isWelcomeMessage: true,
+        ),
+      ];
     });
-
-    try {
-      final data = await ApiService.getChatbotData();
-      setState(() {
-        _chatbotData = data;
-        _isLoadingData = false;
-      });
-    } catch (e) {
-      setState(() {
-        _isLoadingData = false;
-      });
-    }
   }
-
   void _restartChatAPI() {
     setState(() {
-      // Clear all messages except welcome message
       messages = [
         ChatMessage(
           id: DateTime.now().millisecondsSinceEpoch.toString(),
-          text: "Meet ${_chatbotData?.data.first.name ?? ''}\n${_chatbotData?.data.first.uiPreferences.launcherWelcomeMessage ?? ''}",
+          text: "Meet ${widget.chatbotData.data.first.name}\n${widget.chatbotData.data.first.uiPreferences.launcherWelcomeMessage}",
           isBot: true,
           showAvatar: false,
           hasQuickReplies: false,
@@ -155,13 +144,8 @@ class _ChatScreenState extends State<ChatScreen> {
         ),
       ];
 
-      // Clear selected options
       _selectedOptionMessages.clear();
-
-      // Generate new session ID
       _sessionId = "${DateTime.now().millisecondsSinceEpoch ~/ 1000}";
-
-      // Clear any pending message
       _pendingMessage = null;
     });
   }
@@ -180,14 +164,13 @@ class _ChatScreenState extends State<ChatScreen> {
       child: _ChatScreenBody(
         messageController: _messageController,
         scrollController: _scrollController,
-        chatbotData: _chatbotData,
-        isLoadingData: _isLoadingData,
+        chatbotData: widget.chatbotData,
         selectedOptionMessages: _selectedOptionMessages,
         messages: messages,
         onSendMessage: _sendMessage,
         onHandleChatResponse: _handleChatResponse,
         onScrollToBottom: _scrollToBottom,
-        onLoadChatbotData: _loadChatbotData,
+        onLoadChatbotData: () {},
         onRestartChatAPI: _restartChatAPI,
         onUpdateSelectedOptions: (Set<String> newSet) {
           setState(() {
@@ -210,8 +193,7 @@ class _ChatScreenState extends State<ChatScreen> {
 class _ChatScreenBody extends StatelessWidget {
   final TextEditingController messageController;
   final ScrollController scrollController;
-  final MyGPTsResponse? chatbotData;
-  final bool isLoadingData;
+  final MyGPTsResponse chatbotData;
   final Set<String> selectedOptionMessages;
   final List<ChatMessage> messages;
   final Function(String) onSendMessage;
@@ -229,7 +211,7 @@ class _ChatScreenBody extends StatelessWidget {
     required this.messageController,
     required this.scrollController,
     required this.chatbotData,
-    required this.isLoadingData,
+    // required this.isLoadingData,
     required this.selectedOptionMessages,
     required this.messages,
     required this.onSendMessage,
@@ -300,7 +282,7 @@ class _ChatScreenBody extends StatelessWidget {
                             Container(
                               // padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                               decoration: BoxDecoration(
-                                color: Colors.white,
+                                color: Color(int.parse(chatbotData.data.first.uiPreferences.botBubbleColor.replaceFirst('#', '0xFF') ?? '0xFFE5E5FF')),
                                 // borderRadius: BorderRadius.circular(8),
                                   borderRadius: BorderRadius.only(
                                     topLeft:  Radius.circular(8),
@@ -321,10 +303,10 @@ class _ChatScreenBody extends StatelessWidget {
                                   )
                               ),
                               child: SizedBox(
-                                width:90,
-                                height: 60,
+                                width: 80,
+                                height: 40,
                                 child:  Transform.scale(
-                                  scale: 1.5, // Scale up the animation
+                                  scale: 3.5, // Scale up the animation
                                   child: Lottie.asset(
                                     'assets/lottie/bubble-wave-black.json',
                                     fit: BoxFit.contain
@@ -363,17 +345,21 @@ class _ChatScreenBody extends StatelessWidget {
           Container(
             width: 40,
             height: 40,
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               color: Colors.blue,
               shape: BoxShape.circle,
+              border: Border.all(
+                color: Colors.grey.shade300,
+                width: 0.5,
+              ),
             ),
             child: ClipOval(
-              child: (chatbotData?.data != null &&
-                     chatbotData!.data.isNotEmpty &&
-                     chatbotData!.data.first.profileImage != null &&
-                     chatbotData!.data.first.profileImage.isNotEmpty)
+              child: (chatbotData.data != null &&
+                     chatbotData.data.isNotEmpty &&
+                     chatbotData.data.first.profileImage != null &&
+                     chatbotData.data.first.profileImage.isNotEmpty)
                   ? Image.network(
-                      chatbotData!.data.first.profileImage,
+                      chatbotData.data.first.profileImage,
                       width: 40,
                       height: 40,
                       fit: BoxFit.cover,
@@ -406,7 +392,7 @@ class _ChatScreenBody extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                chatbotData?.data.first.name ?? 'Loading...', // Use API data
+                chatbotData.data.first.name ?? 'Loading...', // Use API data
                 style: const TextStyle(
                   color: Colors.black,
                   fontSize: 16,
@@ -671,11 +657,11 @@ class _ChatScreenBody extends StatelessWidget {
                       : CrossAxisAlignment.end,
                   children: [
                     Container(
-                      padding: const EdgeInsets.all(16),
+                      padding: const EdgeInsets.only(top: 10,bottom: 10,left: 14,right: 14),
                       decoration: BoxDecoration(
                         color: message.isBot
-                          ? Color(int.parse(chatbotData?.data.first.uiPreferences.botBubbleColor.replaceFirst('#', '0xFF') ?? '0xFFE5E5FF'))
-                          : Color(int.parse(chatbotData?.data.first.uiPreferences.userBubbleColor.replaceFirst('#', '0xFF') ?? '0xFF007AFF')),
+                          ? Color(int.parse(chatbotData.data.first.uiPreferences.botBubbleColor.replaceFirst('#', '0xFF') ?? '0xFFE5E5FF'))
+                          : Color(int.parse(chatbotData.data.first.uiPreferences.userBubbleColor.replaceFirst('#', '0xFF') ?? '0xFF007AFF')),
                         // borderRadius: BorderRadius.circular(16),
                         borderRadius: BorderRadius.only(
                           topLeft:  Radius.circular(8),
@@ -699,8 +685,8 @@ class _ChatScreenBody extends StatelessWidget {
                         message.text,
                         style: TextStyle(
                           color: message.isBot
-                              ? Color(int.parse(chatbotData?.data.first.uiPreferences.botBubbleFontColor.replaceFirst('#', '0xFF') ?? '0xFFE5E5FF'))
-                              : Color(int.parse(chatbotData?.data.first.uiPreferences.userBubbleFontColor.replaceFirst('#', '0xFF') ?? '0xFF007AFF')),
+                              ? Color(int.parse(chatbotData.data.first.uiPreferences.botBubbleFontColor.replaceFirst('#', '0xFF') ?? '0xFFE5E5FF'))
+                              : Color(int.parse(chatbotData.data.first.uiPreferences.userBubbleFontColor.replaceFirst('#', '0xFF') ?? '0xFF007AFF')),
                           fontSize: 14,
                           fontFamily: "Arial"
                         ),
@@ -816,7 +802,7 @@ class _ChatScreenBody extends StatelessWidget {
                       text: TextSpan(
                         children: [
                           TextSpan(
-                            text: "Meet ${chatbotData?.data.first.name ?? 'Eazy Assistant'}\n",
+                            text: "Meet ${chatbotData.data.first.name ?? 'Eazy Assistant'}\n",
                             style: const TextStyle(
                               color: Colors.white,
                               fontSize: 16,
@@ -824,7 +810,7 @@ class _ChatScreenBody extends StatelessWidget {
                             ),
                           ),
                           TextSpan(
-                            text: chatbotData?.data.first.uiPreferences.launcherWelcomeMessage ?? 'Hi! I am your personal assistant. How can I help you today?',
+                            text: chatbotData.data.first.uiPreferences.launcherWelcomeMessage ?? 'Hi! I am your personal assistant. How can I help you today?',
                             style: const TextStyle(
                               color: Colors.white,
                               fontSize: 14,
@@ -848,17 +834,21 @@ class _ChatScreenBody extends StatelessWidget {
     return Container(
       width: 40,
       height: 40,
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         color: Colors.blue,
         shape: BoxShape.circle,
+        border: Border.all(
+          color: Colors.grey.shade300, // Border color
+          width: 0.5, // Border width
+        ),
       ),
       child: ClipOval(
-        child: (chatbotData?.data != null &&
-               chatbotData!.data.isNotEmpty &&
-               chatbotData!.data.first.profileImage != null &&
-               chatbotData!.data.first.profileImage!.isNotEmpty)
+        child: (chatbotData.data != null &&
+               chatbotData.data.isNotEmpty &&
+               chatbotData.data.first.profileImage != null &&
+               chatbotData.data.first.profileImage.isNotEmpty)
           ? Image.network(
-              chatbotData!.data.first.profileImage!,
+              chatbotData.data.first.profileImage,
               width: 40,
               height: 40,
               fit: BoxFit.cover,
@@ -900,8 +890,8 @@ class _ChatScreenBody extends StatelessWidget {
       children: options.map((option) =>
           Container(
             decoration: BoxDecoration(
-              border: Border.all(color: chatbotData?.data.first.uiPreferences.primaryColor != null
-                  ? Color(int.parse(chatbotData!.data.first.uiPreferences.primaryColor.replaceFirst('#', '0xFF')))
+              border: Border.all(color: chatbotData.data.first.uiPreferences.primaryColor != null
+                  ? Color(int.parse(chatbotData.data.first.uiPreferences.primaryColor.replaceFirst('#', '0xFF')))
                   : const Color(0xFF000000)),
               borderRadius: BorderRadius.circular(20),
             ),
@@ -916,8 +906,8 @@ class _ChatScreenBody extends StatelessWidget {
                 child: Text(
                   option,
                   style: TextStyle(
-                    color: chatbotData?.data.first.uiPreferences.primaryColor != null
-                        ? Color(int.parse(chatbotData!.data.first.uiPreferences.primaryColor.replaceFirst('#', '0xFF')))
+                    color: chatbotData.data.first.uiPreferences.primaryColor != null
+                        ? Color(int.parse(chatbotData.data.first.uiPreferences.primaryColor.replaceFirst('#', '0xFF')))
                         : const Color(0xFF000000),
                     fontSize: 14,
                   ),

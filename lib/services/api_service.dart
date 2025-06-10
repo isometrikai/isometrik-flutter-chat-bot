@@ -5,22 +5,49 @@ import '../model/mygpts_model.dart';
 import '../model/chat_response.dart';
 
 class ApiService {
+  static String _chatBotId = '2';
+  static String _appSecret = "SFMyNTY.g3QAAAACZAAEZGF0YXQAAAADbQAAAAlhY2NvdW50SWRtAAAAGDY2YzQ2YWVhN2E2MDI5Yjk5MTNiMzIxOG0AAAAIa2V5c2V0SWRtAAAAJGFiZGFkNDQyLTA4YzktNDE4Ny1iYjk4LWUwMTAzYmY2YWYzOG0AAAAJcHJvamVjdElkbQAAACQ2Zjg4NzAwMi0yYzQ3LTQ4Y2EtYTQwNS0wZjk2NWVlNDAyNjFkAAZzaWduZWRuBgAUskFvkQE.esNFHT-JxzVtFpxylbJ8ik1lRZ-c75JjuCA0toa4C5M";
+  static String _licenseKey = "lic-IMKMqJdO3e2HO+6qDxctvESxA+HkoLIThG9";
+
+  // Optional location variables
+  static String? _location;
+  static double? _longitude;
+  static double? _latitude;
+
   static const String _baseUrl = 'https://service-apis.isometrik.io';
-  static const String _chatbotEndpoint = '/v1/guest/mygpts?id=2';
   static const String _authEndpoint = '/v2/guestAuth';
   static const String _chatEndpoint = '/v1/eazy/agent-chat';
   static const String _tokenKey = 'access_token';
 
-  static const Map<String, dynamic> _authBody = {
-    "appSecret": "SFMyNTY.g3QAAAACZAAEZGF0YXQAAAADbQAAAAlhY2NvdW50SWRtAAAAGDY2YzQ2YWVhN2E2MDI5Yjk5MTNiMzIxOG0AAAAIa2V5c2V0SWRtAAAAJGFiZGFkNDQyLTA4YzktNDE4Ny1iYjk4LWUwMTAzYmY2YWYzOG0AAAAJcHJvamVjdElkbQAAACQ2Zjg4NzAwMi0yYzQ3LTQ4Y2EtYTQwNS0wZjk2NWVlNDAyNjFkAAZzaWduZWRuBgAUskFvkQE.esNFHT-JxzVtFpxylbJ8ik1lRZ-c75JjuCA0toa4C5M",
-    "createIsometrikUser": true,
-    "fingerprintId": "NjM2MTAzMDYzNjI4NGUwMDEzNzYyMjA5",
-    "licensekey": "lic-IMKMqJdO3e2HO+6qDxctvESxA+HkoLIThG9"
-  };
-
   static String? _accessToken;
 
-  /// Initialize the service by loading saved token
+  /// Configure API service with required and optional parameters
+  static void configure({
+    required String chatBotId,
+    required String appSecret,
+    required String licenseKey,
+    String? location,
+    double? longitude,
+    double? latitude,
+  }) {
+    _chatBotId = chatBotId;
+    _appSecret = appSecret;
+    _licenseKey = licenseKey;
+    _location = location;
+    _longitude = longitude;
+    _latitude = latitude;
+  }
+
+  /// Get current chatbot endpoint with dynamic ID
+  static String get _chatbotEndpoint => '/v1/guest/mygpts?id=$_chatBotId';
+
+  /// Get auth body with current configuration
+  static Map<String, dynamic> get _authBody => {
+    "appSecret": _appSecret,
+    "createIsometrikUser": true,
+    "fingerprintId": "NjM2MTAzMDYzNjI4NGUwMDEzNzYyMjA5",
+    "licensekey": _licenseKey,
+  };
   static Future<void> initialize() async {
     await _loadTokenFromStorage();
   }
