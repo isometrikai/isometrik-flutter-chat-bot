@@ -22,10 +22,12 @@ class _LaunchScreenState extends State<LaunchScreen> {
 
   int currentIndex = 0;
   Timer? _timer;
+  late DateTime _startTime;
 
   @override
   void initState() {
     super.initState();
+    _startTime = DateTime.now();
     _startTagLineRotation();
     _loadChatbotData();
   }
@@ -40,25 +42,29 @@ class _LaunchScreenState extends State<LaunchScreen> {
 
   Future<void> _loadChatbotData() async {
     try {
-      // Initialize API service and load saved token
-
       await ApiService.initialize();
-
-      // Load chatbot data
       final chatbotData = await ApiService.getChatbotData();
 
-      // Navigate to ChatScreen once setup is complete and pass the data
       if (chatbotData != null && mounted) {
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(
-            builder: (context) => ChatScreen(chatbotData: chatbotData),
-          ),
-        );
+        // Calculate minimum time for one complete tagline cycle
+        final minDuration = Duration(milliseconds: tagLines.length * 1500);
+        final elapsed = DateTime.now().difference(_startTime);
+        
+        // Wait for remaining time if needed to complete at least one cycle
+        if (elapsed < minDuration) {
+          await Future.delayed(minDuration - elapsed);
+        }
+
+        if (mounted) {
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(
+              builder: (context) => ChatScreen(chatbotData: chatbotData),
+            ),
+          );
+        }
       }
     } catch (e) {
-      // Handle initialization errors
       print('Error initializing chatbot: $e');
-      // You might want to show an error dialog or retry mechanism here
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
