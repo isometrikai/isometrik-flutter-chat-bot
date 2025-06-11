@@ -9,6 +9,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lottie/lottie.dart';
 import '../services/callback_manage.dart';
 import '../services/api_service.dart';
+import 'package:flutter/services.dart';
 
 class ChatScreen extends StatefulWidget {
   final MyGPTsResponse chatbotData;
@@ -192,6 +193,7 @@ class _ChatScreenState extends State<ChatScreen> {
 }
 
 class _ChatScreenBody extends StatelessWidget {
+  static const platform = MethodChannel('chat_bot_channel');
   final TextEditingController messageController;
   final ScrollController scrollController;
   final MyGPTsResponse chatbotData;
@@ -600,9 +602,13 @@ class _ChatScreenBody extends StatelessWidget {
                   const SizedBox(width: 16),
                   Expanded(
                     child: TextButton(
-                      onPressed: () {
+                      onPressed: () async {
                         Navigator.of(context).pop(); // Close bottom sheet
-                        Navigator.of(context).pop(); // Close chat screen
+                        try {
+                          await platform.invokeMethod('dismissChat');
+                        } catch (e) {
+                          Navigator.of(context).pop(); // Fallback to Flutter navigation
+                        }
                       },
                       style: TextButton.styleFrom(
                         backgroundColor: Colors.red,

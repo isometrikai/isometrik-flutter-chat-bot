@@ -168,6 +168,26 @@ class Product {
       storeId: json['storeId'] ?? '',
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'productId': productId,
+      'productName': productName,
+      'finalPrice': finalPrice,
+      'inStock': inStock,
+      'tag': tag,
+      'finalPriceList': finalPriceList.toJson(),
+      'offers': offers,
+      'product_image': productImage,
+      'average_rating': averageRating,
+      'currencySymbol': currencySymbol,
+      'currency': currency,
+      'url': url,
+      'store': store,
+      'storeId': storeId,
+    };
+  }
 }
 
 // FinalPriceList Model
@@ -200,6 +220,18 @@ class FinalPriceList {
       taxRate: json['taxRate'] ?? 0,
       msrpPrice: (json['msrpPrice'] ?? 0).toDouble(),
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'basePrice': basePrice,
+      'finalPrice': finalPrice,
+      'discountPrice': discountPrice,
+      'discountPercentage': discountPercentage,
+      'discountType': discountType,
+      'taxRate': taxRate,
+      'msrpPrice': msrpPrice,
+    };
   }
 }
 
@@ -264,6 +296,28 @@ class Store {
       currencySymbol: json['currencySymbol'] ?? '',
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'storename': storename,
+      'avgRating': avgRating,
+      'store_is_open': storeIsOpen,
+      'store_tag': storeTag,
+      'logoImages': logoImages.toJson(),
+      'is_temp_close': isTempClose,
+      'address': address.toJson(),
+      'cuisineDetails': cuisineDetails,
+      'storeImage': storeImage,
+      'distance_km': distanceKm,
+      'distance_miles': distanceMiles,
+      'tableReservations': tableReservations,
+      'supportedOrderTypes': supportedOrderTypes,
+      'averageCostForMealForTwo': averageCostForMealForTwo,
+      'currencyCode': currencyCode,
+      'currencySymbol': currencySymbol,
+    };
+  }
 }
 
 // LogoImages Model
@@ -296,6 +350,18 @@ class LogoImages {
       twitterfilePath: json['twitterfilePath'] ?? '',
       opengraphfilePath: json['opengraphfilePath'] ?? '',
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'logoImageMobile': logoImageMobile,
+      'logoImageThumb': logoImageThumb,
+      'logoImageweb': logoImageweb,
+      'logoMobileFilePath': logoMobileFilePath,
+      'profileimgeFilePath': profileimgeFilePath,
+      'twitterfilePath': twitterfilePath,
+      'opengraphfilePath': opengraphfilePath,
+    };
   }
 }
 
@@ -347,6 +413,24 @@ class Address {
       areaOrDistrict: json['areaOrDistrict'] ?? '',
       locality: json['locality'] ?? '',
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'addressLine1': addressLine1,
+      'addressLine2': addressLine2,
+      'addressArea': addressArea,
+      'city': city,
+      'postCode': postCode,
+      'state': state,
+      'lat': lat,
+      'long': long,
+      'address': address,
+      'country': country,
+      'googlePlaceName': googlePlaceName,
+      'areaOrDistrict': areaOrDistrict,
+      'locality': locality,
+    };
   }
 }
 
