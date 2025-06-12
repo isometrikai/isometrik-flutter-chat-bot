@@ -7,7 +7,9 @@ import 'view/chat_screen.dart';
 import 'model/chat_message.dart';
 import 'package:flutter/services.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await PlatformService.initializeFromPlatform();
   runApp(const MyApp());
 }
 
@@ -49,3 +51,49 @@ class MyApp extends StatelessWidget {
     }
   }
 }
+
+
+class PlatformService {
+  static const MethodChannel _channel = MethodChannel('chatbot_config');
+
+  static Future<void> initializeFromPlatform() async {
+    try {
+      print('🔄 Attempting to get config from iOS...');
+      final Map<dynamic, dynamic> config = await _channel.invokeMethod('getConfig');
+
+      print('✅ Config received from iOS: $config');
+
+      // Handle string to double conversion safely
+      double? longitude;
+      double? latitude;
+
+      if (config['longitude'] != null) {
+        longitude = double.tryParse(config['longitude'].toString());
+      }
+
+      if (config['latitude'] != null) {
+        latitude = double.tryParse(config['latitude'].toString());
+      }
+
+      ApiService.configure(
+        chatBotId: config['chatBotId'] ?? '2',
+        appSecret: config['appSecret'] ?? '',
+        licenseKey: config['licenseKey'] ?? '',
+        location: config['location'],
+        longitude: longitude,
+        latitude: latitude,
+      );
+
+      print('✅ ApiService configured successfully');
+    } catch (e) {
+      print('❌ Error getting config from platform: $e');
+      // Fallback to default values if iOS config fails
+      ApiService.configure(
+        chatBotId: '2',
+        appSecret: '',
+        licenseKey: '',
+      );
+    }
+  }
+}
+
