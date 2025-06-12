@@ -13,6 +13,12 @@ void main() async {
   runApp(const MyApp());
 }
 
+// @pragma('vm:entry-point')
+// void chatMain() async {
+//   WidgetsFlutterBinding.ensureInitialized();
+//   await PlatformService.initializeFromPlatform();
+//   runApp(const MyApp());
+// }
 class MyApp extends StatelessWidget {
   static const platform = MethodChannel('chat_bot/orders');
   const MyApp({super.key});
