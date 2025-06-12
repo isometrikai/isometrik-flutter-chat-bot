@@ -22,11 +22,21 @@ class ChatScreen extends StatefulWidget {
 class _ChatScreenState extends State<ChatScreen> {
   final TextEditingController _messageController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
+  final FocusNode _messageFocusNode = FocusNode();
   Set<String> _selectedOptionMessages = {};
   String? _pendingMessage;
   String _sessionId = "";
 
   List<ChatMessage> messages = [];
+
+  void _onFocusChange() {
+    if (_messageFocusNode.hasFocus) {
+      // Scroll to bottom when keyboard opens
+      Future.delayed(const Duration(milliseconds: 300), () {
+        _scrollToBottom();
+      });
+    }
+  }
 
   void _sendMessage(String text) {
     if (text.trim().isEmpty) return;
@@ -41,7 +51,9 @@ class _ChatScreenState extends State<ChatScreen> {
     });
 
     _messageController.clear();
-    _scrollToBottom();
+    // Remove automatic focus request to prevent keyboard from opening when clicking options
+    // _messageFocusNode.requestFocus();
+    // _scrollToBottom();
   }
 
   void _clearPendingMessage() {
@@ -108,6 +120,11 @@ class _ChatScreenState extends State<ChatScreen> {
     super.initState();
     _initializeSession();
     _setupWelcomeMessage();
+    
+    // Add keyboard listener
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _messageFocusNode.addListener(_onFocusChange);
+    });
   }
 
   void _initializeSession() {
@@ -153,9 +170,12 @@ class _ChatScreenState extends State<ChatScreen> {
 
   @override
   void dispose() {
+    _messageFocusNode.removeListener(_onFocusChange);
     _messageController.dispose();
     _scrollController.dispose();
+    _messageFocusNode.dispose();
     OrderService().clearCallback();
+    print("DISPOSE");
     super.dispose();
   }
 
@@ -165,6 +185,7 @@ class _ChatScreenState extends State<ChatScreen> {
       create: (context) => ChatBloc(),
       child: _ChatScreenBody(
         messageController: _messageController,
+        messageFocusNode: _messageFocusNode,
         scrollController: _scrollController,
         chatbotData: widget.chatbotData,
         selectedOptionMessages: _selectedOptionMessages,
@@ -195,6 +216,7 @@ class _ChatScreenState extends State<ChatScreen> {
 class _ChatScreenBody extends StatelessWidget {
   static const platform = MethodChannel('chat_bot_channel');
   final TextEditingController messageController;
+  final FocusNode messageFocusNode;
   final ScrollController scrollController;
   final MyGPTsResponse chatbotData;
   final Set<String> selectedOptionMessages;
@@ -212,6 +234,7 @@ class _ChatScreenBody extends StatelessWidget {
 
   const _ChatScreenBody({
     required this.messageController,
+    required this.messageFocusNode,
     required this.scrollController,
     required this.chatbotData,
     // required this.isLoadingData,
@@ -233,6 +256,7 @@ class _ChatScreenBody extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Color(0xFFF2F2F7),
+      resizeToAvoidBottomInset: true,
       appBar: _buildAppBar(context),
       body: BlocConsumer<ChatBloc, ChatState>(
         listener: (context, state) {
@@ -260,73 +284,79 @@ class _ChatScreenBody extends StatelessWidget {
             });
           }
 
+          if (state is ChatLoading) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              onScrollToBottom();
+            });
+          }
+
           return Column(
             children: [
               Expanded(
-                child: ListView.builder(
-                  controller: scrollController,
-                  padding: const EdgeInsets.all(16),
-                  itemCount: messages.length + (state is ChatLoading ? 1 : 0), // Add 1 for loader
-                  itemBuilder: (context, index) {
-                    // Show messages
-                    if (index < messages.length) {
-                      return _buildMessageBubble(messages[index], context);
-                    }
-                    
-                    // Show loader as last item when loading
-                    if (state is ChatLoading) {
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: 16),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            _buildBotAvatar(),
-                            const SizedBox(width: 8),
-                            Container(
-                              // padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                              decoration: BoxDecoration(
-                                color: Color(int.parse(chatbotData.data.first.uiPreferences.botBubbleColor.replaceFirst('#', '0xFF') ?? '0xFFE5E5FF')),
-                                // borderRadius: BorderRadius.circular(8),
+                child: NotificationListener<ScrollNotification>(
+                  onNotification: (ScrollNotification scrollInfo) {
+                    // Handle scroll notifications if needed
+                    return false;
+                  },
+                  child: ListView.builder(
+                    controller: scrollController,
+                    padding: const EdgeInsets.all(16),
+                    keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+                    itemCount: messages.length + (state is ChatLoading ? 1 : 0),
+                    itemBuilder: (context, index) {
+                      // Show messages
+                      if (index < messages.length) {
+                        return _buildMessageBubble(messages[index], context);
+                      }
+
+                      // Show loader as last item when loading
+                      if (state is ChatLoading) {
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 16),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              _buildBotAvatar(),
+                              const SizedBox(width: 8),
+                              Container(
+                                decoration: BoxDecoration(
+                                    color: Color(int.parse(
+                                        chatbotData.data.first.uiPreferences
+                                            .botBubbleColor.replaceFirst(
+                                            '#', '0xFF') ?? '0xFFE5E5FF')),
                                   borderRadius: BorderRadius.only(
-                                    topLeft:  Radius.circular(8),
+                                    topLeft: Radius.circular(8),
                                     topRight: Radius.circular(8),
-                                    bottomLeft: Radius.circular(0) ,
-                                    bottomRight: Radius.circular(8) ,
+                                    bottomLeft: Radius.circular(0),
+                                    bottomRight: Radius.circular(8),
                                   ),
-                                // boxShadow: [
-                                //   BoxShadow(
-                                //     color: Colors.black.withOpacity(0.05),
-                                //     blurRadius: 5,
-                                //     offset: const Offset(0, 2),
-                                //   ),
-                                // ],
                                   border: Border.all(
-                                    color: Colors.grey.shade300, // light gray
+                                    color: Colors.grey.shade300,
                                     width: 0.5,
                                   )
-                              ),
-                              child: SizedBox(
-                                width: 80,
-                                height: 40,
-                                child:  Transform.scale(
-                                  scale: 3.5, // Scale up the animation
-                                  child: Lottie.asset(
-                                    'assets/lottie/bubble-wave-black.json',
-                                    fit: BoxFit.contain
+                                ),
+                                child: SizedBox(
+                                  width: 80,
+                                  height: 40,
+                                  child: Transform.scale(
+                                    scale: 3.5,
+                                    child: Lottie.asset(
+                                        'assets/lottie/bubble-wave-black.json',
+                                        fit: BoxFit.contain
+                                    ),
                                   ),
                                 ),
                               ),
-                            ),
-                          ],
-                        ),
-                      );
-                    }
+                            ],
+                          ),
+                        );
+                      }
 
-                    return const SizedBox.shrink();
-                  },
+                      return const SizedBox.shrink();
+                    },
+                  ),
                 ),
               ),
-              // Remove the separate loader section that was here
               _buildInputArea(context),
             ],
           );
@@ -962,7 +992,12 @@ class _ChatScreenBody extends StatelessWidget {
         bool isApiLoading = state is ChatLoading;
 
         return Container(
-          padding: const EdgeInsets.all(16),
+          padding: EdgeInsets.only(
+            left: 16,
+            right: 16,
+            top: 16,
+            bottom: 16 + MediaQuery.of(context).viewInsets.bottom, // Add keyboard padding
+          ),
           decoration: BoxDecoration(
             color: Colors.white,
             border: Border(
@@ -987,7 +1022,9 @@ class _ChatScreenBody extends StatelessWidget {
                       borderRadius: BorderRadius.circular(25),
                     ),
                     child: TextField(
+                      autofocus: true,
                       controller: messageController,
+                      focusNode: messageFocusNode,
                       enabled: !isApiLoading,
                       textCapitalization: TextCapitalization.sentences,
                       decoration: const InputDecoration(
@@ -995,7 +1032,12 @@ class _ChatScreenBody extends StatelessWidget {
                         border: InputBorder.none,
                         hintStyle: TextStyle(color: Colors.grey),
                       ),
-                      onSubmitted: isApiLoading ? null : onSendMessage,
+                      onSubmitted: isApiLoading ? null : (text) {
+                        onSendMessage(text);
+                        Future.delayed(const Duration(milliseconds: 100), () {
+                          onScrollToBottom();
+                        });
+                      },
                     ),
                   ),
                 ),
@@ -1014,6 +1056,15 @@ class _ChatScreenBody extends StatelessWidget {
                     ),
                     onPressed: isApiLoading ? null : () {
                       onSendMessage(messageController.text);
+                      // Only request focus when manually sending message via button
+                      if (messageController.text
+                          .trim()
+                          .isNotEmpty) {
+                        FocusScope.of(context).requestFocus(messageFocusNode);
+                      }
+                      Future.delayed(const Duration(milliseconds: 100), () {
+                        onScrollToBottom();
+                      });
                     },
                   ),
                 ),
