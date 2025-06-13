@@ -24,10 +24,10 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
       if (chat != null) {
         emit(ChatLoaded(chat));
       } else {
-        emit(ChatError());
+        emit(ChatError('Failed to send message'));
       }
     } catch (e) {
-      emit(ChatError());
+      emit(ChatError(e.toString()));
     }
   }
 

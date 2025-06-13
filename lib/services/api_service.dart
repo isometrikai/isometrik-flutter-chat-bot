@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:async';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import '../model/mygpts_model.dart';
@@ -24,6 +25,9 @@ class ApiService {
   static const String _tokenKey = 'access_token';
 
   static String? _accessToken;
+
+  static const Duration _requestTimeout = Duration(seconds: 5);
+  static const String _timeoutErrorMessage = "Something went wrong please try again latter";
 
   /// Configure API service with required and optional parameters
   static void configure({
@@ -143,7 +147,7 @@ class ApiService {
           'Authorization': _accessToken!,
           'Content-Type': 'application/json',
         },
-      );
+      ).timeout(_requestTimeout);
 
       print('=== CHATBOT API RESPONSE ===');
       print('Status Code: ${response.statusCode}');
@@ -174,6 +178,9 @@ class ApiService {
 
       print('❌ Chatbot API error: ${response.statusCode} - ${response.body}');
       return null;
+    } on TimeoutException catch (e) {
+      print('❌ Request timeout: $e');
+      throw Exception(_timeoutErrorMessage);
     } catch (e) {
       print('❌ Network error in _fetchChatbotData: $e');
       return null;
@@ -281,7 +288,7 @@ class ApiService {
           'Content-Length': requestBodyJson.length.toString(),
         },
         body: requestBodyJson,
-      );
+      ).timeout(_requestTimeout);
 
       print('=== CHAT API RESPONSE ===');
       print('Status Code: ${response.statusCode}');
@@ -313,6 +320,9 @@ class ApiService {
 
       print('❌ Chat API error: ${response.statusCode} - ${response.body}');
       return null;
+    } on TimeoutException catch (e) {
+      print('❌ Chat request timeout: $e');
+      throw Exception(_timeoutErrorMessage);
     } catch (e) {
       print('❌ Network error in _sendChatMessageRequest: $e');
       return null;
@@ -339,7 +349,7 @@ class ApiService {
           'Content-Type': 'application/json',
         },
         body: requestBody,
-      );
+      ).timeout(_requestTimeout);
 
       print('=== AUTH API RESPONSE ===');
       print('Status Code: ${response.statusCode}');
@@ -365,6 +375,9 @@ class ApiService {
 
       print('❌ Auth API error: ${response.statusCode} - ${response.body}');
       return null;
+    } on TimeoutException catch (e) {
+      print('❌ Auth request timeout: $e');
+      throw Exception(_timeoutErrorMessage);
     } catch (e) {
       print('❌ Network error in _refreshToken: $e');
       return null;

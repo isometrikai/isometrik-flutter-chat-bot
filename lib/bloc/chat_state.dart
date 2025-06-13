@@ -21,4 +21,11 @@ class ChatLoaded extends ChatState {
   List<Object> get props => [messages];
 }
 
-class ChatError extends ChatState {}
+class ChatError extends ChatState {
+  final String error;
+
+  const ChatError([this.error = 'An error occurred']);
+
+  @override
+  List<Object> get props => [error];
+}

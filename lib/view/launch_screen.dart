@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../services/api_service.dart';
 import '../model/mygpts_model.dart';
 import 'chat_screen.dart';
@@ -12,6 +13,9 @@ class LaunchScreen extends StatefulWidget {
 }
 
 class _LaunchScreenState extends State<LaunchScreen> {
+
+  static const platform = MethodChannel('chat_bot_channel');
+
   final List<String> tagLines = [
     "Building your personalized chat experience...",
     "Loading your smart conversation space...",
@@ -62,22 +66,54 @@ class _LaunchScreenState extends State<LaunchScreen> {
             ),
           );
         }
+      }else {
+        print('Failed to load chatbot data');
+        _showTimeoutAlert();
       }
     } catch (e) {
       print('Error initializing chatbot: $e');
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Failed to load chatbot data: $e'),
-            backgroundColor: Colors.red,
-            action: SnackBarAction(
-              label: 'Retry',
-              onPressed: () => _loadChatbotData(),
+        // Check if it's a timeout error
+        if (e.toString().contains(
+            "Something went wrong")) {
+          _showTimeoutAlert();
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Failed to load chatbot data: $e'),
+              backgroundColor: Colors.red,
+              action: SnackBarAction(
+                label: 'Retry',
+                onPressed: () => _loadChatbotData(),
+              ),
             ),
-          ),
-        );
+          );
+        }
       }
     }
+  }
+
+  void _showTimeoutAlert() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Error'),
+          content: const Text('Something went wrong please try again latter'),
+          actions: [
+            TextButton(
+              onPressed: () async {
+                Navigator.of(context).pop(); // Close dialog
+                // Navigator.of(context).pop(); // Close launch screen
+                await platform.invokeMethod('dismissChat');
+              },
+              child: const Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override

@@ -263,12 +263,32 @@ class _ChatScreenBody extends StatelessWidget {
           if (state is ChatLoaded) {
             onHandleChatResponse(state.messages);
           } else if (state is ChatError) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Failed to send message. Please try again.'),
-                backgroundColor: Colors.red,
-              ),
-            );
+            // Check if it's a timeout error
+            if (state.error.contains(
+                "Something went wrong please try again latter")) {
+              // Add timeout error message to chat
+              final messageId = DateTime
+                  .now()
+                  .millisecondsSinceEpoch
+                  .toString();
+              final errorMessage = ChatMessage(
+                id: messageId,
+                text: "Something went wrong please try again latter",
+                isBot: true,
+                showAvatar: true,
+              );
+
+              final updatedMessages = [...messages, errorMessage];
+              onUpdateMessages(updatedMessages);
+              onScrollToBottom();
+            } else {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Something went wrong please try again latter'),
+                  backgroundColor: Colors.red,
+                ),
+              );
+            }
           }
         },
         builder: (context, state) {
