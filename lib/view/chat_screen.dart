@@ -10,6 +10,7 @@ import 'package:lottie/lottie.dart';
 import '../services/callback_manage.dart';
 import '../services/api_service.dart';
 import 'package:flutter/services.dart';
+import 'package:chat_bot/widgets/black_toast_view.dart';
 
 class ChatScreen extends StatefulWidget {
   final MyGPTsResponse chatbotData;
@@ -282,12 +283,8 @@ class _ChatScreenBody extends StatelessWidget {
               onUpdateMessages(updatedMessages);
               onScrollToBottom();
             } else {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Something went wrong please try again latter'),
-                  backgroundColor: Colors.red,
-                ),
-              );
+              // _showErrorToast(context, 'Something went wrong please try again later');
+              BlackToastView.show(context, 'Something went wrong please try again later');
             }
           }
         },
