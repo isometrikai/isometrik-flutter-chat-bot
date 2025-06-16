@@ -45,15 +45,20 @@ class MyApp extends StatelessWidget {
     OrderService().setStoreCallback((Store store) {
       _sendEventToiOS(store.toJson(), 'store');
     });
+
+    // Add dismiss callback
+    OrderService().setDismissCallback(() {
+      _sendEventToiOS({}, 'dismissChat');
+    });
   }
-  Future<void> _sendEventToiOS(Map<String, dynamic> orderData, String type) async {
+  Future<void> _sendEventToiOS(Map<String, dynamic> data, String type) async {
     try {
       await platform.invokeMethod('handleOrder', {
         'type': type,
-        'data': orderData,
+        'data': data,
       });
     } catch (e) {
-      print('Failed to send order to iOS: $e');
+      print('Failed to send $type event to iOS: $e');
     }
   }
 }
@@ -102,4 +107,3 @@ class PlatformService {
     }
   }
 }
-

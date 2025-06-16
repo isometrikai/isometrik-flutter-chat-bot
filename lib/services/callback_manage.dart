@@ -6,8 +6,8 @@ class OrderService {
   OrderService._internal();
 
   Function(Product)? onOrderNow;
-
   Function(Store)? onStoreNow;
+  Function()? onChatDismiss; // Add dismiss callback
 
   void setProductCallback(Function(Product) callback) {
     onOrderNow = callback;
@@ -15,6 +15,11 @@ class OrderService {
 
   void setStoreCallback(Function(Store) callback) {
     onStoreNow = callback;
+  }
+
+  // Add dismiss callback setter
+  void setDismissCallback(Function() callback) {
+    onChatDismiss = callback;
   }
 
   void triggerProductOrder(Product product) {
@@ -30,8 +35,14 @@ class OrderService {
     onStoreNow?.call(store);
   }
 
+  // Add dismiss trigger
+  void triggerChatDismiss() {
+    onChatDismiss?.call();
+  }
+
   void clearCallback() {
     onOrderNow = null;
     onStoreNow = null;
+    onChatDismiss = null; // Clear dismiss callback
   }
 }

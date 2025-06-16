@@ -649,10 +649,10 @@ class _ChatScreenBody extends StatelessWidget {
                   const SizedBox(width: 16),
                   Expanded(
                     child: TextButton(
-                      onPressed: () async {
+                      onPressed: ()  {
                         Navigator.of(context).pop(); // Close bottom sheet
                         try {
-                          await platform.invokeMethod('dismissChat');
+                          OrderService().triggerChatDismiss();
                         } catch (e) {
                           Navigator.of(context).pop(); // Fallback to Flutter navigation
                         }

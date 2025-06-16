@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:chat_bot/services/callback_manage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../services/api_service.dart';
@@ -103,10 +104,11 @@ class _LaunchScreenState extends State<LaunchScreen> {
           content: const Text('Something went wrong please try again latter'),
           actions: [
             TextButton(
-              onPressed: () async {
+              onPressed: () {
                 Navigator.of(context).pop(); // Close dialog
                 // Navigator.of(context).pop(); // Close launch screen
-                await platform.invokeMethod('dismissChat');
+                // await platform.invokeMethod('dismissChat');
+                OrderService().triggerChatDismiss();
               },
               child: const Text('OK'),
             ),
