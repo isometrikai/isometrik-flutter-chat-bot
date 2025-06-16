@@ -359,6 +359,7 @@ class _ChatScreenBody extends StatelessWidget {
                                     scale: 3.5,
                                     child: Lottie.asset(
                                         'assets/lottie/bubble-wave-black.json',
+                                        package: 'chat_bot',
                                         fit: BoxFit.contain
                                     ),
                                   ),
@@ -804,7 +805,8 @@ class _ChatScreenBody extends StatelessWidget {
                     width: 120,
                     height: 160,
                     child: Image.asset(
-                      'assets/images/men.png', // Replace with your image
+                      'assets/images/men.png',
+                      package: 'chat_bot',// Replace with your image
                       width: 120,
                       height: 160,
                       fit: BoxFit.contain,
@@ -991,6 +993,7 @@ class _ChatScreenBody extends StatelessWidget {
         padding: const EdgeInsets.all(8),
         child: Image.asset(
           imagePath,
+          package: 'chat_bot',
           fit: BoxFit.contain,
           errorBuilder: (context, error, stackTrace) {
             // Fallback to default icon if image fails to load
