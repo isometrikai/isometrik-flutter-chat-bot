@@ -100,7 +100,7 @@ class PlatformService {
       print('❌ Error getting config from platform: $e');
       // Fallback to default values if iOS config fails
       ApiService.configure(
-        chatBotId: '2',
+        chatBotId: '',
         appSecret: '',
         licenseKey: '',
       );

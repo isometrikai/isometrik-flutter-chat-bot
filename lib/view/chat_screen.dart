@@ -175,7 +175,7 @@ class _ChatScreenState extends State<ChatScreen> {
     _messageController.dispose();
     _scrollController.dispose();
     _messageFocusNode.dispose();
-    OrderService().clearCallback();
+    // OrderService().clearCallback();
     print("DISPOSE");
     super.dispose();
   }
@@ -653,6 +653,7 @@ class _ChatScreenBody extends StatelessWidget {
                       onPressed: ()  {
                         Navigator.of(context).pop(); // Close bottom sheet
                         try {
+                          // onRestartChatAPI();
                           OrderService().triggerChatDismiss();
                         } catch (e) {
                           Navigator.of(context).pop(); // Fallback to Flutter navigation
