@@ -1043,7 +1043,7 @@ class _ChatScreenBody extends StatelessWidget {
                       borderRadius: BorderRadius.circular(25),
                     ),
                     child: TextField(
-                      autofocus: true,
+                      autofocus: false,
                       controller: messageController,
                       focusNode: messageFocusNode,
                       enabled: !isApiLoading,
