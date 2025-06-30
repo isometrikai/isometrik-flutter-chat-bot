@@ -255,130 +255,133 @@ class _ChatScreenBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Color(0xFFF2F2F7),
-      resizeToAvoidBottomInset: true,
-      appBar: _buildAppBar(context),
-      body: BlocConsumer<ChatBloc, ChatState>(
-        listener: (context, state) {
-          if (state is ChatLoaded) {
-            onHandleChatResponse(state.messages);
-          } else if (state is ChatError) {
-            // Check if it's a timeout error
-            if (state.error.contains(
-                "Something went wrong please try again latter")) {
-              // Add timeout error message to chat
-              final messageId = DateTime
-                  .now()
-                  .millisecondsSinceEpoch
-                  .toString();
-              final errorMessage = ChatMessage(
-                id: messageId,
-                text: "Something went wrong please try again latter",
-                isBot: true,
-                showAvatar: true,
-              );
-
-              final updatedMessages = [...messages, errorMessage];
-              onUpdateMessages(updatedMessages);
-              onScrollToBottom();
-            } else {
-              // _showErrorToast(context, 'Something went wrong please try again later');
-              BlackToastView.show(context, 'Something went wrong please try again later');
+    return PopScope(
+      canPop: false,
+      child: Scaffold(
+        backgroundColor: Color(0xFFF2F2F7),
+        resizeToAvoidBottomInset: true,
+        appBar: _buildAppBar(context),
+        body: BlocConsumer<ChatBloc, ChatState>(
+          listener: (context, state) {
+            if (state is ChatLoaded) {
+              onHandleChatResponse(state.messages);
+            } else if (state is ChatError) {
+              // Check if it's a timeout error
+              if (state.error.contains(
+                  "Something went wrong please try again latter")) {
+                // Add timeout error message to chat
+                final messageId = DateTime
+                    .now()
+                    .millisecondsSinceEpoch
+                    .toString();
+                final errorMessage = ChatMessage(
+                  id: messageId,
+                  text: "Something went wrong please try again latter",
+                  isBot: true,
+                  showAvatar: true,
+                );
+      
+                final updatedMessages = [...messages, errorMessage];
+                onUpdateMessages(updatedMessages);
+                onScrollToBottom();
+              } else {
+                // _showErrorToast(context, 'Something went wrong please try again later');
+                BlackToastView.show(context, 'Something went wrong please try again later');
+              }
             }
-          }
-        },
-        builder: (context, state) {
-          // Send pending message if any
-          if (pendingMessage != null) {
-            WidgetsBinding.instance.addPostFrameCallback((_) async {
-              final event = await ChatLoadEvent.create(
-                message: pendingMessage!,
-                sessionId: sessionId, // Use existing session ID
-              );
-              context.read<ChatBloc>().add(event);
-              onClearPendingMessage();
-            });
-          }
-
-          if (state is ChatLoading) {
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              onScrollToBottom();
-            });
-          }
-
-          return Column(
-            children: [
-              Expanded(
-                child: NotificationListener<ScrollNotification>(
-                  onNotification: (ScrollNotification scrollInfo) {
-                    // Handle scroll notifications if needed
-                    return false;
-                  },
-                  child: ListView.builder(
-                    controller: scrollController,
-                    padding: const EdgeInsets.all(16),
-                    keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-                    itemCount: messages.length + (state is ChatLoading ? 1 : 0),
-                    itemBuilder: (context, index) {
-                      // Show messages
-                      if (index < messages.length) {
-                        return _buildMessageBubble(messages[index], context);
-                      }
-
-                      // Show loader as last item when loading
-                      if (state is ChatLoading) {
-                        return Padding(
-                          padding: const EdgeInsets.only(bottom: 16),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            children: [
-                              _buildBotAvatar(),
-                              const SizedBox(width: 8),
-                              Container(
-                                decoration: BoxDecoration(
-                                    color: Color(int.parse(
-                                        chatbotData.data.first.uiPreferences
-                                            .botBubbleColor.replaceFirst(
-                                            '#', '0xFF') ?? '0xFFE5E5FF')),
-                                  borderRadius: BorderRadius.only(
-                                    topLeft: Radius.circular(8),
-                                    topRight: Radius.circular(8),
-                                    bottomLeft: Radius.circular(0),
-                                    bottomRight: Radius.circular(8),
+          },
+          builder: (context, state) {
+            // Send pending message if any
+            if (pendingMessage != null) {
+              WidgetsBinding.instance.addPostFrameCallback((_) async {
+                final event = await ChatLoadEvent.create(
+                  message: pendingMessage!,
+                  sessionId: sessionId, // Use existing session ID
+                );
+                context.read<ChatBloc>().add(event);
+                onClearPendingMessage();
+              });
+            }
+      
+            if (state is ChatLoading) {
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                onScrollToBottom();
+              });
+            }
+      
+            return Column(
+              children: [
+                Expanded(
+                  child: NotificationListener<ScrollNotification>(
+                    onNotification: (ScrollNotification scrollInfo) {
+                      // Handle scroll notifications if needed
+                      return false;
+                    },
+                    child: ListView.builder(
+                      controller: scrollController,
+                      padding: const EdgeInsets.all(16),
+                      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+                      itemCount: messages.length + (state is ChatLoading ? 1 : 0),
+                      itemBuilder: (context, index) {
+                        // Show messages
+                        if (index < messages.length) {
+                          return _buildMessageBubble(messages[index], context);
+                        }
+      
+                        // Show loader as last item when loading
+                        if (state is ChatLoading) {
+                          return Padding(
+                            padding: const EdgeInsets.only(bottom: 16),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                _buildBotAvatar(),
+                                const SizedBox(width: 8),
+                                Container(
+                                  decoration: BoxDecoration(
+                                      color: Color(int.parse(
+                                          chatbotData.data.first.uiPreferences
+                                              .botBubbleColor.replaceFirst(
+                                              '#', '0xFF') ?? '0xFFE5E5FF')),
+                                    borderRadius: BorderRadius.only(
+                                      topLeft: Radius.circular(8),
+                                      topRight: Radius.circular(8),
+                                      bottomLeft: Radius.circular(0),
+                                      bottomRight: Radius.circular(8),
+                                    ),
+                                    border: Border.all(
+                                      color: Colors.grey.shade300,
+                                      width: 0.5,
+                                    )
                                   ),
-                                  border: Border.all(
-                                    color: Colors.grey.shade300,
-                                    width: 0.5,
-                                  )
-                                ),
-                                child: SizedBox(
-                                  width: 80,
-                                  height: 40,
-                                  child: Transform.scale(
-                                    scale: 3.5,
-                                    child: Lottie.asset(
-                                        'assets/lottie/bubble-wave-black.json',
-                                        package: 'chat_bot',
-                                        fit: BoxFit.contain
+                                  child: SizedBox(
+                                    width: 80,
+                                    height: 40,
+                                    child: Transform.scale(
+                                      scale: 3.5,
+                                      child: Lottie.asset(
+                                          'assets/lottie/bubble-wave-black.json',
+                                          package: 'chat_bot',
+                                          fit: BoxFit.contain
+                                      ),
                                     ),
                                   ),
                                 ),
-                              ),
-                            ],
-                          ),
-                        );
-                      }
-
-                      return const SizedBox.shrink();
-                    },
+                              ],
+                            ),
+                          );
+                        }
+      
+                        return const SizedBox.shrink();
+                      },
+                    ),
                   ),
                 ),
-              ),
-              _buildInputArea(context),
-            ],
-          );
-        },
+                _buildInputArea(context),
+              ],
+            );
+          },
+        ),
       ),
     );
   }
