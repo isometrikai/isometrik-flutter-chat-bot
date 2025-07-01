@@ -16,8 +16,8 @@ class ApiService {
 
   // Optional location variables
   static String? _location;
-  static double? _longitude;
-  static double? _latitude;
+  static double? newLongitude;
+  static double? newLatitude;
 
   static const String _baseUrl = 'https://service-apis.isometrik.io';
   static const String _authEndpoint = '/v2/guestAuth';
@@ -42,8 +42,8 @@ class ApiService {
     _appSecret = appSecret;
     _licenseKey = licenseKey;
     _location = location;
-    _longitude = longitude;
-    _latitude = latitude;
+    newLongitude = longitude;
+    newLatitude = latitude;
   }
 
   /// Get current chatbot endpoint with dynamic ID
@@ -210,8 +210,8 @@ class ApiService {
         fingerPrintId: fingerPrintId,
         sessionId: sessionId,
         isLoggedIn: isLoggedIn,
-        longitude: longitude,
-        latitude: latitude,
+        longitude: newLongitude ?? 0.0,
+        latitude: newLatitude ?? 0.0,
       );
 
       if (response != null) {
