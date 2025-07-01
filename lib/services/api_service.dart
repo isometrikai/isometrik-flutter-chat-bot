@@ -26,7 +26,7 @@ class ApiService {
 
   static String? _accessToken;
 
-  static const Duration _requestTimeout = Duration(seconds: 30);
+  static const Duration _requestTimeout = Duration(seconds: 90);
   static const String _timeoutErrorMessage = "Something went wrong please try again latter";
 
   /// Configure API service with required and optional parameters
