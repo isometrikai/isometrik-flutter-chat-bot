@@ -5,15 +5,15 @@ class OrderService {
   factory OrderService() => _instance;
   OrderService._internal();
 
-  Function(String)? onOrderNow;
-  Function(String)? onStoreNow;
+  Function(Map<String, dynamic>)? onOrderNow;
+  Function(Map<String, dynamic>)? onStoreNow;
   Function()? onChatDismiss; // Add dismiss callback
 
-  void setProductCallback(Function(String) callback) {
+  void setProductCallback(Function(Map<String, dynamic>) callback) {
     onOrderNow = callback;
   }
 
-  void setStoreCallback(Function(String) callback) {
+  void setStoreCallback(Function(Map<String, dynamic>) callback) {
     onStoreNow = callback;
   }
 
@@ -22,16 +22,16 @@ class OrderService {
     onChatDismiss = callback;
   }
 
-  void triggerProductOrder(String product) {
+  void triggerProductOrder(Map<String, dynamic> product) {
     onOrderNow?.call(product);
   }
 
 
-  void setonStoreCallback(Function(String) callback) {
+  void setonStoreCallback(Function(Map<String, dynamic>) callback) {
     onStoreNow = callback;
   }
 
-  void triggerStoreOrder(String store) {
+  void triggerStoreOrder(Map<String, dynamic> store) {
     onStoreNow?.call(store);
   }
 

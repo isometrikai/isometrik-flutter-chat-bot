@@ -38,20 +38,20 @@ class MyApp extends StatelessWidget {
     );
   }
   void _setupCallbacks() {
-    OrderService().setProductCallback((String product) {
+    OrderService().setProductCallback((Map<String, dynamic> product) {
       _sendEventToiOS(product, 'product');
     });
     
-    OrderService().setStoreCallback((String store) {
+    OrderService().setStoreCallback((Map<String, dynamic> store) {
       _sendEventToiOS(store, 'store');
     });
 
     // Add dismiss callback
     OrderService().setDismissCallback(() {
-      _sendEventToiOS('', 'dismissChat');
+      _sendEventToiOS({}, 'dismissChat');
     });
   }
-  Future<void> _sendEventToiOS(String data, String type) async {
+  Future<void> _sendEventToiOS(Map<String, dynamic> data, String type) async {
     try {
       await platform.invokeMethod('handleOrder', {
         'type': type,

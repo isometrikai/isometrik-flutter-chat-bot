@@ -1126,13 +1126,12 @@ class _ChatScreenBody extends StatelessWidget {
     return InkWell(
       onTap: () {
         if (storesWidget != null) {
-          String? rawStoreJson = storesWidget.getRawStoreAsJsonString(index);
-          print('Raw Store JSON: $rawStoreJson');
-          OrderService().triggerStoreOrder(rawStoreJson ?? '');
+          // String? rawStoreJson = storesWidget.getRawStoreAsJsonString(index);
+          final Map<String, dynamic>? storeJson = storesWidget.getRawStore(index);
+          print('Raw Store JSON: $storeJson');
+          OrderService().triggerStoreOrder(storeJson ?? {});
         }
         print('Store clicked: ${store}');
-        // OrderService().triggerStoreOrder(store);
-        // Handle store card tap
       },
       child: Container(
         decoration: BoxDecoration(
@@ -1477,12 +1476,12 @@ class _ChatScreenBody extends StatelessWidget {
                     child: ElevatedButton(
                       onPressed: () {
                         if (productsWidget != null) {
-                          String? rawProductJson = productsWidget.getRawProductAsJsonString(index);
-                          print('Raw Product JSON: $rawProductJson');
-                          OrderService().triggerProductOrder(rawProductJson ?? '');
+                          // String? rawProductJson = productsWidget.getRawProductAsJsonString(index);
+                          final Map<String, dynamic>? productJson = productsWidget.getRawProduct(index);
+                          print('Product JSON: $productJson');
+                          OrderService().triggerProductOrder(productJson ?? {});
                         }
                         print('Product URL: ${product.url}');
-                        // OrderService().triggerProductOrder(product);
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.blue[50],
