@@ -67,7 +67,6 @@ class _ChatScreenState extends State<ChatScreen> {
     final messageId = DateTime.now().millisecondsSinceEpoch.toString();
     ChatWidget? storesWidget;
     ChatWidget? productsWidget;
-
     try {
       storesWidget = response.widgets.firstWhere((widget) => widget.isStoresWidget);
     } catch (e) {
@@ -99,6 +98,8 @@ class _ChatScreenState extends State<ChatScreen> {
             : [],
         stores: storesWidget?.stores ?? [],
         products: productsWidget?.products ?? [],
+        storesWidget: storesWidget,
+        productsWidget: productsWidget,
       ));
     });
     _scrollToBottom();
@@ -777,14 +778,14 @@ class _ChatScreenBody extends StatelessWidget {
             // Move store cards outside to avoid padding constraints
             Transform.translate(
               offset: const Offset(-16, 0), // Offset to counteract parent padding
-              child: _buildStoreCards(message.stores),
+              child: _buildStoreCards(message.stores, message.storesWidget),
             ),
           ],
           if (message.hasProductCards) ...[
             const SizedBox(height: 12),
             Transform.translate(
               offset: const Offset(-16, 0),
-              child: _buildProductCards(message.products),
+              child: _buildProductCards(message.products, message.productsWidget),
             ),
           ],
         ],
@@ -1100,7 +1101,7 @@ class _ChatScreenBody extends StatelessWidget {
     );
   }
 
-  Widget _buildStoreCards(List<Store> stores) {
+  Widget _buildStoreCards(List<Store> stores, ChatWidget? storesWidget) {
     return SizedBox(
       height: 290,
       child: ListView.separated(
@@ -1113,7 +1114,7 @@ class _ChatScreenBody extends StatelessWidget {
           final store = stores[index];
           return SizedBox(
             width: 280,
-            child: _buildStoreCard(store),
+            child: _buildStoreCard(store, storesWidget, index),
           );
         },
       ),
@@ -1121,11 +1122,16 @@ class _ChatScreenBody extends StatelessWidget {
   }
 
   // Add this method to build individual store card
-  Widget _buildStoreCard(Store store) {
+  Widget _buildStoreCard(Store store, ChatWidget? storesWidget, int index) {
     return InkWell(
       onTap: () {
-        print('Store clicked: ${store.storename}');
-        OrderService().triggerStoreOrder(store);
+        if (storesWidget != null) {
+          String? rawStoreJson = storesWidget.getRawStoreAsJsonString(index);
+          print('Raw Store JSON: $rawStoreJson');
+          OrderService().triggerStoreOrder(rawStoreJson ?? '');
+        }
+        print('Store clicked: ${store}');
+        // OrderService().triggerStoreOrder(store);
         // Handle store card tap
       },
       child: Container(
@@ -1212,11 +1218,11 @@ class _ChatScreenBody extends StatelessWidget {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       if (store.supportedOrderTypes == 3) ...[
-                           _buildCustomServiceIcon('assets/images/ic_delivery.png'),
-                            const SizedBox(width: 8),
-                            _buildCustomServiceIcon('assets/images/ic_pickup.png'),
-                      ]else ...[
-                             _buildCustomServiceIcon('assets/images/ic_pickup.png'),
+                        _buildCustomServiceIcon('assets/images/ic_delivery.png'),
+                        const SizedBox(width: 8),
+                        _buildCustomServiceIcon('assets/images/ic_pickup.png'),
+                      ] else ...[
+                        _buildCustomServiceIcon('assets/images/ic_pickup.png'),
                       ],
                       const SizedBox(width: 8),
                       if (store.tableReservations)
@@ -1355,9 +1361,10 @@ class _ChatScreenBody extends StatelessWidget {
   }
 
   // Add product cards method
-  Widget _buildProductCards(List<Product> products) {
+  // Update _buildProductCards to pass the widget and index
+  Widget _buildProductCards(List<Product> products, ChatWidget? productsWidget) {
     return SizedBox(
-      height: 305, // Increased height for larger cards
+      height: 305,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.only(left: 70),
@@ -1367,16 +1374,16 @@ class _ChatScreenBody extends StatelessWidget {
         itemBuilder: (context, index) {
           final product = products[index];
           return SizedBox(
-            width: 200, // Slightly increased width
-            child: _buildProductCard(product),
+            width: 200,
+            child: _buildProductCard(product, productsWidget, index),
           );
         },
       ),
     );
   }
 
-  // Add product card method
-  Widget _buildProductCard(Product product) {
+  // Update _buildProductCard to handle raw JSON  
+  Widget _buildProductCard(Product product, ChatWidget? productsWidget, int index) {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -1419,12 +1426,11 @@ class _ChatScreenBody extends StatelessWidget {
           // Product Details - Fixed height to prevent overflow
           Expanded(
             child: Padding(
-              padding: const EdgeInsets.all(8), // Reduced from 6 to 8 for better balance
+              padding: const EdgeInsets.all(8),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.spaceBetween, // Distribute space
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  // Product Name and Price section
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -1438,8 +1444,7 @@ class _ChatScreenBody extends StatelessWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
-                      const SizedBox(height: 4), // Reduced spacing
-                      // Price Row
+                      const SizedBox(height: 4),
                       Row(
                         children: [
                           Text(
@@ -1466,14 +1471,18 @@ class _ChatScreenBody extends StatelessWidget {
                       ),
                     ],
                   ),
-                  // Order Now Button - Fixed at bottom
                   SizedBox(
                     width: double.infinity,
                     height: 36,
                     child: ElevatedButton(
                       onPressed: () {
+                        if (productsWidget != null) {
+                          String? rawProductJson = productsWidget.getRawProductAsJsonString(index);
+                          print('Raw Product JSON: $rawProductJson');
+                          OrderService().triggerProductOrder(rawProductJson ?? '');
+                        }
                         print('Product URL: ${product.url}');
-                        OrderService().triggerProductOrder(product);
+                        // OrderService().triggerProductOrder(product);
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.blue[50],
@@ -1482,7 +1491,7 @@ class _ChatScreenBody extends StatelessWidget {
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
-                        padding: EdgeInsets.zero, // Remove default padding
+                        padding: EdgeInsets.zero,
                       ),
                       child: const Text(
                         "ORDER NOW",

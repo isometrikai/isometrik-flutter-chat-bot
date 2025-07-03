@@ -53,7 +53,7 @@ class ChatWidget {
   final int widgetId;
   final int widgetsType;
   final String type;
-  final List<dynamic> widget; // Changed from List<String> to List<dynamic>
+  final List<dynamic> widget; // Raw JSON data
 
   ChatWidget({
     required this.widgetId,
@@ -89,20 +89,105 @@ class ChatWidget {
   bool get isImageWidget => type == 'image';
   bool get isTextWidget => type == 'text';
 
+  // Get raw JSON for each item in widget
+  List<Map<String, dynamic>> get rawItems {
+    return widget.map((item) {
+      if (item is Map<String, dynamic>) {
+        return item;
+      } else if (item is String) {
+        try {
+          return json.decode(item) as Map<String, dynamic>;
+        } catch (e) {
+          return {'value': item.toString()};
+        }
+      } else {
+        return {'value': item.toString()};
+      }
+    }).toList();
+  }
+
+  // Get raw JSON for a specific item by index
+  Map<String, dynamic>? getRawItem(int index) {
+    if (index >= 0 && index < widget.length) {
+      final item = widget[index];
+      if (item is Map<String, dynamic>) {
+        return item;
+      } else if (item is String) {
+        try {
+          return json.decode(item) as Map<String, dynamic>;
+        } catch (e) {
+          return {'value': item.toString()};
+        }
+      } else {
+        return {'value': item.toString()};
+      }
+    }
+    return null;
+  }
+
+  // Get JSON string for a specific item by index
+  String? getRawItemAsJsonString(int index) {
+    final rawItem = getRawItem(index);
+    return rawItem != null ? json.encode(rawItem) : null;
+  }
+
+  // Get all raw items as JSON strings
+  List<String> get rawItemsAsJsonStrings {
+    return rawItems.map((item) => json.encode(item)).toList();
+  }
+
   // Get options for options widget
-  List<String> get options => isOptionsWidget 
-      ? widget.map((e) => e.toString()).toList() 
+  List<String> get options => isOptionsWidget
+      ? widget.map((e) => e.toString()).toList()
       : [];
 
-  // Get stores for stores widget
-  List<Store> get stores => isStoresWidget 
+  // Get stores for stores widget (converted to models)
+  List<Store> get stores => isStoresWidget
       ? widget.map((e) => Store.fromJson(e as Map<String, dynamic>)).toList()
       : [];
 
-  // Get products for products widget
-  List<Product> get products => isProductsWidget 
+  // Get products for products widget (converted to models)
+  List<Product> get products => isProductsWidget
       ? widget.map((e) => Product.fromJson(e as Map<String, dynamic>)).toList()
       : [];
+
+  // Get raw stores data (without converting to models)
+  List<Map<String, dynamic>> get rawStores => isStoresWidget
+      ? widget.map((e) => e as Map<String, dynamic>).toList()
+      : [];
+
+  // Get raw products data (without converting to models)
+  List<Map<String, dynamic>> get rawProducts => isProductsWidget
+      ? widget.map((e) => e as Map<String, dynamic>).toList()
+      : [];
+
+  // Get raw store by index
+  Map<String, dynamic>? getRawStore(int index) {
+    if (isStoresWidget && index >= 0 && index < widget.length) {
+      return widget[index] as Map<String, dynamic>;
+    }
+    return null;
+  }
+
+  // Get raw product by index
+  Map<String, dynamic>? getRawProduct(int index) {
+    if (isProductsWidget && index >= 0 && index < widget.length) {
+      return widget[index] as Map<String, dynamic>;
+    }
+    return null;
+  }
+
+  // Get raw store as JSON string by index
+  String? getRawStoreAsJsonString(int index) {
+    final rawStore = getRawStore(index);
+    return rawStore != null ? json.encode(rawStore) : null;
+  }
+
+  // Get raw product as JSON string by index
+  String? getRawProductAsJsonString(int index) {
+    final rawProduct = getRawProduct(index);
+    return rawProduct != null ? json.encode(rawProduct) : null;
+  }
 
   // Get first option (useful for single selection)
   String? get firstOption => widget.isNotEmpty ? widget.first.toString() : null;
@@ -112,6 +197,38 @@ class ChatWidget {
     return 'ChatWidget(id: $widgetId, type: $type, items: ${widget.length})';
   }
 }
+
+// Usage example extension
+extension ChatWidgetUsage on ChatWidget {
+  // Method to handle item click and get raw JSON
+  String? handleItemClick(int index) {
+    switch (type) {
+      case 'products':
+        return getRawProductAsJsonString(index);
+      case 'stores':
+        return getRawStoreAsJsonString(index);
+      default:
+        return getRawItemAsJsonString(index);
+    }
+  }
+
+  // Method to get display data for UI (you can still use models for display)
+  List<dynamic> getDisplayItems() {
+    switch (type) {
+      case 'products':
+        return products; // Use Product models for display
+      case 'stores':
+        return stores; // Use Store models for display
+      case 'options':
+        return options;
+      default:
+        return widget;
+    }
+  }
+}
+
+// Keep all your existing model classes (Product, Store, etc.) unchanged
+// ... (all your existing model classes remain the same)
 
 // Product Model for products widget
 class Product {
@@ -450,7 +567,7 @@ enum WidgetType {
 
   static WidgetType fromString(String value) {
     return WidgetType.values.firstWhere(
-      (type) => type.value == value,
+          (type) => type.value == value,
       orElse: () => WidgetType.unknown,
     );
   }

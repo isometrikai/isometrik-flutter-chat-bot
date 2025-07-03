@@ -38,20 +38,20 @@ class MyApp extends StatelessWidget {
     );
   }
   void _setupCallbacks() {
-    OrderService().setProductCallback((Product product) {
-      _sendEventToiOS(product.toJson(), 'product');
+    OrderService().setProductCallback((String product) {
+      _sendEventToiOS(product, 'product');
     });
     
-    OrderService().setStoreCallback((Store store) {
-      _sendEventToiOS(store.toJson(), 'store');
+    OrderService().setStoreCallback((String store) {
+      _sendEventToiOS(store, 'store');
     });
 
     // Add dismiss callback
     OrderService().setDismissCallback(() {
-      _sendEventToiOS({}, 'dismissChat');
+      _sendEventToiOS('', 'dismissChat');
     });
   }
-  Future<void> _sendEventToiOS(Map<String, dynamic> data, String type) async {
+  Future<void> _sendEventToiOS(String data, String type) async {
     try {
       await platform.invokeMethod('handleOrder', {
         'type': type,
@@ -90,6 +90,7 @@ class PlatformService {
         chatBotId: config['chatBotId'] ?? '2',
         appSecret: config['appSecret'] ?? '',
         licenseKey: config['licenseKey'] ?? '',
+        isProduction: config['isProduction'] ?? false,
         location: config['location'],
         longitude: longitude,
         latitude: latitude,
@@ -100,9 +101,10 @@ class PlatformService {
       print('❌ Error getting config from platform: $e');
       // Fallback to default values if iOS config fails
       ApiService.configure(
-        chatBotId: '',
-        appSecret: '',
-        licenseKey: '',
+        chatBotId: '1476',
+        appSecret: "SFMyNTY.g3QAAAACZAAEZGF0YXQAAAADbQAAAAlhY2NvdW50SWRtAAAAGDY2YzQ2YWVhN2E2MDI5Yjk5MTNiMzIxOG0AAAAIa2V5c2V0SWRtAAAAJGFiZGFkNDQyLTA4YzktNDE4Ny1iYjk4LWUwMTAzYmY2YWYzOG0AAAAJcHJvamVjdElkbQAAACQ2Zjg4NzAwMi0yYzQ3LTQ4Y2EtYTQwNS0wZjk2NWVlNDAyNjFkAAZzaWduZWRuBgAUskFvkQE.esNFHT-JxzVtFpxylbJ8ik1lRZ-c75JjuCA0toa4C5M",
+        licenseKey: "lic-IMKMqJdO3e2HO+6qDxctvESxA+HkoLIThG9",
+        isProduction: false,
       );
     }
   }

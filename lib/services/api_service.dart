@@ -6,13 +6,10 @@ import '../model/mygpts_model.dart';
 import '../model/chat_response.dart';
 
 class ApiService {
-  // static String _chatBotId = '2';
-  // static String _appSecret = "SFMyNTY.g3QAAAACZAAEZGF0YXQAAAADbQAAAAlhY2NvdW50SWRtAAAAGDY2YzQ2YWVhN2E2MDI5Yjk5MTNiMzIxOG0AAAAIa2V5c2V0SWRtAAAAJGFiZGFkNDQyLTA4YzktNDE4Ny1iYjk4LWUwMTAzYmY2YWYzOG0AAAAJcHJvamVjdElkbQAAACQ2Zjg4NzAwMi0yYzQ3LTQ4Y2EtYTQwNS0wZjk2NWVlNDAyNjFkAAZzaWduZWRuBgAUskFvkQE.esNFHT-JxzVtFpxylbJ8ik1lRZ-c75JjuCA0toa4C5M";
-  // static String _licenseKey = "lic-IMKMqJdO3e2HO+6qDxctvESxA+HkoLIThG9";
-
   static String _chatBotId = '';
   static String _appSecret = "";
   static String _licenseKey = "";
+  static bool isProduction = false;
 
   // Optional location variables
   static String? _location;
@@ -34,6 +31,7 @@ class ApiService {
     required String chatBotId,
     required String appSecret,
     required String licenseKey,
+    required bool isProduction,
     String? location,
     double? longitude,
     double? latitude,
@@ -41,6 +39,7 @@ class ApiService {
     _chatBotId = chatBotId;
     _appSecret = appSecret;
     _licenseKey = licenseKey;
+    isProduction = isProduction;
     _location = location;
     newLongitude = longitude;
     newLatitude = latitude;

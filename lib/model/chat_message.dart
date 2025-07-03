@@ -13,6 +13,8 @@ class ChatMessage {
   final List<String> optionButtons;
   final List<Store> stores;
   final List<Product> products;
+  final ChatWidget? storesWidget;
+  final ChatWidget? productsWidget;
 
   ChatMessage({
     required this.id,
@@ -27,5 +29,7 @@ class ChatMessage {
     this.optionButtons = const [],
     this.stores = const [],
     this.products = const [],
+    this.storesWidget,
+    this.productsWidget,
   });
 }
