@@ -20,6 +20,14 @@ class ChatBot {
     double? longitude,
     double? latitude,
   }) {
+    print('chatBotId: $chatBotId');
+    print('appSecret: $appSecret');
+    print('licenseKey: $licenseKey');
+    print('isProduction: $isProduction');
+    print('userId: $userId');
+    print('location: $location');
+    print('longitude: $longitude');
+    print('latitude: $latitude');
     ApiService.configure(
       chatBotId: chatBotId,
       appSecret: appSecret,
