@@ -15,10 +15,12 @@ class ApiService {
   static String? _location;
   static double? newLongitude;
   static double? newLatitude;
+  static String? userID;
 
   static const String _baseUrl = 'https://service-apis.isometrik.io';
+  static const String _chatBaseUrl = 'https://easyagentapi.isometrik.ai';
   static const String _authEndpoint = '/v2/guestAuth';
-  static const String _chatEndpoint = '/v1/eazy/agent-chat';
+  static const String _chatEndpoint = '/v1/chatbot';
   static const String _tokenKey = 'access_token';
 
   static String? _accessToken;
@@ -32,6 +34,7 @@ class ApiService {
     required String appSecret,
     required String licenseKey,
     required bool isProduction,
+    required String userId,
     String? location,
     double? longitude,
     double? latitude,
@@ -40,6 +43,7 @@ class ApiService {
     _appSecret = appSecret;
     _licenseKey = licenseKey;
     isProduction = isProduction;
+    userID = userId;
     _location = location;
     newLongitude = longitude;
     newLatitude = latitude;
@@ -256,16 +260,21 @@ class ApiService {
     }
 
     try {
-      final url = '$_baseUrl$_chatEndpoint';
+      final url = '$_chatBaseUrl$_chatEndpoint';
 
       final requestBody = {
-        "isLoggedIn": isLoggedIn,
-        "agent_id": agentId,
-        "finger_print_id": fingerPrintId,
-        "message": message,
-        "longitude": longitude.toString(),
-        "latitude": latitude.toString(),
+        // "isLoggedIn": isLoggedIn,
+        // "agent_id": agentId,
+        "user_id": userID,
+        "device_id": fingerPrintId,
+        "query": message,
+        // "longitude": longitude.toString(),
+        // "latitude": latitude.toString(),
         "session_id": sessionId,
+        "location": {
+          "latitude": latitude.toString(),
+          "longitude": longitude.toString()
+        }
       };
 
       final requestBodyJson = json.encode(requestBody);
@@ -278,6 +287,11 @@ class ApiService {
           'Headers: Authorization: Bearer $_accessToken, Content-Type: application/json');
       print('Body: $requestBodyJson');
       print('======================');
+
+      final curlCommand = _generateCurlCommand(url, requestBodyJson, _accessToken!);
+      print('\n=== CURL COMMAND FOR POSTMAN ===');
+      print(curlCommand);
+      print('===============================');
 
       final response = await http.post(
         Uri.parse(url),
@@ -326,6 +340,17 @@ class ApiService {
       print('❌ Network error in _sendChatMessageRequest: $e');
       return null;
     }
+  }
+
+  static String _generateCurlCommand(String url, String requestBody, String accessToken) {
+    // Escape double quotes in the request body for proper shell formatting
+    final escapedBody = requestBody.replaceAll('"', '\\"');
+
+    return '''curl -X POST "$url" \\
+  -H "Authorization: Bearer $accessToken" \\
+  -H "Content-Type: application/json" \\
+  -H "Content-Length: ${requestBody.length}" \\
+  -d "$escapedBody"''';
   }
 
   /// Refreshes the access token

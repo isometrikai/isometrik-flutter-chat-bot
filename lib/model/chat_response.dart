@@ -2,19 +2,19 @@ import 'dart:convert';
 
 // Main Chat Response Model
 class ChatResponse {
-  final String response;
+  final String text;
   final String requestId;
   final List<ChatWidget> widgets;
 
   ChatResponse({
-    required this.response,
+    required this.text,
     required this.requestId,
     required this.widgets,
   });
 
   factory ChatResponse.fromJson(Map<String, dynamic> json) {
     return ChatResponse(
-      response: json['response'] ?? '',
+      text: json['text'] ?? '',
       requestId: json['request_id'] ?? '',
       widgets: (json['widgets'] as List<dynamic>?)
           ?.map((item) => ChatWidget.fromJson(item as Map<String, dynamic>))
@@ -25,7 +25,7 @@ class ChatResponse {
 
   Map<String, dynamic> toJson() {
     return {
-      'response': response,
+      'text': text,
       'request_id': requestId,
       'widgets': widgets.map((widget) => widget.toJson()).toList(),
     };
@@ -44,7 +44,7 @@ class ChatResponse {
 
   @override
   String toString() {
-    return 'ChatResponse(response: $response, requestId: $requestId, widgets: ${widgets.length})';
+    return 'ChatResponse(text: $text, requestId: $requestId, widgets: ${widgets.length})';
   }
 }
 

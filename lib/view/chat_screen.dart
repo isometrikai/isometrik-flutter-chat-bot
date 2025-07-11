@@ -86,7 +86,7 @@ class _ChatScreenState extends State<ChatScreen> {
     setState(() {
       messages.add(ChatMessage(
         id: messageId,
-        text: response.response,
+        text: response.text,
         isBot: true,
         showAvatar: true,
         hasStoreCards: hasStores,
@@ -103,6 +103,10 @@ class _ChatScreenState extends State<ChatScreen> {
       ));
     });
     _scrollToBottom();
+    // for (var widget in response.widgets) {
+    //   print(widget);
+    //   print("s");
+    // }
   }
 
   void _scrollToBottom() {

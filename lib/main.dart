@@ -91,6 +91,7 @@ class PlatformService {
         appSecret: config['appSecret'] ?? '',
         licenseKey: config['licenseKey'] ?? '',
         isProduction: config['isProduction'] ?? false,
+        userId: config['userId'] ?? '',
         location: config['location'],
         longitude: longitude,
         latitude: latitude,
@@ -100,12 +101,15 @@ class PlatformService {
     } catch (e) {
       print('❌ Error getting config from platform: $e');
       // Fallback to default values if iOS config fails
-      ApiService.configure(
-        chatBotId: '1476',
-        appSecret: "SFMyNTY.g3QAAAACZAAEZGF0YXQAAAADbQAAAAlhY2NvdW50SWRtAAAAGDY2YzQ2YWVhN2E2MDI5Yjk5MTNiMzIxOG0AAAAIa2V5c2V0SWRtAAAAJGFiZGFkNDQyLTA4YzktNDE4Ny1iYjk4LWUwMTAzYmY2YWYzOG0AAAAJcHJvamVjdElkbQAAACQ2Zjg4NzAwMi0yYzQ3LTQ4Y2EtYTQwNS0wZjk2NWVlNDAyNjFkAAZzaWduZWRuBgAUskFvkQE.esNFHT-JxzVtFpxylbJ8ik1lRZ-c75JjuCA0toa4C5M",
-        licenseKey: "lic-IMKMqJdO3e2HO+6qDxctvESxA+HkoLIThG9",
-        isProduction: false,
-      );
+      // ApiService.configure(
+      //   chatBotId: '1476',
+      //   appSecret: "SFMyNTY.g3QAAAACZAAEZGF0YXQAAAADbQAAAAlhY2NvdW50SWRtAAAAGDY2YzQ2YWVhN2E2MDI5Yjk5MTNiMzIxOG0AAAAIa2V5c2V0SWRtAAAAJGFiZGFkNDQyLTA4YzktNDE4Ny1iYjk4LWUwMTAzYmY2YWYzOG0AAAAJcHJvamVjdElkbQAAACQ2Zjg4NzAwMi0yYzQ3LTQ4Y2EtYTQwNS0wZjk2NWVlNDAyNjFkAAZzaWduZWRuBgAUskFvkQE.esNFHT-JxzVtFpxylbJ8ik1lRZ-c75JjuCA0toa4C5M",
+      //   licenseKey: "lic-IMKMqJdO3e2HO+6qDxctvESxA+HkoLIThG9",
+      //   userId: "user_12345",
+      //   isProduction: false,
+      //   latitude: 40.7128,
+      //   longitude: 74.0060,
+      // );
     }
   }
 }
