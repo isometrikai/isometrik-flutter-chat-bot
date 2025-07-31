@@ -16,15 +16,19 @@ class ChatBot {
     required String licenseKey,
     required bool isProduction,
     required String userId,
-    String? location,
-    double? longitude,
-    double? latitude,
+    required String name,
+    required String timestamp,
+    required String location,
+    required double longitude,
+    required double latitude,
   }) {
     print('chatBotId: $chatBotId');
     print('appSecret: $appSecret');
     print('licenseKey: $licenseKey');
     print('isProduction: $isProduction');
     print('userId: $userId');
+    print('userId: $name');
+    print('userId: $timestamp');
     print('location: $location');
     print('longitude: $longitude');
     print('latitude: $latitude');
@@ -34,6 +38,8 @@ class ChatBot {
       licenseKey: licenseKey,
       isProduction: isProduction,
       userId: userId,
+      name: name,
+      timestamp: timestamp,
       location: location,
       longitude: longitude,
       latitude: latitude,

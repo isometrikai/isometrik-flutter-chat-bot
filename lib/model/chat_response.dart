@@ -236,13 +236,13 @@ class Product {
   final String productId;
   final String productName;
   final double finalPrice;
-  final bool inStock;
-  final int tag;
+  final bool inStock;//
+  final int tag;//
   final FinalPriceList finalPriceList;
-  final Map<String, dynamic> offers;
+  // final Map<String, dynamic> offers;//
   final String productImage;
-  final double averageRating;
-  final String currencySymbol;
+  // final double averageRating;//
+  final String currencySymbol;//
   final String currency;
   final String url;
   final String store;
@@ -256,9 +256,9 @@ class Product {
     required this.inStock,
     required this.tag,
     required this.finalPriceList,
-    required this.offers,
+    // required this.offers,
     required this.productImage,
-    required this.averageRating,
+    // required this.averageRating,
     required this.currencySymbol,
     required this.currency,
     required this.url,
@@ -275,9 +275,9 @@ class Product {
       inStock: json['inStock'] ?? false,
       tag: json['tag'] ?? 0,
       finalPriceList: FinalPriceList.fromJson(json['finalPriceList'] ?? {}),
-      offers: json['offers'] ?? {},
+      // offers: json['offers'] ?? {},
       productImage: json['product_image'] ?? '',
-      averageRating: (json['average_rating'] ?? 0).toDouble(),
+      // averageRating: (json['average_rating'] ?? 0).toDouble(),
       currencySymbol: json['currencySymbol'] ?? '',
       currency: json['currency'] ?? '',
       url: json['url'] ?? '',
@@ -295,9 +295,9 @@ class Product {
       'inStock': inStock,
       'tag': tag,
       'finalPriceList': finalPriceList.toJson(),
-      'offers': offers,
+      // 'offers': offers,
       'product_image': productImage,
-      'average_rating': averageRating,
+      // 'average_rating': averageRating,
       'currencySymbol': currencySymbol,
       'currency': currency,
       'url': url,

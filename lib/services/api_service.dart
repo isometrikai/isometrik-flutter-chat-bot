@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import '../model/mygpts_model.dart';
 import '../model/chat_response.dart';
+import '../utils/log.dart';
 
 class ApiService {
   static String _chatBotId = '';
@@ -12,9 +13,11 @@ class ApiService {
   static bool isProduction = false;
 
   // Optional location variables
-  static String? _location;
-  static double? newLongitude;
-  static double? newLatitude;
+  static String? updateLocation;
+  static double? updateLongitude;
+  static double? updateLatitude;
+  static String? updateName;
+  static String? updateTimestamp;
   static String? userID;
 
   static const String _baseUrl = 'https://service-apis.isometrik.io';
@@ -26,7 +29,7 @@ class ApiService {
   static String? _accessToken;
 
   static const Duration _requestTimeout = Duration(seconds: 120);
-  static const String _timeoutErrorMessage = "Something went wrong please try again latter";
+  static const String _timeoutErrorMessage = "Something went wrong please try again later";
 
   /// Configure API service with required and optional parameters
   static void configure({
@@ -35,6 +38,8 @@ class ApiService {
     required String licenseKey,
     required bool isProduction,
     required String userId,
+    required String name,
+    required String timestamp,
     String? location,
     double? longitude,
     double? latitude,
@@ -44,9 +49,11 @@ class ApiService {
     _licenseKey = licenseKey;
     isProduction = isProduction;
     userID = userId;
-    _location = location;
-    newLongitude = longitude;
-    newLatitude = latitude;
+    updateName = name;
+    updateTimestamp = timestamp;
+    updateLocation = location;
+    updateLongitude = longitude;
+    updateLatitude = latitude;
   }
 
   /// Get current chatbot endpoint with dynamic ID
@@ -59,6 +66,7 @@ class ApiService {
     "fingerprintId": "NjM2MTAzMDYzNjI4NGUwMDEzNzYyMjA5",
     "licensekey": _licenseKey,
   };
+
   static Future<void> initialize() async {
     await _loadTokenFromStorage();
   }
@@ -68,9 +76,9 @@ class ApiService {
     try {
       final prefs = await SharedPreferences.getInstance();
       _accessToken = prefs.getString(_tokenKey);
-      print('📱 Loaded token from storage: ${_accessToken != null ? 'Found' : 'Not found'}');
+      AppLog.info('📱 Loaded token from storage: ${_accessToken != null ? 'Found' : 'Not found'}');
     } catch (e) {
-      print('❌ Error loading token from storage: $e');
+      AppLog.info('❌ Error loading token from storage: $e');
       _accessToken = null;
     }
   }
@@ -80,9 +88,9 @@ class ApiService {
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString(_tokenKey, token);
-      print('💾 Token saved to storage successfully');
+      AppLog.info('💾 Token saved to storage successfully');
     } catch (e) {
-      print('❌ Error saving token to storage: $e');
+      AppLog.info('❌ Error saving token to storage: $e');
     }
   }
 
@@ -91,10 +99,78 @@ class ApiService {
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.remove(_tokenKey);
-      print('🗑️ Token cleared from storage');
+      AppLog.info('🗑️ Token cleared from storage');
     } catch (e) {
-      print('❌ Error clearing token from storage: $e');
+      AppLog.info('❌ Error clearing token from storage: $e');
     }
+  }
+
+  /// Generate cURL command for GET requests
+  static String _generateGetCurlCommand(String url, Map<String, String> headers) {
+    final headerParams = headers.entries
+        .map((entry) => '-H "${entry.key}: ${_escapeHeaderValue(entry.value)}"')
+        .join(' \\\n  ');
+
+    return '''curl -X GET "$url" \\
+  $headerParams''';
+  }
+
+  /// Generate cURL command for POST requests
+  static String _generatePostCurlCommand(String url, String requestBody, Map<String, String> headers) {
+    final headerParams = headers.entries
+        .map((entry) => '-H "${entry.key}: ${_escapeHeaderValue(entry.value)}"')
+        .join(' \\\n  ');
+
+    // Escape the request body for shell
+    final escapedBody = requestBody
+        .replaceAll('\\', '\\\\')
+        .replaceAll('"', '\\"')
+        .replaceAll('\n', '\\n')
+        .replaceAll('\r', '\\r')
+        .replaceAll('\t', '\\t');
+
+    return '''curl -X POST "$url" \\
+  $headerParams \\
+  -d "$escapedBody"''';
+  }
+
+  /// Escape header values for shell safety
+  static String _escapeHeaderValue(String value) {
+    return value
+        .replaceAll('\\', '\\\\')
+        .replaceAll('"', '\\"');
+  }
+
+  /// Log API request details with cURL command
+  static void _logApiRequest({
+    required String apiName,
+    required String method,
+    required String url,
+    required Map<String, String> headers,
+    String? body,
+  }) {
+    AppLog.info('URL: $url');
+    if (body != null) {
+      AppLog.info('Body: $body');
+    }
+
+    // Generate and log cURL command
+    final curlCommand = method.toUpperCase() == 'GET'
+        ? _generateGetCurlCommand(url, headers)
+        : _generatePostCurlCommand(url, body ?? '', headers);
+
+    AppLog.info('\n=== $apiName cURL COMMAND ===');
+    AppLog.info(curlCommand);
+    AppLog.info('================================\n');
+  }
+
+  /// Log API response details
+  static void _logApiResponse({
+    required String apiName,
+    required http.Response response,
+  }) {
+    AppLog.info('=== $apiName API RESPONSE ===');
+    AppLog.info('Response Body: ${response.body}');
   }
 
   /// Fetches chatbot data, handling token refresh if needed
@@ -122,7 +198,7 @@ class ApiService {
 
       return null;
     } catch (e) {
-      print('Error in getChatbotData: $e');
+      AppLog.info('Error in getChatbotData: $e');
       return null;
     }
   }
@@ -130,62 +206,61 @@ class ApiService {
   /// Fetches chatbot data with current token
   static Future<MyGPTsResponse?> _fetchChatbotData() async {
     if (_accessToken == null || _accessToken!.isEmpty) {
-      print('❌ No access token available');
+      AppLog.info('❌ No access token available');
       return null;
     }
 
     try {
       final url = '$_baseUrl$_chatbotEndpoint';
+      final headers = {
+        'Authorization': _accessToken!,
+        'Content-Type': 'application/json',
+      };
 
-      print('=== CHATBOT API DEBUG ===');
-      print('URL: $url');
-      print('Method: GET');
-      print('Authorization: ${_accessToken!.substring(0, 20)}...');
-      print('Headers: Authorization: $_accessToken, Content-Type: application/json');
-      print('========================');
+      // Log request with cURL
+      _logApiRequest(
+        apiName: 'CHATBOT',
+        method: 'GET',
+        url: url,
+        headers: headers,
+      );
 
       final response = await http.get(
         Uri.parse(url),
-        headers: {
-          'Authorization': _accessToken!,
-          'Content-Type': 'application/json',
-        },
+        headers: headers,
       ).timeout(_requestTimeout);
 
-      print('=== CHATBOT API RESPONSE ===');
-      print('Status Code: ${response.statusCode}');
-      print('Response Headers: ${response.headers}');
-      print('Response Body: ${response.body}');
-      print('===========================');
+      // Log response
+      _logApiResponse(apiName: 'CHATBOT', response: response);
 
       if (response.statusCode == 200) {
-        print('✅ Chatbot data fetch successful');
+        AppLog.info('✅ Chatbot data fetch successful');
         final chatbotResponse = MyGPTsResponse.fromJson(json.decode(response.body));
-        print(chatbotResponse.data.first.uiPreferences.primaryColor);
+        AppLog.info(chatbotResponse.data.first.uiPreferences.primaryColor);
         return chatbotResponse;
       } else if (response.statusCode == 401) {
         // Token expired or invalid, remove from storage
         await _clearTokenFromStorage();
         _accessToken = null;
-        
+
         try {
           final errorBody = json.decode(response.body);
           if (errorBody['message'] == 'Token Not found.') {
-            print('🔄 Token expired, will refresh');
+            AppLog.info('🔄 Token expired, will refresh');
             return null; // Signal to refresh token
           }
         } catch (e) {
-          print('❌ Error parsing 401 response: $e');
+          AppLog.info('❌ Error parsing 401 response: $e');
         }
       }
 
-      print('❌ Chatbot API error: ${response.statusCode} - ${response.body}');
+      AppLog.info('❌ Chatbot API error: ${response.statusCode} - ${response.body}');
       return null;
     } on TimeoutException catch (e) {
-      print('❌ Request timeout: $e');
+      AppLog.info('❌ Request timeout: $e');
       throw Exception(_timeoutErrorMessage);
     } catch (e) {
-      print('❌ Network error in _fetchChatbotData: $e');
+      AppLog.info('❌ Network error in _fetchChatbotData: $e');
       return null;
     }
   }
@@ -213,8 +288,11 @@ class ApiService {
         fingerPrintId: fingerPrintId,
         sessionId: sessionId,
         isLoggedIn: isLoggedIn,
-        longitude: newLongitude ?? 0.0,
-        latitude: newLatitude ?? 0.0,
+        longitude: updateLongitude ?? 0.0,
+        latitude: updateLatitude ?? 0.0,
+        name: updateName ?? '',
+        timestamp: updateTimestamp ?? '',
+        location: updateLocation ?? ''
       );
 
       if (response != null) {
@@ -232,14 +310,17 @@ class ApiService {
           fingerPrintId: fingerPrintId,
           sessionId: sessionId,
           isLoggedIn: isLoggedIn,
-          longitude: longitude,
-          latitude: latitude,
+          longitude: updateLongitude ?? 0.0,
+          latitude: updateLatitude ?? 0.0,
+            name: updateName ?? '',
+            timestamp: updateTimestamp ?? '',
+            location: updateLocation ?? ''
         );
       }
 
       return null;
     } catch (e) {
-      print('Error in sendChatMessage: $e');
+      AppLog.info('Error in sendChatMessage: $e');
       return null;
     }
   }
@@ -250,12 +331,15 @@ class ApiService {
     required String agentId,
     required String fingerPrintId,
     required String sessionId,
+    required String name,
+    required String timestamp,
+    required String location,
     bool isLoggedIn = false,
     double longitude = 0.0,
     double latitude = 0.0,
   }) async {
     if (_accessToken == null || _accessToken!.isEmpty) {
-      print('❌ No access token available for chat');
+      AppLog.info('❌ No access token available for chat');
       return null;
     }
 
@@ -263,54 +347,48 @@ class ApiService {
       final url = '$_chatBaseUrl$_chatEndpoint';
 
       final requestBody = {
-        // "isLoggedIn": isLoggedIn,
-        // "agent_id": agentId,
         "user_id": userID,
         "device_id": fingerPrintId,
         "query": message,
-        // "longitude": longitude.toString(),
-        // "latitude": latitude.toString(),
         "session_id": sessionId,
         "location": {
           "latitude": latitude.toString(),
           "longitude": longitude.toString()
+        },
+        "user_data": {
+          "name": name,
+          "timestamp": timestamp,
+          "location": location
         }
       };
 
       final requestBodyJson = json.encode(requestBody);
+      final headers = {
+        'Authorization': 'Bearer $_accessToken',
+        'Content-Type': 'application/json',
+        'Content-Length': requestBodyJson.length.toString(),
+      };
 
-      print('=== CHAT API DEBUG ===');
-      print('URL: $url');
-      print('Method: POST');
-      print('Authorization: Bearer ${_accessToken!.substring(0, 20)}...');
-      print(
-          'Headers: Authorization: Bearer $_accessToken, Content-Type: application/json');
-      print('Body: $requestBodyJson');
-      print('======================');
-
-      final curlCommand = _generateCurlCommand(url, requestBodyJson, _accessToken!);
-      print('\n=== CURL COMMAND FOR POSTMAN ===');
-      print(curlCommand);
-      print('===============================');
+      // Log request with cURL
+      _logApiRequest(
+        apiName: 'CHAT',
+        method: 'POST',
+        url: url,
+        headers: headers,
+        body: requestBodyJson,
+      );
 
       final response = await http.post(
         Uri.parse(url),
-        headers: {
-          'Authorization': 'Bearer $_accessToken',
-          'Content-Type': 'application/json',
-          'Content-Length': requestBodyJson.length.toString(),
-        },
+        headers: headers,
         body: requestBodyJson,
       ).timeout(_requestTimeout);
 
-      print('=== CHAT API RESPONSE ===');
-      print('Status Code: ${response.statusCode}');
-      print('Response Headers: ${response.headers}');
-      print('Response Body: ${response.body}');
-      print('========================');
+      // Log response
+      _logApiResponse(apiName: 'CHAT', response: response);
 
       if (response.statusCode == 200) {
-        print('✅ Chat message sent successfully');
+        AppLog.info('✅ Chat message sent successfully');
         final chatResponse = ChatResponse.fromJson(json.decode(response.body));
         return chatResponse;
       } else if (response.statusCode == 401) {
@@ -321,36 +399,24 @@ class ApiService {
         try {
           final errorBody = json.decode(response.body);
           if (errorBody['message'] == 'Token Not found.' ||
-              errorBody['message']?.toString().contains('Unauthorized') ==
-                  true) {
-            print('🔄 Token expired for chat, will refresh');
+              errorBody['message']?.toString().contains('Unauthorized') == true) {
+            AppLog.info('🔄 Token expired for chat, will refresh');
             return null; // Signal to refresh token
           }
         } catch (e) {
-          print('❌ Error parsing 401 response for chat: $e');
+          AppLog.info('❌ Error parsing 401 response for chat: $e');
         }
       }
 
-      print('❌ Chat API error: ${response.statusCode} - ${response.body}');
+      AppLog.info('❌ Chat API error: ${response.statusCode} - ${response.body}');
       return null;
     } on TimeoutException catch (e) {
-      print('❌ Chat request timeout: $e');
+      AppLog.info('❌ Chat request timeout: $e');
       throw Exception(_timeoutErrorMessage);
     } catch (e) {
-      print('❌ Network error in _sendChatMessageRequest: $e');
+      AppLog.info('❌ Network error in _sendChatMessageRequest: $e');
       return null;
     }
-  }
-
-  static String _generateCurlCommand(String url, String requestBody, String accessToken) {
-    // Escape double quotes in the request body for proper shell formatting
-    final escapedBody = requestBody.replaceAll('"', '\\"');
-
-    return '''curl -X POST "$url" \\
-  -H "Authorization: Bearer $accessToken" \\
-  -H "Content-Type: application/json" \\
-  -H "Content-Length: ${requestBody.length}" \\
-  -d "$escapedBody"''';
   }
 
   /// Refreshes the access token
@@ -358,52 +424,50 @@ class ApiService {
     try {
       final requestBody = json.encode(_authBody);
       final url = '$_baseUrl$_authEndpoint';
+      final headers = {
+        'Content-Type': 'application/json',
+      };
 
-      print('=== AUTH API DEBUG ===');
-      print('URL: $url');
-      print('Method: POST');
-      print('Headers: Content-Type: application/json');
-      print('Body: $requestBody');
-      print('Body length: ${requestBody.length}');
-      print('=====================');
+      // Log request with cURL
+      _logApiRequest(
+        apiName: 'AUTH',
+        method: 'POST',
+        url: url,
+        headers: headers,
+        body: requestBody,
+      );
 
       final response = await http.post(
         Uri.parse(url),
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: headers,
         body: requestBody,
       ).timeout(_requestTimeout);
 
-      print('=== AUTH API RESPONSE ===');
-      print('Status Code: ${response.statusCode}');
-      print('Response Headers: ${response.headers}');
-      print('Response Body: ${response.body}');
-      print('Response Body Length: ${response.body.length}');
-      print('========================');
+      // Log response
+      _logApiResponse(apiName: 'AUTH', response: response);
 
       if (response.statusCode == 200) {
         final responseData = json.decode(response.body);
         if (responseData['message'] == 'Success') {
           final newToken = responseData['data']['accessToken'];
-          print('✅ Token refresh successful');
-          
+          AppLog.info('✅ Token refresh successful');
+
           // Save new token to storage
           await _saveTokenToStorage(newToken);
-          
+
           return newToken;
         } else {
-          print('❌ Unexpected response message: ${responseData['message']}');
+          AppLog.info('❌ Unexpected response message: ${responseData['message']}');
         }
       }
 
-      print('❌ Auth API error: ${response.statusCode} - ${response.body}');
+      AppLog.info('❌ Auth API error: ${response.statusCode} - ${response.body}');
       return null;
     } on TimeoutException catch (e) {
-      print('❌ Auth request timeout: $e');
+      AppLog.info('❌ Auth request timeout: $e');
       throw Exception(_timeoutErrorMessage);
     } catch (e) {
-      print('❌ Network error in _refreshToken: $e');
+      AppLog.info('❌ Network error in _refreshToken: $e');
       return null;
     }
   }

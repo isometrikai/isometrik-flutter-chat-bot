@@ -1485,7 +1485,6 @@ class _ChatScreenBody extends StatelessWidget {
                           print('Product JSON: $productJson');
                           OrderService().triggerProductOrder(productJson ?? {});
                         }
-                        print('Product URL: ${product.url}');
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.blue[50],
