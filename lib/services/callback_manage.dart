@@ -1,4 +1,3 @@
-import '../model/chat_response.dart';
 
 class OrderService {
   static final OrderService _instance = OrderService._internal();

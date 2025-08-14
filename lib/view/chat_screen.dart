@@ -1,20 +1,22 @@
-import 'package:chat_bot/model/mygpts_model.dart';
+import 'package:chat_bot/data/model/mygpts_model.dart';
 import 'package:chat_bot/bloc/chat_bloc.dart';
 import 'package:chat_bot/bloc/chat_event.dart';
 import 'package:chat_bot/bloc/chat_state.dart';
-import 'package:chat_bot/model/chat_response.dart';
-import 'package:chat_bot/model/chat_message.dart';
+import 'package:chat_bot/data/model/chat_response.dart';
+import 'package:chat_bot/data/model/chat_message.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lottie/lottie.dart';
 import '../services/callback_manage.dart';
-import '../services/api_service.dart';
 import 'package:flutter/services.dart';
 import 'package:chat_bot/widgets/black_toast_view.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:chat_bot/data/model/greeting_response.dart';
 
 class ChatScreen extends StatefulWidget {
   final MyGPTsResponse chatbotData;
-  const ChatScreen({super.key, required this.chatbotData});
+  final GreetingResponse? greetingData;
+  const ChatScreen({super.key, required this.chatbotData, this.greetingData});
 
   @override
   State<ChatScreen> createState() => _ChatScreenState();
@@ -125,7 +127,6 @@ class _ChatScreenState extends State<ChatScreen> {
   void initState() {
     super.initState();
     _initializeSession();
-    _setupWelcomeMessage();
     
     // Add keyboard listener
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -137,36 +138,9 @@ class _ChatScreenState extends State<ChatScreen> {
     _sessionId = "${DateTime.now().millisecondsSinceEpoch ~/ 1000}";
   }
 
-  void _setupWelcomeMessage() {
-    setState(() {
-      messages = [
-        ChatMessage(
-          id: DateTime
-              .now()
-              .millisecondsSinceEpoch
-              .toString(),
-          text: "Meet ${widget.chatbotData.data.first.name}\n${widget
-              .chatbotData.data.first.uiPreferences.launcherWelcomeMessage}",
-          isBot: true,
-          showAvatar: false,
-          hasQuickReplies: false,
-          isWelcomeMessage: true,
-        ),
-      ];
-    });
-  }
   void _restartChatAPI() {
     setState(() {
-      messages = [
-        ChatMessage(
-          id: DateTime.now().millisecondsSinceEpoch.toString(),
-          text: "Meet ${widget.chatbotData.data.first.name}\n${widget.chatbotData.data.first.uiPreferences.launcherWelcomeMessage}",
-          isBot: true,
-          showAvatar: false,
-          hasQuickReplies: false,
-          isWelcomeMessage: true,
-        ),
-      ];
+      messages = [];
 
       _selectedOptionMessages.clear();
       _sessionId = "${DateTime.now().millisecondsSinceEpoch ~/ 1000}";
@@ -194,6 +168,7 @@ class _ChatScreenState extends State<ChatScreen> {
         messageFocusNode: _messageFocusNode,
         scrollController: _scrollController,
         chatbotData: widget.chatbotData,
+        greetingData: widget.greetingData,
         selectedOptionMessages: _selectedOptionMessages,
         messages: messages,
         onSendMessage: _sendMessage,
@@ -220,11 +195,12 @@ class _ChatScreenState extends State<ChatScreen> {
 }
 
 class _ChatScreenBody extends StatelessWidget {
-  static const platform = MethodChannel('chat_bot_channel');
+  // static const platform = MethodChannel('chat_bot_channel');
   final TextEditingController messageController;
   final FocusNode messageFocusNode;
   final ScrollController scrollController;
   final MyGPTsResponse chatbotData;
+  final GreetingResponse? greetingData;
   final Set<String> selectedOptionMessages;
   final List<ChatMessage> messages;
   final Function(String) onSendMessage;
@@ -243,6 +219,7 @@ class _ChatScreenBody extends StatelessWidget {
     required this.messageFocusNode,
     required this.scrollController,
     required this.chatbotData,
+    required this.greetingData,
     // required this.isLoadingData,
     required this.selectedOptionMessages,
     required this.messages,
@@ -263,7 +240,7 @@ class _ChatScreenBody extends StatelessWidget {
     return PopScope(
       canPop: false,
       child: Scaffold(
-        backgroundColor: Color(0xFFF2F2F7),
+        backgroundColor: Colors.white,
         resizeToAvoidBottomInset: true,
         appBar: _buildAppBar(context),
         body: BlocConsumer<ChatBloc, ChatState>(
@@ -314,75 +291,88 @@ class _ChatScreenBody extends StatelessWidget {
               });
             }
       
-            return Column(
+            final bool showGreetingOverlay = messages.isEmpty && greetingData != null;
+            return Stack(
               children: [
-                Expanded(
-                  child: NotificationListener<ScrollNotification>(
-                    onNotification: (ScrollNotification scrollInfo) {
-                      // Handle scroll notifications if needed
-                      return false;
-                    },
-                    child: ListView.builder(
-                      controller: scrollController,
-                      padding: const EdgeInsets.all(16),
-                      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-                      itemCount: messages.length + (state is ChatLoading ? 1 : 0),
-                      itemBuilder: (context, index) {
-                        // Show messages
-                        if (index < messages.length) {
-                          return _buildMessageBubble(messages[index], context);
-                        }
-      
-                        // Show loader as last item when loading
-                        if (state is ChatLoading) {
-                          return Padding(
-                            padding: const EdgeInsets.only(bottom: 16),
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.end,
-                              children: [
-                                _buildBotAvatar(),
-                                const SizedBox(width: 8),
-                                Container(
-                                  decoration: BoxDecoration(
-                                      color: Color(int.parse(
-                                          chatbotData.data.first.uiPreferences
-                                              .botBubbleColor.replaceFirst(
-                                              '#', '0xFF') ?? '0xFFE5E5FF')),
-                                    borderRadius: BorderRadius.only(
-                                      topLeft: Radius.circular(8),
-                                      topRight: Radius.circular(8),
-                                      bottomLeft: Radius.circular(0),
-                                      bottomRight: Radius.circular(8),
-                                    ),
-                                    border: Border.all(
-                                      color: Colors.grey.shade300,
-                                      width: 0.5,
-                                    )
-                                  ),
-                                  child: SizedBox(
-                                    width: 80,
-                                    height: 40,
-                                    child: Transform.scale(
-                                      scale: 3.5,
-                                      child: Lottie.asset(
-                                          'assets/lottie/bubble-wave-black.json',
-                                          package: 'chat_bot',
-                                          fit: BoxFit.contain
+                Column(
+                  children: [
+                    Expanded(
+                      child: NotificationListener<ScrollNotification>(
+                        onNotification: (ScrollNotification scrollInfo) {
+                          return false;
+                        },
+                        child: ListView.builder(
+                          controller: scrollController,
+                          padding: const EdgeInsets.all(16),
+                          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+                          itemCount: messages.length + (state is ChatLoading ? 1 : 0),
+                          itemBuilder: (context, index) {
+                            if (index < messages.length) {
+                              return _buildMessageBubble(messages[index], context);
+                            }
+
+                            if (state is ChatLoading) {
+                              return Padding(
+                                padding: const EdgeInsets.only(bottom: 16),
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.end,
+                                  children: [
+                                    _buildBotAvatar(),
+                                    const SizedBox(width: 8),
+                                    Container(
+                                      decoration: BoxDecoration(
+                                          color: Color(
+                                              int.parse(
+                                                  chatbotData
+                                                      .data
+                                                      .first
+                                                      .uiPreferences
+                                                      .botBubbleColor
+                                                      .replaceFirst('#', '0xFF'))),
+                                          borderRadius: const BorderRadius.only(
+                                            topLeft: Radius.circular(8),
+                                            topRight: Radius.circular(8),
+                                            bottomLeft: Radius.circular(0),
+                                            bottomRight: Radius.circular(8),
+                                          ),
+                                          border: Border.all(
+                                            color: Colors.grey.shade300,
+                                            width: 0.5,
+                                          )
+                                      ),
+                                      child: SizedBox(
+                                        width: 80,
+                                        height: 40,
+                                        child: Transform.scale(
+                                          scale: 3.5,
+                                          child: Lottie.asset(
+                                              'assets/lottie/bubble-wave-black.json',
+                                              fit: BoxFit.contain
+                                          ),
+                                        ),
                                       ),
                                     ),
-                                  ),
+                                  ],
                                 ),
-                              ],
-                            ),
-                          );
-                        }
-      
-                        return const SizedBox.shrink();
-                      },
+                              );
+                            }
+
+                            return const SizedBox.shrink();
+                          },
+                        ),
+                      ),
+                    ),
+                    _buildInputArea(context),
+                  ],
+                ),
+                if (showGreetingOverlay) Positioned.fill(
+                  child: IgnorePointer(
+                    ignoring: false,
+                    child: Center(
+                      child: _buildGreetingOverlay(context),
                     ),
                   ),
                 ),
-                _buildInputArea(context),
               ],
             );
           },
@@ -394,10 +384,17 @@ class _ChatScreenBody extends StatelessWidget {
   PreferredSizeWidget _buildAppBar(BuildContext context) {
     return AppBar(
       backgroundColor: Colors.white,
+      surfaceTintColor: Colors.transparent,
+      scrolledUnderElevation: 0,
+      systemOverlayStyle: SystemUiOverlayStyle.dark,
       elevation: 1,
       leading: IconButton(
-        icon: const Icon(Icons.close, color: Colors.black),
-        onPressed: () => _showExitChatConfirmation(context),
+        icon: SvgPicture.asset(
+          'assets/images/ic_history.svg',
+          width: 40,
+          height: 40,
+        ),
+        onPressed: () {},
       ),
       title: Row(
         children: [
@@ -412,60 +409,35 @@ class _ChatScreenBody extends StatelessWidget {
                 width: 0.5,
               ),
             ),
-            child: ClipOval(
-              child: (chatbotData.data != null &&
-                     chatbotData.data.isNotEmpty &&
-                     chatbotData.data.first.profileImage != null &&
-                     chatbotData.data.first.profileImage.isNotEmpty)
-                  ? Image.network(
-                      chatbotData.data.first.profileImage,
-                      width: 40,
-                      height: 40,
-                      fit: BoxFit.cover,
-                      loadingBuilder: (context, child, loadingProgress) {
-                        if (loadingProgress == null) return child;
-                        return const Center(
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                          ),
-                        );
-                      },
-                      errorBuilder: (context, error, stackTrace) {
-                        return const Icon(
-                          Icons.calendar_today,
-                          color: Colors.white,
-                          size: 20,
-                        );
-                      },
-                    )
-                  : const Icon(
-                      Icons.calendar_today,
-                      color: Colors.white,
-                      size: 20,
-                    ),
-            ),
-          ),
-          const SizedBox(width: 12),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                chatbotData.data.first.name ?? 'Loading...', // Use API data
-                style: const TextStyle(
-                  color: Colors.black,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              const Text(
-                'AI Assistant',
-                style: TextStyle(
-                  color: Colors.grey,
-                  fontSize: 12,
-                ),
-              ),
-            ],
+            child: (chatbotData.data.isNotEmpty &&
+                   chatbotData.data.first.profileImage.isNotEmpty)
+                ? Image.network(
+                    chatbotData.data.first.profileImage,
+                    width: 40,
+                    height: 40,
+                    fit: BoxFit.cover,
+                    loadingBuilder: (context, child, loadingProgress) {
+                      if (loadingProgress == null) return child;
+                      return const Center(
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                        ),
+                      );
+                    },
+                    errorBuilder: (context, error, stackTrace) {
+                      return const Icon(
+                        Icons.calendar_today,
+                        color: Colors.white,
+                        size: 20,
+                      );
+                    },
+                  )
+                : const Icon(
+                    Icons.calendar_today,
+                    color: Colors.white,
+                    size: 20,
+                  ),
           ),
         ],
       ),
@@ -473,12 +445,28 @@ class _ChatScreenBody extends StatelessWidget {
         BlocBuilder<ChatBloc, ChatState>(
           builder: (context, state) {
             bool isApiLoading = state is ChatLoading;
-            return IconButton(
-              icon: Icon(
-                Icons.refresh,
-                color: isApiLoading ? Colors.grey : Colors.black,
-              ),
-              onPressed: isApiLoading ? null : () => _showNewChatConfirmation(context),
+            return Row(
+              children: [
+                IconButton(
+                  icon: Opacity(
+                    opacity: isApiLoading ? 0.4 : 1.0,
+                    child: SvgPicture.asset(
+                      'assets/images/ic_reload.svg',
+                      width: 40,
+                      height: 40,
+                    ),
+                  ),
+                  onPressed: isApiLoading ? null : () => _showNewChatConfirmation(context),
+                ),
+                IconButton(
+                  icon: SvgPicture.asset(
+                    'assets/images/ic_close.svg',
+                    width: 40,
+                    height: 40,
+                  ),
+                  onPressed: () => _showExitChatConfirmation(context),
+                ),
+              ],
             );
           },
         ),
@@ -487,7 +475,7 @@ class _ChatScreenBody extends StatelessWidget {
         preferredSize: const Size.fromHeight(0.5),
         child: Container(
           color: Colors.grey.shade300,
-          height: 0.5,
+          height: 0,
         ),
       ),
     );
@@ -695,10 +683,6 @@ class _ChatScreenBody extends StatelessWidget {
   }
 
   Widget _buildMessageBubble(ChatMessage message, BuildContext context) {
-    if (message.isWelcomeMessage) {
-      return _buildWelcomeMessage(message);
-    }
-
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: Column(
@@ -724,8 +708,8 @@ class _ChatScreenBody extends StatelessWidget {
                       padding: const EdgeInsets.only(top: 10,bottom: 10,left: 14,right: 14),
                       decoration: BoxDecoration(
                         color: message.isBot
-                          ? Color(int.parse(chatbotData.data.first.uiPreferences.botBubbleColor.replaceFirst('#', '0xFF') ?? '0xFFE5E5FF'))
-                          : Color(int.parse(chatbotData.data.first.uiPreferences.userBubbleColor.replaceFirst('#', '0xFF') ?? '0xFF007AFF')),
+                          ? Color(int.parse(chatbotData.data.first.uiPreferences.botBubbleColor.replaceFirst('#', '0xFF')))
+                          : Color(int.parse(chatbotData.data.first.uiPreferences.userBubbleColor.replaceFirst('#', '0xFF'))),
                         // borderRadius: BorderRadius.circular(16),
                         borderRadius: BorderRadius.only(
                           topLeft:  Radius.circular(8),
@@ -749,8 +733,8 @@ class _ChatScreenBody extends StatelessWidget {
                         message.text,
                         style: TextStyle(
                           color: message.isBot
-                              ? Color(int.parse(chatbotData.data.first.uiPreferences.botBubbleFontColor.replaceFirst('#', '0xFF') ?? '0xFFE5E5FF'))
-                              : Color(int.parse(chatbotData.data.first.uiPreferences.userBubbleFontColor.replaceFirst('#', '0xFF') ?? '0xFF007AFF')),
+                              ? Color(int.parse(chatbotData.data.first.uiPreferences.botBubbleFontColor.replaceFirst('#', '0xFF')))
+                              : Color(int.parse(chatbotData.data.first.uiPreferences.userBubbleFontColor.replaceFirst('#', '0xFF'))),
                           fontSize: 14,
                           fontFamily: "Arial"
                         ),
@@ -797,97 +781,151 @@ class _ChatScreenBody extends StatelessWidget {
     );
   }
 
-  Widget _buildWelcomeMessage(ChatMessage message) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 24),
+  // Removed welcome message UI
+
+  Widget _buildGreetingOverlay(BuildContext context) {
+    final String titleText = greetingData?.greeting.isNotEmpty == true
+        ? greetingData!.greeting
+        : 'Good evening';
+    final String subtitleText = greetingData?.subtitle.isNotEmpty == true
+        ? greetingData!.subtitle
+        : 'Your intelligent life assistant is ready to help';
+
+    final List<String> opts = (greetingData?.options ?? []).take(4).toList();
+
+    return ConstrainedBox(
+      constraints: const BoxConstraints(maxWidth: 360),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Container(
-            height: 200,
-            width: double.infinity,
+          // Top graphic group
+          SizedBox(
+            width: 90,
+            height: 90,
             child: Stack(
+              clipBehavior: Clip.none,
               children: [
-                Positioned(
-                  left: 20,
-                  bottom: 0,
+                // Outer glow circle
+                Container(
+                  width: 90,
+                  height: 90,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(110),
+                    gradient: const LinearGradient(
+                      begin: Alignment.centerLeft,
+                      end: Alignment.centerRight,
+                      colors: [
+                        Color(0x1AD445EC),
+                        Color(0x1AB02EFB),
+                        Color(0x1A8E2FFD),
+                        Color(0x1A5E3DFE),
+                        Color(0x1A5186E0),
+                      ],
+                    ),
+                  ),
+                ),
+                // Center asset
+                Align(
+                  alignment: Alignment.center,
                   child: Container(
-                    width: 120,
-                    height: 160,
-                    child: Image.asset(
-                      'assets/images/men.png',
-                      package: 'chat_bot',// Replace with your image
-                      width: 120,
-                      height: 160,
-                      fit: BoxFit.contain,
-                      errorBuilder: (context, error, stackTrace) {
-                        // Fallback if image fails to load
-                        return Container(
-                          width: 120,
-                          height: 160,
-                          decoration: BoxDecoration(
-                            color: Colors.blue[50],
-                            borderRadius: BorderRadius.circular(60),
-                          ),
-                          child: const Icon(
-                            Icons.person,
-                            size: 80,
-                            color: Colors.blue,
-                          ),
-                        );
-                      },
+                    width: 70,
+                    height: 70,
+                    decoration: const BoxDecoration(
+                      shape: BoxShape.circle,
+                      gradient: LinearGradient(
+                        begin: Alignment.centerLeft,
+                        end: Alignment.centerRight,
+                        colors: [
+                          Color(0xFFD445EC),
+                          Color(0xFFB02EFB),
+                          Color(0xFF8E2FFD),
+                          Color(0xFF5E3DFE),
+                          Color(0xFF5186E0),
+                        ],
+                      ),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(12),
+                      child: SvgPicture.asset(
+                        'assets/images/ic_mainImg.svg',
+                        fit: BoxFit.contain,
+                      ),
                     ),
                   ),
                 ),
                 Positioned(
-                  right: 20,
-                  top: 20,
-                  child: Container(
-                    constraints: const BoxConstraints(maxWidth: 220),
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        colors: [Colors.blue, Colors.green],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(
-                        color: Colors.grey.shade300,
-                        width: 0.5,
-                      )
-                      // boxShadow: [
-                      //   BoxShadow(
-                      //     color: Colors.black.withOpacity(0.1),
-                      //     blurRadius: 10,
-                      //     offset: const Offset(0, 4),
-                      //   ),
-                      // ],
+                  right: -6,
+                  top: -6,
+                  child: Opacity(
+                    opacity: 0.4,
+                    child: SvgPicture.asset(
+                      'assets/images/ic_topStar.svg',
+                      width: 34,
+                      height: 34,
                     ),
-                    child: RichText(
-                      text: TextSpan(
-                        children: [
-                          TextSpan(
-                            text: "Meet ${chatbotData.data.first.name ?? 'Eazy Assistant'}\n",
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600, // SemiBold
-                            ),
-                          ),
-                          TextSpan(
-                            text: chatbotData.data.first.uiPreferences.launcherWelcomeMessage ?? 'Hi! I am your personal assistant. How can I help you today?',
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 14,
-                              fontWeight: FontWeight.w400, // Regular
-                            ),
-                          ),
-                        ],
-                      ),
+                  ),
+                ),
+                Positioned(
+                  left: -10,
+                  bottom: -8,
+                  child: Opacity(
+                    opacity: 0.4,
+                    child: SvgPicture.asset(
+                      'assets/images/ic_topStar.svg',
+                      width: 51,
+                      height: 51,
                     ),
                   ),
                 ),
               ],
+            ),
+          ),
+          const SizedBox(height: 12),
+          SizedBox(
+            width: 304,
+            child: Text(
+              titleText,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontWeight: FontWeight.w700,
+                fontSize: 24,
+                height: 1.2,
+                color: Color(0xFF171212),
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+          SizedBox(
+            width: 323,
+            child: Text(
+              subtitleText,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontWeight: FontWeight.w400,
+                fontSize: 14,
+                height: 1.4,
+                color: Color(0xFF6E4185),
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+          // Options grid 2x2
+          ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 340),
+            child: Wrap(
+              spacing: 16,
+              runSpacing: 16,
+              children: opts.map((opt) {
+                return _GreetingOptionTile(
+                  text: opt,
+                  onTap: () {
+                    messageController.text = opt;
+                    messageController.selection = TextSelection.collapsed(offset: opt.length);
+                    FocusScope.of(context).requestFocus(messageFocusNode);
+                  },
+                );
+              }).toList(),
             ),
           ),
         ],
@@ -908,9 +946,7 @@ class _ChatScreenBody extends StatelessWidget {
         ),
       ),
       child: ClipOval(
-        child: (chatbotData.data != null &&
-               chatbotData.data.isNotEmpty &&
-               chatbotData.data.first.profileImage != null &&
+        child: (chatbotData.data.isNotEmpty &&
                chatbotData.data.first.profileImage.isNotEmpty)
           ? Image.network(
               chatbotData.data.first.profileImage,
@@ -955,9 +991,9 @@ class _ChatScreenBody extends StatelessWidget {
       children: options.map((option) =>
           Container(
             decoration: BoxDecoration(
-              border: Border.all(color: chatbotData.data.first.uiPreferences.primaryColor != null
-                  ? Color(int.parse(chatbotData.data.first.uiPreferences.primaryColor.replaceFirst('#', '0xFF')))
-                  : const Color(0xFF000000)),
+              border: Border.all(
+                  color: Color(
+                      int.parse(chatbotData.data.first.uiPreferences.primaryColor.replaceFirst('#', '0xFF')))),
               borderRadius: BorderRadius.circular(20),
             ),
             child: InkWell(
@@ -971,9 +1007,8 @@ class _ChatScreenBody extends StatelessWidget {
                 child: Text(
                   option,
                   style: TextStyle(
-                    color: chatbotData.data.first.uiPreferences.primaryColor != null
-                        ? Color(int.parse(chatbotData.data.first.uiPreferences.primaryColor.replaceFirst('#', '0xFF')))
-                        : const Color(0xFF000000),
+                    color: Color(
+                        int.parse(chatbotData.data.first.uiPreferences.primaryColor.replaceFirst('#', '0xFF'))),
                     fontSize: 14,
                   ),
                 ),
@@ -1002,7 +1037,7 @@ class _ChatScreenBody extends StatelessWidget {
         padding: const EdgeInsets.all(8),
         child: Image.asset(
           imagePath,
-          package: 'chat_bot',
+          // package: 'chat_bot',
           fit: BoxFit.contain,
           errorBuilder: (context, error, stackTrace) {
             // Fallback to default icon if image fails to load
@@ -1024,80 +1059,85 @@ class _ChatScreenBody extends StatelessWidget {
           padding: EdgeInsets.only(
             left: 16,
             right: 16,
-            top: 16,
-            bottom: 16 + MediaQuery.of(context).viewInsets.bottom, // Add keyboard padding
+            top: 10,
+            bottom: 16 + MediaQuery.of(context).viewInsets.bottom,
           ),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            border: Border(
-              top: BorderSide(color: Colors.grey.shade300, width: 0.5),
-            )
-            // boxShadow: [
-            //   BoxShadow(
-            //     color: Colors.black.withOpacity(0.05),
-            //     blurRadius: 5,
-            //     offset: const Offset(0, -2),
-            //   ),
-            // ],
-          ),
+          color: Colors.white,
           child: SafeArea(
-            child: Row(
-              children: [
-                Expanded(
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    decoration: BoxDecoration(
-                      color: Colors.grey[100],
-                      borderRadius: BorderRadius.circular(25),
-                    ),
-                    child: TextField(
-                      autofocus: false,
-                      controller: messageController,
-                      focusNode: messageFocusNode,
-                      enabled: !isApiLoading,
-                      textCapitalization: TextCapitalization.sentences,
-                      decoration: const InputDecoration(
-                        hintText: 'Write a message',
-                        border: InputBorder.none,
-                        hintStyle: TextStyle(color: Colors.grey),
-                      ),
-                      onSubmitted: isApiLoading ? null : (text) {
-                        onSendMessage(text);
-                        Future.delayed(const Duration(milliseconds: 100), () {
-                          onScrollToBottom();
-                        });
-                      },
-                    ),
-                  ),
+            top: false,
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(
+                  minHeight: 64,
                 ),
-                const SizedBox(width: 8),
-                Container(
-                  width: 50,
-                  height: 50,
+                child: Container(
+                  height: 64,
                   decoration: BoxDecoration(
-                    color: isApiLoading ? Colors.grey : Colors.blue, // Change color when disabled
-                    shape: BoxShape.circle,
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: const Color(0xFFE9DFFB), width: 1),
                   ),
-                  child: IconButton(
-                    icon: Icon(
-                      Icons.send,
-                      color: isApiLoading ? Colors.grey[600] : Colors.white,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Expanded(
+                          child: TextField(
+                            autofocus: false,
+                            controller: messageController,
+                            focusNode: messageFocusNode,
+                            enabled: !isApiLoading,
+                            textCapitalization: TextCapitalization.sentences,
+                            style: const TextStyle(
+                              fontSize: 16,
+                              height: 1.4,
+                              color: Color(0xFF242424),
+                            ),
+                            decoration: const InputDecoration(
+                              hintText: 'How can zAIn help you today?',
+                              border: InputBorder.none,
+                              hintStyle: TextStyle(color: Colors.grey),
+                              isCollapsed: true,
+                            ),
+                            onSubmitted: isApiLoading ? null : (text) {
+                              onSendMessage(text);
+                              Future.delayed(const Duration(milliseconds: 100), () {
+                                onScrollToBottom();
+                              });
+                            },
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Opacity(
+                          opacity: isApiLoading ? 0.4 : 1.0,
+                          child: GestureDetector(
+                            onTap: isApiLoading
+                                ? null
+                                : () {
+                                    onSendMessage(messageController.text);
+                                    if (messageController.text.trim().isNotEmpty) {
+                                      FocusScope.of(context).requestFocus(messageFocusNode);
+                                    }
+                                    Future.delayed(const Duration(milliseconds: 100), () {
+                                      onScrollToBottom();
+                                    });
+                                  },
+                            child: SizedBox(
+                              width: 34,
+                              height: 34,
+                              child: SvgPicture.asset(
+                                'assets/images/ic_sendImg.svg',
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                    onPressed: isApiLoading ? null : () {
-                      onSendMessage(messageController.text);
-                      // Only request focus when manually sending message via button
-                      if (messageController.text
-                          .trim()
-                          .isNotEmpty) {
-                        FocusScope.of(context).requestFocus(messageFocusNode);
-                      }
-                      Future.delayed(const Duration(milliseconds: 100), () {
-                        onScrollToBottom();
-                      });
-                    },
                   ),
                 ),
-              ],
+              ),
             ),
           ),
         );
@@ -1538,6 +1578,46 @@ class _ChatScreenBody extends StatelessWidget {
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _GreetingOptionTile extends StatelessWidget {
+  final String text;
+  final VoidCallback onTap;
+
+  const _GreetingOptionTile({
+    required this.text,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(8),
+      child: Container(
+        width: 162,
+        height: 84,
+        padding: const EdgeInsets.fromLTRB(10, 30, 10, 10),
+        decoration: BoxDecoration(
+          color: const Color(0xFFF5F7FF),
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: const Color(0xFFEEF4FF), width: 1),
+        ),
+        child: Align(
+          alignment: Alignment.bottomLeft,
+          child: Text(
+            text,
+            style: const TextStyle(
+              fontWeight: FontWeight.w400,
+              fontSize: 16,
+              height: 1.4,
+              color: Color(0xFF242424),
+            ),
+          ),
         ),
       ),
     );

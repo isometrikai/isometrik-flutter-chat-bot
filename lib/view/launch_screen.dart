@@ -3,7 +3,6 @@ import 'package:chat_bot/services/callback_manage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../services/api_service.dart';
-import '../model/mygpts_model.dart';
 import 'chat_screen.dart';
 
 class LaunchScreen extends StatefulWidget {
@@ -49,6 +48,7 @@ class _LaunchScreenState extends State<LaunchScreen> {
     try {
       await ApiService.initialize();
       final chatbotData = await ApiService.getChatbotData();
+      final initialOptionData = await ApiService.getInitialOptionData();
 
       if (chatbotData != null && mounted) {
         // Calculate minimum time for one complete tagline cycle
@@ -63,7 +63,10 @@ class _LaunchScreenState extends State<LaunchScreen> {
         if (mounted) {
           Navigator.of(context).pushReplacement(
             MaterialPageRoute(
-              builder: (context) => ChatScreen(chatbotData: chatbotData),
+              builder: (context) => ChatScreen(
+                chatbotData: chatbotData,
+                greetingData: initialOptionData,
+              ),
             ),
           );
         }
@@ -129,8 +132,9 @@ class _LaunchScreenState extends State<LaunchScreen> {
     return PopScope(
       canPop: false,
       child: Scaffold(
+        backgroundColor: const Color(0xFF1B1B1B),
         body: Container(
-          color: Color.fromRGBO(27, 27, 27, 1),
+          color: const Color(0xFF1B1B1B),
           width: double.infinity,
           height: double.infinity,
           child: Center(

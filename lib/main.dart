@@ -1,10 +1,8 @@
 import 'package:chat_bot/view/launch_screen.dart';
 import 'package:flutter/material.dart';
-import 'model/chat_response.dart';
 import 'services/api_service.dart';
 import 'services/callback_manage.dart';
 import 'view/chat_screen.dart';
-import 'model/chat_message.dart';
 import 'package:flutter/services.dart';
 
 void main() async {
@@ -70,7 +68,9 @@ class PlatformService {
   static Future<void> initializeFromPlatform() async {
     try {
       print('🔄 Attempting to get config from iOS...');
-      final Map<dynamic, dynamic> config = await _channel.invokeMethod('getConfig');
+      final Map<dynamic, dynamic> config = await _channel
+          .invokeMethod('getConfig')
+          .timeout(const Duration(seconds: 5));
 
       print('✅ Config received from iOS: $config');
 
@@ -103,18 +103,18 @@ class PlatformService {
     } catch (e) {
       print('❌ Error getting config from platform: $e');
       // Fallback to default values if iOS config fails
-      // ApiService.configure(
-      //   chatBotId: '1476',
-      //   appSecret: "SFMyNTY.g3QAAAACZAAEZGF0YXQAAAADbQAAAAlhY2NvdW50SWRtAAAAGDY2YzQ2YWVhN2E2MDI5Yjk5MTNiMzIxOG0AAAAIa2V5c2V0SWRtAAAAJGFiZGFkNDQyLTA4YzktNDE4Ny1iYjk4LWUwMTAzYmY2YWYzOG0AAAAJcHJvamVjdElkbQAAACQ2Zjg4NzAwMi0yYzQ3LTQ4Y2EtYTQwNS0wZjk2NWVlNDAyNjFkAAZzaWduZWRuBgAUskFvkQE.esNFHT-JxzVtFpxylbJ8ik1lRZ-c75JjuCA0toa4C5M",
-      //   licenseKey: "lic-IMKMqJdO3e2HO+6qDxctvESxA+HkoLIThG9",
-      //   userId: "user_12345678910",
-      //   name: 'Chintu',
-      //   timestamp: '2025-07-28T12:30:00Z',
-      //   location: 'Dubai Marina',
-      //   isProduction: false,
-      //   latitude: 40.7128,
-      //   longitude: 74.0060,
-      // );
+      ApiService.configure(
+        chatBotId: '1476',
+        appSecret: "SFMyNTY.g3QAAAACZAAEZGF0YXQAAAADbQAAAAlhY2NvdW50SWRtAAAAGDY2YzQ2YWVhN2E2MDI5Yjk5MTNiMzIxOG0AAAAIa2V5c2V0SWRtAAAAJGFiZGFkNDQyLTA4YzktNDE4Ny1iYjk4LWUwMTAzYmY2YWYzOG0AAAAJcHJvamVjdElkbQAAACQ2Zjg4NzAwMi0yYzQ3LTQ4Y2EtYTQwNS0wZjk2NWVlNDAyNjFkAAZzaWduZWRuBgAUskFvkQE.esNFHT-JxzVtFpxylbJ8ik1lRZ-c75JjuCA0toa4C5M",
+        licenseKey: "lic-IMKMqJdO3e2HO+6qDxctvESxA+HkoLIThG9",
+        userId: "user_12345678910",
+        name: 'Chintu',
+        timestamp: '2025-07-28T12:30:00Z',
+        location: 'Dubai Marina',
+        isProduction: false,
+        latitude: 40.7128,
+        longitude: 74.0060,
+      );
     }
   }
 }
