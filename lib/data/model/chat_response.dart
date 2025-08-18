@@ -87,6 +87,7 @@ class ChatWidget {
   bool get isStoresWidget => type == 'stores';
   bool get isProductsWidget => type == 'products';
   bool get isSeeMoreWidget => type == 'see_more';
+  bool get isMenuWidget => type == 'menu';
   bool get isButtonWidget => type == 'button';
   bool get isInputWidget => type == 'input';
   bool get isImageWidget => type == 'image';
@@ -156,6 +157,11 @@ class ChatWidget {
 
   // Get see_more actions (converted to models)
   List<SeeMoreAction> get seeMore => isSeeMoreWidget
+      ? widget.map((e) => SeeMoreAction.fromJson(e as Map<String, dynamic>)).toList()
+      : [];
+
+  // Get menu actions (converted to models)
+  List<SeeMoreAction> get menu => isMenuWidget
       ? widget.map((e) => SeeMoreAction.fromJson(e as Map<String, dynamic>)).toList()
       : [];
 
@@ -388,7 +394,7 @@ class Store {
     final String name = (json['storename'] ?? json['store_name'] ?? '').toString();
     final double rating = ((json['avgRating'] ?? json['rating'] ?? 0) as num).toDouble();
     final String image = (json['storeImage'] ?? json['store_logo'] ?? '').toString();
-    final String distance = (json['distance'] as num).toString();
+    final String distance = (json['distance'] ?? '');
 
     final List<Product> parsedProducts = (json['products'] as List<dynamic>? ?? [])
         .map((e) => Product.fromJson(e as Map<String, dynamic>))

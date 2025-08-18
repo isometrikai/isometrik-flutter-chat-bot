@@ -1057,7 +1057,6 @@ class _ChatScreenBody extends StatelessWidget {
                     MaterialPageRoute(
                       builder: (context) => RestaurantScreen(
                         actionData: action,
-                        restaurantList: messages.last.stores,
                       ),
                     ),
                   );
@@ -1070,7 +1069,7 @@ class _ChatScreenBody extends StatelessWidget {
     }
 
     for (final widget in latestActionWidgets.where((w) => w.type == 'menu')) {
-      for (final action in widget.seeMore) {
+      for (final action in widget.menu) {
         actionButtons.add(
           BlocBuilder<ChatBloc, ChatState>(
             builder: (context, state) {
@@ -1094,8 +1093,7 @@ class _ChatScreenBody extends StatelessWidget {
       }
     }
 
-    // Handle other action types
-    for (final widgetType in ['menu', 'add_more', 'proceed_to_checkout', 'add_address', 'add_payment']) {
+    for (final widgetType in ['add_more', 'proceed_to_checkout', 'add_address', 'add_payment']) {
       final widgets = latestActionWidgets.where((w) => w.type == widgetType);
       for (final widget in widgets) {
         for (final item in widget.rawItems) {
@@ -1104,7 +1102,6 @@ class _ChatScreenBody extends StatelessWidget {
             _buildActionButton(
               text: buttonText,
               onTap: () {
-                // Handle other action types - send message for now
                 onSendMessage(buttonText);
               },
             ),

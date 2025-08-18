@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import '../data/model/chat_response.dart';
 import '../widgets/store_card.dart';
+import 'package:chat_bot/data/services/hawksearch_service.dart';
 
 class RestaurantScreen extends StatefulWidget {
   final SeeMoreAction? actionData;
-  final List<Store>? restaurantList;
 
-  const RestaurantScreen({super.key, this.actionData, this.restaurantList});
+  const RestaurantScreen({super.key, this.actionData});
 
   @override
   State<RestaurantScreen> createState() => _RestaurantScreenState();
@@ -15,13 +15,71 @@ class RestaurantScreen extends StatefulWidget {
 
 class _RestaurantScreenState extends State<RestaurantScreen> {
   final TextEditingController _searchController = TextEditingController();
-  final List<String> _filterOptions = ['Wraps', 'Arabian', 'Pizza', 'Burgers', 'Deserts', 'Drinks'];
-  String _selectedFilter = 'Wraps';
+  List<Store> _restaurants = [];
+  bool _isLoading = false;
+  String _currentKeyword = '';
+  DateTime? _lastQueryAt;
 
   @override
   void dispose() {
     _searchController.dispose();
     super.dispose();
+  }
+
+  void _onSearchChanged(String value) {
+    _currentKeyword = value.trim();
+    final now = DateTime.now();
+    _lastQueryAt = now;
+    Future.delayed(const Duration(milliseconds: 400), () async {
+      if (!mounted) return;
+      // Debounce: only proceed if this is the latest input
+      if (_lastQueryAt != now) return;
+      setState(() {
+        _isLoading = true;
+      });
+      try {
+        final fetched = await HawkSearchService.instance.fetchStoresGroupedByStoreId(
+          keyword: _currentKeyword,
+        );
+        if (!mounted) return;
+        setState(() {
+          _restaurants = fetched;
+        });
+      } finally {
+        if (mounted) {
+          setState(() {
+            _isLoading = false;
+          });
+        }
+      }
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _bootstrapData();
+  }
+
+  Future<void> _bootstrapData() async {
+
+    setState(() {
+      _isLoading = true;
+    });
+    try {
+      final List<Store> fetched = await HawkSearchService.instance.fetchStoresGroupedByStoreId(
+        keyword: _currentKeyword,
+      );
+      setState(() {
+        _restaurants = fetched;
+      });
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
   }
 
   @override
@@ -62,8 +120,8 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                'Here are some healthy\nrestaurants near you',
+               Text(
+                widget.actionData?.title ?? '',
                 style: TextStyle(
                   fontWeight: FontWeight.w700,
                   fontSize: 24,
@@ -72,8 +130,8 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
                 ),
               ),
               const SizedBox(height: 12),
-              const Text(
-                'Which one sounds good?',
+               Text(
+                widget.actionData?.subtitle ?? '',
                 style: TextStyle(
                   fontSize: 14,
                   height: 1.4,
@@ -119,8 +177,7 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
                 contentPadding: EdgeInsets.symmetric(horizontal: 17),
               ),
               onChanged: (value) {
-                // Implement search functionality here
-                setState(() {});
+                _onSearchChanged(value);
               },
             ),
           ),
@@ -145,9 +202,12 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
 
 
   Widget _buildRestaurantList() {
-    final restaurants = widget.restaurantList;
-    
-    if (restaurants == null || restaurants.isEmpty) {
+    if (_isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    final List<Store> restaurants = _restaurants;
+
+    if (restaurants.isEmpty) {
       return const Center(
         child: Text(
           'No restaurants available',
