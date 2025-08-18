@@ -8,10 +8,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lottie/lottie.dart';
 import '../services/callback_manage.dart';
+import 'package:chat_bot/widgets/store_card.dart';
 import 'package:flutter/services.dart';
 import 'package:chat_bot/widgets/black_toast_view.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:chat_bot/data/model/greeting_response.dart';
+import 'package:chat_bot/view/restaurant_menu_screen.dart';
 
 class ChatScreen extends StatefulWidget {
   final MyGPTsResponse chatbotData;
@@ -29,6 +31,8 @@ class _ChatScreenState extends State<ChatScreen> {
   Set<String> _selectedOptionMessages = {};
   String? _pendingMessage;
   String _sessionId = "";
+  double _textFieldHeight = 50.0; // Add height state variable
+  List<ChatWidget> _latestActionWidgets = []; // Track latest action widgets
 
   List<ChatMessage> messages = [];
 
@@ -51,6 +55,7 @@ class _ChatScreenState extends State<ChatScreen> {
           isBot: false
       ));
       _pendingMessage = text;
+      _textFieldHeight = 50.0; // Reset to default height when sending message
     });
 
     _messageController.clear();
@@ -62,6 +67,12 @@ class _ChatScreenState extends State<ChatScreen> {
   void _clearPendingMessage() {
     setState(() {
       _pendingMessage = null;
+    });
+  }
+
+  void _updateTextFieldHeight(double newHeight) {
+    setState(() {
+      _textFieldHeight = newHeight;
     });
   }
 
@@ -103,12 +114,19 @@ class _ChatScreenState extends State<ChatScreen> {
         storesWidget: storesWidget,
         productsWidget: productsWidget,
       ));
+      
+      // Store action widgets for the action buttons
+      _latestActionWidgets = response.widgets.where((widget) => 
+        widget.type == 'see_more' ||
+        widget.type == 'menu' ||
+        widget.type == 'add_more' ||
+        widget.type == 'proceed_to_checkout' ||
+        widget.type == 'add_address' ||
+        widget.type == 'add_payment'
+      ).toList();
     });
     _scrollToBottom();
-    // for (var widget in response.widgets) {
-    //   print(widget);
-    //   print("s");
-    // }
+   
   }
 
   void _scrollToBottom() {
@@ -145,6 +163,7 @@ class _ChatScreenState extends State<ChatScreen> {
       _selectedOptionMessages.clear();
       _sessionId = "${DateTime.now().millisecondsSinceEpoch ~/ 1000}";
       _pendingMessage = null;
+      _latestActionWidgets.clear(); // Clear action widgets when restarting
     });
   }
 
@@ -189,6 +208,9 @@ class _ChatScreenState extends State<ChatScreen> {
         pendingMessage: _pendingMessage,
         onClearPendingMessage: _clearPendingMessage,
         sessionId: _sessionId, // Pass session ID
+        textFieldHeight: _textFieldHeight,
+        onUpdateTextFieldHeight: _updateTextFieldHeight,
+        latestActionWidgets: _latestActionWidgets,
       ),
     );
   }
@@ -213,6 +235,9 @@ class _ChatScreenBody extends StatelessWidget {
   final String? pendingMessage;
   final VoidCallback onClearPendingMessage;
   final String sessionId;
+  final double textFieldHeight;
+  final Function(double) onUpdateTextFieldHeight;
+  final List<ChatWidget> latestActionWidgets;
 
   const _ChatScreenBody({
     required this.messageController,
@@ -233,6 +258,9 @@ class _ChatScreenBody extends StatelessWidget {
     required this.pendingMessage,
     required this.onClearPendingMessage,
     required this.sessionId,
+    required this.textFieldHeight,
+    required this.onUpdateTextFieldHeight,
+    required this.latestActionWidgets,
   });
 
   @override
@@ -362,15 +390,14 @@ class _ChatScreenBody extends StatelessWidget {
                         ),
                       ),
                     ),
+                    _buildActionButtons(context),
                     _buildInputArea(context),
                   ],
                 ),
                 if (showGreetingOverlay) Positioned.fill(
                   child: IgnorePointer(
                     ignoring: false,
-                    child: Center(
-                      child: _buildGreetingOverlay(context),
-                    ),
+                    child: _buildGreetingOverlay(context),
                   ),
                 ),
               ],
@@ -740,14 +767,6 @@ class _ChatScreenBody extends StatelessWidget {
                         ),
                       ),
                     ),
-                    // if (message.hasRestaurantCards) ...[
-                    //   const SizedBox(height: 12),
-                    //   _buildRestaurantCards(),
-                    // ],
-                    // if (message.hasFoodCards) ...[
-                    //   const SizedBox(height: 12),
-                    //   _buildFoodCards(),
-                    // ],
                   ],
                 ),
               ),
@@ -763,11 +782,7 @@ class _ChatScreenBody extends StatelessWidget {
           // Store cards outside the row to avoid constraints
           if (message.hasStoreCards) ...[
             const SizedBox(height: 12),
-            // Move store cards outside to avoid padding constraints
-            Transform.translate(
-              offset: const Offset(-16, 0), // Offset to counteract parent padding
-              child: _buildStoreCards(message.stores, message.storesWidget),
-            ),
+            _buildStoreCards(message.stores, message.storesWidget),
           ],
           if (message.hasProductCards) ...[
             const SizedBox(height: 12),
@@ -1018,33 +1033,104 @@ class _ChatScreenBody extends StatelessWidget {
     );
   }
 
-  Widget _buildCustomServiceIcon(String imagePath) {
-    return Container(
-      width: 40,
-      height: 40,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        shape: BoxShape.circle,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 3,
-            offset: const Offset(0, 1),
+  // Removed unused _buildCustomServiceIcon due to simplified store model
+
+  Widget _buildActionButtons(BuildContext context) {
+    if (latestActionWidgets.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    List<Widget> actionButtons = [];
+
+    // Handle see_more widgets
+    for (final widget in latestActionWidgets.where((w) => w.type == 'see_more')) {
+      for (final action in widget.seeMore) {
+        actionButtons.add(
+          _buildActionButton(
+            text: action.buttonText,
+            onTap: () {
+              // Navigate to restaurant menu screen for see_more actions
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => RestaurantMenuScreen(
+                    actionData: {
+                      'buttonText': action.buttonText,
+                      'title': action.title,
+                      'subtitle': action.subtitle,
+                      'storeCategoryId': action.storeCategoryId,
+                      'keyword': action.keyword,
+                    },
+                  ),
+                ),
+              );
+            },
           ),
-        ],
+        );
+      }
+    }
+
+    // Handle other action types
+    for (final widgetType in ['menu', 'add_more', 'proceed_to_checkout', 'add_address', 'add_payment']) {
+      final widgets = latestActionWidgets.where((w) => w.type == widgetType);
+      for (final widget in widgets) {
+        for (final item in widget.rawItems) {
+          final buttonText = item['button_text'] ?? item['title'] ?? 'Action';
+          actionButtons.add(
+            _buildActionButton(
+              text: buttonText,
+              onTap: () {
+                // Handle other action types - send message for now
+                onSendMessage(buttonText);
+              },
+            ),
+          );
+        }
+      }
+    }
+
+    if (actionButtons.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      width: double.infinity,
+      child: Align(
+        alignment: Alignment.centerLeft,
+        child: Wrap(
+          spacing: 10,
+          runSpacing: 8,
+          alignment: WrapAlignment.start,
+          crossAxisAlignment: WrapCrossAlignment.start,
+          children: actionButtons,
+        ),
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(8),
-        child: Image.asset(
-          imagePath,
-          // package: 'chat_bot',
-          fit: BoxFit.contain,
-          errorBuilder: (context, error, stackTrace) {
-            // Fallback to default icon if image fails to load
-            print('Image loading error: $error');
-            print('Image path: $imagePath');
-            return const Icon(Icons.restaurant, color: Colors.grey, size: 20);
-          },
+    );
+  }
+
+  Widget _buildActionButton({
+    required String text,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          border: Border.all(color: const Color(0xFF8E2FFD), width: 1),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Text(
+          text,
+          style: const TextStyle(
+            fontFamily: 'Plus Jakarta Sans',
+            fontSize: 14,
+            fontWeight: FontWeight.w400,
+            color: Color(0xFF8E2FFD),
+            height: 1.4,
+          ),
         ),
       ),
     );
@@ -1066,12 +1152,13 @@ class _ChatScreenBody extends StatelessWidget {
           child: SafeArea(
             top: false,
             child: Center(
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(
-                  minHeight: 64,
-                ),
+                              child: ConstrainedBox(
+                  constraints: BoxConstraints(
+                    minHeight: 64,
+                    maxHeight: 570, // Allow up to 550 + 20 padding
+                  ),
                 child: Container(
-                  height: 64,
+                  height: textFieldHeight + 20, // Dynamic height based on text field
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(16),
@@ -1084,29 +1171,54 @@ class _ChatScreenBody extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         Expanded(
-                          child: TextField(
-                            autofocus: false,
-                            controller: messageController,
-                            focusNode: messageFocusNode,
-                            enabled: !isApiLoading,
-                            textCapitalization: TextCapitalization.sentences,
-                            style: const TextStyle(
-                              fontSize: 16,
-                              height: 1.4,
-                              color: Color(0xFF242424),
+                          child: Container(
+                            height: textFieldHeight,
+                            child: TextField(
+                              autofocus: false,
+                              controller: messageController,
+                              focusNode: messageFocusNode,
+                              enabled: !isApiLoading,
+                              textCapitalization: TextCapitalization.sentences,
+                              maxLines: null,
+                              minLines: 1,
+                              style: const TextStyle(
+                                fontSize: 16,
+                                height: 1.4,
+                                color: Color(0xFF242424),
+                              ),
+                              decoration: const InputDecoration(
+                                hintText: 'How can zAIn help you today?',
+                                border: InputBorder.none,
+                                hintStyle: TextStyle(color: Colors.grey),
+                                isCollapsed: true,
+                              ),
+                              onChanged: (text) {
+                                // Calculate new height based on text content
+                                final textSpan = TextSpan(
+                                  text: text.isEmpty ? 'How can zAIn help you today?' : text,
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                    height: 1.4,
+                                    color: Color(0xFF242424),
+                                  ),
+                                );
+                                final textPainter = TextPainter(
+                                  text: textSpan,
+                                  textDirection: TextDirection.ltr,
+                                  maxLines: null,
+                                );
+                                textPainter.layout(maxWidth: MediaQuery.of(context).size.width - 120);
+                                
+                                final newHeight = (textPainter.height + 20).clamp(50.0, 550.0);
+                                onUpdateTextFieldHeight(newHeight);
+                              },
+                              onSubmitted: isApiLoading ? null : (text) {
+                                onSendMessage(text);
+                                Future.delayed(const Duration(milliseconds: 100), () {
+                                  onScrollToBottom();
+                                });
+                              },
                             ),
-                            decoration: const InputDecoration(
-                              hintText: 'How can zAIn help you today?',
-                              border: InputBorder.none,
-                              hintStyle: TextStyle(color: Colors.grey),
-                              isCollapsed: true,
-                            ),
-                            onSubmitted: isApiLoading ? null : (text) {
-                              onSendMessage(text);
-                              Future.delayed(const Duration(milliseconds: 100), () {
-                                onScrollToBottom();
-                              });
-                            },
                           ),
                         ),
                         const SizedBox(width: 10),
@@ -1146,262 +1258,25 @@ class _ChatScreenBody extends StatelessWidget {
   }
 
   Widget _buildStoreCards(List<Store> stores, ChatWidget? storesWidget) {
-    return SizedBox(
-      height: 290,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.only(left: 65), // Changed from left: 70
-        clipBehavior: Clip.none,
-        itemCount: stores.length,
-        separatorBuilder: (context, index) => const SizedBox(width: 12),
-        itemBuilder: (context, index) {
-          final store = stores[index];
-          return SizedBox(
-            width: 280,
-            child: _buildStoreCard(store, storesWidget, index),
-          );
-        },
-      ),
-    );
-  }
-
-  // Add this method to build individual store card
-  Widget _buildStoreCard(Store store, ChatWidget? storesWidget, int index) {
-    return InkWell(
-      onTap: () {
-        if (storesWidget != null) {
-          // String? rawStoreJson = storesWidget.getRawStoreAsJsonString(index);
-          final Map<String, dynamic>? storeJson = storesWidget.getRawStore(index);
-          print('Raw Store JSON: $storeJson');
-          OrderService().triggerStoreOrder(storeJson ?? {});
-        }
-        print('Store clicked: ${store}');
+    return ListView.separated(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      padding: EdgeInsets.zero,
+      clipBehavior: Clip.none,
+      itemCount: stores.length,
+      separatorBuilder: (context, index) => const SizedBox(height: 12),
+      itemBuilder: (context, index) {
+        final store = stores[index];
+        return StoreCard(
+          store: store,
+          storesWidget: storesWidget,
+          index: index,
+        );
       },
-      child: Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(
-            color: Colors.grey.shade300,
-            width: 0.5,
-          )
-          // boxShadow: [
-          //   BoxShadow(
-          //     color: Colors.black.withOpacity(0.08),
-          //     blurRadius: 8,
-          //     offset: const Offset(0, 2),
-          //   ),
-          // ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Store Image with Rating - Increased height
-            Stack(
-              children: [
-                Container(
-                  height: 160,
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                    borderRadius: const BorderRadius.vertical(top: Radius.circular(8)),
-                    // gradient: const LinearGradient(
-                    //   colors: [Color(0xFF4A90E2), Color(0xFF7ED321)],
-                    //   begin: Alignment.topLeft,
-                    //   end: Alignment.bottomRight,
-                    // ),
-                  ),
-                  child: ClipRRect(
-                    borderRadius: const BorderRadius.vertical(top: Radius.circular(8)),
-                    child: store.storeImage.isNotEmpty
-                        ? Image.network(
-                            store.storeImage,
-                            fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) =>
-                                _buildDefaultStoreImage(),
-                          )
-                        : _buildDefaultStoreImage(),
-                  ),
-                ),
-                // Rating badge
-                if (store.avgRating > 0)
-                  Positioned(
-                    top: 12,
-                    left: 12,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: Colors.grey.shade300,
-                          width: 0.5,
-                        )
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Icon(Icons.star, color: Colors.black, size: 14),
-                          const SizedBox(width: 4),
-                          Text(
-                            store.avgRating.toStringAsFixed(1),
-                            style: const TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                // Service icons
-                Positioned(
-                  bottom: 12,
-                  right: 12,
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      if (store.supportedOrderTypes == 3) ...[
-                        _buildCustomServiceIcon('assets/images/ic_delivery.png'),
-                        const SizedBox(width: 8),
-                        _buildCustomServiceIcon('assets/images/ic_pickup.png'),
-                      ] else ...[
-                        _buildCustomServiceIcon('assets/images/ic_pickup.png'),
-                      ],
-                      const SizedBox(width: 8),
-                      if (store.tableReservations)
-                        _buildCustomServiceIcon('assets/images/ic_dinein.png'),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            // Store Details - Reduced padding to accommodate larger image
-            Padding(
-              padding: const EdgeInsets.all(12),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    store.storename,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 4),
-                  Row(
-                    children: [
-                      const Icon(Icons.location_on, size: 14, color: Colors.grey),
-                      const SizedBox(width: 4),
-                      Expanded(
-                        child: Text(
-                          "${store.address.city} • ${store.distanceKm.toStringAsFixed(1)} km",
-                          style: const TextStyle(
-                            fontSize: 12,
-                            color: Colors.grey,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  // Price and Status row
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          "${store.currencyCode} ${store.averageCostForMealForTwo} for Two",
-                          style: const TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ),
-                      // Status indicator moved here
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: store.storeIsOpen ? Colors.green[50] : Colors.blue[50],
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            // Container(
-                            //   width: 6,
-                            //   height: 6,
-                              // decoration: BoxDecoration(
-                              //   color: store.storeIsOpen ? Colors.green : Colors.blue,
-                              //   shape: BoxShape.circle,
-                              //
-                              // ),
-                            // ),
-                            Icon(
-                              Icons.access_time_rounded, // Built-in Material icon
-                              size: 12,
-                              color: store.storeIsOpen ? Colors.green : Colors.blue,
-                            ),
-                            const SizedBox(width: 6),
-                            Text(
-                              store.storeIsOpen ? "Open" : store.storeTag.isNotEmpty ? store.storeTag.replaceAll("Next At", "") : "Closed",
-                              style: TextStyle(
-                                fontSize: 11,
-                                color: store.storeIsOpen ? Colors.green[700] : Colors.blue[700],
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                  if (store.cuisineDetails.isNotEmpty) ...[
-                    const SizedBox(height: 4),
-                    Text(
-                      store.cuisineDetails,
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 
-  // Helper method for default store image
-  Widget _buildDefaultStoreImage() {
-    return Container(
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          colors: [Color(0xFF4A90E2), Color(0xFF7ED321)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-      ),
-      child: Center(
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            // _buildServiceIcon(Icons.favorite, Colors.green),
-            // _buildServiceIcon(Icons.delivery_dining, Colors.blue),
-            // _buildServiceIcon(Icons.restaurant_menu, Colors.orange),
-          ],
-        ),
-      ),
-    );
-  }
+  // Individual store card moved to `StoreCard` widget.
 
   // Add product cards method
   // Update _buildProductCards to pass the widget and index
@@ -1435,13 +1310,6 @@ class _ChatScreenBody extends StatelessWidget {
           color: Colors.grey.shade300,
           width: 0.5,
         ),
-        // boxShadow: [
-        //   BoxShadow(
-        //     color: Colors.black.withOpacity(0.08),
-        //     blurRadius: 8,
-        //     offset: const Offset(0, 2),
-        //   ),
-        // ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1491,7 +1359,7 @@ class _ChatScreenBody extends StatelessWidget {
                       Row(
                         children: [
                           Text(
-                            "${product.currency.toUpperCase()} ${product.finalPrice.toStringAsFixed(2)}",
+                            "${product.currencySymbol}${product.finalPrice.toStringAsFixed(2)}",
                             maxLines: 1,
                             style: const TextStyle(
                               fontSize: 12,

@@ -18,7 +18,7 @@ class ApiClient {
   final Future<bool> Function()? onUnauthorizedRefresh;
   final Duration timeout;
 
-  static const _maxRetryCount = 1; // refresh once on 401
+  static const _maxRetryCount = 2; // refresh twice on 401/400/406
 
   Future<ApiResult> get(
     String endpoint, {
@@ -104,9 +104,15 @@ class ApiClient {
     int retryCount = 0,
   }) async {
     final result = await requestFn();
+    
     if (result.isUnauthorized && retryCount < _maxRetryCount) {
-      final canRefresh = await onUnauthorizedRefresh?.call() ?? false;
+      AppLog.info('🔄 Token expired, attempting refresh...');
+      bool canRefresh = false;
+      if (onUnauthorizedRefresh != null) {
+        canRefresh = await onUnauthorizedRefresh!.call();
+      }
       if (canRefresh) {
+        AppLog.info('🔄 Token refreshed, retrying request...');
         return _requestWithRetry(requestFn, retryCount: retryCount + 1);
       }
     }
@@ -129,11 +135,12 @@ class ApiClient {
       })();
 
       final bool isUnauthorizedByMessage = messageField.contains('Token Not found') ||
-          messageField.contains('Unauthorized');
+          messageField.contains('Unauthorized') ||
+          messageField.contains('Token Expired');
 
       if (statusCode >= 200 && statusCode < 300) {
         return ApiResult.success(body);
-      } else if (statusCode == 401 || isUnauthorizedByMessage) {
+      } else if (statusCode == 401 || statusCode == 400 || statusCode == 406 || isUnauthorizedByMessage) {
         return ApiResult.error('Unauthorized', body);
       } else if (statusCode == 404) {
         return ApiResult.error('Not Found', body);

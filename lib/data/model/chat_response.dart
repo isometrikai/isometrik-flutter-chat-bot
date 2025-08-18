@@ -41,6 +41,8 @@ class ChatResponse {
 
   // Helper method to get options widgets specifically
   List<ChatWidget> get optionsWidgets => getWidgetsByType('options');
+  // Helper method to get see_more widgets specifically
+  List<ChatWidget> get seeMoreWidgets => getWidgetsByType('see_more');
 
   @override
   String toString() {
@@ -84,6 +86,7 @@ class ChatWidget {
   bool get isOptionsWidget => type == 'options';
   bool get isStoresWidget => type == 'stores';
   bool get isProductsWidget => type == 'products';
+  bool get isSeeMoreWidget => type == 'see_more';
   bool get isButtonWidget => type == 'button';
   bool get isInputWidget => type == 'input';
   bool get isImageWidget => type == 'image';
@@ -151,6 +154,11 @@ class ChatWidget {
       ? widget.map((e) => Product.fromJson(e as Map<String, dynamic>)).toList()
       : [];
 
+  // Get see_more actions (converted to models)
+  List<SeeMoreAction> get seeMore => isSeeMoreWidget
+      ? widget.map((e) => SeeMoreAction.fromJson(e as Map<String, dynamic>)).toList()
+      : [];
+
   // Get raw stores data (without converting to models)
   List<Map<String, dynamic>> get rawStores => isStoresWidget
       ? widget.map((e) => e as Map<String, dynamic>).toList()
@@ -207,6 +215,8 @@ extension ChatWidgetUsage on ChatWidget {
         return getRawProductAsJsonString(index);
       case 'stores':
         return getRawStoreAsJsonString(index);
+      case 'see_more':
+        return getRawItemAsJsonString(index);
       default:
         return getRawItemAsJsonString(index);
     }
@@ -219,6 +229,8 @@ extension ChatWidgetUsage on ChatWidget {
         return products; // Use Product models for display
       case 'stores':
         return stores; // Use Store models for display
+      case 'see_more':
+        return seeMore; // Use SeeMoreAction models for display
       case 'options':
         return options;
       default:
@@ -233,76 +245,53 @@ extension ChatWidgetUsage on ChatWidget {
 // Product Model for products widget
 class Product {
   final String id;
-  final String productId;
   final String productName;
-  final double finalPrice;
-  final bool inStock;//
-  final int tag;//
   final FinalPriceList finalPriceList;
-  // final Map<String, dynamic> offers;//
   final String productImage;
-  // final double averageRating;//
-  final String currencySymbol;//
-  final String currency;
-  final String url;
-  final String store;
-  final String storeId;
+  final String currencySymbol;
 
-  Product({
+  const Product({
     required this.id,
-    required this.productId,
     required this.productName,
-    required this.finalPrice,
-    required this.inStock,
-    required this.tag,
     required this.finalPriceList,
-    // required this.offers,
     required this.productImage,
-    // required this.averageRating,
     required this.currencySymbol,
-    required this.currency,
-    required this.url,
-    required this.store,
-    required this.storeId,
   });
 
+  double get finalPrice => finalPriceList.finalPrice;
+
   factory Product.fromJson(Map<String, dynamic> json) {
+    final Map<String, dynamic> finalPriceListJson =
+        (json['finalPriceList'] ?? json['finalpricelist'] ?? {}) as Map<String, dynamic>;
+    final double computedFinalPrice =
+        (json['finalPrice'] ?? finalPriceListJson['finalPrice'] ?? 0).toDouble();
+
     return Product(
-      id: json['id'] ?? '',
-      productId: json['productId'] ?? '',
-      productName: json['productName'] ?? '',
-      finalPrice: (json['finalPrice'] ?? 0).toDouble(),
-      inStock: json['inStock'] ?? false,
-      tag: json['tag'] ?? 0,
-      finalPriceList: FinalPriceList.fromJson(json['finalPriceList'] ?? {}),
-      // offers: json['offers'] ?? {},
-      productImage: json['product_image'] ?? '',
-      // averageRating: (json['average_rating'] ?? 0).toDouble(),
-      currencySymbol: json['currencySymbol'] ?? '',
-      currency: json['currency'] ?? '',
-      url: json['url'] ?? '',
-      store: json['store'] ?? '',
-      storeId: json['storeId'] ?? '',
+      id: json['id']?.toString() ?? '',
+      productName: (json['productName'] ?? json['productunitname'] ?? '').toString(),
+      finalPriceList: FinalPriceList.fromJson(finalPriceListJson.isNotEmpty
+          ? finalPriceListJson
+          : {
+              'basePrice': computedFinalPrice,
+              'finalPrice': computedFinalPrice,
+              'discountPrice': 0,
+              'discountPercentage': 0,
+              'discountType': 1,
+              'taxRate': 0,
+              'msrpPrice': 0,
+            }),
+      productImage: (json['product_image'] ?? json['image'] ?? '').toString(),
+      currencySymbol: (json['currencySymbol'] ?? json['currency_symbol'] ?? '').toString(),
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
       'id': id,
-      'productId': productId,
       'productName': productName,
-      'finalPrice': finalPrice,
-      'inStock': inStock,
-      'tag': tag,
       'finalPriceList': finalPriceList.toJson(),
-      // 'offers': offers,
       'product_image': productImage,
-      // 'average_rating': averageRating,
       'currencySymbol': currencySymbol,
-      'currency': currency,
-      'url': url,
-      'store': store,
-      'storeId': storeId,
     };
   }
 }
@@ -352,87 +341,52 @@ class FinalPriceList {
   }
 }
 
-// Store Model for stores widget
+// Store Model for stores widget (now includes nested products)
 class Store {
-  final String id;
   final String storename;
   final double avgRating;
-  final bool storeIsOpen;
-  final String storeTag;
-  final LogoImages logoImages;
-  final bool isTempClose;
-  final Address address;
   final String cuisineDetails;
   final String storeImage;
-  final double distanceKm;
-  final double distanceMiles;
-  final bool tableReservations;
-  final int supportedOrderTypes;
-  final int averageCostForMealForTwo;
-  final String currencyCode;
-  final String currencySymbol;
+  final String distance;
+  final List<Product> products;
 
   Store({
-    required this.id,
     required this.storename,
     required this.avgRating,
-    required this.storeIsOpen,
-    required this.storeTag,
-    required this.logoImages,
-    required this.isTempClose,
-    required this.address,
     required this.cuisineDetails,
     required this.storeImage,
-    required this.distanceKm,
-    required this.distanceMiles,
-    required this.tableReservations,
-    required this.supportedOrderTypes,
-    required this.averageCostForMealForTwo,
-    required this.currencyCode,
-    required this.currencySymbol,
+    required this.distance,
+    required this.products,
   });
 
   factory Store.fromJson(Map<String, dynamic> json) {
+    final String name = (json['storename'] ?? json['store_name'] ?? '').toString();
+    final double rating = ((json['avgRating'] ?? json['rating'] ?? 0) as num).toDouble();
+    final String image = (json['storeImage'] ?? json['store_logo'] ?? '').toString();
+    final String distance = json['distance'] ?? '';
+
+    final List<Product> parsedProducts = (json['products'] as List<dynamic>? ?? [])
+        .map((e) => Product.fromJson(e as Map<String, dynamic>))
+        .toList();
+
     return Store(
-      id: json['id'] ?? '',
-      storename: json['storename'] ?? '',
-      avgRating: (json['avgRating'] ?? 0).toDouble(),
-      storeIsOpen: json['store_is_open'] ?? false,
-      storeTag: json['store_tag'] ?? '',
-      logoImages: LogoImages.fromJson(json['logoImages'] ?? {}),
-      isTempClose: json['is_temp_close'] ?? false,
-      address: Address.fromJson(json['address'] ?? {}),
-      cuisineDetails: json['cuisineDetails'] ?? '',
-      storeImage: json['storeImage'] ?? '',
-      distanceKm: (json['distance_km'] ?? 0).toDouble(),
-      distanceMiles: (json['distance_miles'] ?? 0).toDouble(),
-      tableReservations: json['tableReservations'] ?? false,
-      supportedOrderTypes: json['supportedOrderTypes'] ?? 0,
-      averageCostForMealForTwo: json['averageCostForMealForTwo'] ?? 0,
-      currencyCode: json['currencyCode'] ?? '',
-      currencySymbol: json['currencySymbol'] ?? '',
+      storename: name,
+      avgRating: rating,
+      cuisineDetails: (json['cuisineDetails'] ?? (json['categorylist']?.join(', ') ?? '')).toString(),
+      storeImage: image,
+      distance: distance,
+      products: parsedProducts,
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
-      'id': id,
       'storename': storename,
       'avgRating': avgRating,
-      'store_is_open': storeIsOpen,
-      'store_tag': storeTag,
-      'logoImages': logoImages.toJson(),
-      'is_temp_close': isTempClose,
-      'address': address.toJson(),
       'cuisineDetails': cuisineDetails,
       'storeImage': storeImage,
-      'distance_km': distanceKm,
-      'distance_miles': distanceMiles,
-      'tableReservations': tableReservations,
-      'supportedOrderTypes': supportedOrderTypes,
-      'averageCostForMealForTwo': averageCostForMealForTwo,
-      'currencyCode': currencyCode,
-      'currencySymbol': currencySymbol,
+      'distance': distance,
+      'products': products.map((p) => p.toJson()).toList(),
     };
   }
 }
@@ -555,6 +509,7 @@ class Address {
 enum WidgetType {
   options('options'),
   stores('stores'),
+  seeMore('see_more'),
   products('products'),
   button('button'),
   input('input'),
@@ -584,4 +539,53 @@ extension JsonParsingExtension on String {
     final Map<String, dynamic> json = jsonDecode(this);
     return ChatResponse.fromJson(json);
   }
+}
+
+// See More Action Model for see_more widget
+class SeeMoreAction {
+  final String buttonText;
+  final String title;
+  final String subtitle;
+  final String storeCategoryId;
+  final String keyword;
+
+  SeeMoreAction({
+    required this.buttonText,
+    required this.title,
+    required this.subtitle,
+    required this.storeCategoryId,
+    required this.keyword,
+  });
+
+  factory SeeMoreAction.fromJson(Map<String, dynamic> json) {
+    return SeeMoreAction(
+      buttonText: (json['button_text'] ?? json['buttonText'] ?? '').toString(),
+      title: (json['title'] ?? '').toString(),
+      subtitle: (json['subtitle'] ?? '').toString(),
+      storeCategoryId: (json['storecategoryid'] ?? json['storeCategoryId'] ?? '').toString(),
+      keyword: (json['keyword'] ?? '').toString(),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'button_text': buttonText,
+      'title': title,
+      'subtitle': subtitle,
+      'storecategoryid': storeCategoryId,
+      'keyword': keyword,
+    };
+  }
+}
+
+double _parseDistanceKm(dynamic value) {
+  if (value == null) return 0.0;
+  if (value is num) return value.toDouble();
+  if (value is String) {
+    final match = RegExp(r'([0-9]+(?:\.[0-9]+)?)').firstMatch(value);
+    if (match != null) {
+      return double.tryParse(match.group(1)!) ?? 0.0;
+    }
+  }
+  return 0.0;
 }
