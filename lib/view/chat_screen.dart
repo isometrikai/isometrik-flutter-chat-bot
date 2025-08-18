@@ -1046,27 +1046,47 @@ class _ChatScreenBody extends StatelessWidget {
     for (final widget in latestActionWidgets.where((w) => w.type == 'see_more')) {
       for (final action in widget.seeMore) {
         actionButtons.add(
-          _buildActionButton(
-            text: action.buttonText,
-            onTap: () {
-              // Navigate to restaurant menu screen for see_more actions
-              // Navigator.push(
-              //   context,
-              //   MaterialPageRoute(
-              //     builder: (context) => RestaurantMenuScreen(
-              //       actionData: action,
-              //     ),
-              //   ),
-              // );
+          BlocBuilder<ChatBloc, ChatState>(
+            builder: (context, state) {
+              bool isApiLoading = state is ChatLoading;
+              return _buildActionButton(
+                text: action.buttonText,
+                onTap: isApiLoading ? () {} : () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => RestaurantScreen(
+                        actionData: action,
+                        restaurantList: messages.last.stores,
+                      ),
+                    ),
+                  );
+                },
+              );
+            },
+          ),
+        );
+      }
+    }
 
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => RestaurantScreen(
-                    actionData: action,
-                    restaurantList: messages.last.stores,
-                  ),
-                ),
+    for (final widget in latestActionWidgets.where((w) => w.type == 'menu')) {
+      for (final action in widget.seeMore) {
+        actionButtons.add(
+          BlocBuilder<ChatBloc, ChatState>(
+            builder: (context, state) {
+              bool isApiLoading = state is ChatLoading;
+              return _buildActionButton(
+                text: action.buttonText,
+                onTap: isApiLoading ? () {} : () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => RestaurantMenuScreen(
+                        actionData: action,
+                      ),
+                    ),
+                  );
+                },
               );
             },
           ),
