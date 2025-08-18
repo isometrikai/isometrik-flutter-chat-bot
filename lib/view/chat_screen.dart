@@ -4,6 +4,8 @@ import 'package:chat_bot/bloc/chat_event.dart';
 import 'package:chat_bot/bloc/chat_state.dart';
 import 'package:chat_bot/data/model/chat_response.dart';
 import 'package:chat_bot/data/model/chat_message.dart';
+import 'package:chat_bot/view/restaurant_menu_screen.dart';
+import 'package:chat_bot/view/restaurant_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lottie/lottie.dart';
@@ -13,7 +15,6 @@ import 'package:flutter/services.dart';
 import 'package:chat_bot/widgets/black_toast_view.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:chat_bot/data/model/greeting_response.dart';
-import 'package:chat_bot/view/restaurant_menu_screen.dart';
 
 class ChatScreen extends StatefulWidget {
   final MyGPTsResponse chatbotData;
@@ -1041,7 +1042,6 @@ class _ChatScreenBody extends StatelessWidget {
     }
 
     List<Widget> actionButtons = [];
-
     // Handle see_more widgets
     for (final widget in latestActionWidgets.where((w) => w.type == 'see_more')) {
       for (final action in widget.seeMore) {
@@ -1050,17 +1050,21 @@ class _ChatScreenBody extends StatelessWidget {
             text: action.buttonText,
             onTap: () {
               // Navigate to restaurant menu screen for see_more actions
+              // Navigator.push(
+              //   context,
+              //   MaterialPageRoute(
+              //     builder: (context) => RestaurantMenuScreen(
+              //       actionData: action,
+              //     ),
+              //   ),
+              // );
+
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => RestaurantMenuScreen(
-                    actionData: {
-                      'buttonText': action.buttonText,
-                      'title': action.title,
-                      'subtitle': action.subtitle,
-                      'storeCategoryId': action.storeCategoryId,
-                      'keyword': action.keyword,
-                    },
+                  builder: (context) => RestaurantScreen(
+                    actionData: action,
+                    restaurantList: messages.last.stores,
                   ),
                 ),
               );

@@ -245,53 +245,78 @@ extension ChatWidgetUsage on ChatWidget {
 // Product Model for products widget
 class Product {
   final String id;
+  final String parentProductId;
+  final String childProductId;
+  // final Map<String, dynamic> offers;
+  final int variantsCount;
   final String productName;
   final FinalPriceList finalPriceList;
-  final String productImage;
+  final List<String> images;
+  final bool containsMeat;
   final String currencySymbol;
+  final String currency;
 
   const Product({
     required this.id,
+    required this.parentProductId,
+    required this.childProductId,
+    // required this.offers,
+    required this.variantsCount,
     required this.productName,
     required this.finalPriceList,
-    required this.productImage,
+    required this.images,
+    required this.containsMeat,
     required this.currencySymbol,
+    required this.currency,
   });
 
   double get finalPrice => finalPriceList.finalPrice;
 
+  // Backward compatibility getter for productImage
+  String get productImage => images.isNotEmpty ? images.first : '';
+
   factory Product.fromJson(Map<String, dynamic> json) {
     final Map<String, dynamic> finalPriceListJson =
-        (json['finalPriceList'] ?? json['finalpricelist'] ?? {}) as Map<String, dynamic>;
-    final double computedFinalPrice =
-        (json['finalPrice'] ?? finalPriceListJson['finalPrice'] ?? 0).toDouble();
+        (json['finalPriceList'] ?? {}) as Map<String, dynamic>;
+
+    // Handle images as either List<String> or single string
+    List<String> imagesList = [];
+    if (json['images'] != null) {
+      if (json['images'] is List) {
+        imagesList = (json['images'] as List).map((e) => e.toString()).toList();
+      } else if (json['images'] is String) {
+        imagesList = [json['images'].toString()];
+      }
+    }
 
     return Product(
       id: json['id']?.toString() ?? '',
-      productName: (json['productName'] ?? json['productunitname'] ?? '').toString(),
-      finalPriceList: FinalPriceList.fromJson(finalPriceListJson.isNotEmpty
-          ? finalPriceListJson
-          : {
-              'basePrice': computedFinalPrice,
-              'finalPrice': computedFinalPrice,
-              'discountPrice': 0,
-              'discountPercentage': 0,
-              'discountType': 1,
-              'taxRate': 0,
-              'msrpPrice': 0,
-            }),
-      productImage: (json['product_image'] ?? json['image'] ?? '').toString(),
-      currencySymbol: (json['currencySymbol'] ?? json['currency_symbol'] ?? '').toString(),
+      parentProductId: json['parentProductId']?.toString() ?? '',
+      childProductId: json['childProductId']?.toString() ?? '',
+      // offers: (json['offers'] as Map<String, dynamic>?) ?? {},
+      variantsCount: json['variantsCount'] ?? 0,
+      productName: json['productName']?.toString() ?? '',
+      finalPriceList: FinalPriceList.fromJson(finalPriceListJson),
+      images: imagesList,
+      containsMeat: json['containsMeat'] ?? false,
+      currencySymbol: json['currencySymbol']?.toString() ?? '',
+      currency: json['currency']?.toString() ?? '',
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
       'id': id,
+      'parentProductId': parentProductId,
+      'childProductId': childProductId,
+      // 'offers': offers,
+      'variantsCount': variantsCount,
       'productName': productName,
       'finalPriceList': finalPriceList.toJson(),
-      'product_image': productImage,
+      'images': images,
+      'containsMeat': containsMeat,
       'currencySymbol': currencySymbol,
+      'currency': currency,
     };
   }
 }
@@ -363,7 +388,7 @@ class Store {
     final String name = (json['storename'] ?? json['store_name'] ?? '').toString();
     final double rating = ((json['avgRating'] ?? json['rating'] ?? 0) as num).toDouble();
     final String image = (json['storeImage'] ?? json['store_logo'] ?? '').toString();
-    final String distance = json['distance'] ?? '';
+    final String distance = (json['distance'] as num).toString();
 
     final List<Product> parsedProducts = (json['products'] as List<dynamic>? ?? [])
         .map((e) => Product.fromJson(e as Map<String, dynamic>))

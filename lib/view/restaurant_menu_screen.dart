@@ -1,12 +1,14 @@
 import 'dart:convert';
 
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:chat_bot/data/model/chat_response.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:http/http.dart' as http;
 import 'package:chat_bot/data/model/restaurant_menu_response.dart';
 
 class RestaurantMenuScreen extends StatefulWidget {
-  final Map<String, dynamic>? actionData;
+  final SeeMoreAction? actionData;
 
   const RestaurantMenuScreen({super.key, this.actionData});
 
@@ -176,19 +178,14 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
             ],
           ),
         ),
-        GestureDetector(
-          onTap: () => Navigator.of(context).maybePop(),
-          child: Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.1),
-              shape: BoxShape.circle,
-            ),
-            alignment: Alignment.center,
-            child: const Icon(Icons.close, color: Color(0xFF585C77), size: 20),
-          ),
-        ),
+         IconButton(
+                  icon: SvgPicture.asset(
+                    'assets/images/ic_close.svg',
+                    width: 40,
+                    height: 40,
+                  ),
+                  onPressed: () => Navigator.of(context).maybePop(),
+                ),
       ],
     );
   }
