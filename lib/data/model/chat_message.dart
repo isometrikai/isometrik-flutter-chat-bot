@@ -32,4 +32,38 @@ class ChatMessage {
     this.storesWidget,
     this.productsWidget,
   });
+
+  ChatMessage copyWith({
+    String? id,
+    String? text,
+    bool? isBot,
+    bool? showAvatar,
+    bool? hasQuickReplies,
+    bool? hasStoreCards,
+    bool? hasProductCards,
+    bool? isWelcomeMessage,
+    bool? hasOptionButtons,
+    List<String>? optionButtons,
+    List<Store>? stores,
+    List<Product>? products,
+    ChatWidget? storesWidget,
+    ChatWidget? productsWidget,
+  }) {
+    return ChatMessage(
+      id: id ?? this.id,
+      text: text ?? this.text,
+      isBot: isBot ?? this.isBot,
+      showAvatar: showAvatar ?? this.showAvatar,
+      hasQuickReplies: hasQuickReplies ?? this.hasQuickReplies,
+      hasStoreCards: hasStoreCards ?? this.hasStoreCards,
+      hasProductCards: hasProductCards ?? this.hasProductCards,
+      isWelcomeMessage: isWelcomeMessage ?? this.isWelcomeMessage,
+      hasOptionButtons: hasOptionButtons ?? this.hasOptionButtons,
+      optionButtons: optionButtons ?? this.optionButtons,
+      stores: stores ?? this.stores,
+      products: products ?? this.products,
+      storesWidget: storesWidget ?? this.storesWidget,
+      productsWidget: productsWidget ?? this.productsWidget,
+    );
+  }
 }

@@ -37,6 +37,26 @@ class _ChatScreenState extends State<ChatScreen> {
 
   List<ChatMessage> messages = [];
 
+  // Returns index of the last bot message that shows stores or products widgets; -1 if none
+  int _indexOfLastBotCatalogMessage() {
+    for (int i = messages.length - 1; i >= 0; i--) {
+      final ChatMessage message = messages[i];
+      if (message.isBot && (message.hasStoreCards || message.hasProductCards)) {
+        return i;
+      }
+    }
+    return -1;
+  }
+
+  // Produces a hidden version of catalog widgets for a message (non-destructive to data)
+  ChatMessage _hideCatalogInMessage(ChatMessage message) {
+    if (!(message.hasStoreCards || message.hasProductCards)) return message;
+    return message.copyWith(
+      hasStoreCards: false,
+      hasProductCards: false,
+    );
+  }
+
   void _onFocusChange() {
     if (_messageFocusNode.hasFocus) {
       // Scroll to bottom when keyboard opens
@@ -49,7 +69,13 @@ class _ChatScreenState extends State<ChatScreen> {
   void _sendMessage(String text) {
     if (text.trim().isEmpty) return;
 
+    // Prepare: hide stores/products from the last bot message if present
+    final int catalogIdx = _indexOfLastBotCatalogMessage();
+
     setState(() {
+      if (catalogIdx >= 0) {
+        messages[catalogIdx] = _hideCatalogInMessage(messages[catalogIdx]);
+      }
       messages.add(ChatMessage(
           id: DateTime.now().millisecondsSinceEpoch.toString(),
           text: text,
