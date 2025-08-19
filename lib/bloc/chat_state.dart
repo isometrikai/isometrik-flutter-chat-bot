@@ -29,3 +29,6 @@ class ChatError extends ChatState {
   @override
   List<Object> get props => [error];
 }
+
+class AddToCartState extends ChatState {
+}

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:chat_bot/data/model/chat_response.dart';
 import 'package:chat_bot/services/callback_manage.dart';
+import 'package:chat_bot/bloc/chat_event.dart';
 
 class StoreCard extends StatelessWidget {
   final Store store;
@@ -8,6 +9,7 @@ class StoreCard extends StatelessWidget {
   final int index;
   final EdgeInsets? margin;
   final VoidCallback? onTap;
+  final Function(AddToCartEvent)? onAddToCart;
 
   const StoreCard({
     super.key,
@@ -16,6 +18,7 @@ class StoreCard extends StatelessWidget {
     required this.index,
     this.margin,
     this.onTap,
+    this.onAddToCart,
   });
 
   @override
@@ -124,7 +127,11 @@ class StoreCard extends StatelessWidget {
                 child: ListView.separated(
                   scrollDirection: Axis.horizontal,
                   padding: EdgeInsets.zero,
-                  itemBuilder: (context, i) => _ProductPreviewTile(product: store.products[i]),
+                  itemBuilder: (context, i) => _ProductPreviewTile(
+                    product: store.products[i],
+                    store: store,
+                    onAddToCart: onAddToCart,
+                  ),
                   separatorBuilder: (_, __) => const SizedBox(width: 10),
                   itemCount: store.products.length,
                 ),
@@ -175,8 +182,14 @@ class StoreCard extends StatelessWidget {
 
 class _ProductPreviewTile extends StatelessWidget {
   final Product product;
+  final Store store;
+  final Function(AddToCartEvent)? onAddToCart;
 
-  const _ProductPreviewTile({required this.product});
+  const _ProductPreviewTile({
+    required this.product,
+    required this.store,
+    this.onAddToCart,
+  });
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -255,29 +268,47 @@ class _ProductPreviewTile extends StatelessWidget {
           Positioned(
             right: 10,
             bottom: -4,
-            child: Container(
-              height: 27,
-              padding: const EdgeInsets.symmetric(horizontal: 17),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.white, width: 1),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.08),
-                    blurRadius: 4,
-                    offset: const Offset(0, 4),
+            child: GestureDetector(
+              onTap: () {
+                if (onAddToCart != null) {
+                  final event = AddToCartEvent(
+                    storeId: store.storeId,
+                    cartType: 1, // Default cart type
+                    action: 1, // Add action
+                    newQuantity: 1, // Default quantity
+                    storeTypeId: store.type,
+                    storeCategoryId: store.storeCategoryId,
+                    productId: product.childProductId,
+                    centralProductId: product.parentProductId,
+                    quantity: "1",
+                  );
+                  onAddToCart!(event);
+                }
+              },
+              child: Container(
+                height: 27,
+                padding: const EdgeInsets.symmetric(horizontal: 17),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.white, width: 1),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.08),
+                      blurRadius: 4,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                alignment: Alignment.center,
+                child: const Text(
+                  'Add',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 12,
+                    height: 1.2,
+                    color: Color(0xFF8E2FFD),
                   ),
-                ],
-              ),
-              alignment: Alignment.center,
-              child: const Text(
-                'Add',
-                style: TextStyle(
-                  fontWeight: FontWeight.w700,
-                  fontSize: 12,
-                  height: 1.2,
-                  color: Color(0xFF8E2FFD),
                 ),
               ),
             ),

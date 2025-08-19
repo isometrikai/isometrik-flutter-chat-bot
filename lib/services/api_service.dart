@@ -20,6 +20,7 @@ class ApiService {
     required String userId,
     required String name,
     required String timestamp,
+    required String userToken,
     String? location,
     double? longitude,
     double? latitude,
@@ -33,6 +34,7 @@ class ApiService {
       userId: userId,
       name: name,
       timestamp: timestamp,
+      userToken: userToken,
       location: location,
       longitude: longitude,
       latitude: latitude,
@@ -44,6 +46,7 @@ class ApiService {
       userId: userId,
       name: name,
       timestamp: timestamp,
+      userToken: userToken,
       location: location,
       longitude: longitude,
       latitude: latitude,
@@ -75,6 +78,27 @@ class ApiService {
         isLoggedIn: isLoggedIn,
         longitude: longitude,
         latitude: latitude,
+      );
+
+  static Future<ChatResponse?> addToCart({
+    required String storeId,
+    required int cartType,
+    required int action,
+    required String storeCategoryId,
+    required int newQuantity,
+    required int storeTypeId,
+    required String productId,
+    required String centralProductId,
+  }) =>
+      ComprehensiveApiService.instance.addToCart(
+       storeId: storeId,
+        cartType: cartType,
+        action: action,
+        storeCategoryId: storeCategoryId,
+        newQuantity: newQuantity,
+        storeTypeId: storeTypeId,
+        productId: productId,
+        centralProductId: centralProductId
       );
 
   static bool get isProduction => AuthService.instance.isProduction;

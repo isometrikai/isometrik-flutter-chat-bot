@@ -18,6 +18,7 @@ class ChatBot {
     required String userId,
     required String name,
     required String timestamp,
+    required String userToken,
     required String location,
     required double longitude,
     required double latitude,
@@ -27,8 +28,9 @@ class ChatBot {
     print('licenseKey: $licenseKey');
     print('isProduction: $isProduction');
     print('userId: $userId');
-    print('userId: $name');
-    print('userId: $timestamp');
+    print('name: $name');
+    print('timestamp: $timestamp');
+    print('userToken: $userToken');
     print('location: $location');
     print('longitude: $longitude');
     print('latitude: $latitude');
@@ -40,6 +42,7 @@ class ChatBot {
       userId: userId,
       name: name,
       timestamp: timestamp,
+      userToken: userToken,
       location: location,
       longitude: longitude,
       latitude: latitude,

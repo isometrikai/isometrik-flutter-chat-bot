@@ -68,3 +68,28 @@ class ChatLoadEvent extends ChatEvent {
     latitude,
   ];
 }
+
+
+class AddToCartEvent extends ChatEvent {
+  final String storeId;
+  final int cartType;
+  final int action;
+  final int newQuantity;
+  final int storeTypeId;
+  final String storeCategoryId;
+  final String productId;
+  final String centralProductId;
+  final String quantity;
+
+  const AddToCartEvent({
+    required this.storeId,
+    required this.storeCategoryId,
+    required this.productId,
+    required this.centralProductId,
+    required this.quantity,
+    required this.action,
+    required this.cartType,
+    required this.newQuantity,
+    required this.storeTypeId,
+  });
+}

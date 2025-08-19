@@ -22,6 +22,7 @@ class AuthService {
   String? _userId;
   String? _name;
   String? _timestamp;
+  String? _userToken;
   String? _location;
   double? _longitude;
   double? _latitude;
@@ -32,6 +33,7 @@ class AuthService {
   // Use universal API client
   late final ApiClient _serviceClient = UniversalApiClient.instance.serviceClient;
   late final ApiClient _chatClient = UniversalApiClient.instance.chatClient;
+  late final ApiClient _appClient = UniversalApiClient.instance.appClient;
 
   // Public configuration
   void configure({
@@ -42,6 +44,7 @@ class AuthService {
     required String userId,
     required String name,
     required String timestamp,
+    required String userToken,
     String? location,
     double? longitude,
     double? latitude,
@@ -51,6 +54,7 @@ class AuthService {
     _userId = userId;
     _name = name;
     _timestamp = timestamp;
+    _userToken = userToken;
     _location = location;
     _longitude = longitude;
     _latitude = latitude;
@@ -59,6 +63,7 @@ class AuthService {
     TokenManager.instance.configure(
       appSecret: appSecret,
       licenseKey: licenseKey,
+      userToken: userToken
     );
     
     AppLog.info('Environment: ' + (_isProduction ? 'production' : 'staging'));
@@ -142,31 +147,5 @@ class AuthService {
     return null;
   }
 
-  Future<void> clearStoredData() async {
-    await TokenManager.instance.clearToken();
-  }
-
-  // Sample: Keep your example OTP verification demonstrating ApiClient usage
-  late final ApiClient _exampleClient = UniversalApiClient.instance.serviceClient;
-
-  Future<ApiResult> verifyChangePhoneOtp({
-    required String currentPhoneNumber,
-    required String newPhoneNumber,
-    required String countryCode,
-    required String otp,
-  }) {
-    return _exampleClient.post(
-      '/api/v1/users/change-phone-verify',
-      {
-        'current_phone_number': currentPhoneNumber,
-        'new_phone_number': newPhoneNumber,
-        'country_code': countryCode,
-        'otp': otp,
-      },
-    );
-  }
-
-  // Expose getters if needed
-  String? get currentToken => TokenManager.instance.currentToken;
   bool get isProduction => _isProduction;
 }

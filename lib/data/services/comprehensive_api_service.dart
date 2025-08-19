@@ -16,6 +16,7 @@ class ComprehensiveApiService {
   String? _userId;
   String? _name;
   String? _timestamp;
+  String? _userToken;
   String? _location;
   double? _longitude;
   double? _latitude;
@@ -23,6 +24,7 @@ class ComprehensiveApiService {
   // API Clients
   late final ApiClient _serviceClient = UniversalApiClient.instance.serviceClient;
   late final ApiClient _chatClient = UniversalApiClient.instance.chatClient;
+  late final ApiClient _appClient = UniversalApiClient.instance.appClient;
 
   /// Configure the API service
   void configure({
@@ -30,6 +32,7 @@ class ComprehensiveApiService {
     required String userId,
     required String name,
     required String timestamp,
+    required String userToken,
     String? location,
     double? longitude,
     double? latitude,
@@ -113,6 +116,43 @@ class ComprehensiveApiService {
     };
     
     final res = await _chatClient.post('/v2/chatbot', body);
+    if (res.isSuccess && res.data != null) {
+      try {
+        return ChatResponse.fromJson(res.data as Map<String, dynamic>);
+      } catch (e) {
+        return null;
+      }
+    }
+    return null;
+  }
+
+  Future<ChatResponse?> addToCart({
+    required String storeId,
+    required int cartType,
+    required int action,
+    required String storeCategoryId,
+    required int newQuantity,
+    required int storeTypeId,
+    required String productId,
+    required String centralProductId,
+
+  }) async {
+    final body = {
+      "offers": {},
+      "storeId": storeId,
+      "cartType": cartType,
+      "action": action,
+      "deliveryAddressId": "",
+      "storeCategoryId": storeCategoryId,
+      "newQuantity": newQuantity,
+      "unitId": "",
+      "userType": 1,
+      "storeTypeId": storeTypeId,
+      "productId": productId,
+      "centralProductId": centralProductId
+    };
+
+    final res = await _appClient.post('/v1/cart', body);
     if (res.isSuccess && res.data != null) {
       try {
         return ChatResponse.fromJson(res.data as Map<String, dynamic>);

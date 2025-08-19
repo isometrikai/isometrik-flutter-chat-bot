@@ -1083,6 +1083,9 @@ class _ChatScreenBody extends StatelessWidget {
                     MaterialPageRoute(
                       builder: (context) => RestaurantScreen(
                         actionData: action,
+                        onAddToCart: (event) {
+                          context.read<ChatBloc>().add(event);
+                        },
                       ),
                     ),
                   );
@@ -1318,6 +1321,9 @@ class _ChatScreenBody extends StatelessWidget {
           store: store,
           storesWidget: storesWidget,
           index: index,
+          onAddToCart: (event) {
+            context.read<ChatBloc>().add(event);
+          },
         );
       },
     );

@@ -3,11 +3,17 @@ import 'package:flutter_svg/svg.dart';
 import '../data/model/chat_response.dart';
 import '../widgets/store_card.dart';
 import 'package:chat_bot/data/services/hawksearch_service.dart';
+import 'package:chat_bot/bloc/chat_event.dart';
 
 class RestaurantScreen extends StatefulWidget {
   final SeeMoreAction? actionData;
+  final Function(AddToCartEvent)? onAddToCart;
 
-  const RestaurantScreen({super.key, this.actionData});
+  const RestaurantScreen({
+    super.key, 
+    this.actionData,
+    this.onAddToCart,
+  });
 
   @override
   State<RestaurantScreen> createState() => _RestaurantScreenState();
@@ -233,6 +239,7 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
               // Handle restaurant tap
               Navigator.pop(context);
             },
+            onAddToCart: widget.onAddToCart,
           );
         } catch (e) {
           // Fallback in case of error

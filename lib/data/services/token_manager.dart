@@ -18,6 +18,7 @@ class TokenManager {
   // Token storage
   static const String _tokenKey = 'access_token';
   String? _accessToken;
+  String? _userToken;
   bool _isRefreshing = false;
   final List<Completer<bool>> _refreshCompleters = [];
 
@@ -25,11 +26,13 @@ class TokenManager {
   void configure({
     required String appSecret,
     required String licenseKey,
+    required String userToken,
     String? baseUrl,
     String? authEndpoint,
   }) {
     _appSecret = appSecret;
     _licenseKey = licenseKey;
+    _userToken = userToken;
     if (baseUrl != null) _baseUrl = baseUrl;
     if (authEndpoint != null) _authEndpoint = authEndpoint;
   }
@@ -47,6 +50,8 @@ class TokenManager {
     if ((_accessToken ?? '').isEmpty) return null;
     return _accessToken!.startsWith('Bearer ') ? _accessToken! : 'Bearer $_accessToken';
   }
+
+  String? get userToken => _userToken;
 
   /// Get the current token value
   String? get currentToken => _accessToken;

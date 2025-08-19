@@ -14,7 +14,7 @@ class HawkSearchService {
     double latitude = 13.040803909301758,
     double longitude = 77.562980651855469,
     String clientGuid = '528a7d439df44f2b9457342b7b865be2',
-    String indexName = 'hitechnology.20250626.060135',
+    String indexName = 'hitechnology.20250626.055255',//'hitechnology.20250626.060135',
     String visitId = '3c6b9339-c602-4af9-b454-0ec0df067181',
     String visitorId = '47daf829-b5df-4358-83ea-207aa4eaae15',
     String keyword = '',
@@ -179,6 +179,33 @@ class HawkSearchService {
       return '0.0';
     })();
 
+    final String storeId = (() {
+      final String fromDoc = _firstString(doc['storeid']);
+      if (fromDoc.isNotEmpty) return fromDoc;
+      return storeData['storeId']?.toString() ?? '';
+    })();
+
+    final String storeCategoryId = (() {
+      final String fromDoc = _firstString(doc['storecategoryid']);
+      if (fromDoc.isNotEmpty) return fromDoc;
+      return storeData['storeCategoryId']?.toString() ?? '';
+    })();
+
+    // Extra fields from storeData.metaData
+    final Map<String, dynamic> metaData = (() {
+      final dynamic raw = storeData['metaData'];
+      if (raw is Map) {
+        return Map<String, dynamic>.from(raw);
+      }
+      return <String, dynamic>{};
+    })();
+
+    final String linkFromId = metaData['linkFromId']?.toString() ?? '';
+    final int type = _toInt(metaData['type'], fallback: 0);
+    final bool isDoctored = _toBool(metaData['isDoctore'] ?? metaData['isDoctored']);
+    final bool storeListing = _toBool(metaData['storeListing']);
+    final bool hyperlocal = _toBool(metaData['hyperlocal']);
+
     return Store(
       storename: storename,
       avgRating: avgRating,
@@ -186,6 +213,13 @@ class HawkSearchService {
       storeImage: storeImage,
       distance: distanceStr,
       products: products,
+      storeId: storeId,
+      storeCategoryId: storeCategoryId,
+      linkFromId: linkFromId,
+      type: type,
+      isDoctored: isDoctored,
+      storeListing: storeListing,
+      hyperlocal: hyperlocal,
     );
   }
 
@@ -233,6 +267,17 @@ class HawkSearchService {
     if (value is num) return value.toInt();
     if (value is String) return int.tryParse(value) ?? fallback;
     return fallback;
+  }
+
+  bool _toBool(dynamic value) {
+    if (value is bool) return value;
+    if (value is num) return value != 0;
+    if (value is String) {
+      final String v = value.toLowerCase();
+      if (v == 'true' || v == '1' || v == 'yes' || v == 'y') return true;
+      if (v == 'false' || v == '0' || v == 'no' || v == 'n') return false;
+    }
+    return false;
   }
 }
 

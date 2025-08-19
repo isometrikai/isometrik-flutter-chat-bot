@@ -379,6 +379,13 @@ class Store {
   final String cuisineDetails;
   final String storeImage;
   final String distance;
+  final String storeId;
+  final String storeCategoryId;
+  final String linkFromId;
+  final int type;
+  final bool isDoctored;
+  final bool storeListing;
+  final bool hyperlocal;
   final List<Product> products;
 
   Store({
@@ -387,7 +394,14 @@ class Store {
     required this.cuisineDetails,
     required this.storeImage,
     required this.distance,
+    required this.storeId,
+    required this.storeCategoryId,
     required this.products,
+    required this.linkFromId,
+    required this.type,
+    required this.isDoctored,
+    required this.storeListing,
+    required this.hyperlocal,
   });
 
   factory Store.fromJson(Map<String, dynamic> json) {
@@ -395,6 +409,13 @@ class Store {
     final double rating = ((json['avgRating'] ?? json['rating'] ?? 0) as num).toDouble();
     final String image = (json['storeImage'] ?? json['store_logo'] ?? '').toString();
     final String distance = (json['distance'] ?? '');
+    final String storeId = (json['storeId'] ?? '');
+    final String storeCategoryId = (json['storeCategoryId'] ?? '');
+    final String linkFromId = (json['linkFromId'] ?? '');
+    final int type = (json['type'] ?? 0);
+    final bool isDoctored = (json['isDoctored'] ?? false);
+    final bool storeListing = (json['storeListing'] ?? false);
+    final bool hyperlocal = (json['hyperlocal'] ?? false);
 
     final List<Product> parsedProducts = (json['products'] as List<dynamic>? ?? [])
         .map((e) => Product.fromJson(e as Map<String, dynamic>))
@@ -406,7 +427,14 @@ class Store {
       cuisineDetails: (json['cuisineDetails'] ?? (json['categorylist']?.join(', ') ?? '')).toString(),
       storeImage: image,
       distance: distance,
+      storeId: storeId,
+      storeCategoryId: storeCategoryId,
       products: parsedProducts,
+      linkFromId: linkFromId,
+      type: type,
+      isDoctored: isDoctored,
+      storeListing: storeListing,
+      hyperlocal: hyperlocal,
     );
   }
 
@@ -417,6 +445,8 @@ class Store {
       'cuisineDetails': cuisineDetails,
       'storeImage': storeImage,
       'distance': distance,
+      'storeId': storeId,
+      'storeCategoryId': storeCategoryId,
       'products': products.map((p) => p.toJson()).toList(),
     };
   }

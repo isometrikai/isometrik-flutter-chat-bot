@@ -18,12 +18,31 @@ class UniversalApiClient {
     onUnauthorizedRefresh: _handleTokenRefresh,
   );
 
+  late final ApiClient _appClient = ApiClient(
+    baseUrl: 'https://apisuperapp-staging.eazy-online.com',
+    buildHeaders: _buildAppHeaders,
+  );
+
   /// Build headers with current token
   Future<Map<String, String>> _buildHeaders() async {
     final token = TokenManager.instance.authorizationHeader;
     return {
       'Content-Type': 'application/json',
       if (token != null) 'Authorization': token,
+    };
+  }
+
+  Future<Map<String, String>> _buildAppHeaders() async {
+    final token = TokenManager.instance.userToken;
+    return {
+    'currencycode':'INR',
+    'Content-Length':'391',
+    'Content-Type':'application/json',
+    'language':'en',
+    'currencysymbol': '4oK5',
+    'platform':'1',
+    'ipAddress':'192.168.1.3',
+      'Authorization': token ?? '',
     };
   }
 
@@ -37,6 +56,8 @@ class UniversalApiClient {
 
   /// Get chat API client (for easyagentapi.isometrik.ai APIs)
   ApiClient get chatClient => _chatClient;
+
+  ApiClient get appClient => _appClient;
 
   /// Create a custom API client for any base URL
   ApiClient createClient(String baseUrl) {
