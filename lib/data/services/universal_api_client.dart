@@ -36,7 +36,7 @@ class UniversalApiClient {
     final token = TokenManager.instance.userToken;
     return {
     'currencycode':'INR',
-    'Content-Length':'391',
+    // 'Content-Length':'391',
     'Content-Type':'application/json',
     'language':'en',
     'currencysymbol': '4oK5',

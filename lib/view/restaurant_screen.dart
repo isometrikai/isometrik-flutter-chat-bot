@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import '../data/model/chat_response.dart';
 import '../widgets/store_card.dart';
-import 'package:chat_bot/data/services/hawksearch_service.dart';
 import 'package:chat_bot/bloc/chat_event.dart';
+import 'package:chat_bot/bloc/restaurant/restaurant_bloc.dart';
+import 'package:chat_bot/bloc/restaurant/restaurant_event.dart';
+import 'package:chat_bot/bloc/restaurant/restaurant_state.dart';
 
 class RestaurantScreen extends StatefulWidget {
   final SeeMoreAction? actionData;
@@ -21,14 +24,14 @@ class RestaurantScreen extends StatefulWidget {
 
 class _RestaurantScreenState extends State<RestaurantScreen> {
   final TextEditingController _searchController = TextEditingController();
-  List<Store> _restaurants = [];
-  bool _isLoading = false;
+  late final RestaurantBloc _bloc;
   String _currentKeyword = '';
   DateTime? _lastQueryAt;
 
   @override
   void dispose() {
     _searchController.dispose();
+    _bloc.close();
     super.dispose();
   }
 
@@ -40,78 +43,48 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
       if (!mounted) return;
       // Debounce: only proceed if this is the latest input
       if (_lastQueryAt != now) return;
-      setState(() {
-        _isLoading = true;
-      });
-      try {
-        final fetched = await HawkSearchService.instance.fetchStoresGroupedByStoreId(
-          keyword: _currentKeyword,
-        );
-        if (!mounted) return;
-        setState(() {
-          _restaurants = fetched;
-        });
-      } finally {
-        if (mounted) {
-          setState(() {
-            _isLoading = false;
-          });
-        }
-      }
+      _bloc.add(RestaurantFetchRequested(keyword: _currentKeyword));
     });
   }
 
   @override
   void initState() {
     super.initState();
+    _bloc = RestaurantBloc();
     _bootstrapData();
   }
 
   Future<void> _bootstrapData() async {
-
-    setState(() {
-      _isLoading = true;
-    });
-    try {
-      final List<Store> fetched = await HawkSearchService.instance.fetchStoresGroupedByStoreId(
-        keyword: _currentKeyword,
-      );
-      setState(() {
-        _restaurants = fetched;
-      });
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-      }
-    }
+    _bloc.add(RestaurantFetchRequested(keyword: _currentKeyword));
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: SafeArea(
-        child: Column(
-          children: [
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Column(
-                  children: [
-                    const SizedBox(height: 24),
-                    _buildTitleSection(),
-                    const SizedBox(height: 16),
-                    _buildSearchBar(),
-                    const SizedBox(height: 16),
-                    Expanded(child: _buildRestaurantList()),
-                    const SizedBox(height: 16),
-                  ],
+    return BlocProvider.value(
+      value: _bloc,
+      child: Scaffold(
+        backgroundColor: Colors.white,
+        body: SafeArea(
+          child: Column(
+            children: [
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Column(
+                    children: [
+                      const SizedBox(height: 24),
+                      _buildTitleSection(),
+                      const SizedBox(height: 16),
+                      _buildSearchBar(),
+                      const SizedBox(height: 16),
+                      Expanded(child: _buildRestaurantList()),
+                      const SizedBox(height: 16),
+                    ],
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -208,58 +181,72 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
 
 
   Widget _buildRestaurantList() {
-    if (_isLoading) {
-      return const Center(child: CircularProgressIndicator());
-    }
-    final List<Store> restaurants = _restaurants;
+    return BlocBuilder<RestaurantBloc, RestaurantState>(
+      builder: (context, state) {
+        if (state is RestaurantLoadInProgress || state is RestaurantInitial) {
+          return const Center(child: CircularProgressIndicator());
+        }
 
-    if (restaurants.isEmpty) {
-      return const Center(
-        child: Text(
-          'No restaurants available',
-          style: TextStyle(
-            fontSize: 16,
-            color: Color(0xFF6E4185),
-          ),
-        ),
-      );
-    }
-    
-    return ListView.separated(
-      padding: EdgeInsets.zero,
-      itemCount: restaurants.length,
-      separatorBuilder: (context, index) => const SizedBox(height: 16),
-      itemBuilder: (context, index) {
-        try {
-          return StoreCard(
-            store: restaurants[index],
-            storesWidget: null,
-            index: index,
-            onTap: () {
-              // Handle restaurant tap
-              Navigator.pop(context);
-            },
-            onAddToCart: widget.onAddToCart,
-          );
-        } catch (e) {
-          // Fallback in case of error
-          return Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: const Color(0xFFF5F7FF),
-              border: Border.all(color: const Color(0xFFEEF4FF), width: 1),
-              borderRadius: BorderRadius.circular(16),
-            ),
+        if (state is RestaurantLoadFailure) {
+          return Center(
             child: Text(
-              restaurants[index].storename,
+              state.message,
               style: const TextStyle(
-                fontWeight: FontWeight.w700,
-                fontSize: 18,
-                color: Color(0xFF242424),
+                fontSize: 16,
+                color: Color(0xFF6E4185),
               ),
             ),
           );
         }
+
+        final restaurants = (state as RestaurantLoadSuccess).restaurants;
+        if (restaurants.isEmpty) {
+          return const Center(
+            child: Text(
+              'No restaurants available',
+              style: TextStyle(
+                fontSize: 16,
+                color: Color(0xFF6E4185),
+              ),
+            ),
+          );
+        }
+
+        return ListView.separated(
+          padding: EdgeInsets.zero,
+          itemCount: restaurants.length,
+          separatorBuilder: (context, index) => const SizedBox(height: 16),
+          itemBuilder: (context, index) {
+            try {
+              return StoreCard(
+                store: restaurants[index],
+                storesWidget: null,
+                index: index,
+                onTap: () {
+                  Navigator.pop(context);
+                },
+                onAddToCart: widget.onAddToCart,
+              );
+            } catch (e) {
+              return Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF5F7FF),
+                  border: Border.all(color: const Color(0xFFEEF4FF), width: 1),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Text(
+                  restaurants[index].storename,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 18,
+                    color: Color(0xFF242424),
+                  ),
+                ),
+              );
+            }
+          },
+        );
       },
     );
   }

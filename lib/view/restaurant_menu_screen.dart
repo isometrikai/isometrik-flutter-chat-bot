@@ -1,11 +1,12 @@
-import 'dart:convert';
-
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chat_bot/data/model/chat_response.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:http/http.dart' as http;
 import 'package:chat_bot/data/model/restaurant_menu_response.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:chat_bot/bloc/restaurant_menu/restaurant_menu_bloc.dart';
+import 'package:chat_bot/bloc/restaurant_menu/restaurant_menu_event.dart';
+import 'package:chat_bot/bloc/restaurant_menu/restaurant_menu_state.dart';
 
 class RestaurantMenuScreen extends StatefulWidget {
   final SeeMoreAction? actionData;
@@ -25,17 +26,7 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
   static const Color _nonVeg = Color(0xFFF44336);
 
   final TextEditingController _searchController = TextEditingController();
-
-  // ===== API config (replace token/headers if needed) =====
-  static const String _menuUrl =
-      'https://apisuperapp-staging.eazy-online.com/get/storeMenu?containsMeat=1&lat=25.20485&long=55.270782&storeId=63627cf6b35f2f000c9ecc23&timezone=Asia%2FKolkata&z_id=636dfc8c89b6a857b500ccd1';
-  static const String _platform = '1';
-  static const String _currencySymbolHeader = '2K8u2KU=';
-  static const String _currencyCode = 'AED';
-  static const String _language = 'en';
-  static const String _ipAddress = '192.168.1.3';
-  static const String _bearerToken =
-      'Bearer eyJhbGciOiJSU0EtT0FFUCIsImN0eSI6IkpXVCIsImVuYyI6IkExMjhHQ00iLCJ0eXAiOiJKV1QifQ.MF0rQcJe9Z4fllfF9MOmWSvaHF8wP3H-sLWJZEGzkZ_-SeKmijur8Roiqff7LGi8Q3uOtUzqGe16qZktQIGI3tazEbVIT8OCD6QVEZUeVauE9g48UBxgdf7PLNhV5hq8hBYJAjeM-vrsDgYQrGStXb8u_t7WK8xBYuRrBubgkuE._KO4NJPc0vrHuGv6.4cbF9gWArQvjK6AYd3o7VTvwoP9HDbPsK6EhWq9M-iwLi1Yg68M6HXVvM-YncmVDF121x_rMnf3E5NmZS44xXoDiakqWaeEWBKBq83S5-lpMS70zpzywqGEaalauJSR44TiHhG2vDh1CKqbAFQNQ880v52qgNdwlWnZpO8J1vWb0jsKuMFI5tXGtfgB8cA_W3Gi8ujn1kpmaqAIe5Bdj7dBWVoaV8Fa5iEYZDSuiKmUMLiiN3Hbv_kLG7y6FzotrplQCN2ZZUCJBGIFvf7wcv6nEnOj6MpZxu3ebYREj7zICtHJzfEEVNkJQOJYLQDBhv6YqXClG3lqsnxYO06E1cgrNslDMistA9bUUK-u_4Fr0_qODFA4BQ2On5KkS8wURODQTgibSLw4HyPzGYVlk0Fc2Y5vAheLTnq0h2YwkWrMt2oPSL_wZFM_4o33F-BbiY9JFkJTZ7d-45xeR0D6Fre7JTH_7BnTy-nZ0SHsmAMX7d3tAc7feq4OWo6_XRaPFeHOb8WIxjhoAy60fc64t404OvesmmRF-Yc9XLH4LQSErbnxnhJWQoV-jT_HCP-LH0wDeDmxCfSx2saPB5_8qq_CUwbwOHNPGLaeNcRhX1z-hmhh2-L7Jg35bD5gRmw5PJOW9Wq7R-N1O7rTDCx7B2iSmaf2bfME4BGEAy-7VjYMBfymysy8SiX_iZVuD3snFYG81QPbLGNWnvJDI5XZeDWiz0f__qMIK9UNaMoCAVAICCaamv3qdTkUBalji7CrRQpZFcb1rLI-UsX0oMkzapspr_tDrMR8M_rANU2mYO1FQga6D7r6_efyo5ClIF0W9aBhRn9KO4wtHXzuWVttgrfDgcB4S1un8K8l0TT64-JV2KzoxPJFWydmH4IjZVguZpiWb6UaHMrj48sg4wm9h43IXk0TVbHMhSnlgEHzhNJny4BqYJGXuwC_XBoqUg74k_dZq2g2zXhWTQRfqVcGlvgECg-02A7wbo0DC6hvuQMn_9WRgdSNWsagi-5Y9Jhr-rsYjnDRrUplOi3kL1mMvtwDtElAzMX4xQd4jAPKFG4fu_hc2lFH90IkO2E51GzTmo3xDWNHw8hffFctOBt-ZW7EaDI3EO7aDpA3w10ivF-Gn2hW9IUPMZKzB0FeXUbu33DGjF6b_5JEOO4HbB8XGm7gcStGkBnSP9Nqgu-gJaaIU83vf7iP2EVBpQ8xBj0ImVHUvV9RizUgTfJKmd9varp1GD1lNLf0kHTFuW9j_ACpQX-zZaYRLMScfxGbW-B3HeRsaJtDiNBWvA97TzRuo-ALDhI812Xb5TuzrOO6b6K3cpPBqOKcMdVDnB6mmvU7PBPwiYs1XsWZhGyy2wqtgdYLMnysuRlgKKlV6FwAPTi5FLj1a7tYoSWgrg0eSwu0c_FM_pONtpOa_R9msCkzXf1jNLKrO_6eaH9Nn8g-LZddcEnrrlcKjFBCbuELEU4-zplkZ8yVOKyWWeM52zlg1VDeg-UzZXrSupR2SI4a0l1LirnwO6g_F2Q3fpVX91vQ0sPAvihvZdYZB07AMy0sitNu_Cw2ys2UcqWYCEVm4pJVrWWKXHrC5Xep9Xx5Zgicqb1DagVmwPr-NpCLThtrkSktR9N1LIafv53l_BNQXaRjFVmBHQ_KBXe4Gdl86mOcK3vE8OyNWirmC80Z9K8JL1WdxZ8LkkaNKd50jnu9g4f86FXDMeaOVCklLdD_9u8l2o3BEgr3x2G5bg3b08-k4zl1YavyhEJhR-RTIKFjuCvfXX9Rhss1EpM1Dcyh9LzMDsrpR1H-VQsb1E96bGwdDDMO-Kg.-PTlUaqPZnnjWftXWoOHoQ';
+  late final RestaurantMenuBloc _bloc;
 
   // Dynamic data from API
   List<ProductCategory> _categories = <ProductCategory>[];
@@ -44,8 +35,7 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
   bool _filterVeg = false;
   bool _filterNonVeg = false;
 
-  bool _isLoading = false;
-  String? _errorMessage;
+  
 
   // Maintain subcategory selection per category for ALL view
   final Map<String, int> _subIndexByCategory = <String, int>{};
@@ -53,103 +43,83 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
   @override
   void initState() {
     super.initState();
-    _fetchMenu();
+    _bloc = RestaurantMenuBloc(actionData: widget.actionData);
+    _bloc.add(const RestaurantMenuRequested());
   }
 
   @override
   void dispose() {
     _searchController.dispose();
+    _bloc.close();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: SafeArea(
-        child: Stack(
-          children: <Widget>[
-            Positioned.fill(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: <Widget>[
+    return BlocProvider.value(
+      value: _bloc,
+      child: Scaffold(
+        backgroundColor: Colors.white,
+        body: SafeArea(
+          child: Stack(
+            children: <Widget>[
+              Positioned.fill(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
                       _buildTopBar(context),
                       const SizedBox(height: 16),
-                    _buildSearchBar(theme),
-                    const SizedBox(height: 16),
-                    _buildDietToggles(),
-                    const SizedBox(height: 16),
-                    if (_isLoading)
-                      const Padding(
-                        padding: EdgeInsets.only(top: 32),
-                        child: Center(child: CircularProgressIndicator()),
-                      )
-                    else if (_errorMessage != null)
-                      Padding(
-                        padding: const EdgeInsets.only(top: 32),
-                        child: Text(
-                          _errorMessage!,
-                          style: const TextStyle(color: Colors.red),
-                        ),
-                      )
-                    else if (_categories.isNotEmpty) ...<Widget>[
-                      _buildMainCategories(),
-                      const SizedBox(height: 24),
-                      _buildCurrentCategorySection(),
+                      _buildSearchBar(theme),
+                      const SizedBox(height: 16),
+                      _buildDietToggles(),
+                      const SizedBox(height: 16),
+                      BlocBuilder<RestaurantMenuBloc, RestaurantMenuState>(
+                        builder: (context, state) {
+                          if (state is RestaurantMenuInitial || state is RestaurantMenuLoadInProgress) {
+                            return const Padding(
+                              padding: EdgeInsets.only(top: 32),
+                              child: Center(child: CircularProgressIndicator()),
+                            );
+                          }
+                          if (state is RestaurantMenuLoadFailure) {
+                            return Padding(
+                              padding: const EdgeInsets.only(top: 32),
+                              child: Text(
+                                state.message,
+                                style: const TextStyle(color: Colors.red),
+                              ),
+                            );
+                          }
+                          final categories = (state as RestaurantMenuLoadSuccess).categories;
+                          _categories = categories;
+                          if (categories.isEmpty) {
+                            return const Padding(
+                              padding: EdgeInsets.only(top: 32),
+                              child: Text('No menu available'),
+                            );
+                          }
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: <Widget>[
+                              _buildMainCategories(),
+                              const SizedBox(height: 24),
+                              _buildCurrentCategorySection(),
+                            ],
+                          );
+                        },
+                      ),
                     ],
-                  ],
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
-  }
-
-  Future<void> _fetchMenu() async {
-    setState(() {
-      _isLoading = true;
-      _errorMessage = null;
-    });
-
-    try {
-      final response = await http.get(
-        Uri.parse(_menuUrl),
-        headers: <String, String>{
-          'platform': _platform,
-          'currencysymbol': _currencySymbolHeader,
-          'Authorization': _bearerToken,
-          'currencycode': _currencyCode,
-          'language': _language,
-          'ipAddress': _ipAddress,
-        },
-      );
-
-      if (response.statusCode >= 200 && response.statusCode < 300) {
-        final Map<String, dynamic> body = jsonDecode(response.body) as Map<String, dynamic>;
-        final RestaurantMenuResponse parsed = RestaurantMenuResponse.fromJson(body);
-        setState(() {
-          _categories = parsed.data.productData;
-          _selectedMainCategoryIndex = 0;
-          _selectedBiriyaniSubIndex = 0;
-          _isLoading = false;
-        });
-      } else {
-        setState(() {
-          _isLoading = false;
-          _errorMessage = 'Error: ${response.statusCode}';
-        });
-      }
-    } catch (e) {
-      setState(() {
-        _isLoading = false;
-        _errorMessage = e.toString();
-      });
-    }
   }
 
   Widget _buildTopBar(BuildContext context) {
