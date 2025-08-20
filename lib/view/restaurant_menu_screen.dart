@@ -1,4 +1,3 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chat_bot/data/model/chat_response.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
@@ -7,6 +6,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:chat_bot/bloc/restaurant_menu/restaurant_menu_bloc.dart';
 import 'package:chat_bot/bloc/restaurant_menu/restaurant_menu_event.dart';
 import 'package:chat_bot/bloc/restaurant_menu/restaurant_menu_state.dart';
+import 'package:chat_bot/widgets/menu_item_card.dart';
 
 class RestaurantMenuScreen extends StatefulWidget {
   final SeeMoreAction? actionData;
@@ -340,7 +340,7 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
               selectedSubIndex < category.subCategories.length)
           ? selectedSubIndex
           : 0;
-      final List<RestaurantProduct> products =
+      final List<Product> products =
           category.subCategories[subIndex].products;
       items.addAll(products.map(_mapProduct));
     } else {
@@ -387,11 +387,16 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
             separatorBuilder: (_, __) => const SizedBox(width: 10),
             itemBuilder: (BuildContext context, int index) {
               final _MenuItem item = filtered[index];
-              return _MenuItemCard(
-                item: item,
+              return MenuItemCard(
+                title: item.title,
+                price: item.price,
+                originalPrice: item.originalPrice,
+                isVeg: item.isVeg,
+                imageUrl: item.imageUrl,
                 purple: _purple,
-                nonVeg: _nonVeg,
-                veg: _veg,
+                vegColor: _veg,
+                nonVegColor: _nonVeg,
+                onAdd: () {},
               );
             },
           ),
@@ -400,7 +405,7 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
     );
   }
 
-  _MenuItem _mapProduct(RestaurantProduct p) {
+  _MenuItem _mapProduct(Product p) {
     final String priceText = _formatCurrency(
       p.currencySymbol,
       p.finalPriceList.finalPrice,
@@ -502,142 +507,7 @@ class _DietToggle extends StatelessWidget {
   }
 }
 
-class _MenuItemCard extends StatelessWidget {
-  final _MenuItem item;
-  final Color purple;
-  final Color veg;
-  final Color nonVeg;
-
-  const _MenuItemCard({
-    required this.item,
-    required this.purple,
-    required this.veg,
-    required this.nonVeg,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: 108,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          Stack(
-            clipBehavior: Clip.none,
-            children: <Widget>[
-              ClipRRect(
-                borderRadius: BorderRadius.circular(12),
-                child: item.imageUrl != null
-                    ? CachedNetworkImage(
-                        imageUrl: item.imageUrl!,
-                        width: 108,
-                        height: 108,
-                        fit: BoxFit.cover,
-                        placeholder: (context, url) =>
-                            const SizedBox(width: 108, height: 108, child: ColoredBox(color: Color(0xFFF5F5F5))),
-                        errorWidget: (context, url, error) => const SizedBox(
-                          width: 108,
-                          height: 108,
-                          child: ColoredBox(color: Color(0xFFF5F5F5)),
-                        ),
-                      )
-                    : const SizedBox(
-                        width: 108,
-                        height: 108,
-                        child: ColoredBox(color: Color(0xFFF5F5F5)),
-                      ),
-              ),
-              Positioned(
-                left: 8,
-                top: 8,
-                child: Container(
-                  width: 14,
-                  height: 14,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    border: Border.all(
-                      color: item.isVeg ? veg : nonVeg,
-                      width: 1.05,
-                    ),
-                    borderRadius: BorderRadius.circular(3.5),
-                  ),
-                  child: Center(
-                    child: Container(
-                      width: 8.4,
-                      height: 8.4,
-                      decoration: BoxDecoration(
-                        color: item.isVeg ? veg : nonVeg,
-                        shape: BoxShape.circle,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 9),
-          SizedBox(
-            height: 34,
-            child: Text(
-              item.title,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w700,
-                color: Color(0xFF242424),
-              ),
-            ),
-          ),
-          const SizedBox(height: 4),
-          Row(
-            children: <Widget>[
-              Text(
-                item.price,
-                style: const TextStyle(
-                  fontSize: 12,
-                  color: Color(0xFF242424),
-                ),
-              ),
-              const SizedBox(width: 5),
-              Text(
-                item.originalPrice,
-                style: const TextStyle(
-                  fontSize: 12,
-                  color: Color(0xFF979797),
-                  decoration: TextDecoration.lineThrough,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          SizedBox(
-            width: double.infinity,
-            height: 37,
-            child: OutlinedButton(
-              style: OutlinedButton.styleFrom(
-                side: BorderSide(color: purple, width: 1),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                padding: const EdgeInsets.symmetric(horizontal: 10),
-              ),
-              onPressed: () {},
-              child: Text(
-                'Add',
-                style: TextStyle(
-                  color: purple,
-                  fontWeight: FontWeight.w600,
-                  fontSize: 14,
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
+// Replaced inline card with shared MenuItemCard
 
 class _MenuItem {
   final String title;

@@ -15,6 +15,7 @@ import 'package:flutter/services.dart';
 import 'package:chat_bot/widgets/black_toast_view.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:chat_bot/data/model/greeting_response.dart';
+import 'package:chat_bot/widgets/menu_item_card.dart';
 
 class ChatScreen extends StatefulWidget {
   final MyGPTsResponse chatbotData;
@@ -817,7 +818,7 @@ class _ChatScreenBody extends StatelessWidget {
           if (message.hasProductCards) ...[
             const SizedBox(height: 12),
             Transform.translate(
-              offset: const Offset(-16, 0),
+              offset: const Offset(0, 0),
               child: _buildProductCards(message.products, message.productsWidget),
             ),
           ],
@@ -1332,13 +1333,10 @@ class _ChatScreenBody extends StatelessWidget {
     );
   }
 
-  // Individual store card moved to `StoreCard` widget.
-
-  // Add product cards method
-  // Update _buildProductCards to pass the widget and index
   Widget _buildProductCards(List<Product> products, ChatWidget? productsWidget) {
-    return SizedBox(
-      height: 305,
+    return Container(
+      height: 222,
+      // color: Colors.red,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.only(left: 70),
@@ -1347,164 +1345,37 @@ class _ChatScreenBody extends StatelessWidget {
         separatorBuilder: (context, index) => const SizedBox(width: 16),
         itemBuilder: (context, index) {
           final product = products[index];
-          return SizedBox(
-            width: 200,
-            child: _buildProductCard(product, productsWidget, index),
+          final String priceText = _formatCurrency(
+            product.currencySymbol,
+            product.finalPriceList.finalPrice,
+          );
+          final String basePriceText = _formatCurrency(
+            product.currencySymbol,
+            product.finalPriceList.basePrice,
+          );
+          return MenuItemCard(
+            title: product.productName,
+            price: priceText,
+            originalPrice: basePriceText,
+            isVeg: !product.containsMeat,
+            imageUrl: product.productImage.isNotEmpty ? product.productImage : null,
+            onAdd: () {
+              if (productsWidget != null) {
+                final Map<String, dynamic>? productJson = productsWidget.getRawProduct(index);
+                OrderService().triggerProductOrder(productJson ?? {});
+              }
+            },
           );
         },
       ),
     );
   }
 
-  // Update _buildProductCard to handle raw JSON  
-  Widget _buildProductCard(Product product, ChatWidget? productsWidget, int index) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(
-          color: Colors.grey.shade300,
-          width: 0.5,
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Product Image
-          Container(
-            height: 200,
-            width: double.infinity,
-            decoration: BoxDecoration(
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(8)),
-              color: Colors.grey[50],
-            ),
-            child: ClipRRect(
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(8)),
-              child: product.productImage.isNotEmpty
-                  ? Image.network(
-                      product.productImage,
-                      fit: BoxFit.contain,
-                      errorBuilder: (context, error, stackTrace) =>
-                          _buildDefaultProductImage(),
-                    )
-                  : _buildDefaultProductImage(),
-            ),
-          ),
-          // Product Details - Fixed height to prevent overflow
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.all(8),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        product.productName,
-                        style: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.black,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      const SizedBox(height: 4),
-                      Row(
-                        children: [
-                          Text(
-                            "${product.currencySymbol}${product.finalPrice.toStringAsFixed(2)}",
-                            maxLines: 1,
-                            style: const TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w400,
-                              color: Colors.grey,
-                            ),
-                          ),
-                          if (product.finalPriceList.discountPercentage > 0) ...[
-                            const SizedBox(width: 8),
-                            Text(
-                              "${product.currencySymbol}${product.finalPriceList.basePrice.toStringAsFixed(2)}",
-                              style: const TextStyle(
-                                fontSize: 12,
-                                color: Colors.grey,
-                                decoration: TextDecoration.lineThrough,
-                              ),
-                            ),
-                          ],
-                        ],
-                      ),
-                    ],
-                  ),
-                  SizedBox(
-                    width: double.infinity,
-                    height: 36,
-                    child: ElevatedButton(
-                      onPressed: () {
-                        if (productsWidget != null) {
-                          // String? rawProductJson = productsWidget.getRawProductAsJsonString(index);
-                          final Map<String, dynamic>? productJson = productsWidget.getRawProduct(index);
-                          print('Product JSON: $productJson');
-                          OrderService().triggerProductOrder(productJson ?? {});
-                        }
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.blue[50],
-                        foregroundColor: Colors.blue,
-                        elevation: 0,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        padding: EdgeInsets.zero,
-                      ),
-                      child: const Text(
-                        "ORDER NOW",
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                          letterSpacing: 0.5,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // Helper method for default product image
-  Widget _buildDefaultProductImage() {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.grey[100],
-      ),
-      child: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.inventory_2_outlined,
-              size: 60,
-              color: Colors.grey[400],
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Product Image',
-              style: TextStyle(
-                color: Colors.grey[500],
-                fontSize: 14,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
+  String _formatCurrency(String symbol, double value) {
+    if (symbol.isNotEmpty && symbol != 'AED') {
+      return '$symbol ${value.toStringAsFixed(value.truncateToDouble() == value ? 0 : 2)}';
+    }
+    return 'AED${value.toStringAsFixed(value.truncateToDouble() == value ? 0 : 2)}';
   }
 }
 

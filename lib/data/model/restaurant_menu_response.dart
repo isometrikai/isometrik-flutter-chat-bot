@@ -1,3 +1,5 @@
+import 'package:chat_bot/data/model/chat_response.dart';
+
 class RestaurantMenuResponse {
   final String message;
   final RestaurantMenuData data;
@@ -67,7 +69,7 @@ class ProductCategory {
   final String catName;
   final bool isSubCategories;
   final List<SubCategory> subCategories;
-  final List<RestaurantProduct> products; // Added direct products support
+  final List<Product> products; // Added direct products support
   final int seqId;
 
   ProductCategory({
@@ -86,7 +88,7 @@ class ProductCategory {
           ?.map((item) => SubCategory.fromJson(item as Map<String, dynamic>))
           .toList() ?? [],
       products: (json['products'] as List<dynamic>?) // Added direct products parsing
-          ?.map((item) => RestaurantProduct.fromJson(item as Map<String, dynamic>))
+          ?.map((item) => Product.fromJson(item as Map<String, dynamic>))
           .toList() ?? [],
       seqId: json['seqId'] ?? 0,
     );
@@ -96,7 +98,7 @@ class ProductCategory {
 class SubCategory {
   final String name;
   final int penCount;
-  final List<RestaurantProduct> products;
+  final List<Product> products;
 
   SubCategory({
     required this.name,
@@ -109,55 +111,55 @@ class SubCategory {
       name: json['name'] ?? '',
       penCount: json['penCount'] ?? 0,
       products: (json['products'] as List<dynamic>?)
-          ?.map((item) => RestaurantProduct.fromJson(item as Map<String, dynamic>))
+          ?.map((item) => Product.fromJson(item as Map<String, dynamic>))
           .toList() ?? [],
     );
   }
 }
 
-class RestaurantProduct {
-  final String parentProductId;
-  final String childProductId;
-  final PriceList finalPriceList;
-  final bool addOnsCount;
-  final String productName;
-  final dynamic images; // Can be String, List, or null
-  final bool containsMeat;
-  final String currencySymbol;
-  final String currency;
-  final bool customizable;
-  final bool productStatus;
+// class RestaurantProduct {
+//   final String parentProductId;
+//   final String childProductId;
+//   final PriceList finalPriceList;
+//   final bool addOnsCount;
+//   final String productName;
+//   final dynamic images; // Can be String, List, or null
+//   final bool containsMeat;
+//   final String currencySymbol;
+//   final String currency;
+//   final bool customizable;
+//   final bool productStatus;
 
-  RestaurantProduct({
-    required this.parentProductId,
-    required this.childProductId,
-    required this.finalPriceList,
-    required this.addOnsCount,
-    required this.productName,
-    required this.images,
-    required this.containsMeat,
-    required this.currencySymbol,
-    required this.currency,
-    required this.customizable,
-    required this.productStatus,
-  });
+//   RestaurantProduct({
+//     required this.parentProductId,
+//     required this.childProductId,
+//     required this.finalPriceList,
+//     required this.addOnsCount,
+//     required this.productName,
+//     required this.images,
+//     required this.containsMeat,
+//     required this.currencySymbol,
+//     required this.currency,
+//     required this.customizable,
+//     required this.productStatus,
+//   });
 
-  factory RestaurantProduct.fromJson(Map<String, dynamic> json) {
-    return RestaurantProduct(
-      parentProductId: json['parentProductId'] ?? '',
-      childProductId: json['childProductId'] ?? '',
-      finalPriceList: PriceList.fromJson(json['finalPriceList'] ?? {}),
-      addOnsCount: json['addOnsCount'] ?? false,
-      productName: json['productName'] ?? '',
-      images: json['images'],
-      containsMeat: json['containsMeat'] ?? false,
-      currencySymbol: json['currencySymbol'] ?? '',
-      currency: json['currency'] ?? '',
-      customizable: json['Customizable'] ?? false,
-      productStatus: json['productStatus'] ?? false,
-    );
-  }
-}
+//   factory RestaurantProduct.fromJson(Map<String, dynamic> json) {
+//     return RestaurantProduct(
+//       parentProductId: json['parentProductId'] ?? '',
+//       childProductId: json['childProductId'] ?? '',
+//       finalPriceList: PriceList.fromJson(json['finalPriceList'] ?? {}),
+//       addOnsCount: json['addOnsCount'] ?? false,
+//       productName: json['productName'] ?? '',
+//       images: json['images'],
+//       containsMeat: json['containsMeat'] ?? false,
+//       currencySymbol: json['currencySymbol'] ?? '',
+//       currency: json['currency'] ?? '',
+//       customizable: json['Customizable'] ?? false,
+//       productStatus: json['productStatus'] ?? false,
+//     );
+//   }
+// }
 
 class PriceList {
   final double basePrice;
