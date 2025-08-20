@@ -328,14 +328,17 @@ class _ChatScreenBody extends StatelessWidget {
             }
           },
           builder: (context, state) {
-            // Send pending message if any
+            // Send pending message if any (schedule after build; avoid async directly in builder)
             if (pendingMessage != null) {
+              final bloc = context.read<ChatBloc>();
+              final String msg = pendingMessage!;
+              final String sid = sessionId;
               WidgetsBinding.instance.addPostFrameCallback((_) async {
                 final event = await ChatLoadEvent.create(
-                  message: pendingMessage!,
-                  sessionId: sessionId, // Use existing session ID
+                  message: msg.trim(),
+                  sessionId: sid,
                 );
-                context.read<ChatBloc>().add(event);
+                bloc.add(event);
                 onClearPendingMessage();
               });
             }

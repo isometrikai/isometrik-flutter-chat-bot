@@ -28,7 +28,7 @@ class AuthService {
   double? _latitude;
 
   // Endpoints
-  static const String _chatEndpoint = '/v2/test-response';
+  static const String _chatEndpoint = '/v2/chatbot';
 
   // Use universal API client
   late final ApiClient _serviceClient = UniversalApiClient.instance.serviceClient;
@@ -110,42 +110,5 @@ class AuthService {
     return null;
   }
 
-  Future<ChatResponse?> sendChatMessage({
-    required String message,
-    required String agentId,
-    required String fingerPrintId,
-    required String sessionId,
-    bool isLoggedIn = false,
-    double longitude = 0.0,
-    double latitude = 0.0,
-  }) async {
-    final body = {
-      'user_id': _userId,
-      'device_id': fingerPrintId,
-      'query': message,
-      'session_id': sessionId,
-      'location': {
-        'latitude': (latitude == 0.0 ? (_latitude ?? 0.0) : latitude).toString(),
-        'longitude': (longitude == 0.0 ? (_longitude ?? 0.0) : longitude).toString(),
-      },
-      'user_data': {
-        'name': _name ?? '',
-        'timestamp': _timestamp ?? '',
-        'location': _location ?? '',
-      }
-    };
-    final res = await _chatClient.post(_chatEndpoint, body);
-    if (res.isSuccess && res.data != null) {
-      try {
-        final parsed = ChatResponse.fromJson(res.data as Map<String, dynamic>);
-        return parsed;
-      } catch (e) {
-        AppLog.info('Parsing error (sendChatMessage): $e');
-        return null;
-      }
-    }
-    return null;
-  }
 
-  bool get isProduction => _isProduction;
 }

@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:chat_bot/data/model/chat_response.dart';
-import 'package:chat_bot/data/services/comprehensive_api_service.dart';
+import 'package:chat_bot/data/services/chat_api_services.dart';
 import 'package:chat_bot/utils/api_result.dart';
 
 class HawkSearchService {
@@ -19,7 +19,7 @@ class HawkSearchService {
     String visitorId = '47daf829-b5df-4358-83ea-207aa4eaae15',
     String keyword = '',
   }) async {
-    final client = ComprehensiveApiService.instance
+    final client = ChatApiServices.instance
         .createCustomClient('https://searchapi-dev.hawksearch.net');
 
     final body = {

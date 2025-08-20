@@ -1,6 +1,6 @@
 import 'package:chat_bot/bloc/chat_event.dart';
 import 'package:chat_bot/bloc/chat_state.dart';
-import 'package:chat_bot/services/api_service.dart';
+import 'package:chat_bot/data/services/chat_service.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class ChatBloc extends Bloc<ChatEvent, ChatState> {
@@ -13,7 +13,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
   Future<void> _onFetchChat(ChatLoadEvent event, Emitter<ChatState> emit) async {
     try {
       emit(ChatLoading());
-      final chat = await ApiService.sendChatMessage(
+      final chat = await ChatService.instance.sendChatMessage(
         message: event.message,
         agentId: event.agentId,
         fingerPrintId: event.fingerPrintId,
@@ -35,16 +35,15 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
   Future<void> _addToCart(AddToCartEvent event, Emitter<ChatState> emit) async {
     try {
       emit(ChatLoading());
-      final chat = await ApiService.addToCart(
+      final chat = await ChatService.instance.addToCart(
         storeId: event.storeId,
-          cartType: event.cartType,
-          action: event.action,
-          storeCategoryId: event.storeCategoryId,
-          newQuantity: event.newQuantity,
-          storeTypeId: event.storeTypeId,
-          productId: event.productId,
-          centralProductId: event.centralProductId
-
+        cartType: event.cartType,
+        action: event.action,
+        storeCategoryId: event.storeCategoryId,
+        newQuantity: event.newQuantity,
+        storeTypeId: event.storeTypeId,
+        productId: event.productId,
+        centralProductId: event.centralProductId,
       );
       if (chat != null) {
         emit(ChatLoaded(chat));

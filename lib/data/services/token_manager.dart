@@ -53,12 +53,6 @@ class TokenManager {
 
   String? get userToken => _userToken;
 
-  /// Get the current token value
-  String? get currentToken => _accessToken;
-
-  /// Check if token is available
-  bool get hasToken => (_accessToken ?? '').isNotEmpty;
-
   /// Refresh token with automatic deduplication
   Future<bool> refreshToken() async {
     // If already refreshing, wait for the current refresh to complete
@@ -115,15 +109,6 @@ class TokenManager {
     }
   }
 
-  /// Clear stored token
-  Future<void> clearToken() async {
-    _accessToken = null;
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.remove(_tokenKey);
-    } catch (_) {}
-  }
-
   /// Load token from storage
   Future<void> _loadTokenFromStorage() async {
     try {
@@ -151,10 +136,4 @@ class TokenManager {
     _refreshCompleters.clear();
   }
 
-  /// Force refresh token (for manual refresh scenarios)
-  Future<bool> forceRefreshToken() async {
-    _isRefreshing = false;
-    _refreshCompleters.clear();
-    return refreshToken();
-  }
 }
