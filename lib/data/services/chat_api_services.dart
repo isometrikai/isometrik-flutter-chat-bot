@@ -108,7 +108,8 @@ class ChatApiServices {
       "userType": 1,
       "storeTypeId": storeTypeId,
       "productId": productId,
-      "centralProductId": centralProductId
+      "centralProductId": centralProductId,
+      "isMultiCart": 2
     };
 
     final res = await _appClient.post('/v1/cart', body);

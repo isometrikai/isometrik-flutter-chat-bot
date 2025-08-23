@@ -14,7 +14,7 @@ class HawkSearchService {
     double latitude = 13.040803909301758,
     double longitude = 77.562980651855469,
     String clientGuid = '528a7d439df44f2b9457342b7b865be2',
-    String indexName = 'hitechnology.20250626.055255',//'hitechnology.20250626.060135',
+    String indexName = 'hitechnology.20250821.105131',//'hitechnology.20250626.060135',
     String visitId = '3c6b9339-c602-4af9-b454-0ec0df067181',
     String visitorId = '47daf829-b5df-4358-83ea-207aa4eaae15',
     String keyword = '',

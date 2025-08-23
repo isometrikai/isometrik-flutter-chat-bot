@@ -4,6 +4,8 @@ import 'package:chat_bot/bloc/chat_event.dart';
 import 'package:chat_bot/bloc/chat_state.dart';
 import 'package:chat_bot/data/model/chat_response.dart';
 import 'package:chat_bot/data/model/chat_message.dart';
+import 'package:chat_bot/view/add_card_sheet.dart';
+import 'package:chat_bot/view/address_details_screen.dart';
 import 'package:chat_bot/view/restaurant_menu_screen.dart';
 import 'package:chat_bot/view/restaurant_screen.dart';
 import 'package:flutter/material.dart';
@@ -184,7 +186,7 @@ class _ChatScreenState extends State<ChatScreen> {
     _sessionId = "${DateTime.now().millisecondsSinceEpoch ~/ 1000}";
   }
 
-  void _restartChatAPI() {
+  Future<void> _restartChatAPI() async {
     setState(() {
       messages = [];
 
@@ -193,6 +195,21 @@ class _ChatScreenState extends State<ChatScreen> {
       _pendingMessage = null;
       _latestActionWidgets.clear(); // Clear action widgets when restarting
     });
+
+    // Navigator.push(
+    //   context,
+    //     MaterialPageRoute(builder: (_) => const AddressDetailsScreen()),
+    // ).then((result) {
+    //   if (result != null) {
+    //     print("Result: $result");
+    //   }
+    // });
+    // final result = await AddCardBottomSheet.show(context);
+    //   if (result != null) {
+    //     // e.g., update your state or start a payment
+    //     debugPrint('PM: ${result['paymentMethodId']} '
+    //         '${result['brand']} **** ${result['last4']}');
+    //   }
   }
 
   @override
