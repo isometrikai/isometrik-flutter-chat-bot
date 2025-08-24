@@ -42,6 +42,8 @@ dependencies:
   cached_network_image: ^3.3.0
   lottie: ^2.7.0
   unique_identifier: ^0.4.0
+  flutter_svg: ^2.2.0
+  flutter_stripe: ^10.1.1
 
 dev_dependencies:
   flutter_test:
@@ -84,6 +86,18 @@ flutter:
   # list giving the asset and other descriptors for the font. For
   # example:
   # fonts:
+  #   - family: Plus Jakarta Sans
+  #     fonts:
+  #       - asset: assets/fonts/PlusJakartaSans-Regular.ttf
+  #       - asset: assets/fonts/PlusJakartaSans-Bold.ttf
+  #         weight: 700
+  #       - asset: assets/fonts/PlusJakartaSans-ExtraBold.ttf
+  #         weight: 800
+  #       - asset: assets/fonts/PlusJakartaSans-SemiBold.ttf
+  #         weight: 600
+  #   - family: aed
+  #     fonts:
+  #       - asset: assets/fonts/PlusJakartaSans-Regular.ttf
   #   - family: Schyler
   #     fonts:
   #       - asset: fonts/Schyler-Regular.ttf

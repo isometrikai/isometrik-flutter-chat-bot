@@ -1,20 +1,32 @@
-import 'package:chat_bot/model/mygpts_model.dart';
+import 'package:chat_bot/data/model/mygpts_model.dart';
 import 'package:chat_bot/bloc/chat_bloc.dart';
 import 'package:chat_bot/bloc/chat_event.dart';
 import 'package:chat_bot/bloc/chat_state.dart';
-import 'package:chat_bot/model/chat_response.dart';
-import 'package:chat_bot/model/chat_message.dart';
+import 'package:chat_bot/data/model/chat_response.dart';
+import 'package:chat_bot/data/model/chat_message.dart';
+import 'package:chat_bot/view/add_card_sheet.dart';
+import 'package:chat_bot/view/address_details_screen.dart';
+import 'package:chat_bot/view/restaurant_menu_screen.dart';
+import 'package:chat_bot/view/restaurant_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lottie/lottie.dart';
 import '../services/callback_manage.dart';
-import '../services/api_service.dart';
+import 'package:chat_bot/widgets/store_card.dart';
 import 'package:flutter/services.dart';
 import 'package:chat_bot/widgets/black_toast_view.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:chat_bot/data/model/greeting_response.dart';
+import 'package:chat_bot/widgets/menu_item_card.dart';
+import 'package:chat_bot/widgets/cart_widget.dart';
+import 'package:chat_bot/widgets/choose_address_widget.dart';
+import 'package:chat_bot/widgets/choose_card_widget.dart';
+import '../utils/enum.dart';
 
 class ChatScreen extends StatefulWidget {
   final MyGPTsResponse chatbotData;
-  const ChatScreen({super.key, required this.chatbotData});
+  final GreetingResponse? greetingData;
+  const ChatScreen({super.key, required this.chatbotData, this.greetingData});
 
   @override
   State<ChatScreen> createState() => _ChatScreenState();
@@ -27,8 +39,33 @@ class _ChatScreenState extends State<ChatScreen> {
   Set<String> _selectedOptionMessages = {};
   String? _pendingMessage;
   String _sessionId = "";
+  double _textFieldHeight = 50.0; // Add height state variable
+  List<ChatWidget> _latestActionWidgets = []; // Track latest action widgets
 
   List<ChatMessage> messages = [];
+
+  // Returns index of the last bot message that shows stores, products, cart, choose_address, or choose_card widgets; -1 if none
+  int _indexOfLastBotCatalogMessage() {
+    for (int i = messages.length - 1; i >= 0; i--) {
+      final ChatMessage message = messages[i];
+      if (message.isBot && (message.hasStoreCards || message.hasProductCards || message.hasCartWidget || message.hasChooseAddressWidget || message.hasChooseCardWidget)) {
+        return i;
+      }
+    }
+    return -1;
+  }
+
+  // Produces a hidden version of catalog widgets for a message (non-destructive to data)
+  ChatMessage _hideCatalogInMessage(ChatMessage message) {
+    if (!(message.hasStoreCards || message.hasProductCards || message.hasCartWidget || message.hasChooseAddressWidget || message.hasChooseCardWidget)) return message;
+    return message.copyWith(
+      hasStoreCards: false,
+      hasProductCards: false,
+      hasCartWidget: false,
+      hasChooseAddressWidget: false,
+      hasChooseCardWidget: false,
+    );
+  }
 
   void _onFocusChange() {
     if (_messageFocusNode.hasFocus) {
@@ -42,13 +79,20 @@ class _ChatScreenState extends State<ChatScreen> {
   void _sendMessage(String text) {
     if (text.trim().isEmpty) return;
 
+    // Prepare: hide stores/products from the last bot message if present
+    final int catalogIdx = _indexOfLastBotCatalogMessage();
+
     setState(() {
+      if (catalogIdx >= 0) {
+        messages[catalogIdx] = _hideCatalogInMessage(messages[catalogIdx]);
+      }
       messages.add(ChatMessage(
           id: DateTime.now().millisecondsSinceEpoch.toString(),
           text: text,
           isBot: false
       ));
       _pendingMessage = text;
+      _textFieldHeight = 50.0; // Reset to default height when sending message
     });
 
     _messageController.clear();
@@ -63,10 +107,19 @@ class _ChatScreenState extends State<ChatScreen> {
     });
   }
 
+  void _updateTextFieldHeight(double newHeight) {
+    setState(() {
+      _textFieldHeight = newHeight;
+    });
+  }
+
   void _handleChatResponse(ChatResponse response) {
     final messageId = DateTime.now().millisecondsSinceEpoch.toString();
     ChatWidget? storesWidget;
     ChatWidget? productsWidget;
+    ChatWidget? cartWidget;
+    ChatWidget? chooseAddressWidget;
+    ChatWidget? chooseCardWidget;
     try {
       storesWidget = response.widgets.firstWhere((widget) => widget.isStoresWidget);
     } catch (e) {
@@ -79,9 +132,30 @@ class _ChatScreenState extends State<ChatScreen> {
       productsWidget = null;
     }
 
-    // Check if stores or products are present
+    try {
+      cartWidget = response.widgets.firstWhere((widget) => widget.isCartWidget);
+    } catch (e) {
+      cartWidget = null;
+    }
+
+    try {
+      chooseAddressWidget = response.widgets.firstWhere((widget) => widget.isChooseAddressWidget);
+    } catch (e) {
+      chooseAddressWidget = null;
+    }
+
+    try {
+      chooseCardWidget = response.widgets.firstWhere((widget) => widget.isChooseCardWidget);
+    } catch (e) {
+      chooseCardWidget = null;
+    }
+
+    // Check if stores, products, cart, choose_address, or choose_card are present
     bool hasStores = storesWidget != null;
     bool hasProducts = productsWidget != null;
+    bool hasCart = cartWidget != null;
+    bool hasChooseAddress = chooseAddressWidget != null;
+    bool hasChooseCard = chooseCardWidget != null;
 
     setState(() {
       messages.add(ChatMessage(
@@ -91,22 +165,42 @@ class _ChatScreenState extends State<ChatScreen> {
         showAvatar: true,
         hasStoreCards: hasStores,
         hasProductCards: hasProducts,
-        // Don't show option buttons if stores or products are present
-        hasOptionButtons: !hasStores && !hasProducts && response.hasWidgets && response.optionsWidgets.isNotEmpty,
-        optionButtons: !hasStores && !hasProducts && response.hasWidgets && response.optionsWidgets.isNotEmpty
+        hasCartWidget: hasCart,
+        hasChooseAddressWidget: hasChooseAddress,
+        hasChooseCardWidget: hasChooseCard,
+        // Don't show option buttons if stores, products, cart, choose_address, or choose_card are present
+        hasOptionButtons: !hasStores && !hasProducts && !hasCart && !hasChooseAddress && !hasChooseCard && response.hasWidgets && response.optionsWidgets.isNotEmpty,
+        optionButtons: !hasStores && !hasProducts && !hasCart && !hasChooseAddress && !hasChooseCard && response.hasWidgets && response.optionsWidgets.isNotEmpty
             ? response.optionsWidgets.first.options
             : [],
         stores: storesWidget?.stores ?? [],
         products: productsWidget?.products ?? [],
+        cartItems: cartWidget?.getCartItems() ?? [],
+        addressOptions: chooseAddressWidget?.getAddressOptions() ?? [],
+        cardOptions: chooseCardWidget?.getCardOptions() ?? [],
         storesWidget: storesWidget,
         productsWidget: productsWidget,
+        cartWidget: cartWidget,
+        chooseAddressWidget: chooseAddressWidget,
+        chooseCardWidget: chooseCardWidget,
       ));
+      
+      // Store action widgets for the action buttons
+      _latestActionWidgets = response.widgets.where((widget) => 
+        widget.type == WidgetEnum.see_more.value ||
+        widget.type == WidgetEnum.menu.value ||
+        widget.type == WidgetEnum.add_more.value ||
+        widget.type == WidgetEnum.proceed_to_checkout.value ||
+        widget.type == WidgetEnum.add_address.value ||
+        widget.type == WidgetEnum.add_payment.value ||
+        widget.type == WidgetEnum.cart.value ||
+        widget.type == WidgetEnum.choose_address.value ||
+        widget.type == WidgetEnum.choose_card.value ||
+        widget.type == WidgetEnum.cash_on_delivery.value
+      ).toList();
     });
     _scrollToBottom();
-    // for (var widget in response.widgets) {
-    //   print(widget);
-    //   print("s");
-    // }
+   
   }
 
   void _scrollToBottom() {
@@ -125,7 +219,6 @@ class _ChatScreenState extends State<ChatScreen> {
   void initState() {
     super.initState();
     _initializeSession();
-    _setupWelcomeMessage();
     
     // Add keyboard listener
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -137,41 +230,30 @@ class _ChatScreenState extends State<ChatScreen> {
     _sessionId = "${DateTime.now().millisecondsSinceEpoch ~/ 1000}";
   }
 
-  void _setupWelcomeMessage() {
+  Future<void> _restartChatAPI() async {
     setState(() {
-      messages = [
-        ChatMessage(
-          id: DateTime
-              .now()
-              .millisecondsSinceEpoch
-              .toString(),
-          text: "Meet ${widget.chatbotData.data.first.name}\n${widget
-              .chatbotData.data.first.uiPreferences.launcherWelcomeMessage}",
-          isBot: true,
-          showAvatar: false,
-          hasQuickReplies: false,
-          isWelcomeMessage: true,
-        ),
-      ];
-    });
-  }
-  void _restartChatAPI() {
-    setState(() {
-      messages = [
-        ChatMessage(
-          id: DateTime.now().millisecondsSinceEpoch.toString(),
-          text: "Meet ${widget.chatbotData.data.first.name}\n${widget.chatbotData.data.first.uiPreferences.launcherWelcomeMessage}",
-          isBot: true,
-          showAvatar: false,
-          hasQuickReplies: false,
-          isWelcomeMessage: true,
-        ),
-      ];
+      messages = [];
 
       _selectedOptionMessages.clear();
       _sessionId = "${DateTime.now().millisecondsSinceEpoch ~/ 1000}";
       _pendingMessage = null;
+      _latestActionWidgets.clear(); // Clear action widgets when restarting
     });
+
+    // Navigator.push(
+    //   context,
+    //     MaterialPageRoute(builder: (_) => const AddressDetailsScreen()),
+    // ).then((result) {
+    //   if (result != null) {
+    //     print("Result: $result");
+    //   }
+    // });
+    // final result = await AddCardBottomSheet.show(context);
+    //   if (result != null) {
+    //     // e.g., update your state or start a payment
+    //     debugPrint('PM: ${result['paymentMethodId']} '
+    //         '${result['brand']} **** ${result['last4']}');
+    //   }
   }
 
   @override
@@ -194,6 +276,7 @@ class _ChatScreenState extends State<ChatScreen> {
         messageFocusNode: _messageFocusNode,
         scrollController: _scrollController,
         chatbotData: widget.chatbotData,
+        greetingData: widget.greetingData,
         selectedOptionMessages: _selectedOptionMessages,
         messages: messages,
         onSendMessage: _sendMessage,
@@ -214,17 +297,21 @@ class _ChatScreenState extends State<ChatScreen> {
         pendingMessage: _pendingMessage,
         onClearPendingMessage: _clearPendingMessage,
         sessionId: _sessionId, // Pass session ID
+        textFieldHeight: _textFieldHeight,
+        onUpdateTextFieldHeight: _updateTextFieldHeight,
+        latestActionWidgets: _latestActionWidgets,
       ),
     );
   }
 }
 
 class _ChatScreenBody extends StatelessWidget {
-  static const platform = MethodChannel('chat_bot_channel');
+  // static const platform = MethodChannel('chat_bot_channel');
   final TextEditingController messageController;
   final FocusNode messageFocusNode;
   final ScrollController scrollController;
   final MyGPTsResponse chatbotData;
+  final GreetingResponse? greetingData;
   final Set<String> selectedOptionMessages;
   final List<ChatMessage> messages;
   final Function(String) onSendMessage;
@@ -237,12 +324,16 @@ class _ChatScreenBody extends StatelessWidget {
   final String? pendingMessage;
   final VoidCallback onClearPendingMessage;
   final String sessionId;
+  final double textFieldHeight;
+  final Function(double) onUpdateTextFieldHeight;
+  final List<ChatWidget> latestActionWidgets;
 
   const _ChatScreenBody({
     required this.messageController,
     required this.messageFocusNode,
     required this.scrollController,
     required this.chatbotData,
+    required this.greetingData,
     // required this.isLoadingData,
     required this.selectedOptionMessages,
     required this.messages,
@@ -256,6 +347,9 @@ class _ChatScreenBody extends StatelessWidget {
     required this.pendingMessage,
     required this.onClearPendingMessage,
     required this.sessionId,
+    required this.textFieldHeight,
+    required this.onUpdateTextFieldHeight,
+    required this.latestActionWidgets,
   });
 
   @override
@@ -263,7 +357,7 @@ class _ChatScreenBody extends StatelessWidget {
     return PopScope(
       canPop: false,
       child: Scaffold(
-        backgroundColor: Color(0xFFF2F2F7),
+        backgroundColor: Colors.white,
         resizeToAvoidBottomInset: true,
         appBar: _buildAppBar(context),
         body: BlocConsumer<ChatBloc, ChatState>(
@@ -290,20 +384,22 @@ class _ChatScreenBody extends StatelessWidget {
                 onUpdateMessages(updatedMessages);
                 onScrollToBottom();
               } else {
-                // _showErrorToast(context, 'Something went wrong please try again later');
                 BlackToastView.show(context, 'Something went wrong please try again later');
               }
             }
           },
           builder: (context, state) {
-            // Send pending message if any
+            // Send pending message if any (schedule after build; avoid async directly in builder)
             if (pendingMessage != null) {
+              final bloc = context.read<ChatBloc>();
+              final String msg = pendingMessage!;
+              final String sid = sessionId;
               WidgetsBinding.instance.addPostFrameCallback((_) async {
                 final event = await ChatLoadEvent.create(
-                  message: pendingMessage!,
-                  sessionId: sessionId, // Use existing session ID
+                  message: msg.trim(),
+                  sessionId: sid,
                 );
-                context.read<ChatBloc>().add(event);
+                bloc.add(event);
                 onClearPendingMessage();
               });
             }
@@ -314,75 +410,87 @@ class _ChatScreenBody extends StatelessWidget {
               });
             }
       
-            return Column(
+            final bool showGreetingOverlay = messages.isEmpty && greetingData != null;
+            return Stack(
               children: [
-                Expanded(
-                  child: NotificationListener<ScrollNotification>(
-                    onNotification: (ScrollNotification scrollInfo) {
-                      // Handle scroll notifications if needed
-                      return false;
-                    },
-                    child: ListView.builder(
-                      controller: scrollController,
-                      padding: const EdgeInsets.all(16),
-                      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-                      itemCount: messages.length + (state is ChatLoading ? 1 : 0),
-                      itemBuilder: (context, index) {
-                        // Show messages
-                        if (index < messages.length) {
-                          return _buildMessageBubble(messages[index], context);
-                        }
-      
-                        // Show loader as last item when loading
-                        if (state is ChatLoading) {
-                          return Padding(
-                            padding: const EdgeInsets.only(bottom: 16),
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.end,
-                              children: [
-                                _buildBotAvatar(),
-                                const SizedBox(width: 8),
-                                Container(
-                                  decoration: BoxDecoration(
-                                      color: Color(int.parse(
-                                          chatbotData.data.first.uiPreferences
-                                              .botBubbleColor.replaceFirst(
-                                              '#', '0xFF') ?? '0xFFE5E5FF')),
-                                    borderRadius: BorderRadius.only(
-                                      topLeft: Radius.circular(8),
-                                      topRight: Radius.circular(8),
-                                      bottomLeft: Radius.circular(0),
-                                      bottomRight: Radius.circular(8),
-                                    ),
-                                    border: Border.all(
-                                      color: Colors.grey.shade300,
-                                      width: 0.5,
-                                    )
-                                  ),
-                                  child: SizedBox(
-                                    width: 80,
-                                    height: 40,
-                                    child: Transform.scale(
-                                      scale: 3.5,
-                                      child: Lottie.asset(
-                                          'assets/lottie/bubble-wave-black.json',
-                                          package: 'chat_bot',
-                                          fit: BoxFit.contain
+                Column(
+                  children: [
+                    Expanded(
+                      child: NotificationListener<ScrollNotification>(
+                        onNotification: (ScrollNotification scrollInfo) {
+                          return false;
+                        },
+                        child: ListView.builder(
+                          controller: scrollController,
+                          padding: const EdgeInsets.all(16),
+                          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+                          itemCount: messages.length + (state is ChatLoading ? 1 : 0),
+                          itemBuilder: (context, index) {
+                            if (index < messages.length) {
+                              return _buildMessageBubble(messages[index], context);
+                            }
+
+                            if (state is ChatLoading) {
+                              return Padding(
+                                padding: const EdgeInsets.only(bottom: 16),
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.end,
+                                  children: [
+                                    _buildBotAvatar(),
+                                    const SizedBox(width: 8),
+                                    Container(
+                                      decoration: BoxDecoration(
+                                          color: Color(
+                                              int.parse(
+                                                  chatbotData
+                                                      .data
+                                                      .first
+                                                      .uiPreferences
+                                                      .botBubbleColor
+                                                      .replaceFirst('#', '0xFF'))),
+                                          borderRadius: const BorderRadius.only(
+                                            topLeft: Radius.circular(8),
+                                            topRight: Radius.circular(8),
+                                            bottomLeft: Radius.circular(0),
+                                            bottomRight: Radius.circular(8),
+                                          ),
+                                          border: Border.all(
+                                            color: Colors.grey.shade300,
+                                            width: 0.5,
+                                          )
+                                      ),
+                                      child: SizedBox(
+                                        width: 80,
+                                        height: 40,
+                                        child: Transform.scale(
+                                          scale: 3.5,
+                                          child: Lottie.asset(
+                                              'assets/lottie/bubble-wave-black.json',
+                                              fit: BoxFit.contain
+                                          ),
+                                        ),
                                       ),
                                     ),
-                                  ),
+                                  ],
                                 ),
-                              ],
-                            ),
-                          );
-                        }
-      
-                        return const SizedBox.shrink();
-                      },
+                              );
+                            }
+
+                            return const SizedBox.shrink();
+                          },
+                        ),
+                      ),
                     ),
+                    _buildActionButtons(context),
+                    _buildInputArea(context),
+                  ],
+                ),
+                if (showGreetingOverlay) Positioned.fill(
+                  child: IgnorePointer(
+                    ignoring: false,
+                    child: _buildGreetingOverlay(context),
                   ),
                 ),
-                _buildInputArea(context),
               ],
             );
           },
@@ -394,78 +502,35 @@ class _ChatScreenBody extends StatelessWidget {
   PreferredSizeWidget _buildAppBar(BuildContext context) {
     return AppBar(
       backgroundColor: Colors.white,
+      surfaceTintColor: Colors.transparent,
+      scrolledUnderElevation: 0,
+      systemOverlayStyle: SystemUiOverlayStyle.dark,
       elevation: 1,
       leading: IconButton(
-        icon: const Icon(Icons.close, color: Colors.black),
-        onPressed: () => _showExitChatConfirmation(context),
+        icon: SvgPicture.asset(
+          'assets/images/ic_history.svg',
+          width: 40,
+          height: 40,
+          fit: BoxFit.cover,
+        ),
+        onPressed: () {},
       ),
       title: Row(
         children: [
           Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              color: Colors.blue,
-              shape: BoxShape.circle,
-              border: Border.all(
-                color: Colors.grey.shade300,
-                width: 0.5,
-              ),
-            ),
-            child: ClipOval(
-              child: (chatbotData.data != null &&
-                     chatbotData.data.isNotEmpty &&
-                     chatbotData.data.first.profileImage != null &&
-                     chatbotData.data.first.profileImage.isNotEmpty)
-                  ? Image.network(
-                      chatbotData.data.first.profileImage,
-                      width: 40,
-                      height: 40,
-                      fit: BoxFit.cover,
-                      loadingBuilder: (context, child, loadingProgress) {
-                        if (loadingProgress == null) return child;
-                        return const Center(
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                          ),
-                        );
-                      },
-                      errorBuilder: (context, error, stackTrace) {
-                        return const Icon(
-                          Icons.calendar_today,
-                          color: Colors.white,
-                          size: 20,
-                        );
-                      },
-                    )
-                  : const Icon(
-                      Icons.calendar_today,
-                      color: Colors.white,
-                      size: 20,
-                    ),
-            ),
-          ),
-          const SizedBox(width: 12),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                chatbotData.data.first.name ?? 'Loading...', // Use API data
-                style: const TextStyle(
-                  color: Colors.black,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              const Text(
-                'AI Assistant',
-                style: TextStyle(
-                  color: Colors.grey,
-                  fontSize: 12,
-                ),
-              ),
-            ],
+            child: (chatbotData.data.isNotEmpty &&
+                   chatbotData.data.first.profileImage.isNotEmpty)
+                ? SvgPicture.asset(
+                    'assets/images/ic_header_logo.svg',
+                    width: 80,
+                    height: 23,
+                    fit: BoxFit.cover,
+                  )
+                : const Icon(
+                    Icons.calendar_today,
+                    color: Colors.white,
+                    size: 20,
+                  ),
           ),
         ],
       ),
@@ -473,12 +538,42 @@ class _ChatScreenBody extends StatelessWidget {
         BlocBuilder<ChatBloc, ChatState>(
           builder: (context, state) {
             bool isApiLoading = state is ChatLoading;
-            return IconButton(
-              icon: Icon(
-                Icons.refresh,
-                color: isApiLoading ? Colors.grey : Colors.black,
-              ),
-              onPressed: isApiLoading ? null : () => _showNewChatConfirmation(context),
+            return Row(
+              children: [
+                // Only show reload and cart icons if there are messages
+                if (messages.isNotEmpty) ...[
+                  IconButton(
+                    icon: Opacity(
+                      opacity: isApiLoading ? 0.4 : 1.0,
+                      child: SvgPicture.asset(
+                        'assets/images/ic_reload.svg',
+                        width: 40,
+                        height: 40,
+                      ),
+                    ),
+                    onPressed: isApiLoading ? null : () => _showNewChatConfirmation(context),
+                  ),
+                  IconButton(
+                    icon: Opacity(
+                      opacity: isApiLoading ? 0.4 : 1.0,
+                      child: SvgPicture.asset(
+                        'assets/images/ic_cart.svg',
+                        width: 40,
+                        height: 40,
+                      ),
+                    ),
+                    onPressed: isApiLoading ? null : () => _showNewChatConfirmation(context),
+                  ),
+                ],
+                IconButton(
+                  icon: SvgPicture.asset(
+                    'assets/images/ic_close.svg',
+                    width: 40,
+                    height: 40,
+                  ),
+                  onPressed: () => _showExitChatConfirmation(context),
+                ),
+              ],
             );
           },
         ),
@@ -487,7 +582,7 @@ class _ChatScreenBody extends StatelessWidget {
         preferredSize: const Size.fromHeight(0.5),
         child: Container(
           color: Colors.grey.shade300,
-          height: 0.5,
+          height: 0,
         ),
       ),
     );
@@ -695,10 +790,6 @@ class _ChatScreenBody extends StatelessWidget {
   }
 
   Widget _buildMessageBubble(ChatMessage message, BuildContext context) {
-    if (message.isWelcomeMessage) {
-      return _buildWelcomeMessage(message);
-    }
-
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: Column(
@@ -724,8 +815,8 @@ class _ChatScreenBody extends StatelessWidget {
                       padding: const EdgeInsets.only(top: 10,bottom: 10,left: 14,right: 14),
                       decoration: BoxDecoration(
                         color: message.isBot
-                          ? Color(int.parse(chatbotData.data.first.uiPreferences.botBubbleColor.replaceFirst('#', '0xFF') ?? '0xFFE5E5FF'))
-                          : Color(int.parse(chatbotData.data.first.uiPreferences.userBubbleColor.replaceFirst('#', '0xFF') ?? '0xFF007AFF')),
+                          ? Color(int.parse(chatbotData.data.first.uiPreferences.botBubbleColor.replaceFirst('#', '0xFF')))
+                          : Color(int.parse(chatbotData.data.first.uiPreferences.userBubbleColor.replaceFirst('#', '0xFF'))),
                         // borderRadius: BorderRadius.circular(16),
                         borderRadius: BorderRadius.only(
                           topLeft:  Radius.circular(8),
@@ -749,21 +840,13 @@ class _ChatScreenBody extends StatelessWidget {
                         message.text,
                         style: TextStyle(
                           color: message.isBot
-                              ? Color(int.parse(chatbotData.data.first.uiPreferences.botBubbleFontColor.replaceFirst('#', '0xFF') ?? '0xFFE5E5FF'))
-                              : Color(int.parse(chatbotData.data.first.uiPreferences.userBubbleFontColor.replaceFirst('#', '0xFF') ?? '0xFF007AFF')),
+                              ? Color(int.parse(chatbotData.data.first.uiPreferences.botBubbleFontColor.replaceFirst('#', '0xFF')))
+                              : Color(int.parse(chatbotData.data.first.uiPreferences.userBubbleFontColor.replaceFirst('#', '0xFF'))),
                           fontSize: 14,
                           fontFamily: "Arial"
                         ),
                       ),
                     ),
-                    // if (message.hasRestaurantCards) ...[
-                    //   const SizedBox(height: 12),
-                    //   _buildRestaurantCards(),
-                    // ],
-                    // if (message.hasFoodCards) ...[
-                    //   const SizedBox(height: 12),
-                    //   _buildFoodCards(),
-                    // ],
                   ],
                 ),
               ),
@@ -779,115 +862,175 @@ class _ChatScreenBody extends StatelessWidget {
           // Store cards outside the row to avoid constraints
           if (message.hasStoreCards) ...[
             const SizedBox(height: 12),
-            // Move store cards outside to avoid padding constraints
-            Transform.translate(
-              offset: const Offset(-16, 0), // Offset to counteract parent padding
-              child: _buildStoreCards(message.stores, message.storesWidget),
-            ),
+            _buildStoreCards(message.stores, message.storesWidget),
           ],
           if (message.hasProductCards) ...[
             const SizedBox(height: 12),
             Transform.translate(
-              offset: const Offset(-16, 0),
+              offset: const Offset(0, 0),
               child: _buildProductCards(message.products, message.productsWidget),
             ),
+          ],
+          if (message.hasCartWidget) ...[
+            const SizedBox(height: 12),
+            _buildCartWidget(message.cartItems),
+          ],
+          if (message.hasChooseAddressWidget) ...[
+            const SizedBox(height: 12),
+            _buildChooseAddressWidget(message.addressOptions),
+          ],
+          if (message.hasChooseCardWidget) ...[
+            const SizedBox(height: 12),
+            _buildChooseCardWidget(message.cardOptions),
           ],
         ],
       ),
     );
   }
 
-  Widget _buildWelcomeMessage(ChatMessage message) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 24),
+  // Removed welcome message UI
+
+  Widget _buildGreetingOverlay(BuildContext context) {
+    final String titleText = greetingData?.greeting.isNotEmpty == true
+        ? greetingData!.greeting
+        : 'Good evening';
+    final String subtitleText = greetingData?.subtitle.isNotEmpty == true
+        ? greetingData!.subtitle
+        : 'Your intelligent life assistant is ready to help';
+
+    final List<String> opts = (greetingData?.options ?? []).take(4).toList();
+
+    return ConstrainedBox(
+      constraints: const BoxConstraints(maxWidth: 360),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Container(
-            height: 200,
-            width: double.infinity,
+          // Top graphic group
+          SizedBox(
+            width: 90,
+            height: 90,
             child: Stack(
+              clipBehavior: Clip.none,
               children: [
-                Positioned(
-                  left: 20,
-                  bottom: 0,
+                // Outer glow circle
+                Container(
+                  width: 90,
+                  height: 90,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(110),
+                    gradient: const LinearGradient(
+                      begin: Alignment.centerLeft,
+                      end: Alignment.centerRight,
+                      colors: [
+                        Color(0x1AD445EC),
+                        Color(0x1AB02EFB),
+                        Color(0x1A8E2FFD),
+                        Color(0x1A5E3DFE),
+                        Color(0x1A5186E0),
+                      ],
+                    ),
+                  ),
+                ),
+                // Center asset
+                Align(
+                  alignment: Alignment.center,
                   child: Container(
-                    width: 120,
-                    height: 160,
-                    child: Image.asset(
-                      'assets/images/men.png',
-                      package: 'chat_bot',// Replace with your image
-                      width: 120,
-                      height: 160,
-                      fit: BoxFit.contain,
-                      errorBuilder: (context, error, stackTrace) {
-                        // Fallback if image fails to load
-                        return Container(
-                          width: 120,
-                          height: 160,
-                          decoration: BoxDecoration(
-                            color: Colors.blue[50],
-                            borderRadius: BorderRadius.circular(60),
-                          ),
-                          child: const Icon(
-                            Icons.person,
-                            size: 80,
-                            color: Colors.blue,
-                          ),
-                        );
-                      },
+                    width: 70,
+                    height: 70,
+                    decoration: const BoxDecoration(
+                      shape: BoxShape.circle,
+                      gradient: LinearGradient(
+                        begin: Alignment.centerLeft,
+                        end: Alignment.centerRight,
+                        colors: [
+                          Color(0xFFD445EC),
+                          Color(0xFFB02EFB),
+                          Color(0xFF8E2FFD),
+                          Color(0xFF5E3DFE),
+                          Color(0xFF5186E0),
+                        ],
+                      ),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(12),
+                      child: SvgPicture.asset(
+                        'assets/images/ic_mainImg.svg',
+                        fit: BoxFit.contain,
+                      ),
                     ),
                   ),
                 ),
                 Positioned(
-                  right: 20,
-                  top: 20,
-                  child: Container(
-                    constraints: const BoxConstraints(maxWidth: 220),
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        colors: [Colors.blue, Colors.green],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(
-                        color: Colors.grey.shade300,
-                        width: 0.5,
-                      )
-                      // boxShadow: [
-                      //   BoxShadow(
-                      //     color: Colors.black.withOpacity(0.1),
-                      //     blurRadius: 10,
-                      //     offset: const Offset(0, 4),
-                      //   ),
-                      // ],
+                  right: -6,
+                  top: -6,
+                  child: Opacity(
+                    opacity: 0.4,
+                    child: SvgPicture.asset(
+                      'assets/images/ic_topStar.svg',
+                      width: 34,
+                      height: 34,
                     ),
-                    child: RichText(
-                      text: TextSpan(
-                        children: [
-                          TextSpan(
-                            text: "Meet ${chatbotData.data.first.name ?? 'Eazy Assistant'}\n",
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600, // SemiBold
-                            ),
-                          ),
-                          TextSpan(
-                            text: chatbotData.data.first.uiPreferences.launcherWelcomeMessage ?? 'Hi! I am your personal assistant. How can I help you today?',
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 14,
-                              fontWeight: FontWeight.w400, // Regular
-                            ),
-                          ),
-                        ],
-                      ),
+                  ),
+                ),
+                Positioned(
+                  left: -10,
+                  bottom: -8,
+                  child: Opacity(
+                    opacity: 0.4,
+                    child: SvgPicture.asset(
+                      'assets/images/ic_topStar.svg',
+                      width: 51,
+                      height: 51,
                     ),
                   ),
                 ),
               ],
+            ),
+          ),
+          const SizedBox(height: 12),
+          SizedBox(
+            width: 304,
+            child: Text(
+              titleText,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontWeight: FontWeight.w700,
+                fontSize: 24,
+                height: 1.2,
+                color: Color(0xFF171212),
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+          SizedBox(
+            width: 323,
+            child: Text(
+              subtitleText,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontWeight: FontWeight.w400,
+                fontSize: 14,
+                height: 1.4,
+                color: Color(0xFF6E4185),
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+          // Options grid 2x2
+          ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 340),
+            child: Wrap(
+              spacing: 16,
+              runSpacing: 16,
+              children: opts.map((opt) {
+                return _GreetingOptionTile(
+                  text: opt,
+                  onTap: () {
+                    onSendMessage(opt);
+                  },
+                );
+              }).toList(),
             ),
           ),
         ],
@@ -908,9 +1051,7 @@ class _ChatScreenBody extends StatelessWidget {
         ),
       ),
       child: ClipOval(
-        child: (chatbotData.data != null &&
-               chatbotData.data.isNotEmpty &&
-               chatbotData.data.first.profileImage != null &&
+        child: (chatbotData.data.isNotEmpty &&
                chatbotData.data.first.profileImage.isNotEmpty)
           ? Image.network(
               chatbotData.data.first.profileImage,
@@ -955,9 +1096,9 @@ class _ChatScreenBody extends StatelessWidget {
       children: options.map((option) =>
           Container(
             decoration: BoxDecoration(
-              border: Border.all(color: chatbotData.data.first.uiPreferences.primaryColor != null
-                  ? Color(int.parse(chatbotData.data.first.uiPreferences.primaryColor.replaceFirst('#', '0xFF')))
-                  : const Color(0xFF000000)),
+              border: Border.all(
+                  color: Color(
+                      int.parse(chatbotData.data.first.uiPreferences.primaryColor.replaceFirst('#', '0xFF')))),
               borderRadius: BorderRadius.circular(20),
             ),
             child: InkWell(
@@ -971,9 +1112,8 @@ class _ChatScreenBody extends StatelessWidget {
                 child: Text(
                   option,
                   style: TextStyle(
-                    color: chatbotData.data.first.uiPreferences.primaryColor != null
-                        ? Color(int.parse(chatbotData.data.first.uiPreferences.primaryColor.replaceFirst('#', '0xFF')))
-                        : const Color(0xFF000000),
+                    color: Color(
+                        int.parse(chatbotData.data.first.uiPreferences.primaryColor.replaceFirst('#', '0xFF'))),
                     fontSize: 14,
                   ),
                 ),
@@ -983,33 +1123,183 @@ class _ChatScreenBody extends StatelessWidget {
     );
   }
 
-  Widget _buildCustomServiceIcon(String imagePath) {
-    return Container(
-      width: 40,
-      height: 40,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        shape: BoxShape.circle,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 3,
-            offset: const Offset(0, 1),
+  // Removed unused _buildCustomServiceIcon due to simplified store model
+
+  Widget _buildActionButtons(BuildContext context) {
+    if (latestActionWidgets.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    List<Widget> actionButtons = [];
+    // Handle see_more widgets
+    for (final widget in latestActionWidgets.where((w) => w.type == WidgetEnum.see_more.value)) {
+      for (final action in widget.seeMore) {
+        actionButtons.add(
+          BlocBuilder<ChatBloc, ChatState>(
+            builder: (context, state) {
+              bool isApiLoading = state is ChatLoading;
+              return _buildActionButton(
+                text: action.buttonText,
+                onTap: isApiLoading ? () {} : () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => RestaurantScreen(
+                        actionData: action,
+                        onAddToCart: (event) {
+                          context.read<ChatBloc>().add(event);
+                        },
+                      ),
+                    ),
+                  );
+                },
+              );
+            },
           ),
-        ],
+        );
+      }
+    }
+
+    for (final widget in latestActionWidgets.where((w) => w.type == WidgetEnum.menu.value)) {
+      for (final action in widget.menu) {
+        actionButtons.add(
+          BlocBuilder<ChatBloc, ChatState>(
+            builder: (context, state) {
+              bool isApiLoading = state is ChatLoading;
+              return _buildActionButton(
+                text: action.buttonText,
+                onTap: isApiLoading ? () {} : () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => RestaurantMenuScreen(
+                        actionData: action,
+                      ),
+                    ),
+                  );
+                },
+              );
+            },
+          ),
+        );
+      }
+    }
+
+    for (final widget in latestActionWidgets.where((w) => w.type == WidgetEnum.add_address.value)) {
+      for (final action in widget.addAddress) {
+        actionButtons.add(
+          BlocBuilder<ChatBloc, ChatState>(
+            builder: (context, state) {
+              bool isApiLoading = state is ChatLoading;
+              return _buildActionButton(
+                text: action.buttonText,
+                onTap: isApiLoading ? () {} : () {
+                  // Navigator.push(
+                  //   context,
+                  //   MaterialPageRoute(
+                  //     builder: (context) => RestaurantMenuScreen(
+                  //       actionData: action,
+                  //     ),
+                  //   ),
+                  // );
+                Navigator.push(
+                  context,
+                    MaterialPageRoute(builder: (_) => const AddressDetailsScreen()),
+                ).then((result) {
+                  if (result != null) {
+                    print("Result: $result");
+                  }
+             });
+                },
+              );
+            },
+          ),
+        );
+      }
+    }
+
+     for (final widget in latestActionWidgets.where((w) => w.type == WidgetEnum.add_payment.value)) {
+      for (final action in widget.addPayment) {
+        actionButtons.add(
+          BlocBuilder<ChatBloc, ChatState>(
+            builder: (context, state) {
+              bool isApiLoading = state is ChatLoading;
+              return _buildActionButton(
+                text: action.buttonText,
+                onTap: isApiLoading ? () {} : () async {
+                  
+              final result = await AddCardBottomSheet.show(context);
+                if (result != null) {
+                  debugPrint('PM: ${result['paymentMethodId']} '
+                      '${result['brand']} **** ${result['last4']}');
+                }
+                },
+              );
+            },
+          ),
+        );
+      }
+    }
+
+    for (final widgetType in [WidgetEnum.add_more.value, WidgetEnum.proceed_to_checkout.value, WidgetEnum.cash_on_delivery.value]) {
+      final widgets = latestActionWidgets.where((w) => w.type == widgetType);
+      for (final widget in widgets) {
+        for (final item in widget.rawItems) {
+          final buttonText = item['button_text'] ?? item['title'] ?? 'Action';
+          actionButtons.add(
+            _buildActionButton(
+              text: buttonText,
+              onTap: () {
+                onSendMessage(buttonText);
+              },
+            ),
+          );
+        }
+      }
+    }
+
+    if (actionButtons.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      width: double.infinity,
+      child: Align(
+        alignment: Alignment.centerLeft,
+        child: Wrap(
+          spacing: 10,
+          runSpacing: 8,
+          alignment: WrapAlignment.start,
+          crossAxisAlignment: WrapCrossAlignment.start,
+          children: actionButtons,
+        ),
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(8),
-        child: Image.asset(
-          imagePath,
-          package: 'chat_bot',
-          fit: BoxFit.contain,
-          errorBuilder: (context, error, stackTrace) {
-            // Fallback to default icon if image fails to load
-            print('Image loading error: $error');
-            print('Image path: $imagePath');
-            return const Icon(Icons.restaurant, color: Colors.grey, size: 20);
-          },
+    );
+  }
+
+  Widget _buildActionButton({
+    required String text,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          border: Border.all(color: const Color(0xFF8E2FFD), width: 1),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Text(
+          text,
+          style: const TextStyle(
+            fontFamily: 'Plus Jakarta Sans',
+            fontSize: 14,
+            fontWeight: FontWeight.w400,
+            color: Color(0xFF8E2FFD),
+            height: 1.4,
+          ),
         ),
       ),
     );
@@ -1024,80 +1314,111 @@ class _ChatScreenBody extends StatelessWidget {
           padding: EdgeInsets.only(
             left: 16,
             right: 16,
-            top: 16,
-            bottom: 16 + MediaQuery.of(context).viewInsets.bottom, // Add keyboard padding
+            top: 10,
+            bottom: 16 + MediaQuery.of(context).viewInsets.bottom,
           ),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            border: Border(
-              top: BorderSide(color: Colors.grey.shade300, width: 0.5),
-            )
-            // boxShadow: [
-            //   BoxShadow(
-            //     color: Colors.black.withOpacity(0.05),
-            //     blurRadius: 5,
-            //     offset: const Offset(0, -2),
-            //   ),
-            // ],
-          ),
+          color: Colors.white,
           child: SafeArea(
-            child: Row(
-              children: [
-                Expanded(
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    decoration: BoxDecoration(
-                      color: Colors.grey[100],
-                      borderRadius: BorderRadius.circular(25),
-                    ),
-                    child: TextField(
-                      autofocus: false,
-                      controller: messageController,
-                      focusNode: messageFocusNode,
-                      enabled: !isApiLoading,
-                      textCapitalization: TextCapitalization.sentences,
-                      decoration: const InputDecoration(
-                        hintText: 'Write a message',
-                        border: InputBorder.none,
-                        hintStyle: TextStyle(color: Colors.grey),
-                      ),
-                      onSubmitted: isApiLoading ? null : (text) {
-                        onSendMessage(text);
-                        Future.delayed(const Duration(milliseconds: 100), () {
-                          onScrollToBottom();
-                        });
-                      },
-                    ),
+            top: false,
+            child: Center(
+                              child: ConstrainedBox(
+                  constraints: BoxConstraints(
+                    minHeight: 64,
+                    maxHeight: 570, // Allow up to 550 + 20 padding
                   ),
-                ),
-                const SizedBox(width: 8),
-                Container(
-                  width: 50,
-                  height: 50,
+                child: Container(
+                  height: textFieldHeight + 20, // Dynamic height based on text field
                   decoration: BoxDecoration(
-                    color: isApiLoading ? Colors.grey : Colors.blue, // Change color when disabled
-                    shape: BoxShape.circle,
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: const Color(0xFFE9DFFB), width: 1),
                   ),
-                  child: IconButton(
-                    icon: Icon(
-                      Icons.send,
-                      color: isApiLoading ? Colors.grey[600] : Colors.white,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Expanded(
+                          child: Container(
+                            height: textFieldHeight,
+                            child: TextField(
+                              autofocus: false,
+                              controller: messageController,
+                              focusNode: messageFocusNode,
+                              enabled: !isApiLoading,
+                              textCapitalization: TextCapitalization.sentences,
+                              maxLines: null,
+                              minLines: 1,
+                              style: const TextStyle(
+                                fontSize: 16,
+                                height: 1.4,
+                                color: Color(0xFF242424),
+                              ),
+                              decoration: const InputDecoration(
+                                hintText: 'How can zAIn help you today?',
+                                border: InputBorder.none,
+                                hintStyle: TextStyle(color: Colors.grey),
+                                isCollapsed: true,
+                              ),
+                              onChanged: (text) {
+                                // Calculate new height based on text content
+                                final textSpan = TextSpan(
+                                  text: text.isEmpty ? 'How can zAIn help you today?' : text,
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                    height: 1.4,
+                                    color: Color(0xFF242424),
+                                  ),
+                                );
+                                final textPainter = TextPainter(
+                                  text: textSpan,
+                                  textDirection: TextDirection.ltr,
+                                  maxLines: null,
+                                );
+                                textPainter.layout(maxWidth: MediaQuery.of(context).size.width - 120);
+                                
+                                final newHeight = (textPainter.height + 20).clamp(50.0, 550.0);
+                                onUpdateTextFieldHeight(newHeight);
+                              },
+                              onSubmitted: isApiLoading ? null : (text) {
+                                onSendMessage(text);
+                                Future.delayed(const Duration(milliseconds: 100), () {
+                                  onScrollToBottom();
+                                });
+                              },
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Opacity(
+                          opacity: isApiLoading ? 0.4 : 1.0,
+                          child: GestureDetector(
+                            onTap: isApiLoading
+                                ? null
+                                : () {
+                                    onSendMessage(messageController.text);
+                                    if (messageController.text.trim().isNotEmpty) {
+                                      FocusScope.of(context).requestFocus(messageFocusNode);
+                                    }
+                                    Future.delayed(const Duration(milliseconds: 100), () {
+                                      onScrollToBottom();
+                                    });
+                                  },
+                            child: SizedBox(
+                              width: 34,
+                              height: 34,
+                              child: SvgPicture.asset(
+                                'assets/images/ic_sendImg.svg',
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                    onPressed: isApiLoading ? null : () {
-                      onSendMessage(messageController.text);
-                      // Only request focus when manually sending message via button
-                      if (messageController.text
-                          .trim()
-                          .isNotEmpty) {
-                        FocusScope.of(context).requestFocus(messageFocusNode);
-                      }
-                      Future.delayed(const Duration(milliseconds: 100), () {
-                        onScrollToBottom();
-                      });
-                    },
                   ),
                 ),
-              ],
+              ),
             ),
           ),
         );
@@ -1106,268 +1427,31 @@ class _ChatScreenBody extends StatelessWidget {
   }
 
   Widget _buildStoreCards(List<Store> stores, ChatWidget? storesWidget) {
-    return SizedBox(
-      height: 290,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.only(left: 65), // Changed from left: 70
-        clipBehavior: Clip.none,
-        itemCount: stores.length,
-        separatorBuilder: (context, index) => const SizedBox(width: 12),
-        itemBuilder: (context, index) {
-          final store = stores[index];
-          return SizedBox(
-            width: 280,
-            child: _buildStoreCard(store, storesWidget, index),
-          );
-        },
-      ),
-    );
-  }
-
-  // Add this method to build individual store card
-  Widget _buildStoreCard(Store store, ChatWidget? storesWidget, int index) {
-    return InkWell(
-      onTap: () {
-        if (storesWidget != null) {
-          // String? rawStoreJson = storesWidget.getRawStoreAsJsonString(index);
-          final Map<String, dynamic>? storeJson = storesWidget.getRawStore(index);
-          print('Raw Store JSON: $storeJson');
-          OrderService().triggerStoreOrder(storeJson ?? {});
-        }
-        print('Store clicked: ${store}');
+    return ListView.separated(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      padding: EdgeInsets.zero,
+      clipBehavior: Clip.none,
+      itemCount: stores.length,
+      separatorBuilder: (context, index) => const SizedBox(height: 12),
+      itemBuilder: (context, index) {
+        final store = stores[index];
+        return StoreCard(
+          store: store,
+          storesWidget: storesWidget,
+          index: index,
+          onAddToCart: (event) {
+            context.read<ChatBloc>().add(event);
+          },
+        );
       },
-      child: Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(
-            color: Colors.grey.shade300,
-            width: 0.5,
-          )
-          // boxShadow: [
-          //   BoxShadow(
-          //     color: Colors.black.withOpacity(0.08),
-          //     blurRadius: 8,
-          //     offset: const Offset(0, 2),
-          //   ),
-          // ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Store Image with Rating - Increased height
-            Stack(
-              children: [
-                Container(
-                  height: 160,
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                    borderRadius: const BorderRadius.vertical(top: Radius.circular(8)),
-                    // gradient: const LinearGradient(
-                    //   colors: [Color(0xFF4A90E2), Color(0xFF7ED321)],
-                    //   begin: Alignment.topLeft,
-                    //   end: Alignment.bottomRight,
-                    // ),
-                  ),
-                  child: ClipRRect(
-                    borderRadius: const BorderRadius.vertical(top: Radius.circular(8)),
-                    child: store.storeImage.isNotEmpty
-                        ? Image.network(
-                            store.storeImage,
-                            fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) =>
-                                _buildDefaultStoreImage(),
-                          )
-                        : _buildDefaultStoreImage(),
-                  ),
-                ),
-                // Rating badge
-                if (store.avgRating > 0)
-                  Positioned(
-                    top: 12,
-                    left: 12,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: Colors.grey.shade300,
-                          width: 0.5,
-                        )
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Icon(Icons.star, color: Colors.black, size: 14),
-                          const SizedBox(width: 4),
-                          Text(
-                            store.avgRating.toStringAsFixed(1),
-                            style: const TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                // Service icons
-                Positioned(
-                  bottom: 12,
-                  right: 12,
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      if (store.supportedOrderTypes == 3) ...[
-                        _buildCustomServiceIcon('assets/images/ic_delivery.png'),
-                        const SizedBox(width: 8),
-                        _buildCustomServiceIcon('assets/images/ic_pickup.png'),
-                      ] else ...[
-                        _buildCustomServiceIcon('assets/images/ic_pickup.png'),
-                      ],
-                      const SizedBox(width: 8),
-                      if (store.tableReservations)
-                        _buildCustomServiceIcon('assets/images/ic_dinein.png'),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            // Store Details - Reduced padding to accommodate larger image
-            Padding(
-              padding: const EdgeInsets.all(12),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    store.storename,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 4),
-                  Row(
-                    children: [
-                      const Icon(Icons.location_on, size: 14, color: Colors.grey),
-                      const SizedBox(width: 4),
-                      Expanded(
-                        child: Text(
-                          "${store.address.city} • ${store.distanceKm.toStringAsFixed(1)} km",
-                          style: const TextStyle(
-                            fontSize: 12,
-                            color: Colors.grey,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  // Price and Status row
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          "${store.currencyCode} ${store.averageCostForMealForTwo} for Two",
-                          style: const TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ),
-                      // Status indicator moved here
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: store.storeIsOpen ? Colors.green[50] : Colors.blue[50],
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            // Container(
-                            //   width: 6,
-                            //   height: 6,
-                              // decoration: BoxDecoration(
-                              //   color: store.storeIsOpen ? Colors.green : Colors.blue,
-                              //   shape: BoxShape.circle,
-                              //
-                              // ),
-                            // ),
-                            Icon(
-                              Icons.access_time_rounded, // Built-in Material icon
-                              size: 12,
-                              color: store.storeIsOpen ? Colors.green : Colors.blue,
-                            ),
-                            const SizedBox(width: 6),
-                            Text(
-                              store.storeIsOpen ? "Open" : store.storeTag.isNotEmpty ? store.storeTag.replaceAll("Next At", "") : "Closed",
-                              style: TextStyle(
-                                fontSize: 11,
-                                color: store.storeIsOpen ? Colors.green[700] : Colors.blue[700],
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                  if (store.cuisineDetails.isNotEmpty) ...[
-                    const SizedBox(height: 4),
-                    Text(
-                      store.cuisineDetails,
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 
-  // Helper method for default store image
-  Widget _buildDefaultStoreImage() {
-    return Container(
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          colors: [Color(0xFF4A90E2), Color(0xFF7ED321)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-      ),
-      child: Center(
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            // _buildServiceIcon(Icons.favorite, Colors.green),
-            // _buildServiceIcon(Icons.delivery_dining, Colors.blue),
-            // _buildServiceIcon(Icons.restaurant_menu, Colors.orange),
-          ],
-        ),
-      ),
-    );
-  }
-
-  // Add product cards method
-  // Update _buildProductCards to pass the widget and index
   Widget _buildProductCards(List<Product> products, ChatWidget? productsWidget) {
-    return SizedBox(
-      height: 305,
+    return Container(
+      height: 222,
+      // color: Colors.red,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.only(left: 70),
@@ -1376,168 +1460,106 @@ class _ChatScreenBody extends StatelessWidget {
         separatorBuilder: (context, index) => const SizedBox(width: 16),
         itemBuilder: (context, index) {
           final product = products[index];
-          return SizedBox(
-            width: 200,
-            child: _buildProductCard(product, productsWidget, index),
+          final String priceText = _formatCurrency(
+            product.currencySymbol,
+            product.finalPriceList.finalPrice,
+          );
+          final String basePriceText = _formatCurrency(
+            product.currencySymbol,
+            product.finalPriceList.basePrice,
+          );
+          return MenuItemCard(
+            title: product.productName,
+            price: priceText,
+            originalPrice: basePriceText,
+            isVeg: !product.containsMeat,
+            imageUrl: product.productImage.isNotEmpty ? product.productImage : null,
+            onAdd: () {
+              if (productsWidget != null) {
+                final Map<String, dynamic>? productJson = productsWidget.getRawProduct(index);
+                OrderService().triggerProductOrder(productJson ?? {});
+              }
+            },
           );
         },
       ),
     );
   }
 
-  // Update _buildProductCard to handle raw JSON  
-  Widget _buildProductCard(Product product, ChatWidget? productsWidget, int index) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(
-          color: Colors.grey.shade300,
-          width: 0.5,
-        ),
-        // boxShadow: [
-        //   BoxShadow(
-        //     color: Colors.black.withOpacity(0.08),
-        //     blurRadius: 8,
-        //     offset: const Offset(0, 2),
-        //   ),
-        // ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Product Image
-          Container(
-            height: 200,
-            width: double.infinity,
-            decoration: BoxDecoration(
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(8)),
-              color: Colors.grey[50],
-            ),
-            child: ClipRRect(
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(8)),
-              child: product.productImage.isNotEmpty
-                  ? Image.network(
-                      product.productImage,
-                      fit: BoxFit.contain,
-                      errorBuilder: (context, error, stackTrace) =>
-                          _buildDefaultProductImage(),
-                    )
-                  : _buildDefaultProductImage(),
-            ),
-          ),
-          // Product Details - Fixed height to prevent overflow
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.all(8),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        product.productName,
-                        style: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.black,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      const SizedBox(height: 4),
-                      Row(
-                        children: [
-                          Text(
-                            "${product.currency.toUpperCase()} ${product.finalPrice.toStringAsFixed(2)}",
-                            maxLines: 1,
-                            style: const TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w400,
-                              color: Colors.grey,
-                            ),
-                          ),
-                          if (product.finalPriceList.discountPercentage > 0) ...[
-                            const SizedBox(width: 8),
-                            Text(
-                              "${product.currencySymbol}${product.finalPriceList.basePrice.toStringAsFixed(2)}",
-                              style: const TextStyle(
-                                fontSize: 12,
-                                color: Colors.grey,
-                                decoration: TextDecoration.lineThrough,
-                              ),
-                            ),
-                          ],
-                        ],
-                      ),
-                    ],
-                  ),
-                  SizedBox(
-                    width: double.infinity,
-                    height: 36,
-                    child: ElevatedButton(
-                      onPressed: () {
-                        if (productsWidget != null) {
-                          // String? rawProductJson = productsWidget.getRawProductAsJsonString(index);
-                          final Map<String, dynamic>? productJson = productsWidget.getRawProduct(index);
-                          print('Product JSON: $productJson');
-                          OrderService().triggerProductOrder(productJson ?? {});
-                        }
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.blue[50],
-                        foregroundColor: Colors.blue,
-                        elevation: 0,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        padding: EdgeInsets.zero,
-                      ),
-                      child: const Text(
-                        "ORDER NOW",
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                          letterSpacing: 0.5,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
+  String _formatCurrency(String symbol, double value) {
+    if (symbol.isNotEmpty && symbol != 'AED') {
+      return '$symbol ${value.toStringAsFixed(value.truncateToDouble() == value ? 0 : 2)}';
+    }
+    return 'AED${value.toStringAsFixed(value.truncateToDouble() == value ? 0 : 2)}';
+  }
+
+  Widget _buildCartWidget(List<WidgetAction> cartItems) {
+    return CartWidget(cartItems: cartItems);
+  }
+
+  Widget _buildChooseAddressWidget(List<AddressOption> addressOptions) {
+    return ChooseAddressWidget(
+      addressOptions: addressOptions,
+      onAddressSelected: (selectedAddress) {
+        // Handle address selection
+        print('Selected address: ${selectedAddress.name} - ${selectedAddress.address}');
+      },
+      onSendMessage: (message) {
+        // Automatically send the selected address message
+        onSendMessage(message);
+      },
     );
   }
 
-  // Helper method for default product image
-  Widget _buildDefaultProductImage() {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.grey[100],
-      ),
-      child: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.inventory_2_outlined,
-              size: 60,
-              color: Colors.grey[400],
+  Widget _buildChooseCardWidget(List<CardOption> cardOptions) {
+    return ChooseCardWidget(
+      cardOptions: cardOptions,
+      onCardSelected: (selectedCard) {
+        // Handle card selection
+        print('Selected card: ${selectedCard.title}');
+      },
+      onSendMessage: (message) {
+        // Automatically send the selected card message
+        onSendMessage(message);
+      },
+    );
+  }
+}
+
+class _GreetingOptionTile extends StatelessWidget {
+  final String text;
+  final VoidCallback onTap;
+
+  const _GreetingOptionTile({
+    required this.text,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(8),
+      child: Container(
+        width: 162,
+        height: 84,
+        padding: const EdgeInsets.fromLTRB(10, 30, 10, 10),
+        decoration: BoxDecoration(
+          color: const Color(0xFFF5F7FF),
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: const Color(0xFFEEF4FF), width: 1),
+        ),
+        child: Align(
+          alignment: Alignment.bottomLeft,
+          child: Text(
+            text,
+            style: const TextStyle(
+              fontWeight: FontWeight.w400,
+              fontSize: 16,
+              height: 1.4,
+              color: Color(0xFF242424),
             ),
-            const SizedBox(height: 8),
-            Text(
-              'Product Image',
-              style: TextStyle(
-                color: Colors.grey[500],
-                fontSize: 14,
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     );

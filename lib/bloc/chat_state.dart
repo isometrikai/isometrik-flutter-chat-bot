@@ -1,4 +1,4 @@
-import 'package:chat_bot/model/chat_response.dart';
+import 'package:chat_bot/data/model/chat_response.dart';
 import 'package:equatable/equatable.dart';
 
 abstract class ChatState extends Equatable {
@@ -28,4 +28,7 @@ class ChatError extends ChatState {
 
   @override
   List<Object> get props => [error];
+}
+
+class AddToCartState extends ChatState {
 }

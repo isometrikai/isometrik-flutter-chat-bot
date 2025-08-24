@@ -1,5 +1,9 @@
 import 'dart:convert';
 
+import '../../utils/enum.dart';
+import '../../widgets/choose_address_widget.dart';
+import '../../widgets/choose_card_widget.dart';
+
 // Main Chat Response Model
 class ChatResponse {
   final String text;
@@ -41,6 +45,11 @@ class ChatResponse {
 
   // Helper method to get options widgets specifically
   List<ChatWidget> get optionsWidgets => getWidgetsByType('options');
+  // Helper method to get see_more widgets specifically
+  List<ChatWidget> get seeMoreWidgets => getWidgetsByType('see_more');
+  List<ChatWidget> get cartWidgets => getWidgetsByType('cart');
+  List<ChatWidget> get chooseAddressWidgets => getWidgetsByType('choose_address');
+  List<ChatWidget> get chooseCardWidgets => getWidgetsByType('choose_card');
 
   @override
   String toString() {
@@ -81,9 +90,16 @@ class ChatWidget {
   }
 
   // Helper methods for different widget types
-  bool get isOptionsWidget => type == 'options';
-  bool get isStoresWidget => type == 'stores';
-  bool get isProductsWidget => type == 'products';
+  bool get isOptionsWidget => type == WidgetEnum.options.value;
+  bool get isStoresWidget => type == WidgetEnum.stores.value;
+  bool get isProductsWidget => type == WidgetEnum.products.value;
+  bool get isSeeMoreWidget => type == WidgetEnum.see_more.value;
+  bool get isMenuWidget => type == WidgetEnum.menu.value;
+  bool get isCartWidget => type == WidgetEnum.cart.value;
+  bool get isChooseAddressWidget => type == WidgetEnum.choose_address.value;
+  bool get isChooseCardWidget => type == WidgetEnum.choose_card.value;
+  bool get isAddAddressWidget => type == WidgetEnum.add_address.value;
+  bool get isAddPaymentWidget => type == WidgetEnum.add_payment.value;
   bool get isButtonWidget => type == 'button';
   bool get isInputWidget => type == 'input';
   bool get isImageWidget => type == 'image';
@@ -151,6 +167,26 @@ class ChatWidget {
       ? widget.map((e) => Product.fromJson(e as Map<String, dynamic>)).toList()
       : [];
 
+  // Get see_more actions (converted to models)
+  List<WidgetAction> get seeMore => isSeeMoreWidget
+      ? widget.map((e) => WidgetAction.fromJson(e as Map<String, dynamic>)).toList()
+      : [];
+
+  // Get menu actions (converted to models)
+  List<WidgetAction> get menu => isMenuWidget
+      ? widget.map((e) => WidgetAction.fromJson(e as Map<String, dynamic>)).toList()
+      : [];
+
+  // Get add_address actions (converted to models)
+  List<WidgetAction> get addAddress => isAddAddressWidget
+      ? widget.map((e) => WidgetAction.fromJson(e as Map<String, dynamic>)).toList()
+      : [];
+
+  // Get add_payment actions (converted to models)
+  List<WidgetAction> get addPayment => isAddPaymentWidget
+      ? widget.map((e) => WidgetAction.fromJson(e as Map<String, dynamic>)).toList()
+      : [];
+
   // Get raw stores data (without converting to models)
   List<Map<String, dynamic>> get rawStores => isStoresWidget
       ? widget.map((e) => e as Map<String, dynamic>).toList()
@@ -177,6 +213,30 @@ class ChatWidget {
     return null;
   }
 
+  // Helper method to get cart items
+  List<WidgetAction> getCartItems() {
+    if (isCartWidget) {
+      return widget.map((item) => WidgetAction.fromJson(item as Map<String, dynamic>)).toList();
+    }
+    return [];
+  }
+
+  // Helper method to get address options
+  List<AddressOption> getAddressOptions() {
+    if (isChooseAddressWidget) {
+      return widget.map((item) => AddressOption.fromJson(item as Map<String, dynamic>)).toList();
+    }
+    return [];
+  }
+
+  // Helper method to get card options
+  List<CardOption> getCardOptions() {
+    if (isChooseCardWidget) {
+      return widget.map((item) => CardOption.fromJson(item as Map<String, dynamic>)).toList();
+    }
+    return [];
+  }
+
   // Get raw store as JSON string by index
   String? getRawStoreAsJsonString(int index) {
     final rawStore = getRawStore(index);
@@ -197,35 +257,39 @@ class ChatWidget {
     return 'ChatWidget(id: $widgetId, type: $type, items: ${widget.length})';
   }
 }
-
-// Usage example extension
-extension ChatWidgetUsage on ChatWidget {
-  // Method to handle item click and get raw JSON
-  String? handleItemClick(int index) {
-    switch (type) {
-      case 'products':
-        return getRawProductAsJsonString(index);
-      case 'stores':
-        return getRawStoreAsJsonString(index);
-      default:
-        return getRawItemAsJsonString(index);
-    }
-  }
-
-  // Method to get display data for UI (you can still use models for display)
-  List<dynamic> getDisplayItems() {
-    switch (type) {
-      case 'products':
-        return products; // Use Product models for display
-      case 'stores':
-        return stores; // Use Store models for display
-      case 'options':
-        return options;
-      default:
-        return widget;
-    }
-  }
-}
+//
+// // Usage example extension
+// extension ChatWidgetUsage on ChatWidget {
+//   // Method to handle item click and get raw JSON
+//   String? handleItemClick(int index) {
+//     switch (type) {
+//       case 'products':
+//         return getRawProductAsJsonString(index);
+//       case 'stores':
+//         return getRawStoreAsJsonString(index);
+//       case 'see_more':
+//         return getRawItemAsJsonString(index);
+//       default:
+//         return getRawItemAsJsonString(index);
+//     }
+//   }
+//
+//   // Method to get display data for UI (you can still use models for display)
+//   List<dynamic> getDisplayItems() {
+//     switch (type) {
+//       case 'products':
+//         return products; // Use Product models for display
+//       case 'stores':
+//         return stores; // Use Store models for display
+//       case 'see_more':
+//         return seeMore; // Use SeeMoreAction models for display
+//       case 'options':
+//         return options;
+//       default:
+//         return widget;
+//     }
+//   }
+// }
 
 // Keep all your existing model classes (Product, Store, etc.) unchanged
 // ... (all your existing model classes remain the same)
@@ -233,76 +297,78 @@ extension ChatWidgetUsage on ChatWidget {
 // Product Model for products widget
 class Product {
   final String id;
-  final String productId;
+  final String parentProductId;
+  final String childProductId;
+  // final Map<String, dynamic> offers;
+  final int variantsCount;
   final String productName;
-  final double finalPrice;
-  final bool inStock;//
-  final int tag;//
   final FinalPriceList finalPriceList;
-  // final Map<String, dynamic> offers;//
-  final String productImage;
-  // final double averageRating;//
-  final String currencySymbol;//
+  final List<String> images;
+  final bool containsMeat;
+  final String currencySymbol;
   final String currency;
-  final String url;
-  final String store;
-  final String storeId;
 
-  Product({
+  const Product({
     required this.id,
-    required this.productId,
-    required this.productName,
-    required this.finalPrice,
-    required this.inStock,
-    required this.tag,
-    required this.finalPriceList,
+    required this.parentProductId,
+    required this.childProductId,
     // required this.offers,
-    required this.productImage,
-    // required this.averageRating,
+    required this.variantsCount,
+    required this.productName,
+    required this.finalPriceList,
+    required this.images,
+    required this.containsMeat,
     required this.currencySymbol,
     required this.currency,
-    required this.url,
-    required this.store,
-    required this.storeId,
   });
 
+  double get finalPrice => finalPriceList.finalPrice;
+
+  // Backward compatibility getter for productImage
+  String get productImage => images.isNotEmpty ? images.first : '';
+
   factory Product.fromJson(Map<String, dynamic> json) {
+    final Map<String, dynamic> finalPriceListJson =
+        (json['finalPriceList'] ?? {}) as Map<String, dynamic>;
+
+    // Handle images as either List<String> or single string
+    List<String> imagesList = [];
+    if (json['images'] != null) {
+      if (json['images'] is List) {
+        imagesList = (json['images'] as List).map((e) => e.toString()).toList();
+      } else if (json['images'] is String) {
+        imagesList = [json['images'].toString()];
+      }
+    }
+
     return Product(
-      id: json['id'] ?? '',
-      productId: json['productId'] ?? '',
-      productName: json['productName'] ?? '',
-      finalPrice: (json['finalPrice'] ?? 0).toDouble(),
-      inStock: json['inStock'] ?? false,
-      tag: json['tag'] ?? 0,
-      finalPriceList: FinalPriceList.fromJson(json['finalPriceList'] ?? {}),
-      // offers: json['offers'] ?? {},
-      productImage: json['product_image'] ?? '',
-      // averageRating: (json['average_rating'] ?? 0).toDouble(),
-      currencySymbol: json['currencySymbol'] ?? '',
-      currency: json['currency'] ?? '',
-      url: json['url'] ?? '',
-      store: json['store'] ?? '',
-      storeId: json['storeId'] ?? '',
+      id: json['id']?.toString() ?? '',
+      parentProductId: json['parentProductId']?.toString() ?? '',
+      childProductId: json['childProductId']?.toString() ?? '',
+      // offers: (json['offers'] as Map<String, dynamic>?) ?? {},
+      variantsCount: json['variantsCount'] ?? 0,
+      productName: json['productName']?.toString() ?? '',
+      finalPriceList: FinalPriceList.fromJson(finalPriceListJson),
+      images: imagesList,
+      containsMeat: json['containsMeat'] ?? false,
+      currencySymbol: json['currencySymbol']?.toString() ?? '',
+      currency: json['currency']?.toString() ?? '',
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
       'id': id,
-      'productId': productId,
-      'productName': productName,
-      'finalPrice': finalPrice,
-      'inStock': inStock,
-      'tag': tag,
-      'finalPriceList': finalPriceList.toJson(),
+      'parentProductId': parentProductId,
+      'childProductId': childProductId,
       // 'offers': offers,
-      'product_image': productImage,
-      // 'average_rating': averageRating,
+      'variantsCount': variantsCount,
+      'productName': productName,
+      'finalPriceList': finalPriceList.toJson(),
+      'images': images,
+      'containsMeat': containsMeat,
       'currencySymbol': currencySymbol,
       'currency': currency,
-      'url': url,
-      'store': store,
-      'storeId': storeId,
     };
   }
 }
@@ -352,87 +418,82 @@ class FinalPriceList {
   }
 }
 
-// Store Model for stores widget
+// Store Model for stores widget (now includes nested products)
 class Store {
-  final String id;
   final String storename;
   final double avgRating;
-  final bool storeIsOpen;
-  final String storeTag;
-  final LogoImages logoImages;
-  final bool isTempClose;
-  final Address address;
   final String cuisineDetails;
   final String storeImage;
-  final double distanceKm;
-  final double distanceMiles;
-  final bool tableReservations;
-  final int supportedOrderTypes;
-  final int averageCostForMealForTwo;
-  final String currencyCode;
-  final String currencySymbol;
+  final String distance;
+  final String storeId;
+  final String storeCategoryId;
+  final String linkFromId;
+  final int type;
+  final bool isDoctored;
+  final bool storeListing;
+  final bool hyperlocal;
+  final List<Product> products;
 
   Store({
-    required this.id,
     required this.storename,
     required this.avgRating,
-    required this.storeIsOpen,
-    required this.storeTag,
-    required this.logoImages,
-    required this.isTempClose,
-    required this.address,
     required this.cuisineDetails,
     required this.storeImage,
-    required this.distanceKm,
-    required this.distanceMiles,
-    required this.tableReservations,
-    required this.supportedOrderTypes,
-    required this.averageCostForMealForTwo,
-    required this.currencyCode,
-    required this.currencySymbol,
+    required this.distance,
+    required this.storeId,
+    required this.storeCategoryId,
+    required this.products,
+    required this.linkFromId,
+    required this.type,
+    required this.isDoctored,
+    required this.storeListing,
+    required this.hyperlocal,
   });
 
   factory Store.fromJson(Map<String, dynamic> json) {
+    final String name = (json['storename'] ?? json['store_name'] ?? '').toString();
+    final double rating = ((json['avgRating'] ?? json['rating'] ?? 0) as num).toDouble();
+    final String image = (json['storeImage'] ?? json['store_logo'] ?? '').toString();
+    final String distance = (json['distance'] ?? '');
+    final String storeId = (json['storeId'] ?? '');
+    final String storeCategoryId = (json['storeCategoryId'] ?? '');
+    final String linkFromId = (json['linkFromId'] ?? '');
+    final int type = (json['type'] ?? 0);
+    final bool isDoctored = (json['isDoctored'] ?? false);
+    final bool storeListing = (json['storeListing'] ?? false);
+    final bool hyperlocal = (json['hyperlocal'] ?? false);
+
+    final List<Product> parsedProducts = (json['products'] as List<dynamic>? ?? [])
+        .map((e) => Product.fromJson(e as Map<String, dynamic>))
+        .toList();
+
     return Store(
-      id: json['id'] ?? '',
-      storename: json['storename'] ?? '',
-      avgRating: (json['avgRating'] ?? 0).toDouble(),
-      storeIsOpen: json['store_is_open'] ?? false,
-      storeTag: json['store_tag'] ?? '',
-      logoImages: LogoImages.fromJson(json['logoImages'] ?? {}),
-      isTempClose: json['is_temp_close'] ?? false,
-      address: Address.fromJson(json['address'] ?? {}),
-      cuisineDetails: json['cuisineDetails'] ?? '',
-      storeImage: json['storeImage'] ?? '',
-      distanceKm: (json['distance_km'] ?? 0).toDouble(),
-      distanceMiles: (json['distance_miles'] ?? 0).toDouble(),
-      tableReservations: json['tableReservations'] ?? false,
-      supportedOrderTypes: json['supportedOrderTypes'] ?? 0,
-      averageCostForMealForTwo: json['averageCostForMealForTwo'] ?? 0,
-      currencyCode: json['currencyCode'] ?? '',
-      currencySymbol: json['currencySymbol'] ?? '',
+      storename: name,
+      avgRating: rating,
+      cuisineDetails: (json['cuisineDetails'] ?? (json['categorylist']?.join(', ') ?? '')).toString(),
+      storeImage: image,
+      distance: distance,
+      storeId: storeId,
+      storeCategoryId: storeCategoryId,
+      products: parsedProducts,
+      linkFromId: linkFromId,
+      type: type,
+      isDoctored: isDoctored,
+      storeListing: storeListing,
+      hyperlocal: hyperlocal,
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
-      'id': id,
       'storename': storename,
       'avgRating': avgRating,
-      'store_is_open': storeIsOpen,
-      'store_tag': storeTag,
-      'logoImages': logoImages.toJson(),
-      'is_temp_close': isTempClose,
-      'address': address.toJson(),
       'cuisineDetails': cuisineDetails,
       'storeImage': storeImage,
-      'distance_km': distanceKm,
-      'distance_miles': distanceMiles,
-      'tableReservations': tableReservations,
-      'supportedOrderTypes': supportedOrderTypes,
-      'averageCostForMealForTwo': averageCostForMealForTwo,
-      'currencyCode': currencyCode,
-      'currencySymbol': currencySymbol,
+      'distance': distance,
+      'storeId': storeId,
+      'storeCategoryId': storeCategoryId,
+      'products': products.map((p) => p.toJson()).toList(),
     };
   }
 }
@@ -555,6 +616,7 @@ class Address {
 enum WidgetType {
   options('options'),
   stores('stores'),
+  seeMore('see_more'),
   products('products'),
   button('button'),
   input('input'),
@@ -584,4 +646,81 @@ extension JsonParsingExtension on String {
     final Map<String, dynamic> json = jsonDecode(this);
     return ChatResponse.fromJson(json);
   }
+}
+
+// See More Action Model for widget
+class WidgetAction {
+  final String buttonText;
+  final String title;
+  final String subtitle;
+  final String storeCategoryId;
+  final String keyword;
+  final String? quantity;
+  final String? productName;
+  final String? currencySymbol;
+  final num? productPrice;
+  final String? address;
+  final String? name;
+
+  WidgetAction({
+    required this.buttonText,
+    required this.title,
+    required this.subtitle,
+    required this.storeCategoryId,
+    required this.keyword,
+    this.quantity,
+    this.productName,
+    this.currencySymbol,
+    this.productPrice,
+    this.address,
+    this.name,
+  });
+
+  factory WidgetAction.fromJson(Map<String, dynamic> json) {
+    return WidgetAction(
+      buttonText: (json['button_text'] ?? json['buttonText'] ?? '').toString(),
+      title: (json['title'] ?? '').toString(),
+      subtitle: (json['subtitle'] ?? '').toString(),
+      storeCategoryId: (json['storecategoryid'] ?? json['storeCategoryId'] ?? '').toString(),
+      keyword: (json['keyword'] ?? '').toString(),
+      quantity: json['quantity']?.toString(),
+      productName: json['productName']?.toString(),
+      currencySymbol: json['currencySymbol']?.toString(),
+      productPrice: json['productPrice'] is num 
+          ? json['productPrice'] 
+          : json['productPrice'] is String 
+              ? num.tryParse(json['productPrice']) 
+              : null,
+      address: json['address']?.toString(),
+      name: json['name']?.toString(),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'button_text': buttonText,
+      'title': title,
+      'subtitle': subtitle,
+      'storecategoryid': storeCategoryId,
+      'keyword': keyword,
+      'quantity': quantity,
+      'productName': productName,
+      'currencySymbol': currencySymbol,
+      'productPrice': productPrice,
+      'address': address,
+      'name': name,
+    };
+  }
+}
+
+double _parseDistanceKm(dynamic value) {
+  if (value == null) return 0.0;
+  if (value is num) return value.toDouble();
+  if (value is String) {
+    final match = RegExp(r'([0-9]+(?:\.[0-9]+)?)').firstMatch(value);
+    if (match != null) {
+      return double.tryParse(match.group(1)!) ?? 0.0;
+    }
+  }
+  return 0.0;
 }

@@ -1,4 +1,5 @@
 import 'dart:developer';
+import 'dart:convert';
 
 
 class AppLog {
@@ -114,6 +115,52 @@ class AppLog {
       name: 'Highlight',
       level: 400,
     );
+  }
+
+  /// Build a copy-pastable cURL command for the given request
+  static String buildCurl(
+    String method,
+    String url,
+    Map<String, String> headers, [
+    dynamic body,
+  ]) {
+    String escapeSingleQuotes(String input) => input.replaceAll("'", "'\"'\"'");
+
+    final List<String> parts = [];
+    parts.add('curl');
+    parts.add('-X');
+    parts.add(method.toUpperCase());
+    parts.add("'${escapeSingleQuotes(url)}'");
+
+    headers.forEach((key, value) {
+      parts.add('-H');
+      parts.add("'${escapeSingleQuotes('$key: $value')}'");
+    });
+
+    if (body != null) {
+      String bodyString;
+      if (body is String) {
+        bodyString = body;
+      } else {
+        // Fallback to JSON for map/list bodies
+        bodyString = jsonEncode(body);
+      }
+      parts.add('--data-raw');
+      parts.add("'${escapeSingleQuotes(bodyString)}'");
+    }
+
+    return parts.join(' ');
+  }
+
+  /// Print a cURL command with highlight formatting
+  static void curl(
+    String method,
+    String url,
+    Map<String, String> headers, [
+    dynamic body,
+  ]) {
+    final cmd = buildCurl(method, url, headers, body);
+    AppLog.highlight('cURL: ' + cmd);
   }
 
   final dynamic message;

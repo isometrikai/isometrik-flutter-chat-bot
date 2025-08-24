@@ -2,8 +2,10 @@ import 'dart:async';
 import 'package:chat_bot/services/callback_manage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../services/api_service.dart';
-import '../model/mygpts_model.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:chat_bot/bloc/launch/launch_bloc.dart';
+import 'package:chat_bot/bloc/launch/launch_event.dart';
+import 'package:chat_bot/bloc/launch/launch_state.dart';
 import 'chat_screen.dart';
 
 class LaunchScreen extends StatefulWidget {
@@ -28,13 +30,15 @@ class _LaunchScreenState extends State<LaunchScreen> {
   int currentIndex = 0;
   Timer? _timer;
   late DateTime _startTime;
+  late final LaunchBloc _bloc;
 
   @override
   void initState() {
     super.initState();
     _startTime = DateTime.now();
     _startTagLineRotation();
-    _loadChatbotData();
+    _bloc = LaunchBloc();
+    _bloc.add(const LaunchRequested());
   }
 
   void _startTagLineRotation() {
@@ -45,53 +49,21 @@ class _LaunchScreenState extends State<LaunchScreen> {
     });
   }
 
-  Future<void> _loadChatbotData() async {
-    try {
-      await ApiService.initialize();
-      final chatbotData = await ApiService.getChatbotData();
-
-      if (chatbotData != null && mounted) {
-        // Calculate minimum time for one complete tagline cycle
-        final minDuration = Duration(milliseconds: tagLines.length * 1500);
-        final elapsed = DateTime.now().difference(_startTime);
-        
-        // Wait for remaining time if needed to complete at least one cycle
-        if (elapsed < minDuration) {
-          await Future.delayed(minDuration - elapsed);
-        }
-
-        if (mounted) {
-          Navigator.of(context).pushReplacement(
-            MaterialPageRoute(
-              builder: (context) => ChatScreen(chatbotData: chatbotData),
-            ),
-          );
-        }
-      }else {
-        print('Failed to load chatbot data');
-        _showTimeoutAlert();
-      }
-    } catch (e) {
-      print('Error initializing chatbot: $e');
-      if (mounted) {
-        // Check if it's a timeout error
-        if (e.toString().contains(
-            "Something went wrong")) {
-          _showTimeoutAlert();
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Failed to load chatbot data: $e'),
-              backgroundColor: Colors.red,
-              action: SnackBarAction(
-                label: 'Retry',
-                onPressed: () => _loadChatbotData(),
-              ),
-            ),
-          );
-        }
-      }
+  Future<void> _navigateWhenReady(LaunchSuccess success) async {
+    final minDuration = Duration(milliseconds: tagLines.length * 1500);
+    final elapsed = DateTime.now().difference(_startTime);
+    if (elapsed < minDuration) {
+      await Future.delayed(minDuration - elapsed);
     }
+    if (!mounted) return;
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(
+        builder: (context) => ChatScreen(
+          chatbotData: success.chatbotData,
+          greetingData: success.greetingData,
+        ),
+      ),
+    );
   }
 
   void _showTimeoutAlert() {
@@ -101,7 +73,7 @@ class _LaunchScreenState extends State<LaunchScreen> {
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text('Error'),
-          content: const Text('Something went wrong please try again latter'),
+          content: const Text('Something went wrong please try again later'),
           actions: [
             TextButton(
               onPressed: () {
@@ -121,36 +93,51 @@ class _LaunchScreenState extends State<LaunchScreen> {
   @override
   void dispose() {
     _timer?.cancel();
+    _bloc.close();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return PopScope(
-      canPop: false,
-      child: Scaffold(
-        body: Container(
-          color: Color.fromRGBO(27, 27, 27, 1),
-          width: double.infinity,
-          height: double.infinity,
-          child: Center(
-            child: AnimatedSwitcher(
-              duration: const Duration(milliseconds: 300),
-              transitionBuilder: (Widget child, Animation<double> animation) {
-                return FadeTransition(
-                  opacity: animation,
-                  child: child,
-                );
-              },
-              child: Text(
-                tagLines[currentIndex],
-                key: ValueKey<String>(tagLines[currentIndex]),
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w700,
+    return BlocProvider.value(
+      value: _bloc,
+      child: BlocListener<LaunchBloc, LaunchState>(
+        listener: (context, state) {
+          if (state is LaunchFailure) {
+            // Always show the blocking alert for launch failures
+            _showTimeoutAlert();
+          } else if (state is LaunchSuccess) {
+            _navigateWhenReady(state);
+          }
+        },
+        child: PopScope(
+          canPop: false,
+          child: Scaffold(
+            backgroundColor: const Color(0xFF1B1B1B),
+            body: Container(
+              color: const Color(0xFF1B1B1B),
+              width: double.infinity,
+              height: double.infinity,
+              child: Center(
+                child: AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 300),
+                  transitionBuilder: (Widget child, Animation<double> animation) {
+                    return FadeTransition(
+                      opacity: animation,
+                      child: child,
+                    );
+                  },
+                  child: Text(
+                    tagLines[currentIndex],
+                    key: ValueKey<String>(tagLines[currentIndex]),
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
                 ),
-                textAlign: TextAlign.center,
               ),
             ),
           ),
