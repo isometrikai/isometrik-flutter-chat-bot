@@ -18,6 +18,10 @@ import 'package:chat_bot/widgets/black_toast_view.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:chat_bot/data/model/greeting_response.dart';
 import 'package:chat_bot/widgets/menu_item_card.dart';
+import 'package:chat_bot/widgets/cart_widget.dart';
+import 'package:chat_bot/widgets/choose_address_widget.dart';
+import 'package:chat_bot/widgets/choose_card_widget.dart';
+import '../utils/enum.dart';
 
 class ChatScreen extends StatefulWidget {
   final MyGPTsResponse chatbotData;
@@ -40,11 +44,11 @@ class _ChatScreenState extends State<ChatScreen> {
 
   List<ChatMessage> messages = [];
 
-  // Returns index of the last bot message that shows stores or products widgets; -1 if none
+  // Returns index of the last bot message that shows stores, products, cart, choose_address, or choose_card widgets; -1 if none
   int _indexOfLastBotCatalogMessage() {
     for (int i = messages.length - 1; i >= 0; i--) {
       final ChatMessage message = messages[i];
-      if (message.isBot && (message.hasStoreCards || message.hasProductCards)) {
+      if (message.isBot && (message.hasStoreCards || message.hasProductCards || message.hasCartWidget || message.hasChooseAddressWidget || message.hasChooseCardWidget)) {
         return i;
       }
     }
@@ -53,10 +57,13 @@ class _ChatScreenState extends State<ChatScreen> {
 
   // Produces a hidden version of catalog widgets for a message (non-destructive to data)
   ChatMessage _hideCatalogInMessage(ChatMessage message) {
-    if (!(message.hasStoreCards || message.hasProductCards)) return message;
+    if (!(message.hasStoreCards || message.hasProductCards || message.hasCartWidget || message.hasChooseAddressWidget || message.hasChooseCardWidget)) return message;
     return message.copyWith(
       hasStoreCards: false,
       hasProductCards: false,
+      hasCartWidget: false,
+      hasChooseAddressWidget: false,
+      hasChooseCardWidget: false,
     );
   }
 
@@ -110,6 +117,9 @@ class _ChatScreenState extends State<ChatScreen> {
     final messageId = DateTime.now().millisecondsSinceEpoch.toString();
     ChatWidget? storesWidget;
     ChatWidget? productsWidget;
+    ChatWidget? cartWidget;
+    ChatWidget? chooseAddressWidget;
+    ChatWidget? chooseCardWidget;
     try {
       storesWidget = response.widgets.firstWhere((widget) => widget.isStoresWidget);
     } catch (e) {
@@ -122,9 +132,30 @@ class _ChatScreenState extends State<ChatScreen> {
       productsWidget = null;
     }
 
-    // Check if stores or products are present
+    try {
+      cartWidget = response.widgets.firstWhere((widget) => widget.isCartWidget);
+    } catch (e) {
+      cartWidget = null;
+    }
+
+    try {
+      chooseAddressWidget = response.widgets.firstWhere((widget) => widget.isChooseAddressWidget);
+    } catch (e) {
+      chooseAddressWidget = null;
+    }
+
+    try {
+      chooseCardWidget = response.widgets.firstWhere((widget) => widget.isChooseCardWidget);
+    } catch (e) {
+      chooseCardWidget = null;
+    }
+
+    // Check if stores, products, cart, choose_address, or choose_card are present
     bool hasStores = storesWidget != null;
     bool hasProducts = productsWidget != null;
+    bool hasCart = cartWidget != null;
+    bool hasChooseAddress = chooseAddressWidget != null;
+    bool hasChooseCard = chooseCardWidget != null;
 
     setState(() {
       messages.add(ChatMessage(
@@ -134,25 +165,38 @@ class _ChatScreenState extends State<ChatScreen> {
         showAvatar: true,
         hasStoreCards: hasStores,
         hasProductCards: hasProducts,
-        // Don't show option buttons if stores or products are present
-        hasOptionButtons: !hasStores && !hasProducts && response.hasWidgets && response.optionsWidgets.isNotEmpty,
-        optionButtons: !hasStores && !hasProducts && response.hasWidgets && response.optionsWidgets.isNotEmpty
+        hasCartWidget: hasCart,
+        hasChooseAddressWidget: hasChooseAddress,
+        hasChooseCardWidget: hasChooseCard,
+        // Don't show option buttons if stores, products, cart, choose_address, or choose_card are present
+        hasOptionButtons: !hasStores && !hasProducts && !hasCart && !hasChooseAddress && !hasChooseCard && response.hasWidgets && response.optionsWidgets.isNotEmpty,
+        optionButtons: !hasStores && !hasProducts && !hasCart && !hasChooseAddress && !hasChooseCard && response.hasWidgets && response.optionsWidgets.isNotEmpty
             ? response.optionsWidgets.first.options
             : [],
         stores: storesWidget?.stores ?? [],
         products: productsWidget?.products ?? [],
+        cartItems: cartWidget?.getCartItems() ?? [],
+        addressOptions: chooseAddressWidget?.getAddressOptions() ?? [],
+        cardOptions: chooseCardWidget?.getCardOptions() ?? [],
         storesWidget: storesWidget,
         productsWidget: productsWidget,
+        cartWidget: cartWidget,
+        chooseAddressWidget: chooseAddressWidget,
+        chooseCardWidget: chooseCardWidget,
       ));
       
       // Store action widgets for the action buttons
       _latestActionWidgets = response.widgets.where((widget) => 
-        widget.type == 'see_more' ||
-        widget.type == 'menu' ||
-        widget.type == 'add_more' ||
-        widget.type == 'proceed_to_checkout' ||
-        widget.type == 'add_address' ||
-        widget.type == 'add_payment'
+        widget.type == WidgetEnum.see_more.value ||
+        widget.type == WidgetEnum.menu.value ||
+        widget.type == WidgetEnum.add_more.value ||
+        widget.type == WidgetEnum.proceed_to_checkout.value ||
+        widget.type == WidgetEnum.add_address.value ||
+        widget.type == WidgetEnum.add_payment.value ||
+        widget.type == WidgetEnum.cart.value ||
+        widget.type == WidgetEnum.choose_address.value ||
+        widget.type == WidgetEnum.choose_card.value ||
+        widget.type == WidgetEnum.cash_on_delivery.value
       ).toList();
     });
     _scrollToBottom();
@@ -839,6 +883,18 @@ class _ChatScreenBody extends StatelessWidget {
               child: _buildProductCards(message.products, message.productsWidget),
             ),
           ],
+          if (message.hasCartWidget) ...[
+            const SizedBox(height: 12),
+            _buildCartWidget(message.cartItems),
+          ],
+          if (message.hasChooseAddressWidget) ...[
+            const SizedBox(height: 12),
+            _buildChooseAddressWidget(message.addressOptions),
+          ],
+          if (message.hasChooseCardWidget) ...[
+            const SizedBox(height: 12),
+            _buildChooseCardWidget(message.cardOptions),
+          ],
         ],
       ),
     );
@@ -1090,7 +1146,7 @@ class _ChatScreenBody extends StatelessWidget {
 
     List<Widget> actionButtons = [];
     // Handle see_more widgets
-    for (final widget in latestActionWidgets.where((w) => w.type == 'see_more')) {
+    for (final widget in latestActionWidgets.where((w) => w.type == WidgetEnum.see_more.value)) {
       for (final action in widget.seeMore) {
         actionButtons.add(
           BlocBuilder<ChatBloc, ChatState>(
@@ -1118,7 +1174,7 @@ class _ChatScreenBody extends StatelessWidget {
       }
     }
 
-    for (final widget in latestActionWidgets.where((w) => w.type == 'menu')) {
+    for (final widget in latestActionWidgets.where((w) => w.type == WidgetEnum.menu.value)) {
       for (final action in widget.menu) {
         actionButtons.add(
           BlocBuilder<ChatBloc, ChatState>(
@@ -1143,7 +1199,63 @@ class _ChatScreenBody extends StatelessWidget {
       }
     }
 
-    for (final widgetType in ['add_more', 'proceed_to_checkout', 'add_address', 'add_payment']) {
+    for (final widget in latestActionWidgets.where((w) => w.type == WidgetEnum.add_address.value)) {
+      for (final action in widget.addAddress) {
+        actionButtons.add(
+          BlocBuilder<ChatBloc, ChatState>(
+            builder: (context, state) {
+              bool isApiLoading = state is ChatLoading;
+              return _buildActionButton(
+                text: action.buttonText,
+                onTap: isApiLoading ? () {} : () {
+                  // Navigator.push(
+                  //   context,
+                  //   MaterialPageRoute(
+                  //     builder: (context) => RestaurantMenuScreen(
+                  //       actionData: action,
+                  //     ),
+                  //   ),
+                  // );
+                Navigator.push(
+                  context,
+                    MaterialPageRoute(builder: (_) => const AddressDetailsScreen()),
+                ).then((result) {
+                  if (result != null) {
+                    print("Result: $result");
+                  }
+             });
+                },
+              );
+            },
+          ),
+        );
+      }
+    }
+
+     for (final widget in latestActionWidgets.where((w) => w.type == WidgetEnum.add_payment.value)) {
+      for (final action in widget.addPayment) {
+        actionButtons.add(
+          BlocBuilder<ChatBloc, ChatState>(
+            builder: (context, state) {
+              bool isApiLoading = state is ChatLoading;
+              return _buildActionButton(
+                text: action.buttonText,
+                onTap: isApiLoading ? () {} : () async {
+                  
+              final result = await AddCardBottomSheet.show(context);
+                if (result != null) {
+                  debugPrint('PM: ${result['paymentMethodId']} '
+                      '${result['brand']} **** ${result['last4']}');
+                }
+                },
+              );
+            },
+          ),
+        );
+      }
+    }
+
+    for (final widgetType in [WidgetEnum.add_more.value, WidgetEnum.proceed_to_checkout.value, WidgetEnum.cash_on_delivery.value]) {
       final widgets = latestActionWidgets.where((w) => w.type == widgetType);
       for (final widget in widgets) {
         for (final item in widget.rawItems) {
@@ -1393,6 +1505,38 @@ class _ChatScreenBody extends StatelessWidget {
       return '$symbol ${value.toStringAsFixed(value.truncateToDouble() == value ? 0 : 2)}';
     }
     return 'AED${value.toStringAsFixed(value.truncateToDouble() == value ? 0 : 2)}';
+  }
+
+  Widget _buildCartWidget(List<WidgetAction> cartItems) {
+    return CartWidget(cartItems: cartItems);
+  }
+
+  Widget _buildChooseAddressWidget(List<AddressOption> addressOptions) {
+    return ChooseAddressWidget(
+      addressOptions: addressOptions,
+      onAddressSelected: (selectedAddress) {
+        // Handle address selection
+        print('Selected address: ${selectedAddress.name} - ${selectedAddress.address}');
+      },
+      onSendMessage: (message) {
+        // Automatically send the selected address message
+        onSendMessage(message);
+      },
+    );
+  }
+
+  Widget _buildChooseCardWidget(List<CardOption> cardOptions) {
+    return ChooseCardWidget(
+      cardOptions: cardOptions,
+      onCardSelected: (selectedCard) {
+        // Handle card selection
+        print('Selected card: ${selectedCard.title}');
+      },
+      onSendMessage: (message) {
+        // Automatically send the selected card message
+        onSendMessage(message);
+      },
+    );
   }
 }
 

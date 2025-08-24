@@ -9,7 +9,7 @@ import 'package:chat_bot/bloc/restaurant_menu/restaurant_menu_state.dart';
 import 'package:chat_bot/widgets/menu_item_card.dart';
 
 class RestaurantMenuScreen extends StatefulWidget {
-  final SeeMoreAction? actionData;
+  final WidgetAction? actionData;
 
   const RestaurantMenuScreen({super.key, this.actionData});
 

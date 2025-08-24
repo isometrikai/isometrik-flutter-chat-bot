@@ -7,7 +7,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 class RestaurantMenuBloc extends Bloc<RestaurantMenuEvent, RestaurantMenuState> {
   final RestaurantMenuRepository repository;
-  final SeeMoreAction? actionData;
+  final WidgetAction? actionData;
 
   RestaurantMenuBloc({
     RestaurantMenuRepository? repository,

@@ -28,7 +28,7 @@ class AuthService {
   double? _latitude;
 
   // Endpoints
-  static const String _chatEndpoint = '/v2/chatbot';
+  // static const String _chatEndpoint = '/v2/chatbot';
 
   // Use universal API client
   late final ApiClient _serviceClient = UniversalApiClient.instance.serviceClient;
@@ -74,21 +74,80 @@ class AuthService {
   }
 
   // Chatbot API
+  // Future<MyGPTsResponse?> getChatbotData() async {
+  //   final res = await _serviceClient.get(
+  //     '/v1/guest/mygpts',
+  //     queryParameters: {'id': _chatBotId},
+  //   );
+  //   if (res.isSuccess && res.data != null) {
+  //     try {
+  //       final parsed = MyGPTsResponse.fromJson(res.data as Map<String, dynamic>);
+  //       return parsed;
+  //     } catch (e) {
+  //       AppLog.info('Parsing error (getChatbotData): $e');
+  //       return null;
+  //     }
+  //   }
+  //   return null;
+  // }
+
   Future<MyGPTsResponse?> getChatbotData() async {
-    final res = await _serviceClient.get(
-      '/v1/guest/mygpts',
-      queryParameters: {'id': _chatBotId},
-    );
-    if (res.isSuccess && res.data != null) {
-      try {
-        final parsed = MyGPTsResponse.fromJson(res.data as Map<String, dynamic>);
-        return parsed;
-      } catch (e) {
-        AppLog.info('Parsing error (getChatbotData): $e');
-        return null;
-      }
+    // Temporary: Direct data loading (remove this when API is ready)
+    try {
+      final mockResponseData = {
+        "message": "Data Found Successfully",
+        "data": [
+          {
+            "id": 1476,
+            "bot_identifier": "Q&A Chat bot",
+            "account_id": "66c46aea7a6029b9913b3218",
+            "project_id": "6f887002-2c47-48ca-a405-0f965ee40261",
+            "name": "Eazy Assistant",
+            "user_id": "66c46aea7a6029b9913b3218_api-client",
+            "ui_preferences": {
+              "mode_theme": 1,
+              "primary_color": "#3F51B5",
+              "bot_bubble_color": "#3F51B5",
+              "user_bubble_color": "#3F51B5",
+              "font_size": "12px",
+              "font_style": "Arial",
+              "bot_bubble_font_color": "#FFFFFF",
+              "user_bubble_font_color": "#FFFFFF",
+              "launcher_image": "",
+              "launcher_welcome_message": "Hi! I'm your personal assistant. How can I help you today?",
+              "selected_launcher_image_type": 1
+            },
+            "timezone": "64e5c1f0017128d0df5840cb",
+            "template_id": null,
+            "suggested_replies": [],
+            "profile_image": "https://admin-media1.isometrik.io/ai_bot/_R92GTTRG5.jpg",
+            "status": [
+              {
+                "id": "66c46aea7a6029b9913b3218_api-client",
+                "timestamp": 1750744489,
+                "statusText": "ACTIVE"
+              }
+            ],
+            "created_at": "2025-06-24 05:54:49",
+            "bot_type": "CUSTOMIZED_BOT",
+            "welcome_message": [
+              "Hi! I'm your personal assistant. How can I help you today?"
+            ],
+            "app_type": 1
+          }
+        ],
+        "count": 1
+      };
+
+      // Simulate network delay (optional)
+      await Future.delayed(Duration(milliseconds: 300));
+
+      final parsed = MyGPTsResponse.fromJson(mockResponseData);
+      return parsed;
+    } catch (e) {
+      AppLog.info('Parsing error (getChatbotData - temp): $e');
+      return null;
     }
-    return null;
   }
 
   Future<GreetingResponse?> getInitialOptionData() async {

@@ -1,5 +1,9 @@
 import 'dart:convert';
 
+import '../../utils/enum.dart';
+import '../../widgets/choose_address_widget.dart';
+import '../../widgets/choose_card_widget.dart';
+
 // Main Chat Response Model
 class ChatResponse {
   final String text;
@@ -43,6 +47,9 @@ class ChatResponse {
   List<ChatWidget> get optionsWidgets => getWidgetsByType('options');
   // Helper method to get see_more widgets specifically
   List<ChatWidget> get seeMoreWidgets => getWidgetsByType('see_more');
+  List<ChatWidget> get cartWidgets => getWidgetsByType('cart');
+  List<ChatWidget> get chooseAddressWidgets => getWidgetsByType('choose_address');
+  List<ChatWidget> get chooseCardWidgets => getWidgetsByType('choose_card');
 
   @override
   String toString() {
@@ -83,11 +90,16 @@ class ChatWidget {
   }
 
   // Helper methods for different widget types
-  bool get isOptionsWidget => type == 'options';
-  bool get isStoresWidget => type == 'stores';
-  bool get isProductsWidget => type == 'products';
-  bool get isSeeMoreWidget => type == 'see_more';
-  bool get isMenuWidget => type == 'menu';
+  bool get isOptionsWidget => type == WidgetEnum.options.value;
+  bool get isStoresWidget => type == WidgetEnum.stores.value;
+  bool get isProductsWidget => type == WidgetEnum.products.value;
+  bool get isSeeMoreWidget => type == WidgetEnum.see_more.value;
+  bool get isMenuWidget => type == WidgetEnum.menu.value;
+  bool get isCartWidget => type == WidgetEnum.cart.value;
+  bool get isChooseAddressWidget => type == WidgetEnum.choose_address.value;
+  bool get isChooseCardWidget => type == WidgetEnum.choose_card.value;
+  bool get isAddAddressWidget => type == WidgetEnum.add_address.value;
+  bool get isAddPaymentWidget => type == WidgetEnum.add_payment.value;
   bool get isButtonWidget => type == 'button';
   bool get isInputWidget => type == 'input';
   bool get isImageWidget => type == 'image';
@@ -156,13 +168,23 @@ class ChatWidget {
       : [];
 
   // Get see_more actions (converted to models)
-  List<SeeMoreAction> get seeMore => isSeeMoreWidget
-      ? widget.map((e) => SeeMoreAction.fromJson(e as Map<String, dynamic>)).toList()
+  List<WidgetAction> get seeMore => isSeeMoreWidget
+      ? widget.map((e) => WidgetAction.fromJson(e as Map<String, dynamic>)).toList()
       : [];
 
   // Get menu actions (converted to models)
-  List<SeeMoreAction> get menu => isMenuWidget
-      ? widget.map((e) => SeeMoreAction.fromJson(e as Map<String, dynamic>)).toList()
+  List<WidgetAction> get menu => isMenuWidget
+      ? widget.map((e) => WidgetAction.fromJson(e as Map<String, dynamic>)).toList()
+      : [];
+
+  // Get add_address actions (converted to models)
+  List<WidgetAction> get addAddress => isAddAddressWidget
+      ? widget.map((e) => WidgetAction.fromJson(e as Map<String, dynamic>)).toList()
+      : [];
+
+  // Get add_payment actions (converted to models)
+  List<WidgetAction> get addPayment => isAddPaymentWidget
+      ? widget.map((e) => WidgetAction.fromJson(e as Map<String, dynamic>)).toList()
       : [];
 
   // Get raw stores data (without converting to models)
@@ -191,6 +213,30 @@ class ChatWidget {
     return null;
   }
 
+  // Helper method to get cart items
+  List<WidgetAction> getCartItems() {
+    if (isCartWidget) {
+      return widget.map((item) => WidgetAction.fromJson(item as Map<String, dynamic>)).toList();
+    }
+    return [];
+  }
+
+  // Helper method to get address options
+  List<AddressOption> getAddressOptions() {
+    if (isChooseAddressWidget) {
+      return widget.map((item) => AddressOption.fromJson(item as Map<String, dynamic>)).toList();
+    }
+    return [];
+  }
+
+  // Helper method to get card options
+  List<CardOption> getCardOptions() {
+    if (isChooseCardWidget) {
+      return widget.map((item) => CardOption.fromJson(item as Map<String, dynamic>)).toList();
+    }
+    return [];
+  }
+
   // Get raw store as JSON string by index
   String? getRawStoreAsJsonString(int index) {
     final rawStore = getRawStore(index);
@@ -211,39 +257,39 @@ class ChatWidget {
     return 'ChatWidget(id: $widgetId, type: $type, items: ${widget.length})';
   }
 }
-
-// Usage example extension
-extension ChatWidgetUsage on ChatWidget {
-  // Method to handle item click and get raw JSON
-  String? handleItemClick(int index) {
-    switch (type) {
-      case 'products':
-        return getRawProductAsJsonString(index);
-      case 'stores':
-        return getRawStoreAsJsonString(index);
-      case 'see_more':
-        return getRawItemAsJsonString(index);
-      default:
-        return getRawItemAsJsonString(index);
-    }
-  }
-
-  // Method to get display data for UI (you can still use models for display)
-  List<dynamic> getDisplayItems() {
-    switch (type) {
-      case 'products':
-        return products; // Use Product models for display
-      case 'stores':
-        return stores; // Use Store models for display
-      case 'see_more':
-        return seeMore; // Use SeeMoreAction models for display
-      case 'options':
-        return options;
-      default:
-        return widget;
-    }
-  }
-}
+//
+// // Usage example extension
+// extension ChatWidgetUsage on ChatWidget {
+//   // Method to handle item click and get raw JSON
+//   String? handleItemClick(int index) {
+//     switch (type) {
+//       case 'products':
+//         return getRawProductAsJsonString(index);
+//       case 'stores':
+//         return getRawStoreAsJsonString(index);
+//       case 'see_more':
+//         return getRawItemAsJsonString(index);
+//       default:
+//         return getRawItemAsJsonString(index);
+//     }
+//   }
+//
+//   // Method to get display data for UI (you can still use models for display)
+//   List<dynamic> getDisplayItems() {
+//     switch (type) {
+//       case 'products':
+//         return products; // Use Product models for display
+//       case 'stores':
+//         return stores; // Use Store models for display
+//       case 'see_more':
+//         return seeMore; // Use SeeMoreAction models for display
+//       case 'options':
+//         return options;
+//       default:
+//         return widget;
+//     }
+//   }
+// }
 
 // Keep all your existing model classes (Product, Store, etc.) unchanged
 // ... (all your existing model classes remain the same)
@@ -602,29 +648,51 @@ extension JsonParsingExtension on String {
   }
 }
 
-// See More Action Model for see_more widget
-class SeeMoreAction {
+// See More Action Model for widget
+class WidgetAction {
   final String buttonText;
   final String title;
   final String subtitle;
   final String storeCategoryId;
   final String keyword;
+  final String? quantity;
+  final String? productName;
+  final String? currencySymbol;
+  final num? productPrice;
+  final String? address;
+  final String? name;
 
-  SeeMoreAction({
+  WidgetAction({
     required this.buttonText,
     required this.title,
     required this.subtitle,
     required this.storeCategoryId,
     required this.keyword,
+    this.quantity,
+    this.productName,
+    this.currencySymbol,
+    this.productPrice,
+    this.address,
+    this.name,
   });
 
-  factory SeeMoreAction.fromJson(Map<String, dynamic> json) {
-    return SeeMoreAction(
+  factory WidgetAction.fromJson(Map<String, dynamic> json) {
+    return WidgetAction(
       buttonText: (json['button_text'] ?? json['buttonText'] ?? '').toString(),
       title: (json['title'] ?? '').toString(),
       subtitle: (json['subtitle'] ?? '').toString(),
       storeCategoryId: (json['storecategoryid'] ?? json['storeCategoryId'] ?? '').toString(),
       keyword: (json['keyword'] ?? '').toString(),
+      quantity: json['quantity']?.toString(),
+      productName: json['productName']?.toString(),
+      currencySymbol: json['currencySymbol']?.toString(),
+      productPrice: json['productPrice'] is num 
+          ? json['productPrice'] 
+          : json['productPrice'] is String 
+              ? num.tryParse(json['productPrice']) 
+              : null,
+      address: json['address']?.toString(),
+      name: json['name']?.toString(),
     );
   }
 
@@ -635,6 +703,12 @@ class SeeMoreAction {
       'subtitle': subtitle,
       'storecategoryid': storeCategoryId,
       'keyword': keyword,
+      'quantity': quantity,
+      'productName': productName,
+      'currencySymbol': currencySymbol,
+      'productPrice': productPrice,
+      'address': address,
+      'name': name,
     };
   }
 }

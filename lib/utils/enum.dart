@@ -18,6 +18,9 @@ enum WidgetEnum {
   order_completed,
   rating,
   options,
+  cash_on_delivery,
+  choose_address,
+  choose_card,
   points;
 
   // Add string values for API communication
