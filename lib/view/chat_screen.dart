@@ -540,28 +540,31 @@ class _ChatScreenBody extends StatelessWidget {
             bool isApiLoading = state is ChatLoading;
             return Row(
               children: [
-                IconButton(
-                  icon: Opacity(
-                    opacity: isApiLoading ? 0.4 : 1.0,
-                    child: SvgPicture.asset(
-                      'assets/images/ic_reload.svg',
-                      width: 40,
-                      height: 40,
+                // Only show reload and cart icons if there are messages
+                if (messages.isNotEmpty) ...[
+                  IconButton(
+                    icon: Opacity(
+                      opacity: isApiLoading ? 0.4 : 1.0,
+                      child: SvgPicture.asset(
+                        'assets/images/ic_reload.svg',
+                        width: 40,
+                        height: 40,
+                      ),
                     ),
+                    onPressed: isApiLoading ? null : () => _showNewChatConfirmation(context),
                   ),
-                  onPressed: isApiLoading ? null : () => _showNewChatConfirmation(context),
-                ),
-                IconButton(
-                  icon: Opacity(
-                    opacity: isApiLoading ? 0.4 : 1.0,
-                    child: SvgPicture.asset(
-                      'assets/images/ic_cart.svg',
-                      width: 40,
-                      height: 40,
+                  IconButton(
+                    icon: Opacity(
+                      opacity: isApiLoading ? 0.4 : 1.0,
+                      child: SvgPicture.asset(
+                        'assets/images/ic_cart.svg',
+                        width: 40,
+                        height: 40,
+                      ),
                     ),
+                    onPressed: isApiLoading ? null : () => _showNewChatConfirmation(context),
                   ),
-                  onPressed: isApiLoading ? null : () => _showNewChatConfirmation(context),
-                ),
+                ],
                 IconButton(
                   icon: SvgPicture.asset(
                     'assets/images/ic_close.svg',
