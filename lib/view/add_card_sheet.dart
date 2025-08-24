@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
-import 'package:chat_bot/utils/app_constants.dart';
+import 'package:chat_bot/widgets/screen_header.dart';
 
 /// Modal bottom sheet with a single Stripe CardField for card input
 class AddCardBottomSheet extends StatefulWidget {
@@ -63,42 +63,10 @@ class _AddCardBottomSheetState extends State<AddCardBottomSheet> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              children: [
-                const Expanded(
-                  child: Text(
-                    'Please provide your card details',
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.w700,
-                      color: Color(0xFF171212),
-                    ),
-                  ),
-                ),
-                Container(
-                  width: 24,
-                  height: 24,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFF6F6F6),
-                    borderRadius: BorderRadius.circular(38.18),
-                  ),
-                  child: IconButton(
-                    padding: EdgeInsets.zero,
-                    iconSize: 16,
-                    onPressed: () => Navigator.of(context).maybePop(),
-                    icon: const Icon(Icons.close, color: Color(0xFF585C77), size: 16),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            const Text(
-              'Note: Please ensure your card can be used for online transactions.',
-              style: TextStyle(
-                fontSize: 14,
-                height: 1.4,
-                color: Color(0xFF242424),
-              ),
+            const ScreenHeader(
+              title: 'Please provide your card details',
+              subtitle: 'Note: Please ensure your card can be used for online transactions.',
+              padding: EdgeInsets.zero,
             ),
             const SizedBox(height: 16),
             // Single Stripe textfield that contains number/expiry/cvc

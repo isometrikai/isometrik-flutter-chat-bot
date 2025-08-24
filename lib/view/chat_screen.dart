@@ -384,7 +384,6 @@ class _ChatScreenBody extends StatelessWidget {
                 onUpdateMessages(updatedMessages);
                 onScrollToBottom();
               } else {
-                // _showErrorToast(context, 'Something went wrong please try again later');
                 BlackToastView.show(context, 'Something went wrong please try again later');
               }
             }
@@ -512,45 +511,20 @@ class _ChatScreenBody extends StatelessWidget {
           'assets/images/ic_history.svg',
           width: 40,
           height: 40,
+          fit: BoxFit.cover,
         ),
         onPressed: () {},
       ),
       title: Row(
         children: [
           Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              color: Colors.blue,
-              shape: BoxShape.circle,
-              border: Border.all(
-                color: Colors.grey.shade300,
-                width: 0.5,
-              ),
-            ),
             child: (chatbotData.data.isNotEmpty &&
                    chatbotData.data.first.profileImage.isNotEmpty)
-                ? Image.network(
-                    chatbotData.data.first.profileImage,
-                    width: 40,
-                    height: 40,
+                ? SvgPicture.asset(
+                    'assets/images/ic_header_logo.svg',
+                    width: 80,
+                    height: 23,
                     fit: BoxFit.cover,
-                    loadingBuilder: (context, child, loadingProgress) {
-                      if (loadingProgress == null) return child;
-                      return const Center(
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                        ),
-                      );
-                    },
-                    errorBuilder: (context, error, stackTrace) {
-                      return const Icon(
-                        Icons.calendar_today,
-                        color: Colors.white,
-                        size: 20,
-                      );
-                    },
                   )
                 : const Icon(
                     Icons.calendar_today,
@@ -571,6 +545,17 @@ class _ChatScreenBody extends StatelessWidget {
                     opacity: isApiLoading ? 0.4 : 1.0,
                     child: SvgPicture.asset(
                       'assets/images/ic_reload.svg',
+                      width: 40,
+                      height: 40,
+                    ),
+                  ),
+                  onPressed: isApiLoading ? null : () => _showNewChatConfirmation(context),
+                ),
+                IconButton(
+                  icon: Opacity(
+                    opacity: isApiLoading ? 0.4 : 1.0,
+                    child: SvgPicture.asset(
+                      'assets/images/ic_cart.svg',
                       width: 40,
                       height: 40,
                     ),
@@ -1039,9 +1024,7 @@ class _ChatScreenBody extends StatelessWidget {
                 return _GreetingOptionTile(
                   text: opt,
                   onTap: () {
-                    messageController.text = opt;
-                    messageController.selection = TextSelection.collapsed(offset: opt.length);
-                    FocusScope.of(context).requestFocus(messageFocusNode);
+                    onSendMessage(opt);
                   },
                 );
               }).toList(),

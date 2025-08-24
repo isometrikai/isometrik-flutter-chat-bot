@@ -1,12 +1,12 @@
 import 'package:chat_bot/data/model/chat_response.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:chat_bot/data/model/restaurant_menu_response.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:chat_bot/bloc/restaurant_menu/restaurant_menu_bloc.dart';
 import 'package:chat_bot/bloc/restaurant_menu/restaurant_menu_event.dart';
 import 'package:chat_bot/bloc/restaurant_menu/restaurant_menu_state.dart';
 import 'package:chat_bot/widgets/menu_item_card.dart';
+import 'package:chat_bot/widgets/screen_header.dart';
 
 class RestaurantMenuScreen extends StatefulWidget {
   final WidgetAction? actionData;
@@ -21,7 +21,6 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
   static const Color _purple = Color(0xFF8E2FFD);
   static const Color _border = Color(0xFFD8DEF3);
   static const Color _labelGrey = Color(0xFF979797);
-  static const Color _subtitle = Color(0xFF6E4185);
   static const Color _veg = Color(0xFF66BB6A);
   static const Color _nonVeg = Color(0xFFF44336);
 
@@ -70,7 +69,10 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
-                      _buildTopBar(context),
+                      const ScreenHeader(
+                        title: 'Soup & Salad Co has amazing arabic food.',
+                        subtitle: 'Here are their popular dishes',
+                      ),
                       const SizedBox(height: 16),
                       _buildSearchBar(theme),
                       const SizedBox(height: 16),
@@ -122,43 +124,7 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
     );
   }
 
-  Widget _buildTopBar(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: <Widget>[
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              Text(
-                'Soup & Salad Co has amazing arabic food.',
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.w700,
-                      color: const Color(0xFF171212),
-                    ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Here are their popular dishes',
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: _subtitle,
-                      fontSize: 14,
-                    ),
-              ),
-            ],
-          ),
-        ),
-         IconButton(
-                  icon: SvgPicture.asset(
-                    'assets/images/ic_close.svg',
-                    width: 40,
-                    height: 40,
-                  ),
-                  onPressed: () => Navigator.of(context).maybePop(),
-                ),
-      ],
-    );
-  }
+
 
   Widget _buildSearchBar(ThemeData theme) {
     return Container(

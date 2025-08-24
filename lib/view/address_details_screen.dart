@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../widgets/screen_header.dart';
 
 class AddressDetailsScreen extends StatefulWidget {
   const AddressDetailsScreen({super.key});
@@ -43,7 +44,6 @@ class _AddressDetailsScreenState extends State<AddressDetailsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
@@ -58,13 +58,10 @@ class _AddressDetailsScreenState extends State<AddressDetailsScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                     const SizedBox(height: 32),
-                    Text(
-                      'Please provide your\ncomplete address',
-                      style: theme.textTheme.titleLarge?.copyWith(
-                        fontSize: 24,
-                        fontWeight: FontWeight.w700,
-                        color: const Color(0xFF171212),
-                      ),
+                    const ScreenHeader(
+                      title: 'Please provide your\ncomplete address',
+                      showCloseButton: false,
+                      padding: EdgeInsets.zero,
                     ),
                     const SizedBox(height: 24),
                     // _InputField(controller: _fullAddressController),

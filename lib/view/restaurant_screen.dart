@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../data/model/chat_response.dart';
 import '../widgets/store_card.dart';
+import '../widgets/screen_header.dart';
 import 'package:chat_bot/bloc/chat_event.dart';
 import 'package:chat_bot/bloc/restaurant/restaurant_bloc.dart';
 import 'package:chat_bot/bloc/restaurant/restaurant_event.dart';
@@ -73,7 +73,10 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
                   child: Column(
                     children: [
                       const SizedBox(height: 24),
-                      _buildTitleSection(),
+                      ScreenHeader(
+                        title: widget.actionData?.title ?? '',
+                        subtitle: widget.actionData?.subtitle ?? '',
+                      ),
                       const SizedBox(height: 16),
                       _buildSearchBar(),
                       const SizedBox(height: 16),
@@ -91,46 +94,7 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
   }
 
 
-  Widget _buildTitleSection() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-               Text(
-                widget.actionData?.title ?? '',
-                style: TextStyle(
-                  fontWeight: FontWeight.w700,
-                  fontSize: 24,
-                  height: 1.2,
-                  color: Color(0xFF171212),
-                ),
-              ),
-              const SizedBox(height: 12),
-               Text(
-                widget.actionData?.subtitle ?? '',
-                style: TextStyle(
-                  fontSize: 14,
-                  height: 1.4,
-                  color: Color(0xFF6E4185),
-                ),
-              ),
-            ],
-          ),
-        ),
-         IconButton(
-                  icon: SvgPicture.asset(
-                    'assets/images/ic_close.svg',
-                    width: 40,
-                    height: 40,
-                  ),
-                  onPressed: () => Navigator.pop(context),
-                ),
-      ],
-    );
-  }
+
 
   Widget _buildSearchBar() {
     return Container(
