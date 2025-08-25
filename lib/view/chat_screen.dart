@@ -215,6 +215,19 @@ class _ChatScreenState extends State<ChatScreen> {
     });
   }
 
+  // Method to hide store cards when Add button is clicked
+  void _hideStoreCards() {
+    setState(() {
+      // Find the last bot message with store cards and hide them
+      for (int i = messages.length - 1; i >= 0; i--) {
+        if (messages[i].isBot && messages[i].hasStoreCards) {
+          messages[i] = messages[i].copyWith(hasStoreCards: false);
+          break;
+        }
+      }
+    });
+  }
+
   @override
   void initState() {
     super.initState();
@@ -300,6 +313,7 @@ class _ChatScreenState extends State<ChatScreen> {
         textFieldHeight: _textFieldHeight,
         onUpdateTextFieldHeight: _updateTextFieldHeight,
         latestActionWidgets: _latestActionWidgets,
+        onHideStoreCards: _hideStoreCards, // Add the callback
       ),
     );
   }
@@ -327,6 +341,7 @@ class _ChatScreenBody extends StatelessWidget {
   final double textFieldHeight;
   final Function(double) onUpdateTextFieldHeight;
   final List<ChatWidget> latestActionWidgets;
+  final VoidCallback onHideStoreCards; // Add callback to hide store cards
 
   const _ChatScreenBody({
     required this.messageController,
@@ -350,6 +365,7 @@ class _ChatScreenBody extends StatelessWidget {
     required this.textFieldHeight,
     required this.onUpdateTextFieldHeight,
     required this.latestActionWidgets,
+    required this.onHideStoreCards, // Add the callback parameter
   });
 
   @override
@@ -1147,7 +1163,7 @@ class _ChatScreenBody extends StatelessWidget {
                       builder: (context) => RestaurantScreen(
                         actionData: action,
                         onAddToCart: (event) {
-                          context.read<ChatBloc>().add(event);
+                          // context.read<ChatBloc>().add(event);
                         },
                       ),
                     ),
@@ -1440,9 +1456,10 @@ class _ChatScreenBody extends StatelessWidget {
           store: store,
           storesWidget: storesWidget,
           index: index,
-          onAddToCart: (event) {
-            context.read<ChatBloc>().add(event);
+          onAddToCart: (message) {  
+            onSendMessage(message);
           },
+          onHide: onHideStoreCards, // Use the callback from parent
         );
       },
     );
@@ -1474,11 +1491,14 @@ class _ChatScreenBody extends StatelessWidget {
             originalPrice: basePriceText,
             isVeg: !product.containsMeat,
             imageUrl: product.productImage.isNotEmpty ? product.productImage : null,
-            onAdd: () {
+            onClick: () {
               if (productsWidget != null) {
                 final Map<String, dynamic>? productJson = productsWidget.getRawProduct(index);
                 OrderService().triggerProductOrder(productJson ?? {});
               }
+            },
+            onAddToCart: (message) {
+              onSendMessage(message);
             },
           );
         },

@@ -362,7 +362,7 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
                 purple: _purple,
                 vegColor: _veg,
                 nonVegColor: _nonVeg,
-                onAdd: () {},
+                onClick: () {},
               );
             },
           ),

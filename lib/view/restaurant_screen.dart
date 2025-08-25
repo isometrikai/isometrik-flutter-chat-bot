@@ -10,7 +10,7 @@ import 'package:chat_bot/bloc/restaurant/restaurant_state.dart';
 
 class RestaurantScreen extends StatefulWidget {
   final WidgetAction? actionData;
-  final Function(AddToCartEvent)? onAddToCart;
+  final Function(String)? onAddToCart;
 
   const RestaurantScreen({
     super.key, 

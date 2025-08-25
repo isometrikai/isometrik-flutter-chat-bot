@@ -7,7 +7,8 @@ class MenuItemCard extends StatelessWidget {
   final String originalPrice;
   final bool isVeg;
   final String? imageUrl;
-  final VoidCallback? onAdd;
+  final VoidCallback? onClick;
+  final Function(String)? onAddToCart;
 
   final Color purple;
   final Color vegColor;
@@ -20,7 +21,8 @@ class MenuItemCard extends StatelessWidget {
     required this.originalPrice,
     required this.isVeg,
     this.imageUrl,
-    this.onAdd,
+    this.onClick,
+    this.onAddToCart,
     this.purple = const Color(0xFF8E2FFD),
     this.vegColor = const Color(0xFF66BB6A),
     this.nonVegColor = const Color(0xFFF44336),
@@ -136,7 +138,11 @@ class MenuItemCard extends StatelessWidget {
                 ),
                 padding: const EdgeInsets.symmetric(horizontal: 10),
               ),
-              onPressed: onAdd,
+              onPressed: () {
+                if (onAddToCart != null) {
+                  onAddToCart!("Add $title to cart");
+                }
+              },
               child: Text(
                 'Add',
                 style: TextStyle(

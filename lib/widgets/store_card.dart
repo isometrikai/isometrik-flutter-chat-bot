@@ -9,7 +9,8 @@ class StoreCard extends StatelessWidget {
   final int index;
   final EdgeInsets? margin;
   final VoidCallback? onTap;
-  final Function(AddToCartEvent)? onAddToCart;
+  final Function(String)? onAddToCart;
+  final VoidCallback? onHide; // New callback to hide the widget
 
   const StoreCard({
     super.key,
@@ -19,6 +20,7 @@ class StoreCard extends StatelessWidget {
     this.margin,
     this.onTap,
     this.onAddToCart,
+    this.onHide, // Add the new parameter
   });
 
   @override
@@ -131,6 +133,7 @@ class StoreCard extends StatelessWidget {
                     product: store.products[i],
                     store: store,
                     onAddToCart: onAddToCart,
+                    onHide: onHide, // Pass the onHide callback
                   ),
                   separatorBuilder: (_, __) => const SizedBox(width: 10),
                   itemCount: store.products.length,
@@ -183,12 +186,14 @@ class StoreCard extends StatelessWidget {
 class _ProductPreviewTile extends StatelessWidget {
   final Product product;
   final Store store;
-  final Function(AddToCartEvent)? onAddToCart;
+  final Function(String)? onAddToCart;
+  final VoidCallback? onHide; // New parameter for hiding the widget
 
   const _ProductPreviewTile({
     required this.product,
     required this.store,
     this.onAddToCart,
+    this.onHide, // Add the new parameter
   });
   @override
   Widget build(BuildContext context) {
@@ -271,18 +276,11 @@ class _ProductPreviewTile extends StatelessWidget {
             child: GestureDetector(
               onTap: () {
                 if (onAddToCart != null) {
-                  final event = AddToCartEvent(
-                    storeId: store.storeId,
-                    cartType: 1, // Default cart type
-                    action: 1, // Add action
-                    newQuantity: 1, // Default quantity
-                    storeTypeId: store.type,
-                    storeCategoryId: store.storeCategoryId,
-                    productId: product.childProductId,
-                    centralProductId: product.parentProductId,
-                    quantity: "1",
-                  );
-                  onAddToCart!(event);
+                  onAddToCart!("Add ${product.productName} from ${store.storename} to cart");
+                }
+                
+                if (onHide != null) {
+                  onHide!();
                 }
               },
               child: Container(
