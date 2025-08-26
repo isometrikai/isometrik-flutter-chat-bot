@@ -9,7 +9,7 @@ class StoreCard extends StatelessWidget {
   final int index;
   final EdgeInsets? margin;
   final VoidCallback? onTap;
-  final Function(String)? onAddToCart;
+  final Function(String, Product, Store)? onAddToCart;
   final VoidCallback? onHide; // New callback to hide the widget
 
   const StoreCard({
@@ -76,7 +76,7 @@ class StoreCard extends StatelessWidget {
                           const Icon(Icons.star, size: 14, color: Color(0xFFA674BF)),
                           const SizedBox(width: 4),
                           Text(
-                            store.avgRating > 0 ? store.avgRating.toStringAsFixed(1) : 'New',
+                            store.avgRating.toString(),
                             style: const TextStyle(
                               fontSize: 12,
                               height: 1.4,
@@ -186,7 +186,7 @@ class StoreCard extends StatelessWidget {
 class _ProductPreviewTile extends StatelessWidget {
   final Product product;
   final Store store;
-  final Function(String)? onAddToCart;
+  final Function(String, Product, Store)? onAddToCart;
   final VoidCallback? onHide; // New parameter for hiding the widget
 
   const _ProductPreviewTile({
@@ -276,7 +276,7 @@ class _ProductPreviewTile extends StatelessWidget {
             child: GestureDetector(
               onTap: () {
                 if (onAddToCart != null) {
-                  onAddToCart!("Add ${product.productName} from ${store.storename} to cart");
+                  onAddToCart!("Add ${product.productName} from ${store.storename} to cart", product, store);
                 }
                 
                 if (onHide != null) {

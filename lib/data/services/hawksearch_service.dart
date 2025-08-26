@@ -144,13 +144,13 @@ class HawkSearchService {
         ? _firstString(doc['storename'])
         : (storeData['storeName']?.toString() ?? '');
 
-    final double avgRating = (() {
-      final String r = _firstString(doc['avgrating']);
-      if (r.isNotEmpty) return double.tryParse(r) ?? 0.0;
-      final dynamic sd = storeData['avgRating'];
-      if (sd is num) return sd.toDouble();
-      return 0.0;
-    })();
+    // final double avgRating = (() {
+    //   final String r = _firstString(doc['avgrating']);
+    //   if (r.isNotEmpty) return double.tryParse(r) ?? 0.0;
+    //   final dynamic sd = storeData['avgRating'];
+    //   if (sd is num) return sd.toDouble();
+    //   return 0.0;
+    // })();
 
     final String cuisineDetails = (() {
       final List<dynamic> cl = (doc['categorylist'] as List<dynamic>? ?? []);
@@ -169,14 +169,18 @@ class HawkSearchService {
 
     final String distanceStr = (() {
       // distance array: [{ 'storelocation': miles, 'unit': 'Miles' }]
-      final List<dynamic> dl = (doc['distance'] as List<dynamic>? ?? []);
-      if (dl.isNotEmpty && dl.first is Map<String, dynamic>) {
-        final dynamic milesVal = (dl.first as Map<String, dynamic>)['storelocation'];
-        final double miles = milesVal is num ? milesVal.toDouble() : 0.0;
-        final double km = miles * 1.60934;
-        return km.toStringAsFixed(1);
-      }
-      return '0.0';
+      final distances = doc['distance'] as List<dynamic>? ?? [];
+
+      if (distances.isEmpty) return '0.0';
+
+      final firstDistance = distances.first;
+      if (firstDistance is! Map<String, dynamic>) return '0.0';
+
+      final milesValue = firstDistance['storelocation'];
+      final miles = milesValue is num ? milesValue.toDouble() : 0.0;
+
+      final kilometers = miles * 1.60934;
+      return kilometers.toStringAsFixed(1) + ' km';
     })();
 
     final String storeId = (() {
@@ -189,6 +193,14 @@ class HawkSearchService {
       final String fromDoc = _firstString(doc['storecategoryid']);
       if (fromDoc.isNotEmpty) return fromDoc;
       return storeData['storeCategoryId']?.toString() ?? '';
+    })();
+
+    final double avgRating = (() {
+      final dynamic sd = storeData['avgRating'];
+      if (sd is num) {
+        return double.parse(sd.toDouble().toStringAsFixed(1));
+      }
+      return 0.0;
     })();
 
     // Extra fields from storeData.metaData

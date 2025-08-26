@@ -1162,8 +1162,11 @@ class _ChatScreenBody extends StatelessWidget {
                     MaterialPageRoute(
                       builder: (context) => RestaurantScreen(
                         actionData: action,
-                        onAddToCart: (event) {
-                          // context.read<ChatBloc>().add(event);
+                        onCheckout: (List<String> addedProducts) {
+                          if (addedProducts.isNotEmpty) {
+                            final productsMessage = addedProducts.join(',\n');
+                            onSendMessage("I've added these items to my cart:\n\n$productsMessage");
+                          }
                         },
                       ),
                     ),
@@ -1190,6 +1193,12 @@ class _ChatScreenBody extends StatelessWidget {
                     MaterialPageRoute(
                       builder: (context) => RestaurantMenuScreen(
                         actionData: action,
+                        onCheckout: (List<String> addedProducts) {
+                          if (addedProducts.isNotEmpty) {
+                            final productsMessage = addedProducts.join(',\n');
+                            onSendMessage("I've added these items to my cart:\n\n$productsMessage");
+                          }
+                        },
                       ),
                     ),
                   );
@@ -1456,7 +1465,7 @@ class _ChatScreenBody extends StatelessWidget {
           store: store,
           storesWidget: storesWidget,
           index: index,
-          onAddToCart: (message) {  
+          onAddToCart: (message, product, store) {  
             onSendMessage(message);
           },
           onHide: onHideStoreCards, // Use the callback from parent

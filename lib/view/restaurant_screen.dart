@@ -10,12 +10,12 @@ import 'package:chat_bot/bloc/restaurant/restaurant_state.dart';
 
 class RestaurantScreen extends StatefulWidget {
   final WidgetAction? actionData;
-  final Function(String)? onAddToCart;
+  final Function(List<String>)? onCheckout;
 
   const RestaurantScreen({
     super.key, 
     this.actionData,
-    this.onAddToCart,
+    this.onCheckout,
   });
 
   @override
@@ -27,6 +27,11 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
   late final RestaurantBloc _bloc;
   String _currentKeyword = '';
   DateTime? _lastQueryAt;
+  
+  // Cart state
+  double _cartTotal = 0.00;
+  int _cartItems = 0;
+  List<String> _addedProducts = []; // Track which products are added
 
   @override
   void dispose() {
@@ -58,6 +63,29 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
     _bloc.add(RestaurantFetchRequested(keyword: _currentKeyword));
   }
 
+  void _onAddToCart() {
+    // Handle add to cart action - show added products
+    print("Added Products: $_addedProducts");
+    print("Total Items: $_cartItems");
+    print("Total Price: Đ$_cartTotal");
+    
+    // Call the callback with added products and close the screen
+    if (widget.onCheckout != null && _addedProducts.isNotEmpty) {
+      widget.onCheckout!(_addedProducts);
+    }
+    
+    // Close the screen
+    Navigator.of(context).pop();
+  }
+
+  void _clearCart() {
+    setState(() {
+      _cartItems = 0;
+      _cartTotal = 0.00;
+      _addedProducts.clear();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocProvider.value(
@@ -65,24 +93,125 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
       child: Scaffold(
         backgroundColor: Colors.white,
         body: SafeArea(
-          child: Column(
+          child: Stack(
             children: [
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Column(
-                    children: [
-                      const SizedBox(height: 24),
-                      ScreenHeader(
-                        title: widget.actionData?.title ?? '',
-                        subtitle: widget.actionData?.subtitle ?? '',
+              // Main content
+              Column(
+                children: [
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: Column(
+                        children: [
+                          const SizedBox(height: 24),
+                          ScreenHeader(
+                            title: widget.actionData?.title ?? '',
+                            subtitle: widget.actionData?.subtitle ?? '',
+                            onClose: () {
+                              _onAddToCart();
+                            },
+                          ),
+                          const SizedBox(height: 16),
+                          _buildSearchBar(),
+                          const SizedBox(height: 16),
+                                                  Expanded(child: _buildRestaurantList()),
+                        // Add bottom padding to account for the cart bar (only when items exist)
+                        if (_cartItems > 0) const SizedBox(height: 105),
+                        ],
                       ),
-                      const SizedBox(height: 16),
-                      _buildSearchBar(),
-                      const SizedBox(height: 16),
-                      Expanded(child: _buildRestaurantList()),
-                      const SizedBox(height: 16),
-                    ],
+                    ),
+                  ),
+                ],
+              ),
+              // Bottom cart bar - positioned absolutely at the bottom (only show when items exist)
+              if (_cartItems > 0)
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  child: _buildBottomCartBar(),
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildBottomCartBar() {
+    return Container(
+      width: double.infinity,
+      height: 105.56,
+      padding: const EdgeInsets.only(top: 10),
+      decoration: const BoxDecoration(
+        color: Color(0xFFF5F7FF),
+      ),
+      child: Center(
+        child: Container(
+          width: 343,
+          height: 62,
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              begin: Alignment.centerLeft,
+              end: Alignment.centerRight,
+              colors: [
+                Color(0xFFD445EC),
+                Color(0xFFB02EFB),
+                Color(0xFF8E2FFD),
+                Color(0xFF5E3DFE),
+                Color(0xFF5186E0),
+              ],
+              stops: [0.0, 0.27, 0.48, 0.76, 1.0],
+            ),
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Row(
+            children: [
+              // Left side - Price and items
+              Padding(
+                padding: const EdgeInsets.only(left: 25, top: 13),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'د.إ${_cartTotal.toStringAsFixed(2)}',
+                      style: const TextStyle(
+                        fontFamily: 'aed',
+                        fontSize: 16,
+                        fontWeight: FontWeight.w400,
+                        height: 1.2,
+                        color: Colors.white,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      '${_cartItems.toString().padLeft(2, '0')} items',
+                      style: const TextStyle(
+                        fontFamily: 'Plus Jakarta Sans',
+                        fontSize: 12,
+                        fontWeight: FontWeight.w400,
+                        height: 1.4,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const Spacer(),
+              // Right side - Checkout button
+              Padding(
+                padding: const EdgeInsets.only(right: 25),
+                child: GestureDetector(
+                  // onTap: _onAddToCart,
+                  child: const Text(
+                    'Checkout',
+                    style: TextStyle(
+                      fontFamily: 'Plus Jakarta Sans',
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                      height: 1.2,
+                      color: Colors.white,
+                    ),
                   ),
                 ),
               ),
@@ -189,7 +318,14 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
                 onTap: () {
                   Navigator.pop(context);
                 },
-                onAddToCart: widget.onAddToCart,
+                onAddToCart: (message, product, store) {
+                  // Update cart state when items are added
+                  setState(() {
+                    _cartItems++;
+                    _cartTotal += product.finalPrice; // Use actual product price
+                    _addedProducts.add(message); // Add the product message to the list
+                  });
+                },
               );
             } catch (e) {
               return Container(

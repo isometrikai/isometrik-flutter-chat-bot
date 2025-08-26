@@ -10,8 +10,9 @@ import 'package:chat_bot/widgets/screen_header.dart';
 
 class RestaurantMenuScreen extends StatefulWidget {
   final WidgetAction? actionData;
+  final Function(List<String>)? onCheckout;
 
-  const RestaurantMenuScreen({super.key, this.actionData});
+  const RestaurantMenuScreen({super.key, this.actionData, this.onCheckout});
 
   @override
   State<RestaurantMenuScreen> createState() => _RestaurantMenuScreenState();
@@ -34,6 +35,11 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
   bool _filterVeg = false;
   bool _filterNonVeg = false;
 
+  // Cart state
+  double _cartTotal = 0.00;
+  int _cartItems = 0;
+  List<String> _addedProducts = []; // Track which products are added
+
   
 
   // Maintain subcategory selection per category for ALL view
@@ -53,6 +59,53 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
     super.dispose();
   }
 
+  void _onAddToCart() {
+    // Handle add to cart action - show added products
+    print("Added Products: $_addedProducts");
+    print("Total Items: $_cartItems");
+    print("Total Price: Đ$_cartTotal");
+    
+    // Call the callback with added products and close the screen
+    if (widget.onCheckout != null && _addedProducts.isNotEmpty) {
+      widget.onCheckout!(_addedProducts);
+    }
+    
+    // Close the screen
+    Navigator.of(context).pop();
+  }
+
+  void _clearCart() {
+    setState(() {
+      _cartItems = 0;
+      _cartTotal = 0.00;
+      _addedProducts.clear();
+    });
+  }
+
+  double _extractPriceFromString(String priceString) {
+    // Remove all non-numeric characters except decimal point
+    String cleanString = priceString.replaceAll(RegExp(r'[^\d.]'), '');
+    
+    // Remove trailing decimal points
+    cleanString = cleanString.replaceAll(RegExp(r'\.+$'), '');
+    
+    // Handle cases where there might be multiple decimal points (keep only the first one)
+    final parts = cleanString.split('.');
+    if (parts.length > 2) {
+      cleanString = '${parts[0]}.${parts[1]}';
+    }
+    
+    // Parse the cleaned string
+    final price = double.tryParse(cleanString);
+    
+    print("Price extraction debug:");
+    print("  Original: $priceString");
+    print("  Cleaned: $cleanString");
+    print("  Parsed: $price");
+    
+    return price ?? 0.0;
+  }
+
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
@@ -63,15 +116,19 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
         body: SafeArea(
           child: Stack(
             children: <Widget>[
+              // Main content
               Positioned.fill(
                 child: SingleChildScrollView(
-                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+                  padding: EdgeInsets.fromLTRB(16, 16, 16, _cartItems > 0 ? 129 : 24), // Add bottom padding when cart is visible
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
-                      const ScreenHeader(
+                      ScreenHeader(
                         title: 'Soup & Salad Co has amazing arabic food.',
                         subtitle: 'Here are their popular dishes',
+                        onClose: () {
+                          _onAddToCart();
+                        },
                       ),
                       const SizedBox(height: 16),
                       _buildSearchBar(theme),
@@ -117,6 +174,14 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
                   ),
                 ),
               ),
+              // Bottom cart bar - positioned absolutely at the bottom (only show when items exist)
+              if (_cartItems > 0)
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  child: _buildBottomCartBar(),
+                ),
             ],
           ),
         ),
@@ -363,6 +428,17 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
                 vegColor: _veg,
                 nonVegColor: _nonVeg,
                 onClick: () {},
+                onAddToCart: (message) {
+                  // Update cart state when items are added
+                  setState(() {
+                    _cartItems++;
+                    final priceString = item.price.replaceAll('د.إ', '').trim();
+                    final price = double.tryParse(priceString) ?? 0.0;
+                    print("Price debug: Original='${item.price}', Cleaned='$priceString', Parsed=$price");
+                    _cartTotal += price;
+                    _addedProducts.add(message);
+                  });
+                },
               );
             },
           ),
@@ -409,6 +485,90 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
       if (first is String && first.isNotEmpty) return first;
     }
     return null;
+  }
+
+  Widget _buildBottomCartBar() {
+    return Container(
+      width: double.infinity,
+      height: 105.56,
+      padding: const EdgeInsets.only(top: 10),
+      decoration: const BoxDecoration(
+        color: Color(0xFFF5F7FF),
+      ),
+      child: Center(
+        child: Container(
+          width: 343,
+          height: 62,
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              begin: Alignment.centerLeft,
+              end: Alignment.centerRight,
+              colors: [
+                Color(0xFFD445EC),
+                Color(0xFFB02EFB),
+                Color(0xFF8E2FFD),
+                Color(0xFF5E3DFE),
+                Color(0xFF5186E0),
+              ],
+              stops: [0.0, 0.27, 0.48, 0.76, 1.0],
+            ),
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Row(
+            children: [
+              // Left side - Price and items
+              Padding(
+                padding: const EdgeInsets.only(left: 25, top: 13),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'د.إ${_cartTotal.toStringAsFixed(2)}',
+                      style: const TextStyle(
+                        fontFamily: 'aed',
+                        fontSize: 16,
+                        fontWeight: FontWeight.w400,
+                        height: 1.2,
+                        color: Colors.white,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      '${_cartItems.toString().padLeft(2, '0')} items',
+                      style: const TextStyle(
+                        fontFamily: 'Plus Jakarta Sans',
+                        fontSize: 12,
+                        fontWeight: FontWeight.w400,
+                        height: 1.4,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const Spacer(),
+              // Right side - Checkout button
+              Padding(
+                padding: const EdgeInsets.only(right: 25),
+                child: GestureDetector(
+                  // onTap: _onAddToCart,
+                  child: const Text(
+                    'Checkout',
+                    style: TextStyle(
+                      fontFamily: 'Plus Jakarta Sans',
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                      height: 1.2,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   // Removed mock items in favor of API-driven content
