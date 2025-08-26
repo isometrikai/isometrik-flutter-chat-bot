@@ -23,6 +23,9 @@ import 'package:chat_bot/widgets/choose_address_widget.dart';
 import 'package:chat_bot/widgets/choose_card_widget.dart';
 import '../utils/enum.dart';
 
+// Global variable for cart object
+ChatWidget? cartObject;
+
 class ChatScreen extends StatefulWidget {
   final MyGPTsResponse chatbotData;
   final GreetingResponse? greetingData;
@@ -41,7 +44,7 @@ class _ChatScreenState extends State<ChatScreen> {
   String _sessionId = "";
   double _textFieldHeight = 50.0; // Add height state variable
   List<ChatWidget> _latestActionWidgets = []; // Track latest action widgets
-
+  int _totalCartCount = 0; // Track total cart count
   List<ChatMessage> messages = [];
 
   // Returns index of the last bot message that shows stores, products, cart, choose_address, or choose_card widgets; -1 if none
@@ -111,6 +114,10 @@ class _ChatScreenState extends State<ChatScreen> {
     setState(() {
       _textFieldHeight = newHeight;
     });
+  }
+
+  void _updateCartCount(int count) {
+      _totalCartCount = count;
   }
 
   void _handleChatResponse(ChatResponse response) {
@@ -314,6 +321,8 @@ class _ChatScreenState extends State<ChatScreen> {
         onUpdateTextFieldHeight: _updateTextFieldHeight,
         latestActionWidgets: _latestActionWidgets,
         onHideStoreCards: _hideStoreCards, // Add the callback
+        onUpdateCartCount: _updateCartCount, // Add the callback
+        totalCartCount: _totalCartCount, // Pass the cart count
       ),
     );
   }
@@ -342,6 +351,8 @@ class _ChatScreenBody extends StatelessWidget {
   final Function(double) onUpdateTextFieldHeight;
   final List<ChatWidget> latestActionWidgets;
   final VoidCallback onHideStoreCards; // Add callback to hide store cards
+  final Function(int) onUpdateCartCount; // Add callback to update cart count
+  final int totalCartCount; // Add cart count parameter
 
   const _ChatScreenBody({
     required this.messageController,
@@ -366,6 +377,8 @@ class _ChatScreenBody extends StatelessWidget {
     required this.onUpdateTextFieldHeight,
     required this.latestActionWidgets,
     required this.onHideStoreCards, // Add the callback parameter
+    required this.onUpdateCartCount, // Add the callback parameter
+    required this.totalCartCount, // Add the cart count parameter
   });
 
   @override
@@ -379,6 +392,16 @@ class _ChatScreenBody extends StatelessWidget {
         body: BlocConsumer<ChatBloc, ChatState>(
           listener: (context, state) {
             if (state is ChatLoaded) {
+              List<ChatWidget> cartWidgets = state.messages.cartWidgets;
+              int cartCount = 0;
+              if (cartWidgets.isNotEmpty) {
+                cartCount = cartWidgets.first.getCartItems().length;
+              }
+              //  int cartCount = 0;
+              // if (cartObject != null) {
+              //   cartCount = cartObject.widget.length;
+              // }
+              onUpdateCartCount(cartCount);
               onHandleChatResponse(state.messages);
             } else if (state is ChatError) {
               // Check if it's a timeout error
@@ -515,6 +538,11 @@ class _ChatScreenBody extends StatelessWidget {
     );
   }
 
+  // Calculate total cart count from all messages
+  int _getTotalCartCount() {
+    return totalCartCount;
+  }
+
   PreferredSizeWidget _buildAppBar(BuildContext context) {
     return AppBar(
       backgroundColor: Colors.white,
@@ -554,6 +582,7 @@ class _ChatScreenBody extends StatelessWidget {
         BlocBuilder<ChatBloc, ChatState>(
           builder: (context, state) {
             bool isApiLoading = state is ChatLoading;
+            int cartCount = _getTotalCartCount();
             return Row(
               children: [
                 // Only show reload and cart icons if there are messages
@@ -572,10 +601,39 @@ class _ChatScreenBody extends StatelessWidget {
                   IconButton(
                     icon: Opacity(
                       opacity: isApiLoading ? 0.4 : 1.0,
-                      child: SvgPicture.asset(
-                        'assets/images/ic_cart.svg',
-                        width: 40,
-                        height: 40,
+                      child: Stack(
+                        children: [
+                          SvgPicture.asset(
+                            'assets/images/ic_cart.svg',
+                            width: 40,
+                            height: 40,
+                          ),
+                          if (cartCount > 0)
+                            Positioned(
+                              right: 0,
+                              top: 0,
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFF6B46C1), // Purple color
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                constraints: const BoxConstraints(
+                                  minWidth: 20,
+                                  minHeight: 20,
+                                ),
+                                child: Text(
+                                  cartCount.toString(),
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
+                            ),
+                        ],
                       ),
                     ),
                     onPressed: isApiLoading ? null : () => _showNewChatConfirmation(context),

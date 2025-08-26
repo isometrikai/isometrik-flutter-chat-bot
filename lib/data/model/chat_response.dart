@@ -661,6 +661,7 @@ class WidgetAction {
   final num? productPrice;
   final String? address;
   final String? name;
+  final String? productID;
 
   WidgetAction({
     required this.buttonText,
@@ -674,6 +675,7 @@ class WidgetAction {
     this.productPrice,
     this.address,
     this.name,
+    this.productID,
   });
 
   factory WidgetAction.fromJson(Map<String, dynamic> json) {
@@ -693,6 +695,7 @@ class WidgetAction {
               : null,
       address: json['address']?.toString(),
       name: json['name']?.toString(),
+      productID: json['productID']?.toString(),
     );
   }
 
@@ -709,6 +712,7 @@ class WidgetAction {
       'productPrice': productPrice,
       'address': address,
       'name': name,
+      'productID': productID,
     };
   }
 }
