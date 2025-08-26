@@ -452,29 +452,29 @@ class _ChatScreenBody extends StatelessWidget {
                                 child: Row(
                                   crossAxisAlignment: CrossAxisAlignment.end,
                                   children: [
-                                    _buildBotAvatar(),
-                                    const SizedBox(width: 8),
+                                    // _buildBotAvatar(),
+                                    // const SizedBox(width: 8),
                                     Container(
-                                      decoration: BoxDecoration(
-                                          color: Color(
-                                              int.parse(
-                                                  chatbotData
-                                                      .data
-                                                      .first
-                                                      .uiPreferences
-                                                      .botBubbleColor
-                                                      .replaceFirst('#', '0xFF'))),
-                                          borderRadius: const BorderRadius.only(
-                                            topLeft: Radius.circular(8),
-                                            topRight: Radius.circular(8),
-                                            bottomLeft: Radius.circular(0),
-                                            bottomRight: Radius.circular(8),
-                                          ),
-                                          border: Border.all(
-                                            color: Colors.grey.shade300,
-                                            width: 0.5,
-                                          )
-                                      ),
+                                      // decoration: BoxDecoration(
+                                      //     color: Color(
+                                      //         int.parse(
+                                      //             chatbotData
+                                      //                 .data
+                                      //                 .first
+                                      //                 .uiPreferences
+                                      //                 .botBubbleColor
+                                      //                 .replaceFirst('#', '0xFF'))),
+                                      //     borderRadius: const BorderRadius.only(
+                                      //       topLeft: Radius.circular(8),
+                                      //       topRight: Radius.circular(8),
+                                      //       bottomLeft: Radius.circular(0),
+                                      //       bottomRight: Radius.circular(8),
+                                      //     ),
+                                      //     border: Border.all(
+                                      //       color: Colors.grey.shade300,
+                                      //       width: 0.5,
+                                      //     )
+                                      // ),
                                       child: SizedBox(
                                         width: 80,
                                         height: 40,
@@ -815,12 +815,12 @@ class _ChatScreenBody extends StatelessWidget {
           Row(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              if (message.isBot && message.showAvatar) ...[
-                _buildBotAvatar(),
-                const SizedBox(width: 8),
-              ] else if (message.isBot) ...[
-                const SizedBox(width: 48),
-              ],
+              // if (message.isBot && message.showAvatar) ...[
+              //   _buildBotAvatar(),
+              //   const SizedBox(width: 8),
+              // ] else if (message.isBot) ...[
+              //   const SizedBox(width: 48),
+              // ],
               Expanded(
                 child: Column(
                   crossAxisAlignment: message.isBot
@@ -828,22 +828,22 @@ class _ChatScreenBody extends StatelessWidget {
                       : CrossAxisAlignment.end,
                   children: [
                     Container(
-                      padding: const EdgeInsets.only(top: 10,bottom: 10,left: 14,right: 14),
+                      padding: EdgeInsets.only(top: 10,bottom: 10,left: message.isBot ? 0 : 14,right: 14),
                       decoration: BoxDecoration(
                         color: message.isBot
                           ? Color(int.parse(chatbotData.data.first.uiPreferences.botBubbleColor.replaceFirst('#', '0xFF')))
                           : Color(int.parse(chatbotData.data.first.uiPreferences.userBubbleColor.replaceFirst('#', '0xFF'))),
                         // borderRadius: BorderRadius.circular(16),
-                        borderRadius: BorderRadius.only(
-                          topLeft:  Radius.circular(8),
-                          topRight: Radius.circular(8),
+                        borderRadius: (message.isBot == false) ? BorderRadius.only(
+                          topLeft:  const Radius.circular(8),
+                          topRight: const Radius.circular(8),
                           bottomLeft: message.isBot ? Radius.circular(0) : Radius.circular(8),
                           bottomRight: message.isBot ? Radius.circular(8) : Radius.circular(0),
-                        ),
-                        border: Border.all(
-                          color: Colors.grey.shade300, // light gray
-                          width: 0.5,
-                        ),
+                        ) : null,
+                        // border: Border.all(
+                        //   color: Colors.grey.shade300, // light gray
+                        //   width: 0.5,
+                        // ),
                         // boxShadow: [
                         //   BoxShadow(
                         //     color: Colors.black.withOpacity(0.05),
@@ -858,8 +858,8 @@ class _ChatScreenBody extends StatelessWidget {
                           color: message.isBot
                               ? Color(int.parse(chatbotData.data.first.uiPreferences.botBubbleFontColor.replaceFirst('#', '0xFF')))
                               : Color(int.parse(chatbotData.data.first.uiPreferences.userBubbleFontColor.replaceFirst('#', '0xFF'))),
-                          fontSize: 14,
-                          fontFamily: "Arial"
+                          fontSize: 16,
+                          fontFamily: "Plus Jakarta Sans"
                         ),
                       ),
                     ),
