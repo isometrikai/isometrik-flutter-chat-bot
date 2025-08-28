@@ -13,6 +13,7 @@ import 'package:chat_bot/view/restaurant_screen.dart';
 import 'package:chat_bot/view/cart_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:chat_bot/utils/asset_path.dart';
 import 'package:lottie/lottie.dart';
 import '../services/callback_manage.dart';
 import 'package:chat_bot/widgets/store_card.dart';
@@ -557,7 +558,7 @@ class _ChatScreenBody extends StatelessWidget {
       elevation: 1,
       leading: IconButton(
         icon: SvgPicture.asset(
-          'assets/images/ic_history.svg',
+          AssetPath.get('images/ic_history.svg'),
           width: 40,
           height: 40,
           fit: BoxFit.cover,
@@ -570,7 +571,7 @@ class _ChatScreenBody extends StatelessWidget {
             child: (chatbotData.data.isNotEmpty &&
                    chatbotData.data.first.profileImage.isNotEmpty)
                 ? SvgPicture.asset(
-                    'assets/images/ic_header_logo.svg',
+                    AssetPath.get('images/ic_header_logo.svg'),
                     width: 80,
                     height: 23,
                     fit: BoxFit.cover,
@@ -596,7 +597,7 @@ class _ChatScreenBody extends StatelessWidget {
                     icon: Opacity(
                       opacity: isApiLoading ? 0.4 : 1.0,
                       child: SvgPicture.asset(
-                        'assets/images/ic_reload.svg',
+                        AssetPath.get('images/ic_reload.svg'),
                         width: 40,
                         height: 40,
                       ),
@@ -609,7 +610,7 @@ class _ChatScreenBody extends StatelessWidget {
                       child: Stack(
                         children: [
                           SvgPicture.asset(
-                            'assets/images/ic_cart.svg',
+                            AssetPath.get('images/ic_cart.svg'),
                             width: 40,
                             height: 40,
                           ),
