@@ -5,8 +5,11 @@ import '../data/services/cart_service.dart';
 import '../data/model/universal_cart_response.dart';
 
 class CartScreen extends StatefulWidget {
+  final Function(String)? onCheckout;
+
   const CartScreen({
     super.key,
+    this.onCheckout,
   });
 
   @override
@@ -477,13 +480,8 @@ class _CartScreenState extends State<CartScreen> {
             flex: 2,
             child: GestureDetector(
               onTap: () {
-                // TODO: Navigate to checkout screen
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Proceeding to checkout...'),
-                    backgroundColor: Color(0xFF8E2FFD),
-                  ),
-                );
+                widget.onCheckout?.call("Proceed to checkout");
+                Navigator.of(context).pop();
               },
               child: Container(
                 height: 62,

@@ -63,10 +63,13 @@ class _AddCardBottomSheetState extends State<AddCardBottomSheet> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const ScreenHeader(
+             ScreenHeader(
               title: 'Please provide your card details',
               subtitle: 'Note: Please ensure your card can be used for online transactions.',
               padding: EdgeInsets.zero,
+               onClose: () {
+                              Navigator.of(context).pop();
+                            },
             ),
             const SizedBox(height: 16),
             // Single Stripe textfield that contains number/expiry/cvc

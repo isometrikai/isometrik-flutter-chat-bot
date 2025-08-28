@@ -394,16 +394,21 @@ class _ChatScreenBody extends StatelessWidget {
           listener: (context, state) {
             if (state is ChatLoaded) {
               List<ChatWidget> cartWidgets = state.messages.cartWidgets;
-              int cartCount = 0;
               if (cartWidgets.isNotEmpty) {
-                cartCount = cartWidgets.first.getCartItems().length;
+                int cartCount = 0;
+                // Get all cart items
                 cartObject = cartWidgets.first.getCartItems();
+                // Count only items with valid productID (excluding "Total To Pay" and items with empty productID)
+                cartCount = cartObject?.where((item) => 
+                    item.productID != null && 
+                    item.productID!.isNotEmpty).length ?? 0;
+                onUpdateCartCount(cartCount);
               }
               //  int cartCount = 0;
               // if (cartObject != null) {
               //   cartCount = cartObject.widget.length;
               // }
-              onUpdateCartCount(cartCount);
+              // onUpdateCartCount(cartCount);
               onHandleChatResponse(state.messages);
             } else if (state is ChatError) {
               // Check if it's a timeout error
@@ -642,7 +647,11 @@ class _ChatScreenBody extends StatelessWidget {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => const CartScreen(),
+                          builder: (context) =>  CartScreen(
+                            onCheckout: (message) {
+                              onSendMessage(message);
+                        }
+                          ),
                         ),
                       );
                     },
