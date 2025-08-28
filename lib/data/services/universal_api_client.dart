@@ -14,8 +14,8 @@ class UniversalApiClient {
 
   late final ApiClient _chatClient = ApiClient(
     baseUrl: 'https://easyagentapi.isometrik.ai',
-    buildHeaders: _buildHeaders,
-    onUnauthorizedRefresh: _handleTokenRefresh,
+    buildHeaders: _buildAppHeaders,//_buildHeaders,
+    // onUnauthorizedRefresh: _handleTokenRefresh,
   );
 
   late final ApiClient _appClient = ApiClient(

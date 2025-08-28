@@ -458,12 +458,12 @@ class _ChatScreenBody extends StatelessWidget {
             }
       
             final bool showGreetingOverlay = messages.isEmpty && greetingData != null;
-            return Stack(
+            return Column(
               children: [
-                Column(
-                  children: [
-                    Expanded(
-                      child: NotificationListener<ScrollNotification>(
+                Expanded(
+                  child: Stack(
+                    children: [
+                      NotificationListener<ScrollNotification>(
                         onNotification: (ScrollNotification scrollInfo) {
                           return false;
                         },
@@ -495,7 +495,7 @@ class _ChatScreenBody extends StatelessWidget {
                                       //                 .uiPreferences
                                       //                 .botBubbleColor
                                       //                 .replaceFirst('#', '0xFF'))),
-                                      //     borderRadius: const BorderRadius.only(
+                                      //     borderRadius: BorderRadius.only(
                                       //       topLeft: Radius.circular(8),
                                       //       topRight: Radius.circular(8),
                                       //       bottomLeft: Radius.circular(0),
@@ -527,17 +527,17 @@ class _ChatScreenBody extends StatelessWidget {
                           },
                         ),
                       ),
-                    ),
-                    _buildActionButtons(context),
-                    _buildInputArea(context),
-                  ],
-                ),
-                if (showGreetingOverlay) Positioned.fill(
-                  child: IgnorePointer(
-                    ignoring: false,
-                    child: _buildGreetingOverlay(context),
+                      if (showGreetingOverlay) Positioned.fill(
+                        child: IgnorePointer(
+                          ignoring: false,
+                          child: _buildGreetingOverlay(context),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
+                _buildActionButtons(context),
+                _buildInputArea(context),
               ],
             );
           },
@@ -996,140 +996,145 @@ class _ChatScreenBody extends StatelessWidget {
 
     final List<String> opts = (greetingData?.options ?? []).take(4).toList();
 
-    return ConstrainedBox(
-      constraints: const BoxConstraints(maxWidth: 360),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          // Top graphic group
-          SizedBox(
-            width: 90,
-            height: 90,
-            child: Stack(
-              clipBehavior: Clip.none,
-              children: [
-                // Outer glow circle
-                Container(
-                  width: 90,
-                  height: 90,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(110),
-                    gradient: const LinearGradient(
-                      begin: Alignment.centerLeft,
-                      end: Alignment.centerRight,
-                      colors: [
-                        Color(0x1AD445EC),
-                        Color(0x1AB02EFB),
-                        Color(0x1A8E2FFD),
-                        Color(0x1A5E3DFE),
-                        Color(0x1A5186E0),
-                      ],
-                    ),
-                  ),
-                ),
-                // Center asset
-                Align(
-                  alignment: Alignment.center,
-                  child: Container(
-                    width: 70,
-                    height: 70,
-                    decoration: const BoxDecoration(
-                      shape: BoxShape.circle,
-                      gradient: LinearGradient(
+    return GestureDetector(
+      onTap: () {
+        FocusScope.of(context).unfocus();
+      },
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 360),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            // Top graphic group
+            SizedBox(
+              width: 90,
+              height: 90,
+              child: Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  // Outer glow circle
+                  Container(
+                    width: 90,
+                    height: 90,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(110),
+                      gradient: const LinearGradient(
                         begin: Alignment.centerLeft,
                         end: Alignment.centerRight,
                         colors: [
-                          Color(0xFFD445EC),
-                          Color(0xFFB02EFB),
-                          Color(0xFF8E2FFD),
-                          Color(0xFF5E3DFE),
-                          Color(0xFF5186E0),
+                          Color(0x1AD445EC),
+                          Color(0x1AB02EFB),
+                          Color(0x1A8E2FFD),
+                          Color(0x1A5E3DFE),
+                          Color(0x1A5186E0),
                         ],
                       ),
                     ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(12),
-                      child: SvgPicture.asset(
-                        'assets/images/ic_mainImg.svg',
-                        fit: BoxFit.contain,
+                  ),
+                  // Center asset
+                  Align(
+                    alignment: Alignment.center,
+                    child: Container(
+                      width: 70,
+                      height: 70,
+                      decoration: const BoxDecoration(
+                        shape: BoxShape.circle,
+                        gradient: LinearGradient(
+                          begin: Alignment.centerLeft,
+                          end: Alignment.centerRight,
+                          colors: [
+                            Color(0xFFD445EC),
+                            Color(0xFFB02EFB),
+                            Color(0xFF8E2FFD),
+                            Color(0xFF5E3DFE),
+                            Color(0xFF5186E0),
+                          ],
+                        ),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(12),
+                        child: SvgPicture.asset(
+                          'assets/images/ic_mainImg.svg',
+                          fit: BoxFit.contain,
+                        ),
                       ),
                     ),
                   ),
-                ),
-                Positioned(
-                  right: -6,
-                  top: -6,
-                  child: Opacity(
-                    opacity: 0.4,
-                    child: SvgPicture.asset(
-                      'assets/images/ic_topStar.svg',
-                      width: 34,
-                      height: 34,
+                  Positioned(
+                    right: -6,
+                    top: -6,
+                    child: Opacity(
+                      opacity: 0.4,
+                      child: SvgPicture.asset(
+                        'assets/images/ic_topStar.svg',
+                        width: 34,
+                        height: 34,
+                      ),
                     ),
                   ),
-                ),
-                Positioned(
-                  left: -10,
-                  bottom: -8,
-                  child: Opacity(
-                    opacity: 0.4,
-                    child: SvgPicture.asset(
-                      'assets/images/ic_topStar.svg',
-                      width: 51,
-                      height: 51,
+                  Positioned(
+                    left: -10,
+                    bottom: -8,
+                    child: Opacity(
+                      opacity: 0.4,
+                      child: SvgPicture.asset(
+                        'assets/images/ic_topStar.svg',
+                        width: 51,
+                        height: 51,
+                      ),
                     ),
                   ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 12),
+            SizedBox(
+              width: 304,
+              child: Text(
+                titleText,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontWeight: FontWeight.w700,
+                  fontSize: 24,
+                  height: 1.2,
+                  color: Color(0xFF171212),
                 ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 12),
-          SizedBox(
-            width: 304,
-            child: Text(
-              titleText,
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontWeight: FontWeight.w700,
-                fontSize: 24,
-                height: 1.2,
-                color: Color(0xFF171212),
               ),
             ),
-          ),
-          const SizedBox(height: 12),
-          SizedBox(
-            width: 323,
-            child: Text(
-              subtitleText,
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontWeight: FontWeight.w400,
-                fontSize: 14,
-                height: 1.4,
-                color: Color(0xFF6E4185),
+            const SizedBox(height: 12),
+            SizedBox(
+              width: 323,
+              child: Text(
+                subtitleText,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontWeight: FontWeight.w400,
+                  fontSize: 14,
+                  height: 1.4,
+                  color: Color(0xFF6E4185),
+                ),
               ),
             ),
-          ),
-          const SizedBox(height: 16),
-          // Options grid 2x2
-          ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 340),
-            child: Wrap(
-              spacing: 16,
-              runSpacing: 16,
-              children: opts.map((opt) {
-                return _GreetingOptionTile(
-                  text: opt,
-                  onTap: () {
-                    onSendMessage(opt);
-                  },
-                );
-              }).toList(),
+            const SizedBox(height: 16),
+            // Options grid 2x2
+            ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 340),
+              child: Wrap(
+                spacing: 16,
+                runSpacing: 16,
+                children: opts.map((opt) {
+                  return _GreetingOptionTile(
+                    text: opt,
+                    onTap: () {
+                      onSendMessage(opt);
+                    },
+                  );
+                }).toList(),
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
