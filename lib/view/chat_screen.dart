@@ -52,11 +52,12 @@ class _ChatScreenState extends State<ChatScreen> {
   int _totalCartCount = 0; // Track total cart count
   List<ChatMessage> messages = [];
 
-  // Returns index of the last bot message that shows stores, products, cart, choose_address, or choose_card widgets; -1 if none
+  // Returns index of the last bot message that shows stores, products, choose_address, or choose_card widgets; -1 if none
+  // Cart widget is not considered for hiding
   int _indexOfLastBotCatalogMessage() {
     for (int i = messages.length - 1; i >= 0; i--) {
       final ChatMessage message = messages[i];
-      if (message.isBot && (message.hasStoreCards || message.hasProductCards || message.hasCartWidget || message.hasChooseAddressWidget || message.hasChooseCardWidget)) {
+      if (message.isBot && (message.hasStoreCards || message.hasProductCards || message.hasChooseAddressWidget || message.hasChooseCardWidget)) {
         return i;
       }
     }
@@ -64,14 +65,16 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   // Produces a hidden version of catalog widgets for a message (non-destructive to data)
+  // Only hides stores and products, keeps cart widget visible
   ChatMessage _hideCatalogInMessage(ChatMessage message) {
-    if (!(message.hasStoreCards || message.hasProductCards || message.hasCartWidget || message.hasChooseAddressWidget || message.hasChooseCardWidget)) return message;
+    if (!(message.hasStoreCards || message.hasProductCards || message.hasChooseAddressWidget || message.hasChooseCardWidget)) return message;
     return message.copyWith(
       hasStoreCards: false,
       hasProductCards: false,
-      hasCartWidget: false,
       hasChooseAddressWidget: false,
       hasChooseCardWidget: false,
+      // Keep cart widget visible
+      hasCartWidget: message.hasCartWidget,
     );
   }
 
