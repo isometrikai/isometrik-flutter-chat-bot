@@ -8,6 +8,7 @@ import 'package:chat_bot/bloc/restaurant_menu/restaurant_menu_state.dart';
 import 'package:chat_bot/widgets/menu_item_card.dart';
 import 'package:chat_bot/widgets/screen_header.dart';
 import 'package:chat_bot/services/cart_manager.dart';
+import '../utils/asset_helper.dart';
 
 class RestaurantMenuScreen extends StatefulWidget {
   final WidgetAction? actionData;
@@ -527,7 +528,7 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
       price: priceText,
       originalPrice: basePriceText,
       isVeg: !p.containsMeat,
-      assetPath: imageUrl ?? 'assets/images/men.png',
+      assetPath: imageUrl ?? AssetHelper.getAssetPath('images/men.png'),
       imageUrl: imageUrl,
       productId: p.childProductId,
     );
