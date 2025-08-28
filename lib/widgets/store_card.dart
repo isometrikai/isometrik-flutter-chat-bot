@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:chat_bot/data/model/chat_response.dart';
 import 'package:chat_bot/services/callback_manage.dart';
 import 'package:chat_bot/bloc/chat_event.dart';
+import '../utils/asset_helper.dart';
 
 class StoreCard extends StatelessWidget {
   final Store store;
@@ -271,7 +272,7 @@ class _ProductPreviewTile extends StatelessWidget {
                   color: const Color(0xFFD9D9D9),
                   child: product.productImage.isNotEmpty
                       ? Image.network(product.productImage, fit: BoxFit.cover)
-                      : Image.asset('assets/images/men.png', fit: BoxFit.cover),
+                      : AssetHelper.imageAsset('images/men.png', fit: BoxFit.cover),
                 ),
               ),
             ],

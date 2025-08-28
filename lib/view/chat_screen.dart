@@ -26,6 +26,7 @@ import 'package:chat_bot/widgets/cart_widget.dart';
 import 'package:chat_bot/widgets/choose_address_widget.dart';
 import 'package:chat_bot/widgets/choose_card_widget.dart';
 import '../utils/enum.dart';
+import '../utils/asset_helper.dart';
 
 // Global variable for cart object
 List<WidgetAction>? cartObject = [];
@@ -509,8 +510,8 @@ class _ChatScreenBody extends StatelessWidget {
                                         height: 40,
                                         child: Transform.scale(
                                           scale: 3.5,
-                                          child: Lottie.asset(
-                                              'assets/lottie/bubble-wave-black.json',
+                                          child: AssetHelper.lottieAsset(
+                                              'lottie/bubble-wave-black.json',
                                               fit: BoxFit.contain
                                           ),
                                         ),
@@ -660,8 +661,8 @@ class _ChatScreenBody extends StatelessWidget {
                   ),
                 ],
                 IconButton(
-                  icon: SvgPicture.asset(
-                    'assets/images/ic_close.svg',
+                  icon: AssetHelper.svgAsset(
+                    'images/ic_close.svg',
                     width: 40,
                     height: 40,
                   ),
@@ -1052,8 +1053,8 @@ class _ChatScreenBody extends StatelessWidget {
                       ),
                       child: Padding(
                         padding: const EdgeInsets.all(12),
-                        child: SvgPicture.asset(
-                          'assets/images/ic_mainImg.svg',
+                        child: AssetHelper.svgAsset(
+                          'images/ic_mainImg.svg',
                           fit: BoxFit.contain,
                         ),
                       ),
@@ -1064,8 +1065,8 @@ class _ChatScreenBody extends StatelessWidget {
                     top: -6,
                     child: Opacity(
                       opacity: 0.4,
-                      child: SvgPicture.asset(
-                        'assets/images/ic_topStar.svg',
+                      child: AssetHelper.svgAsset(
+                        'images/ic_topStar.svg',
                         width: 34,
                         height: 34,
                       ),
@@ -1076,8 +1077,8 @@ class _ChatScreenBody extends StatelessWidget {
                     bottom: -8,
                     child: Opacity(
                       opacity: 0.4,
-                      child: SvgPicture.asset(
-                        'assets/images/ic_topStar.svg',
+                      child: AssetHelper.svgAsset(
+                        'images/ic_topStar.svg',
                         width: 51,
                         height: 51,
                       ),
@@ -1516,8 +1517,8 @@ class _ChatScreenBody extends StatelessWidget {
                             child: SizedBox(
                               width: 34,
                               height: 34,
-                              child: SvgPicture.asset(
-                                'assets/images/ic_sendImg.svg',
+                              child: AssetHelper.svgAsset(
+                                'images/ic_sendImg.svg',
                               ),
                             ),
                           ),
