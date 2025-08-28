@@ -13,6 +13,7 @@ import 'package:chat_bot/view/restaurant_screen.dart';
 import 'package:chat_bot/view/cart_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:chat_bot/utils/asset_path.dart';
 import 'package:lottie/lottie.dart';
 import '../services/callback_manage.dart';
 import 'package:chat_bot/widgets/store_card.dart';
@@ -557,8 +558,8 @@ class _ChatScreenBody extends StatelessWidget {
       systemOverlayStyle: SystemUiOverlayStyle.dark,
       elevation: 1,
       leading: IconButton(
-        icon: AssetHelper.svgAsset(
-          'images/ic_history.svg',
+        icon: SvgPicture.asset(
+          AssetPath.get('images/ic_history.svg'),
           width: 40,
           height: 40,
           fit: BoxFit.cover,
@@ -570,8 +571,8 @@ class _ChatScreenBody extends StatelessWidget {
           Container(
             child: (chatbotData.data.isNotEmpty &&
                    chatbotData.data.first.profileImage.isNotEmpty)
-                ? AssetHelper.svgAsset(
-                    'images/ic_header_logo.svg',
+                ? SvgPicture.asset(
+                    AssetPath.get('images/ic_header_logo.svg'),
                     width: 80,
                     height: 23,
                     fit: BoxFit.cover,
@@ -596,8 +597,8 @@ class _ChatScreenBody extends StatelessWidget {
                   IconButton(
                     icon: Opacity(
                       opacity: isApiLoading ? 0.4 : 1.0,
-                      child: AssetHelper.svgAsset(
-                        'images/ic_reload.svg',
+                      child: SvgPicture.asset(
+                        AssetPath.get('images/ic_reload.svg'),
                         width: 40,
                         height: 40,
                       ),
@@ -609,8 +610,8 @@ class _ChatScreenBody extends StatelessWidget {
                       opacity: isApiLoading ? 0.4 : 1.0,
                       child: Stack(
                         children: [
-                          AssetHelper.svgAsset(
-                            'images/ic_cart.svg',
+                          SvgPicture.asset(
+                            AssetPath.get('images/ic_cart.svg'),
                             width: 40,
                             height: 40,
                           ),
