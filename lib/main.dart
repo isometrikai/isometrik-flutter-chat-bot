@@ -108,7 +108,7 @@ class PlatformService {
 
       print('✅ ApiService configured successfully');
     } catch (e) {
-      print('❌ Error getting config from platform: $e');
+      // print('❌ Error getting config from platform: $e');
       // Fallback to default values if iOS config fails
       // ApiService.configure(
       //   chatBotId: '1476',

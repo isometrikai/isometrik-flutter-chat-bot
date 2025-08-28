@@ -26,6 +26,7 @@ import 'package:chat_bot/widgets/cart_widget.dart';
 import 'package:chat_bot/widgets/choose_address_widget.dart';
 import 'package:chat_bot/widgets/choose_card_widget.dart';
 import '../utils/enum.dart';
+import '../utils/asset_helper.dart';
 
 // Global variable for cart object
 List<WidgetAction>? cartObject = [];
