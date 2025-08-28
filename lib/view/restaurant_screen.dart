@@ -7,6 +7,7 @@ import 'package:chat_bot/bloc/chat_event.dart';
 import 'package:chat_bot/bloc/restaurant/restaurant_bloc.dart';
 import 'package:chat_bot/bloc/restaurant/restaurant_event.dart';
 import 'package:chat_bot/bloc/restaurant/restaurant_state.dart';
+import 'package:chat_bot/services/cart_manager.dart';
 
 class RestaurantScreen extends StatefulWidget {
   final WidgetAction? actionData;
@@ -25,13 +26,16 @@ class RestaurantScreen extends StatefulWidget {
 class _RestaurantScreenState extends State<RestaurantScreen> {
   final TextEditingController _searchController = TextEditingController();
   late final RestaurantBloc _bloc;
+  final CartManager cartManager = CartManager();
   String _currentKeyword = '';
   DateTime? _lastQueryAt;
   
   // Cart state
   double _cartTotal = 0.00;
   int _cartItems = 0;
-  List<String> _addedProducts = []; // Track which products are added
+  Map<String, int> _productQuantities = {}; // Track product quantities
+  Map<String, Product> _productDetails = {}; // Track product details
+  Map<String, int> _initialQuantities = {}; // Track initial quantities when screen opened
 
   @override
   void dispose() {
@@ -61,17 +65,48 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
 
   Future<void> _bootstrapData() async {
     _bloc.add(RestaurantFetchRequested(keyword: _currentKeyword));
+    _initializeInitialQuantities();
+  }
+
+  void _initializeInitialQuantities() {
+    // Initialize initial quantities for products already in cart
+    // This ensures we track the correct baseline when screen opens
+    setState(() {
+      // Get all products from CartManager and set their initial quantities
+      final currentQuantities = cartManager.productQuantities;
+      _initialQuantities.addAll(currentQuantities);
+      
+      print("Initialized quantities: $_initialQuantities");
+    });
   }
 
   void _onAddToCart() {
     // Handle add to cart action - show added products
-    print("Added Products: $_addedProducts");
+    print("Product Quantities: $_productQuantities");
+    print("Initial Quantities: $_initialQuantities");
     print("Total Items: $_cartItems");
     print("Total Price: Đ$_cartTotal");
     
-    // Call the callback with added products and close the screen
-    if (widget.onCheckout != null && _addedProducts.isNotEmpty) {
-      widget.onCheckout!(_addedProducts);
+    // Create consolidated messages from quantities
+    List<String> consolidatedMessages = [];
+    _productQuantities.forEach((productId, quantity) {
+      if (quantity > 0 && _productDetails.containsKey(productId)) {
+        final product = _productDetails[productId]!;
+        // Calculate quantity added in this session
+        final initialQuantity = _initialQuantities[productId] ?? 0;
+        final quantityAdded = quantity - initialQuantity;
+        
+        print("Product: ${product.productName}, Current: $quantity, Initial: $initialQuantity, Added: $quantityAdded");
+        
+        if (quantityAdded > 0) {
+          consolidatedMessages.add("Add ${quantityAdded}X ${product.productName} to cart");
+        }
+      }
+    });
+    
+    // Call the callback with consolidated messages and close the screen
+    if (widget.onCheckout != null && consolidatedMessages.isNotEmpty) {
+      widget.onCheckout!(consolidatedMessages);
     }
     
     // Close the screen
@@ -82,7 +117,9 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
     setState(() {
       _cartItems = 0;
       _cartTotal = 0.00;
-      _addedProducts.clear();
+      _productQuantities.clear();
+      _productDetails.clear();
+      _initialQuantities.clear();
     });
   }
 
@@ -319,12 +356,19 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
                 onTap: () {
                   Navigator.pop(context);
                 },
-                onAddToCart: (message, product, store) {
+                onAddToCart: (message, product, store, quantity) {
                   // Update cart state when items are added
                   setState(() {
-                    _cartItems++;
-                    _cartTotal += product.finalPrice; // Use actual product price
-                    _addedProducts.add(message); // Add the product message to the list
+                    // Track product details
+                    _productDetails[product.childProductId] = product;
+                    
+                    // Update quantity with the actual quantity from CartManager
+                    _productQuantities[product.childProductId] = quantity;
+                    
+                    // Update cart totals
+                    _cartItems = _productQuantities.values.fold(0, (sum, qty) => sum + qty);
+                    _cartTotal = _productDetails.values.fold(0.0, (sum, prod) => 
+                      sum + (prod.finalPrice * (_productQuantities[prod.childProductId] ?? 0)));
                   });
                 },
               );

@@ -39,10 +39,10 @@ class UniversalCartResponse {
       // Extract actual cart items from seller products
       if (seller != null && seller.products.isNotEmpty) {
         for (final product in seller.products) {
-          // Get quantity from accounting.totalQuantity or fallback
+          // Get quantity from product.quantity or fallback
           int totalQuantity = 1;
-          if (product.accounting != null) {
-            // totalQuantity = product.accounting!.totalQuantity;
+          if (product.quantity != null) {
+            totalQuantity = product.quantity?.value ?? 1;
           }
           
           // Get unit price with tax from accounting
@@ -285,7 +285,7 @@ class Seller {
   final String contactPersonName;
   final String contactPersonEmail;
   final String phone;
-  final int targetAmtForFreeDelivery;
+  // final int targetAmtForFreeDelivery;
   // final int minOrder;
   final int storeFrontTypeId;
   final String storeFrontType;
@@ -320,7 +320,7 @@ class Seller {
     required this.contactPersonName,
     required this.contactPersonEmail,
     required this.phone,
-    required this.targetAmtForFreeDelivery,
+    // required this.targetAmtForFreeDelivery,
     // required this.minOrder,
     required this.storeFrontTypeId,
     required this.storeFrontType,
@@ -357,7 +357,7 @@ class Seller {
       contactPersonName: json['contactPersonName'] ?? '',
       contactPersonEmail: json['contactPersonEmail'] ?? '',
       phone: json['phone'] ?? '',
-      targetAmtForFreeDelivery: json['targetAmtForFreeDelivery'] ?? 0,
+      // targetAmtForFreeDelivery: json['targetAmtForFreeDelivery'] ?? 0,
       // minOrder: json['minOrder'] ?? 0,
       storeFrontTypeId: json['storeFrontTypeId'] ?? 0,
       storeFrontType: json['storeFrontType'] ?? '',
@@ -397,7 +397,7 @@ class Seller {
       'contactPersonName': contactPersonName,
       'contactPersonEmail': contactPersonEmail,
       'phone': phone,
-      'targetAmtForFreeDelivery': targetAmtForFreeDelivery,
+      // 'targetAmtForFreeDelivery': targetAmtForFreeDelivery,
       // 'minOrder': minOrder,
       'storeFrontTypeId': storeFrontTypeId,
       'storeFrontType': storeFrontType,
@@ -467,15 +467,41 @@ class Logo {
   }
 }
 
+class Quantity {
+  final int value;
+  final String unit;
+
+  Quantity({
+    required this.value,
+    required this.unit,
+  });
+
+  factory Quantity.fromJson(Map<String, dynamic> json) {
+    return Quantity(
+      value: json['value'] ?? 0,
+      unit: json['unit'] ?? '',
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'value': value,
+      'unit': unit,
+    };
+  }
+}
+
 class Product {
   final String id;
   final String name;
   final Accounting? accounting;
+  final Quantity? quantity;
 
   Product({
     required this.id,
     required this.name,
     required this.accounting,
+    this.quantity,
   });
 
   factory Product.fromJson(Map<String, dynamic> json) {
@@ -483,6 +509,7 @@ class Product {
       id: json['_id'] ?? '',
       name: json['name'] ?? '',
       accounting: json['accounting'] != null ? Accounting.fromJson(json['accounting']) : null,
+      quantity: json['quantity'] != null ? Quantity.fromJson(json['quantity']) : null,
     );
   }
 
@@ -491,6 +518,7 @@ class Product {
       '_id': id,
       'name': name,
       'accounting': accounting?.toJson(),
+      'quantity': quantity?.toJson(),
     };
   }
 }

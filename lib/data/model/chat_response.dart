@@ -296,7 +296,7 @@ class ChatWidget {
 
 // Product Model for products widget
 class Product {
-  final String id;
+  // final String id;
   final String parentProductId;
   final String childProductId;
   // final Map<String, dynamic> offers;
@@ -309,7 +309,7 @@ class Product {
   final String currency;
 
   const Product({
-    required this.id,
+    // required this.id,
     required this.parentProductId,
     required this.childProductId,
     // required this.offers,
@@ -342,7 +342,7 @@ class Product {
     }
 
     return Product(
-      id: json['id']?.toString() ?? '',
+      // id: json['id']?.toString() ?? '',
       parentProductId: json['parentProductId']?.toString() ?? '',
       childProductId: json['childProductId']?.toString() ?? '',
       // offers: (json['offers'] as Map<String, dynamic>?) ?? {},
@@ -358,7 +358,7 @@ class Product {
 
   Map<String, dynamic> toJson() {
     return {
-      'id': id,
+      // 'id': id,
       'parentProductId': parentProductId,
       'childProductId': childProductId,
       // 'offers': offers,
@@ -662,6 +662,7 @@ class WidgetAction {
   final String? address;
   final String? name;
   final String? productID;
+  final String? storeId;
 
   WidgetAction({
     required this.buttonText,
@@ -676,6 +677,7 @@ class WidgetAction {
     this.address,
     this.name,
     this.productID,
+    this.storeId
   });
 
   factory WidgetAction.fromJson(Map<String, dynamic> json) {
@@ -696,6 +698,7 @@ class WidgetAction {
       address: json['address']?.toString(),
       name: json['name']?.toString(),
       productID: json['productID']?.toString(),
+      storeId: json['storeId']?.toString()
     );
   }
 
@@ -713,6 +716,7 @@ class WidgetAction {
       'address': address,
       'name': name,
       'productID': productID,
+      'storeId': storeId
     };
   }
 }

@@ -1,5 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:chat_bot/data/model/chat_response.dart';
+import 'package:chat_bot/services/cart_manager.dart';
 
 class MenuItemCard extends StatelessWidget {
   final String title;
@@ -7,20 +9,23 @@ class MenuItemCard extends StatelessWidget {
   final String originalPrice;
   final bool isVeg;
   final String? imageUrl;
+  final String? productId;
   final VoidCallback? onClick;
-  final Function(String)? onAddToCart;
+  final Function(String, String, int)? onAddToCart; // message, productId, quantity
 
   final Color purple;
   final Color vegColor;
   final Color nonVegColor;
+  final CartManager cartManager = CartManager();
 
-  const MenuItemCard({
+  MenuItemCard({
     super.key,
     required this.title,
     required this.price,
     required this.originalPrice,
     required this.isVeg,
     this.imageUrl,
+    this.productId,
     this.onClick,
     this.onAddToCart,
     this.purple = const Color(0xFF8E2FFD),
@@ -99,7 +104,7 @@ class MenuItemCard extends StatelessWidget {
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
               style: const TextStyle(
-                fontSize: 14,
+                fontSize: 12,
                 fontWeight: FontWeight.w700,
                 color: Color(0xFF242424),
               ),
@@ -130,30 +135,152 @@ class MenuItemCard extends StatelessWidget {
           SizedBox(
             width: double.infinity,
             height: 37,
-            child: OutlinedButton(
-              style: OutlinedButton.styleFrom(
-                side: BorderSide(color: purple, width: 1),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                padding: const EdgeInsets.symmetric(horizontal: 10),
-              ),
-              onPressed: () {
-                if (onAddToCart != null) {
-                  onAddToCart!("Add 1X $title to cart");
-                }
-              },
-              child: Text(
-                'Add',
-                style: TextStyle(
-                  color: purple,
-                  fontWeight: FontWeight.w600,
-                  fontSize: 14,
-                ),
-              ),
-            ),
+            child: _buildQuantityControls(),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildQuantityControls() {
+    if (productId == null || productId!.isEmpty) {
+      return _buildAddButton();
+    }
+
+    return StreamBuilder<Map<String, int>>(
+      stream: cartManager.quantityStream,
+      builder: (context, snapshot) {
+        final currentQuantity = cartManager.getQuantity(productId!);
+        
+        if (currentQuantity == 0) {
+          // Show "Add" button when product is not in cart
+          return _buildAddButton();
+        } else {
+          // Show quantity controls when product is in cart
+          return Container(
+            height: 37,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: purple, width: 1),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Minus button
+                GestureDetector(
+                  onTap: () {
+                    if (productId != null && productId!.isNotEmpty) {
+                      cartManager.removeProduct(productId!);
+                      if (onAddToCart != null) {
+                        final newQuantity = cartManager.getQuantity(productId!);
+                        onAddToCart!("Removed 1X $title from cart", productId!, newQuantity);
+                      }
+                    }
+                  },
+                  child: Container(
+                    width: 37,
+                    height: 37,
+                    decoration: BoxDecoration(
+                      color: purple,
+                      borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(8),
+                        bottomLeft: Radius.circular(8),
+                      ),
+                    ),
+                    alignment: Alignment.center,
+                    child: const Text(
+                      '-',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 16,
+                        height: 1.0,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ),
+                
+                // Quantity display
+                Expanded(
+                  child: Container(
+                    alignment: Alignment.center,
+                    child: Text(
+                      currentQuantity.toString(),
+                      style: TextStyle(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 14,
+                        height: 1.2,
+                        color: purple,
+                      ),
+                    ),
+                  ),
+                ),
+                
+                // Plus button
+                GestureDetector(
+                  onTap: () {
+                    if (productId != null && productId!.isNotEmpty) {
+                      cartManager.addProduct(productId!);
+                      if (onAddToCart != null) {
+                        final newQuantity = cartManager.getQuantity(productId!);
+                        onAddToCart!("Added 1X $title to cart", productId!, newQuantity);
+                      }
+                    }
+                  },
+                  child: Container(
+                    width: 37,
+                    height: 37,
+                    decoration: BoxDecoration(
+                      color: purple,
+                      borderRadius: BorderRadius.only(
+                        topRight: Radius.circular(8),
+                        bottomRight: Radius.circular(8),
+                      ),
+                    ),
+                    alignment: Alignment.center,
+                    child: const Text(
+                      '+',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 16,
+                        height: 1.0,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          );
+        }
+      },
+    );
+  }
+
+  Widget _buildAddButton() {
+    return OutlinedButton(
+      style: OutlinedButton.styleFrom(
+        side: BorderSide(color: purple, width: 1),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+        ),
+        padding: const EdgeInsets.symmetric(horizontal: 10),
+      ),
+      onPressed: () {
+        if (onAddToCart != null && productId != null && productId!.isNotEmpty) {
+          final newQuantity = cartManager.getQuantity(productId!) + 1;
+          onAddToCart!("Add 1X $title to cart", productId!, newQuantity);
+          cartManager.setQuantity(productId!, newQuantity);
+        }
+      },
+      child: Text(
+        'Add',
+        style: TextStyle(
+          color: purple,
+          fontWeight: FontWeight.w600,
+          fontSize: 14,
+        ),
       ),
     );
   }

@@ -3,6 +3,7 @@ import 'package:chat_bot/bloc/chat_bloc.dart';
 import 'package:chat_bot/bloc/chat_event.dart';
 import 'package:chat_bot/bloc/chat_state.dart';
 import 'package:chat_bot/bloc/cart/cart_bloc.dart';
+import 'package:chat_bot/bloc/cart/cart_event.dart';
 import 'package:chat_bot/data/model/chat_response.dart';
 import 'package:chat_bot/data/model/chat_message.dart';
 import 'package:chat_bot/view/add_card_sheet.dart';
@@ -120,6 +121,13 @@ class _ChatScreenState extends State<ChatScreen> {
 
   void _updateCartCount(int count) {
       _totalCartCount = count;
+  }
+
+  void _fetchCartData() {
+    final cartBloc = context.read<CartBloc>();
+    cartBloc.add(CartFetchRequested(needToShowLoader: false));
+    print('Cart data fetched - Total product count: ${cartBloc.getTotalProductCount}');
+    _updateCartCount(cartBloc.getTotalProductCount);
   }
 
   void _handleChatResponse(ChatResponse response) {
@@ -245,6 +253,7 @@ class _ChatScreenState extends State<ChatScreen> {
     // Add keyboard listener
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _messageFocusNode.addListener(_onFocusChange);
+      _fetchCartData();
     });
   }
 
@@ -261,21 +270,6 @@ class _ChatScreenState extends State<ChatScreen> {
       _pendingMessage = null;
       _latestActionWidgets.clear(); // Clear action widgets when restarting
     });
-
-    // Navigator.push(
-    //   context,
-    //     MaterialPageRoute(builder: (_) => const AddressDetailsScreen()),
-    // ).then((result) {
-    //   if (result != null) {
-    //     print("Result: $result");
-    //   }
-    // });
-    // final result = await AddCardBottomSheet.show(context);
-    //   if (result != null) {
-    //     // e.g., update your state or start a payment
-    //     debugPrint('PM: ${result['paymentMethodId']} '
-    //         '${result['brand']} **** ${result['last4']}');
-    //   }
   }
 
   @override
@@ -291,8 +285,11 @@ class _ChatScreenState extends State<ChatScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => ChatBloc(),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(create: (context) => ChatBloc()),
+        BlocProvider(create: (context) => CartBloc()),
+      ],
       child: _ChatScreenBody(
         messageController: _messageController,
         messageFocusNode: _messageFocusNode,
@@ -1550,7 +1547,7 @@ class _ChatScreenBody extends StatelessWidget {
           store: store,
           storesWidget: storesWidget,
           index: index,
-          onAddToCart: (message, product, store) {  
+          onAddToCart: (message, product, store, quantity) {  
             onSendMessage(message);
           },
           onHide: onHideStoreCards, // Use the callback from parent
@@ -1585,13 +1582,14 @@ class _ChatScreenBody extends StatelessWidget {
             originalPrice: basePriceText,
             isVeg: !product.containsMeat,
             imageUrl: product.productImage.isNotEmpty ? product.productImage : null,
+            productId: product.childProductId,
             onClick: () {
               if (productsWidget != null) {
                 final Map<String, dynamic>? productJson = productsWidget.getRawProduct(index);
                 OrderService().triggerProductOrder(productJson ?? {});
               }
             },
-            onAddToCart: (message) {
+            onAddToCart: (message, productId, quantity) {
               onSendMessage(message);
             },
           );

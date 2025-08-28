@@ -7,6 +7,7 @@ import 'package:chat_bot/bloc/restaurant_menu/restaurant_menu_event.dart';
 import 'package:chat_bot/bloc/restaurant_menu/restaurant_menu_state.dart';
 import 'package:chat_bot/widgets/menu_item_card.dart';
 import 'package:chat_bot/widgets/screen_header.dart';
+import 'package:chat_bot/services/cart_manager.dart';
 
 class RestaurantMenuScreen extends StatefulWidget {
   final WidgetAction? actionData;
@@ -27,6 +28,7 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
 
   final TextEditingController _searchController = TextEditingController();
   late final RestaurantMenuBloc _bloc;
+  final CartManager cartManager = CartManager();
 
   // Dynamic data from API
   List<ProductCategory> _categories = <ProductCategory>[];
@@ -38,7 +40,9 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
   // Cart state
   double _cartTotal = 0.00;
   int _cartItems = 0;
-  List<String> _addedProducts = []; // Track which products are added
+  Map<String, int> _productQuantities = {}; // Track product quantities
+  Map<String, Product> _productDetails = {}; // Track product details
+  Map<String, int> _initialQuantities = {}; // Track initial quantities when screen opened
 
   
 
@@ -50,6 +54,19 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
     super.initState();
     _bloc = RestaurantMenuBloc(actionData: widget.actionData);
     _bloc.add(const RestaurantMenuRequested());
+    _initializeInitialQuantities();
+  }
+
+  void _initializeInitialQuantities() {
+    // Initialize initial quantities for products already in cart
+    // This ensures we track the correct baseline when screen opens
+    setState(() {
+      // Get all products from CartManager and set their initial quantities
+      final currentQuantities = cartManager.productQuantities;
+      _initialQuantities.addAll(currentQuantities);
+      
+      print("Menu Screen - Initialized quantities: $_initialQuantities");
+    });
   }
 
   @override
@@ -61,13 +78,31 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
 
   void _onAddToCart() {
     // Handle add to cart action - show added products
-    print("Added Products: $_addedProducts");
+    print("Product Quantities: $_productQuantities");
+    print("Initial Quantities: $_initialQuantities");
     print("Total Items: $_cartItems");
     print("Total Price: Đ$_cartTotal");
     
-    // Call the callback with added products and close the screen
-    if (widget.onCheckout != null && _addedProducts.isNotEmpty) {
-      widget.onCheckout!(_addedProducts);
+    // Create consolidated messages from quantities
+    List<String> consolidatedMessages = [];
+    _productQuantities.forEach((productId, quantity) {
+      if (quantity > 0 && _productDetails.containsKey(productId)) {
+        final product = _productDetails[productId]!;
+        // Calculate quantity added in this session
+        final initialQuantity = _initialQuantities[productId] ?? 0;
+        final quantityAdded = quantity - initialQuantity;
+        
+        print("Product: ${product.productName}, Current: $quantity, Initial: $initialQuantity, Added: $quantityAdded");
+        
+        if (quantityAdded > 0) {
+          consolidatedMessages.add("Add ${quantityAdded}X ${product.productName} to cart");
+        }
+      }
+    });
+    
+    // Call the callback with consolidated messages and close the screen
+    if (widget.onCheckout != null && consolidatedMessages.isNotEmpty) {
+      widget.onCheckout!(consolidatedMessages);
     }
     
     // Close the screen
@@ -78,7 +113,9 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
     setState(() {
       _cartItems = 0;
       _cartTotal = 0.00;
-      _addedProducts.clear();
+      _productQuantities.clear();
+      _productDetails.clear();
+      _initialQuantities.clear();
     });
   }
 
@@ -131,8 +168,8 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
                           Navigator.of(context).pop();
                         },
                       ),
-                      const SizedBox(height: 16),
-                      _buildSearchBar(theme),
+                      // const SizedBox(height: 16),
+                      // _buildSearchBar(theme),
                       const SizedBox(height: 16),
                       _buildDietToggles(),
                       const SizedBox(height: 16),
@@ -425,19 +462,46 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
                 originalPrice: item.originalPrice,
                 isVeg: item.isVeg,
                 imageUrl: item.imageUrl,
+                productId: item.productId,
                 purple: _purple,
                 vegColor: _veg,
                 nonVegColor: _nonVeg,
                 onClick: () {},
-                onAddToCart: (message) {
+                onAddToCart: (message, productId, quantity) {
                   // Update cart state when items are added
                   setState(() {
-                    _cartItems++;
-                    final priceString = item.price.replaceAll('د.إ', '').trim();
-                    final price = double.tryParse(priceString) ?? 0.0;
-                    print("Price debug: Original='${item.price}', Cleaned='$priceString', Parsed=$price");
-                    _cartTotal += price;
-                    _addedProducts.add(message);
+                    // For menu items, we need to find the product from the categories
+                    Product? foundProduct;
+                    for (final category in _categories) {
+                      if (category.isSubCategories && category.subCategories.isNotEmpty) {
+                        for (final subCategory in category.subCategories) {
+                          foundProduct = subCategory.products.firstWhere(
+                            (p) => p.childProductId == productId,
+                            orElse: () => subCategory.products.first,
+                          );
+                          if (foundProduct != null) break;
+                        }
+                      } else {
+                        foundProduct = category.products.firstWhere(
+                          (p) => p.childProductId == productId,
+                          orElse: () => category.products.first,
+                        );
+                      }
+                      if (foundProduct != null) break;
+                    }
+                    
+                    if (foundProduct != null) {
+                      // Track product details
+                      _productDetails[productId] = foundProduct;
+                      
+                      // Update quantity with the actual quantity from CartManager
+                      _productQuantities[productId] = quantity;
+                      
+                      // Update cart totals
+                      _cartItems = _productQuantities.values.fold(0, (sum, qty) => sum + qty);
+                      _cartTotal = _productDetails.values.fold(0.0, (sum, prod) => 
+                        sum + (prod.finalPrice * (_productQuantities[prod.childProductId] ?? 0)));
+                    }
                   });
                 },
               );
@@ -465,6 +529,7 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
       isVeg: !p.containsMeat,
       assetPath: imageUrl ?? 'assets/images/men.png',
       imageUrl: imageUrl,
+      productId: p.childProductId,
     );
   }
 
@@ -643,6 +708,7 @@ class _MenuItem {
   final bool isVeg;
   final String assetPath;
   final String? imageUrl;
+  final String? productId;
 
   const _MenuItem({
     required this.title,
@@ -651,6 +717,7 @@ class _MenuItem {
     required this.isVeg,
     required this.assetPath,
     this.imageUrl,
+    this.productId,
   });
 }
 

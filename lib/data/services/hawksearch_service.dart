@@ -119,7 +119,7 @@ class HawkSearchService {
       );
 
       return Product(
-        id: id,
+        // id: id,
         parentProductId: parentProductId,
         childProductId: childProductId,
         variantsCount: variantsCount,

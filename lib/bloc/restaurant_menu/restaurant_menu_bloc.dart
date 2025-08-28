@@ -24,8 +24,8 @@ class RestaurantMenuBloc extends Bloc<RestaurantMenuEvent, RestaurantMenuState> 
   ) async {
     emit(RestaurantMenuLoadInProgress());
     try {
-      final String storeId = actionData?.storeCategoryId.isNotEmpty == true
-          ? actionData!.storeCategoryId
+      final String storeId = actionData?.storeId?.isNotEmpty == true
+          ? actionData?.storeId ?? ''
           : '63627cf6b35f2f000c9ecc23';
 
       final List<ProductCategory> categories = await repository.fetchMenu(
