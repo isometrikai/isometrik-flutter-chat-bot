@@ -90,7 +90,7 @@ class _ChooseAddressWidgetState extends State<ChooseAddressWidget> {
         widget.onAddressSelected?.call(addressOption);
         
         // Automatically send the selected address as a message
-        final message = "${addressOption.name}: ${addressOption.address}";
+        final message = "Use this address:-\n${addressOption.name}: ${addressOption.address}";
         widget.onSendMessage?.call(message);
       },
       child: Container(
