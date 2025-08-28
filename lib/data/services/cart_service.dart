@@ -111,6 +111,7 @@ class CartService {
         return ApiResult.error(result.message ?? 'Failed to fetch cart');
       }
     } catch (e) {
+      print(e);
       return ApiResult.error(e.toString());
     }
   }

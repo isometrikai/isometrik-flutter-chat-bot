@@ -126,7 +126,8 @@ class _CartScreenState extends State<CartScreen> {
               child: const Icon(
                 Icons.close,
                 color: Color(0xFF585C77),
-                size: 16,
+                weight: 100,
+                // height: 100,
               ),
             ),
           ),
@@ -371,17 +372,6 @@ class _CartScreenState extends State<CartScreen> {
                         color: Color(0xFF242424),
                       ),
                     ),
-                    if (storeType != null && storeType.isNotEmpty) ...[
-                      const SizedBox(height: 4),
-                      Text(
-                        storeType,
-                        style: const TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w400,
-                          color: Color(0xFF666666),
-                        ),
-                      ),
-                    ],
                     const SizedBox(height: 10),
                     Row(
                       children: [
@@ -452,35 +442,35 @@ class _CartScreenState extends State<CartScreen> {
       child: Row(
         children: [
           // More items button
-          Expanded(
-            flex: 1,
-            child: GestureDetector(
-              onTap: () {
-                Navigator.of(context).pop();
-                // TODO: Navigate to restaurant/menu screen to add more items
-              },
-              child: Container(
-                height: 62,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  border: Border.all(color: const Color(0xFF8E2FFD), width: 1),
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: const Center(
-                  child: Text(
-                    '+ More items',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                      color: Color(0xFF8E2FFD),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
+          // Expanded(
+          //   flex: 1,
+          //   child: GestureDetector(
+          //     onTap: () {
+          //       Navigator.of(context).pop();
+          //       // TODO: Navigate to restaurant/menu screen to add more items
+          //     },
+          //     child: Container(
+          //       height: 62,
+          //       decoration: BoxDecoration(
+          //         color: Colors.white,
+          //         border: Border.all(color: const Color(0xFF8E2FFD), width: 1),
+          //         borderRadius: BorderRadius.circular(16),
+          //       ),
+          //       child: const Center(
+          //         child: Text(
+          //           '+ More items',
+          //           style: TextStyle(
+          //             fontSize: 16,
+          //             fontWeight: FontWeight.w700,
+          //             color: Color(0xFF8E2FFD),
+          //           ),
+          //         ),
+          //       ),
+          //     ),
+          //   ),
+          // ),
           
-          const SizedBox(width: 16),
+          // const SizedBox(width: 16),
           
           // Proceed to checkout button
           Expanded(

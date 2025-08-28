@@ -286,7 +286,7 @@ class Seller {
   final String contactPersonEmail;
   final String phone;
   final int targetAmtForFreeDelivery;
-  final int minOrder;
+  // final int minOrder;
   final int storeFrontTypeId;
   final String storeFrontType;
   final int sellerTypeId;
@@ -321,7 +321,7 @@ class Seller {
     required this.contactPersonEmail,
     required this.phone,
     required this.targetAmtForFreeDelivery,
-    required this.minOrder,
+    // required this.minOrder,
     required this.storeFrontTypeId,
     required this.storeFrontType,
     required this.sellerTypeId,
@@ -358,7 +358,7 @@ class Seller {
       contactPersonEmail: json['contactPersonEmail'] ?? '',
       phone: json['phone'] ?? '',
       targetAmtForFreeDelivery: json['targetAmtForFreeDelivery'] ?? 0,
-      minOrder: json['minOrder'] ?? 0,
+      // minOrder: json['minOrder'] ?? 0,
       storeFrontTypeId: json['storeFrontTypeId'] ?? 0,
       storeFrontType: json['storeFrontType'] ?? '',
       sellerTypeId: json['sellerTypeId'] ?? 0,
@@ -398,7 +398,7 @@ class Seller {
       'contactPersonEmail': contactPersonEmail,
       'phone': phone,
       'targetAmtForFreeDelivery': targetAmtForFreeDelivery,
-      'minOrder': minOrder,
+      // 'minOrder': minOrder,
       'storeFrontTypeId': storeFrontTypeId,
       'storeFrontType': storeFrontType,
       'sellerTypeId': sellerTypeId,

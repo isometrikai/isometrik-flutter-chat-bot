@@ -76,7 +76,7 @@ class StoreCard extends StatelessWidget {
                           const Icon(Icons.star, size: 14, color: Color(0xFFA674BF)),
                           const SizedBox(width: 4),
                           Text(
-                            store.avgRating.toString(),
+                            store.avgRating.toStringAsFixed(1),
                             style: const TextStyle(
                               fontSize: 12,
                               height: 1.4,
