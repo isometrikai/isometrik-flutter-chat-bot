@@ -510,8 +510,8 @@ class _ChatScreenBody extends StatelessWidget {
                                         height: 40,
                                         child: Transform.scale(
                                           scale: 3.5,
-                                          child: AssetHelper.lottieAsset(
-                                              'lottie/bubble-wave-black.json',
+                                          child: Lottie.asset(
+                                              AssetPath.get('lottie/bubble-wave-black.json'),
                                               fit: BoxFit.contain
                                           ),
                                         ),
@@ -661,8 +661,8 @@ class _ChatScreenBody extends StatelessWidget {
                   ),
                 ],
                 IconButton(
-                  icon: AssetHelper.svgAsset(
-                    'images/ic_close.svg',
+                  icon: SvgPicture.asset(
+                    AssetPath.get('images/ic_close.svg'),
                     width: 40,
                     height: 40,
                   ),
@@ -1053,8 +1053,8 @@ class _ChatScreenBody extends StatelessWidget {
                       ),
                       child: Padding(
                         padding: const EdgeInsets.all(12),
-                        child: AssetHelper.svgAsset(
-                          'images/ic_mainImg.svg',
+                        child: SvgPicture.asset(
+                          AssetPath.get('images/ic_mainImg.svg'),
                           fit: BoxFit.contain,
                         ),
                       ),
@@ -1065,8 +1065,8 @@ class _ChatScreenBody extends StatelessWidget {
                     top: -6,
                     child: Opacity(
                       opacity: 0.4,
-                      child: AssetHelper.svgAsset(
-                        'images/ic_topStar.svg',
+                      child: SvgPicture.asset(
+                        AssetPath.get('images/ic_topStar.svg'),
                         width: 34,
                         height: 34,
                       ),
@@ -1077,8 +1077,8 @@ class _ChatScreenBody extends StatelessWidget {
                     bottom: -8,
                     child: Opacity(
                       opacity: 0.4,
-                      child: AssetHelper.svgAsset(
-                        'images/ic_topStar.svg',
+                      child: SvgPicture.asset(
+                        AssetPath.get('images/ic_topStar.svg'),
                         width: 51,
                         height: 51,
                       ),
@@ -1517,8 +1517,8 @@ class _ChatScreenBody extends StatelessWidget {
                             child: SizedBox(
                               width: 34,
                               height: 34,
-                              child: AssetHelper.svgAsset(
-                                'images/ic_sendImg.svg',
+                              child: SvgPicture.asset(
+                                AssetPath.get('images/ic_sendImg.svg'),
                               ),
                             ),
                           ),
