@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import '../data/model/chat_response.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import '../widgets/cart_details_price_widget';
-import '../data/services/cart_service.dart';
-import '../data/model/universal_cart_response.dart';
+import '../bloc/cart/cart_bloc.dart';
+import '../bloc/cart/cart_event.dart';
+import '../bloc/cart/cart_state.dart';
 
 class CartScreen extends StatefulWidget {
   final Function(String)? onCheckout;
@@ -17,64 +18,12 @@ class CartScreen extends StatefulWidget {
 }
 
 class _CartScreenState extends State<CartScreen> {
-  List<WidgetAction>? _cartItems;
-  bool _isLoading = false;
-  String? _error;
-  String? _storeName;
-  String? _storeType;
-
   @override
   void initState() {
     super.initState();
     
-    // Always fetch from API
-    _fetchCartFromApi();
-  }
-
-  Future<void> _fetchCartFromApi() async {
-    setState(() {
-      _isLoading = true;
-      _error = null;
-    });
-
-    try {
-      final result = await CartService.instance.fetchUniversalCartAsWidgetActions();
-      
-      if (result.isSuccess) {
-        final widgetActions = result.data as List<WidgetAction>;
-        
-        // Also fetch the raw cart data for store information
-        final rawResult = await CartService.instance.fetchRawUniversalCart();
-        if (rawResult.isSuccess) {
-          final universalCartResponse = rawResult.data as UniversalCartResponse;
-          if (universalCartResponse.data.isNotEmpty) {
-            final cartData = universalCartResponse.data.first;
-            final seller = cartData.sellers.isNotEmpty ? cartData.sellers.first : null;
-            
-            // Store the store info
-            _storeName = seller?.name;
-            _storeType = seller?.storeType;
-          }
-        }
-        
-        setState(() {
-          _cartItems = widgetActions;
-          _isLoading = false;
-        });
-        
-        print('Cart fetched successfully: ${_cartItems?.length} items');
-      } else {
-        setState(() {
-          _error = result.message ?? 'Failed to fetch cart';
-          _isLoading = false;
-        });
-      }
-    } catch (e) {
-      setState(() {
-        _error = e.toString();
-        _isLoading = false;
-      });
-    }
+    // Fetch cart data using BLoC
+    context.read<CartBloc>().add(CartFetchRequested());
   }
 
   @override
@@ -217,79 +166,87 @@ class _CartScreenState extends State<CartScreen> {
   }
 
   Widget _buildCartContent() {
-    // Show loading state
-    if (_isLoading) {
-      return const Center(
-        child: CircularProgressIndicator(
-          color: Color(0xFF8E2FFD),
-        ),
-      );
-    }
-
-    // Show error state
-    if (_error != null) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(
-              Icons.error_outline,
-              size: 64,
+    return BlocBuilder<CartBloc, CartState>(
+      builder: (context, state) {
+        if (state is CartLoading) {
+          return const Center(
+            child: CircularProgressIndicator(
               color: Color(0xFF8E2FFD),
             ),
-            const SizedBox(height: 16),
-            Text(
-              'Error loading cart',
-              style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-                color: Color(0xFF242424),
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              _error!,
-              style: const TextStyle(
-                fontSize: 14,
-                color: Color(0xFF666666),
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: _fetchCartFromApi,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF8E2FFD),
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
+          );
+        }
+
+        if (state is CartError) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(
+                  Icons.error_outline,
+                  size: 64,
+                  color: Color(0xFF8E2FFD),
                 ),
-              ),
-              child: const Text('Retry'),
+                const SizedBox(height: 16),
+                Text(
+                  'Error loading cart',
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF242424),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  state.message,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    color: Color(0xFF666666),
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 16),
+                ElevatedButton(
+                  onPressed: () => context.read<CartBloc>().add(CartFetchRequested()),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF8E2FFD),
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  child: const Text('Retry'),
+                ),
+              ],
             ),
-          ],
-        ),
-      );
-    }
+          );
+        }
 
-    // Use the cartItems (either from widget or fetched from API)
-    if (_cartItems == null || _cartItems!.isEmpty) {
-      return _buildEmptyCart();
-    }
+        if (state is CartEmpty) {
+          return _buildEmptyCart();
+        }
 
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        children: [
-          // Store info card (if we have store info)
-          _buildStoreInfoCard(),
-          
-          const SizedBox(height: 24),
-          
-          // Use the CartDetailsPriceWidget
-          CartDetailsPriceWidget(cartItems: _cartItems!),
-        ],
-      ),
+        if (state is CartLoaded) {
+          final cartItems = state.cartItems;
+          return SingleChildScrollView(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              children: [
+                // Store info card (if we have store info)
+                _buildStoreInfoCard(),
+                
+                const SizedBox(height: 24),
+                
+                // Use the CartDetailsPriceWidget
+                CartDetailsPriceWidget(cartItems: cartItems),
+              ],
+            ),
+          );
+        }
+
+        return const Center(
+          child: Text('Unknown cart state'),
+        );
+      },
     );
   }
 
@@ -327,14 +284,21 @@ class _CartScreenState extends State<CartScreen> {
   }
 
   Widget _buildStoreInfoCard() {
-    // Use fetched store data from API
-    String? storeName = _storeName ?? 'Store Name';
-    String? storeType = _storeType;
-    double? rating;
-    String? deliveryTime;
-    String? address;
+    return BlocBuilder<CartBloc, CartState>(
+      builder: (context, state) {
+        // Use fetched store data from BLoC state
+        String? storeName = 'Store Name';
+        String? storeType;
+        double? rating;
+        String? deliveryTime;
+        String? address;
 
-    return Container(
+        if (state is CartLoaded) {
+          storeName = state.storeName ?? 'Store Name';
+          storeType = state.storeType;
+        }
+
+        return Container(
       padding: const EdgeInsets.all(15),
       decoration: BoxDecoration(
         color: const Color(0xFFF5F7FF),
@@ -436,6 +400,8 @@ class _CartScreenState extends State<CartScreen> {
           
         ],
       ),
+    );
+      },
     );
   }
 

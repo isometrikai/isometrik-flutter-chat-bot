@@ -2,6 +2,7 @@ import 'package:chat_bot/data/model/mygpts_model.dart';
 import 'package:chat_bot/bloc/chat_bloc.dart';
 import 'package:chat_bot/bloc/chat_event.dart';
 import 'package:chat_bot/bloc/chat_state.dart';
+import 'package:chat_bot/bloc/cart/cart_bloc.dart';
 import 'package:chat_bot/data/model/chat_response.dart';
 import 'package:chat_bot/data/model/chat_message.dart';
 import 'package:chat_bot/view/add_card_sheet.dart';
@@ -647,10 +648,13 @@ class _ChatScreenBody extends StatelessWidget {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) =>  CartScreen(
-                            onCheckout: (message) {
-                              onSendMessage(message);
-                        }
+                          builder: (context) => BlocProvider(
+                            create: (context) => CartBloc(),
+                            child: CartScreen(
+                              onCheckout: (message) {
+                                onSendMessage(message);
+                              },
+                            ),
                           ),
                         ),
                       );
