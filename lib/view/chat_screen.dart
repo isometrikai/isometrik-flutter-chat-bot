@@ -2,12 +2,15 @@ import 'package:chat_bot/data/model/mygpts_model.dart';
 import 'package:chat_bot/bloc/chat_bloc.dart';
 import 'package:chat_bot/bloc/chat_event.dart';
 import 'package:chat_bot/bloc/chat_state.dart';
+import 'package:chat_bot/bloc/cart/cart_bloc.dart';
+import 'package:chat_bot/bloc/cart/cart_event.dart';
 import 'package:chat_bot/data/model/chat_response.dart';
 import 'package:chat_bot/data/model/chat_message.dart';
 import 'package:chat_bot/view/add_card_sheet.dart';
 import 'package:chat_bot/view/address_details_screen.dart';
 import 'package:chat_bot/view/restaurant_menu_screen.dart';
 import 'package:chat_bot/view/restaurant_screen.dart';
+import 'package:chat_bot/view/cart_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lottie/lottie.dart';
@@ -22,6 +25,9 @@ import 'package:chat_bot/widgets/cart_widget.dart';
 import 'package:chat_bot/widgets/choose_address_widget.dart';
 import 'package:chat_bot/widgets/choose_card_widget.dart';
 import '../utils/enum.dart';
+
+// Global variable for cart object
+List<WidgetAction>? cartObject = [];
 
 class ChatScreen extends StatefulWidget {
   final MyGPTsResponse chatbotData;
@@ -41,7 +47,7 @@ class _ChatScreenState extends State<ChatScreen> {
   String _sessionId = "";
   double _textFieldHeight = 50.0; // Add height state variable
   List<ChatWidget> _latestActionWidgets = []; // Track latest action widgets
-
+  int _totalCartCount = 0; // Track total cart count
   List<ChatMessage> messages = [];
 
   // Returns index of the last bot message that shows stores, products, cart, choose_address, or choose_card widgets; -1 if none
@@ -111,6 +117,17 @@ class _ChatScreenState extends State<ChatScreen> {
     setState(() {
       _textFieldHeight = newHeight;
     });
+  }
+
+  void _updateCartCount(int count) {
+      _totalCartCount = count;
+  }
+
+  void _fetchCartData() {
+    final cartBloc = context.read<CartBloc>();
+    cartBloc.add(CartFetchRequested(needToShowLoader: false));
+    print('Cart data fetched - Total product count: ${cartBloc.getTotalProductCount}');
+    _updateCartCount(cartBloc.getTotalProductCount);
   }
 
   void _handleChatResponse(ChatResponse response) {
@@ -215,6 +232,19 @@ class _ChatScreenState extends State<ChatScreen> {
     });
   }
 
+  // Method to hide store cards when Add button is clicked
+  void _hideStoreCards() {
+    setState(() {
+      // Find the last bot message with store cards and hide them
+      for (int i = messages.length - 1; i >= 0; i--) {
+        if (messages[i].isBot && messages[i].hasStoreCards) {
+          messages[i] = messages[i].copyWith(hasStoreCards: false);
+          break;
+        }
+      }
+    });
+  }
+
   @override
   void initState() {
     super.initState();
@@ -223,6 +253,7 @@ class _ChatScreenState extends State<ChatScreen> {
     // Add keyboard listener
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _messageFocusNode.addListener(_onFocusChange);
+      _fetchCartData();
     });
   }
 
@@ -239,21 +270,6 @@ class _ChatScreenState extends State<ChatScreen> {
       _pendingMessage = null;
       _latestActionWidgets.clear(); // Clear action widgets when restarting
     });
-
-    // Navigator.push(
-    //   context,
-    //     MaterialPageRoute(builder: (_) => const AddressDetailsScreen()),
-    // ).then((result) {
-    //   if (result != null) {
-    //     print("Result: $result");
-    //   }
-    // });
-    // final result = await AddCardBottomSheet.show(context);
-    //   if (result != null) {
-    //     // e.g., update your state or start a payment
-    //     debugPrint('PM: ${result['paymentMethodId']} '
-    //         '${result['brand']} **** ${result['last4']}');
-    //   }
   }
 
   @override
@@ -269,8 +285,11 @@ class _ChatScreenState extends State<ChatScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => ChatBloc(),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(create: (context) => ChatBloc()),
+        BlocProvider(create: (context) => CartBloc()),
+      ],
       child: _ChatScreenBody(
         messageController: _messageController,
         messageFocusNode: _messageFocusNode,
@@ -300,6 +319,9 @@ class _ChatScreenState extends State<ChatScreen> {
         textFieldHeight: _textFieldHeight,
         onUpdateTextFieldHeight: _updateTextFieldHeight,
         latestActionWidgets: _latestActionWidgets,
+        onHideStoreCards: _hideStoreCards, // Add the callback
+        onUpdateCartCount: _updateCartCount, // Add the callback
+        totalCartCount: _totalCartCount, // Pass the cart count
       ),
     );
   }
@@ -327,6 +349,9 @@ class _ChatScreenBody extends StatelessWidget {
   final double textFieldHeight;
   final Function(double) onUpdateTextFieldHeight;
   final List<ChatWidget> latestActionWidgets;
+  final VoidCallback onHideStoreCards; // Add callback to hide store cards
+  final Function(int) onUpdateCartCount; // Add callback to update cart count
+  final int totalCartCount; // Add cart count parameter
 
   const _ChatScreenBody({
     required this.messageController,
@@ -350,6 +375,9 @@ class _ChatScreenBody extends StatelessWidget {
     required this.textFieldHeight,
     required this.onUpdateTextFieldHeight,
     required this.latestActionWidgets,
+    required this.onHideStoreCards, // Add the callback parameter
+    required this.onUpdateCartCount, // Add the callback parameter
+    required this.totalCartCount, // Add the cart count parameter
   });
 
   @override
@@ -363,6 +391,22 @@ class _ChatScreenBody extends StatelessWidget {
         body: BlocConsumer<ChatBloc, ChatState>(
           listener: (context, state) {
             if (state is ChatLoaded) {
+              List<ChatWidget> cartWidgets = state.messages.cartWidgets;
+              if (cartWidgets.isNotEmpty) {
+                int cartCount = 0;
+                // Get all cart items
+                cartObject = cartWidgets.first.getCartItems();
+                // Count only items with valid productID (excluding "Total To Pay" and items with empty productID)
+                cartCount = cartObject?.where((item) => 
+                    item.productID != null && 
+                    item.productID!.isNotEmpty).length ?? 0;
+                onUpdateCartCount(cartCount);
+              }
+              //  int cartCount = 0;
+              // if (cartObject != null) {
+              //   cartCount = cartObject.widget.length;
+              // }
+              // onUpdateCartCount(cartCount);
               onHandleChatResponse(state.messages);
             } else if (state is ChatError) {
               // Check if it's a timeout error
@@ -411,12 +455,12 @@ class _ChatScreenBody extends StatelessWidget {
             }
       
             final bool showGreetingOverlay = messages.isEmpty && greetingData != null;
-            return Stack(
+            return Column(
               children: [
-                Column(
-                  children: [
-                    Expanded(
-                      child: NotificationListener<ScrollNotification>(
+                Expanded(
+                  child: Stack(
+                    children: [
+                      NotificationListener<ScrollNotification>(
                         onNotification: (ScrollNotification scrollInfo) {
                           return false;
                         },
@@ -436,29 +480,29 @@ class _ChatScreenBody extends StatelessWidget {
                                 child: Row(
                                   crossAxisAlignment: CrossAxisAlignment.end,
                                   children: [
-                                    _buildBotAvatar(),
-                                    const SizedBox(width: 8),
+                                    // _buildBotAvatar(),
+                                    // const SizedBox(width: 8),
                                     Container(
-                                      decoration: BoxDecoration(
-                                          color: Color(
-                                              int.parse(
-                                                  chatbotData
-                                                      .data
-                                                      .first
-                                                      .uiPreferences
-                                                      .botBubbleColor
-                                                      .replaceFirst('#', '0xFF'))),
-                                          borderRadius: const BorderRadius.only(
-                                            topLeft: Radius.circular(8),
-                                            topRight: Radius.circular(8),
-                                            bottomLeft: Radius.circular(0),
-                                            bottomRight: Radius.circular(8),
-                                          ),
-                                          border: Border.all(
-                                            color: Colors.grey.shade300,
-                                            width: 0.5,
-                                          )
-                                      ),
+                                      // decoration: BoxDecoration(
+                                      //     color: Color(
+                                      //         int.parse(
+                                      //             chatbotData
+                                      //                 .data
+                                      //                 .first
+                                      //                 .uiPreferences
+                                      //                 .botBubbleColor
+                                      //                 .replaceFirst('#', '0xFF'))),
+                                      //     borderRadius: BorderRadius.only(
+                                      //       topLeft: Radius.circular(8),
+                                      //       topRight: Radius.circular(8),
+                                      //       bottomLeft: Radius.circular(0),
+                                      //       bottomRight: Radius.circular(8),
+                                      //     ),
+                                      //     border: Border.all(
+                                      //       color: Colors.grey.shade300,
+                                      //       width: 0.5,
+                                      //     )
+                                      // ),
                                       child: SizedBox(
                                         width: 80,
                                         height: 40,
@@ -480,23 +524,28 @@ class _ChatScreenBody extends StatelessWidget {
                           },
                         ),
                       ),
-                    ),
-                    _buildActionButtons(context),
-                    _buildInputArea(context),
-                  ],
-                ),
-                if (showGreetingOverlay) Positioned.fill(
-                  child: IgnorePointer(
-                    ignoring: false,
-                    child: _buildGreetingOverlay(context),
+                      if (showGreetingOverlay) Positioned.fill(
+                        child: IgnorePointer(
+                          ignoring: false,
+                          child: _buildGreetingOverlay(context),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
+                _buildActionButtons(context),
+                _buildInputArea(context),
               ],
             );
           },
         ),
       ),
     );
+  }
+
+  // Calculate total cart count from all messages
+  int _getTotalCartCount() {
+    return totalCartCount;
   }
 
   PreferredSizeWidget _buildAppBar(BuildContext context) {
@@ -538,6 +587,7 @@ class _ChatScreenBody extends StatelessWidget {
         BlocBuilder<ChatBloc, ChatState>(
           builder: (context, state) {
             bool isApiLoading = state is ChatLoading;
+            int cartCount = _getTotalCartCount();
             return Row(
               children: [
                 // Only show reload and cart icons if there are messages
@@ -556,13 +606,56 @@ class _ChatScreenBody extends StatelessWidget {
                   IconButton(
                     icon: Opacity(
                       opacity: isApiLoading ? 0.4 : 1.0,
-                      child: SvgPicture.asset(
-                        'assets/images/ic_cart.svg',
-                        width: 40,
-                        height: 40,
+                      child: Stack(
+                        children: [
+                          SvgPicture.asset(
+                            'assets/images/ic_cart.svg',
+                            width: 40,
+                            height: 40,
+                          ),
+                          if (cartCount > 0)
+                            Positioned(
+                              right: 0,
+                              top: 0,
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFF6B46C1), // Purple color
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                constraints: const BoxConstraints(
+                                  minWidth: 20,
+                                  minHeight: 20,
+                                ),
+                                child: Text(
+                                  cartCount.toString(),
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
+                            ),
+                        ],
                       ),
                     ),
-                    onPressed: isApiLoading ? null : () => _showNewChatConfirmation(context),
+                    onPressed: isApiLoading ? null : () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => BlocProvider(
+                            create: (context) => CartBloc(),
+                            child: CartScreen(
+                              onCheckout: (message) {
+                                onSendMessage(message);
+                              },
+                            ),
+                          ),
+                        ),
+                      );
+                    },
                   ),
                 ],
                 IconButton(
@@ -799,12 +892,12 @@ class _ChatScreenBody extends StatelessWidget {
           Row(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              if (message.isBot && message.showAvatar) ...[
-                _buildBotAvatar(),
-                const SizedBox(width: 8),
-              ] else if (message.isBot) ...[
-                const SizedBox(width: 48),
-              ],
+              // if (message.isBot && message.showAvatar) ...[
+              //   _buildBotAvatar(),
+              //   const SizedBox(width: 8),
+              // ] else if (message.isBot) ...[
+              //   const SizedBox(width: 48),
+              // ],
               Expanded(
                 child: Column(
                   crossAxisAlignment: message.isBot
@@ -812,22 +905,22 @@ class _ChatScreenBody extends StatelessWidget {
                       : CrossAxisAlignment.end,
                   children: [
                     Container(
-                      padding: const EdgeInsets.only(top: 10,bottom: 10,left: 14,right: 14),
+                      padding: EdgeInsets.only(top: 10,bottom: 10,left: message.isBot ? 0 : 14,right: 14),
                       decoration: BoxDecoration(
                         color: message.isBot
                           ? Color(int.parse(chatbotData.data.first.uiPreferences.botBubbleColor.replaceFirst('#', '0xFF')))
                           : Color(int.parse(chatbotData.data.first.uiPreferences.userBubbleColor.replaceFirst('#', '0xFF'))),
                         // borderRadius: BorderRadius.circular(16),
-                        borderRadius: BorderRadius.only(
-                          topLeft:  Radius.circular(8),
-                          topRight: Radius.circular(8),
+                        borderRadius: (message.isBot == false) ? BorderRadius.only(
+                          topLeft:  const Radius.circular(8),
+                          topRight: const Radius.circular(8),
                           bottomLeft: message.isBot ? Radius.circular(0) : Radius.circular(8),
                           bottomRight: message.isBot ? Radius.circular(8) : Radius.circular(0),
-                        ),
-                        border: Border.all(
-                          color: Colors.grey.shade300, // light gray
-                          width: 0.5,
-                        ),
+                        ) : null,
+                        // border: Border.all(
+                        //   color: Colors.grey.shade300, // light gray
+                        //   width: 0.5,
+                        // ),
                         // boxShadow: [
                         //   BoxShadow(
                         //     color: Colors.black.withOpacity(0.05),
@@ -842,8 +935,8 @@ class _ChatScreenBody extends StatelessWidget {
                           color: message.isBot
                               ? Color(int.parse(chatbotData.data.first.uiPreferences.botBubbleFontColor.replaceFirst('#', '0xFF')))
                               : Color(int.parse(chatbotData.data.first.uiPreferences.userBubbleFontColor.replaceFirst('#', '0xFF'))),
-                          fontSize: 14,
-                          fontFamily: "Arial"
+                          fontSize: 16,
+                          fontFamily: "Plus Jakarta Sans"
                         ),
                       ),
                     ),
@@ -900,140 +993,145 @@ class _ChatScreenBody extends StatelessWidget {
 
     final List<String> opts = (greetingData?.options ?? []).take(4).toList();
 
-    return ConstrainedBox(
-      constraints: const BoxConstraints(maxWidth: 360),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          // Top graphic group
-          SizedBox(
-            width: 90,
-            height: 90,
-            child: Stack(
-              clipBehavior: Clip.none,
-              children: [
-                // Outer glow circle
-                Container(
-                  width: 90,
-                  height: 90,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(110),
-                    gradient: const LinearGradient(
-                      begin: Alignment.centerLeft,
-                      end: Alignment.centerRight,
-                      colors: [
-                        Color(0x1AD445EC),
-                        Color(0x1AB02EFB),
-                        Color(0x1A8E2FFD),
-                        Color(0x1A5E3DFE),
-                        Color(0x1A5186E0),
-                      ],
-                    ),
-                  ),
-                ),
-                // Center asset
-                Align(
-                  alignment: Alignment.center,
-                  child: Container(
-                    width: 70,
-                    height: 70,
-                    decoration: const BoxDecoration(
-                      shape: BoxShape.circle,
-                      gradient: LinearGradient(
+    return GestureDetector(
+      onTap: () {
+        FocusScope.of(context).unfocus();
+      },
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 360),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            // Top graphic group
+            SizedBox(
+              width: 90,
+              height: 90,
+              child: Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  // Outer glow circle
+                  Container(
+                    width: 90,
+                    height: 90,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(110),
+                      gradient: const LinearGradient(
                         begin: Alignment.centerLeft,
                         end: Alignment.centerRight,
                         colors: [
-                          Color(0xFFD445EC),
-                          Color(0xFFB02EFB),
-                          Color(0xFF8E2FFD),
-                          Color(0xFF5E3DFE),
-                          Color(0xFF5186E0),
+                          Color(0x1AD445EC),
+                          Color(0x1AB02EFB),
+                          Color(0x1A8E2FFD),
+                          Color(0x1A5E3DFE),
+                          Color(0x1A5186E0),
                         ],
                       ),
                     ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(12),
-                      child: SvgPicture.asset(
-                        'assets/images/ic_mainImg.svg',
-                        fit: BoxFit.contain,
+                  ),
+                  // Center asset
+                  Align(
+                    alignment: Alignment.center,
+                    child: Container(
+                      width: 70,
+                      height: 70,
+                      decoration: const BoxDecoration(
+                        shape: BoxShape.circle,
+                        gradient: LinearGradient(
+                          begin: Alignment.centerLeft,
+                          end: Alignment.centerRight,
+                          colors: [
+                            Color(0xFFD445EC),
+                            Color(0xFFB02EFB),
+                            Color(0xFF8E2FFD),
+                            Color(0xFF5E3DFE),
+                            Color(0xFF5186E0),
+                          ],
+                        ),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(12),
+                        child: SvgPicture.asset(
+                          'assets/images/ic_mainImg.svg',
+                          fit: BoxFit.contain,
+                        ),
                       ),
                     ),
                   ),
-                ),
-                Positioned(
-                  right: -6,
-                  top: -6,
-                  child: Opacity(
-                    opacity: 0.4,
-                    child: SvgPicture.asset(
-                      'assets/images/ic_topStar.svg',
-                      width: 34,
-                      height: 34,
+                  Positioned(
+                    right: -6,
+                    top: -6,
+                    child: Opacity(
+                      opacity: 0.4,
+                      child: SvgPicture.asset(
+                        'assets/images/ic_topStar.svg',
+                        width: 34,
+                        height: 34,
+                      ),
                     ),
                   ),
-                ),
-                Positioned(
-                  left: -10,
-                  bottom: -8,
-                  child: Opacity(
-                    opacity: 0.4,
-                    child: SvgPicture.asset(
-                      'assets/images/ic_topStar.svg',
-                      width: 51,
-                      height: 51,
+                  Positioned(
+                    left: -10,
+                    bottom: -8,
+                    child: Opacity(
+                      opacity: 0.4,
+                      child: SvgPicture.asset(
+                        'assets/images/ic_topStar.svg',
+                        width: 51,
+                        height: 51,
+                      ),
                     ),
                   ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 12),
+            SizedBox(
+              width: 304,
+              child: Text(
+                titleText,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontWeight: FontWeight.w700,
+                  fontSize: 24,
+                  height: 1.2,
+                  color: Color(0xFF171212),
                 ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 12),
-          SizedBox(
-            width: 304,
-            child: Text(
-              titleText,
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontWeight: FontWeight.w700,
-                fontSize: 24,
-                height: 1.2,
-                color: Color(0xFF171212),
               ),
             ),
-          ),
-          const SizedBox(height: 12),
-          SizedBox(
-            width: 323,
-            child: Text(
-              subtitleText,
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontWeight: FontWeight.w400,
-                fontSize: 14,
-                height: 1.4,
-                color: Color(0xFF6E4185),
+            const SizedBox(height: 12),
+            SizedBox(
+              width: 323,
+              child: Text(
+                subtitleText,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontWeight: FontWeight.w400,
+                  fontSize: 14,
+                  height: 1.4,
+                  color: Color(0xFF6E4185),
+                ),
               ),
             ),
-          ),
-          const SizedBox(height: 16),
-          // Options grid 2x2
-          ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 340),
-            child: Wrap(
-              spacing: 16,
-              runSpacing: 16,
-              children: opts.map((opt) {
-                return _GreetingOptionTile(
-                  text: opt,
-                  onTap: () {
-                    onSendMessage(opt);
-                  },
-                );
-              }).toList(),
+            const SizedBox(height: 16),
+            // Options grid 2x2
+            ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 340),
+              child: Wrap(
+                spacing: 16,
+                runSpacing: 16,
+                children: opts.map((opt) {
+                  return _GreetingOptionTile(
+                    text: opt,
+                    onTap: () {
+                      onSendMessage(opt);
+                    },
+                  );
+                }).toList(),
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -1146,8 +1244,11 @@ class _ChatScreenBody extends StatelessWidget {
                     MaterialPageRoute(
                       builder: (context) => RestaurantScreen(
                         actionData: action,
-                        onAddToCart: (event) {
-                          context.read<ChatBloc>().add(event);
+                        onCheckout: (List<String> addedProducts) {
+                          if (addedProducts.isNotEmpty) {
+                            final productsMessage = addedProducts.join(',\n');
+                            onSendMessage("I've added these items to my cart:\n\n$productsMessage");
+                          }
                         },
                       ),
                     ),
@@ -1174,6 +1275,12 @@ class _ChatScreenBody extends StatelessWidget {
                     MaterialPageRoute(
                       builder: (context) => RestaurantMenuScreen(
                         actionData: action,
+                        onCheckout: (List<String> addedProducts) {
+                          if (addedProducts.isNotEmpty) {
+                            final productsMessage = addedProducts.join(',\n');
+                            onSendMessage("I've added these items to my cart:\n\n$productsMessage");
+                          }
+                        },
                       ),
                     ),
                   );
@@ -1440,9 +1547,10 @@ class _ChatScreenBody extends StatelessWidget {
           store: store,
           storesWidget: storesWidget,
           index: index,
-          onAddToCart: (event) {
-            context.read<ChatBloc>().add(event);
+          onAddToCart: (message, product, store, quantity) {  
+            onSendMessage(message);
           },
+          onHide: onHideStoreCards, // Use the callback from parent
         );
       },
     );
@@ -1454,7 +1562,7 @@ class _ChatScreenBody extends StatelessWidget {
       // color: Colors.red,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.only(left: 70),
+        padding: const EdgeInsets.only(left: 6),
         clipBehavior: Clip.none,
         itemCount: products.length,
         separatorBuilder: (context, index) => const SizedBox(width: 16),
@@ -1474,11 +1582,15 @@ class _ChatScreenBody extends StatelessWidget {
             originalPrice: basePriceText,
             isVeg: !product.containsMeat,
             imageUrl: product.productImage.isNotEmpty ? product.productImage : null,
-            onAdd: () {
+            productId: product.childProductId,
+            onClick: () {
               if (productsWidget != null) {
                 final Map<String, dynamic>? productJson = productsWidget.getRawProduct(index);
                 OrderService().triggerProductOrder(productJson ?? {});
               }
+            },
+            onAddToCart: (message, productId, quantity) {
+              onSendMessage(message);
             },
           );
         },

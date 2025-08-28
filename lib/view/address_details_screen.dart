@@ -57,7 +57,7 @@ class _AddressDetailsScreenState extends State<AddressDetailsScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                    const SizedBox(height: 32),
+                    // const SizedBox(height: 32),
                     const ScreenHeader(
                       title: 'Please provide your\ncomplete address',
                       showCloseButton: false,

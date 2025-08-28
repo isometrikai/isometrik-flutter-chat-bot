@@ -90,7 +90,7 @@ class _ChooseAddressWidgetState extends State<ChooseAddressWidget> {
         widget.onAddressSelected?.call(addressOption);
         
         // Automatically send the selected address as a message
-        final message = "${addressOption.name}: ${addressOption.address}";
+        final message = "Use this address:-\n${addressOption.name}: ${addressOption.address}";
         widget.onSendMessage?.call(message);
       },
       child: Container(
@@ -139,10 +139,10 @@ class _ChooseAddressWidgetState extends State<ChooseAddressWidget> {
                     addressOption.address,
                     style: const TextStyle(
                       fontFamily: 'Plus Jakarta Sans',
-                      fontSize: 12,
+                      fontSize: 14,
                       fontWeight: FontWeight.w400,
                       height: 1.2,
-                      color: Color(0xFF666666),
+                      color: Color(0xFF242424),
                     ),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,

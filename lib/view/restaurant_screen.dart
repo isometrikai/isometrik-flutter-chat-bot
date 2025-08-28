@@ -7,15 +7,16 @@ import 'package:chat_bot/bloc/chat_event.dart';
 import 'package:chat_bot/bloc/restaurant/restaurant_bloc.dart';
 import 'package:chat_bot/bloc/restaurant/restaurant_event.dart';
 import 'package:chat_bot/bloc/restaurant/restaurant_state.dart';
+import 'package:chat_bot/services/cart_manager.dart';
 
 class RestaurantScreen extends StatefulWidget {
   final WidgetAction? actionData;
-  final Function(AddToCartEvent)? onAddToCart;
+  final Function(List<String>)? onCheckout;
 
   const RestaurantScreen({
     super.key, 
     this.actionData,
-    this.onAddToCart,
+    this.onCheckout,
   });
 
   @override
@@ -25,8 +26,16 @@ class RestaurantScreen extends StatefulWidget {
 class _RestaurantScreenState extends State<RestaurantScreen> {
   final TextEditingController _searchController = TextEditingController();
   late final RestaurantBloc _bloc;
+  final CartManager cartManager = CartManager();
   String _currentKeyword = '';
   DateTime? _lastQueryAt;
+  
+  // Cart state
+  double _cartTotal = 0.00;
+  int _cartItems = 0;
+  Map<String, int> _productQuantities = {}; // Track product quantities
+  Map<String, Product> _productDetails = {}; // Track product details
+  Map<String, int> _initialQuantities = {}; // Track initial quantities when screen opened
 
   @override
   void dispose() {
@@ -56,6 +65,62 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
 
   Future<void> _bootstrapData() async {
     _bloc.add(RestaurantFetchRequested(keyword: _currentKeyword));
+    _initializeInitialQuantities();
+  }
+
+  void _initializeInitialQuantities() {
+    // Initialize initial quantities for products already in cart
+    // This ensures we track the correct baseline when screen opens
+    setState(() {
+      // Get all products from CartManager and set their initial quantities
+      final currentQuantities = cartManager.productQuantities;
+      _initialQuantities.addAll(currentQuantities);
+      
+      print("Initialized quantities: $_initialQuantities");
+    });
+  }
+
+  void _onAddToCart() {
+    // Handle add to cart action - show added products
+    print("Product Quantities: $_productQuantities");
+    print("Initial Quantities: $_initialQuantities");
+    print("Total Items: $_cartItems");
+    print("Total Price: Đ$_cartTotal");
+    
+    // Create consolidated messages from quantities
+    List<String> consolidatedMessages = [];
+    _productQuantities.forEach((productId, quantity) {
+      if (quantity > 0 && _productDetails.containsKey(productId)) {
+        final product = _productDetails[productId]!;
+        // Calculate quantity added in this session
+        final initialQuantity = _initialQuantities[productId] ?? 0;
+        final quantityAdded = quantity - initialQuantity;
+        
+        print("Product: ${product.productName}, Current: $quantity, Initial: $initialQuantity, Added: $quantityAdded");
+        
+        if (quantityAdded > 0) {
+          consolidatedMessages.add("Add ${quantityAdded}X ${product.productName} to cart");
+        }
+      }
+    });
+    
+    // Call the callback with consolidated messages and close the screen
+    if (widget.onCheckout != null && consolidatedMessages.isNotEmpty) {
+      widget.onCheckout!(consolidatedMessages);
+    }
+    
+    // Close the screen
+    Navigator.of(context).pop();
+  }
+
+  void _clearCart() {
+    setState(() {
+      _cartItems = 0;
+      _cartTotal = 0.00;
+      _productQuantities.clear();
+      _productDetails.clear();
+      _initialQuantities.clear();
+    });
   }
 
   @override
@@ -65,28 +130,130 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
       child: Scaffold(
         backgroundColor: Colors.white,
         body: SafeArea(
-          child: Column(
+          child: Stack(
             children: [
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Column(
-                    children: [
-                      const SizedBox(height: 24),
-                      ScreenHeader(
-                        title: widget.actionData?.title ?? '',
-                        subtitle: widget.actionData?.subtitle ?? '',
+              // Main content
+              Column(
+                children: [
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: Column(
+                        children: [
+                          const SizedBox(height: 24),
+                          ScreenHeader(
+                            title: widget.actionData?.title ?? '',
+                            subtitle: widget.actionData?.subtitle ?? '',
+                            onClose: () {
+                              // _onAddToCart();
+                              Navigator.of(context).pop();
+                            },
+                          ),
+                          const SizedBox(height: 16),
+                          _buildSearchBar(),
+                          const SizedBox(height: 16),
+                                                  Expanded(child: _buildRestaurantList()),
+                        // Add bottom padding to account for the cart bar (only when items exist)
+                        if (_cartItems > 0) const SizedBox(height: 105),
+                        ],
                       ),
-                      const SizedBox(height: 16),
-                      _buildSearchBar(),
-                      const SizedBox(height: 16),
-                      Expanded(child: _buildRestaurantList()),
-                      const SizedBox(height: 16),
+                    ),
+                  ),
+                ],
+              ),
+              // Bottom cart bar - positioned absolutely at the bottom (only show when items exist)
+              if (_cartItems > 0)
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  child: _buildBottomCartBar(),
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildBottomCartBar() {
+    return GestureDetector(
+      onTap: _onAddToCart,
+      child: Container(
+        width: double.infinity,
+        height: 105.56,
+        padding: const EdgeInsets.only(top: 10),
+        decoration: const BoxDecoration(
+          color: Color(0xFFF5F7FF),
+        ),
+        child: Center(
+          child: Container(
+            width: 343,
+            height: 62,
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                begin: Alignment.centerLeft,
+                end: Alignment.centerRight,
+                colors: [
+                  Color(0xFFD445EC),
+                  Color(0xFFB02EFB),
+                  Color(0xFF8E2FFD),
+                  Color(0xFF5E3DFE),
+                  Color(0xFF5186E0),
+                ],
+                stops: [0.0, 0.27, 0.48, 0.76, 1.0],
+              ),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Row(
+              children: [
+                // Left side - Price and items
+                Padding(
+                  padding: const EdgeInsets.only(left: 25, top: 13),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'د.إ${_cartTotal.toStringAsFixed(2)}',
+                        style: const TextStyle(
+                          fontFamily: 'aed',
+                          fontSize: 16,
+                          fontWeight: FontWeight.w400,
+                          height: 1.2,
+                          color: Colors.white,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        '${_cartItems.toString().padLeft(2, '0')} items',
+                        style: const TextStyle(
+                          fontFamily: 'Plus Jakarta Sans',
+                          fontSize: 12,
+                          fontWeight: FontWeight.w400,
+                          height: 1.4,
+                          color: Colors.white,
+                        ),
+                      ),
                     ],
                   ),
                 ),
-              ),
-            ],
+                const Spacer(),
+                // Right side - Checkout button
+                Padding(
+                  padding: const EdgeInsets.only(right: 25),
+                  child: const Text(
+                    'Checkout',
+                    style: TextStyle(
+                      fontFamily: 'Plus Jakarta Sans',
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                      height: 1.2,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -189,7 +356,21 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
                 onTap: () {
                   Navigator.pop(context);
                 },
-                onAddToCart: widget.onAddToCart,
+                onAddToCart: (message, product, store, quantity) {
+                  // Update cart state when items are added
+                  setState(() {
+                    // Track product details
+                    _productDetails[product.childProductId] = product;
+                    
+                    // Update quantity with the actual quantity from CartManager
+                    _productQuantities[product.childProductId] = quantity;
+                    
+                    // Update cart totals
+                    _cartItems = _productQuantities.values.fold(0, (sum, qty) => sum + qty);
+                    _cartTotal = _productDetails.values.fold(0.0, (sum, prod) => 
+                      sum + (prod.finalPrice * (_productQuantities[prod.childProductId] ?? 0)));
+                  });
+                },
               );
             } catch (e) {
               return Container(

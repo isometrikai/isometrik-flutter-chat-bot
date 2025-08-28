@@ -7,11 +7,13 @@ import 'package:chat_bot/bloc/restaurant_menu/restaurant_menu_event.dart';
 import 'package:chat_bot/bloc/restaurant_menu/restaurant_menu_state.dart';
 import 'package:chat_bot/widgets/menu_item_card.dart';
 import 'package:chat_bot/widgets/screen_header.dart';
+import 'package:chat_bot/services/cart_manager.dart';
 
 class RestaurantMenuScreen extends StatefulWidget {
   final WidgetAction? actionData;
+  final Function(List<String>)? onCheckout;
 
-  const RestaurantMenuScreen({super.key, this.actionData});
+  const RestaurantMenuScreen({super.key, this.actionData, this.onCheckout});
 
   @override
   State<RestaurantMenuScreen> createState() => _RestaurantMenuScreenState();
@@ -26,6 +28,7 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
 
   final TextEditingController _searchController = TextEditingController();
   late final RestaurantMenuBloc _bloc;
+  final CartManager cartManager = CartManager();
 
   // Dynamic data from API
   List<ProductCategory> _categories = <ProductCategory>[];
@@ -33,6 +36,13 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
   int _selectedBiriyaniSubIndex = 0;
   bool _filterVeg = false;
   bool _filterNonVeg = false;
+
+  // Cart state
+  double _cartTotal = 0.00;
+  int _cartItems = 0;
+  Map<String, int> _productQuantities = {}; // Track product quantities
+  Map<String, Product> _productDetails = {}; // Track product details
+  Map<String, int> _initialQuantities = {}; // Track initial quantities when screen opened
 
   
 
@@ -44,6 +54,19 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
     super.initState();
     _bloc = RestaurantMenuBloc(actionData: widget.actionData);
     _bloc.add(const RestaurantMenuRequested());
+    _initializeInitialQuantities();
+  }
+
+  void _initializeInitialQuantities() {
+    // Initialize initial quantities for products already in cart
+    // This ensures we track the correct baseline when screen opens
+    setState(() {
+      // Get all products from CartManager and set their initial quantities
+      final currentQuantities = cartManager.productQuantities;
+      _initialQuantities.addAll(currentQuantities);
+      
+      print("Menu Screen - Initialized quantities: $_initialQuantities");
+    });
   }
 
   @override
@@ -51,6 +74,73 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
     _searchController.dispose();
     _bloc.close();
     super.dispose();
+  }
+
+  void _onAddToCart() {
+    // Handle add to cart action - show added products
+    print("Product Quantities: $_productQuantities");
+    print("Initial Quantities: $_initialQuantities");
+    print("Total Items: $_cartItems");
+    print("Total Price: Đ$_cartTotal");
+    
+    // Create consolidated messages from quantities
+    List<String> consolidatedMessages = [];
+    _productQuantities.forEach((productId, quantity) {
+      if (quantity > 0 && _productDetails.containsKey(productId)) {
+        final product = _productDetails[productId]!;
+        // Calculate quantity added in this session
+        final initialQuantity = _initialQuantities[productId] ?? 0;
+        final quantityAdded = quantity - initialQuantity;
+        
+        print("Product: ${product.productName}, Current: $quantity, Initial: $initialQuantity, Added: $quantityAdded");
+        
+        if (quantityAdded > 0) {
+          consolidatedMessages.add("Add ${quantityAdded}X ${product.productName} to cart");
+        }
+      }
+    });
+    
+    // Call the callback with consolidated messages and close the screen
+    if (widget.onCheckout != null && consolidatedMessages.isNotEmpty) {
+      widget.onCheckout!(consolidatedMessages);
+    }
+    
+    // Close the screen
+    Navigator.of(context).pop();
+  }
+
+  void _clearCart() {
+    setState(() {
+      _cartItems = 0;
+      _cartTotal = 0.00;
+      _productQuantities.clear();
+      _productDetails.clear();
+      _initialQuantities.clear();
+    });
+  }
+
+  double _extractPriceFromString(String priceString) {
+    // Remove all non-numeric characters except decimal point
+    String cleanString = priceString.replaceAll(RegExp(r'[^\d.]'), '');
+    
+    // Remove trailing decimal points
+    cleanString = cleanString.replaceAll(RegExp(r'\.+$'), '');
+    
+    // Handle cases where there might be multiple decimal points (keep only the first one)
+    final parts = cleanString.split('.');
+    if (parts.length > 2) {
+      cleanString = '${parts[0]}.${parts[1]}';
+    }
+    
+    // Parse the cleaned string
+    final price = double.tryParse(cleanString);
+    
+    print("Price extraction debug:");
+    print("  Original: $priceString");
+    print("  Cleaned: $cleanString");
+    print("  Parsed: $price");
+    
+    return price ?? 0.0;
   }
 
   @override
@@ -63,18 +153,23 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
         body: SafeArea(
           child: Stack(
             children: <Widget>[
+              // Main content
               Positioned.fill(
                 child: SingleChildScrollView(
-                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+                  padding: EdgeInsets.fromLTRB(16, 16, 16, _cartItems > 0 ? 129 : 24), // Add bottom padding when cart is visible
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
-                      const ScreenHeader(
+                      ScreenHeader(
                         title: 'Soup & Salad Co has amazing arabic food.',
                         subtitle: 'Here are their popular dishes',
+                        onClose: () {
+                          // _onAddToCart();
+                          Navigator.of(context).pop();
+                        },
                       ),
-                      const SizedBox(height: 16),
-                      _buildSearchBar(theme),
+                      // const SizedBox(height: 16),
+                      // _buildSearchBar(theme),
                       const SizedBox(height: 16),
                       _buildDietToggles(),
                       const SizedBox(height: 16),
@@ -117,6 +212,14 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
                   ),
                 ),
               ),
+              // Bottom cart bar - positioned absolutely at the bottom (only show when items exist)
+              if (_cartItems > 0)
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  child: _buildBottomCartBar(),
+                ),
             ],
           ),
         ),
@@ -359,10 +462,48 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
                 originalPrice: item.originalPrice,
                 isVeg: item.isVeg,
                 imageUrl: item.imageUrl,
+                productId: item.productId,
                 purple: _purple,
                 vegColor: _veg,
                 nonVegColor: _nonVeg,
-                onAdd: () {},
+                onClick: () {},
+                onAddToCart: (message, productId, quantity) {
+                  // Update cart state when items are added
+                  setState(() {
+                    // For menu items, we need to find the product from the categories
+                    Product? foundProduct;
+                    for (final category in _categories) {
+                      if (category.isSubCategories && category.subCategories.isNotEmpty) {
+                        for (final subCategory in category.subCategories) {
+                          foundProduct = subCategory.products.firstWhere(
+                            (p) => p.childProductId == productId,
+                            orElse: () => subCategory.products.first,
+                          );
+                          if (foundProduct != null) break;
+                        }
+                      } else {
+                        foundProduct = category.products.firstWhere(
+                          (p) => p.childProductId == productId,
+                          orElse: () => category.products.first,
+                        );
+                      }
+                      if (foundProduct != null) break;
+                    }
+                    
+                    if (foundProduct != null) {
+                      // Track product details
+                      _productDetails[productId] = foundProduct;
+                      
+                      // Update quantity with the actual quantity from CartManager
+                      _productQuantities[productId] = quantity;
+                      
+                      // Update cart totals
+                      _cartItems = _productQuantities.values.fold(0, (sum, qty) => sum + qty);
+                      _cartTotal = _productDetails.values.fold(0.0, (sum, prod) => 
+                        sum + (prod.finalPrice * (_productQuantities[prod.childProductId] ?? 0)));
+                    }
+                  });
+                },
               );
             },
           ),
@@ -388,6 +529,7 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
       isVeg: !p.containsMeat,
       assetPath: imageUrl ?? 'assets/images/men.png',
       imageUrl: imageUrl,
+      productId: p.childProductId,
     );
   }
 
@@ -409,6 +551,90 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
       if (first is String && first.isNotEmpty) return first;
     }
     return null;
+  }
+
+  Widget _buildBottomCartBar() {
+    return GestureDetector(
+      onTap: _onAddToCart,
+      child: Container(
+        width: double.infinity,
+        height: 105.56,
+        padding: const EdgeInsets.only(top: 10),
+        decoration: const BoxDecoration(
+          color: Color(0xFFF5F7FF),
+        ),
+        child: Center(
+          child: Container(
+            width: 343,
+            height: 62,
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                begin: Alignment.centerLeft,
+                end: Alignment.centerRight,
+                colors: [
+                  Color(0xFFD445EC),
+                  Color(0xFFB02EFB),
+                  Color(0xFF8E2FFD),
+                  Color(0xFF5E3DFE),
+                  Color(0xFF5186E0),
+                ],
+                stops: [0.0, 0.27, 0.48, 0.76, 1.0],
+              ),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Row(
+              children: [
+                // Left side - Price and items
+                Padding(
+                  padding: const EdgeInsets.only(left: 25, top: 13),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'د.إ${_cartTotal.toStringAsFixed(2)}',
+                        style: const TextStyle(
+                          fontFamily: 'aed',
+                          fontSize: 16,
+                          fontWeight: FontWeight.w400,
+                          height: 1.2,
+                          color: Colors.white,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        '${_cartItems.toString().padLeft(2, '0')} items',
+                        style: const TextStyle(
+                          fontFamily: 'Plus Jakarta Sans',
+                          fontSize: 12,
+                          fontWeight: FontWeight.w400,
+                          height: 1.4,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const Spacer(),
+                // Right side - Checkout button
+                Padding(
+                  padding: const EdgeInsets.only(right: 25),
+                  child: const Text(
+                    'Checkout',
+                    style: TextStyle(
+                      fontFamily: 'Plus Jakarta Sans',
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                      height: 1.2,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
   // Removed mock items in favor of API-driven content
@@ -482,6 +708,7 @@ class _MenuItem {
   final bool isVeg;
   final String assetPath;
   final String? imageUrl;
+  final String? productId;
 
   const _MenuItem({
     required this.title,
@@ -490,6 +717,7 @@ class _MenuItem {
     required this.isVeg,
     required this.assetPath,
     this.imageUrl,
+    this.productId,
   });
 }
 

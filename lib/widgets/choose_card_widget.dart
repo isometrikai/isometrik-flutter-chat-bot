@@ -86,7 +86,7 @@ class _ChooseCardWidgetState extends State<ChooseCardWidget> {
         widget.onCardSelected?.call(cardOption);
         
         // Automatically send the selected card as a message
-        final message = cardOption.title;
+        final message = "Use this card:-\n${cardOption.title}";
         widget.onSendMessage?.call(message);
       },
       child: Container(

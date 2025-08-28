@@ -107,12 +107,12 @@ class AuthService {
             "ui_preferences": {
               "mode_theme": 1,
               "primary_color": "#3F51B5",
-              "bot_bubble_color": "#3F51B5",
-              "user_bubble_color": "#3F51B5",
+              "bot_bubble_color": "#FFFFFF",
+              "user_bubble_color": "#F0DAFE",
               "font_size": "12px",
               "font_style": "Arial",
-              "bot_bubble_font_color": "#FFFFFF",
-              "user_bubble_font_color": "#FFFFFF",
+              "bot_bubble_font_color": "#000000",
+              "user_bubble_font_color": "#242424",
               "launcher_image": "",
               "launcher_welcome_message": "Hi! I'm your personal assistant. How can I help you today?",
               "selected_launcher_image_type": 1

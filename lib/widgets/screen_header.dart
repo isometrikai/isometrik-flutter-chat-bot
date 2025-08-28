@@ -23,7 +23,7 @@ class ScreenHeader extends StatelessWidget {
       padding: const EdgeInsets.all(0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        crossAxisAlignment: CrossAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Expanded(
             child: Column(
@@ -59,7 +59,9 @@ class ScreenHeader extends StatelessWidget {
                 width: 40,
                 height: 40,
               ),
-              onPressed: onClose ?? () => Navigator.of(context).maybePop(),
+              padding: EdgeInsets.fromLTRB(0, 0, 0, 0),
+              // onPressed: onClose ?? () => Navigator.of(context).maybePop(),
+              onPressed: onClose,
             ),
         ],
       ),

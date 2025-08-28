@@ -75,6 +75,7 @@ class ChatApiServices {
 
     // Match existing endpoint used elsewhere
     final res = await _chatClient.post('/v2/chatbot', body);
+    // final res = await _appClient.post('/v2/chatbot', body);
     // final res = await _chatClient.post('/v2/test-response', body);
     if (res.isSuccess && res.data != null) {
       try {
