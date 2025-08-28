@@ -276,7 +276,7 @@ class _ProductPreviewTile extends StatelessWidget {
             child: GestureDetector(
               onTap: () {
                 if (onAddToCart != null) {
-                  onAddToCart!("Add ${product.productName} from ${store.storename} to cart", product, store);
+                  onAddToCart!("Add 1X ${product.productName} to cart", product, store);//from ${store.storename}
                 }
                 
                 if (onHide != null) {

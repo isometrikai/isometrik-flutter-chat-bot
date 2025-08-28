@@ -140,7 +140,7 @@ class MenuItemCard extends StatelessWidget {
               ),
               onPressed: () {
                 if (onAddToCart != null) {
-                  onAddToCart!("Add $title to cart");
+                  onAddToCart!("Add 1X $title to cart");
                 }
               },
               child: Text(

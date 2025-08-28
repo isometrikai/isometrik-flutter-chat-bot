@@ -8,6 +8,7 @@ import 'package:chat_bot/view/add_card_sheet.dart';
 import 'package:chat_bot/view/address_details_screen.dart';
 import 'package:chat_bot/view/restaurant_menu_screen.dart';
 import 'package:chat_bot/view/restaurant_screen.dart';
+import 'package:chat_bot/view/cart_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lottie/lottie.dart';
@@ -24,7 +25,7 @@ import 'package:chat_bot/widgets/choose_card_widget.dart';
 import '../utils/enum.dart';
 
 // Global variable for cart object
-ChatWidget? cartObject;
+List<WidgetAction>? cartObject = [];
 
 class ChatScreen extends StatefulWidget {
   final MyGPTsResponse chatbotData;
@@ -396,6 +397,7 @@ class _ChatScreenBody extends StatelessWidget {
               int cartCount = 0;
               if (cartWidgets.isNotEmpty) {
                 cartCount = cartWidgets.first.getCartItems().length;
+                cartObject = cartWidgets.first.getCartItems();
               }
               //  int cartCount = 0;
               // if (cartObject != null) {
@@ -636,7 +638,14 @@ class _ChatScreenBody extends StatelessWidget {
                         ],
                       ),
                     ),
-                    onPressed: isApiLoading ? null : () => _showNewChatConfirmation(context),
+                    onPressed: isApiLoading ? null : () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const CartScreen(),
+                        ),
+                      );
+                    },
                   ),
                 ],
                 IconButton(
@@ -1538,7 +1547,7 @@ class _ChatScreenBody extends StatelessWidget {
       // color: Colors.red,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.only(left: 70),
+        padding: const EdgeInsets.only(left: 6),
         clipBehavior: Clip.none,
         itemCount: products.length,
         separatorBuilder: (context, index) => const SizedBox(width: 16),
