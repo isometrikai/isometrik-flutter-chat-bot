@@ -5,9 +5,14 @@ import 'services/api_service.dart';
 import 'services/callback_manage.dart';
 import 'view/chat_screen.dart';
 import 'package:flutter/services.dart';
+import 'utils/asset_path.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  
+  // Configure asset loading mode
+  AssetPath.isPackageMode = true; // Set to true for package mode, false for normal project
+  
   await PlatformService.initializeFromPlatform();
   runApp(const MyApp());
 }
