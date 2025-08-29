@@ -50,6 +50,7 @@ class ChatResponse {
   List<ChatWidget> get cartWidgets => getWidgetsByType('cart');
   List<ChatWidget> get chooseAddressWidgets => getWidgetsByType('choose_address');
   List<ChatWidget> get chooseCardWidgets => getWidgetsByType('choose_card');
+  List<ChatWidget> get orderSummaryWidgets => getWidgetsByType('order_summary');
 
   @override
   String toString() {
@@ -100,6 +101,7 @@ class ChatWidget {
   bool get isChooseCardWidget => type == WidgetEnum.choose_card.value;
   bool get isAddAddressWidget => type == WidgetEnum.add_address.value;
   bool get isAddPaymentWidget => type == WidgetEnum.add_payment.value;
+  bool get isOrderSummaryWidget => type == WidgetEnum.order_summary.value;
   bool get isButtonWidget => type == 'button';
   bool get isInputWidget => type == 'input';
   bool get isImageWidget => type == 'image';
@@ -233,6 +235,14 @@ class ChatWidget {
   List<CardOption> getCardOptions() {
     if (isChooseCardWidget) {
       return widget.map((item) => CardOption.fromJson(item as Map<String, dynamic>)).toList();
+    }
+    return [];
+  }
+
+  // Helper method to get order summary items
+  List<WidgetAction> getOrderSummaryItems() {
+    if (isOrderSummaryWidget) {
+      return widget.map((item) => WidgetAction.fromJson(item as Map<String, dynamic>)).toList();
     }
     return [];
   }
@@ -663,6 +673,7 @@ class WidgetAction {
   final String? name;
   final String? productID;
   final String? storeId;
+  final String? storeName;
 
   WidgetAction({
     required this.buttonText,
@@ -677,7 +688,8 @@ class WidgetAction {
     this.address,
     this.name,
     this.productID,
-    this.storeId
+    this.storeId,
+    this.storeName,
   });
 
   factory WidgetAction.fromJson(Map<String, dynamic> json) {
@@ -698,7 +710,8 @@ class WidgetAction {
       address: json['address']?.toString(),
       name: json['name']?.toString(),
       productID: json['productID']?.toString(),
-      storeId: json['storeId']?.toString()
+      storeId: json['storeId']?.toString(),
+      storeName: json['storeName']?.toString(),
     );
   }
 
@@ -716,7 +729,8 @@ class WidgetAction {
       'address': address,
       'name': name,
       'productID': productID,
-      'storeId': storeId
+      'storeId': storeId,
+      'storeName': storeName,
     };
   }
 }
