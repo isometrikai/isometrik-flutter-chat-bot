@@ -177,48 +177,7 @@ class _CartScreenState extends State<CartScreen> {
         }
 
         if (state is CartError) {
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(
-                  Icons.error_outline,
-                  size: 64,
-                  color: Color(0xFF8E2FFD),
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  'Error loading cart',
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
-                    color: Color(0xFF242424),
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  state.message,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    color: Color(0xFF666666),
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 16),
-                ElevatedButton(
-                  onPressed: () => context.read<CartBloc>().add(CartFetchRequested()),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF8E2FFD),
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                  child: const Text('Retry'),
-                ),
-              ],
-            ),
-          );
+          return _buildEmptyCart();
         }
 
         if (state is CartEmpty) {
@@ -227,6 +186,12 @@ class _CartScreenState extends State<CartScreen> {
 
         if (state is CartLoaded) {
           final cartItems = state.cartItems;
+          
+          // Check if cart has items
+          if (cartItems.isEmpty) {
+            return _buildEmptyCart();
+          }
+          
           return SingleChildScrollView(
             padding: const EdgeInsets.all(16),
             child: Column(
@@ -256,27 +221,18 @@ class _CartScreenState extends State<CartScreen> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           const Icon(
-            Icons.shopping_cart_outlined,
+            Icons.error_outline,
             size: 64,
             color: Color(0xFF8E2FFD),
           ),
           const SizedBox(height: 16),
           const Text(
-            'Your cart is empty',
+            'No Data Found',
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w600,
               color: Color(0xFF242424),
             ),
-          ),
-          const SizedBox(height: 8),
-          const Text(
-            'Add some items to get started',
-            style: TextStyle(
-              fontSize: 14,
-              color: Color(0xFF666666),
-            ),
-            textAlign: TextAlign.center,
           ),
         ],
       ),
@@ -406,79 +362,58 @@ class _CartScreenState extends State<CartScreen> {
   }
 
   Widget _buildBottomActions() {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      child: Row(
-        children: [
-          // More items button
-          // Expanded(
-          //   flex: 1,
-          //   child: GestureDetector(
-          //     onTap: () {
-          //       Navigator.of(context).pop();
-          //       // TODO: Navigate to restaurant/menu screen to add more items
-          //     },
-          //     child: Container(
-          //       height: 62,
-          //       decoration: BoxDecoration(
-          //         color: Colors.white,
-          //         border: Border.all(color: const Color(0xFF8E2FFD), width: 1),
-          //         borderRadius: BorderRadius.circular(16),
-          //       ),
-          //       child: const Center(
-          //         child: Text(
-          //           '+ More items',
-          //           style: TextStyle(
-          //             fontSize: 16,
-          //             fontWeight: FontWeight.w700,
-          //             color: Color(0xFF8E2FFD),
-          //           ),
-          //         ),
-          //       ),
-          //     ),
-          //   ),
-          // ),
-          
-          // const SizedBox(width: 16),
-          
-          // Proceed to checkout button
-          Expanded(
-            flex: 2,
-            child: GestureDetector(
-              onTap: () {
-                widget.onCheckout?.call("Proceed to checkout");
-                Navigator.of(context).pop();
-              },
-              child: Container(
-                height: 62,
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [
-                      Color(0xFF5186E0),
-                      Color(0xFF5E3DFE),
-                      Color(0xFF8E2FFD),
-                      Color(0xFFB02EFB),
-                      Color(0xFFD445EC),
-                    ],
-                    stops: [0.0, 0.24, 0.52, 0.73, 1.0],
-                  ),
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: const Center(
-                  child: Text(
-                    'Proceed to checkout',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                      color: Colors.white,
+    return BlocBuilder<CartBloc, CartState>(
+      builder: (context, state) {
+        // Only show checkout button if cart has data
+        if (state is CartLoaded && state.cartItems.isNotEmpty) {
+          return Container(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              children: [
+                // Proceed to checkout button
+                Expanded(
+                  flex: 2,
+                  child: GestureDetector(
+                    onTap: () {
+                      widget.onCheckout?.call("Proceed to checkout");
+                      Navigator.of(context).pop();
+                    },
+                    child: Container(
+                      height: 62,
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          colors: [
+                            Color(0xFF5186E0),
+                            Color(0xFF5E3DFE),
+                            Color(0xFF8E2FFD),
+                            Color(0xFFB02EFB),
+                            Color(0xFFD445EC),
+                          ],
+                          stops: [0.0, 0.24, 0.52, 0.73, 1.0],
+                        ),
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: const Center(
+                        child: Text(
+                          'Proceed to checkout',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
                     ),
                   ),
                 ),
-              ),
+              ],
             ),
-          ),
-        ],
-      ),
+          );
+        }
+        
+        // Return empty container when cart is empty or in other states
+        return const SizedBox.shrink();
+      },
     );
   }
 }
