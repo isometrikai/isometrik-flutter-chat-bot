@@ -90,9 +90,9 @@ class _CartScreenState extends State<CartScreen> {
 
   Widget _buildFilterChips() {
     final categories = [
-      {'name': '🍕 Food', 'count': '', 'isSelected': true},
-      {'name': '🥑 Grocery', 'count': '', 'isSelected': false},
-      {'name': '💊 Pharmacy', 'count': '', 'isSelected': false},
+      {'name': '🍕 Restaurants', 'count': '', 'isSelected': true},
+      // {'name': '🥑 Grocery', 'count': '', 'isSelected': false},
+      // {'name': '💊 Pharmacy', 'count': '', 'isSelected': false},
       // {'name': '🔨 Services', 'count': '', 'isSelected': false},
       // {'name': '🛍️ Shopping', 'count': '', 'isSelected': false},
     ];
@@ -140,7 +140,7 @@ class _CartScreenState extends State<CartScreen> {
             name,
             style: const TextStyle(
               fontSize: 14,
-              fontWeight: FontWeight.w400,
+              fontWeight: FontWeight.w600,
               color: Color(0xFF242424),
             ),
           ),

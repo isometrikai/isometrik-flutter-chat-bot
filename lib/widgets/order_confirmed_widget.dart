@@ -2,12 +2,10 @@ import 'package:flutter/material.dart';
 
 class OrderConfirmedWidget extends StatelessWidget {
   final String title;
-  final String? deliveryTime;
 
   const OrderConfirmedWidget({
     super.key,
     required this.title,
-    this.deliveryTime,
   });
 
   @override

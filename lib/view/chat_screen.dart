@@ -1702,7 +1702,6 @@ class _ChatScreenBody extends StatelessWidget {
       
       return OrderConfirmedWidget(
         title: title,
-        deliveryTime: '30-40 minutes',
       );
     }
     return const SizedBox.shrink();
