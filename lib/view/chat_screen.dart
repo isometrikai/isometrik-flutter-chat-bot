@@ -1320,6 +1320,27 @@ class _ChatScreenBody extends StatelessWidget {
                 ).then((result) {
                   if (result != null) {
                     print("Result: $result");
+                    
+                    // Create a formatted address string
+                    final String building = result['building'] ?? '';
+                    final String landmark = result['landmark'] ?? '';
+                    final String area = result['area'] ?? '';
+                    final String city = result['city'] ?? '';
+                    final String country = result['country'] ?? '';
+                    final String tag = result['tag'] ?? '';
+                    
+                    // Build the full address string
+                    final List<String> addressParts = [];
+                    if (building.isNotEmpty) addressParts.add(building);
+                    if (landmark.isNotEmpty) addressParts.add(landmark);
+                    if (area.isNotEmpty) addressParts.add(area);
+                    if (city.isNotEmpty) addressParts.add(city);
+                    if (country.isNotEmpty) addressParts.add(country);
+                    
+                    final String fullAddress = addressParts.join(', ');
+                    final String addressMessage = "My $tag address is:\n$fullAddress";
+                    
+                    onSendMessage(addressMessage);
                   }
              });
                 },
@@ -1344,6 +1365,7 @@ class _ChatScreenBody extends StatelessWidget {
                 if (result != null) {
                   debugPrint('PM: ${result['paymentMethodId']} '
                       '${result['brand']} **** ${result['last4']}');
+                      onSendMessage('Card added successfully last 4 digits: ${result['last4']}');
                 }
                 },
               );
