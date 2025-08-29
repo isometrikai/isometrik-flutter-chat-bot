@@ -274,7 +274,7 @@ class OrderSummaryWidget extends StatelessWidget {
                       const Text('💳 ', style: TextStyle(fontSize: 14)),
                       Expanded(
                         child: Text(
-                          'Card (*4242)',
+                          totalItem.paymentTypeText ?? '',
                           style: const TextStyle(
                             fontFamily: 'Plus Jakarta Sans',
                             fontSize: 14,

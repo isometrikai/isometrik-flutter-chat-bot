@@ -33,50 +33,47 @@ class CartBloc extends Bloc<CartEvent, CartState> {
     }
 
     try {
-      // Fetch cart items as widget actions
-      final result = await repository.fetchUniversalCartAsWidgetActions();
+      // Fetch raw cart data once and use it for both purposes
+      final rawResult = await repository.fetchRawUniversalCart();
       
-      if (result.isSuccess) {
-        final widgetActions = result.data as List<WidgetAction>;
+      if (rawResult.isSuccess) {
+        final rawCartData = rawResult.data as UniversalCartResponse;
         
-        // Also fetch the raw cart data for store information
-        final rawResult = await repository.fetchRawUniversalCart();
-        UniversalCartResponse? rawCartData;
+        // Convert to widget actions
+        final widgetActions = rawCartData.toWidgetActions();
+        
         String? storeName;
         String? storeType;
         
-        if (rawResult.isSuccess) {
-          rawCartData = rawResult.data as UniversalCartResponse;
-          if (rawCartData.data.isNotEmpty) {
-            final cartData = rawCartData.data.first;
-            final seller = cartData.sellers.isNotEmpty ? cartData.sellers.first : null;
-            
-            totalProductCount = 0;
-            Map<String, int> productQuantities = {};
-            
-            for (var obj in rawCartData.data) {
-              for (var sellerData in obj.sellers) {
-                totalProductCount += sellerData.products.length;
-                
-                // Extract product quantities for CartManager
-                for (var product in sellerData.products) {
-                  if (product.quantity != null) {
-                    productQuantities[product.id] = product.quantity?.value ?? 1;
-                  }
+        if (rawCartData.data.isNotEmpty) {
+          final cartData = rawCartData.data.first;
+          final seller = cartData.sellers.isNotEmpty ? cartData.sellers.first : null;
+          
+          totalProductCount = 0;
+          Map<String, int> productQuantities = {};
+          
+          for (var obj in rawCartData.data) {
+            for (var sellerData in obj.sellers) {
+              totalProductCount += sellerData.products.length;
+              
+              // Extract product quantities for CartManager
+              for (var product in sellerData.products) {
+                if (product.quantity != null) {
+                  productQuantities[product.id] = product.quantity?.value ?? 1;
                 }
               }
             }
-            
-            // Load quantities into CartManager
-            cartManager.loadFromData(productQuantities);
-            
-            print('Total product count across all sellers: $totalProductCount');
-            print('Loaded ${productQuantities.length} products into CartManager');
-            
-            // Store the store info
-            storeName = seller?.name;
-            storeType = seller?.storeType;
           }
+          
+          // Load quantities into CartManager
+          cartManager.loadFromData(productQuantities);
+          
+          print('Total product count across all sellers: $totalProductCount');
+          print('Loaded ${productQuantities.length} products into CartManager');
+          
+          // Store the store info
+          storeName = seller?.name;
+          storeType = seller?.storeType;
         }
         
         if (widgetActions.isEmpty) {
@@ -91,7 +88,7 @@ class CartBloc extends Bloc<CartEvent, CartState> {
         }
         
       } else {
-        emit(CartError(message: result.message ?? 'Failed to fetch cart'));
+        emit(CartError(message: rawResult.message ?? 'Failed to fetch cart'));
       }
     } catch (e) {
       emit(CartError(message: e.toString()));

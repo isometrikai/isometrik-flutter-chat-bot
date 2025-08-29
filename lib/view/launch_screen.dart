@@ -6,6 +6,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:chat_bot/bloc/launch/launch_bloc.dart';
 import 'package:chat_bot/bloc/launch/launch_event.dart';
 import 'package:chat_bot/bloc/launch/launch_state.dart';
+import 'package:chat_bot/bloc/chat_bloc.dart';
+import 'package:chat_bot/bloc/cart/cart_bloc.dart';
 import 'chat_screen.dart';
 
 class LaunchScreen extends StatefulWidget {
@@ -58,9 +60,15 @@ class _LaunchScreenState extends State<LaunchScreen> {
     if (!mounted) return;
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(
-        builder: (context) => ChatScreen(
-          chatbotData: success.chatbotData,
-          greetingData: success.greetingData,
+        builder: (context) => MultiBlocProvider(
+          providers: [
+            BlocProvider(create: (context) => ChatBloc()),
+            BlocProvider(create: (context) => CartBloc()),
+          ],
+          child: ChatScreen(
+            chatbotData: success.chatbotData,
+            greetingData: success.greetingData,
+          ),
         ),
       ),
     );

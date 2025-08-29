@@ -303,44 +303,38 @@ class _ChatScreenState extends State<ChatScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return MultiBlocProvider(
-      providers: [
-        BlocProvider(create: (context) => ChatBloc()),
-        BlocProvider(create: (context) => CartBloc()),
-      ],
-      child: _ChatScreenBody(
-        messageController: _messageController,
-        messageFocusNode: _messageFocusNode,
-        scrollController: _scrollController,
-        chatbotData: widget.chatbotData,
-        greetingData: widget.greetingData,
-        selectedOptionMessages: _selectedOptionMessages,
-        messages: messages,
-        onSendMessage: _sendMessage,
-        onHandleChatResponse: _handleChatResponse,
-        onScrollToBottom: _scrollToBottom,
-        onLoadChatbotData: () {},
-        onRestartChatAPI: _restartChatAPI,
-        onUpdateSelectedOptions: (Set<String> newSet) {
-          setState(() {
-            _selectedOptionMessages = newSet;
-          });
-        },
-        onUpdateMessages: (List<ChatMessage> newMessages) {
-          setState(() {
-            messages = newMessages;
-          });
-        },
-        pendingMessage: _pendingMessage,
-        onClearPendingMessage: _clearPendingMessage,
-        sessionId: _sessionId, // Pass session ID
-        textFieldHeight: _textFieldHeight,
-        onUpdateTextFieldHeight: _updateTextFieldHeight,
-        latestActionWidgets: _latestActionWidgets,
-        onHideStoreCards: _hideStoreCards, // Add the callback
-        onUpdateCartCount: _updateCartCount, // Add the callback
-        totalCartCount: _totalCartCount, // Pass the cart count
-      ),
+    return _ChatScreenBody(
+      messageController: _messageController,
+      messageFocusNode: _messageFocusNode,
+      scrollController: _scrollController,
+      chatbotData: widget.chatbotData,
+      greetingData: widget.greetingData,
+      selectedOptionMessages: _selectedOptionMessages,
+      messages: messages,
+      onSendMessage: _sendMessage,
+      onHandleChatResponse: _handleChatResponse,
+      onScrollToBottom: _scrollToBottom,
+      onLoadChatbotData: () {},
+      onRestartChatAPI: _restartChatAPI,
+      onUpdateSelectedOptions: (Set<String> newSet) {
+        setState(() {
+          _selectedOptionMessages = newSet;
+        });
+      },
+      onUpdateMessages: (List<ChatMessage> newMessages) {
+        setState(() {
+          messages = newMessages;
+        });
+      },
+      pendingMessage: _pendingMessage,
+      onClearPendingMessage: _clearPendingMessage,
+      sessionId: _sessionId, // Pass session ID
+      textFieldHeight: _textFieldHeight,
+      onUpdateTextFieldHeight: _updateTextFieldHeight,
+      latestActionWidgets: _latestActionWidgets,
+      onHideStoreCards: _hideStoreCards, // Add the callback
+      onUpdateCartCount: _updateCartCount, // Add the callback
+      totalCartCount: _totalCartCount, // Pass the cart count
     );
   }
 }
@@ -401,12 +395,12 @@ class _ChatScreenBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return PopScope(
-      canPop: false,
-      child: Scaffold(
-        backgroundColor: Colors.white,
-        resizeToAvoidBottomInset: true,
-        appBar: _buildAppBar(context),
-        body: BlocConsumer<ChatBloc, ChatState>(
+        canPop: false,
+        child: Scaffold(
+          backgroundColor: Colors.white,
+          resizeToAvoidBottomInset: true,
+          appBar: _buildAppBar(context),
+          body: BlocConsumer<ChatBloc, ChatState>(
           listener: (context, state) {
             if (state is ChatLoaded) {
               List<ChatWidget> cartWidgets = state.messages.cartWidgets;
