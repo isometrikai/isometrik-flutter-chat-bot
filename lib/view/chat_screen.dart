@@ -26,6 +26,7 @@ import 'package:chat_bot/widgets/cart_widget.dart';
 import 'package:chat_bot/widgets/choose_address_widget.dart';
 import 'package:chat_bot/widgets/choose_card_widget.dart';
 import 'package:chat_bot/widgets/order_summary_widget.dart';
+import 'package:chat_bot/widgets/order_confirmed_widget.dart';
 import '../utils/enum.dart';
 import '../utils/asset_helper.dart';
 
@@ -53,12 +54,12 @@ class _ChatScreenState extends State<ChatScreen> {
   int _totalCartCount = 0; // Track total cart count
   List<ChatMessage> messages = [];
 
-  // Returns index of the last bot message that shows stores, products, choose_address, choose_card, or order_summary widgets; -1 if none
+  // Returns index of the last bot message that shows stores, products, choose_address, choose_card, order_summary, or order_confirmed widgets; -1 if none
   // Cart widget is not considered for hiding
   int _indexOfLastBotCatalogMessage() {
     for (int i = messages.length - 1; i >= 0; i--) {
       final ChatMessage message = messages[i];
-      if (message.isBot && (message.hasStoreCards || message.hasProductCards || message.hasChooseAddressWidget || message.hasChooseCardWidget || message.hasOrderSummaryWidget)) {
+      if (message.isBot && (message.hasStoreCards || message.hasProductCards || message.hasChooseAddressWidget || message.hasChooseCardWidget || message.hasOrderSummaryWidget || message.hasOrderConfirmedWidget)) {
         return i;
       }
     }
@@ -66,15 +67,16 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   // Produces a hidden version of catalog widgets for a message (non-destructive to data)
-  // Only hides stores and products, keeps cart widget visible
+  // Only hides stores, products, and order confirmed, keeps cart widget visible
   ChatMessage _hideCatalogInMessage(ChatMessage message) {
-    if (!(message.hasStoreCards || message.hasProductCards || message.hasChooseAddressWidget || message.hasChooseCardWidget || message.hasOrderSummaryWidget)) return message;
+    if (!(message.hasStoreCards || message.hasProductCards || message.hasChooseAddressWidget || message.hasChooseCardWidget || message.hasOrderSummaryWidget || message.hasOrderConfirmedWidget)) return message;
     return message.copyWith(
       hasStoreCards: false,
       hasProductCards: false,
       hasChooseAddressWidget: false,
       hasChooseCardWidget: false,
-      hasOrderSummaryWidget: false,
+              hasOrderSummaryWidget: false,
+        hasOrderConfirmedWidget: false,
       // Keep cart widget visible
       hasCartWidget: message.hasCartWidget,
     );
@@ -145,6 +147,7 @@ class _ChatScreenState extends State<ChatScreen> {
     ChatWidget? chooseAddressWidget;
     ChatWidget? chooseCardWidget;
     ChatWidget? orderSummaryWidget;
+    ChatWidget? orderConfirmedWidget;
     try {
       storesWidget = response.widgets.firstWhere((widget) => widget.isStoresWidget);
     } catch (e) {
@@ -181,13 +184,20 @@ class _ChatScreenState extends State<ChatScreen> {
       orderSummaryWidget = null;
     }
 
-    // Check if stores, products, cart, choose_address, choose_card, or order_summary are present
+    try {
+      orderConfirmedWidget = response.widgets.firstWhere((widget) => widget.isOrderConfirmedWidget);
+    } catch (e) {
+      orderConfirmedWidget = null;
+    }
+
+    // Check if stores, products, cart, choose_address, choose_card, order_summary, or order_confirmed are present
     bool hasStores = storesWidget != null;
     bool hasProducts = productsWidget != null;
     bool hasCart = cartWidget != null;
     bool hasChooseAddress = chooseAddressWidget != null;
     bool hasChooseCard = chooseCardWidget != null;
     bool hasOrderSummary = orderSummaryWidget != null;
+    bool hasOrderConfirmed = orderConfirmedWidget != null;
 
     setState(() {
       messages.add(ChatMessage(
@@ -201,9 +211,10 @@ class _ChatScreenState extends State<ChatScreen> {
         hasChooseAddressWidget: hasChooseAddress,
         hasChooseCardWidget: hasChooseCard,
         hasOrderSummaryWidget: hasOrderSummary,
-        // Don't show option buttons if stores, products, cart, choose_address, choose_card, or order_summary are present
-        hasOptionButtons: !hasStores && !hasProducts && !hasCart && !hasChooseAddress && !hasChooseCard && !hasOrderSummary && response.hasWidgets && response.optionsWidgets.isNotEmpty,
-        optionButtons: !hasStores && !hasProducts && !hasCart && !hasChooseAddress && !hasChooseCard && !hasOrderSummary && response.hasWidgets && response.optionsWidgets.isNotEmpty
+        hasOrderConfirmedWidget: hasOrderConfirmed,
+        // Don't show option buttons if stores, products, cart, choose_address, choose_card, order_summary, or order_confirmed are present
+        hasOptionButtons: !hasStores && !hasProducts && !hasCart && !hasChooseAddress && !hasChooseCard && !hasOrderSummary && !hasOrderConfirmed && response.hasWidgets && response.optionsWidgets.isNotEmpty,
+        optionButtons: !hasStores && !hasProducts && !hasCart && !hasChooseAddress && !hasChooseCard && !hasOrderSummary && !hasOrderConfirmed && response.hasWidgets && response.optionsWidgets.isNotEmpty
             ? response.optionsWidgets.first.options
             : [],
         stores: storesWidget?.stores ?? [],
@@ -218,6 +229,7 @@ class _ChatScreenState extends State<ChatScreen> {
         chooseAddressWidget: chooseAddressWidget,
         chooseCardWidget: chooseCardWidget,
         orderSummaryWidget: orderSummaryWidget,
+        orderConfirmedWidget: orderConfirmedWidget,
       ));
       
       // Store action widgets for the action buttons
@@ -992,6 +1004,10 @@ class _ChatScreenBody extends StatelessWidget {
             const SizedBox(height: 12),
             _buildOrderSummaryWidget(message.orderSummaryItems),
           ],
+          if (message.hasOrderConfirmedWidget) ...[
+            const SizedBox(height: 12),
+            _buildOrderConfirmedWidget(message.orderConfirmedWidget!),
+          ],
         ],
       ),
     );
@@ -1677,6 +1693,19 @@ class _ChatScreenBody extends StatelessWidget {
 
   Widget _buildOrderSummaryWidget(List<WidgetAction> orderSummaryItems) {
     return OrderSummaryWidget(orderItems: orderSummaryItems);
+  }
+
+  Widget _buildOrderConfirmedWidget(ChatWidget orderConfirmedWidget) {
+    final orderData = orderConfirmedWidget.getOrderConfirmedData();
+    if (orderData != null) {
+      final title = orderData['title'] as String? ?? '';
+      
+      return OrderConfirmedWidget(
+        title: title,
+        deliveryTime: '30-40 minutes',
+      );
+    }
+    return const SizedBox.shrink();
   }
 }
 

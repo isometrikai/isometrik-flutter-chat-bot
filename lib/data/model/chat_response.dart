@@ -51,6 +51,7 @@ class ChatResponse {
   List<ChatWidget> get chooseAddressWidgets => getWidgetsByType('choose_address');
   List<ChatWidget> get chooseCardWidgets => getWidgetsByType('choose_card');
   List<ChatWidget> get orderSummaryWidgets => getWidgetsByType('order_summary');
+  List<ChatWidget> get orderConfirmedWidgets => getWidgetsByType('order_confirmed');
 
   @override
   String toString() {
@@ -102,6 +103,7 @@ class ChatWidget {
   bool get isAddAddressWidget => type == WidgetEnum.add_address.value;
   bool get isAddPaymentWidget => type == WidgetEnum.add_payment.value;
   bool get isOrderSummaryWidget => type == WidgetEnum.order_summary.value;
+  bool get isOrderConfirmedWidget => type == WidgetEnum.order_confirmed.value;
   bool get isButtonWidget => type == 'button';
   bool get isInputWidget => type == 'input';
   bool get isImageWidget => type == 'image';
@@ -245,6 +247,17 @@ class ChatWidget {
       return widget.map((item) => WidgetAction.fromJson(item as Map<String, dynamic>)).toList();
     }
     return [];
+  }
+
+  // Helper method to get order confirmed data
+  Map<String, dynamic>? getOrderConfirmedData() {
+    if (isOrderConfirmedWidget && widget.isNotEmpty) {
+      final firstItem = widget.first;
+      if (firstItem is Map<String, dynamic>) {
+        return firstItem;
+      }
+    }
+    return null;
   }
 
   // Get raw store as JSON string by index

@@ -14,6 +14,7 @@ class ChatMessage {
   final bool hasChooseAddressWidget;
   final bool hasChooseCardWidget;
   final bool hasOrderSummaryWidget;
+  final bool hasOrderConfirmedWidget;
   final bool isWelcomeMessage;
   final bool hasOptionButtons;
   final List<String> optionButtons;
@@ -29,6 +30,7 @@ class ChatMessage {
       final ChatWidget? chooseAddressWidget;
     final ChatWidget? chooseCardWidget;
     final ChatWidget? orderSummaryWidget;
+  final ChatWidget? orderConfirmedWidget;
 
   ChatMessage({
     required this.id,
@@ -42,6 +44,7 @@ class ChatMessage {
     this.hasChooseAddressWidget = false,
     this.hasChooseCardWidget = false,
     this.hasOrderSummaryWidget = false,
+    this.hasOrderConfirmedWidget = false,
     this.isWelcomeMessage = false,
     this.hasOptionButtons = false,
     this.optionButtons = const [],
@@ -57,6 +60,7 @@ class ChatMessage {
     this.chooseAddressWidget,
     this.chooseCardWidget,
     this.orderSummaryWidget,
+    this.orderConfirmedWidget,
   });
 
   ChatMessage copyWith({
@@ -71,6 +75,7 @@ class ChatMessage {
     bool? hasChooseAddressWidget,
     bool? hasChooseCardWidget,
     bool? hasOrderSummaryWidget,
+    bool? hasOrderConfirmedWidget,
     bool? isWelcomeMessage,
     bool? hasOptionButtons,
     List<String>? optionButtons,
@@ -86,6 +91,7 @@ class ChatMessage {
     ChatWidget? chooseAddressWidget,
     ChatWidget? chooseCardWidget,
     ChatWidget? orderSummaryWidget,
+    ChatWidget? orderConfirmedWidget,
   }) {
     return ChatMessage(
       id: id ?? this.id,
@@ -98,7 +104,8 @@ class ChatMessage {
       hasCartWidget: hasCartWidget ?? this.hasCartWidget,
       hasChooseAddressWidget: hasChooseAddressWidget ?? this.hasChooseAddressWidget,
       hasChooseCardWidget: hasChooseCardWidget ?? this.hasChooseCardWidget,
-      hasOrderSummaryWidget: hasOrderSummaryWidget ?? this.hasOrderSummaryWidget,
+              hasOrderSummaryWidget: hasOrderSummaryWidget ?? this.hasOrderSummaryWidget,
+        hasOrderConfirmedWidget: hasOrderConfirmedWidget ?? this.hasOrderConfirmedWidget,
       isWelcomeMessage: isWelcomeMessage ?? this.isWelcomeMessage,
       hasOptionButtons: hasOptionButtons ?? this.hasOptionButtons,
       optionButtons: optionButtons ?? this.optionButtons,
@@ -114,6 +121,7 @@ class ChatMessage {
               chooseAddressWidget: chooseAddressWidget ?? this.chooseAddressWidget,
         chooseCardWidget: chooseCardWidget ?? this.chooseCardWidget,
         orderSummaryWidget: orderSummaryWidget ?? this.orderSummaryWidget,
+        orderConfirmedWidget: orderConfirmedWidget ?? this.orderConfirmedWidget,
     );
   }
 }
