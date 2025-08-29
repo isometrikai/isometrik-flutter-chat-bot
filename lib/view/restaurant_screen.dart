@@ -8,6 +8,7 @@ import 'package:chat_bot/bloc/restaurant/restaurant_bloc.dart';
 import 'package:chat_bot/bloc/restaurant/restaurant_event.dart';
 import 'package:chat_bot/bloc/restaurant/restaurant_state.dart';
 import 'package:chat_bot/services/cart_manager.dart';
+import 'package:chat_bot/services/callback_manage.dart';
 
 class RestaurantScreen extends StatefulWidget {
   final WidgetAction? actionData;
@@ -354,7 +355,10 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
                 storesWidget: null,
                 index: index,
                 onTap: () {
-                  Navigator.pop(context);
+                  // Pass the entire store object as JSON, just like in Chat screen
+                  final Map<String, dynamic> storeJson = restaurants[index].toJson();
+                  OrderService().triggerStoreOrder(storeJson);
+                  // Navigator.pop(context);
                 },
                 onAddToCart: (message, product, store, quantity) {
                   // Update cart state when items are added
