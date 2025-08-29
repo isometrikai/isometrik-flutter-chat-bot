@@ -11,7 +11,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
   // Configure asset loading mode
-   AssetPath.isPackageMode = false; // Set to true for package mode, false for normal project
+   AssetPath.isPackageMode = true; // Set to true for package mode, false for normal project
   
   await PlatformService.initializeFromPlatform();
   runApp(const MyApp());
