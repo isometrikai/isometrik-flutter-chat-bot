@@ -87,6 +87,25 @@ class UniversalCartResponse {
         ));
       }
       
+      // Add service fee from cart accounting
+      double serviceFee = 0;
+      if (cartData.accounting != null) {
+        serviceFee = cartData.accounting?.serviceFeeTotal ?? 0;
+      }
+      
+      if (serviceFee > 0) {
+        widgetActions.add(WidgetAction(
+          buttonText: '',
+          title: '',
+          subtitle: '',
+          storeCategoryId: cartData.storeCategoryId,
+          keyword: '',
+          productName: 'Service Fee',
+          currencySymbol: cartData.currencySymbol,
+          productPrice: serviceFee,
+        ));
+      }
+      
       // Add total from cart accounting
       double finalTotal = 0;
       if (cartData.accounting != null) {
@@ -528,12 +547,14 @@ class Accounting {
   final double unitPriceWithTax;
   final double finalTotal;
   final double deliveryFee;
+  final double serviceFeeTotal;
 
   Accounting({
     required this.totalQuantity,
     required this.unitPriceWithTax,
     required this.finalTotal,
     required this.deliveryFee,
+    required this.serviceFeeTotal,
   });
 
   factory Accounting.fromJson(Map<String, dynamic> json) {
@@ -542,6 +563,7 @@ class Accounting {
       unitPriceWithTax: json['unitPriceWithTax']?.toDouble() ?? 0,
       finalTotal: json['finalTotal']?.toDouble() ?? 0,
       deliveryFee: json['deliveryFee']?.toDouble() ?? 0,
+      serviceFeeTotal: json['serviceFeeTotal']?.toDouble() ?? 0,
     );
   }
 
@@ -551,6 +573,7 @@ class Accounting {
       'unitPriceWithTax': unitPriceWithTax,
       'finalTotal': finalTotal,
       'deliveryFee': deliveryFee,
+      'serviceFeeTotal': serviceFeeTotal,
     };
   }
 }
