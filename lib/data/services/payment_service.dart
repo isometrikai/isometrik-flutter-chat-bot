@@ -8,6 +8,21 @@ class PaymentService {
 
   late final ApiClient _client = UniversalApiClient.instance.appClient;
 
+  /// Get Stripe setup intent and public key
+  Future<ApiResult> getStripeSetupIntent() async {
+    try {
+      final result = await _client.get('/stripe/v1/setupIntent');
+      
+      if (result.isSuccess) {
+        return ApiResult.success(result.data);
+      } else {
+        return ApiResult.error(result.message ?? 'Unknown error', result.data);
+      }
+    } catch (e) {
+      return ApiResult.error('Failed to get Stripe setup intent: $e');
+    }
+  }
+
   /// Add customer payment method to the system
   Future<ApiResult> addCustomerPaymentMethod({
     required String userId,

@@ -14,7 +14,6 @@ class ChatApiServices {
   // Configuration
   String _chatBotId = '';
   String? _userId;
-  String? _stripePublishableKey;
   String? _name;
   String? _timestamp;
   String? _location;
@@ -31,14 +30,12 @@ class ChatApiServices {
     required String name,
     required String timestamp,
     required String userToken,
-    required String stripePublishableKey,
     String? location,
     double? longitude,
     double? latitude,
   }) {
     _chatBotId = chatBotId;
     _userId = userId;
-    _stripePublishableKey = stripePublishableKey;
     _name = name;
     _timestamp = timestamp;
     _location = location;
@@ -53,8 +50,6 @@ class ChatApiServices {
 
   /// Get the configured userId
   String? get userId => _userId;
-
-  String? get stripePublishableKey => _stripePublishableKey;
 
   Future<ChatResponse?> sendChatMessage({
     required String message,

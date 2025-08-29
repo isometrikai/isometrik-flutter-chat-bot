@@ -42,9 +42,30 @@ class _AddCardBottomSheetState extends State<AddCardBottomSheet> {
   }
 
   Future<void> _ensureStripeConfigured() async {
-    // if (Stripe.publishableKey.isEmpty && stripePublishableKey.isNotEmpty) {
-      Stripe.publishableKey = ChatApiServices.instance.stripePublishableKey ?? '';//'pk_test_51JMA8tJzj1LznXSX7kKInh708nOM3sfZAzxp2SzQIiksRRXgvwoZMtskUR7325uPkF6ulfhQ6fXmPaTL9If804Ra00oYEddhfX';
-    // }
+    try {
+      // Call API to get Stripe setup intent and public key
+      final apiResult = await PaymentService.instance.getStripeSetupIntent();
+      
+      if (apiResult.isSuccess && apiResult.data != null) {
+        final responseData = apiResult.data as Map<String, dynamic>;
+        final data = responseData['data'] as Map<String, dynamic>?;
+        final publicKey = data?['publicKey'] as String?;
+        
+        if (publicKey != null && publicKey.isNotEmpty) {
+          Stripe.publishableKey = publicKey;
+        } else {
+          throw Exception('Public key not found in API response');
+        }
+      } else {
+        throw Exception('Failed to get Stripe configuration: ${apiResult.message}');
+      }
+    } catch (e) {
+      // Fallback to a default key or show error
+      print('Error configuring Stripe: $e');
+      // You might want to show an error dialog here
+      throw Exception('Failed to configure Stripe: $e');
+    }
+    
     // Apply settings so native SDK picks up the key
     await Stripe.instance.applySettings();
   }
@@ -87,8 +108,7 @@ class _AddCardBottomSheetState extends State<AddCardBottomSheet> {
                   return Container(
                     decoration: box,
                     height: 54,
-                    alignment: Alignment.centerLeft,
-                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    alignment: Alignment.center,
                     child: const SizedBox(
                       width: 16,
                       height: 16,
@@ -96,14 +116,17 @@ class _AddCardBottomSheetState extends State<AddCardBottomSheet> {
                     ),
                   );
                 }
-                // if (snapshot.hasError) {
-                //   return Container(
-                //     decoration: box,
-                //     height: 54,
-                //     alignment: Alignment.center,
-                //     child: const Text('Stripe not configured'),
-                //   );
-                // }
+                if (snapshot.hasError) {
+                  return Container(
+                    decoration: box,
+                    height: 54,
+                    alignment: Alignment.center,
+                    child: const Text(
+                      'Stripe configuration failed',
+                      style: TextStyle(color: Colors.red),
+                    ),
+                  );
+                }
                 return Container(
                   decoration: box,
                   child: SizedBox(

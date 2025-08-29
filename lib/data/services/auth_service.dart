@@ -45,7 +45,6 @@ class AuthService {
     required String name,
     required String timestamp,
     required String userToken,
-    required String stripePublishableKey,
     String? location,
     double? longitude,
     double? latitude,

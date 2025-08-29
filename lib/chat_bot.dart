@@ -19,7 +19,6 @@ class ChatBot {
     required String name,
     required String timestamp,
     required String userToken,
-    required String stripePublishableKey,
     required String location,
     required double longitude,
     required double latitude,
@@ -32,7 +31,6 @@ class ChatBot {
     print('name: $name');
     print('timestamp: $timestamp');
     print('userToken: $userToken');
-    print('stripePublishableKey: $stripePublishableKey');
     print('location: $location');
     print('longitude: $longitude');
     print('latitude: $latitude');
@@ -45,7 +43,6 @@ class ChatBot {
       name: name,
       timestamp: timestamp,
       userToken: userToken,
-      stripePublishableKey:stripePublishableKey,
       location: location,
       longitude: longitude,
       latitude: latitude,
