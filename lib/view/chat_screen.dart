@@ -25,6 +25,8 @@ import 'package:chat_bot/widgets/menu_item_card.dart';
 import 'package:chat_bot/widgets/cart_widget.dart';
 import 'package:chat_bot/widgets/choose_address_widget.dart';
 import 'package:chat_bot/widgets/choose_card_widget.dart';
+import 'package:chat_bot/widgets/order_summary_widget.dart';
+import 'package:chat_bot/widgets/order_confirmed_widget.dart';
 import '../utils/enum.dart';
 import '../utils/asset_helper.dart';
 
@@ -52,11 +54,12 @@ class _ChatScreenState extends State<ChatScreen> {
   int _totalCartCount = 0; // Track total cart count
   List<ChatMessage> messages = [];
 
-  // Returns index of the last bot message that shows stores, products, cart, choose_address, or choose_card widgets; -1 if none
+  // Returns index of the last bot message that shows stores, products, choose_address, choose_card, order_summary, or order_confirmed widgets; -1 if none
+  // Cart widget is not considered for hiding
   int _indexOfLastBotCatalogMessage() {
     for (int i = messages.length - 1; i >= 0; i--) {
       final ChatMessage message = messages[i];
-      if (message.isBot && (message.hasStoreCards || message.hasProductCards || message.hasCartWidget || message.hasChooseAddressWidget || message.hasChooseCardWidget)) {
+      if (message.isBot && (message.hasStoreCards || message.hasProductCards || message.hasChooseAddressWidget || message.hasChooseCardWidget || message.hasOrderSummaryWidget || message.hasOrderConfirmedWidget)) {
         return i;
       }
     }
@@ -64,14 +67,18 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   // Produces a hidden version of catalog widgets for a message (non-destructive to data)
+  // Only hides stores, products, and order confirmed, keeps cart widget visible
   ChatMessage _hideCatalogInMessage(ChatMessage message) {
-    if (!(message.hasStoreCards || message.hasProductCards || message.hasCartWidget || message.hasChooseAddressWidget || message.hasChooseCardWidget)) return message;
+    if (!(message.hasStoreCards || message.hasProductCards || message.hasChooseAddressWidget || message.hasChooseCardWidget || message.hasOrderSummaryWidget || message.hasOrderConfirmedWidget)) return message;
     return message.copyWith(
       hasStoreCards: false,
       hasProductCards: false,
-      hasCartWidget: false,
       hasChooseAddressWidget: false,
       hasChooseCardWidget: false,
+              hasOrderSummaryWidget: false,
+        hasOrderConfirmedWidget: false,
+      // Keep cart widget visible
+      hasCartWidget: message.hasCartWidget,
     );
   }
 
@@ -139,6 +146,8 @@ class _ChatScreenState extends State<ChatScreen> {
     ChatWidget? cartWidget;
     ChatWidget? chooseAddressWidget;
     ChatWidget? chooseCardWidget;
+    ChatWidget? orderSummaryWidget;
+    ChatWidget? orderConfirmedWidget;
     try {
       storesWidget = response.widgets.firstWhere((widget) => widget.isStoresWidget);
     } catch (e) {
@@ -169,12 +178,26 @@ class _ChatScreenState extends State<ChatScreen> {
       chooseCardWidget = null;
     }
 
-    // Check if stores, products, cart, choose_address, or choose_card are present
+    try {
+      orderSummaryWidget = response.widgets.firstWhere((widget) => widget.isOrderSummaryWidget);
+    } catch (e) {
+      orderSummaryWidget = null;
+    }
+
+    try {
+      orderConfirmedWidget = response.widgets.firstWhere((widget) => widget.isOrderConfirmedWidget);
+    } catch (e) {
+      orderConfirmedWidget = null;
+    }
+
+    // Check if stores, products, cart, choose_address, choose_card, order_summary, or order_confirmed are present
     bool hasStores = storesWidget != null;
     bool hasProducts = productsWidget != null;
     bool hasCart = cartWidget != null;
     bool hasChooseAddress = chooseAddressWidget != null;
     bool hasChooseCard = chooseCardWidget != null;
+    bool hasOrderSummary = orderSummaryWidget != null;
+    bool hasOrderConfirmed = orderConfirmedWidget != null;
 
     setState(() {
       messages.add(ChatMessage(
@@ -187,9 +210,11 @@ class _ChatScreenState extends State<ChatScreen> {
         hasCartWidget: hasCart,
         hasChooseAddressWidget: hasChooseAddress,
         hasChooseCardWidget: hasChooseCard,
-        // Don't show option buttons if stores, products, cart, choose_address, or choose_card are present
-        hasOptionButtons: !hasStores && !hasProducts && !hasCart && !hasChooseAddress && !hasChooseCard && response.hasWidgets && response.optionsWidgets.isNotEmpty,
-        optionButtons: !hasStores && !hasProducts && !hasCart && !hasChooseAddress && !hasChooseCard && response.hasWidgets && response.optionsWidgets.isNotEmpty
+        hasOrderSummaryWidget: hasOrderSummary,
+        hasOrderConfirmedWidget: hasOrderConfirmed,
+        // Don't show option buttons if stores, products, cart, choose_address, choose_card, order_summary, or order_confirmed are present
+        hasOptionButtons: !hasStores && !hasProducts && !hasCart && !hasChooseAddress && !hasChooseCard && !hasOrderSummary && !hasOrderConfirmed && response.hasWidgets && response.optionsWidgets.isNotEmpty,
+        optionButtons: !hasStores && !hasProducts && !hasCart && !hasChooseAddress && !hasChooseCard && !hasOrderSummary && !hasOrderConfirmed && response.hasWidgets && response.optionsWidgets.isNotEmpty
             ? response.optionsWidgets.first.options
             : [],
         stores: storesWidget?.stores ?? [],
@@ -197,11 +222,14 @@ class _ChatScreenState extends State<ChatScreen> {
         cartItems: cartWidget?.getCartItems() ?? [],
         addressOptions: chooseAddressWidget?.getAddressOptions() ?? [],
         cardOptions: chooseCardWidget?.getCardOptions() ?? [],
+        orderSummaryItems: orderSummaryWidget?.getOrderSummaryItems() ?? [],
         storesWidget: storesWidget,
         productsWidget: productsWidget,
         cartWidget: cartWidget,
         chooseAddressWidget: chooseAddressWidget,
         chooseCardWidget: chooseCardWidget,
+        orderSummaryWidget: orderSummaryWidget,
+        orderConfirmedWidget: orderConfirmedWidget,
       ));
       
       // Store action widgets for the action buttons
@@ -287,44 +315,38 @@ class _ChatScreenState extends State<ChatScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return MultiBlocProvider(
-      providers: [
-        BlocProvider(create: (context) => ChatBloc()),
-        BlocProvider(create: (context) => CartBloc()),
-      ],
-      child: _ChatScreenBody(
-        messageController: _messageController,
-        messageFocusNode: _messageFocusNode,
-        scrollController: _scrollController,
-        chatbotData: widget.chatbotData,
-        greetingData: widget.greetingData,
-        selectedOptionMessages: _selectedOptionMessages,
-        messages: messages,
-        onSendMessage: _sendMessage,
-        onHandleChatResponse: _handleChatResponse,
-        onScrollToBottom: _scrollToBottom,
-        onLoadChatbotData: () {},
-        onRestartChatAPI: _restartChatAPI,
-        onUpdateSelectedOptions: (Set<String> newSet) {
-          setState(() {
-            _selectedOptionMessages = newSet;
-          });
-        },
-        onUpdateMessages: (List<ChatMessage> newMessages) {
-          setState(() {
-            messages = newMessages;
-          });
-        },
-        pendingMessage: _pendingMessage,
-        onClearPendingMessage: _clearPendingMessage,
-        sessionId: _sessionId, // Pass session ID
-        textFieldHeight: _textFieldHeight,
-        onUpdateTextFieldHeight: _updateTextFieldHeight,
-        latestActionWidgets: _latestActionWidgets,
-        onHideStoreCards: _hideStoreCards, // Add the callback
-        onUpdateCartCount: _updateCartCount, // Add the callback
-        totalCartCount: _totalCartCount, // Pass the cart count
-      ),
+    return _ChatScreenBody(
+      messageController: _messageController,
+      messageFocusNode: _messageFocusNode,
+      scrollController: _scrollController,
+      chatbotData: widget.chatbotData,
+      greetingData: widget.greetingData,
+      selectedOptionMessages: _selectedOptionMessages,
+      messages: messages,
+      onSendMessage: _sendMessage,
+      onHandleChatResponse: _handleChatResponse,
+      onScrollToBottom: _scrollToBottom,
+      onLoadChatbotData: () {},
+      onRestartChatAPI: _restartChatAPI,
+      onUpdateSelectedOptions: (Set<String> newSet) {
+        setState(() {
+          _selectedOptionMessages = newSet;
+        });
+      },
+      onUpdateMessages: (List<ChatMessage> newMessages) {
+        setState(() {
+          messages = newMessages;
+        });
+      },
+      pendingMessage: _pendingMessage,
+      onClearPendingMessage: _clearPendingMessage,
+      sessionId: _sessionId, // Pass session ID
+      textFieldHeight: _textFieldHeight,
+      onUpdateTextFieldHeight: _updateTextFieldHeight,
+      latestActionWidgets: _latestActionWidgets,
+      onHideStoreCards: _hideStoreCards, // Add the callback
+      onUpdateCartCount: _updateCartCount, // Add the callback
+      totalCartCount: _totalCartCount, // Pass the cart count
     );
   }
 }
@@ -385,12 +407,12 @@ class _ChatScreenBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return PopScope(
-      canPop: false,
-      child: Scaffold(
-        backgroundColor: Colors.white,
-        resizeToAvoidBottomInset: true,
-        appBar: _buildAppBar(context),
-        body: BlocConsumer<ChatBloc, ChatState>(
+        canPop: false,
+        child: Scaffold(
+          backgroundColor: Colors.white,
+          resizeToAvoidBottomInset: true,
+          appBar: _buildAppBar(context),
+          body: BlocConsumer<ChatBloc, ChatState>(
           listener: (context, state) {
             if (state is ChatLoaded) {
               List<ChatWidget> cartWidgets = state.messages.cartWidgets;
@@ -978,6 +1000,14 @@ class _ChatScreenBody extends StatelessWidget {
             const SizedBox(height: 12),
             _buildChooseCardWidget(message.cardOptions),
           ],
+          if (message.hasOrderSummaryWidget) ...[
+            const SizedBox(height: 12),
+            _buildOrderSummaryWidget(message.orderSummaryItems),
+          ],
+          if (message.hasOrderConfirmedWidget) ...[
+            const SizedBox(height: 12),
+            _buildOrderConfirmedWidget(message.orderConfirmedWidget!),
+          ],
         ],
       ),
     );
@@ -1317,6 +1347,27 @@ class _ChatScreenBody extends StatelessWidget {
                 ).then((result) {
                   if (result != null) {
                     print("Result: $result");
+                    
+                    // Create a formatted address string
+                    final String building = result['building'] ?? '';
+                    final String landmark = result['landmark'] ?? '';
+                    final String area = result['area'] ?? '';
+                    final String city = result['city'] ?? '';
+                    final String country = result['country'] ?? '';
+                    final String tag = result['tag'] ?? '';
+                    
+                    // Build the full address string
+                    final List<String> addressParts = [];
+                    if (building.isNotEmpty) addressParts.add(building);
+                    if (landmark.isNotEmpty) addressParts.add(landmark);
+                    if (area.isNotEmpty) addressParts.add(area);
+                    if (city.isNotEmpty) addressParts.add(city);
+                    if (country.isNotEmpty) addressParts.add(country);
+                    
+                    final String fullAddress = addressParts.join(', ');
+                    final String addressMessage = "My $tag address is:\n$fullAddress";
+                    
+                    onSendMessage(addressMessage);
                   }
              });
                 },
@@ -1341,6 +1392,7 @@ class _ChatScreenBody extends StatelessWidget {
                 if (result != null) {
                   debugPrint('PM: ${result['paymentMethodId']} '
                       '${result['brand']} **** ${result['last4']}');
+                      onSendMessage('Card added successfully last 4 digits: ${result['last4']}');
                 }
                 },
               );
@@ -1637,6 +1689,22 @@ class _ChatScreenBody extends StatelessWidget {
         onSendMessage(message);
       },
     );
+  }
+
+  Widget _buildOrderSummaryWidget(List<WidgetAction> orderSummaryItems) {
+    return OrderSummaryWidget(orderItems: orderSummaryItems);
+  }
+
+  Widget _buildOrderConfirmedWidget(ChatWidget orderConfirmedWidget) {
+    final orderData = orderConfirmedWidget.getOrderConfirmedData();
+    if (orderData != null) {
+      final title = orderData['title'] as String? ?? '';
+      
+      return OrderConfirmedWidget(
+        title: title,
+      );
+    }
+    return const SizedBox.shrink();
   }
 }
 

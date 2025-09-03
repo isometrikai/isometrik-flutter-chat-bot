@@ -48,6 +48,9 @@ class ChatApiServices {
     await TokenManager.instance.initialize();
   }
 
+  /// Get the configured userId
+  String? get userId => _userId;
+
   Future<ChatResponse?> sendChatMessage({
     required String message,
     required String agentId,

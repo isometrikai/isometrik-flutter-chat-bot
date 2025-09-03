@@ -23,7 +23,9 @@ class HawkSearchService {
         .createCustomClient('https://searchapi-dev.hawksearch.net');
 
     final body = {
-      'FacetSelections': {},
+      'FacetSelections': {
+        'storeCategoryName': ['Restaurants'],
+      },
       'ClientData': {
         'Origin': {
           'Latitude': latitude,

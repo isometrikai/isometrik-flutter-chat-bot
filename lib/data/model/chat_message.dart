@@ -13,6 +13,8 @@ class ChatMessage {
   final bool hasCartWidget;
   final bool hasChooseAddressWidget;
   final bool hasChooseCardWidget;
+  final bool hasOrderSummaryWidget;
+  final bool hasOrderConfirmedWidget;
   final bool isWelcomeMessage;
   final bool hasOptionButtons;
   final List<String> optionButtons;
@@ -21,11 +23,14 @@ class ChatMessage {
   final List<WidgetAction> cartItems;
   final List<AddressOption> addressOptions;
   final List<CardOption> cardOptions;
+  final List<WidgetAction> orderSummaryItems;
   final ChatWidget? storesWidget;
   final ChatWidget? productsWidget;
   final ChatWidget? cartWidget;
-  final ChatWidget? chooseAddressWidget;
-  final ChatWidget? chooseCardWidget;
+      final ChatWidget? chooseAddressWidget;
+    final ChatWidget? chooseCardWidget;
+    final ChatWidget? orderSummaryWidget;
+  final ChatWidget? orderConfirmedWidget;
 
   ChatMessage({
     required this.id,
@@ -38,6 +43,8 @@ class ChatMessage {
     this.hasCartWidget = false,
     this.hasChooseAddressWidget = false,
     this.hasChooseCardWidget = false,
+    this.hasOrderSummaryWidget = false,
+    this.hasOrderConfirmedWidget = false,
     this.isWelcomeMessage = false,
     this.hasOptionButtons = false,
     this.optionButtons = const [],
@@ -46,11 +53,14 @@ class ChatMessage {
     this.cartItems = const [],
     this.addressOptions = const [],
     this.cardOptions = const [],
+    this.orderSummaryItems = const [],
     this.storesWidget,
     this.productsWidget,
     this.cartWidget,
     this.chooseAddressWidget,
     this.chooseCardWidget,
+    this.orderSummaryWidget,
+    this.orderConfirmedWidget,
   });
 
   ChatMessage copyWith({
@@ -64,6 +74,8 @@ class ChatMessage {
     bool? hasCartWidget,
     bool? hasChooseAddressWidget,
     bool? hasChooseCardWidget,
+    bool? hasOrderSummaryWidget,
+    bool? hasOrderConfirmedWidget,
     bool? isWelcomeMessage,
     bool? hasOptionButtons,
     List<String>? optionButtons,
@@ -72,11 +84,14 @@ class ChatMessage {
     List<WidgetAction>? cartItems,
     List<AddressOption>? addressOptions,
     List<CardOption>? cardOptions,
+    List<WidgetAction>? orderSummaryItems,
     ChatWidget? storesWidget,
     ChatWidget? productsWidget,
     ChatWidget? cartWidget,
     ChatWidget? chooseAddressWidget,
     ChatWidget? chooseCardWidget,
+    ChatWidget? orderSummaryWidget,
+    ChatWidget? orderConfirmedWidget,
   }) {
     return ChatMessage(
       id: id ?? this.id,
@@ -89,6 +104,8 @@ class ChatMessage {
       hasCartWidget: hasCartWidget ?? this.hasCartWidget,
       hasChooseAddressWidget: hasChooseAddressWidget ?? this.hasChooseAddressWidget,
       hasChooseCardWidget: hasChooseCardWidget ?? this.hasChooseCardWidget,
+              hasOrderSummaryWidget: hasOrderSummaryWidget ?? this.hasOrderSummaryWidget,
+        hasOrderConfirmedWidget: hasOrderConfirmedWidget ?? this.hasOrderConfirmedWidget,
       isWelcomeMessage: isWelcomeMessage ?? this.isWelcomeMessage,
       hasOptionButtons: hasOptionButtons ?? this.hasOptionButtons,
       optionButtons: optionButtons ?? this.optionButtons,
@@ -97,11 +114,14 @@ class ChatMessage {
       cartItems: cartItems ?? this.cartItems,
       addressOptions: addressOptions ?? this.addressOptions,
       cardOptions: cardOptions ?? this.cardOptions,
+      orderSummaryItems: orderSummaryItems ?? this.orderSummaryItems,
       storesWidget: storesWidget ?? this.storesWidget,
       productsWidget: productsWidget ?? this.productsWidget,
       cartWidget: cartWidget ?? this.cartWidget,
-      chooseAddressWidget: chooseAddressWidget ?? this.chooseAddressWidget,
-      chooseCardWidget: chooseCardWidget ?? this.chooseCardWidget,
+              chooseAddressWidget: chooseAddressWidget ?? this.chooseAddressWidget,
+        chooseCardWidget: chooseCardWidget ?? this.chooseCardWidget,
+        orderSummaryWidget: orderSummaryWidget ?? this.orderSummaryWidget,
+        orderConfirmedWidget: orderConfirmedWidget ?? this.orderConfirmedWidget,
     );
   }
 }

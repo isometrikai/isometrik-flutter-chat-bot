@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:chat_bot/widgets/screen_header.dart';
+import 'package:chat_bot/data/services/payment_service.dart';
+import 'package:chat_bot/data/services/chat_api_services.dart';
 
 /// Modal bottom sheet with a single Stripe CardField for card input
 class AddCardBottomSheet extends StatefulWidget {
@@ -40,9 +42,30 @@ class _AddCardBottomSheetState extends State<AddCardBottomSheet> {
   }
 
   Future<void> _ensureStripeConfigured() async {
-    // if (Stripe.publishableKey.isEmpty && stripePublishableKey.isNotEmpty) {
-      Stripe.publishableKey = 'pk_test_51NfUPcHUrndEUSYd4E9FBM0G2CL2WgRejRImsNcGh0IxJ2r5Pcku45FePJyfugKOJCvZFimUTOEDhJyFnEw388Jl00kqLfE93P';
-    // }
+    try {
+      // Call API to get Stripe setup intent and public key
+      final apiResult = await PaymentService.instance.getStripeSetupIntent();
+      
+      if (apiResult.isSuccess && apiResult.data != null) {
+        final responseData = apiResult.data as Map<String, dynamic>;
+        final data = responseData['data'] as Map<String, dynamic>?;
+        final publicKey = data?['publicKey'] as String?;
+        
+        if (publicKey != null && publicKey.isNotEmpty) {
+          Stripe.publishableKey = publicKey;
+        } else {
+          throw Exception('Public key not found in API response');
+        }
+      } else {
+        throw Exception('Failed to get Stripe configuration: ${apiResult.message}');
+      }
+    } catch (e) {
+      // Fallback to a default key or show error
+      print('Error configuring Stripe: $e');
+      // You might want to show an error dialog here
+      throw Exception('Failed to configure Stripe: $e');
+    }
+    
     // Apply settings so native SDK picks up the key
     await Stripe.instance.applySettings();
   }
@@ -85,8 +108,7 @@ class _AddCardBottomSheetState extends State<AddCardBottomSheet> {
                   return Container(
                     decoration: box,
                     height: 54,
-                    alignment: Alignment.centerLeft,
-                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    alignment: Alignment.center,
                     child: const SizedBox(
                       width: 16,
                       height: 16,
@@ -94,14 +116,17 @@ class _AddCardBottomSheetState extends State<AddCardBottomSheet> {
                     ),
                   );
                 }
-                // if (snapshot.hasError) {
-                //   return Container(
-                //     decoration: box,
-                //     height: 54,
-                //     alignment: Alignment.center,
-                //     child: const Text('Stripe not configured'),
-                //   );
-                // }
+                if (snapshot.hasError) {
+                  return Container(
+                    decoration: box,
+                    height: 54,
+                    alignment: Alignment.center,
+                    child: const Text(
+                      'Stripe configuration failed',
+                      style: TextStyle(color: Colors.red),
+                    ),
+                  );
+                }
                 return Container(
                   decoration: box,
                   child: SizedBox(
@@ -128,23 +153,49 @@ class _AddCardBottomSheetState extends State<AddCardBottomSheet> {
                 if (!(_cardDetails?.complete ?? false) || _submitting) return;
                 setState(() => _submitting = true);
                 try {
+                  // Create Stripe payment method
                   final pm = await Stripe.instance.createPaymentMethod(
                     params: const PaymentMethodParams.card(
                       paymentMethodData: PaymentMethodData(),
                     ),
                   );
+                  
                   if (!mounted) return;
-                  Navigator.of(context).pop(<String, dynamic>{
-                    'paymentMethodId': pm.id,
-                    'brand': pm.card.brand,
-                    'last4': pm.card.last4,
-                    'expMonth': pm.card.expMonth,
-                    'expYear': pm.card.expYear,
-                  });
+                  
+                  // Get userId from ChatApiServices
+                  final userId = ChatApiServices.instance.userId;
+                  if (userId == null || userId.isEmpty) {
+                    throw Exception('User ID not configured');
+                  }
+                  
+                  // Call API to add customer payment method
+                  final apiResult = await PaymentService.instance.addCustomerPaymentMethod(
+                    userId: userId,
+                    paymentMethodId: pm.id,
+                  );
+                  
+                  if (!mounted) return;
+                  
+                  if (apiResult.isSuccess) {
+                    // Success - pop with payment method data
+                    Navigator.of(context).pop(<String, dynamic>{
+                      'paymentMethodId': pm.id,
+                      'brand': pm.card.brand,
+                      'last4': pm.card.last4,
+                      'expMonth': pm.card.expMonth,
+                      'expYear': pm.card.expYear,
+                      'apiSuccess': true,
+                    });
+                  } else {
+                    // API failed - show error
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Failed to add card: ${apiResult.message}')),
+                    );
+                  }
                 } catch (e) {
                   if (mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Stripe error: $e')),
+                      SnackBar(content: Text('Error: $e')),
                     );
                   }
                 } finally {

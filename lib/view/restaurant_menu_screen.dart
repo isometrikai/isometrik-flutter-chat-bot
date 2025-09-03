@@ -8,6 +8,7 @@ import 'package:chat_bot/bloc/restaurant_menu/restaurant_menu_state.dart';
 import 'package:chat_bot/widgets/menu_item_card.dart';
 import 'package:chat_bot/widgets/screen_header.dart';
 import 'package:chat_bot/services/cart_manager.dart';
+import 'package:chat_bot/services/callback_manage.dart';
 import '../utils/asset_helper.dart';
 
 class RestaurantMenuScreen extends StatefulWidget {
@@ -467,7 +468,33 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
                 purple: _purple,
                 vegColor: _veg,
                 nonVegColor: _nonVeg,
-                onClick: () {},
+                onClick: () {
+                  // Find the product data and trigger order
+                  Product? foundProduct;
+                  for (final category in _categories) {
+                    if (category.isSubCategories && category.subCategories.isNotEmpty) {
+                      for (final subCategory in category.subCategories) {
+                        foundProduct = subCategory.products.firstWhere(
+                          (p) => p.childProductId == item.productId,
+                          orElse: () => subCategory.products.first,
+                        );
+                        if (foundProduct != null) break;
+                      }
+                    } else {
+                      foundProduct = category.products.firstWhere(
+                        (p) => p.childProductId == item.productId,
+                        orElse: () => category.products.first,
+                      );
+                    }
+                    if (foundProduct != null) break;
+                  }
+                  
+                  if (foundProduct != null) {
+                    // Pass the entire product object as JSON, just like in Chat screen
+                    final Map<String, dynamic> productJson = foundProduct.toJson();
+                    OrderService().triggerProductOrder(productJson);
+                  }
+                },
                 onAddToCart: (message, productId, quantity) {
                   // Update cart state when items are added
                   setState(() {

@@ -39,6 +39,7 @@ class UniversalApiClient {
     // 'Content-Length':'391',
     'Content-Type':'application/json',
     'language':'en',
+    'lan':'en',
     'currencysymbol': '4oK5',
     'platform':'1',
     'ipAddress':'192.168.1.3',
