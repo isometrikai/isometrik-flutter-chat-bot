@@ -2,8 +2,9 @@ import 'package:chat_bot/services/cart_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:chat_bot/data/model/chat_response.dart';
 import 'package:chat_bot/services/callback_manage.dart';
-import 'package:chat_bot/bloc/chat_event.dart';
 import '../utils/asset_helper.dart';
+import '../view/product_customization_screen.dart';
+import '../view/customization_summary_screen.dart';
 
 class StoreCard extends StatelessWidget {
   final Store store;
@@ -224,7 +225,7 @@ class _ProductPreviewTile extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      product.productName,
+                      product.variantsCount.toString(),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
@@ -291,24 +292,91 @@ class _ProductPreviewTile extends StatelessWidget {
     return StreamBuilder<Map<String, int>>(
       stream: cartManager.quantityStream,
       builder: (context, snapshot) {
-        final currentQuantity = cartManager.getQuantity(product.childProductId);
+        // Check if this product or any of its variants are in the cart
+        final currentQuantities = cartManager.productQuantities;
         
-        if (currentQuantity == 0) {
-          // Show "Add" button when product is not in cart
-          return GestureDetector(
-            onTap: () {
-              if (onAddToCart != null) {
-                final currentQuantity = cartManager.getQuantity(product.childProductId);
-                final newQuantity = currentQuantity + 1;
-                final quantityToAdd = newQuantity - currentQuantity; // Always 1 for "Add" button
-                onAddToCart!("Add ${quantityToAdd}X ${product.productName} to cart", product, store, newQuantity);
-                cartManager.setQuantity(product.childProductId, newQuantity);
-              }
-              
-              if (onHide != null) {
-                onHide!();
-              }
-            },
+        // For products with variants, check if any customization combination exists
+        // For single variant products, check the direct product ID
+        bool isInCart = false;
+        int totalQuantity = 0;
+        String? cartProductId = null;
+        
+        if (product.variantsCount > 1) {
+          // Check if any customization combination exists for this product
+          for (final entry in currentQuantities.entries) {
+            if (entry.key.startsWith(product.childProductId + '_') && entry.value > 0) {
+              isInCart = true;
+              totalQuantity += entry.value;
+              cartProductId = entry.key;
+            }
+          }
+        } else {
+          // Single variant product - check direct ID
+          final quantity = currentQuantities[product.childProductId] ?? 0;
+          if (quantity > 0) {
+            isInCart = true;
+            totalQuantity = quantity;
+            cartProductId = product.childProductId;
+          }
+        }
+        
+        if (!isInCart) {
+            // Show "Add" button when product is not in cart
+            return GestureDetector(
+              onTap: () {
+                                // Check if product has multiple variants
+                print("Product: ${product.productName}, variantsCount: ${product.variantsCount}"); // Debug log
+                if (product.variantsCount > 1) {
+                  // Present ProductCustomizationScreen as a modal for products with multiple variants
+                  showModalBottomSheet(
+                    context: context,
+                    isScrollControlled: true,
+                    backgroundColor: Colors.transparent,
+                    builder: (context) => ProductCustomizationScreen(
+                      product: product,
+                      store: store,
+                                                onAddToCart: onAddToCart != null ? (message) {
+                            print("StoreCard received callback from ProductCustomizationScreen: $message"); // Debug log
+                            // Call the existing onAddToCart callback with the variant message
+                            // Get the current quantity when the callback is executed
+                            final currentQuantity = cartManager.getQuantity(product.childProductId);
+                            print("StoreCard calling onAddToCart with message: $message, quantity: $currentQuantity"); // Debug log
+                            print("About to execute final onAddToCart callback..."); // Debug log
+                            onAddToCart!(message, product, store, currentQuantity);
+                            print("Final onAddToCart callback executed successfully"); // Debug log
+                          } : null,
+                    ),
+                  );
+                } else {
+                  // Use existing logic for products with single variant
+                  print("Using single variant logic for: ${product.productName}"); // Debug log
+                  if (onAddToCart != null) {
+                    final currentQuantity = cartManager.getQuantity(product.childProductId);
+                    final newQuantity = currentQuantity + 1;
+                    final quantityToAdd = newQuantity - currentQuantity; // Always 1 for "Add" button
+                    
+                    // Store basic customization info for single variant products
+                    final customizations = <String, List<String>>{
+                      'variant': [product.productName], // Use product name as variant for single variant products
+                    };
+                    cartManager.setCustomizations(product.childProductId, customizations);
+                    
+                    // Store this as the last added customization for "Repeat last" functionality
+                    cartManager.setLastAddedCustomization(
+                      product.childProductId,
+                      product.productName,
+                      customizations,
+                    );
+                    
+                    onAddToCart!("Add ${quantityToAdd}X ${product.productName} to cart", product, store, newQuantity);
+                    cartManager.setQuantity(product.childProductId, newQuantity);
+                  }
+                  
+                  if (onHide != null) {
+                    onHide!();
+                  }
+                }
+              },
             child: Container(
               height: 27,
               padding: const EdgeInsets.symmetric(horizontal: 17),
@@ -358,9 +426,16 @@ class _ProductPreviewTile extends StatelessWidget {
                 // Minus button
                 GestureDetector(
                   onTap: () {
-                    cartManager.removeProduct(product.childProductId);
+                    if (product.variantsCount > 1 && cartProductId != null) {
+                      // For variant products, remove from the specific customization
+                      cartManager.removeProduct(cartProductId);
+                    } else {
+                      // For single variant products, remove from the direct ID
+                      cartManager.removeProduct(product.childProductId);
+                    }
+                    
                     if (onAddToCart != null) {
-                      final newQuantity = cartManager.getQuantity(product.childProductId);
+                      final newQuantity = cartManager.getQuantity(cartProductId ?? product.childProductId);
                       onAddToCart!("Removed 1X ${product.productName} from cart", product, store, newQuantity);
                     }
                   },
@@ -392,7 +467,7 @@ class _ProductPreviewTile extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(horizontal: 8),
                   alignment: Alignment.center,
                   child: Text(
-                    currentQuantity.toString(),
+                    totalQuantity.toString(),
                     style: const TextStyle(
                       fontWeight: FontWeight.w700,
                       fontSize: 12,
@@ -405,10 +480,40 @@ class _ProductPreviewTile extends StatelessWidget {
                 // Plus button
                 GestureDetector(
                   onTap: () {
-                    cartManager.addProduct(product.childProductId);
-                    if (onAddToCart != null) {
-                      final newQuantity = cartManager.getQuantity(product.childProductId);
-                      onAddToCart!("Added 1X ${product.productName} to cart", product, store, newQuantity);
+                    // Check if product has multiple variants
+                    print("Plus button clicked for: ${product.productName}, variantsCount: ${product.variantsCount}"); // Debug log
+                    if (product.variantsCount > 1) {
+                      print("Opening CustomizationSummaryScreen for: ${product.productName}"); // Debug log
+                      // Present CustomizationSummaryScreen as a modal for products with multiple variants
+                      // This ensures each customization combination is treated as a separate cart item
+                      showModalBottomSheet(
+                        context: context,
+                        isScrollControlled: true,
+                        backgroundColor: Colors.transparent,
+                        builder: (context) => CustomizationSummaryScreen(
+                          store: store,
+                          product: product,
+                          onAddToCart: onAddToCart,
+                        ),
+                      );
+                    } else {
+                      print("Using single variant logic for plus button: ${product.productName}"); // Debug log
+                      // Use existing logic for products with single variant
+                      cartManager.addProduct(product.childProductId);
+                      
+                      // Preserve existing customizations or set default ones
+                      final existingCustomizations = cartManager.getCustomizations(product.childProductId);
+                      if (existingCustomizations == null) {
+                        final customizations = <String, List<String>>{
+                          'variant': [product.productName],
+                        };
+                        cartManager.setCustomizations(product.childProductId, customizations);
+                      }
+                      
+                      if (onAddToCart != null) {
+                        final newQuantity = cartManager.getQuantity(product.childProductId);
+                        onAddToCart!("Added 1X ${product.productName} to cart", product, store, newQuantity);
+                      }
                     }
                   },
                   child: Container(
