@@ -37,7 +37,7 @@ class CartService {
               }
               
               cartItems.add(CartItem(
-                name: product.name ?? 'Unknown Product',
+                name: product.name,
                 quantity: quantity,
                 price: price,
                 currencySymbol: cartData.currencySymbol,
@@ -111,7 +111,6 @@ class CartService {
         return ApiResult.error(result.message ?? 'Failed to fetch cart');
       }
     } catch (e) {
-      print(e);
       return ApiResult.error(e.toString());
     }
   }
@@ -126,6 +125,56 @@ class CartService {
         return ApiResult.success(universalCartResponse);
       } else {
         return ApiResult.error(result.message ?? 'Failed to fetch cart');
+      }
+    } catch (e) {
+      return ApiResult.error(e.toString());
+    }
+  }
+
+  /// Add item to cart
+  Future<ApiResult> addToCart({
+    required String storeId,
+    required int cartType,
+    required int action,
+    required String storeCategoryId,
+    required int newQuantity,
+    required int storeTypeId,
+    required String productId,
+    required String centralProductId,
+    required String unitId,
+    List<Map<String, dynamic>>? newAddOns,
+    dynamic addToCartOnId,
+  }) async {
+    try {
+      final body = {
+        "offers": {},
+        "storeId": storeId,
+        "cartType": cartType,
+        "action": action,
+        "deliveryAddressId": "",
+        "storeCategoryId": storeCategoryId,
+        "newQuantity": newQuantity,
+        "unitId": unitId,
+        "userType": 1,
+        "storeTypeId": storeTypeId,
+        "productId": productId,
+        "centralProductId": centralProductId,
+        if (newAddOns != null) "newAddOns": newAddOns,
+        if (addToCartOnId != null) "addToCartOnId": addToCartOnId.toString(),
+        // "isMultiCart": 2
+      };
+
+      final result = await _client.post('/v1/cart', body);
+      
+      if (result.isSuccess && result.data != null) {
+        try {
+          final chatResponse = ChatResponse.fromJson(result.data as Map<String, dynamic>);
+          return ApiResult.success(chatResponse);
+        } catch (e) {
+          return ApiResult.error('Failed to parse response: ${e.toString()}');
+        }
+      } else {
+        return ApiResult.error(result.message ?? 'Failed to add item to cart');
       }
     } catch (e) {
       return ApiResult.error(e.toString());

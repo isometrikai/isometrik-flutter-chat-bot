@@ -85,6 +85,7 @@ class HawkSearchService {
 
   Product? _mapDocumentToProduct(Map<String, dynamic> doc) {
     try {
+      
       final String id = _firstString(doc['id']);
       final String parentProductId = _firstString(doc['parentproductid']);
       final String childProductId = _firstString(doc['childproductid']);
@@ -96,6 +97,8 @@ class HawkSearchService {
       final List<String> images = (doc['image'] as List<dynamic>? ?? [])
           .map((e) => e.toString())
           .toList();
+
+      final String unitId = _firstString(doc['unitid']);
 
       final bool containsMeat = _firstBool(doc['containsmeat']);
       final String currencySymbol = _firstString(doc['currencysymbol']);
@@ -131,6 +134,7 @@ class HawkSearchService {
         containsMeat: containsMeat,
         currencySymbol: currencySymbol,
         currency: currency,
+        unitId: unitId,
       );
     } catch (_) {
       return null;

@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:chat_bot/bloc/cart/cart_event.dart';
 import 'package:chat_bot/bloc/cart/cart_state.dart';
 import 'package:chat_bot/data/model/universal_cart_response.dart';
-import 'package:chat_bot/data/model/chat_response.dart';
+
 import 'package:chat_bot/data/repositories/cart_repository.dart';
 import 'package:chat_bot/services/cart_manager.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -11,6 +11,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 class CartBloc extends Bloc<CartEvent, CartState> {
   final CartRepository repository;
   final CartManager cartManager = CartManager();
+  List<UniversalCartData> cartData = [];
 
   int totalProductCount = 0;
 
@@ -22,6 +23,7 @@ class CartBloc extends Bloc<CartEvent, CartState> {
         super(CartInitial()) {
     
     on<CartFetchRequested>(_onCartFetchRequested);
+    on<CartAddItemRequested>(_onCartAddItemRequested);
   }
 
   Future<void> _onCartFetchRequested(
@@ -46,32 +48,33 @@ class CartBloc extends Bloc<CartEvent, CartState> {
         String? storeType;
         
         if (rawCartData.data.isNotEmpty) {
-          final cartData = rawCartData.data.first;
-          final seller = cartData.sellers.isNotEmpty ? cartData.sellers.first : null;
+          cartData = rawCartData.data;
+          final cart = rawCartData.data.first;
+          final seller = cart.sellers.isNotEmpty ? cart.sellers.first : null;
           
-          totalProductCount = 0;
-          Map<String, int> productQuantities = {};
+        //   totalProductCount = 0;
+        //   Map<String, int> productQuantities = {};
           
-          for (var obj in rawCartData.data) {
-            for (var sellerData in obj.sellers) {
-              totalProductCount += sellerData.products.length;
+        //   for (var obj in rawCartData.data) {
+        //     for (var sellerData in obj.sellers) {
+        //       totalProductCount += sellerData.products.length;
               
-              // Extract product quantities for CartManager
-              for (var product in sellerData.products) {
-                if (product.quantity != null) {
-                  productQuantities[product.id] = product.quantity?.value ?? 1;
-                }
-              }
-            }
-          }
+        //       // Extract product quantities for CartManager
+        //       for (var product in sellerData.products) {
+        //         if (product.quantity != null) {
+        //           productQuantities[product.id] = product.quantity?.value ?? 1;
+        //         }
+        //       }
+        //     }
+        //   }
           
-          // Load quantities into CartManager
-          cartManager.loadFromData(productQuantities);
+        //   // Load quantities into CartManager
+        //   cartManager.loadFromData(productQuantities);
           
-          print('Total product count across all sellers: $totalProductCount');
-          print('Loaded ${productQuantities.length} products into CartManager');
+        //   print('Total product count across all sellers: $totalProductCount');
+        //   print('Loaded ${productQuantities.length} products into CartManager');
           
-          // Store the store info
+        //   // Store the store info
           storeName = seller?.name;
           storeType = seller?.storeType;
         }
@@ -102,4 +105,38 @@ class CartBloc extends Bloc<CartEvent, CartState> {
 
   // Get CartManager instance
   CartManager get getCartManager => cartManager;
+
+  /// Handle adding items to cart
+  Future<void> _onCartAddItemRequested(
+    CartAddItemRequested event,
+    Emitter<CartState> emit,
+  ) async {
+    try {
+      emit(CartLoading());
+      
+      final result = await repository.addToCart(
+        storeId: event.storeId,
+        cartType: event.cartType,
+        action: event.action,
+        storeCategoryId: event.storeCategoryId,
+        newQuantity: event.newQuantity,
+        storeTypeId: event.storeTypeId,
+        productId: event.productId,
+        centralProductId: event.centralProductId,
+        unitId: '', //event.unitId,
+        newAddOns: event.newAddOns,
+        addToCartOnId: event.addToCartOnId,
+      );
+
+      if (result.isSuccess) {
+        
+        emit(CartProductAdded());
+        add(CartFetchRequested(needToShowLoader: false));
+      } else {
+        emit(CartError(message: result.message ?? 'Failed to add item to cart'));
+      }
+    } catch (e) {
+      emit(CartError(message: e.toString()));
+    }
+  }
 }

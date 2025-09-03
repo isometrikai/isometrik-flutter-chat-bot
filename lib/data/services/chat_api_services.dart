@@ -90,43 +90,7 @@ class ChatApiServices {
     return null;
   }
 
-  Future<ChatResponse?> addToCart({
-    required String storeId,
-    required int cartType,
-    required int action,
-    required String storeCategoryId,
-    required int newQuantity,
-    required int storeTypeId,
-    required String productId,
-    required String centralProductId,
 
-  }) async {
-    final body = {
-      "offers": {},
-      "storeId": storeId,
-      "cartType": cartType,
-      "action": action,
-      "deliveryAddressId": "",
-      "storeCategoryId": storeCategoryId,
-      "newQuantity": newQuantity,
-      "unitId": "",
-      "userType": 1,
-      "storeTypeId": storeTypeId,
-      "productId": productId,
-      "centralProductId": centralProductId,
-      "isMultiCart": 2
-    };
-
-    final res = await _appClient.post('/v1/cart', body);
-    if (res.isSuccess && res.data != null) {
-      try {
-        return ChatResponse.fromJson(res.data as Map<String, dynamic>);
-      } catch (e) {
-        return null;
-      }
-    }
-    return null;
-  }
 
   ApiClient createCustomClient(String baseUrl) {
     return UniversalApiClient.instance.createClient(baseUrl);

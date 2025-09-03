@@ -330,6 +330,7 @@ class Product {
   final bool containsMeat;
   final String currencySymbol;
   final String currency;
+  final String unitId;
 
   const Product({
     // required this.id,
@@ -343,6 +344,7 @@ class Product {
     required this.containsMeat,
     required this.currencySymbol,
     required this.currency,
+    required this.unitId,
   });
 
   double get finalPrice => finalPriceList.finalPrice;
@@ -376,6 +378,7 @@ class Product {
       containsMeat: json['containsMeat'] ?? false,
       currencySymbol: json['currencySymbol']?.toString() ?? '',
       currency: json['currency']?.toString() ?? '',
+      unitId: json['unitId']?.toString() ?? '',
     );
   }
 
@@ -392,6 +395,7 @@ class Product {
       'containsMeat': containsMeat,
       'currencySymbol': currencySymbol,
       'currency': currency,
+      'unitId': unitId,
     };
   }
 }

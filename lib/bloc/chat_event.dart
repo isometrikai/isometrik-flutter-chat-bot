@@ -80,6 +80,7 @@ class AddToCartEvent extends ChatEvent {
   final String productId;
   final String centralProductId;
   final String quantity;
+  final String unitId;
 
   const AddToCartEvent({
     required this.storeId,
@@ -91,5 +92,6 @@ class AddToCartEvent extends ChatEvent {
     required this.cartType,
     required this.newQuantity,
     required this.storeTypeId,
+    required this.unitId,
   });
 }
