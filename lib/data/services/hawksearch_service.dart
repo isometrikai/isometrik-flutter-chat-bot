@@ -135,6 +135,7 @@ class HawkSearchService {
         currencySymbol: currencySymbol,
         currency: currency,
         unitId: unitId,
+        customizable: false,
       );
     } catch (_) {
       return null;

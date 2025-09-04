@@ -11,17 +11,30 @@ import 'package:chat_bot/data/services/universal_api_client.dart';
 
 
 class ProductCustomizationScreen extends StatefulWidget {
-  final Product product;
-  final Store store;
+  final Product? product;
+  final Store? store;
+  final bool? isFromMenuScreen;
+  final String? storeId;
+  final String? productId;
+  final String? centralProductId;
+  final String? productName;
+  final String? productImage;
+  
   final Function(String)? onAddToCart;
   final Function(Product, Store, ProductPortion, List<Map<String, dynamic>>)? onAddToCartWithAddOns;
 
   const ProductCustomizationScreen({
     super.key,
-    required this.product,
-    required this.store,
+    this.product,
+    this.store,
     this.onAddToCart,
     this.onAddToCartWithAddOns,
+    this.isFromMenuScreen,
+    this.storeId,
+    this.productId,
+    this.centralProductId,
+    this.productName,
+    this.productImage,
   });
 
   @override
@@ -40,11 +53,19 @@ class _ProductCustomizationScreenState extends State<ProductCustomizationScreen>
       ),
     );
     
-    _bloc.add(LoadProductPortions(
-      centralProductId: widget.product.parentProductId,
-      childProductId: widget.product.childProductId,
-      storeId: widget.store.storeId,
-    ));
+    if (widget.isFromMenuScreen == true) {
+        _bloc.add(LoadProductPortions(
+        centralProductId: widget.centralProductId ?? '',
+        childProductId: widget.productId ?? '',
+        storeId: widget.storeId ?? '',
+      ));
+    }else {
+      _bloc.add(LoadProductPortions(
+        centralProductId: widget.product?.parentProductId ?? '',
+        childProductId: widget.product?.childProductId ?? '',
+        storeId: widget.store?.storeId ?? '',
+      ));
+    }
   }
 
   @override
@@ -119,11 +140,19 @@ class _ProductCustomizationScreenState extends State<ProductCustomizationScreen>
                                     const SizedBox(height: 24),
                                     ElevatedButton(
                                       onPressed: () {
-                                        _bloc.add(LoadProductPortions(
-                                          centralProductId: widget.product.parentProductId,
-                                          childProductId: widget.product.childProductId,
-                                          storeId: widget.store.storeId,
+                                        if (widget.isFromMenuScreen == true) {
+                                          _bloc.add(LoadProductPortions(
+                                          centralProductId: widget.centralProductId ?? '',
+                                          childProductId: widget.productId ?? '',
+                                          storeId: widget.storeId ?? '',
                                         ));
+                                        }else {
+                                        _bloc.add(LoadProductPortions(
+                                          centralProductId: widget.product?.parentProductId ?? '',
+                                          childProductId: widget.product?.childProductId ?? '',
+                                          storeId: widget.store?.storeId ?? '',
+                                        ));
+                                        }
                                       },
                                       style: ElevatedButton.styleFrom(
                                         backgroundColor: const Color(0xFF8E2FFD),
@@ -194,9 +223,9 @@ class _ProductCustomizationScreenState extends State<ProductCustomizationScreen>
                 ),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(6.22),
-                  child: widget.product.productImage.isNotEmpty
+                  child: widget.product?.productImage.isNotEmpty ?? false
                       ? Image.network(
-                          widget.product.productImage,
+                          widget.isFromMenuScreen == true ? widget.productImage ?? '' : widget.product?.productImage ?? '',
                           fit: BoxFit.cover,
                           errorBuilder: (context, error, stackTrace) => const Icon(
                             Icons.restaurant,
@@ -214,7 +243,7 @@ class _ProductCustomizationScreenState extends State<ProductCustomizationScreen>
               const SizedBox(width: 10),
               Expanded(
                 child: Text(
-                  widget.product.productName,
+                 widget.isFromMenuScreen == true ? widget.productName ?? '' : widget.product?.productName ?? '',
                   style: const TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.w700,
@@ -553,22 +582,22 @@ class _ProductCustomizationScreenState extends State<ProductCustomizationScreen>
                       if (formattedAddOns.isNotEmpty) {
                         // Addons selected, use the new callback
                         if (widget.onAddToCartWithAddOns != null) {
-                          widget.onAddToCartWithAddOns!(
-                            widget.product,
-                            widget.store,
-                            state.selectedVariant!,
-                            formattedAddOns,
+                          if (widget.isFromMenuScreen == true) {
+                          // widget.onAddToCartWithAddOns!(
+                          //   widget.product!,
+                          //     widget.store!,
+                          //     state.selectedVariant!,
+                          //     formattedAddOns,
+                          //   );
+                          }else {
+                            widget.onAddToCartWithAddOns!(
+                              widget.product!,
+                              widget.store!,
+                              state.selectedVariant!,
+                              formattedAddOns,
                           );
-                          
+                          }
                           Navigator.of(context).pop();
-                          
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text('Added ${widget.product.productName} with addons to cart'),
-                              backgroundColor: const Color(0xFF8E2FFD),
-                              duration: const Duration(seconds: 2),
-                            ),
-                          );
                         }
                       } else {
                         // No addons selected, proceed with original logic
@@ -621,7 +650,7 @@ class _ProductCustomizationScreenState extends State<ProductCustomizationScreen>
                             }
                           }
                           
-                          String message = "[VARIANT_SELECTION] Added 1X ${widget.product.productName} - $variantName";
+                          String message = "[VARIANT_SELECTION] Added 1X ${widget.isFromMenuScreen == true ? widget.productName ?? '' : widget.product?.productName ?? ''} - $variantName";
                           if (customizationDetails.isNotEmpty) {
                             message += " with ${customizationDetails.join(', ')}";
                           }
@@ -632,13 +661,6 @@ class _ProductCustomizationScreenState extends State<ProductCustomizationScreen>
                         
                         Navigator.of(context).pop();
                         
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text('Added ${widget.product.productName} to cart'),
-                            backgroundColor: const Color(0xFF8E2FFD),
-                            duration: const Duration(seconds: 2),
-                          ),
-                        );
                       }
                     }
                   },

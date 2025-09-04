@@ -1,4 +1,9 @@
-import 'package:chat_bot/data/model/chat_response.dart';
+import 'package:chat_bot/bloc/cart/cart_bloc.dart';
+import 'package:chat_bot/bloc/cart/cart_event.dart';
+import 'package:chat_bot/bloc/cart/cart_state.dart';
+import 'package:chat_bot/data/model/chat_response.dart' as chat;
+import 'package:chat_bot/view/customization_summary_screen.dart';
+import 'package:chat_bot/view/product_customization_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:chat_bot/data/model/restaurant_menu_response.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -10,9 +15,10 @@ import 'package:chat_bot/widgets/screen_header.dart';
 import 'package:chat_bot/services/cart_manager.dart';
 import 'package:chat_bot/services/callback_manage.dart';
 import '../utils/asset_helper.dart';
+import 'package:chat_bot/data/model/universal_cart_response.dart';
 
 class RestaurantMenuScreen extends StatefulWidget {
-  final WidgetAction? actionData;
+  final chat.WidgetAction? actionData;
   final Function(List<String>)? onCheckout;
 
   const RestaurantMenuScreen({super.key, this.actionData, this.onCheckout});
@@ -30,7 +36,7 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
 
   final TextEditingController _searchController = TextEditingController();
   late final RestaurantMenuBloc _bloc;
-  final CartManager cartManager = CartManager();
+  late final CartBloc cartBloc;
 
   // Dynamic data from API
   List<ProductCategory> _categories = <ProductCategory>[];
@@ -43,8 +49,9 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
   double _cartTotal = 0.00;
   int _cartItems = 0;
   Map<String, int> _productQuantities = {}; // Track product quantities
-  Map<String, Product> _productDetails = {}; // Track product details
+  Map<String, chat.Product> _productDetails = {}; // Track product details
   Map<String, int> _initialQuantities = {}; // Track initial quantities when screen opened
+  List<UniversalCartData> _cartData = []; // Store cart data from getCart API
 
   
 
@@ -55,20 +62,11 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
   void initState() {
     super.initState();
     _bloc = RestaurantMenuBloc(actionData: widget.actionData);
+    cartBloc = CartBloc();
     _bloc.add(const RestaurantMenuRequested());
-    _initializeInitialQuantities();
-  }
-
-  void _initializeInitialQuantities() {
-    // Initialize initial quantities for products already in cart
-    // This ensures we track the correct baseline when screen opens
-    setState(() {
-      // Get all products from CartManager and set their initial quantities
-      final currentQuantities = cartManager.productQuantities;
-      _initialQuantities.addAll(currentQuantities);
-      
-      print("Menu Screen - Initialized quantities: $_initialQuantities");
-    });
+    
+    // Fetch initial cart data
+    cartBloc.add(CartFetchRequested(needToShowLoader: false));
   }
 
   @override
@@ -79,11 +77,6 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
   }
 
   void _onAddToCart() {
-    // Handle add to cart action - show added products
-    print("Product Quantities: $_productQuantities");
-    print("Initial Quantities: $_initialQuantities");
-    print("Total Items: $_cartItems");
-    print("Total Price: Đ$_cartTotal");
     
     // Create consolidated messages from quantities
     List<String> consolidatedMessages = [];
@@ -137,10 +130,6 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
     // Parse the cleaned string
     final price = double.tryParse(cleanString);
     
-    print("Price extraction debug:");
-    print("  Original: $priceString");
-    print("  Cleaned: $cleanString");
-    print("  Parsed: $price");
     
     return price ?? 0.0;
   }
@@ -148,8 +137,11 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    return BlocProvider.value(
-      value: _bloc,
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider.value(value: _bloc),
+        BlocProvider.value(value: cartBloc),
+      ],
       child: Scaffold(
         backgroundColor: Colors.white,
         body: SafeArea(
@@ -175,40 +167,48 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
                       const SizedBox(height: 16),
                       _buildDietToggles(),
                       const SizedBox(height: 16),
-                      BlocBuilder<RestaurantMenuBloc, RestaurantMenuState>(
-                        builder: (context, state) {
-                          if (state is RestaurantMenuInitial || state is RestaurantMenuLoadInProgress) {
-                            return const Padding(
-                              padding: EdgeInsets.only(top: 32),
-                              child: Center(child: CircularProgressIndicator()),
-                            );
+                      BlocListener<CartBloc, CartState>(
+                        listener: (context, state) {
+                          if (state is CartLoaded && state.rawCartData != null) {
+                            _updateCartData(state.rawCartData!.data);
                           }
-                          if (state is RestaurantMenuLoadFailure) {
-                            return Padding(
-                              padding: const EdgeInsets.only(top: 32),
-                              child: Text(
-                                state.message,
-                                style: const TextStyle(color: Colors.red),
-                              ),
-                            );
-                          }
-                          final categories = (state as RestaurantMenuLoadSuccess).categories;
-                          _categories = categories;
-                          if (categories.isEmpty) {
-                            return const Padding(
-                              padding: EdgeInsets.only(top: 32),
-                              child: Text('No menu available'),
-                            );
-                          }
-                          return Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: <Widget>[
-                              _buildMainCategories(),
-                              const SizedBox(height: 24),
-                              _buildCurrentCategorySection(),
-                            ],
-                          );
                         },
+                        child: BlocBuilder<RestaurantMenuBloc, RestaurantMenuState>(
+                          builder: (context, state) {
+                            if (state is RestaurantMenuInitial || state is RestaurantMenuLoadInProgress) {
+                              return const Padding(
+                                padding: EdgeInsets.only(top: 32),
+                                child: Center(child: CircularProgressIndicator()),
+                              );
+                            }
+                            if (state is RestaurantMenuLoadFailure) {
+                              return Padding(
+                                padding: const EdgeInsets.only(top: 32),
+                                child: Text(
+                                  state.message,
+                                  style: const TextStyle(color: Colors.red),
+                                ),
+                              );
+                            }
+                            final categories = (state as RestaurantMenuLoadSuccess).categories;
+                            _categories = categories;
+                            
+                            if (categories.isEmpty) {
+                              return const Padding(
+                                padding: EdgeInsets.only(top: 32),
+                                child: Text('No menu available'),
+                              );
+                            }
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: <Widget>[
+                                _buildMainCategories(),
+                                const SizedBox(height: 24),
+                                _buildCurrentCategorySection(),
+                              ],
+                            );
+                          },
+                        ),
                       ),
                     ],
                   ),
@@ -411,7 +411,7 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
               selectedSubIndex < category.subCategories.length)
           ? selectedSubIndex
           : 0;
-      final List<Product> products =
+      final List<chat.Product> products =
           category.subCategories[subIndex].products;
       items.addAll(products.map(_mapProduct));
     } else {
@@ -465,12 +465,16 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
                 isVeg: item.isVeg,
                 imageUrl: item.imageUrl,
                 productId: item.productId,
+                centralProductId: item.centralProductId,
+                isCustomizable: item.isCustomizable,
                 purple: _purple,
                 vegColor: _veg,
                 nonVegColor: _nonVeg,
+                cartData: _cartData, // Pass cart data to MenuItemCard
+                onQuantityChanged: _onQuantityChanged, // Pass quantity change callback
                 onClick: () {
                   // Find the product data and trigger order
-                  Product? foundProduct;
+                  chat.Product? foundProduct;
                   for (final category in _categories) {
                     if (category.isSubCategories && category.subCategories.isNotEmpty) {
                       for (final subCategory in category.subCategories) {
@@ -495,42 +499,49 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
                     OrderService().triggerProductOrder(productJson);
                   }
                 },
-                onAddToCart: (message, productId, quantity) {
-                  // Update cart state when items are added
-                  setState(() {
-                    // For menu items, we need to find the product from the categories
-                    Product? foundProduct;
-                    for (final category in _categories) {
-                      if (category.isSubCategories && category.subCategories.isNotEmpty) {
-                        for (final subCategory in category.subCategories) {
-                          foundProduct = subCategory.products.firstWhere(
-                            (p) => p.childProductId == productId,
-                            orElse: () => subCategory.products.first,
-                          );
-                          if (foundProduct != null) break;
-                        }
-                      } else {
-                        foundProduct = category.products.firstWhere(
-                          (p) => p.childProductId == productId,
-                          orElse: () => category.products.first,
-                        );
-                      }
-                      if (foundProduct != null) break;
-                    }
-                    
-                    if (foundProduct != null) {
-                      // Track product details
-                      _productDetails[productId] = foundProduct;
-                      
-                      // Update quantity with the actual quantity from CartManager
-                      _productQuantities[productId] = quantity;
-                      
-                      // Update cart totals
-                      _cartItems = _productQuantities.values.fold(0, (sum, qty) => sum + qty);
-                      _cartTotal = _productDetails.values.fold(0.0, (sum, prod) => 
-                        sum + (prod.finalPrice * (_productQuantities[prod.childProductId] ?? 0)));
-                    }
-                  });
+                onAddToCart: (productId, centralProductId, quantity, isCustomizable) {
+                  if (isCustomizable) {
+
+                     showModalBottomSheet(
+                    context: context,
+                    isScrollControlled: true,
+                    backgroundColor: Colors.transparent,
+                    builder: (context) => ProductCustomizationScreen(
+                      productId: productId,
+                      centralProductId: centralProductId,
+                      storeId: widget.actionData?.storeId ?? '',
+                      productName: item.title,
+                      productImage: item.imageUrl?.isNotEmpty ?? false ? item.imageUrl : null,
+                      isFromMenuScreen: true,
+                      onAddToCartWithAddOns: (product, store, variant, addOns) {
+                        cartBloc.add(CartAddItemRequested(
+                       storeId: widget.actionData?.storeId ?? '',
+                       cartType: 1, // Default cart type
+                       action: 1, // Add action
+                       storeCategoryId: widget.actionData?.storeCategoryId ?? '',
+                       newQuantity: quantity , // Add 1 item
+                       storeTypeId: widget.actionData?.storeTypeId ?? -111,
+                        productId: productId,
+                        centralProductId: centralProductId,
+                        unitId: variant.unitId,
+                        newAddOns: addOns,
+                    ));
+                      },
+                    ),
+                  );
+                  }else {
+                  cartBloc.add(CartAddItemRequested(
+                       storeId: widget.actionData?.storeId ?? '',
+                       cartType: 1, // Default cart type
+                       action: 1, // Add action
+                       storeCategoryId: widget.actionData?.storeCategoryId ?? '',
+                       newQuantity: quantity , // Add 1 item
+                       storeTypeId: widget.actionData?.storeTypeId ?? -111,
+                        productId: productId,
+                        centralProductId: centralProductId,
+                        unitId: '',
+                    ));
+                  }                 
                 },
               );
             },
@@ -540,7 +551,7 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
     );
   }
 
-  _MenuItem _mapProduct(Product p) {
+  _MenuItem _mapProduct(chat.Product p) {
     final String priceText = _formatCurrency(
       p.currencySymbol,
       p.finalPriceList.finalPrice,
@@ -558,6 +569,8 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
       assetPath: imageUrl ?? AssetHelper.getAssetPath('images/men.png'),
       imageUrl: imageUrl,
       productId: p.childProductId,
+      centralProductId: p.parentProductId,
+      isCustomizable: p.variantsCount > 1,
     );
   }
 
@@ -665,7 +678,215 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
     );
   }
 
-  // Removed mock items in favor of API-driven content
+  // Update cart data from getCart API response
+  void _updateCartData(List<UniversalCartData> cartData) {
+    // Use post-frame callback to avoid calling setState during build
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        setState(() {
+          _cartData = cartData;
+          
+          // Update product quantities from cart data
+          // for (final cartItem in cartData) {
+          //   for (final seller in cartItem.sellers) {
+          //     for (final cartProduct in seller.products) {
+          //       if (cartProduct.quantity != null && cartProduct.quantity!.value > 0) {
+          //         // Find the corresponding product in our categories data
+          //         for (final category in _categories) {
+          //           if (category.isSubCategories && category.subCategories.isNotEmpty) {
+          //             for (final subCategory in category.subCategories) {
+          //               for (final product in subCategory.products) {
+          //                 if (product.childProductId == cartProduct.id) {
+          //                   _productQuantities[product.childProductId] = cartProduct.quantity!.value;
+          //                   _productDetails[product.childProductId] = product;
+          //                   break;
+          //                 }
+          //               }
+          //             }
+          //           } else {
+          //             for (final product in category.products) {
+          //               if (product.childProductId == cartProduct.id) {
+          //                 _productQuantities[product.childProductId] = cartProduct.quantity!.value;
+          //                 _productDetails[product.childProductId] = product;
+          //                 break;
+          //               }
+          //             }
+          //           }
+          //         }
+          //       }
+          //     }
+          //   }
+          // }
+          
+          // _updateCartTotals();
+        });
+      }
+    });
+  }
+
+  // Update cart totals based on current quantities
+  // void _updateCartTotals() {
+  //   setState(() {
+  //     _cartItems = _productQuantities.values.fold(0, (sum, quantity) => sum + quantity);
+  //     _cartTotal = _productDetails.values.fold(0.0, (sum, product) => 
+  //       sum + (product.finalPrice * (_productQuantities[product.childProductId] ?? 0)));
+  //   });
+  // }
+
+   /// Get addToCartOnId from cart data for a specific product
+  dynamic _getAddToCartOnId(String productId) {
+    try {
+      // Use filter to find the product with matching ID
+      final cartData = cartBloc.cartData
+          .expand((cart) => cart.sellers)
+          .expand((seller) => seller.products)
+          .where((product) => product.id == productId)
+          .firstOrNull;
+      
+      return cartData?.addToCartOnId;
+    } catch (e) {
+      print('Error getting addToCartOnId: $e');
+      return null;
+    }
+  }
+
+  // Handle quantity changes for products
+  void _onQuantityChanged(String productId, String centralProductId, int currentQuantity, bool isIncrease, bool isCustomizable) {
+    try {
+      if (isIncrease == false && currentQuantity == 1) {
+
+           final addToCartOnId = _getAddToCartOnId(productId);
+        print("addCartOnID: $addToCartOnId");
+
+         cartBloc.add(CartAddItemRequested(
+          storeId: widget.actionData?.storeId ?? '',
+          cartType: 1,
+          action: 3, // Add action
+          storeCategoryId: widget.actionData?.storeCategoryId ?? '',
+          newQuantity: 0,
+          storeTypeId: widget.actionData?.storeTypeId ?? -111,
+          productId: productId,
+          centralProductId: centralProductId,
+          unitId: '',
+          addToCartOnId: addToCartOnId,
+        ));
+      }else if (currentQuantity > 0 && isIncrease == true) {
+
+          if (isCustomizable) {
+
+            showModalBottomSheet(
+                        context: context,
+                        isScrollControlled: true,
+                        backgroundColor: Colors.transparent,
+                        builder: (context) => CustomizationSummaryScreen(
+                          
+                          onChooseClicked: () {
+                            // When "I'll choose" is clicked, open ProductCustomizationScreen
+                            _openProductCustomization(productId, centralProductId,widget.actionData?.storeId ?? '', widget.actionData?.storeCategoryId ?? '', widget.actionData?.storeTypeId ?? -111, context);
+                          },
+                          onRepeatClicked: () {
+                            // Get the addToCartOnId from cart data for this product
+                            final addToCartOnId = _getAddToCartOnId(productId);
+                            print("addCartOnID: $addToCartOnId");
+
+                            cartBloc.add(CartAddItemRequested(
+                              storeId: widget.actionData?.storeId ?? '',
+                              cartType: 1,
+                              action: 2, // Add action
+                              storeCategoryId: widget.actionData?.storeCategoryId ?? '',
+                              newQuantity: currentQuantity + 1,
+                              storeTypeId: widget.actionData?.storeTypeId ?? -111,
+                              productId: productId,
+                              centralProductId: centralProductId,
+                              unitId: '',
+                              addToCartOnId: addToCartOnId,
+                            )); 
+                          
+                          },
+                        ),
+          );
+             
+          }else {
+             cartBloc.add(CartAddItemRequested(
+          storeId: widget.actionData?.storeId ?? '',
+          cartType: 1,
+          action: 2, // Remove action
+          storeCategoryId: widget.actionData?.storeCategoryId ?? '',
+          newQuantity: currentQuantity + 1,
+          storeTypeId: widget.actionData?.storeTypeId ?? -111,
+          productId: productId,
+          centralProductId: centralProductId,
+          unitId: '',
+        ));
+          }
+    
+      } else {
+        // Update quantity
+        cartBloc.add(CartAddItemRequested(
+          storeId: widget.actionData?.storeId ?? '',
+          cartType: 1,
+          action: 2, // Add action
+          storeCategoryId: widget.actionData?.storeCategoryId ?? '',
+          newQuantity: currentQuantity - 1,
+          storeTypeId: widget.actionData?.storeTypeId ?? -111,
+          productId: productId,
+          centralProductId: centralProductId,
+          unitId: '',
+        ));
+      }
+    } catch (e) {
+      print('Error changing quantity: $e');
+    }
+  }
+
+  void _openProductCustomization(String productId, String centralProductId, String storeId,String storeCategoryId,int storeTypeId, BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => ProductCustomizationScreen(
+        productId: productId,
+        centralProductId: centralProductId,
+        storeId: storeId,
+        productName: 'Product Name',
+        productImage: 'Product Image',
+        isFromMenuScreen: true,
+        onAddToCartWithAddOns: (product, store, variant, addOns) => _onAddToCartWithAddOns(productId, centralProductId, storeId, storeCategoryId, storeTypeId, context, variant, addOns),
+      ),
+    );
+  }
+
+   /// Handle adding products with addons to cart
+  void _onAddToCartWithAddOns(
+    String productId, 
+    String centralProductId, 
+    String storeId, 
+    String storeCategoryId,
+    int storeTypeId,
+    BuildContext context,
+    dynamic variant, 
+    List<Map<String, dynamic>> addOns
+  ) {
+    try {
+      // Use BlocProvider.of to get the CartBloc from context
+      cartBloc.add(CartAddItemRequested(
+        storeId: storeId,
+        cartType: 1, // Default cart type
+        action: 1, // Add action
+        storeCategoryId: storeCategoryId,
+        newQuantity: 1,
+        storeTypeId: storeTypeId,
+        productId: productId,
+        centralProductId: centralProductId,
+        unitId: variant.unitId,
+        newAddOns: addOns,
+      ));
+      
+      // print("Added product with addons to cart: ${product.productName}");
+    } catch (e) {
+      print('RestaurantScreen: Error dispatching CartAddItemRequested with addons: $e');
+    }
+  }
 }
 
 class _DietToggle extends StatelessWidget {
@@ -737,6 +958,8 @@ class _MenuItem {
   final String assetPath;
   final String? imageUrl;
   final String? productId;
+  final String? centralProductId;
+  final bool isCustomizable;
 
   const _MenuItem({
     required this.title,
@@ -746,6 +969,8 @@ class _MenuItem {
     required this.assetPath,
     this.imageUrl,
     this.productId,
+    this.centralProductId,
+    this.isCustomizable = false,
   });
 }
 

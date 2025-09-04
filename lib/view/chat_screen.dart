@@ -1828,19 +1828,203 @@ class _ChatScreenBody extends StatelessWidget {
             isVeg: !product.containsMeat,
             imageUrl: product.productImage.isNotEmpty ? product.productImage : null,
             productId: product.childProductId,
+             centralProductId: product.parentProductId,
+                isCustomizable: product.variantsCount > 1,
+                cartData: cartBloc.cartData,
             onClick: () {
               if (productsWidget != null) {
                 final Map<String, dynamic>? productJson = productsWidget.getRawProduct(index);
                 OrderService().triggerProductOrder(productJson ?? {});
               }
             },
-            onAddToCart: (message, productId, quantity) {
-              onSendMessage(message);
+            onQuantityChanged: (productId, centralProductId, quantity, isIncrease, isCustomizable) {
+              _onQuantityChanged1(productId, centralProductId, quantity, isIncrease, isCustomizable, product.storeId ?? '', product.storeCategoryId ?? '', product.storeTypeId ?? -111, context);
             },
+            onAddToCart: (productId, centralProductId, quantity, isCustomizable) {
+                  if (isCustomizable) {
+                     showModalBottomSheet(
+                    context: context,
+                    isScrollControlled: true,
+                    backgroundColor: Colors.transparent,
+                    builder: (context) => ProductCustomizationScreen(
+                      productId: productId,
+                      centralProductId: centralProductId,
+                      storeId: product.storeId,
+                      productName: product.productName,
+                      productImage: product.productImage.isNotEmpty ? product.productImage : null,
+                      isFromMenuScreen: true,
+                      onAddToCartWithAddOns: (product, store, variant, addOns) {
+                        cartBloc.add(CartAddItemRequested(
+                       storeId: product.storeId ?? '',
+                       cartType: 1, // Default cart type
+                       action: 1, // Add action
+                       storeCategoryId: product.storeCategoryId ?? '',
+                       newQuantity: quantity , // Add 1 item
+                       storeTypeId: product.storeTypeId ?? -111,
+                        productId: productId,
+                        centralProductId: centralProductId,
+                        unitId: variant.unitId,
+                        newAddOns: addOns,
+                    ));
+                      },
+                    ),
+                  );
+                  }else {
+                    print("product.storeId: ${product.productName}");
+                  cartBloc.add(CartAddItemRequested(
+                       storeId: product.storeId ?? '',
+                       cartType: 1, // Default cart type
+                       action: 1, // Add action
+                       storeCategoryId: product.storeCategoryId ?? '',
+                       newQuantity: quantity , // Add 1 item
+                       storeTypeId: product.storeTypeId ?? -111,
+                        productId: productId,
+                        centralProductId: centralProductId,
+                        unitId: '',
+                    ));
+                  }                 
+                },
           );
         },
       ),
     );
+  }
+
+   void _onQuantityChanged1(String productId, String centralProductId, int currentQuantity, bool isIncrease, bool isCustomizable, String storeId,String storeCategoryId,int storeTypeId, BuildContext context) {
+    try {
+      if (isIncrease == false && currentQuantity == 1) {
+
+           final addToCartOnId = _getAddToCartOnId(productId);
+        print("addCartOnID: $addToCartOnId");
+
+         cartBloc.add(CartAddItemRequested(
+          storeId: storeId,
+          cartType: 1,
+          action: 3, // Add action
+          storeCategoryId: storeCategoryId,
+          newQuantity: 0,
+          storeTypeId: storeTypeId,
+          productId: productId,
+          centralProductId: centralProductId,
+          unitId: '',
+          addToCartOnId: addToCartOnId,
+        ));
+      }else if (currentQuantity > 0 && isIncrease == true) {
+
+          if (isCustomizable) {
+
+            showModalBottomSheet(
+                        context: context,
+                        isScrollControlled: true,
+                        backgroundColor: Colors.transparent,
+                        builder: (context) => CustomizationSummaryScreen(
+                          
+                          onChooseClicked: () {
+                            // When "I'll choose" is clicked, open ProductCustomizationScreen
+                            _openProductCustomization1(productId, centralProductId,storeId, storeCategoryId, storeTypeId, context);
+                          },
+                          onRepeatClicked: () {
+                            // Get the addToCartOnId from cart data for this product
+                            final addToCartOnId = _getAddToCartOnId(productId);
+                            print("addCartOnID: $addToCartOnId");
+
+                            cartBloc.add(CartAddItemRequested(
+                              storeId: storeId,
+                              cartType: 1,
+                              action: 2, // Add action
+                              storeCategoryId: storeCategoryId,
+                              newQuantity: currentQuantity + 1,
+                              storeTypeId: storeTypeId,
+                              productId: productId,
+                              centralProductId: centralProductId,
+                              unitId: '',
+                              addToCartOnId: addToCartOnId,
+                            )); 
+                          
+                          },
+                        ),
+          );
+             
+          }else {
+             cartBloc.add(CartAddItemRequested(
+          storeId: storeId,
+          cartType: 1,
+          action: 2, // Remove action
+          storeCategoryId: storeCategoryId,
+          newQuantity: currentQuantity + 1,
+          storeTypeId: storeTypeId,
+          productId: productId,
+          centralProductId: centralProductId,
+          unitId: '',
+        ));
+          }
+    
+      } else {
+        // Update quantity
+        cartBloc.add(CartAddItemRequested(
+          storeId: storeId,
+          cartType: 1,
+          action: 2, // Add action
+          storeCategoryId: storeCategoryId,
+          newQuantity: currentQuantity - 1,
+          storeTypeId: storeTypeId,
+          productId: productId,
+          centralProductId: centralProductId,
+          unitId: '',
+        ));
+      }
+    } catch (e) {
+      print('Error changing quantity: $e');
+    }
+  }
+
+  void _openProductCustomization1(String productId, String centralProductId, String storeId,String storeCategoryId,int storeTypeId, BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => ProductCustomizationScreen(
+        productId: productId,
+        centralProductId: centralProductId,
+        storeId: storeId,
+        productName: 'Product Name',
+        productImage: 'Product Image',
+        isFromMenuScreen: true,
+        onAddToCartWithAddOns: (product, store, variant, addOns) => _onAddToCartWithAddOns1(productId, centralProductId, storeId, storeCategoryId, storeTypeId, context, variant, addOns),
+      ),
+    );
+  }
+
+   /// Handle adding products with addons to cart
+  void _onAddToCartWithAddOns1(
+    String productId, 
+    String centralProductId, 
+    String storeId, 
+    String storeCategoryId,
+    int storeTypeId,
+    BuildContext context,
+    dynamic variant, 
+    List<Map<String, dynamic>> addOns
+  ) {
+    try {
+    
+      cartBloc.add(CartAddItemRequested(
+        storeId: storeId,
+        cartType: 1, // Default cart type
+        action: 1, // Add action
+        storeCategoryId: storeCategoryId,
+        newQuantity: 1,
+        storeTypeId: storeTypeId,
+        productId: productId,
+        centralProductId: centralProductId,
+        unitId: variant.unitId,
+        newAddOns: addOns,
+      ));
+      
+      // print("Added product with addons to cart: ${product.productName}");
+    } catch (e) {
+      print('RestaurantScreen: Error dispatching CartAddItemRequested with addons: $e');
+    }
   }
 
   String _formatCurrency(String symbol, double value) {

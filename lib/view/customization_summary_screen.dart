@@ -4,15 +4,15 @@ import 'package:chat_bot/data/model/chat_response.dart';
 
 
 class CustomizationSummaryScreen extends StatefulWidget {
-  final Store store;
-  final Product product;
+  final Store? store;
+  final Product? product;
   final VoidCallback? onChooseClicked; 
   final VoidCallback? onRepeatClicked; // Callback when "I'll choose" is clicked
 
   const CustomizationSummaryScreen({
     super.key,
-    required this.store,
-    required this.product,
+    this.store,
+    this.product,
     this.onChooseClicked,
     this.onRepeatClicked,
   });
@@ -79,7 +79,7 @@ class _CustomizationSummaryScreenState extends State<CustomizationSummaryScreen>
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      '${widget.product.productName}',
+                      '${widget.product?.productName}',
                       style: const TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w400,
@@ -204,7 +204,7 @@ class _CustomizationSummaryScreenState extends State<CustomizationSummaryScreen>
             height: 62,
             child: OutlinedButton(
               onPressed: () {
-                print("I'll choose button clicked for: ${widget.product.productName}");
+                print("I'll choose button clicked for: ${widget.product?.productName}");
                 Navigator.of(context).pop();
                 
                 // Call the callback to let parent know "I'll choose" was clicked

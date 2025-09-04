@@ -331,6 +331,10 @@ class Product {
   final String currencySymbol;
   final String currency;
   final String unitId;
+  final bool? customizable;
+  final String? storeCategoryId;
+  final int? storeTypeId;
+  final String? storeId;
 
   const Product({
     // required this.id,
@@ -345,6 +349,10 @@ class Product {
     required this.currencySymbol,
     required this.currency,
     required this.unitId,
+     this.customizable,
+     this.storeCategoryId,
+     this.storeTypeId,
+     this.storeId,
   });
 
   double get finalPrice => finalPriceList.finalPrice;
@@ -379,6 +387,10 @@ class Product {
       currencySymbol: json['currencySymbol']?.toString() ?? '',
       currency: json['currency']?.toString() ?? '',
       unitId: json['unitId']?.toString() ?? '',
+      customizable: json['customizable'] ?? false,
+      storeCategoryId: json['storeCategoryId']?.toString() ?? '',
+      storeTypeId: json['storeTypeId'] ?? -111,
+      storeId: json['storeId']?.toString() ?? '',
     );
   }
 
@@ -396,6 +408,10 @@ class Product {
       'currencySymbol': currencySymbol,
       'currency': currency,
       'unitId': unitId,
+      'customizable': customizable,
+      'storeCategoryId': storeCategoryId,
+      'storeTypeId': storeTypeId,
+      'storeId': storeId,
     };
   }
 }
@@ -692,6 +708,7 @@ class WidgetAction {
   final String? storeId;
   final String? storeName;
   final String? paymentTypeText;
+  final int? storeTypeId;
 
   WidgetAction({
     required this.buttonText,
@@ -709,6 +726,7 @@ class WidgetAction {
     this.storeId,
     this.storeName,
     this.paymentTypeText,
+    this.storeTypeId,
   });
 
   factory WidgetAction.fromJson(Map<String, dynamic> json) {
@@ -732,6 +750,7 @@ class WidgetAction {
       storeId: json['storeId']?.toString(),
       storeName: json['storeName']?.toString(),
       paymentTypeText: json['paymentTypeText']?.toString(),
+      storeTypeId: json['storeTypeId'] ?? -111,
     );
   }
 
@@ -752,6 +771,7 @@ class WidgetAction {
       'storeId': storeId,
       'storeName': storeName,
       'paymentTypeText': paymentTypeText,
+      'storeTypeId': storeTypeId,
     };
   }
 }
