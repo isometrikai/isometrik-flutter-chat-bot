@@ -1693,7 +1693,7 @@ class _ChatScreenBody extends StatelessWidget {
   void _onQuantityChanged(BuildContext context, Product product, Store store, int newQuantity, bool isIncrease) {
     if (isIncrease == false && newQuantity == 1) {
       //TODO:- 0 Quantity
-      var addToCartOnId = '';
+      int? addToCartOnId;
       if (product.variantsCount > 1) {
         addToCartOnId = _getAddToCartOnId(product.childProductId);
         print("addCartOnID: $addToCartOnId");
@@ -1761,7 +1761,7 @@ class _ChatScreenBody extends StatelessWidget {
 
     } else {
       //TODO:- Remove Quantity
-      var addToCartOnId = '';
+      int? addToCartOnId;
       if (product.variantsCount > 1) {
         addToCartOnId = _getAddToCartOnId(product.childProductId);
         print("addCartOnID: $addToCartOnId");
@@ -1916,7 +1916,7 @@ class _ChatScreenBody extends StatelessWidget {
     try {
       if (isIncrease == false && currentQuantity == 1) {
         //TODO:- 0 Quantity
-        var addToCartOnId = '';
+        int? addToCartOnId;
         if (isCustomizable == true) {
           addToCartOnId = _getAddToCartOnId(productId);
           print("addCartOnID: $addToCartOnId");
@@ -1987,7 +1987,7 @@ class _ChatScreenBody extends StatelessWidget {
     
       } else {
         //TODO:- Remove Quantity
-        var addToCartOnId = '';
+        int? addToCartOnId;
         if (isCustomizable == true) {
           addToCartOnId = _getAddToCartOnId(productId);
           print("addCartOnID: $addToCartOnId");

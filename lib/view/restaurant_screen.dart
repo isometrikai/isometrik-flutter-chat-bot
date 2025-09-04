@@ -79,6 +79,8 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
     cartBloc.stream.listen((state) {
       if (state is CartLoaded && state.rawCartData != null) {
         _updateCartData(state.rawCartData!.data);
+      }else if (state is CartEmpty) {
+        _updateCartData([]);
       }
     });
   }
@@ -205,8 +207,8 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
   void _onQuantityChanged(chat.Product product, chat.Store store, int newQuantity, bool isIncrease) {
     if (isIncrease == false && newQuantity == 1) {
       //TODO:- 0 Quantity
-       var addToCartOnId = '';
-       if (product.variantsCount > 1) {
+      int? addToCartOnId;
+      if (product.variantsCount > 1) {
          addToCartOnId = _getAddToCartOnId(product.childProductId);
          print("addCartOnID: $addToCartOnId");
        }
@@ -259,7 +261,6 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
           );
       }else {
         //TODO:- Add Quantity
-      // Call cart API to Add item
       cartBloc.add(CartAddItemRequested(
         storeId: store.storeId,
         cartType: 1,
@@ -275,7 +276,7 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
 
     } else {
       //TODO:- Remove Quantity
-      var addToCartOnId = '';
+      int? addToCartOnId;
       if (product.variantsCount > 1) {
         addToCartOnId = _getAddToCartOnId(product.childProductId);
         print("addCartOnID: $addToCartOnId");
@@ -313,26 +314,26 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
       _cartData = cartData;
       
       // Update product quantities from cart data
-      for (final cartItem in cartData) {
-        for (final seller in cartItem.sellers) {
-          for (final cartProduct in seller.products) {
-            if (cartProduct.quantity != null && cartProduct.quantity!.value > 0) {
-              // Find the corresponding product in our store data
-              for (final store in _bloc.state is RestaurantLoadSuccess 
-                  ? (_bloc.state as RestaurantLoadSuccess).restaurants 
-                  : []) {
-                for (final product in store.products) {
-                  if (product.childProductId == cartProduct.id) {
-                    _productQuantities[product.childProductId] = cartProduct.quantity!.value;
-                    _productDetails[product.childProductId] = product;
-                    break;
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
+      // for (final cartItem in cartData) {
+      //   for (final seller in cartItem.sellers) {
+      //     for (final cartProduct in seller.products) {
+      //       if (cartProduct.quantity != null && cartProduct.quantity!.value > 0) {
+      //         // Find the corresponding product in our store data
+      //         for (final store in _bloc.state is RestaurantLoadSuccess 
+      //             ? (_bloc.state as RestaurantLoadSuccess).restaurants 
+      //             : []) {
+      //           for (final product in store.products) {
+      //             if (product.childProductId == cartProduct.id) {
+      //               _productQuantities[product.childProductId] = cartProduct.quantity!.value;
+      //               _productDetails[product.childProductId] = product;
+      //               break;
+      //             }
+      //           }
+      //         }
+      //       }
+      //     }
+      //   }
+      // }
       
       // _updateCartTotals();
     });

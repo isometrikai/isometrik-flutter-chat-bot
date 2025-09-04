@@ -58,9 +58,10 @@ class CartBloc extends Bloc<CartEvent, CartState> {
           final cart = rawCartData.data.first;
           final seller = cart.sellers.isNotEmpty ? cart.sellers.first : null;
 
-        //   // Store the store info
           storeName = seller?.name;
           storeType = seller?.storeType;
+        }else {
+          cartData.clear();
         }
         
         if (widgetActions.isEmpty) {
@@ -75,9 +76,12 @@ class CartBloc extends Bloc<CartEvent, CartState> {
         }
         
       } else {
-        emit(CartError(message: rawResult.message ?? 'Failed to fetch cart'));
+        cartData.clear();
+        emit(CartEmpty());
+        // emit(CartError(message: rawResult.message ?? 'Failed to fetch cart'));
       }
     } catch (e) {
+      cartData.clear();
       emit(CartError(message: e.toString()));
        if (event.needToShowLoader) {
         Utility.closeProgressDialog();
@@ -160,7 +164,8 @@ class CartBloc extends Bloc<CartEvent, CartState> {
                 add(event);
                 return;
               } else {
-                emit(CartError(message: clearResult.message ?? 'Failed to clear cart'));
+                add(event);//i Added
+                // emit(CartError(message: clearResult.message ?? 'Failed to clear cart'));
                 return;
               }
             } else {
@@ -204,6 +209,7 @@ class CartBloc extends Bloc<CartEvent, CartState> {
         emit(CartProductAdded());
         add(CartFetchRequested(needToShowLoader: false));
       } else {
+        add(CartFetchRequested(needToShowLoader: false));
         emit(CartError(message: result.message ?? 'Failed to add item to cart'));
       }
     } catch (e) {

@@ -176,6 +176,8 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
                         listener: (context, state) {
                           if (state is CartLoaded && state.rawCartData != null) {
                             _updateCartData(state.rawCartData!.data);
+                          }else if (state is CartEmpty) {
+                            _updateCartData([]);
                           }
                         },
                         child: BlocBuilder<RestaurantMenuBloc, RestaurantMenuState>(
@@ -766,7 +768,7 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
     try {
       if (isIncrease == false && currentQuantity == 1) {
           //TODO:- 0 Quantity
-        var addToCartOnId = '';
+        int? addToCartOnId;
         if (isCustomizable == true) {
           addToCartOnId = _getAddToCartOnId(productId);
           print("addCartOnID: $addToCartOnId");
@@ -837,7 +839,7 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
     
       } else {
         //TODO:- Remove Quantity
-        var addToCartOnId = '';
+        int? addToCartOnId;
         if (isCustomizable == true) {
           addToCartOnId = _getAddToCartOnId(productId);
           print("addCartOnID: $addToCartOnId");
