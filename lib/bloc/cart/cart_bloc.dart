@@ -6,6 +6,7 @@ import 'package:chat_bot/data/model/universal_cart_response.dart';
 
 import 'package:chat_bot/data/repositories/cart_repository.dart';
 import 'package:chat_bot/services/cart_manager.dart';
+import 'package:chat_bot/utils/utility.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class CartBloc extends Bloc<CartEvent, CartState> {
@@ -31,12 +32,16 @@ class CartBloc extends Bloc<CartEvent, CartState> {
     Emitter<CartState> emit,
   ) async {
     if (event.needToShowLoader) { 
-      emit(CartLoading());
+      Utility.showLoader();
     }
 
     try {
       // Fetch raw cart data once and use it for both purposes
       final rawResult = await repository.fetchRawUniversalCart();
+
+       if (event.needToShowLoader) {
+        Utility.closeProgressDialog();
+      }
       
       if (rawResult.isSuccess) {
         final rawCartData = rawResult.data as UniversalCartResponse;
@@ -73,6 +78,9 @@ class CartBloc extends Bloc<CartEvent, CartState> {
       }
     } catch (e) {
       emit(CartError(message: e.toString()));
+       if (event.needToShowLoader) {
+        Utility.closeProgressDialog();
+      }
     }
   }
 
@@ -90,7 +98,10 @@ class CartBloc extends Bloc<CartEvent, CartState> {
     Emitter<CartState> emit,
   ) async {
     try {
-      emit(CartLoading());
+      // emit(CartLoading());
+      if (event.needToShowLoader) {
+        Utility.showLoader();
+      }
       
       final result = await repository.addToCart(
         storeId: event.storeId,
@@ -106,6 +117,10 @@ class CartBloc extends Bloc<CartEvent, CartState> {
         addToCartOnId: event.addToCartOnId,
       );
 
+      if (event.needToShowLoader) {
+        Utility.closeProgressDialog();
+      }
+
       if (result.isSuccess) {
         isCartAPICalled = true;
         emit(CartProductAdded());
@@ -114,6 +129,9 @@ class CartBloc extends Bloc<CartEvent, CartState> {
         emit(CartError(message: result.message ?? 'Failed to add item to cart'));
       }
     } catch (e) {
+       if (event.needToShowLoader) {
+        Utility.closeProgressDialog();
+      }
       emit(CartError(message: e.toString()));
     }
   }
