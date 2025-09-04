@@ -101,6 +101,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
     // Prepare: hide stores/products from the last bot message if present
     final int catalogIdx = _indexOfLastBotCatalogMessage();
+    _hideStoreCards();
 
     setState(() {
       if (catalogIdx >= 0) {
@@ -477,8 +478,9 @@ class _ChatScreenBody extends StatelessWidget {
               BlocListener<CartBloc, CartState>(
                 listener: (context, state) {
                   if (state is CartProductAdded) {
+                    // onHideStoreCards();
                     // Product added to cart successfully
-                    onSendMessage("I have added products to cart");
+                    onSendMessage("I have updated the cart");
                   }
                 },
               ),
@@ -1291,7 +1293,7 @@ class _ChatScreenBody extends StatelessWidget {
                             actionData: action,
                             onCheckout: (value) {
                              if (isCartAPICalled == true) {
-                               onSendMessage("I have added products to cart");
+                               onSendMessage("I have updated the cart");
                                isCartAPICalled = false;
                              }
                             },
@@ -1323,7 +1325,7 @@ class _ChatScreenBody extends StatelessWidget {
                         actionData: action,
                         onCheckout: (value) {
                           if (isCartAPICalled == true) {
-                            onSendMessage("I have added products to cart");
+                            onSendMessage("I have updated the cart");
                             isCartAPICalled = false;
                           }
                         },
@@ -1619,7 +1621,7 @@ class _ChatScreenBody extends StatelessWidget {
           onAddToCart: (message, product, store, quantity) {  
             onSendMessage(message);
           },
-          onHide: onHideStoreCards, 
+          // onHide: onHideStoreCards, 
           onQuantityChanged: (product, store, newQuantity, isIncrease) => _onQuantityChanged(context, product, store, newQuantity, isIncrease),// Use the callback from parent
           onAddToCartRequested: (product, store) {
             if (store.storeIsOpen == false) {

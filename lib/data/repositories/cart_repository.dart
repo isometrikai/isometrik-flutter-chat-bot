@@ -43,4 +43,8 @@ class CartRepository {
       addToCartOnId: addToCartOnId,
     );
   }
+
+  Future<ApiResult> clearCart({required String cartId}) {
+    return CartService.instance.clearCart(cartId: cartId);
+  }
 }

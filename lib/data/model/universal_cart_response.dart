@@ -516,6 +516,7 @@ class Product {
   final Accounting? accounting;
   final Quantity? quantity;
   final num? addToCartOnId;
+  final String? storeId;
 
   Product({
     required this.id,
@@ -523,6 +524,7 @@ class Product {
     required this.accounting,
     this.quantity,
     this.addToCartOnId,
+    this.storeId,
   });
 
   factory Product.fromJson(Map<String, dynamic> json) {
@@ -532,6 +534,7 @@ class Product {
       accounting: json['accounting'] != null ? Accounting.fromJson(json['accounting']) : null,
       quantity: json['quantity'] != null ? Quantity.fromJson(json['quantity']) : null,
       addToCartOnId: json['addToCartOnId'] ?? 0,
+      storeId: json['storeId'] ?? '',
     );
   }
 
@@ -542,6 +545,7 @@ class Product {
       'accounting': accounting?.toJson(),
       'quantity': quantity?.toJson(),
       'addToCartOnId': addToCartOnId,
+      'storeId': storeId,
     };
   }
 }

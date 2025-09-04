@@ -180,4 +180,19 @@ class CartService {
       return ApiResult.error(e.toString());
     }
   }
+
+  /// Clear cart by cart ID
+  Future<ApiResult> clearCart({required String cartId}) async {
+    try {
+      final result = await _client.delete('/v1/cart?cartId=$cartId');
+      
+      if (result.isSuccess) {
+        return ApiResult.success(result.data);
+      } else {
+        return ApiResult.error(result.message ?? 'Failed to clear cart');
+      }
+    } catch (e) {
+      return ApiResult.error(e.toString());
+    }
+  }
 }
