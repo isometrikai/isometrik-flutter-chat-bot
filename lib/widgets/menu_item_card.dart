@@ -1,4 +1,3 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:chat_bot/data/model/chat_response.dart';
 import 'package:chat_bot/data/model/universal_cart_response.dart';
@@ -55,22 +54,13 @@ class MenuItemCard extends StatelessWidget {
                 ClipRRect(
                   borderRadius: BorderRadius.circular(12),
                   child: imageUrl != null
-                      ? CachedNetworkImage(
-                          imageUrl: imageUrl!,
+                      ?
+                  Image.network(
+                      imageUrl!,
                           width: 108,
-                          height: 108,
-                          fit: BoxFit.cover,
-                          placeholder: (context, url) => const SizedBox(
-                            width: 108,
-                            height: 108,
-                            child: ColoredBox(color: Color(0xFFF5F5F5)),
-                          ),
-                          errorWidget: (context, url, error) => const SizedBox(
-                            width: 108,
-                            height: 108,
-                            child: ColoredBox(color: Color(0xFFF5F5F5)),
-                          ),
-                        )
+                      height: 108,
+                      fit: BoxFit.cover,
+                  )
                       : const SizedBox(
                           width: 108,
                           height: 108,

@@ -1,11 +1,10 @@
 import 'package:chat_bot/view/launch_screen.dart';
-import 'package:chat_bot/view/restaurant_screen.dart';
 import 'package:flutter/material.dart';
 import 'services/api_service.dart';
 import 'services/callback_manage.dart';
-import 'view/chat_screen.dart';
 import 'package:flutter/services.dart';
 import 'utils/asset_path.dart';
+import 'utils/utility.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -34,6 +33,7 @@ class MyApp extends StatelessWidget {
     
     return MaterialApp(
       title: 'Flutter Demo',
+      navigatorKey: kNavigatorKey,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
