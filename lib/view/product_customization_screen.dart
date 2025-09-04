@@ -7,6 +7,7 @@ import 'package:chat_bot/data/model/product_portion_response.dart';
 import 'package:chat_bot/data/model/chat_response.dart';
 import 'package:chat_bot/data/repositories/product_portion_repository.dart';
 import 'package:chat_bot/data/services/universal_api_client.dart';
+import 'package:chat_bot/widgets/black_toast_view.dart';
 
 
 
@@ -493,7 +494,7 @@ class _ProductCustomizationScreenState extends State<ProductCustomizationScreen>
                     ? BorderRadius.circular(3.33) 
                     : null,
                 border: Border.all(
-                  color: isSelected ? const Color(0xFF8E2FFD) : const Color(0xFFEEF4FF),
+                  color: isSelected ? const Color(0xFF8E2FFD) : const Color(0xFFB0C4FF),
                   width: 0.83,
                 ),
                 color: isSelected ? const Color(0xFF8E2FFD) : Colors.white,
@@ -542,6 +543,41 @@ class _ProductCustomizationScreenState extends State<ProductCustomizationScreen>
     return formattedAddOns;
   }
 
+  /// Validates if all required options are selected
+  bool _validateRequiredOptions(ProductCustomizationLoaded state) {
+    // Check if size is selected (always required)
+    if (state.selectedVariant == null) {
+      BlackToastView.show(context, 'Please select a size');
+      return false;
+    }
+
+    // Check mandatory add-on categories
+    for (final addOnCategory in state.selectedVariant!.addOns) {
+      if (addOnCategory.mandatory) {
+        final selectedItems = state.selectedAddOns[addOnCategory.name] ?? <String>{};
+        
+        if (selectedItems.isEmpty) {
+          BlackToastView.show(context, 'Please Select Option');
+          return false;
+        }
+        
+        // Check if minimum required items are selected
+        if (selectedItems.length < addOnCategory.minimumLimit) {
+          BlackToastView.show(context, 'Please select at least ${addOnCategory.minimumLimit} items from ${addOnCategory.name}');
+          return false;
+        }
+        
+        // Check if maximum limit is not exceeded
+        if (selectedItems.length > addOnCategory.maximumLimit) {
+          BlackToastView.show(context, 'You can select maximum ${addOnCategory.maximumLimit} items from ${addOnCategory.name}');
+          return false;
+        }
+      }
+    }
+
+    return true;
+  }
+
   Widget _buildBottomBar() {
     return BlocBuilder<ProductCustomizationBloc, ProductCustomizationState>(
       builder: (context, state) {
@@ -575,6 +611,11 @@ class _ProductCustomizationScreenState extends State<ProductCustomizationScreen>
                 ),
                 child: ElevatedButton(
                   onPressed: () async {
+                    // Validate required options first
+                    if (!_validateRequiredOptions(state)) {
+                      return; // Stop execution if validation fails
+                    }
+                    
                     if (state.selectedVariant != null) {
                       // Format addons data for API
                       final formattedAddOns = _formatAddOnsForAPI(state);
