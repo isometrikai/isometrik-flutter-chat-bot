@@ -1289,11 +1289,11 @@ class _ChatScreenBody extends StatelessWidget {
                       builder: (context) {
                           return RestaurantScreen(
                             actionData: action,
-                            onCheckout: (List<String> addedProducts) {
-                              if (addedProducts.isNotEmpty) {
-                                final productsMessage = addedProducts.join(',\n');
-                                onSendMessage("I've added these items to my cart:\n\n$productsMessage");
-                              }
+                            onCheckout: (value) {
+                             if (isCartAPICalled == true) {
+                               onSendMessage("Get My Cart Details");
+                               isCartAPICalled = false;
+                             }
                             },
                           );
                         }
@@ -1321,10 +1321,10 @@ class _ChatScreenBody extends StatelessWidget {
                     MaterialPageRoute(
                       builder: (context) => RestaurantMenuScreen(
                         actionData: action,
-                        onCheckout: (List<String> addedProducts) {
-                          if (addedProducts.isNotEmpty) {
-                            final productsMessage = addedProducts.join(',\n');
-                            onSendMessage("I've added these items to my cart:\n\n$productsMessage");
+                        onCheckout: (value) {
+                          if (isCartAPICalled == true) {
+                            onSendMessage("Get My Cart Details");
+                            isCartAPICalled = false;
                           }
                         },
                       ),
@@ -1622,6 +1622,11 @@ class _ChatScreenBody extends StatelessWidget {
           onHide: onHideStoreCards, 
           onQuantityChanged: (product, store, newQuantity, isIncrease) => _onQuantityChanged(context, product, store, newQuantity, isIncrease),// Use the callback from parent
           onAddToCartRequested: (product, store) {
+            if (store.storeIsOpen == false) {
+              print('Store is closed');
+              BlackToastView.show(context, 'Store is closed. Please try again later');
+              return;
+            }
               if (product.variantsCount > 1) {
                          showModalBottomSheet(
                     context: context,
@@ -1634,6 +1639,7 @@ class _ChatScreenBody extends StatelessWidget {
                     ),
                   );
                     }else {
+                //TODO:- Add Quantity
                       cartBloc.add(CartAddItemRequested(
                           storeId: store.storeId,
                           cartType: 1, // Default cart type
@@ -1662,6 +1668,7 @@ class _ChatScreenBody extends StatelessWidget {
     List<Map<String, dynamic>> addOns
   ) {
     try {
+      //TODO:- Add Quantity
       cartBloc.add(CartAddItemRequested(
         storeId: store.storeId,
         cartType: 1, // Default cart type
@@ -1677,18 +1684,21 @@ class _ChatScreenBody extends StatelessWidget {
       
       print("Added product with addons to cart: ${product.productName}");
     } catch (e) {
-      print('RestaurantScreen: Error dispatching CartAddItemRequested with addons: $e');
+      print('RestaurantScreen: Error dispatching CartAddItemRequeste with addons: $e');
     }
   }
 
   void _onQuantityChanged(BuildContext context, Product product, Store store, int newQuantity, bool isIncrease) {
     if (isIncrease == false && newQuantity == 1) {
-       final addToCartOnId = _getAddToCartOnId(product.childProductId);
+      //TODO:- 0 Quantity
+      var addToCartOnId = '';
+      if (product.variantsCount > 1) {
+        addToCartOnId = _getAddToCartOnId(product.childProductId);
         print("addCartOnID: $addToCartOnId");
-       // Call cart API to update quantity
+      }
       cartBloc.add(CartAddItemRequested(
         storeId: store.storeId,
-        cartType: 1,
+        cartType: 2,
         action: 3, // Add/Update action
         storeCategoryId: store.storeCategoryId,
         newQuantity: 0,
@@ -1712,7 +1722,7 @@ class _ChatScreenBody extends StatelessWidget {
                             _openProductCustomization(context, product, store);
                           },
                           onRepeatClicked: () {
-                            // Get the addToCartOnId from cart data for this product
+                            //TODO:- Add Quantity
                             final addToCartOnId = _getAddToCartOnId(product.childProductId);
                             print("addCartOnID: $addToCartOnId");
 
@@ -1733,7 +1743,7 @@ class _ChatScreenBody extends StatelessWidget {
                         ),
           );
       }else {
-      // Call cart API to Add item
+        //TODO:- Add Quantity
       cartBloc.add(CartAddItemRequested(
         storeId: store.storeId,
         cartType: 1,
@@ -1748,12 +1758,15 @@ class _ChatScreenBody extends StatelessWidget {
       }
 
     } else {
-       final addToCartOnId = _getAddToCartOnId(product.childProductId);
+      //TODO:- Remove Quantity
+      var addToCartOnId = '';
+      if (product.variantsCount > 1) {
+        addToCartOnId = _getAddToCartOnId(product.childProductId);
         print("addCartOnID: $addToCartOnId");
-      // Call cart API to remove quantity
+      }
       cartBloc.add(CartAddItemRequested(
         storeId: store.storeId,
-        cartType: 1,
+        cartType: 2,
         action: 2, // Add/Update action
         storeCategoryId: store.storeCategoryId,
         newQuantity: newQuantity - 1,
@@ -1838,9 +1851,14 @@ class _ChatScreenBody extends StatelessWidget {
               }
             },
             onQuantityChanged: (productId, centralProductId, quantity, isIncrease, isCustomizable) {
-              _onQuantityChanged1(productId, centralProductId, quantity, isIncrease, isCustomizable, product.storeId ?? '', product.storeCategoryId ?? '', product.storeTypeId ?? -111, context);
+              _onQuantityChangedMenuItem(productId, centralProductId, quantity, isIncrease, isCustomizable, product.storeId ?? '', product.storeCategoryId ?? '', product.storeTypeId ?? -111, context);
             },
             onAddToCart: (productId, centralProductId, quantity, isCustomizable) {
+              if (product.storeIsOpen == false) {
+                print('STORE CLSOSED');
+                BlackToastView.show(context, 'Store is closed. Please try again later');
+                return;
+              }
                   if (isCustomizable) {
                      showModalBottomSheet(
                     context: context,
@@ -1854,6 +1872,7 @@ class _ChatScreenBody extends StatelessWidget {
                       productImage: product.productImage.isNotEmpty ? product.productImage : null,
                       isFromMenuScreen: true,
                       onAddToCartWithAddOns: (product, store, variant, addOns) {
+                        //TODO:- Add Quantity
                         cartBloc.add(CartAddItemRequested(
                        storeId: product.storeId ?? '',
                        cartType: 1, // Default cart type
@@ -1870,6 +1889,7 @@ class _ChatScreenBody extends StatelessWidget {
                     ),
                   );
                   }else {
+                    //TODO:- Add Quantity
                     print("product.storeId: ${product.productName}");
                   cartBloc.add(CartAddItemRequested(
                        storeId: product.storeId ?? '',
@@ -1890,16 +1910,19 @@ class _ChatScreenBody extends StatelessWidget {
     );
   }
 
-   void _onQuantityChanged1(String productId, String centralProductId, int currentQuantity, bool isIncrease, bool isCustomizable, String storeId,String storeCategoryId,int storeTypeId, BuildContext context) {
+   void _onQuantityChangedMenuItem(String productId, String centralProductId, int currentQuantity, bool isIncrease, bool isCustomizable, String storeId,String storeCategoryId,int storeTypeId, BuildContext context) {
     try {
       if (isIncrease == false && currentQuantity == 1) {
-
-           final addToCartOnId = _getAddToCartOnId(productId);
-        print("addCartOnID: $addToCartOnId");
+        //TODO:- 0 Quantity
+        var addToCartOnId = '';
+        if (isCustomizable == true) {
+          addToCartOnId = _getAddToCartOnId(productId);
+          print("addCartOnID: $addToCartOnId");
+        }
 
          cartBloc.add(CartAddItemRequested(
           storeId: storeId,
-          cartType: 1,
+          cartType: 2,
           action: 3, // Add action
           storeCategoryId: storeCategoryId,
           newQuantity: 0,
@@ -1921,10 +1944,10 @@ class _ChatScreenBody extends StatelessWidget {
                           
                           onChooseClicked: () {
                             // When "I'll choose" is clicked, open ProductCustomizationScreen
-                            _openProductCustomization1(productId, centralProductId,storeId, storeCategoryId, storeTypeId, context);
+                            _openProductCustomizationMenuItem(productId, centralProductId,storeId, storeCategoryId, storeTypeId, context);
                           },
                           onRepeatClicked: () {
-                            // Get the addToCartOnId from cart data for this product
+                            //TODO:- Add Quantity
                             final addToCartOnId = _getAddToCartOnId(productId);
                             print("addCartOnID: $addToCartOnId");
 
@@ -1946,6 +1969,7 @@ class _ChatScreenBody extends StatelessWidget {
           );
              
           }else {
+            //TODO:- Add Quantity
              cartBloc.add(CartAddItemRequested(
           storeId: storeId,
           cartType: 1,
@@ -1960,10 +1984,15 @@ class _ChatScreenBody extends StatelessWidget {
           }
     
       } else {
-        // Update quantity
+        //TODO:- Remove Quantity
+        var addToCartOnId = '';
+        if (isCustomizable == true) {
+          addToCartOnId = _getAddToCartOnId(productId);
+          print("addCartOnID: $addToCartOnId");
+        }
         cartBloc.add(CartAddItemRequested(
           storeId: storeId,
-          cartType: 1,
+          cartType: 2,
           action: 2, // Add action
           storeCategoryId: storeCategoryId,
           newQuantity: currentQuantity - 1,
@@ -1971,6 +2000,7 @@ class _ChatScreenBody extends StatelessWidget {
           productId: productId,
           centralProductId: centralProductId,
           unitId: '',
+          addToCartOnId: addToCartOnId,
         ));
       }
     } catch (e) {
@@ -1978,7 +2008,7 @@ class _ChatScreenBody extends StatelessWidget {
     }
   }
 
-  void _openProductCustomization1(String productId, String centralProductId, String storeId,String storeCategoryId,int storeTypeId, BuildContext context) {
+  void _openProductCustomizationMenuItem(String productId, String centralProductId, String storeId,String storeCategoryId,int storeTypeId, BuildContext context) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -1990,13 +2020,13 @@ class _ChatScreenBody extends StatelessWidget {
         productName: 'Product Name',
         productImage: 'Product Image',
         isFromMenuScreen: true,
-        onAddToCartWithAddOns: (product, store, variant, addOns) => _onAddToCartWithAddOns1(productId, centralProductId, storeId, storeCategoryId, storeTypeId, context, variant, addOns),
+        onAddToCartWithAddOns: (product, store, variant, addOns) => _onAddToCartWithAddOnsMenuItem(productId, centralProductId, storeId, storeCategoryId, storeTypeId, context, variant, addOns),
       ),
     );
   }
 
    /// Handle adding products with addons to cart
-  void _onAddToCartWithAddOns1(
+  void _onAddToCartWithAddOnsMenuItem(
     String productId, 
     String centralProductId, 
     String storeId, 
@@ -2007,7 +2037,7 @@ class _ChatScreenBody extends StatelessWidget {
     List<Map<String, dynamic>> addOns
   ) {
     try {
-    
+      //TODO:- Add Quantity
       cartBloc.add(CartAddItemRequested(
         storeId: storeId,
         cartType: 1, // Default cart type
@@ -2023,7 +2053,7 @@ class _ChatScreenBody extends StatelessWidget {
       
       // print("Added product with addons to cart: ${product.productName}");
     } catch (e) {
-      print('RestaurantScreen: Error dispatching CartAddItemRequested with addons: $e');
+      print('RestaurantScreen: Error dispatching CartAddItemRequeste with addons: $e');
     }
   }
 

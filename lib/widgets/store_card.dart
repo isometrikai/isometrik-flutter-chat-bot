@@ -4,6 +4,7 @@ import 'package:chat_bot/data/model/universal_cart_response.dart';
 import 'package:chat_bot/services/callback_manage.dart';
 import 'package:chat_bot/bloc/chat_event.dart';
 import '../utils/asset_helper.dart';
+import 'black_toast_view.dart';
 
 class StoreCard extends StatelessWidget {
   final chat.Store store;
@@ -414,7 +415,11 @@ class _ProductPreviewTile extends StatelessWidget {
       // Show Add button when product is not in cart
       return GestureDetector(
         onTap: () {
-          // Call the cart request callback if provided
+          if (store.storeIsOpen == false) {
+            print("STORE IS CLOSED");
+            BlackToastView.show(context, 'Store is closed. Please try again later');
+            return;
+          }
           if (onAddToCartRequested != null) {
             onAddToCartRequested!(product, store);
           }

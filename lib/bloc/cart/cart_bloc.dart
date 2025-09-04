@@ -10,7 +10,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 class CartBloc extends Bloc<CartEvent, CartState> {
   final CartRepository repository;
-  final CartManager cartManager = CartManager();
+  // final CartManager cartManager = CartManager();
   List<UniversalCartData> cartData = [];
 
   int totalProductCount = 0;
@@ -51,29 +51,7 @@ class CartBloc extends Bloc<CartEvent, CartState> {
           cartData = rawCartData.data;
           final cart = rawCartData.data.first;
           final seller = cart.sellers.isNotEmpty ? cart.sellers.first : null;
-          
-        //   totalProductCount = 0;
-        //   Map<String, int> productQuantities = {};
-          
-        //   for (var obj in rawCartData.data) {
-        //     for (var sellerData in obj.sellers) {
-        //       totalProductCount += sellerData.products.length;
-              
-        //       // Extract product quantities for CartManager
-        //       for (var product in sellerData.products) {
-        //         if (product.quantity != null) {
-        //           productQuantities[product.id] = product.quantity?.value ?? 1;
-        //         }
-        //       }
-        //     }
-        //   }
-          
-        //   // Load quantities into CartManager
-        //   cartManager.loadFromData(productQuantities);
-          
-        //   print('Total product count across all sellers: $totalProductCount');
-        //   print('Loaded ${productQuantities.length} products into CartManager');
-          
+
         //   // Store the store info
           storeName = seller?.name;
           storeType = seller?.storeType;
@@ -104,7 +82,7 @@ class CartBloc extends Bloc<CartEvent, CartState> {
   }
 
   // Get CartManager instance
-  CartManager get getCartManager => cartManager;
+  // CartManager get getCartManager => cartManager;
 
   /// Handle adding items to cart
   Future<void> _onCartAddItemRequested(
@@ -129,7 +107,7 @@ class CartBloc extends Bloc<CartEvent, CartState> {
       );
 
       if (result.isSuccess) {
-        
+        isCartAPICalled = true;
         emit(CartProductAdded());
         add(CartFetchRequested(needToShowLoader: false));
       } else {
@@ -140,3 +118,5 @@ class CartBloc extends Bloc<CartEvent, CartState> {
     }
   }
 }
+
+var isCartAPICalled = false;

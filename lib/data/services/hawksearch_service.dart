@@ -210,6 +210,14 @@ class HawkSearchService {
       return 0.0;
     })();
 
+    final bool storeIsOpen = (() {
+      final dynamic sd = storeData['storeIsOpen'];
+      if (sd == 'True' || sd == true) {
+        return true;
+      }
+      return false;
+    })();
+
     // Extra fields from storeData.metaData
     final Map<String, dynamic> metaData = (() {
       final dynamic raw = storeData['metaData'];
@@ -239,6 +247,7 @@ class HawkSearchService {
       isDoctored: isDoctored,
       storeListing: storeListing,
       hyperlocal: hyperlocal,
+        storeIsOpen: storeIsOpen
     );
   }
 

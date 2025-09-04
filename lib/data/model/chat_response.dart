@@ -335,6 +335,7 @@ class Product {
   final String? storeCategoryId;
   final int? storeTypeId;
   final String? storeId;
+  final bool? storeIsOpen;
 
   const Product({
     // required this.id,
@@ -353,6 +354,7 @@ class Product {
      this.storeCategoryId,
      this.storeTypeId,
      this.storeId,
+     this.storeIsOpen,
   });
 
   double get finalPrice => finalPriceList.finalPrice;
@@ -391,6 +393,7 @@ class Product {
       storeCategoryId: json['storeCategoryId']?.toString() ?? '',
       storeTypeId: json['storeTypeId'] ?? -111,
       storeId: json['storeId']?.toString() ?? '',
+        storeIsOpen: json['storeIsOpen'] ?? false,
     );
   }
 
@@ -412,6 +415,7 @@ class Product {
       'storeCategoryId': storeCategoryId,
       'storeTypeId': storeTypeId,
       'storeId': storeId,
+      'storeIsOpen': storeIsOpen
     };
   }
 }
@@ -477,6 +481,8 @@ class Store {
   final bool hyperlocal;
   final List<Product> products;
 
+  final bool storeIsOpen;
+
   Store({
     required this.storename,
     required this.avgRating,
@@ -491,6 +497,7 @@ class Store {
     required this.isDoctored,
     required this.storeListing,
     required this.hyperlocal,
+    required this.storeIsOpen,
   });
 
   factory Store.fromJson(Map<String, dynamic> json) {
@@ -505,6 +512,7 @@ class Store {
     final bool isDoctored = (json['isDoctored'] ?? false);
     final bool storeListing = (json['storeListing'] ?? false);
     final bool hyperlocal = (json['hyperlocal'] ?? false);
+    final bool storeIsOpen = (json['storeIsOpen'] ?? false);
 
     final List<Product> parsedProducts = (json['products'] as List<dynamic>? ?? [])
         .map((e) => Product.fromJson(e as Map<String, dynamic>))
@@ -524,6 +532,7 @@ class Store {
       isDoctored: isDoctored,
       storeListing: storeListing,
       hyperlocal: hyperlocal,
+      storeIsOpen: storeIsOpen,
     );
   }
 
@@ -537,6 +546,7 @@ class Store {
       'storeId': storeId,
       'storeCategoryId': storeCategoryId,
       'products': products.map((p) => p.toJson()).toList(),
+      'storeIsOpen': storeIsOpen
     };
   }
 }
@@ -710,6 +720,8 @@ class WidgetAction {
   final String? paymentTypeText;
   final int? storeTypeId;
 
+  final bool? storeIsOpen;
+
   WidgetAction({
     required this.buttonText,
     required this.title,
@@ -727,6 +739,7 @@ class WidgetAction {
     this.storeName,
     this.paymentTypeText,
     this.storeTypeId,
+    this.storeIsOpen
   });
 
   factory WidgetAction.fromJson(Map<String, dynamic> json) {
@@ -751,6 +764,7 @@ class WidgetAction {
       storeName: json['storeName']?.toString(),
       paymentTypeText: json['paymentTypeText']?.toString(),
       storeTypeId: json['storeTypeId'] ?? -111,
+        storeIsOpen: json['storeIsOpen'] ?? false
     );
   }
 
@@ -772,6 +786,7 @@ class WidgetAction {
       'storeName': storeName,
       'paymentTypeText': paymentTypeText,
       'storeTypeId': storeTypeId,
+      'storeIsOpen': storeIsOpen
     };
   }
 }
