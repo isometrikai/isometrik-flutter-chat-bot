@@ -13,10 +13,13 @@ class CartBloc extends Bloc<CartEvent, CartState> {
   // final CartManager cartManager = CartManager();
   List<UniversalCartData> cartData = [];
 
-  int totalProductCount = 0;
+  
 
   // Getter for total product count
-  int get getTotalProductCount => totalProductCount;
+  int get getTotalProductCount {
+    print('CartBloc getTotalProductCount called: $totalProductCount');
+    return totalProductCount;
+  }
 
   CartBloc({CartRepository? repository})
       : repository = repository ?? const CartRepository(),
@@ -60,8 +63,20 @@ class CartBloc extends Bloc<CartEvent, CartState> {
 
           storeName = seller?.name;
           storeType = seller?.storeType;
+          
+          // Calculate total product count
+          totalProductCount = 0;
+          for (final cartItem in rawCartData.data) {
+            for (final sellerItem in cartItem.sellers) {
+              // for (final product in sellerItem.products) {
+                totalProductCount += sellerItem.products.length;
+              // }
+            }
+          }
+          print('CartBloc: Calculated totalProductCount: $totalProductCount');
         }else {
           cartData.clear();
+          totalProductCount = 0;
         }
         
         if (widgetActions.isEmpty) {
@@ -77,11 +92,13 @@ class CartBloc extends Bloc<CartEvent, CartState> {
         
       } else {
         cartData.clear();
+        totalProductCount = 0;
         emit(CartEmpty());
         // emit(CartError(message: rawResult.message ?? 'Failed to fetch cart'));
       }
     } catch (e) {
       cartData.clear();
+      totalProductCount = 0;
       emit(CartError(message: e.toString()));
        if (event.needToShowLoader) {
         Utility.closeProgressDialog();
@@ -160,6 +177,7 @@ class CartBloc extends Bloc<CartEvent, CartState> {
                 // Cart cleared successfully, now add the new item
                 // Clear local cart data
                 cartData.clear();
+                totalProductCount = 0;
                 // Call the same event again to add the pending item
                 add(event);
                 return;
@@ -171,6 +189,7 @@ class CartBloc extends Bloc<CartEvent, CartState> {
             } else {
               // No cart ID available, just clear local data and continue
               cartData.clear();
+              totalProductCount = 0;
               // Call the same event again to add the pending item
               add(event);
               return;
@@ -222,6 +241,7 @@ class CartBloc extends Bloc<CartEvent, CartState> {
 }
 var cartId = '';
 var isCartAPICalled = false;
+int totalProductCount = 0;
 
 /// Result class for cart validation
 class CartValidationResult {

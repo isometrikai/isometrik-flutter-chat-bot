@@ -31,10 +31,6 @@ import 'package:chat_bot/widgets/choose_card_widget.dart';
 import 'package:chat_bot/widgets/order_summary_widget.dart';
 import 'package:chat_bot/widgets/order_confirmed_widget.dart';
 import '../utils/enum.dart';
-import '../utils/asset_helper.dart';
-
-// Global variable for cart object
-List<WidgetAction>? cartObject = [];
 
 class ChatScreen extends StatefulWidget {
   final MyGPTsResponse chatbotData;
@@ -142,8 +138,17 @@ class _ChatScreenState extends State<ChatScreen> {
     if (!mounted) return;
     
     _cartBloc.add(CartFetchRequested(needToShowLoader: false));
-    print('Cart data fetched - Total product count: ${_cartBloc.getTotalProductCount}');
-    _updateCartCount(_cartBloc.getTotalProductCount);
+    // Cart count will be updated via the CartBloc listener
+    print('Cart data fetch requested');
+    
+    // Also update cart count directly from cart bloc after a short delay
+    Future.delayed(const Duration(milliseconds: 500), () {
+      if (mounted) {
+        final directCount = _cartBloc.getTotalProductCount;
+        print('Direct cart count after fetch: $directCount');
+        _updateCartCount(directCount);
+      }
+    });
   }
 
   void _handleChatResponse(ChatResponse response) {
@@ -433,22 +438,8 @@ class _ChatScreenBody extends StatelessWidget {
               BlocListener<ChatBloc, ChatState>(
                 listener: (context, state) {
                   if (state is ChatLoaded) {
-                    List<ChatWidget> cartWidgets = state.messages.cartWidgets;
-                    if (cartWidgets.isNotEmpty) {
-                      int cartCount = 0;
-                      // Get all cart items
-                      cartObject = cartWidgets.first.getCartItems();
-                      // Count only items with valid productID (excluding "Total To Pay" and items with empty productID)
-                      cartCount = cartObject?.where((item) => 
-                          item.productID != null && 
-                          item.productID!.isNotEmpty).length ?? 0;
+                      int cartCount = cartBloc.getTotalProductCount;
                       onUpdateCartCount(cartCount);
-                    }
-                    //  int cartCount = 0;
-                    // if (cartObject != null) {
-                    //   cartCount = cartObject.widget.length;
-                    // }
-                    // onUpdateCartCount(cartCount);
                     onHandleChatResponse(state.messages);
                   } else if (state is ChatError) {
                     // Check if it's a timeout error
@@ -481,6 +472,13 @@ class _ChatScreenBody extends StatelessWidget {
                     // onHideStoreCards();
                     // Product added to cart successfully
                     onSendMessage("I have updated the cart");
+                  } else if (state is CartLoaded) {
+                    int cartCount = cartBloc.getTotalProductCount;
+                    onUpdateCartCount(cartCount);
+                  } else if (state is CartEmpty) {
+                    // Cart is empty, set count to 0
+                    print('CartBloc CartEmpty: Setting cart count to 0');
+                    onUpdateCartCount(0);
                   }
                 },
               ),
@@ -621,11 +619,20 @@ class _ChatScreenBody extends StatelessWidget {
         ],
       ),
       actions: [
-        BlocBuilder<ChatBloc, ChatState>(
-          builder: (context, state) {
-            bool isApiLoading = state is ChatLoading;
-            int cartCount = _getTotalCartCount();
-            return Row(
+        BlocBuilder<CartBloc, CartState>(
+          builder: (context, cartState) {
+            return BlocBuilder<ChatBloc, ChatState>(
+              builder: (context, chatState) {
+                bool isApiLoading = chatState is ChatLoading;
+                int cartCount = _getTotalCartCount();
+                int directCartCount = cartBloc.getTotalProductCount;
+
+                if (directCartCount != cartCount) {
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    onUpdateCartCount(directCartCount);
+                  });
+                }
+                return Row(
               children: [
                 // Only show reload and cart icons if there are messages
                 if (messages.isNotEmpty) ...[
@@ -650,7 +657,7 @@ class _ChatScreenBody extends StatelessWidget {
                             width: 40,
                             height: 40,
                           ),
-                          if (cartCount > 0)
+                          if (cartCount > 0 || directCartCount > 0)
                             Positioned(
                               right: 0,
                               top: 0,
@@ -665,7 +672,7 @@ class _ChatScreenBody extends StatelessWidget {
                                   minHeight: 20,
                                 ),
                                 child: Text(
-                                  cartCount.toString(),
+                                  (cartCount > 0 ? cartCount : directCartCount).toString(),
                                   style: const TextStyle(
                                     color: Colors.white,
                                     fontSize: 12,
@@ -704,6 +711,8 @@ class _ChatScreenBody extends StatelessWidget {
                   onPressed: () => _showExitChatConfirmation(context),
                 ),
               ],
+            );
+              },
             );
           },
         ),
@@ -1181,52 +1190,6 @@ class _ChatScreenBody extends StatelessWidget {
     );
   }
 
-  Widget _buildBotAvatar() {
-    return Container(
-      width: 40,
-      height: 40,
-      decoration: BoxDecoration(
-        color: Colors.blue,
-        shape: BoxShape.circle,
-        border: Border.all(
-          color: Colors.grey.shade300, // Border color
-          width: 0.5, // Border width
-        ),
-      ),
-      child: ClipOval(
-        child: (chatbotData.data.isNotEmpty &&
-               chatbotData.data.first.profileImage.isNotEmpty)
-          ? Image.network(
-              chatbotData.data.first.profileImage,
-              width: 40,
-              height: 40,
-              fit: BoxFit.cover,
-              loadingBuilder: (context, child, loadingProgress) {
-                if (loadingProgress == null) return child;
-                return const Center(
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                  ),
-                );
-              },
-              errorBuilder: (context, error, stackTrace) {
-                // Fallback to default icon if image fails to load
-                return const Icon(
-                  Icons.calendar_today,
-                  color: Colors.white,
-                  size: 20,
-                );
-              },
-            )
-          : const Icon(
-              Icons.calendar_today,
-              color: Colors.white,
-              size: 20,
-            ),
-      ),
-    );
-  }
 
   Widget _buildOptionButtons(List<String> options, String messageId, BuildContext context) {
     if (selectedOptionMessages.contains(messageId)) {
@@ -1293,6 +1256,7 @@ class _ChatScreenBody extends StatelessWidget {
                             actionData: action,
                             onCheckout: (value) {
                              if (isCartAPICalled == true) {
+                              onUpdateCartCount(cartBloc.getTotalProductCount);
                                onSendMessage("I have updated the cart");
                                isCartAPICalled = false;
                              }
@@ -1325,6 +1289,7 @@ class _ChatScreenBody extends StatelessWidget {
                         actionData: action,
                         onCheckout: (value) {
                           if (isCartAPICalled == true) {
+                            onUpdateCartCount(cartBloc.getTotalProductCount);
                             onSendMessage("I have updated the cart");
                             isCartAPICalled = false;
                           }
