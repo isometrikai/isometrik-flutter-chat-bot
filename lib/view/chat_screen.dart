@@ -478,7 +478,7 @@ class _ChatScreenBody extends StatelessWidget {
                 listener: (context, state) {
                   if (state is CartProductAdded) {
                     // Product added to cart successfully
-                    onSendMessage("Get My Cart Details");
+                    onSendMessage("I have added products to cart");
                   }
                 },
               ),
@@ -1291,7 +1291,7 @@ class _ChatScreenBody extends StatelessWidget {
                             actionData: action,
                             onCheckout: (value) {
                              if (isCartAPICalled == true) {
-                               onSendMessage("Get My Cart Details");
+                               onSendMessage("I have added products to cart");
                                isCartAPICalled = false;
                              }
                             },
@@ -1323,7 +1323,7 @@ class _ChatScreenBody extends StatelessWidget {
                         actionData: action,
                         onCheckout: (value) {
                           if (isCartAPICalled == true) {
-                            onSendMessage("Get My Cart Details");
+                            onSendMessage("I have added products to cart");
                             isCartAPICalled = false;
                           }
                         },
