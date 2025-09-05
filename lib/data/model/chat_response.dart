@@ -336,6 +336,7 @@ class Product {
   final int? storeTypeId;
   final String? storeId;
   final bool? storeIsOpen;
+  final bool? instock;
 
   const Product({
     // required this.id,
@@ -355,6 +356,7 @@ class Product {
      this.storeTypeId,
      this.storeId,
      this.storeIsOpen,
+     this.instock,
   });
 
   double get finalPrice => finalPriceList.finalPrice;
@@ -394,6 +396,7 @@ class Product {
       storeTypeId: json['storeTypeId'] ?? -111,
       storeId: json['storeId']?.toString() ?? '',
         storeIsOpen: json['storeIsOpen'] ?? false,
+        instock: json['instock'] ?? false,
     );
   }
 
@@ -415,7 +418,8 @@ class Product {
       'storeCategoryId': storeCategoryId,
       'storeTypeId': storeTypeId,
       'storeId': storeId,
-      'storeIsOpen': storeIsOpen
+      'storeIsOpen': storeIsOpen,
+      'instock': instock,
     };
   }
 }
@@ -719,8 +723,8 @@ class WidgetAction {
   final String? storeName;
   final String? paymentTypeText;
   final int? storeTypeId;
-
   final bool? storeIsOpen;
+  final String? storeCategoryName;
 
   WidgetAction({
     required this.buttonText,
@@ -739,7 +743,8 @@ class WidgetAction {
     this.storeName,
     this.paymentTypeText,
     this.storeTypeId,
-    this.storeIsOpen
+    this.storeIsOpen,
+    this.storeCategoryName,
   });
 
   factory WidgetAction.fromJson(Map<String, dynamic> json) {
@@ -764,7 +769,8 @@ class WidgetAction {
       storeName: json['storeName']?.toString(),
       paymentTypeText: json['paymentTypeText']?.toString(),
       storeTypeId: json['storeTypeId'] ?? -111,
-        storeIsOpen: json['storeIsOpen'] ?? false
+        storeIsOpen: json['storeIsOpen'] ?? false,
+        storeCategoryName: json['storeCategoryName']?.toString(),
     );
   }
 
@@ -786,7 +792,8 @@ class WidgetAction {
       'storeName': storeName,
       'paymentTypeText': paymentTypeText,
       'storeTypeId': storeTypeId,
-      'storeIsOpen': storeIsOpen
+      'storeIsOpen': storeIsOpen,
+      'storeCategoryName': storeCategoryName,
     };
   }
 }

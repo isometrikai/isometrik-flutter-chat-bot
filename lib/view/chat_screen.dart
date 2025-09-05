@@ -317,6 +317,7 @@ class _ChatScreenState extends State<ChatScreen> {
       _sessionId = "${DateTime.now().millisecondsSinceEpoch ~/ 1000}";
       _pendingMessage = null;
       _latestActionWidgets.clear(); // Clear action widgets when restarting
+      _cartBloc.add(CartFetchRequested(needToShowLoader: false));
     });
   }
 
@@ -441,6 +442,9 @@ class _ChatScreenBody extends StatelessWidget {
                       int cartCount = cartBloc.getTotalProductCount;
                       onUpdateCartCount(cartCount);
                     onHandleChatResponse(state.messages);
+                    if (state.messages.orderConfirmedWidgets.isNotEmpty) {
+                      context.read<CartBloc>().add(CartFetchRequested(needToShowLoader: false));
+                    }
                   } else if (state is ChatError) {
                     // Check if it's a timeout error
                     if (state.error.contains(
@@ -1593,6 +1597,10 @@ class _ChatScreenBody extends StatelessWidget {
               print('Store is closed');
               BlackToastView.show(context, 'Store is closed. Please try again later');
               return;
+            }else if (product.instock == false) {
+              print('Product is not in stock');
+              BlackToastView.show(context, 'Product is not in stock. Please try again later');
+              return;
             }
               if (product.variantsCount > 1) {
                          showModalBottomSheet(
@@ -1824,6 +1832,10 @@ class _ChatScreenBody extends StatelessWidget {
               if (product.storeIsOpen == false) {
                 print('STORE CLSOSED');
                 BlackToastView.show(context, 'Store is closed. Please try again later');
+                return;
+              }else if (product.instock == false) {
+                print('Product is not in stock');
+                BlackToastView.show(context, 'Product is not in stock. Please try again later');
                 return;
               }
                   if (isCustomizable) {

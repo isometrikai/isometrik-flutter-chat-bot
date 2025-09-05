@@ -64,7 +64,7 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
       if (!mounted) return;
       // Debounce: only proceed if this is the latest input
       if (_lastQueryAt != now) return;
-      _bloc.add(RestaurantFetchRequested(keyword: _currentKeyword));
+      _bloc.add(RestaurantFetchRequested(keyword: _currentKeyword, storeCategoryName: widget.actionData?.storeCategoryName ?? ''));
     });
   }
 
@@ -86,7 +86,7 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
   }
 
   Future<void> _bootstrapData() async {
-    _bloc.add(RestaurantFetchRequested(keyword: _currentKeyword));
+    _bloc.add(RestaurantFetchRequested(keyword: _currentKeyword, storeCategoryName: widget.actionData?.storeCategoryName ?? ''));
     _initializeInitialQuantities();
     
     // Fetch initial cart data
@@ -570,7 +570,7 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
         return RefreshIndicator(
           onRefresh: () async {
             _refreshCart();
-            _bloc.add(RestaurantFetchRequested(keyword: _currentKeyword));
+            _bloc.add(RestaurantFetchRequested(keyword: _currentKeyword, storeCategoryName: widget.actionData?.storeCategoryName ?? ''));
           },
           child: ListView.separated(
             padding: EdgeInsets.zero,
@@ -593,6 +593,10 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
                     if (store.storeIsOpen == false) {
                       print('STORE CLOSED');
                       BlackToastView.show(context, 'Store is closed. Please try again later');
+                      return;
+                    }else if (product.instock == false) {
+                      print('Product is not in stock');
+                      BlackToastView.show(context, 'Product is not in stock. Please try again later');
                       return;
                     }
                     if (product.variantsCount > 1) {

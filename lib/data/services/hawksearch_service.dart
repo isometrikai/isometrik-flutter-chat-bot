@@ -18,13 +18,14 @@ class HawkSearchService {
     String visitId = '3c6b9339-c602-4af9-b454-0ec0df067181',
     String visitorId = '47daf829-b5df-4358-83ea-207aa4eaae15',
     String keyword = '',
+    String storeCategoryName = '',
   }) async {
     final client = ChatApiServices.instance
         .createCustomClient('https://searchapi-dev.hawksearch.net');
 
     final body = {
       'FacetSelections': {
-        'storeCategoryName': ['Restaurants'],
+        'storeCategoryName': [storeCategoryName],
       },
       'ClientData': {
         'Origin': {
@@ -99,6 +100,7 @@ class HawkSearchService {
           .toList();
 
       final String unitId = _firstString(doc['unitid']);
+      final bool instock = (_firstString(doc['instock']) == '1' ? true : false);
 
       final bool containsMeat = _firstBool(doc['containsmeat']);
       final String currencySymbol = _firstString(doc['currencysymbol']);
@@ -136,6 +138,7 @@ class HawkSearchService {
         currency: currency,
         unitId: unitId,
         customizable: false,
+        instock: instock,
       );
     } catch (_) {
       return null;

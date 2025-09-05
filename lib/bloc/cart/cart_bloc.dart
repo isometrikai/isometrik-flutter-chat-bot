@@ -17,7 +17,7 @@ class CartBloc extends Bloc<CartEvent, CartState> {
 
   // Getter for total product count
   int get getTotalProductCount {
-    print('CartBloc getTotalProductCount called: $totalProductCount');
+    // print('CartBloc getTotalProductCount called: $totalProductCount');
     return totalProductCount;
   }
 

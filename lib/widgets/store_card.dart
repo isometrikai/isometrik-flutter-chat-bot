@@ -419,6 +419,10 @@ class _ProductPreviewTile extends StatelessWidget {
             print("STORE IS CLOSED");
             BlackToastView.show(context, 'Store is closed. Please try again later');
             return;
+          }else if (product.instock == false) {
+            print('Product is not in stock');
+            BlackToastView.show(context, 'Product is not in stock. Please try again later');
+            return;
           }
           if (onAddToCartRequested != null) {
             onAddToCartRequested!(product, store);

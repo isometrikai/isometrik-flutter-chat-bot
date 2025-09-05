@@ -157,8 +157,8 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
                       ScreenHeader(
-                        title: 'Soup & Salad Co has amazing arabic food.',
-                        subtitle: 'Here are their popular dishes',
+                        title: widget.actionData?.title ?? '',
+                        subtitle: widget.actionData?.subtitle ?? '',
                         onClose: () {
                           // _onAddToCart();
                           if (widget.onCheckout != null ) {
@@ -510,6 +510,11 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
                     if (widget.actionData?.storeIsOpen == false) {
                       print('STORE CLOSED');
                       BlackToastView.show(context, 'Store is closed. Please try again later');
+                      return;
+                    }
+                    if (item.instock == false) {
+                      print('Product is not in stock');
+                      BlackToastView.show(context, 'Product is not in stock. Please try again later');
                       return;
                     }
                   if (isCustomizable) {
@@ -983,6 +988,7 @@ class _MenuItem {
   final String? productId;
   final String? centralProductId;
   final bool isCustomizable;
+  final bool instock;
 
   const _MenuItem({
     required this.title,
@@ -994,6 +1000,7 @@ class _MenuItem {
     this.productId,
     this.centralProductId,
     this.isCustomizable = false,
+    this.instock = true,
   });
 }
 
