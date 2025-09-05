@@ -27,17 +27,16 @@ class _CustomizationSummaryScreenState extends State<CustomizationSummaryScreen>
   Widget build(BuildContext context) {
     return SizedBox(
       height: 250,
-      child: Scaffold(
-        backgroundColor: Colors.white,
-        body: SafeArea(
-          child: Container(
-            decoration: const BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(16),
-                topRight: Radius.circular(16),
-              ),
-            ),
+      child: ClipRRect(
+        borderRadius: const BorderRadius.only(
+          topLeft: Radius.circular(16),
+          topRight: Radius.circular(16),
+        ),
+        child: Container(
+          decoration: const BoxDecoration(
+            color: Colors.white,
+          ),
+          child: SafeArea(
             child: Column(
               children: [
                 _buildHeader(),
@@ -77,15 +76,15 @@ class _CustomizationSummaryScreenState extends State<CustomizationSummaryScreen>
                         color: Color(0xFF242424),
                       ),
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      '${widget.product?.productName}',
-                      style: const TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w400,
-                        color: Color(0xFF6E4185),
-                      ),
-                    ),
+                    // const SizedBox(height: 4),
+                    // Text(
+                    //   '${widget.product?.productName}',
+                    //   style: const TextStyle(
+                    //     fontSize: 12,
+                    //     fontWeight: FontWeight.w400,
+                    //     color: Color(0xFF6E4185),
+                    //   ),
+                    // ),
                   ],
                 ),
               ),
