@@ -5,17 +5,20 @@ class GreetingResponse {
   final String greeting;
   final String subtitle;
   final List<String> options;
+  final String weatherText;
 
   GreetingResponse({
     required this.greeting,
     required this.subtitle,
     required this.options,
+    required this.weatherText,
   });
 
   factory GreetingResponse.fromJson(Map<String, dynamic> json) {
     return GreetingResponse(
       greeting: json['greeting']?.toString() ?? '',
       subtitle: json['subtitle']?.toString() ?? '',
+      weatherText: json['weatherText']?.toString() ?? '',
       options: (json['options'] as List<dynamic>?)
           ?.map((item) => item.toString())
           .toList() ??

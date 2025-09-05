@@ -1048,6 +1048,7 @@ class _ChatScreenBody extends StatelessWidget {
     final String subtitleText = greetingData?.subtitle.isNotEmpty == true
         ? greetingData!.subtitle
         : 'Your intelligent life assistant is ready to help';
+    final String weatherText = greetingData?.weatherText.isNotEmpty == true ? greetingData!.weatherText : 'dsada';
 
     final List<String> opts = (greetingData?.options ?? []).take(4).toList();
 
@@ -1168,6 +1169,31 @@ class _ChatScreenBody extends StatelessWidget {
                   fontSize: 14,
                   height: 1.4,
                   color: Color(0xFF6E4185),
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            // Weather information view
+            Container(
+              width: 340,
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF5F0FF), // Light purple background
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: const Color(0xFFE8D5FF),
+                  width: 1,
+                ),
+              ),
+              child: Text(
+                weatherText,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontStyle: FontStyle.italic,
+                  fontWeight: FontWeight.w400,
+                  fontSize: 14,
+                  height: 1.4,
+                  color: Color(0xFF6E4185), // Darker purple text
                 ),
               ),
             ),
