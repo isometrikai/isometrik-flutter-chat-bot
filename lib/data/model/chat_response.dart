@@ -484,7 +484,7 @@ class Store {
   final bool storeListing;
   final bool hyperlocal;
   final List<Product> products;
-
+  final int? storeTypeId;
   final bool storeIsOpen;
 
   Store({
@@ -501,6 +501,7 @@ class Store {
     required this.isDoctored,
     required this.storeListing,
     required this.hyperlocal,
+    this.storeTypeId,
     required this.storeIsOpen,
   });
 
@@ -516,6 +517,7 @@ class Store {
     final bool isDoctored = (json['isDoctored'] ?? false);
     final bool storeListing = (json['storeListing'] ?? false);
     final bool hyperlocal = (json['hyperlocal'] ?? false);
+    final int storeTypeId = (json['storeTypeId'] ?? 0);
     final bool storeIsOpen = (json['storeIsOpen'] ?? false);
 
     final List<Product> parsedProducts = (json['products'] as List<dynamic>? ?? [])
@@ -536,6 +538,7 @@ class Store {
       isDoctored: isDoctored,
       storeListing: storeListing,
       hyperlocal: hyperlocal,
+      storeTypeId: storeTypeId,
       storeIsOpen: storeIsOpen,
     );
   }
@@ -550,7 +553,8 @@ class Store {
       'storeId': storeId,
       'storeCategoryId': storeCategoryId,
       'products': products.map((p) => p.toJson()).toList(),
-      'storeIsOpen': storeIsOpen
+      'storeIsOpen': storeIsOpen,
+      'storeTypeId': storeTypeId,
     };
   }
 }

@@ -121,27 +121,21 @@ class CartBloc extends Bloc<CartEvent, CartState> {
       return CartValidationResult(isValid: true);
     }
 
-    // Get the first cart data to check existing store info
-    final existingCart = cartData.first;
-    
-    // Check if store type ID matches
-    if (existingCart.storeTypeId != event.storeTypeId) {
-      return CartValidationResult(
-        isValid: false,
-        errorMessage: 'Cannot add items from different store types. Please clear your cart first.',
-      );
-    }
-
-    // Check if store ID matches (from seller info)
-    if (existingCart.sellers.isNotEmpty) {
-      // Check if any product in the cart has a different store ID
-      for (final seller in existingCart.sellers) {
-        for (final product in seller.products) {
-          if (product.storeId != null && product.storeId != event.storeId) {
-            return CartValidationResult(
-              isValid: false,
-              errorMessage: 'Cannot add items from different stores. Please clear your cart first.',
-            );
+    // Check all cart items for compatibility
+    for (final existingCart in cartData) {
+      // If store type ID is the same, check if store ID matches
+      if (existingCart.storeTypeId == event.storeTypeId) {
+        if (existingCart.sellers.isNotEmpty) {
+          // Check if any product in the cart has a different store ID
+          for (final seller in existingCart.sellers) {
+            for (final product in seller.products) {
+              if (product.storeId != null && product.storeId != event.storeId) {
+                return CartValidationResult(
+                  isValid: false,
+                  errorMessage: 'Cannot add items from different stores. Please clear your cart first.',
+                );
+              }
+            }
           }
         }
       }

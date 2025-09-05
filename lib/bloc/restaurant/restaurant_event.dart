@@ -14,16 +14,17 @@ class RestaurantFetchRequested extends RestaurantEvent {
   const RestaurantFetchRequested({this.keyword = '', this.storeCategoryName = ''});
 
   @override
-  List<Object?> get props => [keyword];
+  List<Object?> get props => [keyword, storeCategoryName];
 }
 
 class RestaurantRefreshed extends RestaurantEvent {
   final String keyword;
+  final String storeCategoryName;
 
-  const RestaurantRefreshed({this.keyword = ''});
+  const RestaurantRefreshed({this.keyword = '', this.storeCategoryName = ''});
 
   @override
-  List<Object?> get props => [keyword];
+  List<Object?> get props => [keyword, storeCategoryName];
 }
 
 

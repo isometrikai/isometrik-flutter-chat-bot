@@ -1,3 +1,4 @@
+import 'package:chat_bot/utils/enum.dart';
 import 'package:flutter/material.dart';
 import 'package:chat_bot/data/model/chat_response.dart' as chat;
 import 'package:chat_bot/data/model/universal_cart_response.dart';
@@ -419,7 +420,8 @@ class _ProductPreviewTile extends StatelessWidget {
             print("STORE IS CLOSED");
             BlackToastView.show(context, 'Store is closed. Please try again later');
             return;
-          }else if (product.instock == false) {
+          }
+          else if (product.instock == false && store.type == FoodCategory.grocery.value) {
             print('Product is not in stock');
             BlackToastView.show(context, 'Product is not in stock. Please try again later');
             return;

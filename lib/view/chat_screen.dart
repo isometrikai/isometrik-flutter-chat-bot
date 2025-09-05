@@ -1597,7 +1597,8 @@ class _ChatScreenBody extends StatelessWidget {
               print('Store is closed');
               BlackToastView.show(context, 'Store is closed. Please try again later');
               return;
-            }else if (product.instock == false) {
+            }
+            else if (product.instock == false && store.storeTypeId == FoodCategory.grocery.value) {
               print('Product is not in stock');
               BlackToastView.show(context, 'Product is not in stock. Please try again later');
               return;
@@ -1833,7 +1834,8 @@ class _ChatScreenBody extends StatelessWidget {
                 print('STORE CLSOSED');
                 BlackToastView.show(context, 'Store is closed. Please try again later');
                 return;
-              }else if (product.instock == false) {
+              }
+              else if (product.instock == false && product.storeTypeId == FoodCategory.grocery.value) {
                 print('Product is not in stock');
                 BlackToastView.show(context, 'Product is not in stock. Please try again later');
                 return;

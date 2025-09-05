@@ -1,3 +1,4 @@
+import 'package:chat_bot/utils/enum.dart';
 import 'package:chat_bot/view/customization_summary_screen.dart';
 import 'package:chat_bot/view/product_customization_screen.dart';
 import 'package:flutter/material.dart';
@@ -594,7 +595,7 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
                       print('STORE CLOSED');
                       BlackToastView.show(context, 'Store is closed. Please try again later');
                       return;
-                    }else if (product.instock == false) {
+                    }else if (product.instock == false && store.type == FoodCategory.grocery.value) {
                       print('Product is not in stock');
                       BlackToastView.show(context, 'Product is not in stock. Please try again later');
                       return;

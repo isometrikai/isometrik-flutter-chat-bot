@@ -2,6 +2,7 @@ import 'package:chat_bot/bloc/cart/cart_bloc.dart';
 import 'package:chat_bot/bloc/cart/cart_event.dart';
 import 'package:chat_bot/bloc/cart/cart_state.dart';
 import 'package:chat_bot/data/model/chat_response.dart' as chat;
+import 'package:chat_bot/utils/enum.dart';
 import 'package:chat_bot/view/customization_summary_screen.dart';
 import 'package:chat_bot/view/product_customization_screen.dart';
 import 'package:flutter/material.dart';
@@ -512,7 +513,7 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
                       BlackToastView.show(context, 'Store is closed. Please try again later');
                       return;
                     }
-                    if (item.instock == false) {
+                    else if (item.instock == false && widget.actionData?.storeTypeId == FoodCategory.grocery.value) {
                       print('Product is not in stock');
                       BlackToastView.show(context, 'Product is not in stock. Please try again later');
                       return;
