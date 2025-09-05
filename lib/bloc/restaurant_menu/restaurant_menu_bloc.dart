@@ -28,11 +28,11 @@ class RestaurantMenuBloc extends Bloc<RestaurantMenuEvent, RestaurantMenuState> 
           ? actionData?.storeId ?? ''
           : '63627cf6b35f2f000c9ecc23';
 
-      final List<ProductCategory> categories = await repository.fetchMenu(
+      final obj = await repository.fetchMenu(
         storeId: storeId,
       );
 
-      emit(RestaurantMenuLoadSuccess(categories: categories));
+      emit(RestaurantMenuLoadSuccess(categories: obj.productData, storeData: obj.storeData));
     } catch (e) {
       emit(RestaurantMenuLoadFailure(e.toString()));
     }

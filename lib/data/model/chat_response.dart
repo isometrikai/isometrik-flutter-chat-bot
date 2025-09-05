@@ -330,6 +330,13 @@ class Product {
   final bool containsMeat;
   final String currencySymbol;
   final String currency;
+  final String unitId;
+  final bool? customizable;
+  final String? storeCategoryId;
+  final int? storeTypeId;
+  final String? storeId;
+  final bool? storeIsOpen;
+  final bool? instock;
 
   const Product({
     // required this.id,
@@ -343,6 +350,13 @@ class Product {
     required this.containsMeat,
     required this.currencySymbol,
     required this.currency,
+    required this.unitId,
+     this.customizable,
+     this.storeCategoryId,
+     this.storeTypeId,
+     this.storeId,
+     this.storeIsOpen,
+     this.instock,
   });
 
   double get finalPrice => finalPriceList.finalPrice;
@@ -376,6 +390,13 @@ class Product {
       containsMeat: json['containsMeat'] ?? false,
       currencySymbol: json['currencySymbol']?.toString() ?? '',
       currency: json['currency']?.toString() ?? '',
+      unitId: json['unitId']?.toString() ?? '',
+      customizable: json['customizable'] ?? false,
+      storeCategoryId: json['storeCategoryId']?.toString() ?? '',
+      storeTypeId: json['storeTypeId'] ?? -111,
+      storeId: json['storeId']?.toString() ?? '',
+        storeIsOpen: json['storeIsOpen'] ?? false,
+        instock: json['instock'] ?? false,
     );
   }
 
@@ -392,6 +413,13 @@ class Product {
       'containsMeat': containsMeat,
       'currencySymbol': currencySymbol,
       'currency': currency,
+      'unitId': unitId,
+      'customizable': customizable,
+      'storeCategoryId': storeCategoryId,
+      'storeTypeId': storeTypeId,
+      'storeId': storeId,
+      'storeIsOpen': storeIsOpen,
+      'instock': instock,
     };
   }
 }
@@ -456,6 +484,8 @@ class Store {
   final bool storeListing;
   final bool hyperlocal;
   final List<Product> products;
+  final int? storeTypeId;
+  final bool storeIsOpen;
 
   Store({
     required this.storename,
@@ -471,6 +501,8 @@ class Store {
     required this.isDoctored,
     required this.storeListing,
     required this.hyperlocal,
+    this.storeTypeId,
+    required this.storeIsOpen,
   });
 
   factory Store.fromJson(Map<String, dynamic> json) {
@@ -485,6 +517,8 @@ class Store {
     final bool isDoctored = (json['isDoctored'] ?? false);
     final bool storeListing = (json['storeListing'] ?? false);
     final bool hyperlocal = (json['hyperlocal'] ?? false);
+    final int storeTypeId = (json['storeTypeId'] ?? 0);
+    final bool storeIsOpen = (json['storeIsOpen'] ?? false);
 
     final List<Product> parsedProducts = (json['products'] as List<dynamic>? ?? [])
         .map((e) => Product.fromJson(e as Map<String, dynamic>))
@@ -504,6 +538,8 @@ class Store {
       isDoctored: isDoctored,
       storeListing: storeListing,
       hyperlocal: hyperlocal,
+      storeTypeId: storeTypeId,
+      storeIsOpen: storeIsOpen,
     );
   }
 
@@ -517,6 +553,8 @@ class Store {
       'storeId': storeId,
       'storeCategoryId': storeCategoryId,
       'products': products.map((p) => p.toJson()).toList(),
+      'storeIsOpen': storeIsOpen,
+      'storeTypeId': storeTypeId,
     };
   }
 }
@@ -688,6 +726,9 @@ class WidgetAction {
   final String? storeId;
   final String? storeName;
   final String? paymentTypeText;
+  final int? storeTypeId;
+  final bool? storeIsOpen;
+  final String? storeCategoryName;
 
   WidgetAction({
     required this.buttonText,
@@ -705,6 +746,9 @@ class WidgetAction {
     this.storeId,
     this.storeName,
     this.paymentTypeText,
+    this.storeTypeId,
+    this.storeIsOpen,
+    this.storeCategoryName,
   });
 
   factory WidgetAction.fromJson(Map<String, dynamic> json) {
@@ -728,6 +772,9 @@ class WidgetAction {
       storeId: json['storeId']?.toString(),
       storeName: json['storeName']?.toString(),
       paymentTypeText: json['paymentTypeText']?.toString(),
+      storeTypeId: json['storeTypeId'] ?? -111,
+        storeIsOpen: json['storeIsOpen'] ?? false,
+        storeCategoryName: json['storeCategoryName']?.toString(),
     );
   }
 
@@ -748,6 +795,9 @@ class WidgetAction {
       'storeId': storeId,
       'storeName': storeName,
       'paymentTypeText': paymentTypeText,
+      'storeTypeId': storeTypeId,
+      'storeIsOpen': storeIsOpen,
+      'storeCategoryName': storeCategoryName,
     };
   }
 }

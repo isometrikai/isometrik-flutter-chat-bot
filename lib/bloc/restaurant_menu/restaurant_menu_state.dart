@@ -14,11 +14,12 @@ class RestaurantMenuLoadInProgress extends RestaurantMenuState {}
 
 class RestaurantMenuLoadSuccess extends RestaurantMenuState {
   final List<ProductCategory> categories;
+  final StoreData storeData;
 
-  const RestaurantMenuLoadSuccess({required this.categories});
+  const RestaurantMenuLoadSuccess({required this.categories, required this.storeData});
 
   @override
-  List<Object?> get props => [categories];
+  List<Object?> get props => [categories, storeData];
 }
 
 class RestaurantMenuLoadFailure extends RestaurantMenuState {

@@ -1,20 +1,23 @@
-import 'package:chat_bot/services/cart_manager.dart';
+import 'package:chat_bot/utils/enum.dart';
 import 'package:flutter/material.dart';
-import 'package:chat_bot/data/model/chat_response.dart';
+import 'package:chat_bot/data/model/chat_response.dart' as chat;
+import 'package:chat_bot/data/model/universal_cart_response.dart';
 import 'package:chat_bot/services/callback_manage.dart';
 import 'package:chat_bot/bloc/chat_event.dart';
 import '../utils/asset_helper.dart';
+import 'black_toast_view.dart';
 
 class StoreCard extends StatelessWidget {
-  final Store store;
-  final ChatWidget? storesWidget;
+  final chat.Store store;
+  final chat.ChatWidget? storesWidget;
   final int index;
   final EdgeInsets? margin;
   final VoidCallback? onTap;
-  final Function(String, Product, Store, int)? onAddToCart;
+  final Function(String, chat.Product, chat.Store, int)? onAddToCart;
   final VoidCallback? onHide; // New callback to hide the widget
-
-  final CartManager cartManager = CartManager();
+  final Function(chat.Product, chat.Store)? onAddToCartRequested; // New callback for cart requests
+  final List<UniversalCartData>? cartData; // Cart data from getCart API
+  final Function(chat.Product, chat.Store, int, bool)? onQuantityChanged; // Callback for quantity changes
 
    StoreCard({
     super.key,
@@ -25,6 +28,9 @@ class StoreCard extends StatelessWidget {
     this.onTap,
     this.onAddToCart,
     this.onHide, // Add the new parameter
+    this.onAddToCartRequested, // Add the new parameter
+    this.cartData, // Add cart data parameter
+    this.onQuantityChanged, // Add quantity change callback
   });
 
   @override
@@ -56,7 +62,7 @@ class StoreCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _buildLogo(),
-                const SizedBox(width: 8),
+                const SizedBox(width: 10),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -136,9 +142,11 @@ class StoreCard extends StatelessWidget {
                   itemBuilder: (context, i) => _ProductPreviewTile(
                     product: store.products[i],
                     store: store,
-                    cartManager: cartManager,
                     onAddToCart: onAddToCart,
                     onHide: onHide, // Pass the onHide callback
+                    onAddToCartRequested: onAddToCartRequested, // Pass the new callback
+                    cartData: cartData, // Pass cart data
+                    onQuantityChanged: onQuantityChanged, // Pass quantity change callback
                   ),
                   separatorBuilder: (_, __) => const SizedBox(width: 10),
                   itemCount: store.products.length,
@@ -189,18 +197,22 @@ class StoreCard extends StatelessWidget {
 }
 
 class _ProductPreviewTile extends StatelessWidget {
-  final Product product;
-  final Store store;
-  final CartManager cartManager;
-  final Function(String, Product, Store, int)? onAddToCart;
+  final chat.Product product;
+  final chat.Store store;
+  final Function(String, chat.Product, chat.Store, int)? onAddToCart;
   final VoidCallback? onHide; // New parameter for hiding the widget
+  final Function(chat.Product, chat.Store)? onAddToCartRequested; // New parameter for cart requests
+  final List<UniversalCartData>? cartData; // Cart data from getCart API
+  final Function(chat.Product, chat.Store, int, bool)? onQuantityChanged; // Callback for quantity changes
 
   const _ProductPreviewTile({
     required this.product,
     required this.store,
-    required this.cartManager,
     this.onAddToCart,
     this.onHide, // Add the new parameter
+    this.onAddToCartRequested, // Add the new parameter
+    this.cartData, // Add cart data parameter
+    this.onQuantityChanged, // Add quantity change callback
   });
   @override
   Widget build(BuildContext context) {
@@ -280,54 +292,92 @@ class _ProductPreviewTile extends StatelessWidget {
           Positioned(
             right: 10,
             bottom: -4,
-            child: _buildQuantityControls(),
+            child: _buildAddButton(context),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildQuantityControls() {
-    return StreamBuilder<Map<String, int>>(
-      stream: cartManager.quantityStream,
-      builder: (context, snapshot) {
-        final currentQuantity = cartManager.getQuantity(product.childProductId);
-        
-        if (currentQuantity == 0) {
-          // Show "Add" button when product is not in cart
-          return GestureDetector(
-            onTap: () {
-              if (onAddToCart != null) {
-                final currentQuantity = cartManager.getQuantity(product.childProductId);
-                final newQuantity = currentQuantity + 1;
-                final quantityToAdd = newQuantity - currentQuantity; // Always 1 for "Add" button
-                onAddToCart!("Add ${quantityToAdd}X ${product.productName} to cart", product, store, newQuantity);
-                cartManager.setQuantity(product.childProductId, newQuantity);
-              }
-              
-              if (onHide != null) {
-                onHide!();
-              }
-            },
-            child: Container(
-              height: 27,
-              padding: const EdgeInsets.symmetric(horizontal: 17),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.white, width: 1),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.08),
-                    blurRadius: 4,
-                    offset: const Offset(0, 4),
+  // Helper method to check if product is in cart and get its quantity
+  int? _getProductCartQuantity() {
+    if (cartData == null) return null;
+    
+    try {
+      // Use functional programming approach with firstWhere for better performance
+      final cartProduct = cartData!
+          .expand((cartItem) => cartItem.sellers)
+          .expand((seller) => seller.products)
+          .firstWhere(
+            (cartProduct) => cartProduct.id == product.childProductId,
+            orElse: () => throw StateError('Product not found'),
+          );
+      
+      return cartProduct.quantity?.value ?? 0;
+    } catch (e) {
+      // Product not found in cart
+      return null;
+    }
+  }
+
+  // Helper method to check if product is in cart
+  bool _isProductInCart() {
+    return _getProductCartQuantity() != null && _getProductCartQuantity()! > 0;
+  }
+
+  Widget _buildAddButton(BuildContext context) {
+    final cartQuantity = _getProductCartQuantity();
+    final isInCart = _isProductInCart();
+    
+    if (isInCart && cartQuantity != null && cartQuantity > 0) {
+      // Show quantity controls when product is in cart
+      return Container(
+        height: 27,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: Colors.white, width: 1),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.08),
+              blurRadius: 4,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Decrease button
+            GestureDetector(
+              onTap: () {
+                if (onQuantityChanged != null) {
+                  onQuantityChanged!(product, store, cartQuantity, false);
+                }
+              },
+              child: Container(
+                width: 27,
+                height: 27,
+                decoration: const BoxDecoration(
+                  color: Color(0xFF8E2FFD),
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(8),
+                    bottomLeft: Radius.circular(8),
                   ),
-                ],
+                ),
+                child: const Icon(
+                  Icons.remove,
+                  size: 16,
+                  color: Colors.white,
+                ),
               ),
-              alignment: Alignment.center,
-              child: const Text(
-                'Add',
-                style: TextStyle(
+            ),
+            // Quantity display
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              child: Text(
+                '$cartQuantity',
+                style: const TextStyle(
                   fontWeight: FontWeight.w700,
                   fontSize: 12,
                   height: 1.2,
@@ -335,109 +385,83 @@ class _ProductPreviewTile extends StatelessWidget {
                 ),
               ),
             ),
-          );
-        } else {
-          // Show quantity controls when product is in cart
-          return Container(
-            height: 27,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: Colors.white, width: 1),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.08),
-                  blurRadius: 4,
-                  offset: const Offset(0, 4),
+            // Increase button
+            GestureDetector(
+              onTap: () {
+                if (onQuantityChanged != null) {
+                  onQuantityChanged!(product, store, cartQuantity, true);
+                }
+              },
+              child: Container(
+                width: 27,
+                height: 27,
+                decoration: const BoxDecoration(
+                  color: Color(0xFF8E2FFD),
+                  borderRadius: BorderRadius.only(
+                    topRight: Radius.circular(8),
+                    bottomRight: Radius.circular(8),
+                  ),
                 ),
-              ],
+                child: const Icon(
+                  Icons.add,
+                  size: 16,
+                  color: Colors.white,
+                ),
+              ),
             ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // Minus button
-                GestureDetector(
-                  onTap: () {
-                    cartManager.removeProduct(product.childProductId);
-                    if (onAddToCart != null) {
-                      final newQuantity = cartManager.getQuantity(product.childProductId);
-                      onAddToCart!("Removed 1X ${product.productName} from cart", product, store, newQuantity);
-                    }
-                  },
-                  child: Container(
-                    width: 27,
-                    height: 27,
-                    decoration: const BoxDecoration(
-                      color: Color(0xFF8E2FFD),
-                      borderRadius: BorderRadius.only(
-                        topLeft: Radius.circular(8),
-                        bottomLeft: Radius.circular(8),
-                      ),
-                    ),
-                    alignment: Alignment.center,
-                    child: const Text(
-                      '-',
-                      style: TextStyle(
-                        fontWeight: FontWeight.w700,
-                        fontSize: 16,
-                        height: 1.0,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
-                ),
-                
-                // Quantity display
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8),
-                  alignment: Alignment.center,
-                  child: Text(
-                    currentQuantity.toString(),
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w700,
-                      fontSize: 12,
-                      height: 1.2,
-                      color: Color(0xFF8E2FFD),
-                    ),
-                  ),
-                ),
-                
-                // Plus button
-                GestureDetector(
-                  onTap: () {
-                    cartManager.addProduct(product.childProductId);
-                    if (onAddToCart != null) {
-                      final newQuantity = cartManager.getQuantity(product.childProductId);
-                      onAddToCart!("Added 1X ${product.productName} to cart", product, store, newQuantity);
-                    }
-                  },
-                  child: Container(
-                    width: 27,
-                    height: 27,
-                    decoration: const BoxDecoration(
-                      color: Color(0xFF8E2FFD),
-                      borderRadius: BorderRadius.only(
-                        topRight: Radius.circular(8),
-                        bottomRight: Radius.circular(8),
-                      ),
-                    ),
-                    alignment: Alignment.center,
-                    child: const Text(
-                      '+',
-                      style: TextStyle(
-                        fontWeight: FontWeight.w700,
-                        fontSize: 16,
-                        height: 1.0,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
+          ],
+        ),
+      );
+    } else {
+      // Show Add button when product is not in cart
+      return GestureDetector(
+        onTap: () {
+          if (store.storeIsOpen == false) {
+            print("STORE IS CLOSED");
+            BlackToastView.show(context, 'Store is closed. Please try again later');
+            return;
+          }
+          else if (product.instock == false && store.type == FoodCategory.grocery.value) {
+            print('Product is not in stock');
+            BlackToastView.show(context, 'Product is not in stock. Please try again later');
+            return;
+          }
+          if (onAddToCartRequested != null) {
+            onAddToCartRequested!(product, store);
+          }
+
+          // Call onHide callback if provided
+          if (onHide != null) {
+            onHide!();
+          }
+        },
+        child: Container(
+          height: 27,
+          padding: const EdgeInsets.symmetric(horizontal: 17),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: Colors.white, width: 1),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.08),
+                blurRadius: 4,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          alignment: Alignment.center,
+          child: const Text(
+            'Add',
+            style: TextStyle(
+              fontWeight: FontWeight.w700,
+              fontSize: 12,
+              height: 1.2,
+              color: Color(0xFF8E2FFD),
             ),
-          );
-        }
-      },
-    );
+          ),
+        ),
+      );
+    }
   }
 }

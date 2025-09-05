@@ -1,6 +1,11 @@
+import 'package:chat_bot/utils/enum.dart';
+import 'package:chat_bot/view/customization_summary_screen.dart';
+import 'package:chat_bot/view/product_customization_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../data/model/chat_response.dart';
+import '../data/model/chat_response.dart' as chat;
+import '../data/model/universal_cart_response.dart';
+import '../widgets/black_toast_view.dart';
 import '../widgets/store_card.dart';
 import '../widgets/screen_header.dart';
 import 'package:chat_bot/bloc/chat_event.dart';
@@ -9,15 +14,20 @@ import 'package:chat_bot/bloc/restaurant/restaurant_event.dart';
 import 'package:chat_bot/bloc/restaurant/restaurant_state.dart';
 import 'package:chat_bot/services/cart_manager.dart';
 import 'package:chat_bot/services/callback_manage.dart';
+import 'package:chat_bot/bloc/cart/cart_bloc.dart';
+import 'package:chat_bot/bloc/cart/cart_event.dart';
+import 'package:chat_bot/bloc/cart/cart_state.dart';
 
 class RestaurantScreen extends StatefulWidget {
-  final WidgetAction? actionData;
-  final Function(List<String>)? onCheckout;
+  final chat.WidgetAction? actionData;
+  final Function(bool)? onCheckout;
+  // final CartBloc? cartBloc; // Optional CartBloc parameter
 
   const RestaurantScreen({
     super.key, 
     this.actionData,
     this.onCheckout,
+    // this.cartBloc, // Optional parameter
   });
 
   @override
@@ -27,7 +37,8 @@ class RestaurantScreen extends StatefulWidget {
 class _RestaurantScreenState extends State<RestaurantScreen> {
   final TextEditingController _searchController = TextEditingController();
   late final RestaurantBloc _bloc;
-  final CartManager cartManager = CartManager();
+  late final CartBloc cartBloc;
+  // final CartManager cartManager = CartManager();
   String _currentKeyword = '';
   DateTime? _lastQueryAt;
   
@@ -35,8 +46,9 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
   double _cartTotal = 0.00;
   int _cartItems = 0;
   Map<String, int> _productQuantities = {}; // Track product quantities
-  Map<String, Product> _productDetails = {}; // Track product details
+  Map<String, chat.Product> _productDetails = {}; // Track product details
   Map<String, int> _initialQuantities = {}; // Track initial quantities when screen opened
+  List<UniversalCartData> _cartData = []; // Store cart data from getCart API
 
   @override
   void dispose() {
@@ -53,7 +65,7 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
       if (!mounted) return;
       // Debounce: only proceed if this is the latest input
       if (_lastQueryAt != now) return;
-      _bloc.add(RestaurantFetchRequested(keyword: _currentKeyword));
+      _bloc.add(RestaurantFetchRequested(keyword: _currentKeyword, storeCategoryName: widget.actionData?.storeCategoryName ?? ''));
     });
   }
 
@@ -61,58 +73,125 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
   void initState() {
     super.initState();
     _bloc = RestaurantBloc();
+    cartBloc = CartBloc();
     _bootstrapData();
+    
+    // Listen to cart state changes to update cart data
+    cartBloc.stream.listen((state) {
+      if (state is CartLoaded && state.rawCartData != null) {
+        _updateCartData(state.rawCartData!.data);
+      }else if (state is CartEmpty) {
+        _updateCartData([]);
+      }
+    });
   }
 
   Future<void> _bootstrapData() async {
-    _bloc.add(RestaurantFetchRequested(keyword: _currentKeyword));
+    _bloc.add(RestaurantFetchRequested(keyword: _currentKeyword, storeCategoryName: widget.actionData?.storeCategoryName ?? ''));
     _initializeInitialQuantities();
+    
+    // Fetch initial cart data
+    cartBloc.add(CartFetchRequested(needToShowLoader: false));
   }
 
   void _initializeInitialQuantities() {
     // Initialize initial quantities for products already in cart
     // This ensures we track the correct baseline when screen opens
-    setState(() {
-      // Get all products from CartManager and set their initial quantities
-      final currentQuantities = cartManager.productQuantities;
-      _initialQuantities.addAll(currentQuantities);
-      
-      print("Initialized quantities: $_initialQuantities");
-    });
+    // setState(() {
+    //   // Get all products from CartManager and set their initial quantities
+    //   final currentQuantities = cartManager.productQuantities;
+    //   _initialQuantities.addAll(currentQuantities);
+    //
+    //   print("Initialized quantities: $_initialQuantities");
+    // });
   }
 
-  void _onAddToCart() {
-    // Handle add to cart action - show added products
-    print("Product Quantities: $_productQuantities");
-    print("Initial Quantities: $_initialQuantities");
-    print("Total Items: $_cartItems");
-    print("Total Price: Đ$_cartTotal");
-    
-    // Create consolidated messages from quantities
-    List<String> consolidatedMessages = [];
-    _productQuantities.forEach((productId, quantity) {
-      if (quantity > 0 && _productDetails.containsKey(productId)) {
-        final product = _productDetails[productId]!;
-        // Calculate quantity added in this session
-        final initialQuantity = _initialQuantities[productId] ?? 0;
-        final quantityAdded = quantity - initialQuantity;
-        
-        print("Product: ${product.productName}, Current: $quantity, Initial: $initialQuantity, Added: $quantityAdded");
-        
-        if (quantityAdded > 0) {
-          consolidatedMessages.add("Add ${quantityAdded}X ${product.productName} to cart");
-        }
-      }
-    });
-    
-    // Call the callback with consolidated messages and close the screen
-    if (widget.onCheckout != null && consolidatedMessages.isNotEmpty) {
-      widget.onCheckout!(consolidatedMessages);
+  /// Handle adding products with addons to cart
+  void _onAddToCartWithAddOns(
+    chat.Product product, 
+    chat.Store store, 
+    dynamic variant, 
+    List<Map<String, dynamic>> addOns
+  ) {
+    try {
+      //TODO:- Add Quantity
+      cartBloc.add(CartAddItemRequested(
+        storeId: store.storeId,
+        cartType: 1, // Default cart type
+        action: 1, // Add action
+        storeCategoryId: store.storeCategoryId,
+        newQuantity: 1,
+        storeTypeId: store.type,
+        productId: product.childProductId,
+        centralProductId: product.parentProductId,
+        unitId: variant.unitId,
+        newAddOns: addOns,
+      ));
+      
+      print("Added product with addons to cart: ${product.productName}");
+    } catch (e) {
+      print('RestaurantScreen: Error dispatching CartAddItemRequeste with addons: $e');
     }
-    
-    // Close the screen
-    Navigator.of(context).pop();
   }
+
+  /// Open ProductCustomizationScreen with proper callbacks
+  void _openProductCustomization(chat.Product product, chat.Store store) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => ProductCustomizationScreen(
+        product: product,
+        store: store,
+        onAddToCartWithAddOns: _onAddToCartWithAddOns,
+      ),
+    );
+  }
+
+  /// Get addToCartOnId from cart data for a specific product
+  dynamic _getAddToCartOnId(String productId) {
+    try {
+      // Use filter to find the product with matching ID
+      final cartData = cartBloc.cartData
+          .expand((cart) => cart.sellers)
+          .expand((seller) => seller.products)
+          .where((product) => product.id == productId)
+          .firstOrNull;
+      
+      return cartData?.addToCartOnId;
+    } catch (e) {
+      print('Error getting addToCartOnId: $e');
+      return null;
+    }
+  }
+
+  // void _onAddToCart() {
+  //
+  //   // Create consolidated messages from quantities
+  //   List<String> consolidatedMessages = [];
+  //   _productQuantities.forEach((productId, quantity) {
+  //     if (quantity > 0 && _productDetails.containsKey(productId)) {
+  //       final product = _productDetails[productId]!;
+  //       // Calculate quantity added in this session
+  //       final initialQuantity = _initialQuantities[productId] ?? 0;
+  //       final quantityAdded = quantity - initialQuantity;
+  //
+  //       print("Product: ${product.productName}, Current: $quantity, Initial: $initialQuantity, Added: $quantityAdded");
+  //
+  //       if (quantityAdded > 0) {
+  //         consolidatedMessages.add("Add ${quantityAdded}X ${product.productName} to cart");
+  //       }
+  //     }
+  //   });
+  //
+  //   // Call the callback with consolidated messages and close the screen
+  //   if (widget.onCheckout != null && consolidatedMessages.isNotEmpty) {
+  //     widget.onCheckout!(consolidatedMessages);
+  //   }
+  //
+  //   // Close the screen
+  //   Navigator.of(context).pop();
+  // }
 
   void _clearCart() {
     setState(() {
@@ -121,7 +200,149 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
       _productQuantities.clear();
       _productDetails.clear();
       _initialQuantities.clear();
+      _cartData.clear();
     });
+  }
+
+  // Handle quantity changes from StoreCard
+  void _onQuantityChanged(chat.Product product, chat.Store store, int newQuantity, bool isIncrease) {
+    if (isIncrease == false && newQuantity == 1) {
+      //TODO:- 0 Quantity
+      int? addToCartOnId;
+      if (product.variantsCount > 1) {
+         addToCartOnId = _getAddToCartOnId(product.childProductId);
+         print("addCartOnID: $addToCartOnId");
+       }
+
+      cartBloc.add(CartAddItemRequested(
+        storeId: store.storeId,
+        cartType: 2,
+        action: 3, // Add/Update action
+        storeCategoryId: store.storeCategoryId,
+        newQuantity: 0,
+        storeTypeId: store.type,
+        productId: product.childProductId,
+        centralProductId: product.parentProductId,
+        unitId: product.unitId,
+        addToCartOnId: addToCartOnId,
+      ));
+    }else if (newQuantity > 0 && isIncrease == true) {
+      if (product.variantsCount > 1) {
+         showModalBottomSheet(
+                        context: context,
+                        isScrollControlled: true,
+                        backgroundColor: Colors.transparent,
+                        builder: (context) => CustomizationSummaryScreen(
+                          store: store,
+                          product: product,
+                          onChooseClicked: () {
+                            // When "I'll choose" is clicked, open ProductCustomizationScreen
+                            _openProductCustomization(product, store);
+                          },
+                          onRepeatClicked: () {
+                            //TODO:- Add Quantity
+                            final addToCartOnId = _getAddToCartOnId(product.childProductId);
+                            print("addCartOnID: $addToCartOnId");
+
+                            cartBloc.add(CartAddItemRequested(
+                              storeId: store.storeId,
+                              cartType: 1,
+                              action: 2, // Add action
+                              storeCategoryId: store.storeCategoryId,
+                              newQuantity: newQuantity + 1,
+                              storeTypeId: store.type,
+                              productId: product.childProductId,
+                              centralProductId: product.parentProductId,
+                              unitId: product.unitId,
+                              addToCartOnId: addToCartOnId,
+                            )); 
+                          
+                          },
+                        ),
+          );
+      }else {
+        //TODO:- Add Quantity
+      cartBloc.add(CartAddItemRequested(
+        storeId: store.storeId,
+        cartType: 1,
+        action: 2, // Add action
+        storeCategoryId: store.storeCategoryId,
+        newQuantity: newQuantity + 1,
+        storeTypeId: store.type,
+        productId: product.childProductId,
+        centralProductId: product.parentProductId,
+        unitId: product.unitId,
+      ));        
+      }
+
+    } else {
+      //TODO:- Remove Quantity
+      int? addToCartOnId;
+      if (product.variantsCount > 1) {
+        addToCartOnId = _getAddToCartOnId(product.childProductId);
+        print("addCartOnID: $addToCartOnId");
+      }
+      cartBloc.add(CartAddItemRequested(
+        storeId: store.storeId,
+        cartType: 2,
+        action: 2, // Add/Update action
+        storeCategoryId: store.storeCategoryId,
+        newQuantity: newQuantity - 1,
+        storeTypeId: store.type,
+        productId: product.childProductId,
+        centralProductId: product.parentProductId,
+        unitId: product.unitId,
+        addToCartOnId: addToCartOnId,
+      ));
+    }
+    
+    // Update cart totals
+    // _updateCartTotals();
+  }
+
+  // Update cart totals based on current quantities
+  // void _updateCartTotals() {
+  //   setState(() {
+  //     _cartItems = _productQuantities.values.fold(0, (sum, qty) => sum + qty);
+  //     _cartTotal = _productDetails.values.fold(0.0, (sum, prod) => 
+  //       sum + (prod.finalPrice * (_productQuantities[prod.childProductId] ?? 0)));
+  //   });
+  // }
+
+  // Update cart data from getCart API response
+  void _updateCartData(List<UniversalCartData> cartData) {
+    setState(() {
+      _cartData = cartData;
+      
+      // Update product quantities from cart data
+      // for (final cartItem in cartData) {
+      //   for (final seller in cartItem.sellers) {
+      //     for (final cartProduct in seller.products) {
+      //       if (cartProduct.quantity != null && cartProduct.quantity!.value > 0) {
+      //         // Find the corresponding product in our store data
+      //         for (final store in _bloc.state is RestaurantLoadSuccess 
+      //             ? (_bloc.state as RestaurantLoadSuccess).restaurants 
+      //             : []) {
+      //           for (final product in store.products) {
+      //             if (product.childProductId == cartProduct.id) {
+      //               _productQuantities[product.childProductId] = cartProduct.quantity!.value;
+      //               _productDetails[product.childProductId] = product;
+      //               break;
+      //             }
+      //           }
+      //         }
+      //       }
+      //     }
+      //   }
+      // }
+      
+      // _updateCartTotals();
+    });
+  }
+
+  // Refresh cart data
+  void _refreshCart() {
+    cartBloc.add(CartFetchRequested(needToShowLoader: false));
   }
 
   @override
@@ -147,13 +368,16 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
                             subtitle: widget.actionData?.subtitle ?? '',
                             onClose: () {
                               // _onAddToCart();
+                                if (widget.onCheckout != null ) {
+                                  widget.onCheckout!(true);
+                                }
                               Navigator.of(context).pop();
                             },
                           ),
                           const SizedBox(height: 16),
                           _buildSearchBar(),
                           const SizedBox(height: 16),
-                                                  Expanded(child: _buildRestaurantList()),
+                          Expanded(child: _buildRestaurantList()),
                         // Add bottom padding to account for the cart bar (only when items exist)
                         if (_cartItems > 0) const SizedBox(height: 105),
                         ],
@@ -162,14 +386,14 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
                   ),
                 ],
               ),
-              // Bottom cart bar - positioned absolutely at the bottom (only show when items exist)
-              if (_cartItems > 0)
-                Positioned(
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
-                  child: _buildBottomCartBar(),
-                ),
+              // // Bottom cart bar - positioned absolutely at the bottom (only show when items exist)
+              // if (_cartItems > 0)
+              //   Positioned(
+              //     left: 0,
+              //     right: 0,
+              //     bottom: 0,
+              //     child: _buildBottomCartBar(),
+              //   ),
             ],
           ),
         ),
@@ -177,89 +401,89 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
     );
   }
 
-  Widget _buildBottomCartBar() {
-    return GestureDetector(
-      onTap: _onAddToCart,
-      child: Container(
-        width: double.infinity,
-        height: 105.56,
-        padding: const EdgeInsets.only(top: 10),
-        decoration: const BoxDecoration(
-          color: Color(0xFFF5F7FF),
-        ),
-        child: Center(
-          child: Container(
-            width: 343,
-            height: 62,
-            decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                begin: Alignment.centerLeft,
-                end: Alignment.centerRight,
-                colors: [
-                  Color(0xFFD445EC),
-                  Color(0xFFB02EFB),
-                  Color(0xFF8E2FFD),
-                  Color(0xFF5E3DFE),
-                  Color(0xFF5186E0),
-                ],
-                stops: [0.0, 0.27, 0.48, 0.76, 1.0],
-              ),
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: Row(
-              children: [
-                // Left side - Price and items
-                Padding(
-                  padding: const EdgeInsets.only(left: 25, top: 13),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'د.إ${_cartTotal.toStringAsFixed(2)}',
-                        style: const TextStyle(
-                          fontFamily: 'aed',
-                          fontSize: 16,
-                          fontWeight: FontWeight.w400,
-                          height: 1.2,
-                          color: Colors.white,
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        '${_cartItems.toString().padLeft(2, '0')} items',
-                        style: const TextStyle(
-                          fontFamily: 'Plus Jakarta Sans',
-                          fontSize: 12,
-                          fontWeight: FontWeight.w400,
-                          height: 1.4,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const Spacer(),
-                // Right side - Checkout button
-                Padding(
-                  padding: const EdgeInsets.only(right: 25),
-                  child: const Text(
-                    'Checkout',
-                    style: TextStyle(
-                      fontFamily: 'Plus Jakarta Sans',
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                      height: 1.2,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
+  // Widget _buildBottomCartBar() {
+  //   return GestureDetector(
+  //     onTap: _onAddToCart,
+  //     child: Container(
+  //       width: double.infinity,
+  //       height: 105.56,
+  //       padding: const EdgeInsets.only(top: 10),
+  //       decoration: const BoxDecoration(
+  //         color: Color(0xFFF5F7FF),
+  //       ),
+  //       child: Center(
+  //         child: Container(
+  //           width: 343,
+  //           height: 62,
+  //           decoration: BoxDecoration(
+  //             gradient: const LinearGradient(
+  //               begin: Alignment.centerLeft,
+  //               end: Alignment.centerRight,
+  //               colors: [
+  //                 Color(0xFFD445EC),
+  //                 Color(0xFFB02EFB),
+  //                 Color(0xFF8E2FFD),
+  //                 Color(0xFF5E3DFE),
+  //                 Color(0xFF5186E0),
+  //               ],
+  //               stops: [0.0, 0.27, 0.48, 0.76, 1.0],
+  //             ),
+  //             borderRadius: BorderRadius.circular(16),
+  //           ),
+  //           child: Row(
+  //             children: [
+  //               // Left side - Price and items
+  //               Padding(
+  //                 padding: const EdgeInsets.only(left: 25, top: 13),
+  //                 child: Column(
+  //                   crossAxisAlignment: CrossAxisAlignment.start,
+  //                   children: [
+  //                     Text(
+  //                       'د.إ${_cartTotal.toStringAsFixed(2)}',
+  //                       style: const TextStyle(
+  //                         fontFamily: 'aed',
+  //                         fontSize: 16,
+  //                         fontWeight: FontWeight.w400,
+  //                         height: 1.2,
+  //                         color: Colors.white,
+  //                       ),
+  //                     ),
+  //                     const SizedBox(height: 2),
+  //                     Text(
+  //                       '${_cartItems.toString().padLeft(2, '0')} items',
+  //                       style: const TextStyle(
+  //                         fontFamily: 'Plus Jakarta Sans',
+  //                         fontSize: 12,
+  //                         fontWeight: FontWeight.w400,
+  //                         height: 1.4,
+  //                         color: Colors.white,
+  //                       ),
+  //                     ),
+  //                   ],
+  //                 ),
+  //               ),
+  //               const Spacer(),
+  //               // Right side - Checkout button
+  //               Padding(
+  //                 padding: const EdgeInsets.only(right: 25),
+  //                 child: const Text(
+  //                   'Checkout',
+  //                   style: TextStyle(
+  //                     fontFamily: 'Plus Jakarta Sans',
+  //                     fontSize: 16,
+  //                     fontWeight: FontWeight.w700,
+  //                     height: 1.2,
+  //                     color: Colors.white,
+  //                   ),
+  //                 ),
+  //               ),
+  //             ],
+  //           ),
+  //         ),
+  //       ),
+  //     ),
+  //   );
+  // }
 
 
 
@@ -344,57 +568,90 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
           );
         }
 
-        return ListView.separated(
-          padding: EdgeInsets.zero,
-          itemCount: restaurants.length,
-          separatorBuilder: (context, index) => const SizedBox(height: 16),
-          itemBuilder: (context, index) {
-            try {
-              return StoreCard(
-                store: restaurants[index],
-                storesWidget: null,
-                index: index,
-                onTap: () {
-                  // Pass the entire store object as JSON, just like in Chat screen
-                  final Map<String, dynamic> storeJson = restaurants[index].toJson();
-                  OrderService().triggerStoreOrder(storeJson);
-                  // Navigator.pop(context);
-                },
-                onAddToCart: (message, product, store, quantity) {
-                  // Update cart state when items are added
-                  setState(() {
-                    // Track product details
-                    _productDetails[product.childProductId] = product;
-                    
-                    // Update quantity with the actual quantity from CartManager
-                    _productQuantities[product.childProductId] = quantity;
-                    
-                    // Update cart totals
-                    _cartItems = _productQuantities.values.fold(0, (sum, qty) => sum + qty);
-                    _cartTotal = _productDetails.values.fold(0.0, (sum, prod) => 
-                      sum + (prod.finalPrice * (_productQuantities[prod.childProductId] ?? 0)));
-                  });
-                },
-              );
-            } catch (e) {
-              return Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFF5F7FF),
-                  border: Border.all(color: const Color(0xFFEEF4FF), width: 1),
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: Text(
-                  restaurants[index].storename,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w700,
-                    fontSize: 18,
-                    color: Color(0xFF242424),
-                  ),
-                ),
-              );
-            }
+        return RefreshIndicator(
+          onRefresh: () async {
+            _refreshCart();
+            _bloc.add(RestaurantFetchRequested(keyword: _currentKeyword, storeCategoryName: widget.actionData?.storeCategoryName ?? ''));
           },
+          child: ListView.separated(
+            padding: EdgeInsets.zero,
+            itemCount: restaurants.length,
+            separatorBuilder: (context, index) => const SizedBox(height: 16),
+            itemBuilder: (context, index) {
+              try {
+                return StoreCard(
+                  store: restaurants[index],
+                  storesWidget: null,
+                  index: index,
+                  cartData: _cartData, // Pass cart data to StoreCard
+                  onTap: () {
+                    // Pass the entire store object as JSON, just like in Chat screen
+                    final Map<String, dynamic> storeJson = restaurants[index].toJson();
+                    OrderService().triggerStoreOrder(storeJson);
+                    // Navigator.pop(context);
+                  },
+                  onAddToCartRequested: (product, store) {
+                    if (store.storeIsOpen == false) {
+                      print('STORE CLOSED');
+                      BlackToastView.show(context, 'Store is closed. Please try again later');
+                      return;
+                    }else if (product.instock == false && store.type == FoodCategory.grocery.value) {
+                      print('Product is not in stock');
+                      BlackToastView.show(context, 'Product is not in stock. Please try again later');
+                      return;
+                    }
+                    if (product.variantsCount > 1) {
+                         showModalBottomSheet(
+                    context: context,
+                    isScrollControlled: true,
+                    backgroundColor: Colors.transparent,
+                    builder: (context) => ProductCustomizationScreen(
+                      product: product,
+                      store: store,
+                      onAddToCartWithAddOns: _onAddToCartWithAddOns,
+                    ),
+                  );
+                    }else {
+                         try {
+                           //TODO:- Add Quantity
+                        cartBloc.add(CartAddItemRequested(
+                          storeId: store.storeId,
+                          cartType: 1, // Default cart type
+                          action: 1, // Add action
+                          storeCategoryId: store.storeCategoryId,
+                          newQuantity: 1, // Add 1 item
+                          storeTypeId: store.type,
+                          productId: product.childProductId,
+                          centralProductId: product.parentProductId,
+                          unitId: product.unitId,
+                        ));
+                      } catch (e) {
+                        print('RestaurantScreen: Error dispatching CartAddItemRequeste: $e');
+                      }
+                    }                  
+                  },
+                  onQuantityChanged: _onQuantityChanged, // Add quantity change callback
+                );
+              } catch (e) {
+                return Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF5F7FF),
+                    border: Border.all(color: const Color(0xFFEEF4FF), width: 1),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Text(
+                    restaurants[index].storename,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 18,
+                      color: Color(0xFF242424),
+                    ),
+                  ),
+                );
+              }
+            },
+          ),
         );
       },
     );

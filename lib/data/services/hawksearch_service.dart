@@ -18,13 +18,14 @@ class HawkSearchService {
     String visitId = '3c6b9339-c602-4af9-b454-0ec0df067181',
     String visitorId = '47daf829-b5df-4358-83ea-207aa4eaae15',
     String keyword = '',
+    String storeCategoryName = '',
   }) async {
     final client = ChatApiServices.instance
         .createCustomClient('https://searchapi-dev.hawksearch.net');
 
     final body = {
       'FacetSelections': {
-        'storeCategoryName': ['Restaurants'],
+        'storeCategoryName': [storeCategoryName],
       },
       'ClientData': {
         'Origin': {
@@ -85,6 +86,7 @@ class HawkSearchService {
 
   Product? _mapDocumentToProduct(Map<String, dynamic> doc) {
     try {
+      
       final String id = _firstString(doc['id']);
       final String parentProductId = _firstString(doc['parentproductid']);
       final String childProductId = _firstString(doc['childproductid']);
@@ -96,6 +98,9 @@ class HawkSearchService {
       final List<String> images = (doc['image'] as List<dynamic>? ?? [])
           .map((e) => e.toString())
           .toList();
+
+      final String unitId = _firstString(doc['unitid']);
+      final bool instock = (_firstString(doc['instock']) == '1' ? true : false);
 
       final bool containsMeat = _firstBool(doc['containsmeat']);
       final String currencySymbol = _firstString(doc['currencysymbol']);
@@ -131,6 +136,9 @@ class HawkSearchService {
         containsMeat: containsMeat,
         currencySymbol: currencySymbol,
         currency: currency,
+        unitId: unitId,
+        customizable: false,
+        instock: instock,
       );
     } catch (_) {
       return null;
@@ -205,6 +213,14 @@ class HawkSearchService {
       return 0.0;
     })();
 
+    final bool storeIsOpen = (() {
+      final dynamic sd = storeData['storeIsOpen'];
+      if (sd == 'True' || sd == true) {
+        return true;
+      }
+      return false;
+    })();
+
     // Extra fields from storeData.metaData
     final Map<String, dynamic> metaData = (() {
       final dynamic raw = storeData['metaData'];
@@ -234,6 +250,7 @@ class HawkSearchService {
       isDoctored: isDoctored,
       storeListing: storeListing,
       hyperlocal: hyperlocal,
+        storeIsOpen: storeIsOpen
     );
   }
 

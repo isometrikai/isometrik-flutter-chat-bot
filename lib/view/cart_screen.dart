@@ -4,6 +4,23 @@ import '../widgets/cart_details_price_widget';
 import '../bloc/cart/cart_bloc.dart';
 import '../bloc/cart/cart_event.dart';
 import '../bloc/cart/cart_state.dart';
+import '../data/model/universal_cart_response.dart';
+import '../data/model/chat_response.dart';
+
+/// Data class to hold category-specific cart information
+class CategoryData {
+  final List<WidgetAction> cartItems;
+  final String storeName;
+  final String? storeType;
+  final String currencySymbol;
+
+  CategoryData({
+    required this.cartItems,
+    required this.storeName,
+    this.storeType,
+    required this.currencySymbol,
+  });
+}
 
 class CartScreen extends StatefulWidget {
   final Function(String)? onCheckout;
@@ -18,6 +35,8 @@ class CartScreen extends StatefulWidget {
 }
 
 class _CartScreenState extends State<CartScreen> {
+  int selectedCategoryIndex = 0; // 0 for Restaurant, 1 for Grocery
+
   @override
   void initState() {
     super.initState();
@@ -90,11 +109,8 @@ class _CartScreenState extends State<CartScreen> {
 
   Widget _buildFilterChips() {
     final categories = [
-      {'name': '🍕 Restaurants', 'count': '', 'isSelected': true},
-      // {'name': '🥑 Grocery', 'count': '', 'isSelected': false},
-      // {'name': '💊 Pharmacy', 'count': '', 'isSelected': false},
-      // {'name': '🔨 Services', 'count': '', 'isSelected': false},
-      // {'name': '🛍️ Shopping', 'count': '', 'isSelected': false},
+      {'name': '🍕 Restaurants', 'count': ''},
+      {'name': '🥑 Grocery', 'count': ''},
     ];
 
     return Container(
@@ -106,12 +122,20 @@ class _CartScreenState extends State<CartScreen> {
         itemCount: categories.length,
         itemBuilder: (context, index) {
           final category = categories[index];
-          return Container(
-            margin: const EdgeInsets.only(right: 8),
-            child: _buildFilterChip(
-              name: category['name'] as String,
-              count: category['count'] as String,
-              isSelected: category['isSelected'] as bool,
+          final isSelected = selectedCategoryIndex == index;
+          return GestureDetector(
+            onTap: () {
+              setState(() {
+                selectedCategoryIndex = index;
+              });
+            },
+            child: Container(
+              margin: const EdgeInsets.only(right: 8),
+              child: _buildFilterChip(
+                name: category['name'] as String,
+                count: category['count'] as String,
+                isSelected: isSelected,
+              ),
             ),
           );
         },
@@ -185,10 +209,10 @@ class _CartScreenState extends State<CartScreen> {
         }
 
         if (state is CartLoaded) {
-          final cartItems = state.cartItems;
+          // Get data for the selected category
+          final categoryData = _getCategoryData(state, selectedCategoryIndex);
           
-          // Check if cart has items
-          if (cartItems.isEmpty) {
+          if (categoryData == null) {
             return _buildEmptyCart();
           }
           
@@ -197,19 +221,19 @@ class _CartScreenState extends State<CartScreen> {
             child: Column(
               children: [
                 // Store info card (if we have store info)
-                _buildStoreInfoCard(),
+                _buildStoreInfoCard(categoryData),
                 
                 const SizedBox(height: 24),
                 
                 // Use the CartDetailsPriceWidget
-                CartDetailsPriceWidget(cartItems: cartItems),
+                CartDetailsPriceWidget(cartItems: categoryData.cartItems),
               ],
             ),
           );
         }
 
         return const Center(
-          child: Text('Unknown cart state'),
+          // child: Text('Unknown cart state'),
         );
       },
     );
@@ -239,22 +263,129 @@ class _CartScreenState extends State<CartScreen> {
     );
   }
 
-  Widget _buildStoreInfoCard() {
-    return BlocBuilder<CartBloc, CartState>(
-      builder: (context, state) {
-        // Use fetched store data from BLoC state
-        String? storeName = 'Store Name';
-        String? storeType;
-        double? rating;
-        String? deliveryTime;
-        String? address;
+  /// Get category data based on selected index
+  CategoryData? _getCategoryData(CartLoaded state, int categoryIndex) {
+    if (state.rawCartData == null || state.rawCartData!.data.isEmpty) {
+      return null;
+    }
 
-        if (state is CartLoaded) {
-          storeName = state.storeName ?? 'Store Name';
-          storeType = state.storeType;
+    // Check if we have data for the selected category index
+    if (categoryIndex >= state.rawCartData!.data.length) {
+      return null;
+    }
+
+    final cartData = state.rawCartData!.data[categoryIndex];
+    final seller = cartData.sellers.isNotEmpty ? cartData.sellers.first : null;
+    
+    // Convert to widget actions for this specific category
+    final cartItems = _convertToWidgetActions(cartData);
+    
+    return CategoryData(
+      cartItems: cartItems,
+      storeName: seller?.name ?? 'Store Name',
+      storeType: seller?.storeType,
+      currencySymbol: cartData.currencySymbol,
+    );
+  }
+
+  /// Convert UniversalCartData to WidgetAction list
+  List<WidgetAction> _convertToWidgetActions(UniversalCartData cartData) {
+    List<WidgetAction> widgetActions = [];
+    
+    final seller = cartData.sellers.isNotEmpty ? cartData.sellers.first : null;
+    
+    // Extract actual cart items from seller products
+    if (seller != null && seller.products.isNotEmpty) {
+      for (final product in seller.products) {
+        // Get quantity from product.quantity or fallback
+        int totalQuantity = 1;
+        if (product.quantity != null) {
+          totalQuantity = product.quantity?.value ?? 1;
         }
+        
+        // Get unit price with tax from accounting
+        double unitPrice = 0;
+        if (product.accounting != null) {
+          unitPrice = product.accounting!.unitPriceWithTax;
+        }
+        
+        // Get product name
+        String productName = product.name;
+        
+        widgetActions.add(WidgetAction(
+          buttonText: '',
+          title: '',
+          subtitle: '',
+          storeCategoryId: cartData.storeCategoryId,
+          keyword: '',
+          quantity: '${totalQuantity}x',
+          productName: productName,
+          currencySymbol: cartData.currencySymbol,
+          productPrice: unitPrice,
+        ));
+      }
+    }
+    
+    // Add delivery fee from cart accounting
+    double deliveryFee = 0;
+    if (cartData.accounting != null) {
+      deliveryFee = cartData.accounting!.deliveryFee;
+    }
+    
+    if (deliveryFee > 0) {
+      widgetActions.add(WidgetAction(
+        buttonText: '',
+        title: '',
+        subtitle: '',
+        storeCategoryId: cartData.storeCategoryId,
+        keyword: '',
+        productName: 'Delivery fee',
+        currencySymbol: cartData.currencySymbol,
+        productPrice: deliveryFee,
+      ));
+    }
+    
+    // Add service fee from cart accounting
+    double serviceFee = 0;
+    if (cartData.accounting != null) {
+      serviceFee = cartData.accounting?.serviceFeeTotal ?? 0;
+    }
+    
+    if (serviceFee > 0) {
+      widgetActions.add(WidgetAction(
+        buttonText: '',
+        title: '',
+        subtitle: '',
+        storeCategoryId: cartData.storeCategoryId,
+        keyword: '',
+        productName: 'Service Fee',
+        currencySymbol: cartData.currencySymbol,
+        productPrice: serviceFee,
+      ));
+    }
+    
+    // Add total from cart accounting
+    double finalTotal = 0;
+    if (cartData.accounting != null) {
+      finalTotal = cartData.accounting!.finalTotal;
+    }
+    
+    widgetActions.add(WidgetAction(
+      buttonText: '',
+      title: '',
+      subtitle: '',
+      storeCategoryId: cartData.storeCategoryId,
+      keyword: '',
+      productName: 'Total To Pay',
+      currencySymbol: cartData.currencySymbol,
+      productPrice: finalTotal,
+    ));
+    
+    return widgetActions;
+  }
 
-        return Container(
+  Widget _buildStoreInfoCard(CategoryData categoryData) {
+    return Container(
       padding: const EdgeInsets.all(15),
       decoration: BoxDecoration(
         color: const Color(0xFFF5F7FF),
@@ -288,85 +419,84 @@ class _CartScreenState extends State<CartScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      storeName,
+                      categoryData.storeName,
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w400,
                         color: Color(0xFF242424),
                       ),
                     ),
-                    const SizedBox(height: 10),
-                    Row(
-                      children: [
-                        // Rating
-                        Row(
-                          children: [
-                            const Icon(
-                              Icons.star,
-                              size: 12,
-                              color: Color(0xFFA674BF),
-                            ),
-                            const SizedBox(width: 4),
-                            Text(
-                              '${rating?.toStringAsFixed(1) ?? '4.5'} (1.2k reviews)',
-                              style: const TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w400,
-                                color: Color(0xFF242424),
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(width: 7),
-                        const Text(
-                          '|',
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w400,
-                            color: Color(0xFFD7CDE9),
-                          ),
-                        ),
-                        const SizedBox(width: 7),
-                        // Delivery time
-                        Row(
-                          children: [
-                            const Icon(
-                              Icons.access_time,
-                              size: 12,
-                              color: Color(0xFFA674BF),
-                            ),
-                            const SizedBox(width: 4),
-                            Text(
-                              deliveryTime ?? '15-20 min',
-                              style: const TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w400,
-                                color: Color(0xFF242424),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
+                    // const SizedBox(height: 10),
+                    // Row(
+                    //   children: [
+                    //     // Rating
+                    //     Row(
+                    //       children: [
+                    //         const Icon(
+                    //           Icons.star,
+                    //           size: 12,
+                    //           color: Color(0xFFA674BF),
+                    //         ),
+                    //         const SizedBox(width: 4),
+                    //         Text(
+                    //           '4.5 (1.2k reviews)',
+                    //           style: const TextStyle(
+                    //             fontSize: 12,
+                    //             fontWeight: FontWeight.w400,
+                    //             color: Color(0xFF242424),
+                    //           ),
+                    //         ),
+                    //       ],
+                    //     ),
+                    //     const SizedBox(width: 7),
+                    //     const Text(
+                    //       '|',
+                    //       style: TextStyle(
+                    //         fontSize: 12,
+                    //         fontWeight: FontWeight.w400,
+                    //         color: Color(0xFFD7CDE9),
+                    //       ),
+                    //     ),
+                    //     const SizedBox(width: 7),
+                    //     // Delivery time
+                    //     Row(
+                    //       children: [
+                    //         const Icon(
+                    //           Icons.access_time,
+                    //           size: 12,
+                    //           color: Color(0xFFA674BF),
+                    //         ),
+                    //         const SizedBox(width: 4),
+                    //         Text(
+                    //           '15-20 min',
+                    //           style: const TextStyle(
+                    //             fontSize: 12,
+                    //             fontWeight: FontWeight.w400,
+                    //             color: Color(0xFF242424),
+                    //           ),
+                    //         ),
+                    //       ],
+                    //     ),
+                    //   ],
+                    // ),
                   ],
                 ),
               ),
             ],
           ),
-          
         ],
       ),
-    );
-      },
     );
   }
 
   Widget _buildBottomActions() {
     return BlocBuilder<CartBloc, CartState>(
       builder: (context, state) {
-        // Only show checkout button if cart has data
-        if (state is CartLoaded && state.cartItems.isNotEmpty) {
-          return Container(
+        // Only show checkout button if cart has data for the selected category
+        if (state is CartLoaded) {
+          final categoryData = _getCategoryData(state, selectedCategoryIndex);
+          if (categoryData != null && categoryData.cartItems.isNotEmpty) {
+            return Container(
             padding: const EdgeInsets.all(16),
             child: Row(
               children: [
@@ -409,6 +539,7 @@ class _CartScreenState extends State<CartScreen> {
               ],
             ),
           );
+          }
         }
         
         // Return empty container when cart is empty or in other states

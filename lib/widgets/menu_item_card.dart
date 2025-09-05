@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:chat_bot/data/model/chat_response.dart';
-import 'package:chat_bot/services/cart_manager.dart';
+import 'package:chat_bot/data/model/universal_cart_response.dart';
 
 class MenuItemCard extends StatelessWidget {
   final String title;
@@ -9,13 +9,16 @@ class MenuItemCard extends StatelessWidget {
   final bool isVeg;
   final String? imageUrl;
   final String? productId;
+  final String? centralProductId;
   final VoidCallback? onClick;
-  final Function(String, String, int)? onAddToCart; // message, productId, quantity
-
+  final Function(String, String, int, bool)? onAddToCart; // productId, centralProductId, quantity, isCustomizable
+  final List<UniversalCartData>? cartData; // Cart data from getCart API
+  final Function(String, String, int, bool, bool)? onQuantityChanged; // Callback for quantity changes
+  final bool isCustomizable;
   final Color purple;
   final Color vegColor;
   final Color nonVegColor;
-  final CartManager cartManager = CartManager();
+  
 
   MenuItemCard({
     super.key,
@@ -25,8 +28,12 @@ class MenuItemCard extends StatelessWidget {
     required this.isVeg,
     this.imageUrl,
     this.productId,
+    this.centralProductId,
     this.onClick,
     this.onAddToCart,
+    this.cartData,
+    this.onQuantityChanged,
+    this.isCustomizable = false,
     this.purple = const Color(0xFF8E2FFD),
     this.vegColor = const Color(0xFF66BB6A),
     this.nonVegColor = const Color(0xFFF44336),
@@ -49,10 +56,10 @@ class MenuItemCard extends StatelessWidget {
                   child: imageUrl != null
                       ?
                   Image.network(
-                    imageUrl!,
-                    width: 108,
-                    height: 108,
-                    fit: BoxFit.cover,
+                      imageUrl!,
+                          width: 108,
+                      height: 108,
+                      fit: BoxFit.cover,
                   )
                       : const SizedBox(
                           width: 108,
@@ -140,114 +147,122 @@ class MenuItemCard extends StatelessWidget {
       return _buildAddButton();
     }
 
-    return StreamBuilder<Map<String, int>>(
-      stream: cartManager.quantityStream,
-      builder: (context, snapshot) {
-        final currentQuantity = cartManager.getQuantity(productId!);
-        
-        if (currentQuantity == 0) {
-          // Show "Add" button when product is not in cart
-          return _buildAddButton();
-        } else {
-          // Show quantity controls when product is in cart
-          return Container(
-            height: 37,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: purple, width: 1),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // Minus button
-                GestureDetector(
-                  onTap: () {
-                    if (productId != null && productId!.isNotEmpty) {
-                      cartManager.removeProduct(productId!);
-                      if (onAddToCart != null) {
-                        final newQuantity = cartManager.getQuantity(productId!);
-                        onAddToCart!("Removed 1X $title from cart", productId!, newQuantity);
-                      }
-                    }
-                  },
-                  child: Container(
-                    width: 37,
-                    height: 37,
-                    decoration: BoxDecoration(
-                      color: purple,
-                      borderRadius: BorderRadius.only(
-                        topLeft: Radius.circular(8),
-                        bottomLeft: Radius.circular(8),
-                      ),
-                    ),
-                    alignment: Alignment.center,
-                    child: const Text(
-                      '-',
-                      style: TextStyle(
-                        fontWeight: FontWeight.w700,
-                        fontSize: 16,
-                        height: 1.0,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
-                ),
-                
-                // Quantity display
-                Expanded(
-                  child: Container(
-                    alignment: Alignment.center,
-                    child: Text(
-                      currentQuantity.toString(),
-                      style: TextStyle(
-                        fontWeight: FontWeight.w700,
-                        fontSize: 14,
-                        height: 1.2,
-                        color: purple,
-                      ),
-                    ),
-                  ),
-                ),
-                
-                // Plus button
-                GestureDetector(
-                  onTap: () {
-                    if (productId != null && productId!.isNotEmpty) {
-                      cartManager.addProduct(productId!);
-                      if (onAddToCart != null) {
-                        final newQuantity = cartManager.getQuantity(productId!);
-                        onAddToCart!("Added 1X $title to cart", productId!, newQuantity);
-                      }
-                    }
-                  },
-                  child: Container(
-                    width: 37,
-                    height: 37,
-                    decoration: BoxDecoration(
-                      color: purple,
-                      borderRadius: BorderRadius.only(
-                        topRight: Radius.circular(8),
-                        bottomRight: Radius.circular(8),
-                      ),
-                    ),
-                    alignment: Alignment.center,
-                    child: const Text(
-                      '+',
-                      style: TextStyle(
-                        fontWeight: FontWeight.w700,
-                        fontSize: 16,
-                        height: 1.0,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
+    // Check if product is in cart and get its quantity
+    final cartQuantity = _getProductCartQuantity();
+    final isInCart = _isProductInCart();
+
+    if (isInCart && cartQuantity != null && cartQuantity > 0) {
+      // Show quantity controls when product is in cart
+      return _buildQuantityControlsUI(cartQuantity);
+    } else {
+      // Show Add button when product is not in cart
+      return _buildAddButton();
+    }
+  }
+
+  // Helper method to check if product is in cart and get its quantity
+  int? _getProductCartQuantity() {
+    if (cartData == null || productId == null) return null;
+    
+    try {
+      // Use functional programming approach with firstWhere for better performance
+      final cartProduct = cartData!
+          .expand((cartItem) => cartItem.sellers)
+          .expand((seller) => seller.products)
+          .firstWhere(
+            (cartProduct) => cartProduct.id == productId,
+            orElse: () => throw StateError('Product not found'),
           );
-        }
-      },
+      
+      return cartProduct.quantity?.value ?? 0;
+    } catch (e) {
+      // Product not found in cart
+      return null;
+    }
+  }
+
+  // Helper method to check if product is in cart
+  bool _isProductInCart() {
+    return _getProductCartQuantity() != null && _getProductCartQuantity()! > 0;
+  }
+
+  Widget _buildQuantityControlsUI(int quantity) {
+    return Container(
+      height: 37,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: purple, width: 1),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Decrease button
+          GestureDetector(
+            onTap: () {
+              if (onQuantityChanged != null && productId != null && centralProductId != null) {
+                onQuantityChanged!(productId!, centralProductId!, quantity, false, isCustomizable);
+              }
+            },
+            child: Container(
+              width: 37,
+              height: 37,
+              decoration: BoxDecoration(
+                color: purple,
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(8),
+                  bottomLeft: Radius.circular(8),
+                ),
+              ),
+              child: const Icon(
+                Icons.remove,
+                size: 20,
+                color: Colors.white,
+              ),
+            ),
+          ),
+          // Quantity display
+          Expanded(
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              alignment: Alignment.center,
+              child: Text(
+                '$quantity',
+                style: TextStyle(
+                  fontWeight: FontWeight.w700,
+                  fontSize: 14,
+                  height: 1.2,
+                  color: purple,
+                ),
+              ),
+            ),
+          ),
+          // Increase button
+          GestureDetector(
+            onTap: () {
+              if (onQuantityChanged != null && productId != null && centralProductId != null) {
+                onQuantityChanged!(productId!, centralProductId!, quantity, true, isCustomizable);
+              }
+            },
+            child: Container(
+              width: 37,
+              height: 37,
+              decoration: BoxDecoration(
+                color: purple,
+                borderRadius: const BorderRadius.only(
+                  topRight: Radius.circular(8),
+                  bottomRight: Radius.circular(8),
+                ),
+              ),
+              child: const Icon(
+                Icons.add,
+                size: 20,
+                color: Colors.white,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -261,10 +276,8 @@ class MenuItemCard extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 10),
       ),
       onPressed: () {
-        if (onAddToCart != null && productId != null && productId!.isNotEmpty) {
-          final newQuantity = cartManager.getQuantity(productId!) + 1;
-          onAddToCart!("Add 1X $title to cart", productId!, newQuantity);
-          cartManager.setQuantity(productId!, newQuantity);
+        if (onAddToCart != null && productId != null && productId!.isNotEmpty && centralProductId != null && centralProductId!.isNotEmpty) {
+          onAddToCart!(productId!, centralProductId!, 1, isCustomizable);
         }
       },
       child: Text(

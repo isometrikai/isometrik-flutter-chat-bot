@@ -37,3 +37,21 @@ enum WidgetEnum {
   }
   
 }
+
+enum FoodCategory {
+  food(1),
+  grocery(2),
+  pharmacy(3);
+
+  const FoodCategory(this.value);
+  
+  final int value;
+  
+  // Create from integer value
+  static FoodCategory fromValue(int value) {
+    return FoodCategory.values.firstWhere(
+      (category) => category.value == value,
+      orElse: () => FoodCategory.food, // default fallback
+    );
+  }
+}

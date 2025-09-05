@@ -23,6 +23,8 @@ class CartLoaded extends CartState {
 
 class CartEmpty extends CartState {}
 
+class CartProductAdded extends CartState {}
+
 class CartError extends CartState {
   final String message;
 

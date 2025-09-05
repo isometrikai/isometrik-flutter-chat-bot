@@ -140,7 +140,7 @@ class UniversalCartData {
   final String storeCategory;
   final String storeSubCategory;
   final bool hyperlocal;
-  final int storeListing;
+  // final int storeListing;
   final bool ecommerce;
   final int storeTypeId;
   final String storeType;
@@ -178,7 +178,7 @@ class UniversalCartData {
     required this.storeCategory,
     required this.storeSubCategory,
     required this.hyperlocal,
-    required this.storeListing,
+    // required this.storeListing,
     required this.ecommerce,
     required this.storeTypeId,
     required this.storeType,
@@ -218,7 +218,7 @@ class UniversalCartData {
       storeCategory: json['storeCategory'] ?? '',
       storeSubCategory: json['storeSubCategory'] ?? '',
       hyperlocal: json['hyperlocal'] ?? false,
-      storeListing: json['storeListing'] ?? 0,
+      // storeListing: json['storeListing'] ?? 0,
       ecommerce: json['ecommerce'] ?? false,
       storeTypeId: json['storeTypeId'] ?? 0,
       storeType: json['storeType'] ?? '',
@@ -263,7 +263,7 @@ class UniversalCartData {
       'storeCategory': storeCategory,
       'storeSubCategory': storeSubCategory,
       'hyperlocal': hyperlocal,
-      'storeListing': storeListing,
+      // 'storeListing': storeListing,
       'ecommerce': ecommerce,
       'storeTypeId': storeTypeId,
       'storeType': storeType,
@@ -515,12 +515,16 @@ class Product {
   final String name;
   final Accounting? accounting;
   final Quantity? quantity;
+  final num? addToCartOnId;
+  final String? storeId;
 
   Product({
     required this.id,
     required this.name,
     required this.accounting,
     this.quantity,
+    this.addToCartOnId,
+    this.storeId,
   });
 
   factory Product.fromJson(Map<String, dynamic> json) {
@@ -529,6 +533,8 @@ class Product {
       name: json['name'] ?? '',
       accounting: json['accounting'] != null ? Accounting.fromJson(json['accounting']) : null,
       quantity: json['quantity'] != null ? Quantity.fromJson(json['quantity']) : null,
+      addToCartOnId: json['addToCartOnId'] ?? 0,
+      storeId: json['storeId'] ?? '',
     );
   }
 
@@ -538,6 +544,8 @@ class Product {
       'name': name,
       'accounting': accounting?.toJson(),
       'quantity': quantity?.toJson(),
+      'addToCartOnId': addToCartOnId,
+      'storeId': storeId,
     };
   }
 }

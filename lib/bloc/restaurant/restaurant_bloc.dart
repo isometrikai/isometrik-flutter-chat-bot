@@ -21,15 +21,18 @@ class RestaurantBloc extends Bloc<RestaurantEvent, RestaurantState> {
     Emitter<RestaurantState> emit,
   ) async {
     String keyword = '';
+    String storeCategoryName = '';
     if (event is RestaurantFetchRequested) {
       keyword = event.keyword;
+      storeCategoryName = event.storeCategoryName;
     } else if (event is RestaurantRefreshed) {
       keyword = event.keyword;
+      storeCategoryName = event.storeCategoryName;
     }
 
     emit(RestaurantLoadInProgress());
     try {
-      final List<Store> stores = await repository.fetchStores(keyword: keyword);
+      final List<Store> stores = await repository.fetchStores(keyword: keyword, storeCategoryName: storeCategoryName);
       emit(RestaurantLoadSuccess(restaurants: stores, keyword: keyword));
     } catch (e) {
       emit(RestaurantLoadFailure(e.toString()));

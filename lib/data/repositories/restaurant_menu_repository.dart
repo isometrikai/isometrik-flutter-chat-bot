@@ -5,7 +5,7 @@ import 'package:chat_bot/utils/api_result.dart';
 class RestaurantMenuRepository {
   const RestaurantMenuRepository();
 
-  Future<List<ProductCategory>> fetchMenu({
+  Future<RestaurantMenuData> fetchMenu({
     required String storeId,
     double latitude = 25.20485,
     double longitude = 55.270782,
@@ -33,7 +33,7 @@ class RestaurantMenuRepository {
 
     final RestaurantMenuResponse parsed =
         RestaurantMenuResponse.fromJson(res.data as Map<String, dynamic>);
-    return parsed.data.productData;
+    return parsed.data;
   }
 }
 
