@@ -1370,11 +1370,11 @@ class _ChatScreenBody extends StatelessWidget {
                     
                     // Build the full address string
                     final List<String> addressParts = [];
-                    if (building.isNotEmpty) addressParts.add(building);
-                    if (landmark.isNotEmpty) addressParts.add(landmark);
+                    if (country.isNotEmpty) addressParts.add(country);
                     if (area.isNotEmpty) addressParts.add(area);
                     if (city.isNotEmpty) addressParts.add(city);
-                    if (country.isNotEmpty) addressParts.add(country);
+                    if (building.isNotEmpty) addressParts.add(building);
+                    if (landmark.isNotEmpty) addressParts.add(landmark);
                     
                     final String fullAddress = addressParts.join(', ');
                     final String addressMessage = "My $tag address is:\n$fullAddress";
