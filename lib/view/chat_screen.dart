@@ -643,7 +643,7 @@ class _ChatScreenBody extends StatelessWidget {
                 if (messages.isNotEmpty) ...[
                   IconButton(
                     icon: Opacity(
-                      opacity: isApiLoading ? 0.4 : 1.0,
+                      opacity: 1.0,
                       child: SvgPicture.asset(
                         AssetPath.get('images/ic_reload.svg'),
                         width: 40,
@@ -654,7 +654,7 @@ class _ChatScreenBody extends StatelessWidget {
                   ),
                   IconButton(
                     icon: Opacity(
-                      opacity: isApiLoading ? 0.4 : 1.0,
+                      opacity: 1.0,
                       child: Stack(
                         children: [
                           SvgPicture.asset(
@@ -1345,14 +1345,6 @@ class _ChatScreenBody extends StatelessWidget {
               return _buildActionButton(
                 text: action.buttonText,
                 onTap: isApiLoading ? () {} : () {
-                  // Navigator.push(
-                  //   context,
-                  //   MaterialPageRoute(
-                  //     builder: (context) => RestaurantMenuScreen(
-                  //       actionData: action,
-                  //     ),
-                  //   ),
-                  // );
                 Navigator.push(
                   context,
                     MaterialPageRoute(builder: (_) => const AddressDetailsScreen()),
@@ -1620,10 +1612,10 @@ class _ChatScreenBody extends StatelessWidget {
           // onHide: onHideStoreCards, 
           onQuantityChanged: (product, store, newQuantity, isIncrease) {
             if (store.type == FoodCategory.grocery.value) {
-                      _onQuantityChangedForGrocery(context,product.parentProductId,product.childProductId,product.unitId,store.storeId,store.storeCategoryId,store.type,product.variantsCount,newQuantity,isIncrease);
-                    }else {
+              _onQuantityChangedForGrocery(context,product.parentProductId,product.childProductId,product.unitId,store.storeId,store.storeCategoryId,store.type,product.variantsCount,newQuantity,isIncrease);
+            }else {
               _onQuantityChanged(context, product, store, newQuantity, isIncrease);
-                    }
+            }
           },
           onAddToCartRequested: (product, store) {
             if (store.storeIsOpen == false) {
