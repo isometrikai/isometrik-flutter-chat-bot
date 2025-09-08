@@ -21,42 +21,42 @@ class _LaunchScreenState extends State<LaunchScreen> {
 
   static const platform = MethodChannel('chat_bot_channel');
 
-  final List<String> tagLines = [
-    "Building your personalized chat experience...",
-    "Loading your smart conversation space...",
-    "Tailoring your chat journey just for you...",
-    "Configuring the chat that gets you...",
-    "Preparing your next-level conversation..."
-  ];
+  // final List<String> tagLines = [
+  //   "Building your personalized chat experience...",
+  //   "Loading your smart conversation space...",
+  //   "Tailoring your chat journey just for you...",
+  //   "Configuring the chat that gets you...",
+  //   "Preparing your next-level conversation..."
+  // ];
 
-  int currentIndex = 0;
-  Timer? _timer;
-  late DateTime _startTime;
+  // int currentIndex = 0;
+  // Timer? _timer;
+  // late DateTime _startTime;
   late final LaunchBloc _bloc;
 
   @override
   void initState() {
     super.initState();
-    _startTime = DateTime.now();
-    _startTagLineRotation();
+    // _startTime = DateTime.now();
+    // _startTagLineRotation();
     _bloc = LaunchBloc();
     _bloc.add(const LaunchRequested());
   }
 
-  void _startTagLineRotation() {
-    _timer = Timer.periodic(const Duration(milliseconds: 1500), (timer) {
-      setState(() {
-        currentIndex = (currentIndex + 1) % tagLines.length;
-      });
-    });
-  }
+  // void _startTagLineRotation() {
+  //   _timer = Timer.periodic(const Duration(milliseconds: 1500), (timer) {
+  //     setState(() {
+  //       currentIndex = (currentIndex + 1) % tagLines.length;
+  //     });
+  //   });
+  // }
 
   Future<void> _navigateWhenReady(LaunchSuccess success) async {
-    final minDuration = Duration(milliseconds: tagLines.length * 1500);
-    final elapsed = DateTime.now().difference(_startTime);
-    if (elapsed < minDuration) {
-      await Future.delayed(minDuration - elapsed);
-    }
+    // final minDuration = Duration(milliseconds: tagLines.length * 1500);
+    // final elapsed = DateTime.now().difference(_startTime);
+    // if (elapsed < minDuration) {
+    //   await Future.delayed(minDuration - elapsed);
+    // }
     if (!mounted) return;
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(
@@ -100,7 +100,7 @@ class _LaunchScreenState extends State<LaunchScreen> {
 
   @override
   void dispose() {
-    _timer?.cancel();
+    // _timer?.cancel();
     _bloc.close();
     super.dispose();
   }
@@ -121,9 +121,9 @@ class _LaunchScreenState extends State<LaunchScreen> {
         child: PopScope(
           canPop: false,
           child: Scaffold(
-            backgroundColor: const Color(0xFF1B1B1B),
+            backgroundColor: Colors.white, //const Color(0xFF1B1B1B),
             body: Container(
-              color: const Color(0xFF1B1B1B),
+              color: Colors.white, //const Color(0xFF1B1B1B),
               width: double.infinity,
               height: double.infinity,
               child: Center(
@@ -136,8 +136,8 @@ class _LaunchScreenState extends State<LaunchScreen> {
                     );
                   },
                   child: Text(
-                    tagLines[currentIndex],
-                    key: ValueKey<String>(tagLines[currentIndex]),
+                    'Loading...',
+                    key: ValueKey<String>('Loading...'),
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 16,
