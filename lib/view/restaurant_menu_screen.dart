@@ -585,7 +585,7 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
       price: priceText,
       originalPrice: basePriceText,
       isVeg: !p.containsMeat,
-      assetPath: imageUrl ?? AssetHelper.getAssetPath('images/men.png'),
+      assetPath: imageUrl ?? AssetHelper.getAssetPath('images/ic_placeHolder.svg'),
       imageUrl: imageUrl,
       productId: p.childProductId,
       centralProductId: p.parentProductId,
@@ -705,52 +705,10 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
         setState(() {
           _cartData = cartData;
           
-          // Update product quantities from cart data
-          // for (final cartItem in cartData) {
-          //   for (final seller in cartItem.sellers) {
-          //     for (final cartProduct in seller.products) {
-          //       if (cartProduct.quantity != null && cartProduct.quantity!.value > 0) {
-          //         // Find the corresponding product in our categories data
-          //         for (final category in _categories) {
-          //           if (category.isSubCategories && category.subCategories.isNotEmpty) {
-          //             for (final subCategory in category.subCategories) {
-          //               for (final product in subCategory.products) {
-          //                 if (product.childProductId == cartProduct.id) {
-          //                   _productQuantities[product.childProductId] = cartProduct.quantity!.value;
-          //                   _productDetails[product.childProductId] = product;
-          //                   break;
-          //                 }
-          //               }
-          //             }
-          //           } else {
-          //             for (final product in category.products) {
-          //               if (product.childProductId == cartProduct.id) {
-          //                 _productQuantities[product.childProductId] = cartProduct.quantity!.value;
-          //                 _productDetails[product.childProductId] = product;
-          //                 break;
-          //               }
-          //             }
-          //           }
-          //         }
-          //       }
-          //     }
-          //   }
-          // }
-          
-          // _updateCartTotals();
         });
       }
     });
   }
-
-  // Update cart totals based on current quantities
-  // void _updateCartTotals() {
-  //   setState(() {
-  //     _cartItems = _productQuantities.values.fold(0, (sum, quantity) => sum + quantity);
-  //     _cartTotal = _productDetails.values.fold(0.0, (sum, product) => 
-  //       sum + (product.finalPrice * (_productQuantities[product.childProductId] ?? 0)));
-  //   });
-  // }
 
    /// Get addToCartOnId from cart data for a specific product
   dynamic _getAddToCartOnId(String productId) {

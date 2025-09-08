@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:chat_bot/data/model/chat_response.dart';
 import 'package:chat_bot/data/model/universal_cart_response.dart';
+import '../utils/asset_helper.dart';
 
 class MenuItemCard extends StatelessWidget {
   final String title;
@@ -60,6 +61,11 @@ class MenuItemCard extends StatelessWidget {
                           width: 108,
                       height: 108,
                       fit: BoxFit.cover,
+                      loadingBuilder: (context, child, loadingProgress) {
+                        if (loadingProgress == null) return child;
+                        return _placeholderImage();
+                      },
+                      errorBuilder: (context, error, stackTrace) => _placeholderImage(),
                   )
                       : const SizedBox(
                           width: 108,
@@ -286,6 +292,26 @@ class MenuItemCard extends StatelessWidget {
           color: purple,
           fontWeight: FontWeight.w600,
           fontSize: 14,
+        ),
+      ),
+    );
+  }
+
+  Widget _placeholderImage() {
+    return Container(
+      width: 108,
+      height: 108,
+      decoration: BoxDecoration(
+        color: const Color(0xFFF5F5F5),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Center(
+        child: AssetHelper.svgAsset(
+          'images/ic_placeHolder.svg',
+          // width: 32,
+          // height: 32,
+          fit: BoxFit.cover,
+          // color: const Color(0xFF363648),
         ),
       ),
     );

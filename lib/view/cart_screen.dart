@@ -1,3 +1,4 @@
+import 'package:chat_bot/utils/asset_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../widgets/cart_details_price_widget';
@@ -6,6 +7,7 @@ import '../bloc/cart/cart_event.dart';
 import '../bloc/cart/cart_state.dart';
 import '../data/model/universal_cart_response.dart';
 import '../data/model/chat_response.dart';
+import '../utils/asset_helper_svg.dart';
 
 /// Data class to hold category-specific cart information
 class CategoryData {
@@ -244,18 +246,35 @@ class _CartScreenState extends State<CartScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(
-            Icons.error_outline,
-            size: 64,
-            color: Color(0xFF8E2FFD),
+          // Empty cart SVG icon
+          AssetHelper.svgAsset(
+            'images/ic_emptyCart.svg',
+            width: 120,
+            height: 120,
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 24),
+          // "Your cart is empty" text
           const Text(
-            'No Data Found',
+            'Your cart is empty',
             style: TextStyle(
               fontSize: 18,
-              fontWeight: FontWeight.w600,
+              fontWeight: FontWeight.w700,
               color: Color(0xFF242424),
+            ),
+          ),
+          const SizedBox(height: 8),
+          // Description text
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 40),
+            child: Text(
+              'Add items like food, groceries, medicines, services or other products to get started.',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w400,
+                color: Color(0xFF6E4185),
+                height: 1.4,
+              ),
             ),
           ),
         ],

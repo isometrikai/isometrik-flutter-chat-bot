@@ -18,7 +18,7 @@ extension AssetHelperSvg on AssetHelper {
       width: width,
       height: height,
       fit: fit ?? BoxFit.contain,
-      colorFilter: color != null ? ColorFilter.mode(color!, BlendMode.srcIn) : null,
+      colorFilter: color != null ? ColorFilter.mode(color, BlendMode.srcIn) : null,
     );
   }
 }
