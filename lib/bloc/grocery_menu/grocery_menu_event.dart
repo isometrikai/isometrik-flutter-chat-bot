@@ -14,3 +14,14 @@ class GroceryMenuRequested extends GroceryMenuEvent {
 class GroceryMenuRefreshed extends GroceryMenuEvent {
   const GroceryMenuRefreshed();
 }
+
+class SubCategoryProductsRequested extends GroceryMenuEvent {
+  final String storeId;
+
+  const SubCategoryProductsRequested({
+    required this.storeId,
+  });
+
+  @override
+  List<Object?> get props => [storeId];
+}

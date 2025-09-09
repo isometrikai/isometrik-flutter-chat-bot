@@ -7,6 +7,7 @@ import 'package:chat_bot/bloc/cart/cart_event.dart';
 import 'package:chat_bot/bloc/cart/cart_state.dart';
 import 'package:chat_bot/data/model/chat_response.dart';
 import 'package:chat_bot/data/model/chat_message.dart';
+import 'package:chat_bot/view/Groceries_menu_screen.dart';
 import 'package:chat_bot/view/add_card_sheet.dart';
 import 'package:chat_bot/view/address_details_screen.dart';
 import 'package:chat_bot/view/customization_summary_screen.dart';
@@ -1313,7 +1314,24 @@ class _ChatScreenBody extends StatelessWidget {
               return _buildActionButton(
                 text: action.buttonText,
                 onTap: isApiLoading ? () {} : () {
-                  Navigator.push(
+                  if (action.storeTypeId == FoodCategory.grocery.value) {
+                      Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => GroceriesMenuScreen(
+                        actionData: action,
+                        onCheckout: (value) {
+                          if (isCartAPICalled == true) {
+                            onUpdateCartCount(cartBloc.getTotalProductCount);
+                            onSendMessage("I have updated the cart");
+                            isCartAPICalled = false;
+                          }
+                        },
+                      ),
+                    ),
+                  );
+                  }else {
+                     Navigator.push(
                     context,
                     MaterialPageRoute(
                       builder: (context) => RestaurantMenuScreen(
@@ -1328,6 +1346,7 @@ class _ChatScreenBody extends StatelessWidget {
                       ),
                     ),
                   );
+                  }
                 },
               );
             },

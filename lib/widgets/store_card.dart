@@ -262,6 +262,7 @@ class _ProductPreviewTile extends StatelessWidget {
                             color: Color(0xFF242424),
                           ),
                         ),
+                        if (product.finalPriceList.basePrice != product.finalPriceList.finalPrice) ...[
                         const SizedBox(width: 5),
                         Flexible(
                           child: Text(
@@ -275,6 +276,7 @@ class _ProductPreviewTile extends StatelessWidget {
                             ),
                           ),
                         ),
+                      ]
                       ],
                     )
                   ],

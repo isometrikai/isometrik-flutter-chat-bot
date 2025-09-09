@@ -79,34 +79,6 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
     super.dispose();
   }
 
-  // void _onAddToCart() {
-  //
-  //   // Create consolidated messages from quantities
-  //   List<String> consolidatedMessages = [];
-  //   _productQuantities.forEach((productId, quantity) {
-  //     if (quantity > 0 && _productDetails.containsKey(productId)) {
-  //       final product = _productDetails[productId]!;
-  //       // Calculate quantity added in this session
-  //       final initialQuantity = _initialQuantities[productId] ?? 0;
-  //       final quantityAdded = quantity - initialQuantity;
-  //
-  //       print("Product: ${product.productName}, Current: $quantity, Initial: $initialQuantity, Added: $quantityAdded");
-  //
-  //       if (quantityAdded > 0) {
-  //         consolidatedMessages.add("Add ${quantityAdded}X ${product.productName} to cart");
-  //       }
-  //     }
-  //   });
-  //
-  //   // Call the callback with consolidated messages and close the screen
-  //   if (widget.onCheckout != null && consolidatedMessages.isNotEmpty) {
-  //     widget.onCheckout!(consolidatedMessages);
-  //   }
-  //
-  //   // Close the screen
-  //   Navigator.of(context).pop();
-  // }
-
   void _clearCart() {
     setState(() {
       _cartItems = 0;

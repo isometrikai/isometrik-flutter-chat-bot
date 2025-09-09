@@ -1,5 +1,6 @@
 import 'package:chat_bot/data/api_client.dart';
 import 'package:chat_bot/data/services/token_manager.dart';
+import 'package:chat_bot/utils/api_result.dart';
 
 /// Universal API client that automatically handles token refresh for all APIs
 class UniversalApiClient {
@@ -21,6 +22,11 @@ class UniversalApiClient {
   late final ApiClient _appClient = ApiClient(
     baseUrl: 'https://apisuperapp-staging.eazy-online.com',
     buildHeaders: _buildAppHeaders,
+  );
+
+  late final ApiClient _groceryClient = ApiClient(
+    baseUrl: 'https://apisuperapp-staging.eazy-online.com',
+    buildHeaders: _buildGroceryHeaders,
   );
 
   /// Build headers with current token
@@ -47,6 +53,44 @@ class UniversalApiClient {
     };
   }
 
+  /// Build headers specifically for grocery API calls
+  Future<Map<String, String>> _buildGroceryHeaders() async {
+    final token = TokenManager.instance.userToken;
+    return {
+      'currencysymbol': '4oK5',
+      'storeId': '634ea323eaa246001371fa07', // Default storeId, will be overridden
+      'Authorization': token ?? '',
+      'storeType': '8',
+      'ipAddress': '192.168.5.105',
+      'platform': '1',
+      'language': 'en',
+      'currencycode': 'INR',
+      'skip': '0',
+      'cityId': '5df7b7218798dc2c1114e6bf',
+      'size': '5',
+      'storeCategoryId': '634e537076e179f58008c0e5',
+    };
+  }
+
+  /// Build grocery headers with dynamic storeId
+  Future<Map<String, String>> buildGroceryHeadersWithStoreId(String storeId) async {
+    final token = TokenManager.instance.userToken;
+    return {
+      'currencysymbol': '4oK5',
+      'storeId': storeId,
+      'Authorization': 'Bearer $token',
+      'storeType': '8',
+      'ipAddress': '192.168.5.105',
+      'platform': '1',
+      'language': 'en',
+      'currencycode': 'INR',
+      'skip': '0',
+      'cityId': '5df7b7218798dc2c1114e6bf',
+      'size': '5',
+      'storeCategoryId': '634e537076e179f58008c0e5',
+    };
+  }
+
   /// Handle token refresh when unauthorized
   Future<bool> _handleTokenRefresh() async {
     return await TokenManager.instance.refreshToken();
@@ -60,6 +104,9 @@ class UniversalApiClient {
 
   ApiClient get appClient => _appClient;
 
+  /// Get grocery API client (for grocery-specific APIs)
+  ApiClient get groceryClient => _groceryClient;
+
   /// Create a custom API client for any base URL
   ApiClient createClient(String baseUrl) {
     return ApiClient(
@@ -67,5 +114,20 @@ class UniversalApiClient {
       buildHeaders: _buildHeaders,
       onUnauthorizedRefresh: _handleTokenRefresh,
     );
+  }
+
+  /// Make a GET request with custom headers
+  Future<ApiResult> getWithCustomHeaders(
+    String endpoint, {
+    Map<String, String>? queryParameters,
+    Map<String, String>? customHeaders,
+  }) async {
+    // Create a custom client with the specific headers
+    final client = ApiClient(
+      baseUrl: 'https://apisuperapp-staging.eazy-online.com',
+      buildHeaders: () async => customHeaders ?? {},
+    );
+    
+    return await client.get(endpoint, queryParameters: queryParameters);
   }
 }

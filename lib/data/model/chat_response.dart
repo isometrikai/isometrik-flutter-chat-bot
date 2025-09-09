@@ -337,6 +337,7 @@ class Product {
   final String? storeId;
   final bool? storeIsOpen;
   final bool? instock;
+  final bool? variantCount;// For Grocery Only
 
   const Product({
     // required this.id,
@@ -357,6 +358,7 @@ class Product {
      this.storeId,
      this.storeIsOpen,
      this.instock,
+     this.variantCount,
   });
 
   double get finalPrice => finalPriceList.finalPrice;
@@ -397,6 +399,7 @@ class Product {
       storeId: json['storeId']?.toString() ?? '',
         storeIsOpen: json['storeIsOpen'] ?? false,
         instock: json['instock'] ?? false,
+        variantCount: json['variantCount'] ?? false,
     );
   }
 
@@ -420,6 +423,7 @@ class Product {
       'storeId': storeId,
       'storeIsOpen': storeIsOpen,
       'instock': instock,
+      'variantCount': variantCount,
     };
   }
 }
@@ -773,7 +777,7 @@ class WidgetAction {
       storeName: json['storeName']?.toString(),
       paymentTypeText: json['paymentTypeText']?.toString(),
       storeTypeId: json['storeTypeId'] ?? -111,
-        storeIsOpen: json['storeIsOpen'] ?? false,
+        storeIsOpen: json['storeIsOpen'] ?? true,
         storeCategoryName: json['storeCategoryName']?.toString(),
     );
   }
