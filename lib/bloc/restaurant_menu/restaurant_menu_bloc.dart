@@ -3,6 +3,7 @@ import 'package:chat_bot/bloc/restaurant_menu/restaurant_menu_state.dart';
 import 'package:chat_bot/data/model/chat_response.dart';
 import 'package:chat_bot/data/model/restaurant_menu_response.dart';
 import 'package:chat_bot/data/repositories/restaurant_menu_repository.dart';
+import 'package:chat_bot/utils/utility.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class RestaurantMenuBloc extends Bloc<RestaurantMenuEvent, RestaurantMenuState> {
@@ -22,7 +23,8 @@ class RestaurantMenuBloc extends Bloc<RestaurantMenuEvent, RestaurantMenuState> 
     RestaurantMenuEvent event,
     Emitter<RestaurantMenuState> emit,
   ) async {
-    emit(RestaurantMenuLoadInProgress());
+    // emit(RestaurantMenuLoadInProgress());
+    Utility.showLoader();
     try {
       final String storeId = actionData?.storeId?.isNotEmpty == true
           ? actionData?.storeId ?? ''
@@ -32,8 +34,10 @@ class RestaurantMenuBloc extends Bloc<RestaurantMenuEvent, RestaurantMenuState> 
         storeId: storeId,
       );
 
+      Utility.closeProgressDialog();
       emit(RestaurantMenuLoadSuccess(categories: obj.productData, storeData: obj.storeData));
     } catch (e) {
+      Utility.closeProgressDialog();
       emit(RestaurantMenuLoadFailure(e.toString()));
     }
   }

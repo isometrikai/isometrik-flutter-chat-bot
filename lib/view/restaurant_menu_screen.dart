@@ -157,10 +157,11 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
                         child: BlocBuilder<RestaurantMenuBloc, RestaurantMenuState>(
                           builder: (context, state) {
                             if (state is RestaurantMenuInitial || state is RestaurantMenuLoadInProgress) {
-                              return const Padding(
-                                padding: EdgeInsets.only(top: 32),
-                                child: Center(child: CircularProgressIndicator()),
-                              );
+                              return Container();
+                              // const Padding(
+                              //   padding: EdgeInsets.only(top: 32),
+                              //   child: Center(child: CircularProgressIndicator()),
+                              // );
                             }
                             if (state is RestaurantMenuLoadFailure) {
                               return Padding(

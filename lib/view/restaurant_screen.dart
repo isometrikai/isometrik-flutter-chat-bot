@@ -615,7 +615,7 @@ void _onQuantityChangedForGrocery(String parentProductId,
     return BlocBuilder<RestaurantBloc, RestaurantState>(
       builder: (context, state) {
         if (state is RestaurantLoadInProgress || state is RestaurantInitial) {
-          return const Center(child: CircularProgressIndicator());
+          return const Center();
         }
 
         if (state is RestaurantLoadFailure) {

@@ -121,10 +121,7 @@ class _GroceriesMenuScreenState extends State<GroceriesMenuScreen> {
                         child: BlocBuilder<GroceryMenuBloc, GroceryMenuState>(
                           builder: (context, state) {
                             if (state is SubCategoryProductsLoadInProgress) {
-                              return const Padding(
-                                padding: EdgeInsets.only(top: 32),
-                                child: Center(child: CircularProgressIndicator()),
-                              );
+                              return Container();
                             }
                             if (state is SubCategoryProductsLoadFailure) {
                               return Padding(
@@ -140,10 +137,7 @@ class _GroceriesMenuScreenState extends State<GroceriesMenuScreen> {
                             }
                             
                             // Default loading state
-                            return const Padding(
-                              padding: EdgeInsets.only(top: 32),
-                              child: Center(child: CircularProgressIndicator()),
-                            );
+                            return  Container();
                           },
                         ),
                         ),

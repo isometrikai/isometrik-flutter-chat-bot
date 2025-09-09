@@ -18,6 +18,7 @@ import 'package:chat_bot/view/restaurant_screen.dart';
 import 'package:chat_bot/view/cart_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_html/flutter_html.dart';
 import 'package:chat_bot/utils/asset_path.dart';
 import 'package:lottie/lottie.dart';
 import '../services/callback_manage.dart';
@@ -1066,16 +1067,48 @@ class _ChatScreenBody extends StatelessWidget {
                         //   ),
                         // ],
                       ),
-                      child: Text(
-                        message.text,
-                        style: TextStyle(
-                          color: message.isBot
-                              ? Color(int.parse(chatbotData.data.first.uiPreferences.botBubbleFontColor.replaceFirst('#', '0xFF')))
-                              : Color(int.parse(chatbotData.data.first.uiPreferences.userBubbleFontColor.replaceFirst('#', '0xFF'))),
-                          fontSize: 16,
-                          fontFamily: "Plus Jakarta Sans"
-                        ),
-                      ),
+                      child: _hasMarkdownSyntax(message.text)
+                          ? Html(
+                              data: _markdownToHtml(message.text),
+                              style: {
+                                "body": Style(
+                                  margin: Margins.zero,
+                                  padding: HtmlPaddings.zero,
+                                  fontSize: FontSize(16),
+                                  fontFamily: "Plus Jakarta Sans",
+                                  color: message.isBot
+                                      ? Color(int.parse(chatbotData.data.first.uiPreferences.botBubbleFontColor.replaceFirst('#', '0xFF')))
+                                      : Color(int.parse(chatbotData.data.first.uiPreferences.userBubbleFontColor.replaceFirst('#', '0xFF'))),
+                                ),
+                                "strong": Style(
+                                  fontWeight: FontWeight.bold,
+                                  color: message.isBot
+                                      ? Color(int.parse(chatbotData.data.first.uiPreferences.botBubbleFontColor.replaceFirst('#', '0xFF')))
+                                      : Color(int.parse(chatbotData.data.first.uiPreferences.userBubbleFontColor.replaceFirst('#', '0xFF'))),
+                                ),
+                                "em": Style(
+                                  fontStyle: FontStyle.italic,
+                                  color: message.isBot
+                                      ? Color(int.parse(chatbotData.data.first.uiPreferences.botBubbleFontColor.replaceFirst('#', '0xFF')))
+                                      : Color(int.parse(chatbotData.data.first.uiPreferences.userBubbleFontColor.replaceFirst('#', '0xFF'))),
+                                ),
+                                "code": Style(
+                                  backgroundColor: Colors.grey.shade200,
+                                  padding: HtmlPaddings.symmetric(horizontal: 4, vertical: 2),
+                                  fontFamily: "monospace",
+                                ),
+                              },
+                            )
+                          : Text(
+                              message.text,
+                              style: TextStyle(
+                                color: message.isBot
+                                    ? Color(int.parse(chatbotData.data.first.uiPreferences.botBubbleFontColor.replaceFirst('#', '0xFF')))
+                                    : Color(int.parse(chatbotData.data.first.uiPreferences.userBubbleFontColor.replaceFirst('#', '0xFF'))),
+                                fontSize: 16,
+                                fontFamily: "Plus Jakarta Sans"
+                              ),
+                            ),
                     ),
                   ],
                 ),
@@ -1124,6 +1157,47 @@ class _ChatScreenBody extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  // Helper method to check if text contains markdown syntax
+  bool _hasMarkdownSyntax(String text) {
+    // Check for common markdown patterns
+    return text.contains('**') || // Bold text
+           text.contains('*') ||  // Italic text
+           text.contains('`') ||  // Code
+           text.contains('#') ||  // Headers
+           text.contains('- ') || // Lists
+           text.contains('1. ') || // Numbered lists
+           text.contains('[') ||  // Links
+           text.contains('](');   // Links
+  }
+
+  // Helper method to convert markdown to HTML
+  String _markdownToHtml(String text) {
+    String html = text;
+    
+    // Convert bold text **text** to <strong>text</strong>
+    html = html.replaceAllMapped(
+      RegExp(r'\*\*(.*?)\*\*'),
+      (match) => '<strong>${match.group(1)}</strong>'
+    );
+    
+    // Convert italic text *text* to <em>text</em>
+    html = html.replaceAllMapped(
+      RegExp(r'\*(.*?)\*'),
+      (match) => '<em>${match.group(1)}</em>'
+    );
+    
+    // Convert code `text` to <code>text</code>
+    html = html.replaceAllMapped(
+      RegExp(r'`(.*?)`'),
+      (match) => '<code>${match.group(1)}</code>'
+    );
+    
+    // Convert line breaks \n to <br>
+    html = html.replaceAll('\n', '<br>');
+    
+    return html;
   }
 
   // Removed welcome message UI
