@@ -111,44 +111,51 @@ class _CartScreenState extends State<CartScreen> {
   }
 
   Widget _buildFilterChips() {
-    final categories = [
-      {'name': '🍕 Food', 'count': '3'},
-      {'name': '🥑 Grocery', 'count': ''},
-    ];
+    return BlocBuilder<CartBloc, CartState>(
+      builder: (context, state) {
+        // Calculate category counts from cart data
+        final categoryCounts = _calculateCategoryCounts(state);
+        
+        final categories = [
+          {'name': '🍕 Food', 'count': categoryCounts['food']},
+          {'name': '🥑 Grocery', 'count': categoryCounts['grocery']},
+        ];
 
-    return Container(
-      height: 40,
-      margin: const EdgeInsets.only(top: 16),
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        itemCount: categories.length,
-        itemBuilder: (context, index) {
-          final category = categories[index];
-          final isSelected = selectedCategoryIndex == index;
-          return GestureDetector(
-            onTap: () {
-              setState(() {
-                selectedCategoryIndex = index;
-              });
+        return Container(
+          height: 40,
+          margin: const EdgeInsets.only(top: 16),
+          child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            itemCount: categories.length,
+            itemBuilder: (context, index) {
+              final category = categories[index];
+              final isSelected = selectedCategoryIndex == index;
+              return GestureDetector(
+                onTap: () {
+                  setState(() {
+                    selectedCategoryIndex = index;
+                  });
+                },
+                child: Container(
+                  margin: const EdgeInsets.only(right: 8),
+                  child: _buildFilterChip(
+                    name: category['name'] as String,
+                    count: category['count'] as int,
+                    isSelected: isSelected,
+                  ),
+                ),
+              );
             },
-            child: Container(
-              margin: const EdgeInsets.only(right: 8),
-              child: _buildFilterChip(
-                name: category['name'] as String,
-                count: category['count'] as String,
-                isSelected: isSelected,
-              ),
-            ),
-          );
-        },
-      ),
+          ),
+        );
+      },
     );
   }
 
   Widget _buildFilterChip({
     required String name,
-    required String count,
+    required int count,
     required bool isSelected,
   }) {
     return Container(
@@ -162,6 +169,7 @@ class _CartScreenState extends State<CartScreen> {
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Text(
             name,
@@ -171,25 +179,52 @@ class _CartScreenState extends State<CartScreen> {
               color: Color(0xFF242424),
             ),
           ),
-          // const SizedBox(width: 4),
-          // Container(
-          //   padding: const EdgeInsets.all(2.64),
-          //   decoration: BoxDecoration(
-          //     color: const Color(0xFF8E2FFD),
-          //     borderRadius: BorderRadius.circular(39.59),
-          //   ),
-          //   child: Text(
-          //     count,
-          //     style: const TextStyle(
-          //       fontSize: 7.71,
-          //       fontWeight: FontWeight.w600,
-          //       color: Colors.white,
-          //     ),
-          //   ),
-          // ),
+          // Only show count badge if count > 0
+          if (count > 0) ...[
+            const SizedBox(width: 6),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+              decoration: BoxDecoration(
+                color: const Color(0xFF8E2FFD),
+                borderRadius: BorderRadius.circular(39.59),
+              ),
+              child: Text(
+                count.toString().padLeft(2, '0'),
+                style: const TextStyle(
+                  fontSize: 7.71,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ],
         ],
       ),
     );
+  }
+
+  /// Calculate category counts from cart data
+  Map<String, int> _calculateCategoryCounts(CartState state) {
+    int foodCount = 0;
+    int groceryCount = 0;
+
+    if (state is CartLoaded && state.rawCartData != null) {
+      for (final cartData in state.rawCartData!.data) {
+        for (final seller in cartData.sellers) {
+          // storeTypeId 1 = Food, storeTypeId 2 = Grocery
+          if (seller.storeTypeId == 1) {
+            foodCount += seller.products.length;
+          } else if (seller.storeTypeId == 2) {
+            groceryCount += seller.products.length;
+          }
+        }
+      }
+    }
+
+    return {
+      'food': foodCount,
+      'grocery': groceryCount,
+    };
   }
 
   Widget _buildCartContent() {
