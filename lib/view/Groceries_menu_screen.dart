@@ -342,7 +342,7 @@ class _GroceriesMenuScreenState extends State<GroceriesMenuScreen> {
                 cardWidth: dimensions['itemWidth']!,
                 cartData: _cartData,
                 onQuantityChanged: (productId, centralProductId, quantity, isIncrease, isCustomizable) {
-                  _onQuantityChangedForGrocery(product.parentProductId,product.childProductId,product.unitId,product.storeId ?? '',product.storeCategoryId ?? '',product.storeTypeId ?? -111,product.variantsCount,quantity,isIncrease);
+                  _onQuantityChangedForGrocery(product.parentProductId,product.childProductId,product.unitId,product.storeId ?? '',product.storeCategoryId ?? '',product.storeTypeId ?? -111,product.variantsCount,quantity,isIncrease,product.productName,product.productImage);
                 },
                 onClick: () {
                   // Handle product click
@@ -513,7 +513,9 @@ void _onQuantityChangedForGrocery(
     int storeTypeId,
     int variantsCount,
     int newQuantity,
-    bool isIncrease) {
+    bool isIncrease,
+    String productName,
+    String productImage) {
     if (isIncrease == false && newQuantity == 1) {
       //TODO:- 0 Quantity
       int? addToCartOnId;
@@ -544,7 +546,7 @@ void _onQuantityChangedForGrocery(
                           // store: store,
                           // product: product,
                           onChooseClicked: () {
-                            _openGroceryCustomization(parentProductId,productId,unitId,storeId,storeCategoryId,storeTypeId);
+                            _openGroceryCustomization(parentProductId,productId,unitId,storeId,storeCategoryId,storeTypeId,productName,productImage);
                           },
                           onRepeatClicked: () {
                             //TODO:- Add Quantity
@@ -608,25 +610,8 @@ void _onQuantityChangedForGrocery(
   
   }
 
-  void _openProductCustomization(String productId, String centralProductId, String storeId,String storeCategoryId,int storeTypeId, BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => ProductCustomizationScreen(
-        productId: productId,
-        centralProductId: centralProductId,
-        storeId: storeId,
-        productName: 'Product Name',
-        productImage: 'Product Image',
-        isFromMenuScreen: true,
-        onAddToCartWithAddOns: (product, store, variant, addOns) => _onAddToCartWithAddOns(productId, centralProductId, storeId, storeCategoryId, storeTypeId, context, variant, addOns),
-      ),
-    );
-  }
 
-
-void _openGroceryCustomization(String parentProductId, String productId, String unitId, String storeId, String storeCategoryId, int storeTypeId) {
+void _openGroceryCustomization(String parentProductId, String productId, String unitId, String storeId, String storeCategoryId, int storeTypeId, String productName, String productImage) {
   showModalBottomSheet(
                           context: context,
                           isScrollControlled: true,
@@ -635,8 +620,8 @@ void _openGroceryCustomization(String parentProductId, String productId, String 
                             parentProductId: parentProductId,
                             productId: productId,
                             storeId: storeId,
-                            productName: 'productName',
-                            productImage: 'productImage',
+                            productName: productName,
+                            productImage: productImage,
                             onAddToCart: (parentProductId,productId,unitId) {
                               _onAddToCartForGrocery(parentProductId,productId,unitId,storeId,storeCategoryId,storeTypeId,null);
                             },

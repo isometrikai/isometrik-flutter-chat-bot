@@ -2143,7 +2143,7 @@ void _openGroceryCustomization(BuildContext context, String parentProductId, Str
               if (product.storeTypeId == FoodCategory.grocery.value) {
                 _onQuantityChangedForGrocery(context,product.parentProductId,product.childProductId,product.unitId,product.storeId ?? '',product.storeCategoryId ?? '',product.storeTypeId ?? -111,product.variantsCount,quantity,isIncrease);
               }else {
-              _onQuantityChangedMenuItem(productId, centralProductId, quantity, isIncrease, isCustomizable, product.storeId ?? '', product.storeCategoryId ?? '', product.storeTypeId ?? -111, context);
+              _onQuantityChangedMenuItem(productId, centralProductId, quantity, isIncrease, isCustomizable, product.storeId ?? '', product.storeCategoryId ?? '', product.storeTypeId ?? -111, context, product.productName, product.productImage);
               }
             },
             onAddToCart: (productId, centralProductId, quantity, isCustomizable) {
@@ -2247,7 +2247,7 @@ void _openGroceryCustomization(BuildContext context, String parentProductId, Str
     );
   }
 
-   void _onQuantityChangedMenuItem(String productId, String centralProductId, int currentQuantity, bool isIncrease, bool isCustomizable, String storeId,String storeCategoryId,int storeTypeId, BuildContext context) {
+   void _onQuantityChangedMenuItem(String productId, String centralProductId, int currentQuantity, bool isIncrease, bool isCustomizable, String storeId,String storeCategoryId,int storeTypeId, BuildContext context, String productName, String productImage) {
     try {
       if (isIncrease == false && currentQuantity == 1) {
         //TODO:- 0 Quantity
@@ -2282,7 +2282,7 @@ void _openGroceryCustomization(BuildContext context, String parentProductId, Str
                           
                           onChooseClicked: () {
                             // When "I'll choose" is clicked, open ProductCustomizationScreen
-                            _openProductCustomizationMenuItem(productId, centralProductId,storeId, storeCategoryId, storeTypeId, context);
+                            _openProductCustomizationMenuItem(productId, centralProductId,storeId, storeCategoryId, storeTypeId, context, productName, productImage);
                           },
                           onRepeatClicked: () {
                             //TODO:- Add Quantity
@@ -2349,7 +2349,7 @@ void _openGroceryCustomization(BuildContext context, String parentProductId, Str
     }
   }
 
-  void _openProductCustomizationMenuItem(String productId, String centralProductId, String storeId,String storeCategoryId,int storeTypeId, BuildContext context) {
+  void _openProductCustomizationMenuItem(String productId, String centralProductId, String storeId,String storeCategoryId,int storeTypeId, BuildContext context, String productName, String productImage) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -2358,8 +2358,8 @@ void _openGroceryCustomization(BuildContext context, String parentProductId, Str
         productId: productId,
         centralProductId: centralProductId,
         storeId: storeId,
-        productName: 'Product Name',
-        productImage: 'Product Image',
+        productName: productName,
+        productImage: productImage,
         isFromMenuScreen: true,
         onAddToCartWithAddOns: (product, store, variant, addOns) => _onAddToCartWithAddOnsMenuItem(productId, centralProductId, storeId, storeCategoryId, storeTypeId, context, variant, addOns),
       ),

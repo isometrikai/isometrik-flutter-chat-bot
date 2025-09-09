@@ -452,7 +452,9 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
                 vegColor: _veg,
                 nonVegColor: _nonVeg,
                 cartData: _cartData, // Pass cart data to MenuItemCard
-                onQuantityChanged: _onQuantityChanged, // Pass quantity change callback
+                onQuantityChanged: (productId, centralProductId, quantity, isIncrease, isCustomizable) {
+                  _onQuantityChanged(productId, centralProductId, quantity, isIncrease, isCustomizable, item.title, item.imageUrl ?? '');
+                }, // Pass quantity change callback
                 onClick: () {
                   // Find the product data and trigger order
                   chat.Product? foundProduct;
@@ -701,7 +703,7 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
   }
 
   // Handle quantity changes for products
-  void _onQuantityChanged(String productId, String centralProductId, int currentQuantity, bool isIncrease, bool isCustomizable) {
+  void _onQuantityChanged(String productId, String centralProductId, int currentQuantity, bool isIncrease, bool isCustomizable, String productName, String productImage) {
     try {
       if (isIncrease == false && currentQuantity == 1) {
           //TODO:- 0 Quantity
@@ -735,7 +737,7 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
                           
                           onChooseClicked: () {
                             // When "I'll choose" is clicked, open ProductCustomizationScreen
-                            _openProductCustomization(productId, centralProductId,widget.actionData?.storeId ?? '', widget.actionData?.storeCategoryId ?? '', widget.actionData?.storeTypeId ?? -111, context);
+                            _openProductCustomization(productId, centralProductId,widget.actionData?.storeId ?? '', widget.actionData?.storeCategoryId ?? '', widget.actionData?.storeTypeId ?? -111, context, productName, productImage);
                           },
                           onRepeatClicked: () {
                             //TODO:- Add Quantity
@@ -799,7 +801,7 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
     }
   }
 
-  void _openProductCustomization(String productId, String centralProductId, String storeId,String storeCategoryId,int storeTypeId, BuildContext context) {
+  void _openProductCustomization(String productId, String centralProductId, String storeId,String storeCategoryId,int storeTypeId, BuildContext context, String productName, String productImage) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -808,8 +810,8 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
         productId: productId,
         centralProductId: centralProductId,
         storeId: storeId,
-        productName: 'Product Name',
-        productImage: 'Product Image',
+        productName: productName,
+        productImage: productImage,
         isFromMenuScreen: true,
         onAddToCartWithAddOns: (product, store, variant, addOns) => _onAddToCartWithAddOns(productId, centralProductId, storeId, storeCategoryId, storeTypeId, context, variant, addOns),
       ),
