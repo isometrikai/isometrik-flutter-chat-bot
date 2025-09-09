@@ -111,9 +111,6 @@ class CartBloc extends Bloc<CartEvent, CartState> {
     totalProductCount = count;
   }
 
-  // Get CartManager instance
-  // CartManager get getCartManager => cartManager;
-
   /// Validate cart compatibility before adding new items
   CartValidationResult _validateCartCompatibility(CartAddItemRequested event) {
     // If cart is empty, allow adding any item
@@ -220,9 +217,9 @@ class CartBloc extends Bloc<CartEvent, CartState> {
       if (result.isSuccess) {
         isCartAPICalled = true;
         emit(CartProductAdded());
-        add(CartFetchRequested(needToShowLoader: false));
+        add(CartFetchRequested(needToShowLoader: event.needToShowLoaderForCartFetch));
       } else {
-        add(CartFetchRequested(needToShowLoader: false));
+        add(CartFetchRequested(needToShowLoader: event.needToShowLoaderForCartFetch));
         emit(CartError(message: result.message ?? 'Failed to add item to cart'));
       }
     } catch (e) {

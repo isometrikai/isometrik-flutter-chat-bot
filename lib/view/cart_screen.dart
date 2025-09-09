@@ -112,7 +112,7 @@ class _CartScreenState extends State<CartScreen> {
 
   Widget _buildFilterChips() {
     final categories = [
-      {'name': '🍕 Food', 'count': ''},
+      {'name': '🍕 Food', 'count': '3'},
       {'name': '🥑 Grocery', 'count': ''},
     ];
 

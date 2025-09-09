@@ -19,6 +19,7 @@ class CartAddItemRequested extends CartEvent {
   final List<Map<String, dynamic>>? newAddOns;
   final dynamic addToCartOnId;
   final bool needToShowLoader;
+  final bool needToShowLoaderForCartFetch;
 
   CartAddItemRequested({
     required this.storeId,
@@ -33,5 +34,6 @@ class CartAddItemRequested extends CartEvent {
     this.newAddOns,
     this.addToCartOnId,
     this.needToShowLoader = true,
+    this.needToShowLoaderForCartFetch = true,
   });
 }

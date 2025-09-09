@@ -133,7 +133,9 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   void _updateCartCount(int count) {
+    setState(() {
       _totalCartCount = count;
+    });
   }
 
   void _fetchCartData() {
@@ -445,6 +447,9 @@ class _ChatScreenBody extends StatelessWidget {
                       onUpdateCartCount(cartCount);
                     onHandleChatResponse(state.messages);
                     if (state.messages.orderConfirmedWidgets.isNotEmpty) {
+                      context.read<CartBloc>().add(CartFetchRequested(needToShowLoader: false));
+                    }
+                    if (state.messages.cartCount != null && state.messages.cartCount == 0) {
                       context.read<CartBloc>().add(CartFetchRequested(needToShowLoader: false));
                     }
                   } else if (state is ChatError) {
@@ -772,50 +777,130 @@ class _ChatScreenBody extends StatelessWidget {
               const SizedBox(height: 24),
               Row(
                 children: [
+                  // Expanded(
+                  //   child: TextButton(
+                  //     onPressed: () => Navigator.of(context).pop(),
+                  //     style: TextButton.styleFrom(
+                  //       backgroundColor: Colors.grey[100],
+                  //       foregroundColor: Colors.black,
+                  //       padding: const EdgeInsets.symmetric(vertical: 16),
+                  //       shape: RoundedRectangleBorder(
+                  //         borderRadius: BorderRadius.circular(12),
+                  //       ),
+                  //     ),
+                  //     child: const Text(
+                  //       'CANCEL',
+                  //       style: TextStyle(
+                  //         fontSize: 16,
+                  //         fontWeight: FontWeight.w600,
+                  //         color: Color(0xFF8E2FFD)
+                  //       ),
+                  //     ),
+                  //   ),
+                  // ),
+                  // const SizedBox(width: 16),
+                  // Expanded(
+                  //   child: TextButton(
+                  //     onPressed: () {
+                  //       Navigator.of(context).pop();
+                  //       onRestartChatAPI();
+                  //     },
+                  //     style: TextButton.styleFrom(
+                  //       backgroundColor: Color(0xFF8E2FFD),
+                  //       foregroundColor: Colors.white,
+                  //       padding: const EdgeInsets.symmetric(vertical: 16),
+                  //       shape: RoundedRectangleBorder(
+                  //         borderRadius: BorderRadius.circular(12),
+                  //       ),
+                  //     ),
+                  //     child: const Text(
+                  //       'YES',
+                  //       style: TextStyle(
+                  //         fontSize: 16,
+                  //         fontWeight: FontWeight.w600,
+                  //       ),
+                  //     ),
+                  //   ),
+                  // ),
                   Expanded(
-                    child: TextButton(
-                      onPressed: () => Navigator.of(context).pop(),
-                      style: TextButton.styleFrom(
-                        backgroundColor: Colors.grey[100],
-                        foregroundColor: Colors.black,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      child: const Text(
-                        'CANCEL',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
+          child: SizedBox(
+            height: 62,
+            child: OutlinedButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              style: OutlinedButton.styleFrom(
+                side: const BorderSide(color: Color(0xFF8E2FFD), width: 2),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                backgroundColor: Colors.white,
+              ),
+              child: const Text(
+                "CANCEL",
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                  color: Color(0xFF8E2FFD),
+                ),
+              ),
+            ),
+          ),
+        ),
+        
+        // Spacing between buttons
+        const SizedBox(width: 16),
+        
+        // Right button - "Repeat last" (Gradient)
+        Expanded(
+          child: SizedBox(
+            height: 62,
+            child: ElevatedButton(
+              onPressed: () {
+                   Navigator.of(context).pop();
+                   onRestartChatAPI();
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.transparent,
+                elevation: 0,
+                shadowColor: Colors.transparent,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                padding: EdgeInsets.zero,
+              ),
+              child: Ink(
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [
+                      Color(0xFF5186E0),
+                      Color(0xFF5E3DFE),
+                      Color(0xFF8E2FFD),
+                      Color(0xFFB02EFB),
+                      Color(0xFFD445EC),
+                    ],
+                    stops: [0.0, 0.24, 0.52, 0.73, 1.0],
+                    begin: Alignment.centerLeft,
+                    end: Alignment.centerRight,
+                  ),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Container(
+                  height: 62,
+                  alignment: Alignment.center,
+                  child: const Text(
+                    "YES",
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.white,
                     ),
                   ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: TextButton(
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                        onRestartChatAPI();
-                      },
-                      style: TextButton.styleFrom(
-                        backgroundColor: Colors.black,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      child: const Text(
-                        'YES',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
                 ],
               ),
               SizedBox(height: MediaQuery.of(context).padding.bottom + 8),
@@ -1688,6 +1773,7 @@ class _ChatScreenBody extends StatelessWidget {
                           productId: product.childProductId,
                           centralProductId: product.parentProductId,
                           unitId: product.unitId,
+                          needToShowLoaderForCartFetch: false,
                         )); 
                     }
                         
@@ -1718,6 +1804,7 @@ class _ChatScreenBody extends StatelessWidget {
         centralProductId: product.parentProductId,
         unitId: variant.unitId,
         newAddOns: addOns,
+        needToShowLoaderForCartFetch: false,
       ));
       
       print("Added product with addons to cart: ${product.productName}");
@@ -1748,6 +1835,7 @@ class _ChatScreenBody extends StatelessWidget {
         centralProductId: parentProductId,
         unitId: unitId,
         addToCartOnId: addToCartOnId,
+        needToShowLoaderForCartFetch: false,
       ));
       
       print("Added product to cart: ${productId}");
@@ -1787,6 +1875,7 @@ void _onQuantityChangedForGrocery(
         centralProductId: parentProductId,
         unitId: unitId,
         addToCartOnId: addToCartOnId,
+        needToShowLoaderForCartFetch: false,
       ));
     }else if (newQuantity > 0 && isIncrease == true) {
       if (variantsCount > 1) {
@@ -1816,6 +1905,7 @@ void _onQuantityChangedForGrocery(
                               centralProductId: parentProductId,
                               unitId: unitId,
                               addToCartOnId: addToCartOnId,
+                              needToShowLoaderForCartFetch: false,
                             )); 
                           
                           },
@@ -1836,6 +1926,7 @@ void _onQuantityChangedForGrocery(
         centralProductId: parentProductId,
         unitId: unitId,
         addToCartOnId: addToCartOnId,
+        needToShowLoaderForCartFetch: false,
       ));        
       }
 
@@ -1857,6 +1948,7 @@ void _onQuantityChangedForGrocery(
         centralProductId: parentProductId,
         unitId: unitId,
         addToCartOnId: addToCartOnId,
+        needToShowLoaderForCartFetch: false,
       ));
     }
   
@@ -1900,6 +1992,7 @@ void _openGroceryCustomization(BuildContext context, String parentProductId, Str
         centralProductId: product.parentProductId,
         unitId: product.unitId,
         addToCartOnId: addToCartOnId,
+        needToShowLoaderForCartFetch: false,
       ));
     }else if (newQuantity > 0 && isIncrease == true) {
       if (product.variantsCount > 1) {
@@ -1930,6 +2023,7 @@ void _openGroceryCustomization(BuildContext context, String parentProductId, Str
                               centralProductId: product.parentProductId,
                               unitId: product.unitId,
                               addToCartOnId: addToCartOnId,
+                              needToShowLoaderForCartFetch: false,
                             )); 
                           
                           },
@@ -1947,6 +2041,7 @@ void _openGroceryCustomization(BuildContext context, String parentProductId, Str
         productId: product.childProductId,
         centralProductId: product.parentProductId,
         unitId: product.unitId,
+        needToShowLoaderForCartFetch: false,
       ));        
       }
 
@@ -1968,6 +2063,7 @@ void _openGroceryCustomization(BuildContext context, String parentProductId, Str
         centralProductId: product.parentProductId,
         unitId: product.unitId,
         addToCartOnId: addToCartOnId,
+        needToShowLoaderForCartFetch: false,
       ));
     }
     
@@ -2093,6 +2189,7 @@ void _openGroceryCustomization(BuildContext context, String parentProductId, Str
                   centralProductId: product.parentProductId,
                   unitId: product.unitId,
                   addToCartOnId: addToCartOnId,
+                  needToShowLoaderForCartFetch: false,
                 )); 
                 }
               }else {
@@ -2121,6 +2218,7 @@ void _openGroceryCustomization(BuildContext context, String parentProductId, Str
                         centralProductId: centralProductId,
                         unitId: variant.unitId,
                         newAddOns: addOns,
+                        needToShowLoaderForCartFetch: false,
                     ));
                       },
                     ),
@@ -2138,6 +2236,7 @@ void _openGroceryCustomization(BuildContext context, String parentProductId, Str
                         productId: productId,
                         centralProductId: centralProductId,
                         unitId: '',
+                        needToShowLoaderForCartFetch: false,
                     ));
                   } 
               }                
@@ -2169,6 +2268,7 @@ void _openGroceryCustomization(BuildContext context, String parentProductId, Str
           centralProductId: centralProductId,
           unitId: '',
           addToCartOnId: addToCartOnId,
+          needToShowLoaderForCartFetch: false,
         ));
       }else if (currentQuantity > 0 && isIncrease == true) {
 
@@ -2200,6 +2300,7 @@ void _openGroceryCustomization(BuildContext context, String parentProductId, Str
                               centralProductId: centralProductId,
                               unitId: '',
                               addToCartOnId: addToCartOnId,
+                              needToShowLoaderForCartFetch: false,
                             )); 
                           
                           },
@@ -2218,6 +2319,7 @@ void _openGroceryCustomization(BuildContext context, String parentProductId, Str
           productId: productId,
           centralProductId: centralProductId,
           unitId: '',
+          needToShowLoaderForCartFetch: false,
         ));
           }
     
@@ -2239,6 +2341,7 @@ void _openGroceryCustomization(BuildContext context, String parentProductId, Str
           centralProductId: centralProductId,
           unitId: '',
           addToCartOnId: addToCartOnId,
+          needToShowLoaderForCartFetch: false,
         ));
       }
     } catch (e) {
@@ -2287,6 +2390,7 @@ void _openGroceryCustomization(BuildContext context, String parentProductId, Str
         centralProductId: centralProductId,
         unitId: variant.unitId,
         newAddOns: addOns,
+        needToShowLoaderForCartFetch: false,
       ));
       
       // print("Added product with addons to cart: ${product.productName}");

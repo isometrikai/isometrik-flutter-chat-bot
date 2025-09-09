@@ -64,6 +64,7 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
   @override
   void initState() {
     super.initState();
+    isCartAPICalled = false;
     _bloc = RestaurantMenuBloc(actionData: widget.actionData);
     cartBloc = CartBloc();
     _bloc.add(const RestaurantMenuRequested());

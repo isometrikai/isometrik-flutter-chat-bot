@@ -76,7 +76,7 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
     _bloc = RestaurantBloc();
     cartBloc = CartBloc();
     _bootstrapData();
-    
+    isCartAPICalled = false;
     // Listen to cart state changes to update cart data
     cartBloc.stream.listen((state) {
       if (state is CartLoaded && state.rawCartData != null) {

@@ -9,11 +9,13 @@ class ChatResponse {
   final String text;
   final String requestId;
   final List<ChatWidget> widgets;
+  final int? cartCount;
 
   ChatResponse({
     required this.text,
     required this.requestId,
     required this.widgets,
+    this.cartCount,
   });
 
   factory ChatResponse.fromJson(Map<String, dynamic> json) {
@@ -24,6 +26,7 @@ class ChatResponse {
           ?.map((item) => ChatWidget.fromJson(item as Map<String, dynamic>))
           .toList() ??
           [],
+      cartCount: json['cartCount'] ?? -1,
     );
   }
 
@@ -32,6 +35,7 @@ class ChatResponse {
       'text': text,
       'request_id': requestId,
       'widgets': widgets.map((widget) => widget.toJson()).toList(),
+      'cartCount': cartCount,
     };
   }
 

@@ -85,8 +85,8 @@ class AppLoader extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           CircularProgressIndicator(
-            color: Theme.of(context).primaryColor,
-            strokeWidth: 3,
+            color: Color(0xFF8E2FFD),
+            strokeWidth: 4,
           ),
           if (message != null) ...[
             const SizedBox(height: 16),
