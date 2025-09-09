@@ -1715,8 +1715,8 @@ class _ChatScreenBody extends StatelessWidget {
           },
           // onHide: onHideStoreCards, 
           onQuantityChanged: (product, store, newQuantity, isIncrease) {
-            if (store.type == FoodCategory.grocery.value) {
-              _onQuantityChangedForGrocery(context,product.parentProductId,product.childProductId,product.unitId,store.storeId,store.storeCategoryId,store.type,product.variantsCount,newQuantity,isIncrease);
+            if (store.storeTypeId == FoodCategory.grocery.value) {
+              _onQuantityChangedForGrocery(context,product.parentProductId,product.childProductId,product.unitId,store.storeId,store.storeCategoryId,store.storeTypeId ?? -111,product.variantsCount,newQuantity,isIncrease);
             }else {
               _onQuantityChanged(context, product, store, newQuantity, isIncrease);
             }
@@ -1745,7 +1745,7 @@ class _ChatScreenBody extends StatelessWidget {
                             productName: product.productName,
                             productImage: product.productImage,
                             onAddToCart: (parentProductId,productId,unitId) {
-                              _onAddToCartForGrocery(parentProductId,productId,unitId,store.storeId,store.storeCategoryId,store.type,null);
+                              _onAddToCartForGrocery(parentProductId,productId,unitId,store.storeId,store.storeCategoryId,store.storeTypeId ?? -111,null);
                             },
                           ),
                         );
@@ -1769,7 +1769,7 @@ class _ChatScreenBody extends StatelessWidget {
                           action: 1, // Add action
                           storeCategoryId: store.storeCategoryId,
                           newQuantity: 1, // Add 1 item
-                          storeTypeId: store.type,
+                          storeTypeId: store.storeTypeId ?? -111,
                           productId: product.childProductId,
                           centralProductId: product.parentProductId,
                           unitId: product.unitId,
@@ -1799,7 +1799,7 @@ class _ChatScreenBody extends StatelessWidget {
         action: 1, // Add action
         storeCategoryId: store.storeCategoryId,
         newQuantity: 1,
-        storeTypeId: store.type,
+        storeTypeId: store.storeTypeId ?? -111,
         productId: product.childProductId,
         centralProductId: product.parentProductId,
         unitId: variant.unitId,
@@ -1987,7 +1987,7 @@ void _openGroceryCustomization(BuildContext context, String parentProductId, Str
         action: 3, // Add/Update action
         storeCategoryId: store.storeCategoryId,
         newQuantity: 0,
-        storeTypeId: store.type,
+        storeTypeId: store.storeTypeId ?? -111,
         productId: product.childProductId,
         centralProductId: product.parentProductId,
         unitId: product.unitId,
@@ -2018,7 +2018,7 @@ void _openGroceryCustomization(BuildContext context, String parentProductId, Str
                               action: 2, // Add action
                               storeCategoryId: store.storeCategoryId,
                               newQuantity: newQuantity + 1,
-                              storeTypeId: store.type,
+                              storeTypeId: store.storeTypeId ?? -111,
                               productId: product.childProductId,
                               centralProductId: product.parentProductId,
                               unitId: product.unitId,
@@ -2037,7 +2037,7 @@ void _openGroceryCustomization(BuildContext context, String parentProductId, Str
         action: 2, // Add action
         storeCategoryId: store.storeCategoryId,
         newQuantity: newQuantity + 1,
-        storeTypeId: store.type,
+        storeTypeId: store.storeTypeId ?? -111,
         productId: product.childProductId,
         centralProductId: product.parentProductId,
         unitId: product.unitId,
@@ -2058,7 +2058,7 @@ void _openGroceryCustomization(BuildContext context, String parentProductId, Str
         action: 2, // Add/Update action
         storeCategoryId: store.storeCategoryId,
         newQuantity: newQuantity - 1,
-        storeTypeId: store.type,
+        storeTypeId: store.storeTypeId ?? -111,
         productId: product.childProductId,
         centralProductId: product.parentProductId,
         unitId: product.unitId,
