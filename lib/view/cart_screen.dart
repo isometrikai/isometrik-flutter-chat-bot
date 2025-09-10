@@ -288,11 +288,6 @@ class _CartScreenState extends State<CartScreen> {
             width: 120,
             height: 120,
           ),
-          // AssetHelper.svgAsset(
-          //   'images/ic_emptyCart.svg',
-          //   width: 120,
-          //   height: 120,
-          // ),
           const SizedBox(height: 24),
           // "Your cart is empty" text
           const Text(

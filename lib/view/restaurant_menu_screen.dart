@@ -561,7 +561,7 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
       price: priceText,
       originalPrice: basePriceText,
       isVeg: !p.containsMeat,
-      assetPath: imageUrl ?? AssetHelper.getAssetPath('images/ic_placeHolder.svg'),
+      assetPath: imageUrl ?? '',
       imageUrl: imageUrl,
       productId: p.childProductId,
       centralProductId: p.parentProductId,

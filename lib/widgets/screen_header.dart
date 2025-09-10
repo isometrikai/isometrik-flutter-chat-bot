@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import '../utils/asset_helper.dart';
+import '../utils/asset_path.dart';
 
 class ScreenHeader extends StatelessWidget {
   final String title;
@@ -55,8 +56,10 @@ class ScreenHeader extends StatelessWidget {
           ),
           if (showCloseButton)
             IconButton(
-              icon: AssetHelper.svgAsset(
+              icon: SvgPicture.asset(
+    AssetPath.get(
                 'images/ic_close.svg',
+    ),
                 width: 40,
                 height: 40,
               ),

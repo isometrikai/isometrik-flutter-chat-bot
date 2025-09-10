@@ -4,8 +4,10 @@ import 'package:chat_bot/data/model/chat_response.dart' as chat;
 import 'package:chat_bot/data/model/universal_cart_response.dart';
 import 'package:chat_bot/services/callback_manage.dart';
 import 'package:chat_bot/bloc/chat_event.dart';
+import 'package:flutter_svg/svg.dart';
 import '../utils/asset_helper.dart';
 import '../utils/asset_helper_svg.dart';
+import '../utils/asset_path.dart';
 import 'black_toast_view.dart';
 
 class StoreCard extends StatelessWidget {
@@ -182,8 +184,10 @@ class StoreCard extends StatelessWidget {
 
   Widget _placeholderLogo() {
     return Center(
-      child: AssetHelper.svgAsset(
+      child: SvgPicture.asset(
+        AssetPath.get(
         'images/ic_placeHolder.svg',
+        ),
         width: 69,
         height: 69,
         fit: BoxFit.cover,
@@ -342,8 +346,9 @@ class _ProductPreviewTile extends StatelessWidget {
 
   Widget _placeholderProductImage() {
     return Center(
-      child: AssetHelper.svgAsset(
-        'images/ic_placeHolder.svg',
+      child: SvgPicture.asset(
+        AssetPath.get(
+        'images/ic_placeHolder.svg',),
         width: 78,
         height: 78,
         fit: BoxFit.cover,
