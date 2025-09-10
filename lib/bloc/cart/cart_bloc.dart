@@ -127,6 +127,7 @@ class CartBloc extends Bloc<CartEvent, CartState> {
           for (final seller in existingCart.sellers) {
             for (final product in seller.products) {
               if (product.storeId != null && product.storeId != event.storeId) {
+                cartId = existingCart.id;
                 return CartValidationResult(
                   isValid: false,
                   errorMessage: 'Cannot add items from different stores. Please clear your cart first.',

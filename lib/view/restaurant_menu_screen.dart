@@ -67,10 +67,9 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
     isCartAPICalled = false;
     _bloc = RestaurantMenuBloc(actionData: widget.actionData);
     cartBloc = CartBloc();
+    cartBloc.add(CartFetchRequested(needToShowLoader: false));
     _bloc.add(const RestaurantMenuRequested());
     
-    // Fetch initial cart data
-    cartBloc.add(CartFetchRequested(needToShowLoader: false));
   }
 
   @override

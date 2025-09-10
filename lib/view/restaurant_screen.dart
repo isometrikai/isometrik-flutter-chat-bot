@@ -88,10 +88,9 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
   }
 
   Future<void> _bootstrapData() async {
+    cartBloc.add(CartFetchRequested(needToShowLoader: false));
     _bloc.add(RestaurantFetchRequested(keyword: _currentKeyword, storeCategoryName: widget.actionData?.storeCategoryName ?? ''));
     
-    // Fetch initial cart data
-    cartBloc.add(CartFetchRequested(needToShowLoader: false));
   }
 
   /// Handle adding products with addons to cart

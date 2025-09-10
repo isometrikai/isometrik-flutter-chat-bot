@@ -52,9 +52,8 @@ class _GroceriesMenuScreenState extends State<GroceriesMenuScreen> {
     isCartAPICalled = false;
     _bloc = GroceryMenuBloc(actionData: widget.actionData);
     cartBloc = CartBloc();
-    
-    _fetchSubCategoryProducts();
     cartBloc.add(CartFetchRequested(needToShowLoader: false));
+    _fetchSubCategoryProducts();
   }
 
   void _fetchSubCategoryProducts() {
