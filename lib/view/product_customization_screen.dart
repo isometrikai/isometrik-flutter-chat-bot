@@ -22,7 +22,7 @@ class ProductCustomizationScreen extends StatefulWidget {
   final String? productImage;
   
   final Function(String)? onAddToCart;
-  final Function(Product, Store, ProductPortion, List<Map<String, dynamic>>)? onAddToCartWithAddOns;
+  final Function(Product, Store, ProductPortion, List<Map<String, dynamic>>,String)? onAddToCartWithAddOns;
 
   const ProductCustomizationScreen({
     super.key,
@@ -636,6 +636,7 @@ class _ProductCustomizationScreenState extends State<ProductCustomizationScreen>
                               widget.store!,
                               state.selectedVariant!,
                               formattedAddOns,
+                              state.selectedVariant!.childProductId,
                           );
                           }
                           Navigator.of(context).pop();
@@ -646,6 +647,7 @@ class _ProductCustomizationScreenState extends State<ProductCustomizationScreen>
                               widget.store!,
                               state.selectedVariant!,
                               formattedAddOns,
+                              state.selectedVariant!.childProductId,
                         );
                         Navigator.of(context).pop();
                         // No addons selected, proceed with original logic

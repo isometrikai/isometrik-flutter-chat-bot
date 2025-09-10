@@ -99,7 +99,8 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
     chat.Product product, 
     chat.Store store, 
     dynamic variant, 
-    List<Map<String, dynamic>> addOns
+    List<Map<String, dynamic>> addOns,
+    String selectedProductId
   ) {
     try {
       //TODO:- Add Quantity
@@ -110,7 +111,7 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
         storeCategoryId: store.storeCategoryId,
         newQuantity: 1,
         storeTypeId: store.type,
-        productId: product.childProductId,
+        productId: selectedProductId,
         centralProductId: product.parentProductId,
         unitId: variant.unitId,
         newAddOns: addOns,
