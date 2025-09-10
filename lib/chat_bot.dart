@@ -3,6 +3,7 @@ library chat_bot;
 import 'package:flutter/material.dart';
 import 'view/launch_screen.dart';
 import 'services/api_service.dart';
+import 'utils/utility.dart';
 
 export 'view/launch_screen.dart';
 export 'view/chat_screen.dart';
@@ -50,6 +51,9 @@ class ChatBot {
   }
 
   static void openChatBot(BuildContext context) {
+    // Set current context for fallback when navigator key is not available
+    Utility.setCurrentContext(context);
+    
     Navigator.push(
       context,
       MaterialPageRoute(

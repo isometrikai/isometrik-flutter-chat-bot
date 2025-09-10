@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:chat_bot/data/model/universal_cart_response.dart';
+import 'package:flutter_svg/svg.dart';
 import '../utils/asset_helper.dart';
+import '../utils/asset_path.dart';
 
 class MenuItemCard extends StatelessWidget {
   final String title;
@@ -313,10 +315,12 @@ class MenuItemCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
       ),
       child: Center(
-        child: AssetHelper.svgAsset(
-          'images/ic_placeHolder.svg',
-          // width: 32,
-          // height: 32,
+        child: SvgPicture.asset(
+            AssetPath.get(
+                  'images/ic_placeHolder.svg',
+                  // width: 32,
+                  // height: 32,
+            ),
           fit: BoxFit.cover,
           // color: const Color(0xFF363648),
         ),

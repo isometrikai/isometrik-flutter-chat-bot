@@ -283,8 +283,8 @@ class _CartScreenState extends State<CartScreen> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           // Empty cart SVG icon
-          AssetHelper.svgAsset(
-            'images/ic_emptyCart.svg',
+          SvgPicture.asset(
+            AssetPath.get('images/ic_emptyCart.svg'),
             width: 120,
             height: 120,
           ),
