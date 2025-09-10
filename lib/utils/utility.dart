@@ -78,7 +78,7 @@ class Utility {
     VoidCallback? onSecondaryPressed,
     bool barrierDismissible = true,
   }) async {
-    final context = kNavigatorKey.currentContext;
+    final context = kNavigatorKey.currentContext ?? _currentContext;
     if (context == null) {
       print('Warning: Navigator context is null, cannot show dialog');
       return null;
