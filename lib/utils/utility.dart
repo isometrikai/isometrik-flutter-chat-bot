@@ -13,11 +13,22 @@ class Utility {
     final context = kNavigatorKey.currentContext;
     if (context == null) {
       print('Warning: Navigator context is null, cannot show loader');
+      // Try to get context from the current widget tree
+      final currentContext = _getCurrentContext();
+      if (currentContext == null) {
+        print('Error: No valid context available for showing loader');
+        return;
+      }
+      _showLoaderWithContext(currentContext, message);
       return;
     }
     
+    _showLoaderWithContext(context, message);
+  }
+
+  static void _showLoaderWithContext(BuildContext context, String? message) {
     isLoading = true;
-    await showDialog(
+    showDialog(
       barrierColor: Colors.transparent,
       context: context,
       builder: (_) => AppLoader(
@@ -27,8 +38,29 @@ class Utility {
     );
   }
 
+  static BuildContext? _getCurrentContext() {
+    // Try to get context from the current widget tree
+    // This is a fallback when navigator key context is not available
+    try {
+      // This will be set by the app when it initializes
+      return _currentContext;
+    } catch (e) {
+      print('Error getting current context: $e');
+      return null;
+    }
+  }
+
+  // Static variable to store current context as fallback
+  static BuildContext? _currentContext;
+
+  /// Set the current context for fallback when navigator key is not available
+  /// Call this method in your app's build method to ensure context is available
+  static void setCurrentContext(BuildContext context) {
+    _currentContext = context;
+  }
+
   static void closeProgressDialog() {
-    final context = kNavigatorKey.currentContext;
+    final context = kNavigatorKey.currentContext ?? _currentContext;
     if (isLoading && context != null && Navigator.of(context).canPop()) {
       isLoading = false;
       Navigator.of(context).pop();

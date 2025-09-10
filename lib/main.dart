@@ -10,18 +10,22 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
   // Configure asset loading mode
-  //  AssetPath.isPackageMode = true; // Set to true for package mode, false for normal project
+  // AssetPath.isPackageMode = true; // Set to true for package mode, false for normal project
   
   await PlatformService.initializeFromPlatform();
   runApp(const MyApp());
 }
 
-// @pragma('vm:entry-point')
-// void chatMain() async {
-//   WidgetsFlutterBinding.ensureInitialized();
-//   await PlatformService.initializeFromPlatform();
-//   runApp(const MyApp());
-// }
+@pragma('vm:entry-point')
+void chatMain() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  
+  // Configure for package mode
+  AssetPath.isPackageMode = true;
+  
+  await PlatformService.initializeFromPlatform();
+  runApp(const MyApp());
+}
 class MyApp extends StatelessWidget {
   static const platform = MethodChannel('chat_bot/orders');
   const MyApp({super.key});
@@ -30,6 +34,9 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     // Set up callbacks when app initializes
     _setupCallbacks();
+    
+    // Set current context for fallback when navigator key is not available
+    Utility.setCurrentContext(context);
     
     return MaterialApp(
       title: 'Flutter Demo',
