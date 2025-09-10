@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:chat_bot/data/model/chat_response.dart';
 import 'package:chat_bot/data/model/universal_cart_response.dart';
+import '../utils/asset_helper.dart';
 
 class MenuItemCard extends StatelessWidget {
   final String title;
@@ -18,6 +18,9 @@ class MenuItemCard extends StatelessWidget {
   final Color purple;
   final Color vegColor;
   final Color nonVegColor;
+  final double? imageWidth;
+  final double? imageHeight;
+  final double? cardWidth;
   
 
   MenuItemCard({
@@ -37,6 +40,9 @@ class MenuItemCard extends StatelessWidget {
     this.purple = const Color(0xFF8E2FFD),
     this.vegColor = const Color(0xFF66BB6A),
     this.nonVegColor = const Color(0xFFF44336),
+    this.imageWidth,
+    this.imageHeight,
+    this.cardWidth,
   });
 
   @override
@@ -44,7 +50,7 @@ class MenuItemCard extends StatelessWidget {
     return GestureDetector(
       onTap: onClick,
       child: SizedBox(
-        width: 108,
+        width: cardWidth ?? 108,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
@@ -57,14 +63,19 @@ class MenuItemCard extends StatelessWidget {
                       ?
                   Image.network(
                       imageUrl!,
-                          width: 108,
-                      height: 108,
+                          width: imageWidth ?? 108,
+                      height: imageHeight ?? 108,
                       fit: BoxFit.cover,
+                      loadingBuilder: (context, child, loadingProgress) {
+                        if (loadingProgress == null) return child;
+                        return _placeholderImage();
+                      },
+                      errorBuilder: (context, error, stackTrace) => _placeholderImage(),
                   )
-                      : const SizedBox(
-                          width: 108,
-                          height: 108,
-                          child: ColoredBox(color: Color(0xFFF5F5F5)),
+                      : SizedBox(
+                          width: imageWidth ?? 108,
+                          height: imageHeight ?? 108,
+                          child: const ColoredBox(color: Color(0xFFF5F5F5)),
                         ),
                 ),
                 Positioned(
@@ -119,15 +130,17 @@ class MenuItemCard extends StatelessWidget {
                     color: Color(0xFF242424),
                   ),
                 ),
+                if (originalPrice != price) ...[
                 const SizedBox(width: 5),
                 Text(
                   originalPrice,
                   style: const TextStyle(
                     fontSize: 12,
                     color: Color(0xFF979797),
-                    decoration: TextDecoration.lineThrough,
+                      decoration: TextDecoration.lineThrough,
+                    ),
                   ),
-                ),
+                ]
               ],
             ),
             const SizedBox(height: 8),
@@ -286,6 +299,26 @@ class MenuItemCard extends StatelessWidget {
           color: purple,
           fontWeight: FontWeight.w600,
           fontSize: 14,
+        ),
+      ),
+    );
+  }
+
+  Widget _placeholderImage() {
+    return Container(
+      width: imageWidth ?? 108,
+      height: imageHeight ?? 108,
+      decoration: BoxDecoration(
+        color: const Color(0xFFF5F5F5),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Center(
+        child: AssetHelper.svgAsset(
+          'images/ic_placeHolder.svg',
+          // width: 32,
+          // height: 32,
+          fit: BoxFit.cover,
+          // color: const Color(0xFF363648),
         ),
       ),
     );

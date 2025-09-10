@@ -7,15 +7,18 @@ import 'package:chat_bot/bloc/cart/cart_event.dart';
 import 'package:chat_bot/bloc/cart/cart_state.dart';
 import 'package:chat_bot/data/model/chat_response.dart';
 import 'package:chat_bot/data/model/chat_message.dart';
+import 'package:chat_bot/view/Groceries_menu_screen.dart';
 import 'package:chat_bot/view/add_card_sheet.dart';
 import 'package:chat_bot/view/address_details_screen.dart';
 import 'package:chat_bot/view/customization_summary_screen.dart';
+import 'package:chat_bot/view/grocery_customization_screen.dart';
 import 'package:chat_bot/view/product_customization_screen.dart';
 import 'package:chat_bot/view/restaurant_menu_screen.dart';
 import 'package:chat_bot/view/restaurant_screen.dart';
 import 'package:chat_bot/view/cart_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_html/flutter_html.dart';
 import 'package:chat_bot/utils/asset_path.dart';
 import 'package:lottie/lottie.dart';
 import '../services/callback_manage.dart';
@@ -131,7 +134,9 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   void _updateCartCount(int count) {
+    setState(() {
       _totalCartCount = count;
+    });
   }
 
   void _fetchCartData() {
@@ -445,6 +450,9 @@ class _ChatScreenBody extends StatelessWidget {
                     if (state.messages.orderConfirmedWidgets.isNotEmpty) {
                       context.read<CartBloc>().add(CartFetchRequested(needToShowLoader: false));
                     }
+                    if (state.messages.cartCount != null && state.messages.cartCount == 0) {
+                      context.read<CartBloc>().add(CartFetchRequested(needToShowLoader: false));
+                    }
                   } else if (state is ChatError) {
                     // Check if it's a timeout error
                     if (state.error.contains(
@@ -642,7 +650,7 @@ class _ChatScreenBody extends StatelessWidget {
                 if (messages.isNotEmpty) ...[
                   IconButton(
                     icon: Opacity(
-                      opacity: isApiLoading ? 0.4 : 1.0,
+                      opacity: 1.0,
                       child: SvgPicture.asset(
                         AssetPath.get('images/ic_reload.svg'),
                         width: 40,
@@ -653,7 +661,7 @@ class _ChatScreenBody extends StatelessWidget {
                   ),
                   IconButton(
                     icon: Opacity(
-                      opacity: isApiLoading ? 0.4 : 1.0,
+                      opacity: 1.0,
                       child: Stack(
                         children: [
                           SvgPicture.asset(
@@ -770,50 +778,130 @@ class _ChatScreenBody extends StatelessWidget {
               const SizedBox(height: 24),
               Row(
                 children: [
+                  // Expanded(
+                  //   child: TextButton(
+                  //     onPressed: () => Navigator.of(context).pop(),
+                  //     style: TextButton.styleFrom(
+                  //       backgroundColor: Colors.grey[100],
+                  //       foregroundColor: Colors.black,
+                  //       padding: const EdgeInsets.symmetric(vertical: 16),
+                  //       shape: RoundedRectangleBorder(
+                  //         borderRadius: BorderRadius.circular(12),
+                  //       ),
+                  //     ),
+                  //     child: const Text(
+                  //       'CANCEL',
+                  //       style: TextStyle(
+                  //         fontSize: 16,
+                  //         fontWeight: FontWeight.w600,
+                  //         color: Color(0xFF8E2FFD)
+                  //       ),
+                  //     ),
+                  //   ),
+                  // ),
+                  // const SizedBox(width: 16),
+                  // Expanded(
+                  //   child: TextButton(
+                  //     onPressed: () {
+                  //       Navigator.of(context).pop();
+                  //       onRestartChatAPI();
+                  //     },
+                  //     style: TextButton.styleFrom(
+                  //       backgroundColor: Color(0xFF8E2FFD),
+                  //       foregroundColor: Colors.white,
+                  //       padding: const EdgeInsets.symmetric(vertical: 16),
+                  //       shape: RoundedRectangleBorder(
+                  //         borderRadius: BorderRadius.circular(12),
+                  //       ),
+                  //     ),
+                  //     child: const Text(
+                  //       'YES',
+                  //       style: TextStyle(
+                  //         fontSize: 16,
+                  //         fontWeight: FontWeight.w600,
+                  //       ),
+                  //     ),
+                  //   ),
+                  // ),
                   Expanded(
-                    child: TextButton(
-                      onPressed: () => Navigator.of(context).pop(),
-                      style: TextButton.styleFrom(
-                        backgroundColor: Colors.grey[100],
-                        foregroundColor: Colors.black,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      child: const Text(
-                        'CANCEL',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
+          child: SizedBox(
+            height: 62,
+            child: OutlinedButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              style: OutlinedButton.styleFrom(
+                side: const BorderSide(color: Color(0xFF8E2FFD), width: 2),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                backgroundColor: Colors.white,
+              ),
+              child: const Text(
+                "CANCEL",
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                  color: Color(0xFF8E2FFD),
+                ),
+              ),
+            ),
+          ),
+        ),
+        
+        // Spacing between buttons
+        const SizedBox(width: 16),
+        
+        // Right button - "Repeat last" (Gradient)
+        Expanded(
+          child: SizedBox(
+            height: 62,
+            child: ElevatedButton(
+              onPressed: () {
+                   Navigator.of(context).pop();
+                   onRestartChatAPI();
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.transparent,
+                elevation: 0,
+                shadowColor: Colors.transparent,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                padding: EdgeInsets.zero,
+              ),
+              child: Ink(
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [
+                      Color(0xFF5186E0),
+                      Color(0xFF5E3DFE),
+                      Color(0xFF8E2FFD),
+                      Color(0xFFB02EFB),
+                      Color(0xFFD445EC),
+                    ],
+                    stops: [0.0, 0.24, 0.52, 0.73, 1.0],
+                    begin: Alignment.centerLeft,
+                    end: Alignment.centerRight,
+                  ),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Container(
+                  height: 62,
+                  alignment: Alignment.center,
+                  child: const Text(
+                    "YES",
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.white,
                     ),
                   ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: TextButton(
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                        onRestartChatAPI();
-                      },
-                      style: TextButton.styleFrom(
-                        backgroundColor: Colors.black,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      child: const Text(
-                        'YES',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
                 ],
               ),
               SizedBox(height: MediaQuery.of(context).padding.bottom + 8),
@@ -979,16 +1067,48 @@ class _ChatScreenBody extends StatelessWidget {
                         //   ),
                         // ],
                       ),
-                      child: Text(
-                        message.text,
-                        style: TextStyle(
-                          color: message.isBot
-                              ? Color(int.parse(chatbotData.data.first.uiPreferences.botBubbleFontColor.replaceFirst('#', '0xFF')))
-                              : Color(int.parse(chatbotData.data.first.uiPreferences.userBubbleFontColor.replaceFirst('#', '0xFF'))),
-                          fontSize: 16,
-                          fontFamily: "Plus Jakarta Sans"
-                        ),
-                      ),
+                      child: _hasMarkdownSyntax(message.text)
+                          ? Html(
+                              data: _markdownToHtml(message.text),
+                              style: {
+                                "body": Style(
+                                  margin: Margins.zero,
+                                  padding: HtmlPaddings.zero,
+                                  fontSize: FontSize(16),
+                                  fontFamily: "Plus Jakarta Sans",
+                                  color: message.isBot
+                                      ? Color(int.parse(chatbotData.data.first.uiPreferences.botBubbleFontColor.replaceFirst('#', '0xFF')))
+                                      : Color(int.parse(chatbotData.data.first.uiPreferences.userBubbleFontColor.replaceFirst('#', '0xFF'))),
+                                ),
+                                "strong": Style(
+                                  fontWeight: FontWeight.bold,
+                                  color: message.isBot
+                                      ? Color(int.parse(chatbotData.data.first.uiPreferences.botBubbleFontColor.replaceFirst('#', '0xFF')))
+                                      : Color(int.parse(chatbotData.data.first.uiPreferences.userBubbleFontColor.replaceFirst('#', '0xFF'))),
+                                ),
+                                "em": Style(
+                                  fontStyle: FontStyle.italic,
+                                  color: message.isBot
+                                      ? Color(int.parse(chatbotData.data.first.uiPreferences.botBubbleFontColor.replaceFirst('#', '0xFF')))
+                                      : Color(int.parse(chatbotData.data.first.uiPreferences.userBubbleFontColor.replaceFirst('#', '0xFF'))),
+                                ),
+                                "code": Style(
+                                  backgroundColor: Colors.grey.shade200,
+                                  padding: HtmlPaddings.symmetric(horizontal: 4, vertical: 2),
+                                  fontFamily: "monospace",
+                                ),
+                              },
+                            )
+                          : Text(
+                              message.text,
+                              style: TextStyle(
+                                color: message.isBot
+                                    ? Color(int.parse(chatbotData.data.first.uiPreferences.botBubbleFontColor.replaceFirst('#', '0xFF')))
+                                    : Color(int.parse(chatbotData.data.first.uiPreferences.userBubbleFontColor.replaceFirst('#', '0xFF'))),
+                                fontSize: 16,
+                                fontFamily: "Plus Jakarta Sans"
+                              ),
+                            ),
                     ),
                   ],
                 ),
@@ -1037,6 +1157,47 @@ class _ChatScreenBody extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  // Helper method to check if text contains markdown syntax
+  bool _hasMarkdownSyntax(String text) {
+    // Check for common markdown patterns
+    return text.contains('**') || // Bold text
+           text.contains('*') ||  // Italic text
+           text.contains('`') ||  // Code
+           text.contains('#') ||  // Headers
+           text.contains('- ') || // Lists
+           text.contains('1. ') || // Numbered lists
+           text.contains('[') ||  // Links
+           text.contains('](');   // Links
+  }
+
+  // Helper method to convert markdown to HTML
+  String _markdownToHtml(String text) {
+    String html = text;
+    
+    // Convert bold text **text** to <strong>text</strong>
+    html = html.replaceAllMapped(
+      RegExp(r'\*\*(.*?)\*\*'),
+      (match) => '<strong>${match.group(1)}</strong>'
+    );
+    
+    // Convert italic text *text* to <em>text</em>
+    html = html.replaceAllMapped(
+      RegExp(r'\*(.*?)\*'),
+      (match) => '<em>${match.group(1)}</em>'
+    );
+    
+    // Convert code `text` to <code>text</code>
+    html = html.replaceAllMapped(
+      RegExp(r'`(.*?)`'),
+      (match) => '<code>${match.group(1)}</code>'
+    );
+    
+    // Convert line breaks \n to <br>
+    html = html.replaceAll('\n', '<br>');
+    
+    return html;
   }
 
   // Removed welcome message UI
@@ -1312,7 +1473,24 @@ class _ChatScreenBody extends StatelessWidget {
               return _buildActionButton(
                 text: action.buttonText,
                 onTap: isApiLoading ? () {} : () {
-                  Navigator.push(
+                  if (action.storeTypeId == FoodCategory.grocery.value) {
+                      Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => GroceriesMenuScreen(
+                        actionData: action,
+                        onCheckout: (value) {
+                          if (isCartAPICalled == true) {
+                            onUpdateCartCount(cartBloc.getTotalProductCount);
+                            onSendMessage("I have updated the cart");
+                            isCartAPICalled = false;
+                          }
+                        },
+                      ),
+                    ),
+                  );
+                  }else {
+                     Navigator.push(
                     context,
                     MaterialPageRoute(
                       builder: (context) => RestaurantMenuScreen(
@@ -1327,6 +1505,7 @@ class _ChatScreenBody extends StatelessWidget {
                       ),
                     ),
                   );
+                  }
                 },
               );
             },
@@ -1344,14 +1523,6 @@ class _ChatScreenBody extends StatelessWidget {
               return _buildActionButton(
                 text: action.buttonText,
                 onTap: isApiLoading ? () {} : () {
-                  // Navigator.push(
-                  //   context,
-                  //   MaterialPageRoute(
-                  //     builder: (context) => RestaurantMenuScreen(
-                  //       actionData: action,
-                  //     ),
-                  //   ),
-                  // );
                 Navigator.push(
                   context,
                     MaterialPageRoute(builder: (_) => const AddressDetailsScreen()),
@@ -1369,11 +1540,11 @@ class _ChatScreenBody extends StatelessWidget {
                     
                     // Build the full address string
                     final List<String> addressParts = [];
-                    if (building.isNotEmpty) addressParts.add(building);
-                    if (landmark.isNotEmpty) addressParts.add(landmark);
+                    if (country.isNotEmpty) addressParts.add(country);
                     if (area.isNotEmpty) addressParts.add(area);
                     if (city.isNotEmpty) addressParts.add(city);
-                    if (country.isNotEmpty) addressParts.add(country);
+                    if (building.isNotEmpty) addressParts.add(building);
+                    if (landmark.isNotEmpty) addressParts.add(landmark);
                     
                     final String fullAddress = addressParts.join(', ');
                     final String addressMessage = "My $tag address is:\n$fullAddress";
@@ -1617,7 +1788,13 @@ class _ChatScreenBody extends StatelessWidget {
             onSendMessage(message);
           },
           // onHide: onHideStoreCards, 
-          onQuantityChanged: (product, store, newQuantity, isIncrease) => _onQuantityChanged(context, product, store, newQuantity, isIncrease),// Use the callback from parent
+          onQuantityChanged: (product, store, newQuantity, isIncrease) {
+            if (store.storeTypeId == FoodCategory.grocery.value) {
+              _onQuantityChangedForGrocery(context,product.parentProductId,product.childProductId,product.unitId,store.storeId,store.storeCategoryId,store.storeTypeId ?? -111,product.variantsCount,newQuantity,isIncrease);
+            }else {
+              _onQuantityChanged(context, product, store, newQuantity, isIncrease);
+            }
+          },
           onAddToCartRequested: (product, store) {
             if (store.storeIsOpen == false) {
               print('Store is closed');
@@ -1630,7 +1807,24 @@ class _ChatScreenBody extends StatelessWidget {
               return;
             }
               if (product.variantsCount > 1) {
-                         showModalBottomSheet(
+                if (store.storeTypeId == FoodCategory.grocery.value) {
+                    showModalBottomSheet(
+                          context: context,
+                          isScrollControlled: true,
+                          backgroundColor: Colors.transparent,
+                          builder: (context) => GroceryCustomizationScreen(
+                            parentProductId: product.parentProductId,
+                            productId: product.childProductId,
+                            storeId: store.storeId,
+                            productName: product.productName,
+                            productImage: product.productImage,
+                            onAddToCart: (parentProductId,productId,unitId) {
+                              _onAddToCartForGrocery(parentProductId,productId,unitId,store.storeId,store.storeCategoryId,store.storeTypeId ?? -111,null);
+                            },
+                          ),
+                        );
+                }else {
+                    showModalBottomSheet(
                     context: context,
                     isScrollControlled: true,
                     backgroundColor: Colors.transparent,
@@ -1640,6 +1834,7 @@ class _ChatScreenBody extends StatelessWidget {
                       onAddToCartWithAddOns: _onAddToCartWithAddOns,
                     ),
                   );
+                }
                     }else {
                 //TODO:- Add Quantity
                       cartBloc.add(CartAddItemRequested(
@@ -1648,10 +1843,11 @@ class _ChatScreenBody extends StatelessWidget {
                           action: 1, // Add action
                           storeCategoryId: store.storeCategoryId,
                           newQuantity: 1, // Add 1 item
-                          storeTypeId: store.type,
+                          storeTypeId: store.storeTypeId ?? -111,
                           productId: product.childProductId,
                           centralProductId: product.parentProductId,
                           unitId: product.unitId,
+                          needToShowLoaderForCartFetch: false,
                         )); 
                     }
                         
@@ -1677,17 +1873,178 @@ class _ChatScreenBody extends StatelessWidget {
         action: 1, // Add action
         storeCategoryId: store.storeCategoryId,
         newQuantity: 1,
-        storeTypeId: store.type,
+        storeTypeId: store.storeTypeId ?? -111,
         productId: product.childProductId,
         centralProductId: product.parentProductId,
         unitId: variant.unitId,
         newAddOns: addOns,
+        needToShowLoaderForCartFetch: false,
       ));
       
       print("Added product with addons to cart: ${product.productName}");
     } catch (e) {
       print('RestaurantScreen: Error dispatching CartAddItemRequeste with addons: $e');
     }
+  }
+
+  void _onAddToCartForGrocery(
+    String parentProductId,
+    String productId,
+    String unitId,
+    String storeId,
+    String storeCategoryId,
+    int storeTypeId,
+    int? addToCartOnId,
+  ) {
+    try {
+      //TODO:- Add Quantity
+      cartBloc.add(CartAddItemRequested(
+        storeId: storeId,
+        cartType: 1, // Default cart type
+        action: 1, // Add action
+        storeCategoryId: storeCategoryId,
+        newQuantity: 1,
+        storeTypeId: storeTypeId,
+        productId: productId,
+        centralProductId: parentProductId,
+        unitId: unitId,
+        addToCartOnId: addToCartOnId,
+        needToShowLoaderForCartFetch: false,
+      ));
+      
+      print("Added product to cart: ${productId}");
+    } catch (e) {
+      print('RestaurantScreen: Error dispatching CartAddItemRequeste with addons: $e');
+    }
+  }
+
+
+void _onQuantityChangedForGrocery(
+  BuildContext context,
+  String parentProductId,
+    String productId,
+    String unitId,
+    String storeId,
+    String storeCategoryId,
+    int storeTypeId,
+    int variantsCount,
+    int newQuantity,
+    bool isIncrease) {
+    if (isIncrease == false && newQuantity == 1) {
+      //TODO:- 0 Quantity
+      int? addToCartOnId;
+      if (variantsCount > 1) {
+         addToCartOnId = _getAddToCartOnId(productId);
+         print("addCartOnID: $addToCartOnId");
+       }
+
+      cartBloc.add(CartAddItemRequested(
+        storeId: storeId,
+        cartType: 2,
+        action: 3, // Add/Update action
+        storeCategoryId: storeCategoryId,
+        newQuantity: 0,
+        storeTypeId: storeTypeId,
+        productId: productId,
+        centralProductId: parentProductId,
+        unitId: unitId,
+        addToCartOnId: addToCartOnId,
+        needToShowLoaderForCartFetch: false,
+      ));
+    }else if (newQuantity > 0 && isIncrease == true) {
+      if (variantsCount > 1) {
+         showModalBottomSheet(
+                        context: context,
+                        isScrollControlled: true,
+                        backgroundColor: Colors.transparent,
+                        builder: (context) => CustomizationSummaryScreen(
+                          // store: store,
+                          // product: product,
+                          onChooseClicked: () {
+                            _openGroceryCustomization(context,parentProductId,productId,unitId,storeId,storeCategoryId,storeTypeId);
+                          },
+                          onRepeatClicked: () {
+                            //TODO:- Add Quantity
+                            final addToCartOnId = _getAddToCartOnId(productId);
+                            print("addCartOnID: $addToCartOnId");
+
+                            cartBloc.add(CartAddItemRequested(
+                              storeId: storeId,
+                              cartType: 1,
+                              action: 2, // Add action
+                              storeCategoryId: storeCategoryId,
+                              newQuantity: newQuantity + 1,
+                              storeTypeId: storeTypeId,
+                              productId: productId,
+                              centralProductId: parentProductId,
+                              unitId: unitId,
+                              addToCartOnId: addToCartOnId,
+                              needToShowLoaderForCartFetch: false,
+                            )); 
+                          
+                          },
+                        ),
+          );
+      }else {
+        //TODO:- Add Quantity
+         final addToCartOnId = _getAddToCartOnId(productId);
+          print("addCartOnID: $addToCartOnId");
+      cartBloc.add(CartAddItemRequested(
+        storeId: storeId,
+        cartType: 1,
+        action: 2, // Add action
+        storeCategoryId: storeCategoryId,
+        newQuantity: newQuantity + 1,
+        storeTypeId: storeTypeId,
+        productId: productId,
+        centralProductId: parentProductId,
+        unitId: unitId,
+        addToCartOnId: addToCartOnId,
+        needToShowLoaderForCartFetch: false,
+      ));        
+      }
+
+    } else {
+      //TODO:- Remove Quantity
+      int? addToCartOnId;
+      if (variantsCount > 1) {
+        addToCartOnId = _getAddToCartOnId(productId);
+        print("addCartOnID: $addToCartOnId");
+      }
+      cartBloc.add(CartAddItemRequested(
+        storeId: storeId,
+        cartType: 2,
+        action: 2, // Add/Update action
+        storeCategoryId: storeCategoryId,
+        newQuantity: newQuantity - 1,
+        storeTypeId: storeTypeId,
+        productId: productId,
+        centralProductId: parentProductId,
+        unitId: unitId,
+        addToCartOnId: addToCartOnId,
+        needToShowLoaderForCartFetch: false,
+      ));
+    }
+  
+  }
+
+
+void _openGroceryCustomization(BuildContext context, String parentProductId, String productId, String unitId, String storeId, String storeCategoryId, int storeTypeId) {
+  showModalBottomSheet(
+                          context: context,
+                          isScrollControlled: true,
+                          backgroundColor: Colors.transparent,
+                          builder: (context) => GroceryCustomizationScreen(
+                            parentProductId: parentProductId,
+                            productId: productId,
+                            storeId: storeId,
+                            productName: 'productName',
+                            productImage: 'productImage',
+                            onAddToCart: (parentProductId,productId,unitId) {
+                              _onAddToCartForGrocery(parentProductId,productId,unitId,storeId,storeCategoryId,storeTypeId,null);
+                            },
+                          ),
+                        );
   }
 
   void _onQuantityChanged(BuildContext context, Product product, Store store, int newQuantity, bool isIncrease) {
@@ -1704,11 +2061,12 @@ class _ChatScreenBody extends StatelessWidget {
         action: 3, // Add/Update action
         storeCategoryId: store.storeCategoryId,
         newQuantity: 0,
-        storeTypeId: store.type,
+        storeTypeId: store.storeTypeId ?? -111,
         productId: product.childProductId,
         centralProductId: product.parentProductId,
         unitId: product.unitId,
         addToCartOnId: addToCartOnId,
+        needToShowLoaderForCartFetch: false,
       ));
     }else if (newQuantity > 0 && isIncrease == true) {
       if (product.variantsCount > 1) {
@@ -1734,11 +2092,12 @@ class _ChatScreenBody extends StatelessWidget {
                               action: 2, // Add action
                               storeCategoryId: store.storeCategoryId,
                               newQuantity: newQuantity + 1,
-                              storeTypeId: store.type,
+                              storeTypeId: store.storeTypeId ?? -111,
                               productId: product.childProductId,
                               centralProductId: product.parentProductId,
                               unitId: product.unitId,
                               addToCartOnId: addToCartOnId,
+                              needToShowLoaderForCartFetch: false,
                             )); 
                           
                           },
@@ -1752,10 +2111,11 @@ class _ChatScreenBody extends StatelessWidget {
         action: 2, // Add action
         storeCategoryId: store.storeCategoryId,
         newQuantity: newQuantity + 1,
-        storeTypeId: store.type,
+        storeTypeId: store.storeTypeId ?? -111,
         productId: product.childProductId,
         centralProductId: product.parentProductId,
         unitId: product.unitId,
+        needToShowLoaderForCartFetch: false,
       ));        
       }
 
@@ -1772,11 +2132,12 @@ class _ChatScreenBody extends StatelessWidget {
         action: 2, // Add/Update action
         storeCategoryId: store.storeCategoryId,
         newQuantity: newQuantity - 1,
-        storeTypeId: store.type,
+        storeTypeId: store.storeTypeId ?? -111,
         productId: product.childProductId,
         centralProductId: product.parentProductId,
         unitId: product.unitId,
         addToCartOnId: addToCartOnId,
+        needToShowLoaderForCartFetch: false,
       ));
     }
     
@@ -1853,7 +2214,11 @@ class _ChatScreenBody extends StatelessWidget {
               }
             },
             onQuantityChanged: (productId, centralProductId, quantity, isIncrease, isCustomizable) {
-              _onQuantityChangedMenuItem(productId, centralProductId, quantity, isIncrease, isCustomizable, product.storeId ?? '', product.storeCategoryId ?? '', product.storeTypeId ?? -111, context);
+              if (product.storeTypeId == FoodCategory.grocery.value) {
+                _onQuantityChangedForGrocery(context,product.parentProductId,product.childProductId,product.unitId,product.storeId ?? '',product.storeCategoryId ?? '',product.storeTypeId ?? -111,product.variantsCount,quantity,isIncrease);
+              }else {
+              _onQuantityChangedMenuItem(productId, centralProductId, quantity, isIncrease, isCustomizable, product.storeId ?? '', product.storeCategoryId ?? '', product.storeTypeId ?? -111, context, product.productName, product.productImage);
+              }
             },
             onAddToCart: (productId, centralProductId, quantity, isCustomizable) {
               if (product.storeIsOpen == false) {
@@ -1866,7 +2231,43 @@ class _ChatScreenBody extends StatelessWidget {
                 BlackToastView.show(context, 'Product is not in stock. Please try again later');
                 return;
               }
-                  if (isCustomizable) {
+              if (product.storeTypeId == FoodCategory.grocery.value) {
+                if (isCustomizable) {
+                        showModalBottomSheet(
+                          context: context,
+                          isScrollControlled: true,
+                          backgroundColor: Colors.transparent,
+                          builder: (context) => GroceryCustomizationScreen(
+                            parentProductId: product.parentProductId,
+                            productId: product.childProductId,
+                            storeId: product.storeId ?? '',
+                            productName: product.productName,
+                            productImage: product.productImage,
+                            onAddToCart: (parentProductId,productId,unitId) {
+                              _onAddToCartForGrocery(parentProductId,productId,unitId,product.storeId ?? '',product.storeCategoryId ?? '',product.storeTypeId ?? -111,null);
+                            },
+                          ),
+                        );
+                }else {
+                  //TODO:- Add Quantity
+                  final addToCartOnId = _getAddToCartOnId(productId);
+                    print("addCartOnID: $addToCartOnId");
+                cartBloc.add(CartAddItemRequested(
+                  storeId: product.storeId ?? '',
+                  cartType: 1,
+                  action: 2, // Add action
+                  storeCategoryId: product.storeCategoryId ?? '',
+                  newQuantity: quantity + 1,
+                  storeTypeId: product.storeTypeId ?? -111,
+                  productId: productId,
+                  centralProductId: product.parentProductId,
+                  unitId: product.unitId,
+                  addToCartOnId: addToCartOnId,
+                  needToShowLoaderForCartFetch: false,
+                )); 
+                }
+              }else {
+                if (isCustomizable) {
                      showModalBottomSheet(
                     context: context,
                     isScrollControlled: true,
@@ -1891,6 +2292,7 @@ class _ChatScreenBody extends StatelessWidget {
                         centralProductId: centralProductId,
                         unitId: variant.unitId,
                         newAddOns: addOns,
+                        needToShowLoaderForCartFetch: false,
                     ));
                       },
                     ),
@@ -1908,8 +2310,10 @@ class _ChatScreenBody extends StatelessWidget {
                         productId: productId,
                         centralProductId: centralProductId,
                         unitId: '',
+                        needToShowLoaderForCartFetch: false,
                     ));
-                  }                 
+                  } 
+              }                
                 },
           );
         },
@@ -1917,7 +2321,7 @@ class _ChatScreenBody extends StatelessWidget {
     );
   }
 
-   void _onQuantityChangedMenuItem(String productId, String centralProductId, int currentQuantity, bool isIncrease, bool isCustomizable, String storeId,String storeCategoryId,int storeTypeId, BuildContext context) {
+   void _onQuantityChangedMenuItem(String productId, String centralProductId, int currentQuantity, bool isIncrease, bool isCustomizable, String storeId,String storeCategoryId,int storeTypeId, BuildContext context, String productName, String productImage) {
     try {
       if (isIncrease == false && currentQuantity == 1) {
         //TODO:- 0 Quantity
@@ -1938,6 +2342,7 @@ class _ChatScreenBody extends StatelessWidget {
           centralProductId: centralProductId,
           unitId: '',
           addToCartOnId: addToCartOnId,
+          needToShowLoaderForCartFetch: false,
         ));
       }else if (currentQuantity > 0 && isIncrease == true) {
 
@@ -1951,7 +2356,7 @@ class _ChatScreenBody extends StatelessWidget {
                           
                           onChooseClicked: () {
                             // When "I'll choose" is clicked, open ProductCustomizationScreen
-                            _openProductCustomizationMenuItem(productId, centralProductId,storeId, storeCategoryId, storeTypeId, context);
+                            _openProductCustomizationMenuItem(productId, centralProductId,storeId, storeCategoryId, storeTypeId, context, productName, productImage);
                           },
                           onRepeatClicked: () {
                             //TODO:- Add Quantity
@@ -1969,6 +2374,7 @@ class _ChatScreenBody extends StatelessWidget {
                               centralProductId: centralProductId,
                               unitId: '',
                               addToCartOnId: addToCartOnId,
+                              needToShowLoaderForCartFetch: false,
                             )); 
                           
                           },
@@ -1987,6 +2393,7 @@ class _ChatScreenBody extends StatelessWidget {
           productId: productId,
           centralProductId: centralProductId,
           unitId: '',
+          needToShowLoaderForCartFetch: false,
         ));
           }
     
@@ -2008,6 +2415,7 @@ class _ChatScreenBody extends StatelessWidget {
           centralProductId: centralProductId,
           unitId: '',
           addToCartOnId: addToCartOnId,
+          needToShowLoaderForCartFetch: false,
         ));
       }
     } catch (e) {
@@ -2015,7 +2423,7 @@ class _ChatScreenBody extends StatelessWidget {
     }
   }
 
-  void _openProductCustomizationMenuItem(String productId, String centralProductId, String storeId,String storeCategoryId,int storeTypeId, BuildContext context) {
+  void _openProductCustomizationMenuItem(String productId, String centralProductId, String storeId,String storeCategoryId,int storeTypeId, BuildContext context, String productName, String productImage) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -2024,8 +2432,8 @@ class _ChatScreenBody extends StatelessWidget {
         productId: productId,
         centralProductId: centralProductId,
         storeId: storeId,
-        productName: 'Product Name',
-        productImage: 'Product Image',
+        productName: productName,
+        productImage: productImage,
         isFromMenuScreen: true,
         onAddToCartWithAddOns: (product, store, variant, addOns) => _onAddToCartWithAddOnsMenuItem(productId, centralProductId, storeId, storeCategoryId, storeTypeId, context, variant, addOns),
       ),
@@ -2056,6 +2464,7 @@ class _ChatScreenBody extends StatelessWidget {
         centralProductId: centralProductId,
         unitId: variant.unitId,
         newAddOns: addOns,
+        needToShowLoaderForCartFetch: false,
       ));
       
       // print("Added product with addons to cart: ${product.productName}");

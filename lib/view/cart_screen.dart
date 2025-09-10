@@ -1,5 +1,8 @@
+import 'package:chat_bot/utils/asset_helper.dart';
+import 'package:chat_bot/utils/asset_path.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_svg/svg.dart';
 import '../widgets/cart_details_price_widget';
 import '../bloc/cart/cart_bloc.dart';
 import '../bloc/cart/cart_event.dart';
@@ -108,44 +111,51 @@ class _CartScreenState extends State<CartScreen> {
   }
 
   Widget _buildFilterChips() {
-    final categories = [
-      {'name': '🍕 Food', 'count': ''},
-      {'name': '🥑 Grocery', 'count': ''},
-    ];
+    return BlocBuilder<CartBloc, CartState>(
+      builder: (context, state) {
+        // Calculate category counts from cart data
+        final categoryCounts = _calculateCategoryCounts(state);
+        
+        final categories = [
+          {'name': '🍕 Food', 'count': categoryCounts['food']},
+          {'name': '🥑 Grocery', 'count': categoryCounts['grocery']},
+        ];
 
-    return Container(
-      height: 40,
-      margin: const EdgeInsets.only(top: 16),
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        itemCount: categories.length,
-        itemBuilder: (context, index) {
-          final category = categories[index];
-          final isSelected = selectedCategoryIndex == index;
-          return GestureDetector(
-            onTap: () {
-              setState(() {
-                selectedCategoryIndex = index;
-              });
+        return Container(
+          height: 40,
+          margin: const EdgeInsets.only(top: 16),
+          child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            itemCount: categories.length,
+            itemBuilder: (context, index) {
+              final category = categories[index];
+              final isSelected = selectedCategoryIndex == index;
+              return GestureDetector(
+                onTap: () {
+                  setState(() {
+                    selectedCategoryIndex = index;
+                  });
+                },
+                child: Container(
+                  margin: const EdgeInsets.only(right: 8),
+                  child: _buildFilterChip(
+                    name: category['name'] as String,
+                    count: category['count'] as int,
+                    isSelected: isSelected,
+                  ),
+                ),
+              );
             },
-            child: Container(
-              margin: const EdgeInsets.only(right: 8),
-              child: _buildFilterChip(
-                name: category['name'] as String,
-                count: category['count'] as String,
-                isSelected: isSelected,
-              ),
-            ),
-          );
-        },
-      ),
+          ),
+        );
+      },
     );
   }
 
   Widget _buildFilterChip({
     required String name,
-    required String count,
+    required int count,
     required bool isSelected,
   }) {
     return Container(
@@ -159,6 +169,7 @@ class _CartScreenState extends State<CartScreen> {
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Text(
             name,
@@ -168,25 +179,52 @@ class _CartScreenState extends State<CartScreen> {
               color: Color(0xFF242424),
             ),
           ),
-          // const SizedBox(width: 4),
-          // Container(
-          //   padding: const EdgeInsets.all(2.64),
-          //   decoration: BoxDecoration(
-          //     color: const Color(0xFF8E2FFD),
-          //     borderRadius: BorderRadius.circular(39.59),
-          //   ),
-          //   child: Text(
-          //     count,
-          //     style: const TextStyle(
-          //       fontSize: 7.71,
-          //       fontWeight: FontWeight.w600,
-          //       color: Colors.white,
-          //     ),
-          //   ),
-          // ),
+          // Only show count badge if count > 0
+          if (count > 0) ...[
+            const SizedBox(width: 6),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+              decoration: BoxDecoration(
+                color: const Color(0xFF8E2FFD),
+                borderRadius: BorderRadius.circular(39.59),
+              ),
+              child: Text(
+                count.toString().padLeft(2, '0'),
+                style: const TextStyle(
+                  fontSize: 7.71,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ],
         ],
       ),
     );
+  }
+
+  /// Calculate category counts from cart data
+  Map<String, int> _calculateCategoryCounts(CartState state) {
+    int foodCount = 0;
+    int groceryCount = 0;
+
+    if (state is CartLoaded && state.rawCartData != null) {
+      for (final cartData in state.rawCartData!.data) {
+        for (final seller in cartData.sellers) {
+          // storeTypeId 1 = Food, storeTypeId 2 = Grocery
+          if (seller.storeTypeId == 1) {
+            foodCount += seller.products.length;
+          } else if (seller.storeTypeId == 2) {
+            groceryCount += seller.products.length;
+          }
+        }
+      }
+    }
+
+    return {
+      'food': foodCount,
+      'grocery': groceryCount,
+    };
   }
 
   Widget _buildCartContent() {
@@ -244,18 +282,35 @@ class _CartScreenState extends State<CartScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(
-            Icons.error_outline,
-            size: 64,
-            color: Color(0xFF8E2FFD),
+          // Empty cart SVG icon
+          AssetHelper.svgAsset(
+            'images/ic_emptyCart.svg',
+            width: 120,
+            height: 120,
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 24),
+          // "Your cart is empty" text
           const Text(
-            'No Data Found',
+            'Your cart is empty',
             style: TextStyle(
               fontSize: 18,
-              fontWeight: FontWeight.w600,
+              fontWeight: FontWeight.w700,
               color: Color(0xFF242424),
+            ),
+          ),
+          const SizedBox(height: 8),
+          // Description text
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 40),
+            child: Text(
+              'Add items like food, groceries, medicines, services or other products to get started.',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w400,
+                color: Color(0xFF6E4185),
+                height: 1.4,
+              ),
             ),
           ),
         ],
@@ -263,39 +318,52 @@ class _CartScreenState extends State<CartScreen> {
     );
   }
 
-  /// Get category data based on selected index
+  /// Get category data based on selected category (Food=1, Grocery=2)
   CategoryData? _getCategoryData(CartLoaded state, int categoryIndex) {
     if (state.rawCartData == null || state.rawCartData!.data.isEmpty) {
       return null;
     }
 
-    // Check if we have data for the selected category index
-    if (categoryIndex >= state.rawCartData!.data.length) {
-      return null;
+    // Map category index to storeId: 0=Food(storeId=1), 1=Grocery(storeId=2)
+    int targetStoreId = categoryIndex == 0 ? 1 : 2;
+
+    // Find cart data with matching storeId
+    UniversalCartData? matchingCartData;
+    Seller? matchingSeller;
+    
+    for (final cartData in state.rawCartData!.data) {
+      // Check if any seller in this cart has the target storeId
+      for (final seller in cartData.sellers) {
+        if (seller.storeTypeId == targetStoreId) {
+          matchingCartData = cartData;
+          matchingSeller = seller;
+          break;
+        }
+      }
+      if (matchingCartData != null) break;
     }
 
-    final cartData = state.rawCartData!.data[categoryIndex];
-    final seller = cartData.sellers.isNotEmpty ? cartData.sellers.first : null;
+    if (matchingCartData == null || matchingSeller == null) {
+      return null;
+    }
     
     // Convert to widget actions for this specific category
-    final cartItems = _convertToWidgetActions(cartData);
+    final cartItems = _convertToWidgetActions(matchingCartData, matchingSeller);
     
     return CategoryData(
       cartItems: cartItems,
-      storeName: seller?.name ?? 'Store Name',
-      storeType: seller?.storeType,
-      currencySymbol: cartData.currencySymbol,
+      storeName: matchingSeller.name,
+      storeType: matchingSeller.storeType,
+      currencySymbol: matchingCartData.currencySymbol,
     );
   }
 
-  /// Convert UniversalCartData to WidgetAction list
-  List<WidgetAction> _convertToWidgetActions(UniversalCartData cartData) {
+  /// Convert UniversalCartData to WidgetAction list for specific seller
+  List<WidgetAction> _convertToWidgetActions(UniversalCartData cartData, Seller seller) {
     List<WidgetAction> widgetActions = [];
     
-    final seller = cartData.sellers.isNotEmpty ? cartData.sellers.first : null;
-    
     // Extract actual cart items from seller products
-    if (seller != null && seller.products.isNotEmpty) {
+    if (seller.products.isNotEmpty) {
       for (final product in seller.products) {
         // Get quantity from product.quantity or fallback
         int totalQuantity = 1;
@@ -405,10 +473,11 @@ class _CartScreenState extends State<CartScreen> {
                   color: const Color(0xFFE9DFFB),
                   borderRadius: BorderRadius.circular(42.67),
                 ),
-                child: const Icon(
-                  Icons.store,
-                  size: 16,
-                  color: Color(0xFF777777),
+                child: SvgPicture.asset(
+                  AssetPath.get('images/ic_storeCart.svg'),
+                  width: 40,
+                  height: 40,
+                  fit: BoxFit.cover,
                 ),
               ),
               const SizedBox(width: 12),
@@ -422,7 +491,7 @@ class _CartScreenState extends State<CartScreen> {
                       categoryData.storeName,
                       style: const TextStyle(
                         fontSize: 16,
-                        fontWeight: FontWeight.w400,
+                        fontWeight: FontWeight.w700,
                         color: Color(0xFF242424),
                       ),
                     ),

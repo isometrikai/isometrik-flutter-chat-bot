@@ -4,6 +4,7 @@ import 'package:chat_bot/bloc/restaurant/restaurant_event.dart';
 import 'package:chat_bot/bloc/restaurant/restaurant_state.dart';
 import 'package:chat_bot/data/model/chat_response.dart';
 import 'package:chat_bot/data/repositories/restaurant_repository.dart';
+import 'package:chat_bot/utils/utility.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class RestaurantBloc extends Bloc<RestaurantEvent, RestaurantState> {
@@ -29,12 +30,14 @@ class RestaurantBloc extends Bloc<RestaurantEvent, RestaurantState> {
       keyword = event.keyword;
       storeCategoryName = event.storeCategoryName;
     }
-
-    emit(RestaurantLoadInProgress());
+    Utility.showLoader();
+    // emit(RestaurantLoadInProgress());
     try {
       final List<Store> stores = await repository.fetchStores(keyword: keyword, storeCategoryName: storeCategoryName);
+      Utility.closeProgressDialog();
       emit(RestaurantLoadSuccess(restaurants: stores, keyword: keyword));
     } catch (e) {
+      Utility.closeProgressDialog();
       emit(RestaurantLoadFailure(e.toString()));
     }
   }

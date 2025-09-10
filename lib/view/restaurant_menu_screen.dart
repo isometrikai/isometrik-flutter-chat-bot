@@ -64,6 +64,7 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
   @override
   void initState() {
     super.initState();
+    isCartAPICalled = false;
     _bloc = RestaurantMenuBloc(actionData: widget.actionData);
     cartBloc = CartBloc();
     _bloc.add(const RestaurantMenuRequested());
@@ -78,34 +79,6 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
     _bloc.close();
     super.dispose();
   }
-
-  // void _onAddToCart() {
-  //
-  //   // Create consolidated messages from quantities
-  //   List<String> consolidatedMessages = [];
-  //   _productQuantities.forEach((productId, quantity) {
-  //     if (quantity > 0 && _productDetails.containsKey(productId)) {
-  //       final product = _productDetails[productId]!;
-  //       // Calculate quantity added in this session
-  //       final initialQuantity = _initialQuantities[productId] ?? 0;
-  //       final quantityAdded = quantity - initialQuantity;
-  //
-  //       print("Product: ${product.productName}, Current: $quantity, Initial: $initialQuantity, Added: $quantityAdded");
-  //
-  //       if (quantityAdded > 0) {
-  //         consolidatedMessages.add("Add ${quantityAdded}X ${product.productName} to cart");
-  //       }
-  //     }
-  //   });
-  //
-  //   // Call the callback with consolidated messages and close the screen
-  //   if (widget.onCheckout != null && consolidatedMessages.isNotEmpty) {
-  //     widget.onCheckout!(consolidatedMessages);
-  //   }
-  //
-  //   // Close the screen
-  //   Navigator.of(context).pop();
-  // }
 
   void _clearCart() {
     setState(() {
@@ -184,10 +157,11 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
                         child: BlocBuilder<RestaurantMenuBloc, RestaurantMenuState>(
                           builder: (context, state) {
                             if (state is RestaurantMenuInitial || state is RestaurantMenuLoadInProgress) {
-                              return const Padding(
-                                padding: EdgeInsets.only(top: 32),
-                                child: Center(child: CircularProgressIndicator()),
-                              );
+                              return Container();
+                              // const Padding(
+                              //   padding: EdgeInsets.only(top: 32),
+                              //   child: Center(child: CircularProgressIndicator()),
+                              // );
                             }
                             if (state is RestaurantMenuLoadFailure) {
                               return Padding(
@@ -479,7 +453,9 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
                 vegColor: _veg,
                 nonVegColor: _nonVeg,
                 cartData: _cartData, // Pass cart data to MenuItemCard
-                onQuantityChanged: _onQuantityChanged, // Pass quantity change callback
+                onQuantityChanged: (productId, centralProductId, quantity, isIncrease, isCustomizable) {
+                  _onQuantityChanged(productId, centralProductId, quantity, isIncrease, isCustomizable, item.title, item.imageUrl ?? '');
+                }, // Pass quantity change callback
                 onClick: () {
                   // Find the product data and trigger order
                   chat.Product? foundProduct;
@@ -585,7 +561,7 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
       price: priceText,
       originalPrice: basePriceText,
       isVeg: !p.containsMeat,
-      assetPath: imageUrl ?? AssetHelper.getAssetPath('images/men.png'),
+      assetPath: imageUrl ?? AssetHelper.getAssetPath('images/ic_placeHolder.svg'),
       imageUrl: imageUrl,
       productId: p.childProductId,
       centralProductId: p.parentProductId,
@@ -705,52 +681,10 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
         setState(() {
           _cartData = cartData;
           
-          // Update product quantities from cart data
-          // for (final cartItem in cartData) {
-          //   for (final seller in cartItem.sellers) {
-          //     for (final cartProduct in seller.products) {
-          //       if (cartProduct.quantity != null && cartProduct.quantity!.value > 0) {
-          //         // Find the corresponding product in our categories data
-          //         for (final category in _categories) {
-          //           if (category.isSubCategories && category.subCategories.isNotEmpty) {
-          //             for (final subCategory in category.subCategories) {
-          //               for (final product in subCategory.products) {
-          //                 if (product.childProductId == cartProduct.id) {
-          //                   _productQuantities[product.childProductId] = cartProduct.quantity!.value;
-          //                   _productDetails[product.childProductId] = product;
-          //                   break;
-          //                 }
-          //               }
-          //             }
-          //           } else {
-          //             for (final product in category.products) {
-          //               if (product.childProductId == cartProduct.id) {
-          //                 _productQuantities[product.childProductId] = cartProduct.quantity!.value;
-          //                 _productDetails[product.childProductId] = product;
-          //                 break;
-          //               }
-          //             }
-          //           }
-          //         }
-          //       }
-          //     }
-          //   }
-          // }
-          
-          // _updateCartTotals();
         });
       }
     });
   }
-
-  // Update cart totals based on current quantities
-  // void _updateCartTotals() {
-  //   setState(() {
-  //     _cartItems = _productQuantities.values.fold(0, (sum, quantity) => sum + quantity);
-  //     _cartTotal = _productDetails.values.fold(0.0, (sum, product) => 
-  //       sum + (product.finalPrice * (_productQuantities[product.childProductId] ?? 0)));
-  //   });
-  // }
 
    /// Get addToCartOnId from cart data for a specific product
   dynamic _getAddToCartOnId(String productId) {
@@ -770,7 +704,7 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
   }
 
   // Handle quantity changes for products
-  void _onQuantityChanged(String productId, String centralProductId, int currentQuantity, bool isIncrease, bool isCustomizable) {
+  void _onQuantityChanged(String productId, String centralProductId, int currentQuantity, bool isIncrease, bool isCustomizable, String productName, String productImage) {
     try {
       if (isIncrease == false && currentQuantity == 1) {
           //TODO:- 0 Quantity
@@ -804,7 +738,7 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
                           
                           onChooseClicked: () {
                             // When "I'll choose" is clicked, open ProductCustomizationScreen
-                            _openProductCustomization(productId, centralProductId,widget.actionData?.storeId ?? '', widget.actionData?.storeCategoryId ?? '', widget.actionData?.storeTypeId ?? -111, context);
+                            _openProductCustomization(productId, centralProductId,widget.actionData?.storeId ?? '', widget.actionData?.storeCategoryId ?? '', widget.actionData?.storeTypeId ?? -111, context, productName, productImage);
                           },
                           onRepeatClicked: () {
                             //TODO:- Add Quantity
@@ -868,7 +802,7 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
     }
   }
 
-  void _openProductCustomization(String productId, String centralProductId, String storeId,String storeCategoryId,int storeTypeId, BuildContext context) {
+  void _openProductCustomization(String productId, String centralProductId, String storeId,String storeCategoryId,int storeTypeId, BuildContext context, String productName, String productImage) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -877,8 +811,8 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
         productId: productId,
         centralProductId: centralProductId,
         storeId: storeId,
-        productName: 'Product Name',
-        productImage: 'Product Image',
+        productName: productName,
+        productImage: productImage,
         isFromMenuScreen: true,
         onAddToCartWithAddOns: (product, store, variant, addOns) => _onAddToCartWithAddOns(productId, centralProductId, storeId, storeCategoryId, storeTypeId, context, variant, addOns),
       ),

@@ -9,21 +9,39 @@ class ChatResponse {
   final String text;
   final String requestId;
   final List<ChatWidget> widgets;
+  final int? cartCount;
 
   ChatResponse({
     required this.text,
     required this.requestId,
     required this.widgets,
+    this.cartCount,
   });
 
   factory ChatResponse.fromJson(Map<String, dynamic> json) {
+    List<ChatWidget> widgetsList = [];
+    
+    // Handle widgets field - it can be either a List or a String
+    final widgetsData = json['widgets'];
+    if (widgetsData != null) {
+      if (widgetsData is List) {
+        // Normal case: widgets is a list
+        widgetsList = widgetsData
+            .map((item) => ChatWidget.fromJson(item as Map<String, dynamic>))
+            .toList();
+      } else if (widgetsData is String) {
+        // Edge case: widgets is a string (like error messages)
+        // In this case, we don't parse it as widgets and leave the list empty
+        // This prevents parsing errors and the string won't be displayed anywhere
+        widgetsList = [];
+      }
+    }
+    
     return ChatResponse(
       text: json['text'] ?? '',
       requestId: json['request_id'] ?? '',
-      widgets: (json['widgets'] as List<dynamic>?)
-          ?.map((item) => ChatWidget.fromJson(item as Map<String, dynamic>))
-          .toList() ??
-          [],
+      widgets: widgetsList,
+      cartCount: json['cartCount'] ?? -1,
     );
   }
 
@@ -32,6 +50,7 @@ class ChatResponse {
       'text': text,
       'request_id': requestId,
       'widgets': widgets.map((widget) => widget.toJson()).toList(),
+      'cartCount': cartCount,
     };
   }
 
@@ -58,6 +77,63 @@ class ChatResponse {
     return 'ChatResponse(text: $text, requestId: $requestId, widgets: ${widgets.length})';
   }
 }
+// class ChatResponse {
+//   final String text;
+//   final String requestId;
+//   final List<ChatWidget> widgets;
+//   final int? cartCount;
+
+//   ChatResponse({
+//     required this.text,
+//     required this.requestId,
+//     required this.widgets,
+//     this.cartCount,
+//   });
+
+//   factory ChatResponse.fromJson(Map<String, dynamic> json) {
+//     return ChatResponse(
+//       text: json['text'] ?? '',
+//       requestId: json['request_id'] ?? '',
+//       widgets: (json['widgets'] as List<dynamic>?)
+//           ?.map((item) => ChatWidget.fromJson(item as Map<String, dynamic>))
+//           .toList() ??
+//           [],
+//       cartCount: json['cartCount'] ?? -1,
+//     );
+//   }
+
+//   Map<String, dynamic> toJson() {
+//     return {
+//       'text': text,
+//       'request_id': requestId,
+//       'widgets': widgets.map((widget) => widget.toJson()).toList(),
+//       'cartCount': cartCount,
+//     };
+//   }
+
+//   // Helper method to check if response has widgets
+//   bool get hasWidgets => widgets.isNotEmpty;
+
+//   // Helper method to get widgets by type
+//   List<ChatWidget> getWidgetsByType(String type) {
+//     return widgets.where((widget) => widget.type == type).toList();
+//   }
+
+//   // Helper method to get options widgets specifically
+//   List<ChatWidget> get optionsWidgets => getWidgetsByType('options');
+//   // Helper method to get see_more widgets specifically
+//   List<ChatWidget> get seeMoreWidgets => getWidgetsByType('see_more');
+//   List<ChatWidget> get cartWidgets => getWidgetsByType('cart');
+//   List<ChatWidget> get chooseAddressWidgets => getWidgetsByType('choose_address');
+//   List<ChatWidget> get chooseCardWidgets => getWidgetsByType('choose_card');
+//   List<ChatWidget> get orderSummaryWidgets => getWidgetsByType('order_summary');
+//   List<ChatWidget> get orderConfirmedWidgets => getWidgetsByType('order_confirmed');
+
+//   @override
+//   String toString() {
+//     return 'ChatResponse(text: $text, requestId: $requestId, widgets: ${widgets.length})';
+//   }
+// }
 
 // Chat Widget Model
 class ChatWidget {
@@ -337,6 +413,7 @@ class Product {
   final String? storeId;
   final bool? storeIsOpen;
   final bool? instock;
+  final bool? variantCount;// For Grocery Only
 
   const Product({
     // required this.id,
@@ -357,6 +434,7 @@ class Product {
      this.storeId,
      this.storeIsOpen,
      this.instock,
+     this.variantCount,
   });
 
   double get finalPrice => finalPriceList.finalPrice;
@@ -397,6 +475,7 @@ class Product {
       storeId: json['storeId']?.toString() ?? '',
         storeIsOpen: json['storeIsOpen'] ?? false,
         instock: json['instock'] ?? false,
+        variantCount: json['variantCount'] ?? false,
     );
   }
 
@@ -420,6 +499,7 @@ class Product {
       'storeId': storeId,
       'storeIsOpen': storeIsOpen,
       'instock': instock,
+      'variantCount': variantCount,
     };
   }
 }
@@ -773,7 +853,7 @@ class WidgetAction {
       storeName: json['storeName']?.toString(),
       paymentTypeText: json['paymentTypeText']?.toString(),
       storeTypeId: json['storeTypeId'] ?? -111,
-        storeIsOpen: json['storeIsOpen'] ?? false,
+        storeIsOpen: json['storeIsOpen'] ?? true,
         storeCategoryName: json['storeCategoryName']?.toString(),
     );
   }

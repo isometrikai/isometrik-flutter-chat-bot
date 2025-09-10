@@ -5,6 +5,7 @@ import 'package:chat_bot/data/model/universal_cart_response.dart';
 import 'package:chat_bot/services/callback_manage.dart';
 import 'package:chat_bot/bloc/chat_event.dart';
 import '../utils/asset_helper.dart';
+import '../utils/asset_helper_svg.dart';
 import 'black_toast_view.dart';
 
 class StoreCard extends StatelessWidget {
@@ -164,24 +165,28 @@ class StoreCard extends StatelessWidget {
       child: Container(
         width: 69,
         height: 69,
-        color: const Color(0xFFFFF067),
         child: store.storeImage.isNotEmpty
             ? Image.network(
           store.storeImage,
           fit: BoxFit.cover,
-          errorBuilder: (context, error, stackTrace) => _defaultLogo(),
+          loadingBuilder: (context, child, loadingProgress) {
+            if (loadingProgress == null) return child;
+            return _placeholderLogo();
+          },
+          errorBuilder: (context, error, stackTrace) => _placeholderLogo(),
         )
-            : _defaultLogo(),
+            : _placeholderLogo(),
       ),
     );
   }
 
-  Widget _defaultLogo() {
-    return const Center(
-      child: Icon(
-        Icons.storefront,
-        size: 28,
-        color: Color(0xFF363648),
+  Widget _placeholderLogo() {
+    return Center(
+      child: AssetHelper.svgAsset(
+        'images/ic_placeHolder.svg',
+        width: 69,
+        height: 69,
+        fit: BoxFit.cover,
       ),
     );
   }
@@ -257,6 +262,7 @@ class _ProductPreviewTile extends StatelessWidget {
                             color: Color(0xFF242424),
                           ),
                         ),
+                        if (product.finalPriceList.basePrice != product.finalPriceList.finalPrice) ...[
                         const SizedBox(width: 5),
                         Flexible(
                           child: Text(
@@ -270,6 +276,7 @@ class _ProductPreviewTile extends StatelessWidget {
                             ),
                           ),
                         ),
+                      ]
                       ],
                     )
                   ],
@@ -281,10 +288,18 @@ class _ProductPreviewTile extends StatelessWidget {
                 child: Container(
                   width: 78,
                   height: 78,
-                  color: const Color(0xFFD9D9D9),
+                  // color: const Color(0xFFD9D9D9),
                   child: product.productImage.isNotEmpty
-                      ? Image.network(product.productImage, fit: BoxFit.cover)
-                      : AssetHelper.imageAsset('images/men.png', fit: BoxFit.cover),
+                      ? Image.network(
+                          product.productImage,
+                          fit: BoxFit.cover,
+                          loadingBuilder: (context, child, loadingProgress) {
+                            if (loadingProgress == null) return child;
+                            return _placeholderProductImage();
+                          },
+                          errorBuilder: (context, error, stackTrace) => _placeholderProductImage(),
+                        )
+                      : _placeholderProductImage(),
                 ),
               ),
             ],
@@ -323,6 +338,17 @@ class _ProductPreviewTile extends StatelessWidget {
   // Helper method to check if product is in cart
   bool _isProductInCart() {
     return _getProductCartQuantity() != null && _getProductCartQuantity()! > 0;
+  }
+
+  Widget _placeholderProductImage() {
+    return Center(
+      child: AssetHelper.svgAsset(
+        'images/ic_placeHolder.svg',
+        width: 78,
+        height: 78,
+        fit: BoxFit.cover,
+      ),
+    );
   }
 
   Widget _buildAddButton(BuildContext context) {
