@@ -17,11 +17,13 @@ class GroceryMenuRefreshed extends GroceryMenuEvent {
 
 class SubCategoryProductsRequested extends GroceryMenuEvent {
   final String storeId;
+  final String subCategoryId;
 
   const SubCategoryProductsRequested({
     required this.storeId,
+    required this.subCategoryId,
   });
 
   @override
-  List<Object?> get props => [storeId];
+  List<Object?> get props => [storeId, subCategoryId];
 }

@@ -58,7 +58,7 @@ class _GroceriesMenuScreenState extends State<GroceriesMenuScreen> {
   }
 
   void _fetchSubCategoryProducts() {
-    _bloc.add(SubCategoryProductsRequested(storeId: widget.actionData?.storeId ?? ''));
+    _bloc.add(SubCategoryProductsRequested(storeId: widget.actionData?.storeId ?? '',subCategoryId: widget.actionData?.storeCategoryId ?? ''));
   }
 
   @override

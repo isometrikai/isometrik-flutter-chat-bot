@@ -29,7 +29,7 @@ class GroceryMenuBloc extends Bloc<GroceryMenuEvent, GroceryMenuState> {
       print('🚀 GroceryMenuBloc: Starting SubCategoryProducts API call');
       print('  - All parameters now passed as headers');
       
-      final response = await repository.fetchSubCategoryProducts(storeId: event.storeId);
+      final response = await repository.fetchSubCategoryProducts(storeId: event.storeId, subCategoryId: event.subCategoryId);
 
       print('✅ GroceryMenuBloc: API call successful');
       print('  - Response categories: ${response.categoryData.length}');
