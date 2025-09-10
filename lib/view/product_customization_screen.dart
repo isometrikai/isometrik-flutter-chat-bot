@@ -641,66 +641,73 @@ class _ProductCustomizationScreenState extends State<ProductCustomizationScreen>
                           Navigator.of(context).pop();
                         }
                       } else {
-                        // No addons selected, proceed with original logic
-                        final customizations = <String, List<String>>{};
-                        
-                        customizations['variant'] = [state.selectedVariant!.name];
-                        
-                        for (final entry in state.selectedAddOns.entries) {
-                          if (entry.value.isNotEmpty) {
-                            final addOnCategory = state.selectedVariant!.addOns.firstWhere(
-                              (category) => category.name == entry.key,
-                            );
-                            
-                            final selectedItems = <String>[];
-                            for (final addOnId in entry.value) {
-                              final addOnItem = addOnCategory.addOns.firstWhere(
-                                (item) => item.id == addOnId,
-                              );
-                              selectedItems.add(addOnItem.name);
-                            }
-                            
-                            if (selectedItems.isNotEmpty) {
-                              customizations[entry.key] = selectedItems;
-                            }
-                          }
-                        }
-                        
-                        if (widget.onAddToCart != null) {
-                          final variantName = state.selectedVariant!.name;
-                          
-                          List<String> customizationDetails = [];
-                          
-                          for (final entry in state.selectedAddOns.entries) {
-                            if (entry.value.isNotEmpty) {
-                              final addOnCategory = state.selectedVariant!.addOns.firstWhere(
-                                (category) => category.name == entry.key,
-                              );
-                              
-                              final selectedItems = <String>[];
-                              for (final addOnId in entry.value) {
-                                final addOnItem = addOnCategory.addOns.firstWhere(
-                                  (item) => item.id == addOnId,
-                                );
-                                selectedItems.add(addOnItem.name);
-                              }
-                              
-                              if (selectedItems.isNotEmpty) {
-                                customizationDetails.add("${entry.key}: ${selectedItems.join(', ')}");
-                              }
-                            }
-                          }
-                          
-                          String message = "[VARIANT_SELECTION] Added 1X ${widget.isFromMenuScreen == true ? widget.productName ?? '' : widget.product?.productName ?? ''} - $variantName";
-                          if (customizationDetails.isNotEmpty) {
-                            message += " with ${customizationDetails.join(', ')}";
-                          }
-                          message += " to cart";
-                          
-                          widget.onAddToCart!(message);
-                        }
-                        
+                        widget.onAddToCartWithAddOns!(
+                              widget.product!,
+                              widget.store!,
+                              state.selectedVariant!,
+                              formattedAddOns,
+                        );
                         Navigator.of(context).pop();
+                        // No addons selected, proceed with original logic
+                        // final customizations = <String, List<String>>{};
+                        
+                        // customizations['variant'] = [state.selectedVariant!.name];
+                        
+                        // for (final entry in state.selectedAddOns.entries) {
+                        //   if (entry.value.isNotEmpty) {
+                        //     final addOnCategory = state.selectedVariant!.addOns.firstWhere(
+                        //       (category) => category.name == entry.key,
+                        //     );
+                            
+                        //     final selectedItems = <String>[];
+                        //     for (final addOnId in entry.value) {
+                        //       final addOnItem = addOnCategory.addOns.firstWhere(
+                        //         (item) => item.id == addOnId,
+                        //       );
+                        //       selectedItems.add(addOnItem.name);
+                        //     }
+                            
+                        //     if (selectedItems.isNotEmpty) {
+                        //       customizations[entry.key] = selectedItems;
+                        //     }
+                        //   }
+                        // }
+                        
+                        // if (widget.onAddToCart != null) {
+                        //   final variantName = state.selectedVariant!.name;
+                          
+                        //   List<String> customizationDetails = [];
+                          
+                        //   for (final entry in state.selectedAddOns.entries) {
+                        //     if (entry.value.isNotEmpty) {
+                        //       final addOnCategory = state.selectedVariant!.addOns.firstWhere(
+                        //         (category) => category.name == entry.key,
+                        //       );
+                              
+                        //       final selectedItems = <String>[];
+                        //       for (final addOnId in entry.value) {
+                        //         final addOnItem = addOnCategory.addOns.firstWhere(
+                        //           (item) => item.id == addOnId,
+                        //         );
+                        //         selectedItems.add(addOnItem.name);
+                        //       }
+                              
+                        //       if (selectedItems.isNotEmpty) {
+                        //         customizationDetails.add("${entry.key}: ${selectedItems.join(', ')}");
+                        //       }
+                        //     }
+                        //   }
+                          
+                        //   String message = "[VARIANT_SELECTION] Added 1X ${widget.isFromMenuScreen == true ? widget.productName ?? '' : widget.product?.productName ?? ''} - $variantName";
+                        //   if (customizationDetails.isNotEmpty) {
+                        //     message += " with ${customizationDetails.join(', ')}";
+                        //   }
+                        //   message += " to cart";
+                          
+                        //   widget.onAddToCart!(message);
+                        // }
+                        
+                        // Navigator.of(context).pop();
                         
                       }
                     }

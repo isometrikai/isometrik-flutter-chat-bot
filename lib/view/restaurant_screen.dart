@@ -75,6 +75,7 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
     super.initState();
     _bloc = RestaurantBloc();
     cartBloc = CartBloc();
+    _cartData = globalCartData;
     _bootstrapData();
     isCartAPICalled = false;
     // Listen to cart state changes to update cart data

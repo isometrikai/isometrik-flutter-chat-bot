@@ -185,13 +185,12 @@ class CartService {
   /// Clear cart by cart ID
   Future<ApiResult> clearCart({required String cartId}) async {
     try {
-      final result = await _client.delete('/v1/cart?cartId=$cartId');
       Utility.showLoader();
+      final result = await _client.delete('/v1/cart?cartId=$cartId');
+      Utility.closeProgressDialog();
       if (result.isSuccess) {
-        Utility.closeProgressDialog();
         return ApiResult.success(result.data);
       } else {
-        Utility.closeProgressDialog();
         return ApiResult.error(result.message ?? 'Failed to clear cart');
       }
     } catch (e) {

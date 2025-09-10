@@ -50,6 +50,7 @@ class _GroceriesMenuScreenState extends State<GroceriesMenuScreen> {
   void initState() {
     super.initState();
     isCartAPICalled = false;
+    _cartData = globalCartData;
     _bloc = GroceryMenuBloc(actionData: widget.actionData);
     cartBloc = CartBloc();
     cartBloc.add(CartFetchRequested(needToShowLoader: false));
