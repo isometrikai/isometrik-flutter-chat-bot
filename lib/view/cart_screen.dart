@@ -283,11 +283,16 @@ class _CartScreenState extends State<CartScreen> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           // Empty cart SVG icon
-          AssetHelper.svgAsset(
-            'images/ic_emptyCart.svg',
+          SvgPicture.asset(
+            AssetPath.get('images/ic_emptyCart.svg'),
             width: 120,
             height: 120,
           ),
+          // AssetHelper.svgAsset(
+          //   'images/ic_emptyCart.svg',
+          //   width: 120,
+          //   height: 120,
+          // ),
           const SizedBox(height: 24),
           // "Your cart is empty" text
           const Text(
