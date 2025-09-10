@@ -65,12 +65,12 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
   void initState() {
     super.initState();
     isCartAPICalled = false;
+    _cartData = globalCartData;
     _bloc = RestaurantMenuBloc(actionData: widget.actionData);
     cartBloc = CartBloc();
+    cartBloc.add(CartFetchRequested(needToShowLoader: false));
     _bloc.add(const RestaurantMenuRequested());
     
-    // Fetch initial cart data
-    cartBloc.add(CartFetchRequested(needToShowLoader: false));
   }
 
   @override
@@ -506,7 +506,7 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
                       productName: item.title,
                       productImage: item.imageUrl?.isNotEmpty ?? false ? item.imageUrl : null,
                       isFromMenuScreen: true,
-                      onAddToCartWithAddOns: (product, store, variant, addOns) {
+                      onAddToCartWithAddOns: (product, store, variant, addOns, selectedProductId) {
                         //TODO:- Add Quantity
                         cartBloc.add(CartAddItemRequested(
                        storeId: widget.actionData?.storeId ?? '',
@@ -515,7 +515,7 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
                        storeCategoryId: widget.actionData?.storeCategoryId ?? '',
                        newQuantity: quantity , // Add 1 item
                        storeTypeId: widget.actionData?.storeTypeId ?? -111,
-                        productId: productId,
+                        productId: selectedProductId,
                         centralProductId: centralProductId,
                         unitId: variant.unitId,
                         newAddOns: addOns,
@@ -814,7 +814,7 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
         productName: productName,
         productImage: productImage,
         isFromMenuScreen: true,
-        onAddToCartWithAddOns: (product, store, variant, addOns) => _onAddToCartWithAddOns(productId, centralProductId, storeId, storeCategoryId, storeTypeId, context, variant, addOns),
+        onAddToCartWithAddOns: (product, store, variant, addOns, selectedProductId) => _onAddToCartWithAddOns(productId, centralProductId, storeId, storeCategoryId, storeTypeId, context, variant, addOns,selectedProductId),
       ),
     );
   }
@@ -828,7 +828,8 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
     int storeTypeId,
     BuildContext context,
     dynamic variant, 
-    List<Map<String, dynamic>> addOns
+    List<Map<String, dynamic>> addOns,
+    String selectedProductId
   ) {
     try {
       //TODO:- Add Quantity
@@ -839,7 +840,7 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
         storeCategoryId: storeCategoryId,
         newQuantity: 1,
         storeTypeId: storeTypeId,
-        productId: productId,
+        productId: selectedProductId,
         centralProductId: centralProductId,
         unitId: variant.unitId,
         newAddOns: addOns,

@@ -4,6 +4,7 @@ import 'package:chat_bot/data/model/universal_cart_response.dart';
 import 'package:chat_bot/data/model/chat_response.dart';
 import 'package:chat_bot/data/services/universal_api_client.dart';
 import 'package:chat_bot/utils/api_result.dart';
+import 'package:chat_bot/utils/utility.dart';
 
 class CartService {
   CartService._internal();
@@ -184,14 +185,16 @@ class CartService {
   /// Clear cart by cart ID
   Future<ApiResult> clearCart({required String cartId}) async {
     try {
+      Utility.showLoader();
       final result = await _client.delete('/v1/cart?cartId=$cartId');
-      
+      Utility.closeProgressDialog();
       if (result.isSuccess) {
         return ApiResult.success(result.data);
       } else {
         return ApiResult.error(result.message ?? 'Failed to clear cart');
       }
     } catch (e) {
+      Utility.closeProgressDialog();
       return ApiResult.error(e.toString());
     }
   }

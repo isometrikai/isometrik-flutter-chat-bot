@@ -1863,7 +1863,8 @@ class _ChatScreenBody extends StatelessWidget {
     Product product, 
     Store store, 
     dynamic variant, 
-    List<Map<String, dynamic>> addOns
+    List<Map<String, dynamic>> addOns,
+    String selectedProductId
   ) {
     try {
       //TODO:- Add Quantity
@@ -1874,7 +1875,7 @@ class _ChatScreenBody extends StatelessWidget {
         storeCategoryId: store.storeCategoryId,
         newQuantity: 1,
         storeTypeId: store.storeTypeId ?? -111,
-        productId: product.childProductId,
+        productId: selectedProductId,
         centralProductId: product.parentProductId,
         unitId: variant.unitId,
         newAddOns: addOns,
@@ -2279,7 +2280,7 @@ void _openGroceryCustomization(BuildContext context, String parentProductId, Str
                       productName: product.productName,
                       productImage: product.productImage.isNotEmpty ? product.productImage : null,
                       isFromMenuScreen: true,
-                      onAddToCartWithAddOns: (product, store, variant, addOns) {
+                      onAddToCartWithAddOns: (product, store, variant, addOns, selectedProductId) {
                         //TODO:- Add Quantity
                         cartBloc.add(CartAddItemRequested(
                        storeId: product.storeId ?? '',
@@ -2288,7 +2289,7 @@ void _openGroceryCustomization(BuildContext context, String parentProductId, Str
                        storeCategoryId: product.storeCategoryId ?? '',
                        newQuantity: quantity , // Add 1 item
                        storeTypeId: product.storeTypeId ?? -111,
-                        productId: productId,
+                        productId: selectedProductId,
                         centralProductId: centralProductId,
                         unitId: variant.unitId,
                         newAddOns: addOns,
@@ -2435,7 +2436,7 @@ void _openGroceryCustomization(BuildContext context, String parentProductId, Str
         productName: productName,
         productImage: productImage,
         isFromMenuScreen: true,
-        onAddToCartWithAddOns: (product, store, variant, addOns) => _onAddToCartWithAddOnsMenuItem(productId, centralProductId, storeId, storeCategoryId, storeTypeId, context, variant, addOns),
+        onAddToCartWithAddOns: (product, store, variant, addOns, selectedProductId) => _onAddToCartWithAddOnsMenuItem(productId, centralProductId, storeId, storeCategoryId, storeTypeId, context, variant, addOns,selectedProductId),
       ),
     );
   }
@@ -2449,7 +2450,8 @@ void _openGroceryCustomization(BuildContext context, String parentProductId, Str
     int storeTypeId,
     BuildContext context,
     dynamic variant, 
-    List<Map<String, dynamic>> addOns
+    List<Map<String, dynamic>> addOns,
+    String selectedProductId
   ) {
     try {
       //TODO:- Add Quantity
@@ -2460,7 +2462,7 @@ void _openGroceryCustomization(BuildContext context, String parentProductId, Str
         storeCategoryId: storeCategoryId,
         newQuantity: 1,
         storeTypeId: storeTypeId,
-        productId: productId,
+        productId: selectedProductId,
         centralProductId: centralProductId,
         unitId: variant.unitId,
         newAddOns: addOns,

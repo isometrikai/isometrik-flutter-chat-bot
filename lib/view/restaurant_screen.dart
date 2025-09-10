@@ -75,6 +75,7 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
     super.initState();
     _bloc = RestaurantBloc();
     cartBloc = CartBloc();
+    _cartData = globalCartData;
     _bootstrapData();
     isCartAPICalled = false;
     // Listen to cart state changes to update cart data
@@ -88,10 +89,9 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
   }
 
   Future<void> _bootstrapData() async {
+    cartBloc.add(CartFetchRequested(needToShowLoader: false));
     _bloc.add(RestaurantFetchRequested(keyword: _currentKeyword, storeCategoryName: widget.actionData?.storeCategoryName ?? ''));
     
-    // Fetch initial cart data
-    cartBloc.add(CartFetchRequested(needToShowLoader: false));
   }
 
   /// Handle adding products with addons to cart
@@ -99,7 +99,8 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
     chat.Product product, 
     chat.Store store, 
     dynamic variant, 
-    List<Map<String, dynamic>> addOns
+    List<Map<String, dynamic>> addOns,
+    String selectedProductId
   ) {
     try {
       //TODO:- Add Quantity
@@ -110,7 +111,7 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
         storeCategoryId: store.storeCategoryId,
         newQuantity: 1,
         storeTypeId: store.type,
-        productId: product.childProductId,
+        productId: selectedProductId,
         centralProductId: product.parentProductId,
         unitId: variant.unitId,
         newAddOns: addOns,

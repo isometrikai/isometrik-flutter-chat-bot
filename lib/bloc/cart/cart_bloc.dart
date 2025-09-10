@@ -8,6 +8,8 @@ import 'package:chat_bot/data/repositories/cart_repository.dart';
 import 'package:chat_bot/utils/utility.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+List<UniversalCartData> globalCartData = [];
+
 class CartBloc extends Bloc<CartEvent, CartState> {
   final CartRepository repository;
   // final CartManager cartManager = CartManager();
@@ -58,6 +60,7 @@ class CartBloc extends Bloc<CartEvent, CartState> {
         
         if (rawCartData.data.isNotEmpty) {
           cartData = rawCartData.data;
+          globalCartData = rawCartData.data;
           final cart = rawCartData.data.first;
           final seller = cart.sellers.isNotEmpty ? cart.sellers.first : null;
 
@@ -76,6 +79,7 @@ class CartBloc extends Bloc<CartEvent, CartState> {
           print('CartBloc: Calculated totalProductCount: $totalProductCount');
         }else {
           cartData.clear();
+          globalCartData.clear();
           totalProductCount = 0;
         }
         
@@ -92,12 +96,14 @@ class CartBloc extends Bloc<CartEvent, CartState> {
         
       } else {
         cartData.clear();
+        globalCartData.clear();
         totalProductCount = 0;
         emit(CartEmpty());
         // emit(CartError(message: rawResult.message ?? 'Failed to fetch cart'));
       }
     } catch (e) {
       cartData.clear();
+      globalCartData.clear();
       totalProductCount = 0;
       emit(CartError(message: e.toString()));
        if (event.needToShowLoader) {
@@ -114,6 +120,12 @@ class CartBloc extends Bloc<CartEvent, CartState> {
   /// Validate cart compatibility before adding new items
   CartValidationResult _validateCartCompatibility(CartAddItemRequested event) {
     // If cart is empty, allow adding any item
+    if (cartData.isEmpty && globalCartData.isEmpty) {
+      return CartValidationResult(isValid: true);
+    }
+    // if (globalCartData.isNotEmpty && cartData.isEmpty) {
+      cartData = globalCartData;
+    // }
     if (cartData.isEmpty) {
       return CartValidationResult(isValid: true);
     }
@@ -127,6 +139,7 @@ class CartBloc extends Bloc<CartEvent, CartState> {
           for (final seller in existingCart.sellers) {
             for (final product in seller.products) {
               if (product.storeId != null && product.storeId != event.storeId) {
+                cartId = existingCart.id;
                 return CartValidationResult(
                   isValid: false,
                   errorMessage: 'Cannot add items from different stores. Please clear your cart first.',
@@ -168,6 +181,7 @@ class CartBloc extends Bloc<CartEvent, CartState> {
                 // Cart cleared successfully, now add the new item
                 // Clear local cart data
                 cartData.clear();
+                globalCartData.clear();
                 totalProductCount = 0;
                 // Call the same event again to add the pending item
                 add(event);
@@ -180,6 +194,7 @@ class CartBloc extends Bloc<CartEvent, CartState> {
             } else {
               // No cart ID available, just clear local data and continue
               cartData.clear();
+              globalCartData.clear();
               totalProductCount = 0;
               // Call the same event again to add the pending item
               add(event);
