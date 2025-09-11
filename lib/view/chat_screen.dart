@@ -1790,7 +1790,7 @@ class _ChatScreenBody extends StatelessWidget {
           // onHide: onHideStoreCards, 
           onQuantityChanged: (product, store, newQuantity, isIncrease) {
             if (store.storeTypeId == FoodCategory.grocery.value) {
-              _onQuantityChangedForGrocery(context,product.parentProductId,product.childProductId,product.unitId,store.storeId,store.storeCategoryId,store.storeTypeId ?? -111,product.variantsCount,newQuantity,isIncrease);
+              _onQuantityChangedForGrocery(context,product.parentProductId,product.childProductId,product.unitId,store.storeId,store.storeCategoryId,store.storeTypeId ?? -111,product.variantsCount,newQuantity,isIncrease,product.productName,product.productImage);
             }else {
               _onQuantityChanged(context, product, store, newQuantity, isIncrease);
             }
@@ -1930,7 +1930,9 @@ void _onQuantityChangedForGrocery(
     int storeTypeId,
     int variantsCount,
     int newQuantity,
-    bool isIncrease) {
+    bool isIncrease,
+    String productName,
+    String productImage) {
     if (isIncrease == false && newQuantity == 1) {
       //TODO:- 0 Quantity
       int? addToCartOnId;
@@ -1962,7 +1964,7 @@ void _onQuantityChangedForGrocery(
                           // store: store,
                           // product: product,
                           onChooseClicked: () {
-                            _openGroceryCustomization(context,parentProductId,productId,unitId,storeId,storeCategoryId,storeTypeId);
+                            _openGroceryCustomization(context,parentProductId,productId,unitId,storeId,storeCategoryId,storeTypeId,productName,productImage);
                           },
                           onRepeatClicked: () {
                             //TODO:- Add Quantity
@@ -2030,7 +2032,7 @@ void _onQuantityChangedForGrocery(
   }
 
 
-void _openGroceryCustomization(BuildContext context, String parentProductId, String productId, String unitId, String storeId, String storeCategoryId, int storeTypeId) {
+void _openGroceryCustomization(BuildContext context, String parentProductId, String productId, String unitId, String storeId, String storeCategoryId, int storeTypeId, String productName, String productImage) {
   showModalBottomSheet(
                           context: context,
                           isScrollControlled: true,
@@ -2039,8 +2041,8 @@ void _openGroceryCustomization(BuildContext context, String parentProductId, Str
                             parentProductId: parentProductId,
                             productId: productId,
                             storeId: storeId,
-                            productName: 'productName',
-                            productImage: 'productImage',
+                            productName: productName,
+                            productImage: productImage,
                             onAddToCart: (parentProductId,productId,unitId) {
                               _onAddToCartForGrocery(parentProductId,productId,unitId,storeId,storeCategoryId,storeTypeId,null);
                             },
@@ -2216,7 +2218,7 @@ void _openGroceryCustomization(BuildContext context, String parentProductId, Str
             },
             onQuantityChanged: (productId, centralProductId, quantity, isIncrease, isCustomizable) {
               if (product.storeTypeId == FoodCategory.grocery.value) {
-                _onQuantityChangedForGrocery(context,product.parentProductId,product.childProductId,product.unitId,product.storeId ?? '',product.storeCategoryId ?? '',product.storeTypeId ?? -111,product.variantsCount,quantity,isIncrease);
+                _onQuantityChangedForGrocery(context,product.parentProductId,product.childProductId,product.unitId,product.storeId ?? '',product.storeCategoryId ?? '',product.storeTypeId ?? -111,product.variantsCount,quantity,isIncrease,product.productName,product.productImage);
               }else {
               _onQuantityChangedMenuItem(productId, centralProductId, quantity, isIncrease, isCustomizable, product.storeId ?? '', product.storeCategoryId ?? '', product.storeTypeId ?? -111, context, product.productName, product.productImage);
               }

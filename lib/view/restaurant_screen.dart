@@ -154,7 +154,7 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
     }
   }
 
-void _openGroceryCustomization(String parentProductId, String productId, String unitId, String storeId, String storeCategoryId, int storeTypeId) {
+void _openGroceryCustomization(String parentProductId, String productId, String unitId, String storeId, String storeCategoryId, int storeTypeId, String productName, String productImage) {
   showModalBottomSheet(
                           context: context,
                           isScrollControlled: true,
@@ -163,8 +163,8 @@ void _openGroceryCustomization(String parentProductId, String productId, String 
                             parentProductId: parentProductId,
                             productId: productId,
                             storeId: storeId,
-                            productName: 'productName',
-                            productImage: 'productImage',
+                            productName: productName,
+                            productImage: productImage,
                             onAddToCart: (parentProductId,productId,unitId) {
                               _onAddToCartForGrocery(parentProductId,productId,unitId,storeId,storeCategoryId,storeTypeId,null);
                             },
@@ -221,7 +221,9 @@ void _onQuantityChangedForGrocery(String parentProductId,
     int storeTypeId,
     int variantsCount,
     int newQuantity,
-    bool isIncrease) {
+    bool isIncrease,
+    String productName,
+    String productImage) {
     if (isIncrease == false && newQuantity == 1) {
       //TODO:- 0 Quantity
       int? addToCartOnId;
@@ -252,7 +254,7 @@ void _onQuantityChangedForGrocery(String parentProductId,
                           // store: store,
                           // product: product,
                           onChooseClicked: () {
-                            _openGroceryCustomization(parentProductId,productId,unitId,storeId,storeCategoryId,storeTypeId);
+                            _openGroceryCustomization(parentProductId,productId,unitId,storeId,storeCategoryId,storeTypeId,productName,productImage);
                           },
                           onRepeatClicked: () {
                             //TODO:- Add Quantity
@@ -562,8 +564,6 @@ void _onQuantityChangedForGrocery(String parentProductId,
   // }
 
 
-
-
   Widget _buildSearchBar() {
     return Container(
       height: 54,
@@ -726,7 +726,7 @@ void _onQuantityChangedForGrocery(String parentProductId,
                   },
                   onQuantityChanged: (product, store, newQuantity, isIncrease) {
                     if (store.type == FoodCategory.grocery.value) {
-                      _onQuantityChangedForGrocery(product.parentProductId,product.childProductId,product.unitId,store.storeId,store.storeCategoryId,store.type,product.variantsCount,newQuantity,isIncrease);
+                      _onQuantityChangedForGrocery(product.parentProductId,product.childProductId,product.unitId,store.storeId,store.storeCategoryId,store.type,product.variantsCount,newQuantity,isIncrease,product.productName,product.productImage);
                     }else {
                       _onQuantityChanged(product, store, newQuantity, isIncrease);
                     }
