@@ -1361,7 +1361,7 @@ class _ChatScreenBody extends StatelessWidget {
             const SizedBox(height: 16),
             // Options grid 2x2
             ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 340),
+              constraints: const BoxConstraints(maxWidth: 360),
               child: Wrap(
                 spacing: 16,
                 runSpacing: 16,
@@ -2547,8 +2547,8 @@ class _GreetingOptionTile extends StatelessWidget {
       borderRadius: BorderRadius.circular(8),
       child: Container(
         width: 162,
-        height: 84,
-        padding: const EdgeInsets.fromLTRB(10, 30, 10, 10),
+        height: 90,
+        padding: const EdgeInsets.fromLTRB(8, 0, 8, 5),
         decoration: BoxDecoration(
           color: const Color(0xFFF5F7FF),
           borderRadius: BorderRadius.circular(8),
@@ -2558,10 +2558,11 @@ class _GreetingOptionTile extends StatelessWidget {
           alignment: Alignment.bottomLeft,
           child: Text(
             text,
+            maxLines: 3,
             style: const TextStyle(
               fontWeight: FontWeight.w400,
-              fontSize: 16,
-              height: 1.4,
+              fontSize: 15,
+              height: 1.3,
               color: Color(0xFF242424),
             ),
           ),
