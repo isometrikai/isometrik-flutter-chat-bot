@@ -58,7 +58,7 @@ class UniversalApiClient {
     final token = TokenManager.instance.userToken;
     return {
       'currencysymbol': '4oK5',
-      'storeId': '634ea323eaa246001371fa07', // Default storeId, will be overridden
+      'storeId': '', // Default storeId, will be overridden
       'Authorization': token ?? '',
       'storeType': '8',
       'ipAddress': '192.168.5.105',
@@ -68,17 +68,17 @@ class UniversalApiClient {
       'skip': '0',
       'cityId': '5df7b7218798dc2c1114e6bf',
       'size': '5',
-      'storeCategoryId': '634e537076e179f58008c0e5',
+      'storeCategoryId': '',
     };
   }
 
   /// Build grocery headers with dynamic storeId
-  Future<Map<String, String>> buildGroceryHeadersWithStoreId(String storeId) async {
+  Future<Map<String, String>> buildGroceryHeadersWithStoreId(String storeId, String storeCategoryId) async {
     final token = TokenManager.instance.userToken;
     return {
       'currencysymbol': '4oK5',
       'storeId': storeId,
-      'Authorization': 'Bearer $token',
+      'Authorization': '$token',
       'storeType': '8',
       'ipAddress': '192.168.5.105',
       'platform': '1',
@@ -87,7 +87,7 @@ class UniversalApiClient {
       'skip': '0',
       'cityId': '5df7b7218798dc2c1114e6bf',
       'size': '5',
-      'storeCategoryId': '634e537076e179f58008c0e5',
+      'storeCategoryId': storeCategoryId,
     };
   }
 

@@ -106,7 +106,7 @@ class CategoryData {
 class SubCategoryProduct {
   final bool outOfStock;
   final String parentProductId;
-  final int totalStarRating;
+  final num totalStarRating;
   final String childProductId;
   final String productName;
   final int maxQuantityPerUser;
@@ -166,7 +166,7 @@ class SubCategoryProduct {
     return SubCategoryProduct(
       outOfStock: json['outOfStock'] ?? false,
       parentProductId: json['parentProductId']?.toString() ?? '',
-      totalStarRating: json['TotalStarRating'] ?? 0,
+      totalStarRating: json['TotalStarRating'] ?? 0.0,
       childProductId: json['childProductId']?.toString() ?? '',
       productName: json['productName']?.toString() ?? '',
       maxQuantityPerUser: json['maxQuantityPerUser'] ?? 1,

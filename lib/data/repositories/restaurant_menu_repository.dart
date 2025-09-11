@@ -39,9 +39,10 @@ class RestaurantMenuRepository {
 
   Future<SubCategoryProductsResponse> fetchSubCategoryProducts({
     required String storeId,
+    required String subCategoryId,
   }) async {
     // Get dynamic headers with the provided storeId
-    final headers = await UniversalApiClient.instance.buildGroceryHeadersWithStoreId(storeId);
+    final headers = await UniversalApiClient.instance.buildGroceryHeadersWithStoreId(storeId,subCategoryId);
     
     // Make API call with custom headers
     final ApiResult res = await UniversalApiClient.instance.getWithCustomHeaders(
