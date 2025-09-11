@@ -309,7 +309,7 @@ class _ProductPreviewTile extends StatelessWidget {
             ],
           ),
           Positioned(
-            right: 10,
+            right: 0,
             bottom: -4,
             child: _buildAddButton(context),
           ),
@@ -468,6 +468,7 @@ class _ProductPreviewTile extends StatelessWidget {
         },
         child: Container(
           height: 27,
+          width: 78,
           padding: const EdgeInsets.symmetric(horizontal: 17),
           decoration: BoxDecoration(
             color: Colors.white,
