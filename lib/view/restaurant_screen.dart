@@ -9,11 +9,9 @@ import '../data/model/universal_cart_response.dart';
 import '../widgets/black_toast_view.dart';
 import '../widgets/store_card.dart';
 import '../widgets/screen_header.dart';
-import 'package:chat_bot/bloc/chat_event.dart';
 import 'package:chat_bot/bloc/restaurant/restaurant_bloc.dart';
 import 'package:chat_bot/bloc/restaurant/restaurant_event.dart';
 import 'package:chat_bot/bloc/restaurant/restaurant_state.dart';
-import 'package:chat_bot/services/cart_manager.dart';
 import 'package:chat_bot/services/callback_manage.dart';
 import 'package:chat_bot/bloc/cart/cart_bloc.dart';
 import 'package:chat_bot/bloc/cart/cart_event.dart';
@@ -44,11 +42,7 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
   DateTime? _lastQueryAt;
   
   // Cart state
-  double _cartTotal = 0.00;
   int _cartItems = 0;
-  Map<String, int> _productQuantities = {}; // Track product quantities
-  Map<String, chat.Product> _productDetails = {}; // Track product details
-  Map<String, int> _initialQuantities = {}; // Track initial quantities when screen opened
   List<UniversalCartData> _cartData = []; // Store cart data from getCart API
 
   @override
@@ -62,7 +56,15 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
     _currentKeyword = value.trim();
     final now = DateTime.now();
     _lastQueryAt = now;
-    Future.delayed(const Duration(milliseconds: 400), () async {
+    
+    // Skip API call for empty queries - show all results
+    if (_currentKeyword.isEmpty) {
+      _bloc.add(RestaurantFetchRequested(keyword: '', storeCategoryName: widget.actionData?.storeCategoryName ?? ''));
+      return;
+    }
+    
+    // Reduced debounce delay for faster response
+    Future.delayed(const Duration(milliseconds: 300), () async {
       if (!mounted) return;
       // Debounce: only proceed if this is the latest input
       if (_lastQueryAt != now) return;
@@ -202,16 +204,6 @@ void _openGroceryCustomization(String parentProductId, String productId, String 
     }
   }
 
-  void _clearCart() {
-    setState(() {
-      _cartItems = 0;
-      _cartTotal = 0.00;
-      _productQuantities.clear();
-      _productDetails.clear();
-      _initialQuantities.clear();
-      _cartData.clear();
-    });
-  }
 
 void _onQuantityChangedForGrocery(String parentProductId,
     String productId,
@@ -653,6 +645,7 @@ void _onQuantityChangedForGrocery(String parentProductId,
             padding: EdgeInsets.zero,
             itemCount: restaurants.length,
             separatorBuilder: (context, index) => const SizedBox(height: 16),
+            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
             itemBuilder: (context, index) {
               try {
                 return StoreCard(

@@ -30,8 +30,14 @@ class RestaurantBloc extends Bloc<RestaurantEvent, RestaurantState> {
       keyword = event.keyword;
       storeCategoryName = event.storeCategoryName;
     }
-    Utility.showLoader();
-    // emit(RestaurantLoadInProgress());
+    
+    // Only show global loader for initial load, not for search
+    if (keyword.isEmpty) {
+      Utility.showLoader();
+    } else {
+      emit(RestaurantLoadInProgress());
+    }
+    
     try {
       final List<Store> stores = await repository.fetchStores(keyword: keyword, storeCategoryName: storeCategoryName);
       Utility.closeProgressDialog();
