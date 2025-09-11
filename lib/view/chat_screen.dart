@@ -1547,7 +1547,7 @@ class _ChatScreenBody extends StatelessWidget {
                     if (landmark.isNotEmpty) addressParts.add(landmark);
                     
                     final String fullAddress = addressParts.join(', ');
-                    final String addressMessage = "My $tag address is:\n$fullAddress";
+                    final String addressMessage = "I have added a new address.\nMy $tag address is:\n$fullAddress";
                     
                     onSendMessage(addressMessage);
                   }
