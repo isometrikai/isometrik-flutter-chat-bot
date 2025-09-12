@@ -59,7 +59,7 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
     
     // Skip API call for empty queries - show all results
     if (_currentKeyword.isEmpty) {
-      _bloc.add(RestaurantFetchRequested(keyword: '', storeCategoryName: widget.actionData?.storeCategoryName ?? ''));
+      _bloc.add(RestaurantFetchRequested(keyword: '', storeCategoryName: widget.actionData?.storeCategoryName ?? '', storeCategoryId: widget.actionData?.storeCategoryId ?? ''));
       return;
     }
     
@@ -68,7 +68,7 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
       if (!mounted) return;
       // Debounce: only proceed if this is the latest input
       if (_lastQueryAt != now) return;
-      _bloc.add(RestaurantFetchRequested(keyword: _currentKeyword, storeCategoryName: widget.actionData?.storeCategoryName ?? ''));
+      _bloc.add(RestaurantFetchRequested(keyword: _currentKeyword, storeCategoryName: widget.actionData?.storeCategoryName ?? '', storeCategoryId: widget.actionData?.storeCategoryId ?? ''));
     });
   }
 
@@ -92,7 +92,7 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
 
   Future<void> _bootstrapData() async {
     cartBloc.add(CartFetchRequested(needToShowLoader: false));
-    _bloc.add(RestaurantFetchRequested(keyword: _currentKeyword, storeCategoryName: widget.actionData?.storeCategoryName ?? ''));
+    _bloc.add(RestaurantFetchRequested(keyword: _currentKeyword, storeCategoryName: widget.actionData?.storeCategoryName ?? '', storeCategoryId: widget.actionData?.storeCategoryId ?? ''));
     
   }
 

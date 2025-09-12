@@ -10,21 +10,23 @@ class RestaurantEvent extends Equatable {
 class RestaurantFetchRequested extends RestaurantEvent {
   final String keyword;
   final String storeCategoryName;
+  final String storeCategoryId; 
 
-  const RestaurantFetchRequested({this.keyword = '', this.storeCategoryName = ''});
+  const RestaurantFetchRequested({this.keyword = '', this.storeCategoryName = '', this.storeCategoryId = ''});
 
   @override
-  List<Object?> get props => [keyword, storeCategoryName];
+  List<Object?> get props => [keyword, storeCategoryName, storeCategoryId];
 }
 
 class RestaurantRefreshed extends RestaurantEvent {
   final String keyword;
   final String storeCategoryName;
+  final String storeCategoryId;
 
-  const RestaurantRefreshed({this.keyword = '', this.storeCategoryName = ''});
+  const RestaurantRefreshed({this.keyword = '', this.storeCategoryName = '', this.storeCategoryId = ''});
 
   @override
-  List<Object?> get props => [keyword, storeCategoryName];
+  List<Object?> get props => [keyword, storeCategoryName, storeCategoryId];
 }
 
 

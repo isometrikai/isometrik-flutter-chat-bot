@@ -19,14 +19,16 @@ class HawkSearchService {
     String visitorId = '47daf829-b5df-4358-83ea-207aa4eaae15',
     String keyword = '',
     String storeCategoryName = '',
+    String storeCategoryId = '',
   }) async {
     final client = ChatApiServices.instance
         .createCustomClient('https://searchapi-dev.hawksearch.net');
 
     final body = {
-      'FacetSelections': {
-        'storeCategoryName': [storeCategoryName],
-      },
+      // 'FacetSelections': {
+      //   'storeCategoryName': [storeCategoryName],
+      // },
+      "SearchWithin": storeCategoryId,
       'ClientData': {
         'Origin': {
           'Latitude': latitude,
@@ -41,6 +43,11 @@ class HawkSearchService {
       'ClientGuid': clientGuid,
       'Keyword': keyword,
       'IndexName': indexName,
+      "FacetSelections": {
+        "storeLocation": [
+            "4"
+        ]
+    }
     };
 
     final ApiResult res = await client.post('/api/v2/search', body);
