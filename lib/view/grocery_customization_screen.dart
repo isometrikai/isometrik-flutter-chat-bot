@@ -263,8 +263,6 @@ class _GroceryCustomizationScreenState extends State<GroceryCustomizationScreen>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // _buildQuantitySection(state),
-          // const SizedBox(height: 16),
           _buildVariantSection(state),
           const SizedBox(height: 20),
         ],
@@ -272,113 +270,6 @@ class _GroceryCustomizationScreenState extends State<GroceryCustomizationScreen>
     );
   }
 
-  Widget _buildQuantitySection(GroceryCustomizationLoaded state) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          'Quantity*',
-          style: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w700,
-            color: Color(0xFF242424),
-          ),
-        ),
-        const SizedBox(height: 4),
-        const Text(
-          'Required | Select quantity',
-          style: TextStyle(
-            fontSize: 12,
-            fontWeight: FontWeight.w400,
-            color: Color(0xFF6E4185),
-          ),
-        ),
-        const SizedBox(height: 8),
-        Container(
-          padding: const EdgeInsets.all(15),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            border: Border.all(color: const Color(0xFFEEF4FF)),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text(
-                'Quantity',
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w400,
-                  color: Color(0xFF242424),
-                ),
-              ),
-              Row(
-                children: [
-                  GestureDetector(
-                    onTap: () {
-                      if (state.quantity > 1) {
-                        _bloc.add(UpdateGroceryQuantity(quantity: state.quantity - 1));
-                      }
-                    },
-                    child: Container(
-                      width: 32,
-                      height: 32,
-                      decoration: BoxDecoration(
-                        color: state.quantity > 1 ? const Color(0xFF8E2FFD) : const Color(0xFFE9DFFB),
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      child: Icon(
-                        Icons.remove,
-                        color: state.quantity > 1 ? Colors.white : const Color(0xFF8E2FFD),
-                        size: 16,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Text(
-                    state.quantity.toString(),
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: Color(0xFF242424),
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  GestureDetector(
-                    onTap: () {
-                      if (state.selectedSizeData != null && 
-                          state.quantity < state.selectedSizeData!.availableStock) {
-                        _bloc.add(UpdateGroceryQuantity(quantity: state.quantity + 1));
-                      }
-                    },
-                    child: Container(
-                      width: 32,
-                      height: 32,
-                      decoration: BoxDecoration(
-                        color: state.selectedSizeData != null && 
-                               state.quantity < state.selectedSizeData!.availableStock
-                            ? const Color(0xFF8E2FFD)
-                            : const Color(0xFFE9DFFB),
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      child: Icon(
-                        Icons.add,
-                        color: state.selectedSizeData != null && 
-                               state.quantity < state.selectedSizeData!.availableStock
-                            ? Colors.white
-                            : const Color(0xFF8E2FFD),
-                        size: 16,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
 
   Widget _buildVariantSection(GroceryCustomizationLoaded state) {
     if (state.product.variants.isEmpty) {
@@ -406,28 +297,76 @@ class _GroceryCustomizationScreenState extends State<GroceryCustomizationScreen>
           ),
         ),
         const SizedBox(height: 8),
-        Container(
-          padding: const EdgeInsets.all(15),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            border: Border.all(color: const Color(0xFFEEF4FF)),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Column(
-            children: [
-              ...state.product.variants.expand((variant) => 
-                variant.sizeData.map((sizeData) => _buildVariantOption(sizeData, state))
-              ),
-            ],
-          ),
-        ),
+        ...state.product.variants.map((variant) => _buildVariantTypeSection(variant, state)),
       ],
     );
   }
 
-  Widget _buildVariantOption(GroceryProductSizeData sizeData, GroceryCustomizationLoaded state) {
-    final isSelected = state.selectedSizeData?.childProductId == sizeData.childProductId;
+  Widget _buildVariantTypeSection(GroceryProductVariant variant, GroceryCustomizationLoaded state) {
+    final hasMultipleOptions = variant.sizeData.length > 1;
+    final isAutoSelected = !hasMultipleOptions;
+    
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(15),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border.all(color: const Color(0xFFEEF4FF)),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Variant type header
+          Row(
+            children: [
+              if (state.product.variants.length > 1) ...[
+              Text(
+                variant.name,
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFF242424),
+                ),
+              ),
+              ]
+              // if (isAutoSelected) ...[
+              //   const SizedBox(width: 8),
+              //   Container(
+              //     padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+              //     decoration: BoxDecoration(
+              //       color: const Color(0xFFE9DFFB),
+              //       borderRadius: BorderRadius.circular(4),
+              //     ),
+              //     child: const Text(
+              //       'Auto-selected',
+              //       style: TextStyle(
+              //         fontSize: 10,
+              //         fontWeight: FontWeight.w500,
+              //         color: Color(0xFF8E2FFD),
+              //       ),
+              //     ),
+              //   ),
+              // ],
+            ],
+          ),
+          if (state.product.variants.length > 1) ...[
+          const SizedBox(height: 12),
+          ],
+          // Variant options
+          ...variant.sizeData.map((sizeData) => _buildVariantOption(sizeData, state, isAutoSelected)),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildVariantOption(GroceryProductSizeData sizeData, GroceryCustomizationLoaded state, bool isAutoSelected) {
     final isOutOfStock = sizeData.outOfStock || sizeData.availableStock == 0;
+    final isClickable = !isOutOfStock && !isAutoSelected;
+    // If not clickable (auto-selected), make it selected
+    final isSelected = isClickable 
+        ? state.selectedSizeData?.childProductId == sizeData.childProductId
+        : true;
     
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
@@ -468,9 +407,9 @@ class _GroceryCustomizationScreenState extends State<GroceryCustomizationScreen>
             ),
           ),
           GestureDetector(
-            onTap: isOutOfStock ? null : () {
+            onTap: isClickable ? () {
               _bloc.add(SelectGroceryProductVariant(variant: sizeData));
-            },
+            } : null,
             child: Container(
               width: 20,
               height: 20,
