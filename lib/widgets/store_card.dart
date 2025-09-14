@@ -120,6 +120,7 @@ class StoreCard extends StatelessWidget {
                       ),
                       const SizedBox(height: 6),
                       // Cuisine subtitle
+                      if (store.storeIsOpen) ...[
                       Text(
                         store.cuisineDetails.isNotEmpty ? store.cuisineDetails : ' ',
                         maxLines: 1,
@@ -130,6 +131,16 @@ class StoreCard extends StatelessWidget {
                           color: Color(0xFF6E4185),
                         ),
                       ),
+                      ]else ...[
+                        Text(
+                          'Store is closed',
+                          style: TextStyle(
+                            fontSize: 12,
+                            height: 1.4,
+                            color: Color(0xFF979797),
+                          ),
+                        ),
+                      ]
                     ],
                   ),
                 ),
@@ -154,6 +165,26 @@ class StoreCard extends StatelessWidget {
                   separatorBuilder: (_, __) => const SizedBox(width: 10),
                   itemCount: store.products.length,
                 ),
+              ),
+              const SizedBox(height: 15),
+              Row(
+                children: [
+                  const SizedBox(width: 3),
+                 SvgPicture.asset(
+                          AssetPath.get('images/ic_eazy_app.svg'),
+                          fit: BoxFit.contain,
+                        ),
+                  const SizedBox(width: 5),
+                   Text('Open in Eazy app'
+                    ,style: TextStyle(
+                      fontWeight: FontWeight.w400,
+                      fontFamily: "Plus Jakarta Sans",
+                      fontSize: 12,
+                      height: 1.4,
+                      color: Color(0xFF8E2FFD),
+              ),
+              )
+                ],
               ),
           ],
         ),
