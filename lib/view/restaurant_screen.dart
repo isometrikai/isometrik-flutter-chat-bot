@@ -219,7 +219,7 @@ void _onQuantityChangedForGrocery(String parentProductId,
     if (isIncrease == false && newQuantity == 1) {
       //TODO:- 0 Quantity
       int? addToCartOnId;
-      if (variantsCount > 1) {
+      if (variantsCount > 0) {
          addToCartOnId = _getAddToCartOnId(productId);
          print("addCartOnID: $addToCartOnId");
        }
@@ -237,7 +237,7 @@ void _onQuantityChangedForGrocery(String parentProductId,
         addToCartOnId: addToCartOnId,
       ));
     }else if (newQuantity > 0 && isIncrease == true) {
-      if (variantsCount > 1) {
+      if (variantsCount > 0) {
          showModalBottomSheet(
                         context: context,
                         isScrollControlled: true,
@@ -290,7 +290,7 @@ void _onQuantityChangedForGrocery(String parentProductId,
     } else {
       //TODO:- Remove Quantity
       int? addToCartOnId;
-      if (variantsCount > 1) {
+      if (variantsCount > 0) {
         addToCartOnId = _getAddToCartOnId(productId);
         print("addCartOnID: $addToCartOnId");
       }
@@ -314,7 +314,7 @@ void _onQuantityChangedForGrocery(String parentProductId,
     if (isIncrease == false && newQuantity == 1) {
       //TODO:- 0 Quantity
       int? addToCartOnId;
-      if (product.variantsCount > 1) {
+      if (product.variantsCount > 0) {
          addToCartOnId = _getAddToCartOnId(product.childProductId);
          print("addCartOnID: $addToCartOnId");
        }
@@ -332,7 +332,7 @@ void _onQuantityChangedForGrocery(String parentProductId,
         addToCartOnId: addToCartOnId,
       ));
     }else if (newQuantity > 0 && isIncrease == true) {
-      if (product.variantsCount > 1) {
+      if (product.variantsCount > 0) {
          showModalBottomSheet(
                         context: context,
                         isScrollControlled: true,
@@ -382,7 +382,7 @@ void _onQuantityChangedForGrocery(String parentProductId,
     } else {
       //TODO:- Remove Quantity
       int? addToCartOnId;
-      if (product.variantsCount > 1) {
+      if (product.variantsCount > 0) {
         addToCartOnId = _getAddToCartOnId(product.childProductId);
         print("addCartOnID: $addToCartOnId");
       }
@@ -660,16 +660,16 @@ void _onQuantityChangedForGrocery(String parentProductId,
                     // Navigator.pop(context);
                   },
                   onAddToCartRequested: (product, store) {
-                    // if (store.storeIsOpen == false) {
-                    //   print('STORE CLOSED');
-                    //   BlackToastView.show(context, 'Store is closed. Please try again later');
-                    //   return;
-                    // }else if (product.instock == false && store.type == FoodCategory.grocery.value) {
-                    //   print('Product is not in stock');
-                    //   BlackToastView.show(context, 'Product is not in stock. Please try again later');
-                    //   return;
-                    // }
-                    // if (product.variantsCount > 1) {
+                    if (store.storeIsOpen == false && store.type == FoodCategory.grocery.value) {
+                      print('STORE CLOSED');
+                      BlackToastView.show(context, 'Store is closed. Please try again later');
+                      return;
+                    }else if (product.instock == false && store.type == FoodCategory.grocery.value) {
+                      print('Product is not in stock');
+                      BlackToastView.show(context, 'Product is not in stock. Please try again later');
+                      return;
+                    }
+                    if (product.variantsCount > 0) {
                       if (store.type == FoodCategory.grocery.value || store.type == 0) {
                         showModalBottomSheet(
                           context: context,
@@ -698,24 +698,24 @@ void _onQuantityChangedForGrocery(String parentProductId,
                           ),
                         );
                       }
-                    // }else {
-                    //      try {
-                    //        //TODO:- Add Quantity
-                    //     cartBloc.add(CartAddItemRequested(
-                    //       storeId: store.storeId,
-                    //       cartType: 1, // Default cart type
-                    //       action: 1, // Add action
-                    //       storeCategoryId: store.storeCategoryId,
-                    //       newQuantity: 1, // Add 1 item
-                    //       storeTypeId: store.type,
-                    //       productId: product.childProductId,
-                    //       centralProductId: product.parentProductId,
-                    //       unitId: product.unitId,
-                    //     ));
-                    //   } catch (e) {
-                    //     print('RestaurantScreen: Error dispatching CartAddItemRequeste: $e');
-                    //   }
-                    // }                  
+                    }else {
+                         try {
+                           //TODO:- Add Quantity
+                        cartBloc.add(CartAddItemRequested(
+                          storeId: store.storeId,
+                          cartType: 1, // Default cart type
+                          action: 1, // Add action
+                          storeCategoryId: store.storeCategoryId,
+                          newQuantity: 1, // Add 1 item
+                          storeTypeId: store.type,
+                          productId: product.childProductId,
+                          centralProductId: product.parentProductId,
+                          unitId: product.unitId,
+                        ));
+                      } catch (e) {
+                        print('RestaurantScreen: Error dispatching CartAddItemRequeste: $e');
+                      }
+                    }                  
                   },
                   onQuantityChanged: (product, store, newQuantity, isIncrease) {
                     if (store.type == FoodCategory.grocery.value) {

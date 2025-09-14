@@ -361,7 +361,7 @@ class _GroceryCustomizationScreenState extends State<GroceryCustomizationScreen>
   }
 
   Widget _buildVariantOption(GroceryProductSizeData sizeData, GroceryCustomizationLoaded state, bool isAutoSelected) {
-    final isOutOfStock = sizeData.outOfStock || sizeData.availableStock == 0;
+    final isOutOfStock = false;//sizeData.outOfStock || sizeData.availableStock == 0;
     final isClickable = !isOutOfStock && !isAutoSelected;
     // If not clickable (auto-selected), make it selected
     final isSelected = isClickable 
@@ -483,15 +483,15 @@ class _GroceryCustomizationScreenState extends State<GroceryCustomizationScreen>
                       return;
                     }
                     
-                    if (state.selectedSizeData!.outOfStock) {
-                      BlackToastView.show(context, 'This item is out of stock');
-                      return;
-                    }
+                    // if (state.selectedSizeData!.outOfStock) {
+                    //   BlackToastView.show(context, 'This item is out of stock');
+                    //   return;
+                    // }
                     
-                    if (state.quantity > state.selectedSizeData!.availableStock) {
-                      BlackToastView.show(context, 'Not enough stock available');
-                      return;
-                    }
+                    // if (state.quantity > state.selectedSizeData!.availableStock) {
+                    //   BlackToastView.show(context, 'Not enough stock available');
+                    //   return;
+                    // }
                     
                     _bloc.add(AddGroceryToCart(
                       quantity: state.quantity,

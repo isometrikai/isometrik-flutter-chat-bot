@@ -1473,7 +1473,7 @@ class _ChatScreenBody extends StatelessWidget {
               return _buildActionButton(
                 text: action.buttonText,
                 onTap: isApiLoading ? () {} : () {
-                  if (action.storeTypeId == FoodCategory.grocery.value) {
+                  if (action.storeTypeId == FoodCategory.grocery.value || action.storeTypeId == FoodCategory.pharmacy.value) {
                       Navigator.push(
                     context,
                     MaterialPageRoute(
@@ -1789,25 +1789,25 @@ class _ChatScreenBody extends StatelessWidget {
           },
           // onHide: onHideStoreCards, 
           onQuantityChanged: (product, store, newQuantity, isIncrease) {
-            if (store.storeTypeId == FoodCategory.grocery.value) {
+            if (store.storeTypeId == FoodCategory.grocery.value || store.storeTypeId == FoodCategory.pharmacy.value) {
               _onQuantityChangedForGrocery(context,product.parentProductId,product.childProductId,product.unitId,store.storeId,store.storeCategoryId,store.storeTypeId ?? -111,product.variantsCount,newQuantity,isIncrease,product.productName,product.productImage);
             }else {
               _onQuantityChanged(context, product, store, newQuantity, isIncrease);
             }
           },
           onAddToCartRequested: (product, store) {
-            if (store.storeIsOpen == false) {
+            if (store.storeIsOpen == false && store.type != FoodCategory.pharmacy.value) {
               print('Store is closed');
               BlackToastView.show(context, 'Store is closed. Please try again later');
               return;
             }
-            else if (product.instock == false && store.storeTypeId == FoodCategory.grocery.value) {
+            else if (product.instock == false && (store.storeTypeId == FoodCategory.grocery.value || store.storeTypeId == FoodCategory.pharmacy.value)) {
               print('Product is not in stock');
               BlackToastView.show(context, 'Product is not in stock. Please try again later');
               return;
             }
-              if (product.variantsCount > 1) {
-                if (store.storeTypeId == FoodCategory.grocery.value) {
+              if ((product.variantsCount > 1 && store.storeTypeId == FoodCategory.food.value) || (product.variantsCount > 0 && (store.storeTypeId == FoodCategory.grocery.value || store.storeTypeId == FoodCategory.pharmacy.value))) {
+                if (store.storeTypeId == FoodCategory.grocery.value || store.storeTypeId == FoodCategory.pharmacy.value) {
                     showModalBottomSheet(
                           context: context,
                           isScrollControlled: true,
@@ -1936,7 +1936,7 @@ void _onQuantityChangedForGrocery(
     if (isIncrease == false && newQuantity == 1) {
       //TODO:- 0 Quantity
       int? addToCartOnId;
-      if (variantsCount > 1) {
+      if (variantsCount > 0) {
          addToCartOnId = _getAddToCartOnId(productId);
          print("addCartOnID: $addToCartOnId");
        }
@@ -1955,7 +1955,7 @@ void _onQuantityChangedForGrocery(
         needToShowLoaderForCartFetch: false,
       ));
     }else if (newQuantity > 0 && isIncrease == true) {
-      if (variantsCount > 1) {
+      if (variantsCount > 0) {
          showModalBottomSheet(
                         context: context,
                         isScrollControlled: true,
@@ -2010,7 +2010,7 @@ void _onQuantityChangedForGrocery(
     } else {
       //TODO:- Remove Quantity
       int? addToCartOnId;
-      if (variantsCount > 1) {
+      if (variantsCount > 0) {
         addToCartOnId = _getAddToCartOnId(productId);
         print("addCartOnID: $addToCartOnId");
       }
@@ -2208,7 +2208,7 @@ void _openGroceryCustomization(BuildContext context, String parentProductId, Str
             imageUrl: product.productImage.isNotEmpty ? product.productImage : null,
             productId: product.childProductId,
              centralProductId: product.parentProductId,
-                isCustomizable: product.variantsCount > 1,
+                isCustomizable: (product.variantsCount > 1 && product.storeTypeId == FoodCategory.food.value) || (product.variantsCount > 0 && (product.storeTypeId == FoodCategory.grocery.value || product.storeTypeId == FoodCategory.pharmacy.value)),
                 cartData: cartBloc.cartData,
             onClick: () {
               if (productsWidget != null) {
@@ -2217,24 +2217,24 @@ void _openGroceryCustomization(BuildContext context, String parentProductId, Str
               }
             },
             onQuantityChanged: (productId, centralProductId, quantity, isIncrease, isCustomizable) {
-              if (product.storeTypeId == FoodCategory.grocery.value) {
-                _onQuantityChangedForGrocery(context,product.parentProductId,product.childProductId,product.unitId,product.storeId ?? '',product.storeCategoryId ?? '',product.storeTypeId ?? -111,product.variantsCount,quantity,isIncrease,product.productName,product.productImage);
+              if (product.storeTypeId == FoodCategory.grocery.value || product.storeTypeId == FoodCategory.pharmacy.value) {
+                _onQuantityChangedForGrocery(context,centralProductId,productId,product.unitId,product.storeId ?? '',product.storeCategoryId ?? '',product.storeTypeId ?? -111,product.variantsCount,quantity,isIncrease,product.productName,product.productImage);
               }else {
-              _onQuantityChangedMenuItem(productId, centralProductId, quantity, isIncrease, isCustomizable, product.storeId ?? '', product.storeCategoryId ?? '', product.storeTypeId ?? -111, context, product.productName, product.productImage);
+                _onQuantityChangedMenuItem(productId, centralProductId, quantity, isIncrease, isCustomizable, product.storeId ?? '', product.storeCategoryId ?? '', product.storeTypeId ?? -111, context, product.productName, product.productImage);
               }
             },
             onAddToCart: (productId, centralProductId, quantity, isCustomizable) {
-              if (product.storeIsOpen == false) {
+              if (product.storeIsOpen == false && product.storeTypeId != FoodCategory.pharmacy.value) {
                 print('STORE CLSOSED');
                 BlackToastView.show(context, 'Store is closed. Please try again later');
                 return;
               }
-              else if (product.instock == false && product.storeTypeId == FoodCategory.grocery.value) {
+              else if (product.instock == false && (product.storeTypeId == FoodCategory.grocery.value || product.storeTypeId == FoodCategory.pharmacy.value)) {
                 print('Product is not in stock');
                 BlackToastView.show(context, 'Product is not in stock. Please try again later');
                 return;
               }
-              if (product.storeTypeId == FoodCategory.grocery.value) {
+              if (product.storeTypeId == FoodCategory.grocery.value || product.storeTypeId == FoodCategory.pharmacy.value) {
                 if (isCustomizable) {
                         showModalBottomSheet(
                           context: context,

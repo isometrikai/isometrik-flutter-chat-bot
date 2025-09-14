@@ -1,5 +1,6 @@
 import 'package:chat_bot/utils/asset_helper.dart';
 import 'package:chat_bot/utils/asset_path.dart';
+import 'package:chat_bot/utils/enum.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
@@ -38,7 +39,7 @@ class CartScreen extends StatefulWidget {
 }
 
 class _CartScreenState extends State<CartScreen> {
-  int selectedCategoryIndex = 0; // 0 for Restaurant, 1 for Grocery
+  int selectedCategoryIndex = 0; // 0 for Restaurant, 1 for Grocery, 2 for Pharmacy
 
   @override
   void initState() {
@@ -117,8 +118,9 @@ class _CartScreenState extends State<CartScreen> {
         final categoryCounts = _calculateCategoryCounts(state);
         
         final categories = [
-          {'name': '🍕 Restaurant', 'count': categoryCounts['Restaurant']},
+          {'name': '🍕 Restaurant', 'count': categoryCounts['restaurant']},
           {'name': '🥑 Grocery', 'count': categoryCounts['grocery']},
+          {'name': '🥑 Pharmacy', 'count': categoryCounts['pharmacy']},
         ];
 
         return Container(
@@ -207,23 +209,27 @@ class _CartScreenState extends State<CartScreen> {
   Map<String, int> _calculateCategoryCounts(CartState state) {
     int foodCount = 0;
     int groceryCount = 0;
+    int pharmacyCount = 0;
 
     if (state is CartLoaded && state.rawCartData != null) {
       for (final cartData in state.rawCartData!.data) {
         for (final seller in cartData.sellers) {
           // storeTypeId 1 = Food, storeTypeId 2 = Grocery
-          if (seller.storeTypeId == 1) {
+          if (seller.storeTypeId == FoodCategory.food.value) {
             foodCount += seller.products.length;
-          } else if (seller.storeTypeId == 2) {
+          } else if (seller.storeTypeId == FoodCategory.grocery.value) {
             groceryCount += seller.products.length;
+          } else if (seller.storeTypeId == FoodCategory.pharmacy.value) {
+            pharmacyCount += seller.products.length;
           }
         }
       }
     }
 
     return {
-      'Restaurant': foodCount,
+      'restaurant': foodCount,
       'grocery': groceryCount,
+      'pharmacy': pharmacyCount,
     };
   }
 
@@ -325,7 +331,7 @@ class _CartScreenState extends State<CartScreen> {
     }
 
     // Map category index to storeId: 0=Food(storeId=1), 1=Grocery(storeId=2)
-    int targetStoreId = categoryIndex == 0 ? 1 : 2;
+    int targetStoreId = categoryIndex == 0 ? FoodCategory.food.value : categoryIndex == 1 ? FoodCategory.grocery.value : FoodCategory.pharmacy.value;
 
     // Find cart data with matching storeId
     UniversalCartData? matchingCartData;
