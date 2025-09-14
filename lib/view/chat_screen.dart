@@ -28,6 +28,7 @@ import 'package:chat_bot/widgets/black_toast_view.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:chat_bot/data/model/greeting_response.dart';
 import 'package:chat_bot/widgets/menu_item_card.dart';
+import 'package:chat_bot/utils/text_styles.dart';
 import 'package:chat_bot/widgets/cart_widget.dart';
 import 'package:chat_bot/widgets/choose_address_widget.dart';
 import 'package:chat_bot/widgets/choose_card_widget.dart';
@@ -1101,12 +1102,10 @@ class _ChatScreenBody extends StatelessWidget {
                             )
                           : Text(
                               message.text,
-                              style: TextStyle(
+                              style: AppTextStyles.chatMessage.copyWith(
                                 color: message.isBot
                                     ? Color(int.parse(chatbotData.data.first.uiPreferences.botBubbleFontColor.replaceFirst('#', '0xFF')))
                                     : Color(int.parse(chatbotData.data.first.uiPreferences.userBubbleFontColor.replaceFirst('#', '0xFF'))),
-                                fontSize: 16,
-                                fontFamily: "Plus Jakarta Sans"
                               ),
                             ),
                     ),
@@ -1311,11 +1310,8 @@ class _ChatScreenBody extends StatelessWidget {
               child: Text(
                 titleText,
                 textAlign: TextAlign.center,
-                style: const TextStyle(
-                  fontWeight: FontWeight.w700,
-                  fontSize: 24,
-                  height: 1.2,
-                  color: Color(0xFF171212),
+                style: AppTextStyles.launchTitle.copyWith(
+                  color: const Color(0xFF171212),
                 ),
               ),
             ),
@@ -1325,11 +1321,8 @@ class _ChatScreenBody extends StatelessWidget {
               child: Text(
                 subtitleText,
                 textAlign: TextAlign.center,
-                style: const TextStyle(
-                  fontWeight: FontWeight.w400,
-                  fontSize: 14,
-                  height: 1.4,
-                  color: Color(0xFF6E4185),
+                style: AppTextStyles.launchSubtitle.copyWith(
+                  color: const Color(0xFF6E4185),
                 ),
               ),
             ),
@@ -1349,12 +1342,8 @@ class _ChatScreenBody extends StatelessWidget {
               child: Text(
                 weatherText,
                 textAlign: TextAlign.center,
-                style: const TextStyle(
-                  fontStyle: FontStyle.italic,
-                  fontWeight: FontWeight.w400,
-                  fontSize: 14,
-                  height: 1.4,
-                  color: Color(0xFF6E4185), // Darker purple text
+                style: AppTextStyles.launchWeather.copyWith(
+                  color: const Color(0xFF6E4185), // Darker purple text
                 ),
               ),
             ),
@@ -1636,12 +1625,8 @@ class _ChatScreenBody extends StatelessWidget {
         ),
         child: Text(
           text,
-          style: const TextStyle(
-            fontFamily: 'Plus Jakarta Sans',
-            fontSize: 14,
-            fontWeight: FontWeight.w400,
-            color: Color(0xFF8E2FFD),
-            height: 1.4,
+          style: AppTextStyles.button.copyWith(
+            color: const Color(0xFF8E2FFD),
           ),
         ),
       ),
@@ -1693,16 +1678,20 @@ class _ChatScreenBody extends StatelessWidget {
                               textCapitalization: TextCapitalization.sentences,
                               maxLines: null,
                               minLines: 1,
-                              style: const TextStyle(
-                                fontSize: 16,
-                                height: 1.4,
-                                color: Color(0xFF242424),
+                              style: AppTextStyles.chatInput.copyWith(
+                                color: const Color(0xFF242424),
                               ),
-                              decoration: const InputDecoration(
+                              decoration: InputDecoration(
                                 hintText: 'How can zAIn help you today?',
                                 border: InputBorder.none,
-                                hintStyle: TextStyle(color: Colors.grey),
+                                enabledBorder: InputBorder.none,
+                                focusedBorder: InputBorder.none,
+                                errorBorder: InputBorder.none,
+                                focusedErrorBorder: InputBorder.none,
+                                disabledBorder: InputBorder.none,
+                                hintStyle: AppTextStyles.chatInput.copyWith(color: Colors.grey),
                                 isCollapsed: true,
+                                contentPadding: EdgeInsets.zero,
                               ),
                               onChanged: (text) {
                                 // Calculate new height based on text content
@@ -2561,11 +2550,8 @@ class _GreetingOptionTile extends StatelessWidget {
           child: Text(
             text,
             maxLines: 3,
-            style: const TextStyle(
-              fontWeight: FontWeight.w400,
-              fontSize: 15,
-              height: 1.3,
-              color: Color(0xFF242424),
+            style: AppTextStyles.bodyText.copyWith(
+              color: const Color(0xFF242424),
             ),
           ),
         ),

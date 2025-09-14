@@ -7,6 +7,7 @@ import 'package:chat_bot/data/model/grocery_product_details_response.dart';
 import 'package:chat_bot/data/repositories/grocery_product_repository.dart';
 import 'package:chat_bot/data/services/universal_api_client.dart';
 import 'package:chat_bot/widgets/black_toast_view.dart';
+import '../utils/text_styles.dart';
 
 class GroceryCustomizationScreen extends StatefulWidget {
   final String parentProductId;
@@ -120,9 +121,8 @@ class _GroceryCustomizationScreenState extends State<GroceryCustomizationScreen>
                                     const SizedBox(height: 16),
                                     Text(
                                       state.message,
-                                      style: const TextStyle(
-                                        fontSize: 16,
-                                        color: Color(0xFF6E4185),
+                                      style: AppTextStyles.bodyText.copyWith(
+                                        color: const Color(0xFF6E4185),
                                       ),
                                       textAlign: TextAlign.center,
                                     ),
@@ -143,7 +143,12 @@ class _GroceryCustomizationScreenState extends State<GroceryCustomizationScreen>
                                         ),
                                         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                                       ),
-                                      child: const Text('Retry'),
+                                      child: Text(
+                                        'Retry',
+                                        style: AppTextStyles.button.copyWith(
+                                          color: Colors.white,
+                                        ),
+                                      ),
                                     ),
                                   ],
                                 ),
@@ -225,10 +230,8 @@ class _GroceryCustomizationScreenState extends State<GroceryCustomizationScreen>
               Expanded(
                 child: Text(
                   widget.productName,
-                  style: const TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w700,
-                    color: Color(0xFF242424),
+                  style: AppTextStyles.launchTitle.copyWith(
+                    color: const Color(0xFF242424),
                   ),
                 ),
               ),
@@ -279,21 +282,17 @@ class _GroceryCustomizationScreenState extends State<GroceryCustomizationScreen>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           'Choose your variant*',
-          style: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w700,
-            color: Color(0xFF242424),
+          style: AppTextStyles.productTitle.copyWith(
+            color: const Color(0xFF242424),
           ),
         ),
         const SizedBox(height: 4),
-        const Text(
+        Text(
           'Required | Select any 1',
-          style: TextStyle(
-            fontSize: 12,
-            fontWeight: FontWeight.w400,
-            color: Color(0xFF6E4185),
+          style: AppTextStyles.restaurantDescription.copyWith(
+            color: const Color(0xFF6E4185),
           ),
         ),
         const SizedBox(height: 8),
@@ -323,10 +322,9 @@ class _GroceryCustomizationScreenState extends State<GroceryCustomizationScreen>
               if (state.product.variants.length > 1) ...[
               Text(
                 variant.name,
-                style: const TextStyle(
-                  fontSize: 14,
+                style: AppTextStyles.productTitle.copyWith(
+                  color: const Color(0xFF242424),
                   fontWeight: FontWeight.w600,
-                  color: Color(0xFF242424),
                 ),
               ),
               ]
@@ -379,27 +377,22 @@ class _GroceryCustomizationScreenState extends State<GroceryCustomizationScreen>
               children: [
                 Text(
                   '${sizeData.name} (${state.product.currencySymbol}${sizeData.finalPriceList.finalPrice.toStringAsFixed(0)})',
-                  style: TextStyle(
-                    fontSize: 14,
+                  style: AppTextStyles.productTitle.copyWith(
                     fontWeight: FontWeight.w400,
                     color: isOutOfStock ? const Color(0xFF979797) : const Color(0xFF242424),
                   ),
                 ),
                 if (isOutOfStock)
-                  const Text(
+                  Text(
                     'Out of Stock',
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w400,
+                    style: AppTextStyles.restaurantDescription.copyWith(
                       color: Colors.red,
                     ),
                   )
                 else if (sizeData.availableStock < 10)
                   Text(
                     'Only ${sizeData.availableStock} left',
-                    style: const TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w400,
+                    style: AppTextStyles.restaurantDescription.copyWith(
                       color: Colors.orange,
                     ),
                   ),
@@ -507,11 +500,9 @@ class _GroceryCustomizationScreenState extends State<GroceryCustomizationScreen>
                       borderRadius: BorderRadius.circular(16),
                     ),
                   ),
-                  child: const Text(
+                  child: Text(
                     'Add',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
+                    style: AppTextStyles.button.copyWith(
                       color: Colors.white,
                     ),
                   ),

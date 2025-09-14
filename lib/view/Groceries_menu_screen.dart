@@ -17,6 +17,7 @@ import '../bloc/grocery_menu/grocery_menu_event.dart';
 import '../bloc/grocery_menu/grocery_menu_state.dart';
 import '../utils/asset_helper.dart';
 import 'package:chat_bot/data/model/universal_cart_response.dart';
+import '../utils/text_styles.dart';
 
 import '../widgets/black_toast_view.dart';
 
@@ -128,7 +129,9 @@ class _GroceriesMenuScreenState extends State<GroceriesMenuScreen> {
                                 padding: const EdgeInsets.only(top: 32),
                                 child: Text(
                                   state.message,
-                                  style: const TextStyle(color: Colors.red),
+                                  style: AppTextStyles.bodyText.copyWith(
+                                    color: Colors.red,
+                                  ),
                                 ),
                               );
                             }
@@ -200,8 +203,7 @@ class _GroceriesMenuScreenState extends State<GroceriesMenuScreen> {
               alignment: Alignment.center,
               child: Text(
                 categoryData.subCategoryName,
-                style: TextStyle(
-                  fontSize: 14,
+                style: AppTextStyles.button.copyWith(
                   color: const Color(0xFF242424),
                   fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
                 ),
@@ -257,31 +259,29 @@ class _GroceriesMenuScreenState extends State<GroceriesMenuScreen> {
 
   Widget _buildProductsGrid(SubCategoryProductsResponse subCategoryProducts) {
     if (subCategoryProducts.categoryData.isEmpty) {
-      return const Expanded(
+      return Expanded(
         child: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(
+              const Icon(
                 Icons.shopping_bag_outlined,
                 size: 64,
                 color: Color(0xFF979797),
               ),
-              SizedBox(height: 16),
+              const SizedBox(height: 16),
               Text(
                 'No products available',
-                style: TextStyle(
-                  fontSize: 18,
-                  color: Color(0xFF979797),
+                style: AppTextStyles.restaurantTitle.copyWith(
+                  color: const Color(0xFF979797),
                   fontWeight: FontWeight.w500,
                 ),
               ),
-              SizedBox(height: 8),
+              const SizedBox(height: 8),
               Text(
                 'Try adjusting your search or check back later',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Color(0xFF979797),
+                style: AppTextStyles.restaurantDescription.copyWith(
+                  color: const Color(0xFF979797),
                 ),
               ),
             ],

@@ -17,6 +17,7 @@ import 'package:chat_bot/services/cart_manager.dart';
 import 'package:chat_bot/services/callback_manage.dart';
 import '../utils/asset_helper.dart';
 import 'package:chat_bot/data/model/universal_cart_response.dart';
+import '../utils/text_styles.dart';
 
 import '../widgets/black_toast_view.dart';
 
@@ -168,7 +169,9 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
                                 padding: const EdgeInsets.only(top: 32),
                                 child: Text(
                                   state.message,
-                                  style: const TextStyle(color: Colors.red),
+                                  style: AppTextStyles.bodyText.copyWith(
+                                    color: Colors.red,
+                                  ),
                                 ),
                               );
                             }
@@ -176,9 +179,14 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
                             _categories = categories;
                             
                             if (categories.isEmpty) {
-                              return const Padding(
-                                padding: EdgeInsets.only(top: 32),
-                                child: Text('No menu available'),
+                              return Padding(
+                                padding: const EdgeInsets.only(top: 32),
+                                child: Text(
+                                  'No menu available',
+                                  style: AppTextStyles.bodyText.copyWith(
+                                    color: const Color(0xFF6E4185),
+                                  ),
+                                ),
                               );
                             }
                             return Column(
@@ -229,9 +237,8 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
               controller: _searchController,
               decoration: InputDecoration(
                 hintText: 'Search',
-                hintStyle: theme.textTheme.bodyLarge?.copyWith(
+                hintStyle: AppTextStyles.bodyText.copyWith(
                       color: _labelGrey,
-                      fontSize: 16,
                     ),
                 border: InputBorder.none,
               ),
@@ -297,8 +304,7 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
               alignment: Alignment.center,
               child: Text(
                 index == 0 ? 'ALL' : _categories[index - 1].catName,
-                style: TextStyle(
-                  fontSize: 14,
+                style: AppTextStyles.button.copyWith(
                   color: const Color(0xFF242424),
                   fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
                 ),
@@ -336,10 +342,8 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
               alignment: Alignment.center,
               child: Text(
                 category.subCategories[index].name,
-                style: const TextStyle(
-                  fontSize: 12,
-                  color: Color(0xFF242424),
-                  fontWeight: FontWeight.w400,
+                style: AppTextStyles.restaurantDescription.copyWith(
+                  color: const Color(0xFF242424),
                 ),
               ),
             ),
@@ -417,10 +421,8 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
       children: <Widget>[
         Text(
           category.catName,
-          style: const TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.w800,
-            color: Color(0xFF242424),
+          style: AppTextStyles.restaurantTitle.copyWith(
+            color: const Color(0xFF242424),
           ),
         ),
         const SizedBox(height: 8),

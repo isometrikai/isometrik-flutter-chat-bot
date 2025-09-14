@@ -10,6 +10,7 @@ import '../bloc/cart/cart_event.dart';
 import '../bloc/cart/cart_state.dart';
 import '../data/model/universal_cart_response.dart';
 import '../data/model/chat_response.dart';
+import '../utils/text_styles.dart';
 
 /// Data class to hold category-specific cart information
 class CategoryData {
@@ -81,12 +82,10 @@ class _CartScreenState extends State<CartScreen> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          const Text(
+          Text(
             'Your cart',
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.w700,
-              color: Color(0xFF171212),
+            style: AppTextStyles.launchTitle.copyWith(
+              color: const Color(0xFF171212),
             ),
           ),
           GestureDetector(
@@ -175,10 +174,8 @@ class _CartScreenState extends State<CartScreen> {
         children: [
           Text(
             name,
-            style: const TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-              color: Color(0xFF242424),
+            style: AppTextStyles.button.copyWith(
+              color: const Color(0xFF242424),
             ),
           ),
           // Only show count badge if count > 0
@@ -192,9 +189,8 @@ class _CartScreenState extends State<CartScreen> {
               ),
               child: Text(
                 count.toString().padLeft(2, '0'),
-                style: const TextStyle(
+                style: AppTextStyles.restaurantDescription.copyWith(
                   fontSize: 7.71,
-                  fontWeight: FontWeight.w600,
                   color: Colors.white,
                 ),
               ),
@@ -296,26 +292,21 @@ class _CartScreenState extends State<CartScreen> {
           ),
           const SizedBox(height: 24),
           // "Your cart is empty" text
-          const Text(
+          Text(
             'Your cart is empty',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w700,
-              color: Color(0xFF242424),
+            style: AppTextStyles.restaurantTitle.copyWith(
+              color: const Color(0xFF242424),
             ),
           ),
           const SizedBox(height: 8),
           // Description text
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 40),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 40),
             child: Text(
               'Add items like food, groceries, medicines, services or other products to get started.',
               textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w400,
-                color: Color(0xFF6E4185),
-                height: 1.4,
+              style: AppTextStyles.restaurantDescription.copyWith(
+                color: const Color(0xFF6E4185),
               ),
             ),
           ),
@@ -495,10 +486,8 @@ class _CartScreenState extends State<CartScreen> {
                   children: [
                     Text(
                       categoryData.storeName,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700,
-                        color: Color(0xFF242424),
+                      style: AppTextStyles.bodyText.copyWith(
+                        color: const Color(0xFF242424),
                       ),
                     ),
                     // const SizedBox(height: 10),
@@ -598,12 +587,10 @@ class _CartScreenState extends State<CartScreen> {
                         ),
                         borderRadius: BorderRadius.circular(16),
                       ),
-                      child: const Center(
+                      child: Center(
                         child: Text(
                           'Proceed to checkout',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w700,
+                          style: AppTextStyles.button.copyWith(
                             color: Colors.white,
                           ),
                         ),

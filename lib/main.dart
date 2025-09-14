@@ -5,6 +5,7 @@ import 'services/callback_manage.dart';
 import 'package:flutter/services.dart';
 import 'utils/asset_path.dart';
 import 'utils/utility.dart';
+import 'utils/app_theme.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -39,11 +40,11 @@ class MyApp extends StatelessWidget {
     Utility.setCurrentContext(context);
     
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Chat Bot',
       navigatorKey: kNavigatorKey,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-      ),
+      theme: AppTheme.lightTheme,
+      darkTheme: AppTheme.darkTheme,
+      themeMode: ThemeMode.system,
       home:  LaunchScreen(),//ChatScreen(),
       debugShowCheckedModeBanner: false,
     );

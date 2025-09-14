@@ -16,6 +16,7 @@ import 'package:chat_bot/services/callback_manage.dart';
 import 'package:chat_bot/bloc/cart/cart_bloc.dart';
 import 'package:chat_bot/bloc/cart/cart_event.dart';
 import 'package:chat_bot/bloc/cart/cart_state.dart';
+import 'package:chat_bot/utils/text_styles.dart';
 
 class RestaurantScreen extends StatefulWidget {
   final chat.WidgetAction? actionData;
@@ -569,15 +570,18 @@ void _onQuantityChangedForGrocery(String parentProductId,
           Expanded(
             child: TextField(
               controller: _searchController,
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 hintText: 'Search',
-                hintStyle: TextStyle(
-                  fontSize: 16,
-                  height: 1.4,
-                  color: Color(0xFF979797),
+                hintStyle: AppTextStyles.bodyText.copyWith(
+                  color: const Color(0xFF979797),
                 ),
                 border: InputBorder.none,
-                contentPadding: EdgeInsets.symmetric(horizontal: 17),
+                                enabledBorder: InputBorder.none,
+                                focusedBorder: InputBorder.none,
+                                errorBorder: InputBorder.none,
+                                focusedErrorBorder: InputBorder.none,
+                                disabledBorder: InputBorder.none,
+                contentPadding: const EdgeInsets.symmetric(horizontal: 17),
               ),
               onChanged: (value) {
                 _onSearchChanged(value);
@@ -615,9 +619,8 @@ void _onQuantityChangedForGrocery(String parentProductId,
           return Center(
             child: Text(
               state.message,
-              style: const TextStyle(
-                fontSize: 16,
-                color: Color(0xFF6E4185),
+              style: AppTextStyles.bodyText.copyWith(
+                color: const Color(0xFF6E4185),
               ),
             ),
           );
@@ -625,12 +628,11 @@ void _onQuantityChangedForGrocery(String parentProductId,
 
         final restaurants = (state as RestaurantLoadSuccess).restaurants;
         if (restaurants.isEmpty) {
-          return const Center(
+          return Center(
             child: Text(
               'No restaurants available',
-              style: TextStyle(
-                fontSize: 16,
-                color: Color(0xFF6E4185),
+              style: AppTextStyles.bodyText.copyWith(
+                color: const Color(0xFF6E4185),
               ),
             ),
           );
@@ -735,10 +737,8 @@ void _onQuantityChangedForGrocery(String parentProductId,
                   ),
                   child: Text(
                     restaurants[index].storename,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w700,
-                      fontSize: 18,
-                      color: Color(0xFF242424),
+                    style: AppTextStyles.restaurantTitle.copyWith(
+                      color: const Color(0xFF242424),
                     ),
                   ),
                 );
