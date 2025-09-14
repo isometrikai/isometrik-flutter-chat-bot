@@ -35,6 +35,7 @@ import 'package:chat_bot/widgets/choose_card_widget.dart';
 import 'package:chat_bot/widgets/order_summary_widget.dart';
 import 'package:chat_bot/widgets/order_confirmed_widget.dart';
 import '../utils/enum.dart';
+import '../services/speech_service.dart';
 
 class ChatScreen extends StatefulWidget {
   final MyGPTsResponse chatbotData;
@@ -58,6 +59,9 @@ class _ChatScreenState extends State<ChatScreen> {
   List<ChatMessage> messages = [];
   
   late final CartBloc _cartBloc;
+  final SpeechService _speechService = SpeechService();
+  bool _isSpeechAvailable = false;
+  bool _isRecording = false;
 
   // Returns index of the last bot message that shows stores, products, choose_address, choose_card, order_summary, or order_confirmed widgets; -1 if none
   // Cart widget is not considered for hiding
@@ -301,6 +305,10 @@ class _ChatScreenState extends State<ChatScreen> {
     // Initialize cartBloc directly since it's provided by parent MultiBlocProvider
     _cartBloc = context.read<CartBloc>();
     
+    // Speech service is already initialized at app startup for ultra-fast response
+    // Just check availability
+    _initializeSpeechService();
+    
     // Add keyboard listener
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
@@ -313,6 +321,121 @@ class _ChatScreenState extends State<ChatScreen> {
 
   void _initializeSession() {
     _sessionId = "${DateTime.now().millisecondsSinceEpoch ~/ 1000}";
+  }
+
+  Future<void> _initializeSpeechService() async {
+    // Check if service is already available from app startup
+    _isSpeechAvailable = _speechService.isAvailable;
+    
+    if (_isSpeechAvailable) {
+      debugPrint('Speech service already initialized at app startup');
+    } else {
+      // Fallback initialization if not already done
+      try {
+        _isSpeechAvailable = await _speechService.initialize();
+        if (!_isSpeechAvailable) {
+          debugPrint('Speech recognition not available');
+        } else {
+          debugPrint('Speech service initialized successfully');
+        }
+      } catch (e) {
+        debugPrint('Failed to initialize speech service: $e');
+        _isSpeechAvailable = false;
+      }
+    }
+  }
+
+  Future<void> _startSpeechRecording() async {
+    if (!_isSpeechAvailable || _isRecording) {
+      return;
+    }
+
+    // IMMEDIATE response - no async operations blocking UI
+    setState(() {
+      _isRecording = true;
+    });
+    
+    // Haptic feedback for immediate response
+    HapticFeedback.mediumImpact();
+    
+    // Show recording indicator immediately
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Recording... Speak now'),
+        backgroundColor: Colors.red,
+        duration: Duration(seconds: 1),
+      ),
+    );
+
+    // Ultra-fast start - fire and forget approach
+    final bool started = _speechService.startListeningFast();
+    if (!started) {
+      // If fast start failed, reset the UI state
+      setState(() {
+        _isRecording = false;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Failed to start recording'),
+          backgroundColor: Colors.red,
+          duration: Duration(seconds: 2),
+        ),
+      );
+    }
+  }
+
+  Future<void> _stopSpeechRecording() async {
+    if (!_isRecording) {
+      return;
+    }
+
+    // Haptic feedback for stop
+    HapticFeedback.lightImpact();
+
+    try {
+      await _speechService.stopListening();
+      
+      setState(() {
+        _isRecording = false;
+      });
+
+      final String recognizedText = _speechService.currentRecognizedText;
+      
+      if (recognizedText.trim().isNotEmpty) {
+        // Set the recognized text to the text field
+        _messageController.text = recognizedText.trim();
+        
+        // Show success message
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Recognized: $recognizedText'),
+            backgroundColor: Colors.green,
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      } else {
+        // Show no speech detected message
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('No speech detected. Please try again.'),
+            backgroundColor: Colors.orange,
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
+    } catch (e) {
+      debugPrint('Failed to stop speech recording: $e');
+      setState(() {
+        _isRecording = false;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Recording failed. Please try again.'),
+          backgroundColor: Colors.red,
+          duration: Duration(seconds: 2),
+        ),
+      );
+    }
   }
 
   Future<void> _restartChatAPI() async {
@@ -373,6 +496,9 @@ class _ChatScreenState extends State<ChatScreen> {
       onUpdateCartCount: _updateCartCount, // Add the callback
       totalCartCount: _totalCartCount, // Pass the cart count
       cartBloc: _cartBloc, // Pass the cart bloc
+      onStartSpeechRecording: _startSpeechRecording, // Add start speech handler
+      onStopSpeechRecording: _stopSpeechRecording, // Add stop speech handler
+      isRecording: _isRecording, // Pass recording state
     );
   }
 }
@@ -403,6 +529,9 @@ class _ChatScreenBody extends StatelessWidget {
   final Function(int) onUpdateCartCount; // Add callback to update cart count
   final int totalCartCount; // Add cart count parameter
   final CartBloc cartBloc; // Add cart bloc parameter
+  final Future<void> Function() onStartSpeechRecording; // Add start speech handler
+  final Future<void> Function() onStopSpeechRecording; // Add stop speech handler
+  final bool isRecording; // Add recording state
 
   const _ChatScreenBody({
     required this.messageController,
@@ -430,6 +559,9 @@ class _ChatScreenBody extends StatelessWidget {
     required this.onUpdateCartCount, // Add the callback parameter
     required this.totalCartCount, // Add the cart count parameter
     required this.cartBloc, // Add the cart bloc parameter
+    required this.onStartSpeechRecording, // Add the start speech handler parameter
+    required this.onStopSpeechRecording, // Add the stop speech handler parameter
+    required this.isRecording, // Add the recording state parameter
   });
 
   @override
@@ -1648,39 +1780,102 @@ class _ChatScreenBody extends StatelessWidget {
           color: Colors.white,
           child: SafeArea(
             top: false,
-            child: Center(
-                              child: ConstrainedBox(
-                  constraints: BoxConstraints(
-                    minHeight: 64,
-                    maxHeight: 570, // Allow up to 550 + 20 padding
-                  ),
-                child: Container(
-                  height: textFieldHeight + 20, // Dynamic height based on text field
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: const Color(0xFFE9DFFB), width: 1),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 12),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Recording indicator
+                if (isRecording)
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    margin: const EdgeInsets.only(bottom: 8),
+                    decoration: BoxDecoration(
+                      color: Colors.red.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: Colors.red, width: 1),
+                    ),
                     child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        Expanded(
-                          child: Container(
-                            height: textFieldHeight,
-                            child: TextField(
-                              autofocus: false,
-                              controller: messageController,
-                              focusNode: messageFocusNode,
-                              enabled: !isApiLoading,
-                              textCapitalization: TextCapitalization.sentences,
-                              maxLines: null,
-                              minLines: 1,
-                              style: AppTextStyles.chatInput.copyWith(
-                                color: const Color(0xFF242424),
-                              ),
+                        Container(
+                          width: 12,
+                          height: 12,
+                          decoration: const BoxDecoration(
+                            color: Colors.red,
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        const Text(
+                          'Recording...',
+                          style: TextStyle(
+                            color: Colors.red,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        const Spacer(),
+                        Container(
+                          width: 8,
+                          height: 8,
+                          decoration: const BoxDecoration(
+                            color: Colors.red,
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                        const SizedBox(width: 4),
+                        Container(
+                          width: 8,
+                          height: 8,
+                          decoration: const BoxDecoration(
+                            color: Colors.red,
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                        const SizedBox(width: 4),
+                        Container(
+                          width: 8,
+                          height: 8,
+                          decoration: const BoxDecoration(
+                            color: Colors.red,
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                // Input field container
+                Center(
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      minHeight: 64,
+                      maxHeight: 570, // Allow up to 550 + 20 padding
+                    ),
+                    child: Container(
+                      height: textFieldHeight + 20, // Dynamic height based on text field
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: const Color(0xFFE9DFFB), width: 1),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Expanded(
+                              child: Container(
+                                height: textFieldHeight,
+                                child: TextField(
+                                  autofocus: false,
+                                  controller: messageController,
+                                  focusNode: messageFocusNode,
+                                  enabled: !isApiLoading,
+                                  textCapitalization: TextCapitalization.sentences,
+                                  maxLines: null,
+                                  minLines: 1,
+                                  style: AppTextStyles.chatInput.copyWith(
+                                    color: const Color(0xFF242424),
+                                  ),
                               decoration: InputDecoration(
                                 hintText: 'How can zAIn help you today?',
                                 border: InputBorder.none,
@@ -1708,7 +1903,7 @@ class _ChatScreenBody extends StatelessWidget {
                                   textDirection: TextDirection.ltr,
                                   maxLines: null,
                                 );
-                                textPainter.layout(maxWidth: MediaQuery.of(context).size.width - 120);
+                                textPainter.layout(maxWidth: MediaQuery.of(context).size.width - 160);
                                 
                                 final newHeight = (textPainter.height + 20).clamp(50.0, 550.0);
                                 onUpdateTextFieldHeight(newHeight);
@@ -1723,6 +1918,48 @@ class _ChatScreenBody extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(width: 10),
+                        // Speech button - Press and hold like WhatsApp
+                        Opacity(
+                          opacity: isApiLoading ? 0.4 : 1.0,
+                          child: GestureDetector(
+                            onLongPressStart: isApiLoading
+                                ? null
+                                : (details) async {
+                                    // Start recording when long press starts
+                                    await onStartSpeechRecording();
+                                  },
+                            onLongPressEnd: isApiLoading
+                                ? null
+                                : (details) async {
+                                    // Stop recording when long press ends
+                                    await onStopSpeechRecording();
+                                  },
+                            onLongPressCancel: isApiLoading
+                                ? null
+                                : () async {
+                                    // Cancel recording if long press is cancelled
+                                    await onStopSpeechRecording();
+                                  },
+                            child: Container(
+                              width: 34,
+                              height: 34,
+                              decoration: BoxDecoration(
+                                color: isRecording ? Colors.red : Colors.transparent,
+                                shape: BoxShape.circle,
+                                border: isRecording 
+                                    ? Border.all(color: Colors.red, width: 2)
+                                    : null,
+                              ),
+                              child: Icon(
+                                isRecording ? Icons.stop : Icons.mic,
+                                color: isRecording ? Colors.white : const Color(0xFF7C3AED),
+                                size: 24,
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        // Send button
                         Opacity(
                           opacity: isApiLoading ? 0.4 : 1.0,
                           child: GestureDetector(
@@ -1750,7 +1987,9 @@ class _ChatScreenBody extends StatelessWidget {
                     ),
                   ),
                 ),
-              ),
+                ),
+                ),
+              ],
             ),
           ),
         );

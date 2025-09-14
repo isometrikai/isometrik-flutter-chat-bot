@@ -45,5 +45,10 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<!-- Permission for speech to text -->
+	<key>NSMicrophoneUsageDescription</key>
+	<string>This app needs access to microphone for speech to text functionality.</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>This app needs access to speech recognition to convert your speech to text.</string>
 </dict>
 </plist>

@@ -2,6 +2,7 @@ import 'package:chat_bot/view/launch_screen.dart';
 import 'package:flutter/material.dart';
 import 'services/api_service.dart';
 import 'services/callback_manage.dart';
+import 'services/speech_service.dart';
 import 'package:flutter/services.dart';
 import 'utils/asset_path.dart';
 import 'utils/utility.dart';
@@ -14,6 +15,10 @@ void main() async {
   // AssetPath.isPackageMode = true; // Set to true for package mode, false for normal project
   
   await PlatformService.initializeFromPlatform();
+  
+  // Pre-initialize speech service for ultra-fast response
+  SpeechService().initialize();
+  
   runApp(const MyApp());
 }
 
@@ -25,6 +30,10 @@ void chatMain() async {
   AssetPath.isPackageMode = true;
   
   await PlatformService.initializeFromPlatform();
+  
+  // Pre-initialize speech service for ultra-fast response
+  SpeechService().initialize();
+  
   runApp(const MyApp());
 }
 class MyApp extends StatelessWidget {
