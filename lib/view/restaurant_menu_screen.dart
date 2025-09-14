@@ -261,20 +261,148 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
   Widget _buildDietToggles() {
     return Row(
       children: <Widget>[
-        _DietToggle(
-          color: _nonVeg,
-          value: _filterNonVeg,
-          onChanged: (bool v) {
-            setState(() => _filterNonVeg = v);
-          },
+        // Non-veg switch
+        Row(
+          children: <Widget>[
+            Positioned(
+                  left: 8,
+                  top: 8,
+                  child: Container(
+                    width: 14,
+                    height: 14,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      border: Border.all(
+                        color: _nonVeg ,
+                        width: 1.05,
+                      ),
+                      borderRadius: BorderRadius.circular(3.5),
+                    ),
+                    child: Center(
+                      child: Container(
+                        width: 8.4,
+                        height: 8.4,
+                        decoration: BoxDecoration(
+                          color: _nonVeg ,
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+            const SizedBox(width: 8),
+            GestureDetector(
+              onTap: () {
+                setState(() {
+                  _filterNonVeg = !_filterNonVeg;
+                });
+              },
+              child: Container(
+                width: 40,
+                height: 20,
+                decoration: BoxDecoration(
+                  color: _filterNonVeg ? _nonVeg : const Color(0xFFD8DEF3),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Stack(
+                  children: <Widget>[
+                    AnimatedPositioned(
+                      duration: const Duration(milliseconds: 200),
+                      left: _filterNonVeg ? 22 : 2,
+                      top: 2,
+                      child: Container(
+                        width: 16,
+                        height: 16,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(8),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.1),
+                              blurRadius: 2,
+                              offset: const Offset(0, 1),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
         ),
-        const SizedBox(width: 8),
-        _DietToggle(
-          color: _veg,
-          value: _filterVeg,
-          onChanged: (bool v) {
-            setState(() => _filterVeg = v);
-          },
+        const SizedBox(width: 20),
+        // Veg switch
+        Row(
+          children: <Widget>[
+            Positioned(
+                  left: 8,
+                  top: 8,
+                  child: Container(
+                    width: 14,
+                    height: 14,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      border: Border.all(
+                        color:  _veg ,
+                        width: 1.05,
+                      ),
+                      borderRadius: BorderRadius.circular(3.5),
+                    ),
+                    child: Center(
+                      child: Container(
+                        width: 8.4,
+                        height: 8.4,
+                        decoration: BoxDecoration(
+                          color: _veg ,
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+            const SizedBox(width: 8),
+            GestureDetector(
+              onTap: () {
+                setState(() {
+                  _filterVeg = !_filterVeg;
+                });
+              },
+              child: Container(
+                width: 40,
+                height: 20,
+                decoration: BoxDecoration(
+                  color: _filterVeg ? _veg : const Color(0xFFD8DEF3),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Stack(
+                  children: <Widget>[
+                    AnimatedPositioned(
+                      duration: const Duration(milliseconds: 200),
+                      left: _filterVeg ? 22 : 2,
+                      top: 2,
+                      child: Container(
+                        width: 16,
+                        height: 16,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(8),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.1),
+                              blurRadius: 2,
+                              offset: const Offset(0, 1),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
         ),
       ],
     );
@@ -405,8 +533,26 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
     }
 
     final List<_MenuItem> filtered = items.where((menuItem) {
-      if (_filterVeg && !menuItem.isVeg) return false;
-      if (_filterNonVeg && menuItem.isVeg) return false;
+      // If both filters are off, show all items
+      if (!_filterVeg && !_filterNonVeg) {
+        // Only apply search filter
+        if (_searchController.text.trim().isNotEmpty &&
+            !menuItem.title
+                .toLowerCase()
+                .contains(_searchController.text.trim().toLowerCase())) {
+          return false;
+        }
+        return true;
+      }
+      
+      // If only veg filter is on, show only veg items
+      if (_filterVeg && !_filterNonVeg && !menuItem.isVeg) return false;
+      
+      // If only non-veg filter is on, show only non-veg items
+      if (_filterNonVeg && !_filterVeg && menuItem.isVeg) return false;
+      
+      // If both filters are on, show all items (both veg and non-veg)
+      // Apply search filter
       if (_searchController.text.trim().isNotEmpty &&
           !menuItem.title
               .toLowerCase()
@@ -855,64 +1001,6 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
   }
 }
 
-class _DietToggle extends StatelessWidget {
-  final Color color;
-  final bool value;
-  final ValueChanged<bool> onChanged;
-
-  const _DietToggle({
-    required this.color,
-    required this.value,
-    required this.onChanged,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () => onChanged(!value),
-      child: SizedBox(
-        width: 28,
-        height: 20,
-        child: Stack(
-          clipBehavior: Clip.none,
-          children: <Widget>[
-            Container(
-              width: 28,
-              height: 5,
-              decoration: BoxDecoration(
-                color: const Color(0xFFD8DEF3),
-                borderRadius: BorderRadius.circular(20),
-              ),
-            ),
-            Positioned(
-              top: -5,
-              left: value ? 12 : 0, // Move to right when ON
-              child: Container(
-                width: 16,
-                height: 16,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(4),
-                  border: Border.all(color: color, width: 1.2),
-                ),
-                child: Center(
-                  child: Container(
-                    width: 9.6,
-                    height: 9.6,
-                    decoration: BoxDecoration(
-                      color: color , // Show color only when ON
-                      shape: BoxShape.circle,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
 
 // Replaced inline card with shared MenuItemCard
 
