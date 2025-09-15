@@ -304,6 +304,16 @@ class _ChatScreenState extends State<ChatScreen> {
     // Initialize cartBloc directly since it's provided by parent MultiBlocProvider
     _cartBloc = context.read<CartBloc>();
     
+    // Set up cart update callback - the mounted check handles if screen is active
+    OrderService().setCartUpdateCallback((bool isCartUpdate) {
+      if (mounted && isCartUpdate) {
+        print('ChatScreen: Cart update received - $isCartUpdate');
+        // Refresh cart data when cart update is triggered
+        print('ChatScreen: Refreshing cart data');
+        _cartBloc.add(CartFetchRequested(needToShowLoader: true));
+      }
+    });
+    
     // Add keyboard listener
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
@@ -336,6 +346,7 @@ class _ChatScreenState extends State<ChatScreen> {
     _messageController.dispose();
     _scrollController.dispose();
     _messageFocusNode.dispose();
+    
     // OrderService().clearCallback();
     print("DISPOSE");
     super.dispose();
