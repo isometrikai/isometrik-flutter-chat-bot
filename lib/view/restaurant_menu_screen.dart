@@ -72,6 +72,15 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
     cartBloc.add(CartFetchRequested(needToShowLoader: false));
     _bloc.add(const RestaurantMenuRequested());
     
+      OrderService().setCartUpdateCallback((bool isCartUpdate) {
+      if (mounted && isCartUpdate) {
+        print('RestaurantMenuScreen: Cart update received - $isCartUpdate');
+        // Refresh cart data when cart update is triggered
+        print('RestaurantMenuScreen: Refreshing cart data');
+        cartBloc.add(CartFetchRequested(needToShowLoader: true));
+      }
+    });
+
   }
 
   @override
