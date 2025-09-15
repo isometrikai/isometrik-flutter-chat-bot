@@ -1474,12 +1474,6 @@ class _ChatScreenBody extends StatelessWidget {
                   );
                   
                   if (orderDetails != null) {
-                    print("Order Details:");
-                    print("storeOrderId: ${orderDetails['storeOrderId']}");
-                    print("storeType: ${orderDetails['storeType']}");
-                    print("storeCategoryId: ${orderDetails['storeCategoryId']}");
-                    // print("storeSubCategoryId: ${orderDetails['storeSubCategoryId']}");
-                    // print("subStoreTypeId: ${orderDetails['subStoreTypeId']}");
                     OrderService().triggerOrderTracking(orderDetails);
                   } else {
                     print("Failed to fetch order details");
@@ -1509,12 +1503,6 @@ class _ChatScreenBody extends StatelessWidget {
                   );
                   
                   if (orderDetails != null) {
-                    print("Order Details:");
-                    print("storeOrderId: ${orderDetails['storeOrderId']}");
-                    print("storeType: ${orderDetails['storeType']}");
-                    print("storeCategoryId: ${orderDetails['storeCategoryId']}");
-                    // print("storeSubCategoryId: ${orderDetails['storeSubCategoryId']}");
-                    // print("subStoreTypeId: ${orderDetails['subStoreTypeId']}");
                     OrderService().triggerOrderDetails(orderDetails);
                   } else {
                     print("Failed to fetch order details");

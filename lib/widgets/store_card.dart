@@ -3,10 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:chat_bot/data/model/chat_response.dart' as chat;
 import 'package:chat_bot/data/model/universal_cart_response.dart';
 import 'package:chat_bot/services/callback_manage.dart';
-import 'package:chat_bot/bloc/chat_event.dart';
 import 'package:flutter_svg/svg.dart';
-import '../utils/asset_helper.dart';
-import '../utils/asset_helper_svg.dart';
 import '../utils/asset_path.dart';
 import 'black_toast_view.dart';
 import '../utils/text_styles.dart';
@@ -45,10 +42,10 @@ class StoreCard extends StatelessWidget {
           onTap!.call();
           return;
         }
-        if (storesWidget != null) {
-          final Map<String, dynamic>? storeJson = storesWidget!.getRawStore(index);
-          OrderService().triggerStoreOrder(storeJson ?? {});
-        }
+        // if (storesWidget != null) {
+        //   final Map<String, dynamic>? storeJson = storesWidget!.getRawStore(index);
+        //   OrderService().triggerStoreOrder(storeJson ?? {});
+        // }
       },
       child: Container(
         // margin: margin ?? const EdgeInsets.symmetric(horizontal: 16),
@@ -161,20 +158,28 @@ class StoreCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 15),
-              Row(
-                children: [
-                  const SizedBox(width: 3),
-                 SvgPicture.asset(
-                          AssetPath.get('images/ic_eazy_app.svg'),
-                          fit: BoxFit.contain,
-                        ),
-                  const SizedBox(width: 5),
-                   Text('Open in Eazy app'
-                    ,style: AppTextStyles.restaurantDescription.copyWith(
-                      color: const Color(0xFF8E2FFD),
-                    ),
-              )
-                ],
+              GestureDetector(
+                onTap: () {
+                   if (storesWidget != null) {
+                    final Map<String, dynamic>? storeJson = storesWidget!.getRawStore(index);
+                    OrderService().triggerStoreOrder(storeJson ?? {});
+                  }
+                },
+                child: Row(
+                  children: [
+                    const SizedBox(width: 3),
+                   SvgPicture.asset(
+                            AssetPath.get('images/ic_eazy_app.svg'),
+                            fit: BoxFit.contain,
+                          ),
+                    const SizedBox(width: 5),
+                     Text('Open in Eazy app'
+                      ,style: AppTextStyles.restaurantDescription.copyWith(
+                        color: const Color(0xFF8E2FFD),
+                      ),
+                )
+                  ],
+                ),
               ),
           ],
         ),
@@ -216,14 +221,6 @@ class StoreCard extends StatelessWidget {
     );
   }
 
-  static String _formatEta(double distanceKm) {
-    // Very rough heuristic: 1 km ~ 2 min delivery time
-    if (distanceKm <= 0) return '15–20 min';
-    final int minutes = (distanceKm * 2).clamp(10, 45).round();
-    final int minLow = (minutes - 3).clamp(8, minutes);
-    final int minHigh = (minutes + 2).clamp(minutes, 50);
-    return '$minLow–$minHigh min';
-  }
 }
 
 class _ProductPreviewTile extends StatelessWidget {
