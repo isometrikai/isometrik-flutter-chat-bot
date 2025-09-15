@@ -7,6 +7,7 @@ import 'package:chat_bot/bloc/cart/cart_event.dart';
 import 'package:chat_bot/bloc/cart/cart_state.dart';
 import 'package:chat_bot/data/model/chat_response.dart';
 import 'package:chat_bot/data/model/chat_message.dart';
+import 'package:chat_bot/data/services/chat_api_services.dart';
 import 'package:chat_bot/view/Groceries_menu_screen.dart';
 import 'package:chat_bot/view/add_card_sheet.dart';
 import 'package:chat_bot/view/address_details_screen.dart';
@@ -1463,8 +1464,26 @@ class _ChatScreenBody extends StatelessWidget {
               bool isApiLoading = state is ChatLoading;
               return _buildActionButton(
                 text: action.buttonText,
-                onTap: isApiLoading ? () {} : () {
+                onTap: isApiLoading ? () {} : () async {
                   print("Order Tracking: ${action.orderId}");
+                  
+                  // Call the order details API
+                  final orderDetails = await ChatApiServices.instance.getOrderDetails(
+                    orderId: action.orderId ?? '',
+                    type: 'masterOrder',
+                  );
+                  
+                  if (orderDetails != null) {
+                    print("Order Details:");
+                    print("storeOrderId: ${orderDetails['storeOrderId']}");
+                    print("storeType: ${orderDetails['storeType']}");
+                    print("storeCategoryId: ${orderDetails['storeCategoryId']}");
+                    // print("storeSubCategoryId: ${orderDetails['storeSubCategoryId']}");
+                    // print("subStoreTypeId: ${orderDetails['subStoreTypeId']}");
+                    OrderService().triggerOrderTracking(orderDetails);
+                  } else {
+                    print("Failed to fetch order details");
+                  }
                 },
               );
             },
@@ -1481,8 +1500,25 @@ class _ChatScreenBody extends StatelessWidget {
               bool isApiLoading = state is ChatLoading;
               return _buildActionButton(
                 text: action.buttonText,
-                onTap: isApiLoading ? () {} : () {
+                onTap: isApiLoading ? () {} : () async {
                   print("Order Details: ${action.orderId}");
+                  // Call the order details API
+                  final orderDetails = await ChatApiServices.instance.getOrderDetails(
+                    orderId: action.orderId ?? '',
+                    type: 'masterOrder',
+                  );
+                  
+                  if (orderDetails != null) {
+                    print("Order Details:");
+                    print("storeOrderId: ${orderDetails['storeOrderId']}");
+                    print("storeType: ${orderDetails['storeType']}");
+                    print("storeCategoryId: ${orderDetails['storeCategoryId']}");
+                    // print("storeSubCategoryId: ${orderDetails['storeSubCategoryId']}");
+                    // print("subStoreTypeId: ${orderDetails['subStoreTypeId']}");
+                    OrderService().triggerOrderDetails(orderDetails);
+                  } else {
+                    print("Failed to fetch order details");
+                  }
                 },
               );
             },
