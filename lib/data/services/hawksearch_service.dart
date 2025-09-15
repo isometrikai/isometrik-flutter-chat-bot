@@ -11,8 +11,8 @@ class HawkSearchService {
   /// Calls HawkSearch and returns a list of `Store` grouped with their `Product`s.
   /// Only required fields are bound. We do not bind the entire response.
   Future<List<Store>> fetchStoresGroupedByStoreId({
-    double latitude = 13.040803909301758,
-    double longitude = 77.562980651855469,
+    double latitude = 25.276987,
+    double longitude = 55.296249,
     String clientGuid = '528a7d439df44f2b9457342b7b865be2',
     String indexName = 'hitechnology.20250821.105131',//'hitechnology.20250626.060135',
     String visitId = '3c6b9339-c602-4af9-b454-0ec0df067181',

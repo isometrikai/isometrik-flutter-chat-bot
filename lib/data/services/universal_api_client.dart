@@ -41,12 +41,12 @@ class UniversalApiClient {
   Future<Map<String, String>> _buildAppHeaders() async {
     final token = TokenManager.instance.userToken;
     return {
-    'currencycode':'INR',
+    'currencycode':'PLN',
     // 'Content-Length':'391',
     'Content-Type':'application/json',
     'language':'en',
     'lan':'en',
-    'currencysymbol': '4oK5',
+    'currencysymbol': 'esWC',
     'platform':'1',
     'ipAddress':'192.168.1.3',
       'Authorization': token ?? '',
@@ -57,14 +57,14 @@ class UniversalApiClient {
   Future<Map<String, String>> _buildGroceryHeaders() async {
     final token = TokenManager.instance.userToken;
     return {
-      'currencysymbol': '4oK5',
+      'currencysymbol': 'esWC',
       'storeId': '', // Default storeId, will be overridden
       'Authorization': token ?? '',
       'storeType': '8',
       'ipAddress': '192.168.5.105',
       'platform': '1',
       'language': 'en',
-      'currencycode': 'INR',
+      'currencycode': 'PLN',
       'skip': '0',
       'cityId': '5df7b7218798dc2c1114e6bf',
       'size': '5',
@@ -76,14 +76,14 @@ class UniversalApiClient {
   Future<Map<String, String>> buildGroceryHeadersWithStoreId(String storeId, String storeCategoryId) async {
     final token = TokenManager.instance.userToken;
     return {
-      'currencysymbol': '4oK5',
+      'currencysymbol': 'esWC',
       'storeId': storeId,
       'Authorization': '$token',
       'storeType': '8',
       'ipAddress': '192.168.5.105',
       'platform': '1',
       'language': 'en',
-      'currencycode': 'INR',
+      'currencycode': 'PLN',
       'skip': '0',
       'cityId': '5df7b7218798dc2c1114e6bf',
       'size': '5',
