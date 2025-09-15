@@ -9,6 +9,7 @@ class OrderService {
   Function(Map<String, dynamic>)? onOrderDetails;
   Function(Map<String, dynamic>)? onOrderTracking;
   Function()? onChatDismiss; // Add dismiss callback
+  Function(bool)? onCartUpdate; // Add cart update callback
 
   void setProductCallback(Function(Map<String, dynamic>) callback) {
     onOrderNow = callback;
@@ -29,6 +30,11 @@ class OrderService {
   // Add dismiss callback setter
   void setDismissCallback(Function() callback) {
     onChatDismiss = callback;
+  }
+
+  // Add cart update callback setter
+  void setCartUpdateCallback(Function(bool) callback) {
+    onCartUpdate = callback;
   }
 
   void setonStoreCallback(Function(Map<String, dynamic>) callback) {
@@ -56,10 +62,16 @@ class OrderService {
     onChatDismiss?.call();
   }
 
+  // Add cart update trigger
+  void triggerCartUpdate(bool isCartUpdate) {
+    onCartUpdate?.call(isCartUpdate);
+  }
+
   void clearCallback() {
     onOrderNow = null;
     onStoreNow = null;
     onOrderDetails = null;
     onChatDismiss = null; // Clear dismiss callback
+    onCartUpdate = null; // Clear cart update callback
   }
 }

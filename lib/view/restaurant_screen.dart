@@ -81,6 +81,17 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
     _cartData = globalCartData;
     _bootstrapData();
     isCartAPICalled = false;
+    
+    // Set up cart update callback - the mounted check handles if screen is active
+    OrderService().setCartUpdateCallback((bool isCartUpdate) {
+      if (mounted && isCartUpdate) {
+        print('RestaurantScreen: Cart update received - $isCartUpdate');
+        // Refresh cart data when cart update is triggered
+        print('RestaurantScreen: Refreshing cart data');
+        cartBloc.add(CartFetchRequested(needToShowLoader: true));
+      }
+    });
+    
     // Listen to cart state changes to update cart data
     cartBloc.stream.listen((state) {
       if (state is CartLoaded && state.rawCartData != null) {

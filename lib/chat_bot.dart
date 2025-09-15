@@ -3,6 +3,7 @@ library chat_bot;
 import 'package:flutter/material.dart';
 import 'view/launch_screen.dart';
 import 'services/api_service.dart';
+import 'services/callback_manage.dart';
 import 'utils/utility.dart';
 
 export 'view/launch_screen.dart';
@@ -64,5 +65,7 @@ class ChatBot {
 
   static void isCartUpdate(bool isCartUpdate) {
     print('isCartUpdate: $isCartUpdate');
+    // Trigger the cart update callback to notify both ChatScreen and RestaurantScreen
+    OrderService().triggerCartUpdate(isCartUpdate);
   }
 }
