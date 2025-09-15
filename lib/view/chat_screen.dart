@@ -1697,6 +1697,7 @@ class _ChatScreenBody extends StatelessWidget {
         child: Text(
           text,
           style: AppTextStyles.button.copyWith(
+            fontWeight: FontWeight.w400,
             color: const Color(0xFF8E2FFD),
           ),
         ),
