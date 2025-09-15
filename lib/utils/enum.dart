@@ -21,7 +21,7 @@ enum WidgetEnum {
   cash_on_delivery,
   choose_address,
   choose_card,
-  track_order,
+  order_tracking,
   points;
 
   // Add string values for API communication

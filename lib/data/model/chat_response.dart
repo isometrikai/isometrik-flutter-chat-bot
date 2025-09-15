@@ -71,6 +71,8 @@ class ChatResponse {
   List<ChatWidget> get chooseCardWidgets => getWidgetsByType('choose_card');
   List<ChatWidget> get orderSummaryWidgets => getWidgetsByType('order_summary');
   List<ChatWidget> get orderConfirmedWidgets => getWidgetsByType('order_confirmed');
+  List<ChatWidget> get orderTrackingWidgets => getWidgetsByType('order_tracking');
+  List<ChatWidget> get orderDetailsWidgets => getWidgetsByType('order_details');
 
   @override
   String toString() {
@@ -180,6 +182,8 @@ class ChatWidget {
   bool get isAddPaymentWidget => type == WidgetEnum.add_payment.value;
   bool get isOrderSummaryWidget => type == WidgetEnum.order_summary.value;
   bool get isOrderConfirmedWidget => type == WidgetEnum.order_confirmed.value;
+  bool get isOrderTrackingWidget => type == WidgetEnum.order_tracking.value;
+  bool get isOrderDetailsWidget => type == WidgetEnum.order_details.value;
   bool get isButtonWidget => type == 'button';
   bool get isInputWidget => type == 'input';
   bool get isImageWidget => type == 'image';
@@ -254,6 +258,14 @@ class ChatWidget {
 
   // Get menu actions (converted to models)
   List<WidgetAction> get menu => isMenuWidget
+      ? widget.map((e) => WidgetAction.fromJson(e as Map<String, dynamic>)).toList()
+      : [];
+
+  List<WidgetAction> get orderTracking => isOrderTrackingWidget
+      ? widget.map((e) => WidgetAction.fromJson(e as Map<String, dynamic>)).toList()
+      : [];
+
+  List<WidgetAction> get orderDetails => isOrderDetailsWidget
       ? widget.map((e) => WidgetAction.fromJson(e as Map<String, dynamic>)).toList()
       : [];
 
@@ -809,6 +821,7 @@ class WidgetAction {
   final int? storeTypeId;
   final bool? storeIsOpen;
   final String? storeCategoryName;
+  final String? orderId;
 
   WidgetAction({
     required this.buttonText,
@@ -829,6 +842,7 @@ class WidgetAction {
     this.storeTypeId,
     this.storeIsOpen,
     this.storeCategoryName,
+    this.orderId,
   });
 
   factory WidgetAction.fromJson(Map<String, dynamic> json) {
@@ -855,6 +869,7 @@ class WidgetAction {
       storeTypeId: json['storeTypeId'] ?? -111,
         storeIsOpen: json['storeIsOpen'] ?? true,
         storeCategoryName: json['storeCategoryName']?.toString(),
+        orderId: json['orderId']?.toString(),
     );
   }
 
@@ -878,6 +893,7 @@ class WidgetAction {
       'storeTypeId': storeTypeId,
       'storeIsOpen': storeIsOpen,
       'storeCategoryName': storeCategoryName,
+      'orderId': orderId,
     };
   }
 }

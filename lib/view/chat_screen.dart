@@ -261,7 +261,9 @@ class _ChatScreenState extends State<ChatScreen> {
         widget.type == WidgetEnum.cart.value ||
         widget.type == WidgetEnum.choose_address.value ||
         widget.type == WidgetEnum.choose_card.value ||
-        widget.type == WidgetEnum.cash_on_delivery.value
+        widget.type == WidgetEnum.cash_on_delivery.value ||
+          widget.type == WidgetEnum.order_tracking.value ||
+            widget.type == WidgetEnum.order_details.value
       ).toList();
     });
     _scrollToBottom();
@@ -1445,6 +1447,42 @@ class _ChatScreenBody extends StatelessWidget {
                         }
                     ),
                   );
+                },
+              );
+            },
+          ),
+        );
+      }
+    }
+
+    for (final widget in latestActionWidgets.where((w) => w.type == WidgetEnum.order_tracking.value)) {
+      for (final action in widget.orderTracking) {
+        actionButtons.add(
+          BlocBuilder<ChatBloc, ChatState>(
+            builder: (context, state) {
+              bool isApiLoading = state is ChatLoading;
+              return _buildActionButton(
+                text: action.buttonText,
+                onTap: isApiLoading ? () {} : () {
+                  print("Order Tracking: ${action.orderId}");
+                },
+              );
+            },
+          ),
+        );
+      }
+    }
+
+    for (final widget in latestActionWidgets.where((w) => w.type == WidgetEnum.order_details.value)) {
+      for (final action in widget.orderDetails) {
+        actionButtons.add(
+          BlocBuilder<ChatBloc, ChatState>(
+            builder: (context, state) {
+              bool isApiLoading = state is ChatLoading;
+              return _buildActionButton(
+                text: action.buttonText,
+                onTap: isApiLoading ? () {} : () {
+                  print("Order Details: ${action.orderId}");
                 },
               );
             },
