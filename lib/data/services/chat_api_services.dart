@@ -114,6 +114,7 @@ class ChatApiServices {
         final data = responseData['data'] as Map<String, dynamic>?;
         
         if (data != null && data['storeOrders'] != null) {
+          final orderType = data['orderType'] ?? -1;
           final storeOrders = data['storeOrders'] as List<dynamic>;
           if (storeOrders.isNotEmpty) {
             final storeOrder = storeOrders.first as Map<String, dynamic>;
@@ -123,6 +124,7 @@ class ChatApiServices {
               'storeOrderId': storeOrder['storeOrderId'] ?? '',
               'storeType': storeOrder['storeType'] ?? 0,
               'storeCategoryId': storeOrder['storeCategoryId'] ?? '',
+              'orderType': orderType,
               // 'storeSubCategoryId': storeOrder['storeSubCategoryId'] ?? '',
               // 'subStoreTypeId': storeOrder['subStoreTypeId'] ?? '',
             };

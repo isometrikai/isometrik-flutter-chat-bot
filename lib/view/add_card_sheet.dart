@@ -135,8 +135,14 @@ class _AddCardBottomSheetState extends State<AddCardBottomSheet> {
                       cursorColor: const Color(0xFF8E2FFD),
                       decoration: const InputDecoration(
                         hintText: 'Card number',
-                        border: InputBorder.none,
+                         border: InputBorder.none,  
+                                enabledBorder: InputBorder.none,
+                                focusedBorder: InputBorder.none,
+                                errorBorder: InputBorder.none,
+                                focusedErrorBorder: InputBorder.none,
+                                disabledBorder: InputBorder.none,
                         contentPadding: EdgeInsets.symmetric(horizontal: 12),
+
                       ),
                       onCardChanged: (card) {
                         setState(() => _cardDetails = card);
