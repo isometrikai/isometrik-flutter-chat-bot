@@ -308,9 +308,7 @@ class _ChatScreenState extends State<ChatScreen> {
     OrderService().setCartUpdateCallback((bool isCartUpdate) {
       if (mounted && isCartUpdate) {
         print('ChatScreen: Cart update received - $isCartUpdate');
-        // Refresh cart data when cart update is triggered
-        print('ChatScreen: Refreshing cart data');
-        _cartBloc.add(CartFetchRequested(needToShowLoader: true));
+        _sendMessage("I have updated the cart");
       }
     });
     
