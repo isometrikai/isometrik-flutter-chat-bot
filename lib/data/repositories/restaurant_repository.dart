@@ -4,10 +4,11 @@ import 'package:chat_bot/data/services/hawksearch_service.dart';
 class RestaurantRepository {
   const RestaurantRepository();
 
-  Future<List<Store>> fetchStores({String keyword = '', String storeCategoryName = ''}) {
+  Future<List<Store>> fetchStores({String keyword = '', String storeCategoryName = '', String storeCategoryId = ''}) {
     return HawkSearchService.instance.fetchStoresGroupedByStoreId(
       keyword: keyword,
       storeCategoryName: storeCategoryName,
+      storeCategoryId: storeCategoryId,
     );
   }
 }

@@ -3,6 +3,7 @@ import 'package:chat_bot/data/model/universal_cart_response.dart';
 import 'package:flutter_svg/svg.dart';
 import '../utils/asset_helper.dart';
 import '../utils/asset_path.dart';
+import '../utils/text_styles.dart';
 
 class MenuItemCard extends StatelessWidget {
   final String title;
@@ -115,10 +116,10 @@ class MenuItemCard extends StatelessWidget {
                 title,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  fontSize: 12,
+                style: AppTextStyles.productTitle.copyWith(
+                  color: const Color(0xFF242424),
                   fontWeight: FontWeight.w700,
-                  color: Color(0xFF242424),
+                  fontSize: 13,
                 ),
               ),
             ),
@@ -127,20 +128,20 @@ class MenuItemCard extends StatelessWidget {
               children: <Widget>[
                 Text(
                   price,
-                  style: const TextStyle(
+                  style: AppTextStyles.productPrice.copyWith(
+                    color: const Color(0xFF242424),
                     fontSize: 12,
-                    color: Color(0xFF242424),
                   ),
                 ),
                 if (originalPrice != price) ...[
                 const SizedBox(width: 5),
                 Text(
                   originalPrice,
-                  style: const TextStyle(
+                  style: AppTextStyles.productPrice.copyWith(
+                    color: const Color(0xFF979797),
+                    decoration: TextDecoration.lineThrough,
                     fontSize: 12,
-                    color: Color(0xFF979797),
-                      decoration: TextDecoration.lineThrough,
-                    ),
+                  ),
                   ),
                 ]
               ],
@@ -243,10 +244,7 @@ class MenuItemCard extends StatelessWidget {
               alignment: Alignment.center,
               child: Text(
                 '$quantity',
-                style: TextStyle(
-                  fontWeight: FontWeight.w700,
-                  fontSize: 14,
-                  height: 1.2,
+                style: AppTextStyles.button.copyWith(
                   color: purple,
                 ),
               ),
@@ -297,10 +295,8 @@ class MenuItemCard extends StatelessWidget {
       },
       child: Text(
         'Add',
-        style: TextStyle(
+        style: AppTextStyles.button.copyWith(
           color: purple,
-          fontWeight: FontWeight.w600,
-          fontSize: 14,
         ),
       ),
     );

@@ -7,6 +7,7 @@ import 'package:chat_bot/bloc/cart/cart_event.dart';
 import 'package:chat_bot/bloc/cart/cart_state.dart';
 import 'package:chat_bot/data/model/chat_response.dart';
 import 'package:chat_bot/data/model/chat_message.dart';
+import 'package:chat_bot/data/services/chat_api_services.dart';
 import 'package:chat_bot/view/Groceries_menu_screen.dart';
 import 'package:chat_bot/view/add_card_sheet.dart';
 import 'package:chat_bot/view/address_details_screen.dart';
@@ -28,6 +29,7 @@ import 'package:chat_bot/widgets/black_toast_view.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:chat_bot/data/model/greeting_response.dart';
 import 'package:chat_bot/widgets/menu_item_card.dart';
+import 'package:chat_bot/utils/text_styles.dart';
 import 'package:chat_bot/widgets/cart_widget.dart';
 import 'package:chat_bot/widgets/choose_address_widget.dart';
 import 'package:chat_bot/widgets/choose_card_widget.dart';
@@ -260,7 +262,9 @@ class _ChatScreenState extends State<ChatScreen> {
         widget.type == WidgetEnum.cart.value ||
         widget.type == WidgetEnum.choose_address.value ||
         widget.type == WidgetEnum.choose_card.value ||
-        widget.type == WidgetEnum.cash_on_delivery.value
+        widget.type == WidgetEnum.cash_on_delivery.value ||
+          widget.type == WidgetEnum.order_tracking.value ||
+            widget.type == WidgetEnum.order_details.value
       ).toList();
     });
     _scrollToBottom();
@@ -1101,12 +1105,10 @@ class _ChatScreenBody extends StatelessWidget {
                             )
                           : Text(
                               message.text,
-                              style: TextStyle(
+                              style: AppTextStyles.chatMessage.copyWith(
                                 color: message.isBot
                                     ? Color(int.parse(chatbotData.data.first.uiPreferences.botBubbleFontColor.replaceFirst('#', '0xFF')))
                                     : Color(int.parse(chatbotData.data.first.uiPreferences.userBubbleFontColor.replaceFirst('#', '0xFF'))),
-                                fontSize: 16,
-                                fontFamily: "Plus Jakarta Sans"
                               ),
                             ),
                     ),
@@ -1311,11 +1313,8 @@ class _ChatScreenBody extends StatelessWidget {
               child: Text(
                 titleText,
                 textAlign: TextAlign.center,
-                style: const TextStyle(
-                  fontWeight: FontWeight.w700,
-                  fontSize: 24,
-                  height: 1.2,
-                  color: Color(0xFF171212),
+                style: AppTextStyles.launchTitle.copyWith(
+                  color: const Color(0xFF171212),
                 ),
               ),
             ),
@@ -1325,11 +1324,8 @@ class _ChatScreenBody extends StatelessWidget {
               child: Text(
                 subtitleText,
                 textAlign: TextAlign.center,
-                style: const TextStyle(
-                  fontWeight: FontWeight.w400,
-                  fontSize: 14,
-                  height: 1.4,
-                  color: Color(0xFF6E4185),
+                style: AppTextStyles.launchSubtitle.copyWith(
+                  color: const Color(0xFF6E4185),
                 ),
               ),
             ),
@@ -1349,19 +1345,15 @@ class _ChatScreenBody extends StatelessWidget {
               child: Text(
                 weatherText,
                 textAlign: TextAlign.center,
-                style: const TextStyle(
-                  fontStyle: FontStyle.italic,
-                  fontWeight: FontWeight.w400,
-                  fontSize: 14,
-                  height: 1.4,
-                  color: Color(0xFF6E4185), // Darker purple text
+                style: AppTextStyles.launchWeather.copyWith(
+                  color: const Color(0xFF6E4185), // Darker purple text
                 ),
               ),
             ),
             const SizedBox(height: 16),
             // Options grid 2x2
             ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 340),
+              constraints: const BoxConstraints(maxWidth: 360),
               child: Wrap(
                 spacing: 16,
                 runSpacing: 16,
@@ -1464,6 +1456,65 @@ class _ChatScreenBody extends StatelessWidget {
       }
     }
 
+    for (final widget in latestActionWidgets.where((w) => w.type == WidgetEnum.order_tracking.value)) {
+      for (final action in widget.orderTracking) {
+        actionButtons.add(
+          BlocBuilder<ChatBloc, ChatState>(
+            builder: (context, state) {
+              bool isApiLoading = state is ChatLoading;
+              return _buildActionButton(
+                text: action.buttonText,
+                onTap: isApiLoading ? () {} : () async {
+                  print("Order Tracking: ${action.orderId}");
+                  
+                  // Call the order details API
+                  final orderDetails = await ChatApiServices.instance.getOrderDetails(
+                    orderId: action.orderId ?? '',
+                    type: 'masterOrder',
+                  );
+                  
+                  if (orderDetails != null) {
+                    OrderService().triggerOrderTracking(orderDetails);
+                  } else {
+                    print("Failed to fetch order details");
+                  }
+                },
+              );
+            },
+          ),
+        );
+      }
+    }
+
+    for (final widget in latestActionWidgets.where((w) => w.type == WidgetEnum.order_details.value)) {
+      for (final action in widget.orderDetails) {
+        actionButtons.add(
+          BlocBuilder<ChatBloc, ChatState>(
+            builder: (context, state) {
+              bool isApiLoading = state is ChatLoading;
+              return _buildActionButton(
+                text: action.buttonText,
+                onTap: isApiLoading ? () {} : () async {
+                  print("Order Details: ${action.orderId}");
+                  // Call the order details API
+                  final orderDetails = await ChatApiServices.instance.getOrderDetails(
+                    orderId: action.orderId ?? '',
+                    type: 'masterOrder',
+                  );
+                  
+                  if (orderDetails != null) {
+                    OrderService().triggerOrderDetails(orderDetails);
+                  } else {
+                    print("Failed to fetch order details");
+                  }
+                },
+              );
+            },
+          ),
+        );
+      }
+    }
+
     for (final widget in latestActionWidgets.where((w) => w.type == WidgetEnum.menu.value)) {
       for (final action in widget.menu) {
         actionButtons.add(
@@ -1473,7 +1524,7 @@ class _ChatScreenBody extends StatelessWidget {
               return _buildActionButton(
                 text: action.buttonText,
                 onTap: isApiLoading ? () {} : () {
-                  if (action.storeTypeId == FoodCategory.grocery.value) {
+                  if (action.storeTypeId == FoodCategory.grocery.value || action.storeTypeId == FoodCategory.pharmacy.value) {
                       Navigator.push(
                     context,
                     MaterialPageRoute(
@@ -1636,12 +1687,8 @@ class _ChatScreenBody extends StatelessWidget {
         ),
         child: Text(
           text,
-          style: const TextStyle(
-            fontFamily: 'Plus Jakarta Sans',
-            fontSize: 14,
-            fontWeight: FontWeight.w400,
-            color: Color(0xFF8E2FFD),
-            height: 1.4,
+          style: AppTextStyles.button.copyWith(
+            color: const Color(0xFF8E2FFD),
           ),
         ),
       ),
@@ -1693,16 +1740,20 @@ class _ChatScreenBody extends StatelessWidget {
                               textCapitalization: TextCapitalization.sentences,
                               maxLines: null,
                               minLines: 1,
-                              style: const TextStyle(
-                                fontSize: 16,
-                                height: 1.4,
-                                color: Color(0xFF242424),
+                              style: AppTextStyles.chatInput.copyWith(
+                                color: const Color(0xFF242424),
                               ),
-                              decoration: const InputDecoration(
+                              decoration: InputDecoration(
                                 hintText: 'How can zAIn help you today?',
                                 border: InputBorder.none,
-                                hintStyle: TextStyle(color: Colors.grey),
+                                enabledBorder: InputBorder.none,
+                                focusedBorder: InputBorder.none,
+                                errorBorder: InputBorder.none,
+                                focusedErrorBorder: InputBorder.none,
+                                disabledBorder: InputBorder.none,
+                                hintStyle: AppTextStyles.chatInput.copyWith(color: Colors.grey),
                                 isCollapsed: true,
+                                contentPadding: EdgeInsets.zero,
                               ),
                               onChanged: (text) {
                                 // Calculate new height based on text content
@@ -1789,25 +1840,25 @@ class _ChatScreenBody extends StatelessWidget {
           },
           // onHide: onHideStoreCards, 
           onQuantityChanged: (product, store, newQuantity, isIncrease) {
-            if (store.storeTypeId == FoodCategory.grocery.value) {
-              _onQuantityChangedForGrocery(context,product.parentProductId,product.childProductId,product.unitId,store.storeId,store.storeCategoryId,store.storeTypeId ?? -111,product.variantsCount,newQuantity,isIncrease);
+            if (store.storeTypeId == FoodCategory.grocery.value || store.storeTypeId == FoodCategory.pharmacy.value) {
+              _onQuantityChangedForGrocery(context,product.parentProductId,product.childProductId,product.unitId,store.storeId,store.storeCategoryId,store.storeTypeId ?? -111,product.variantsCount,newQuantity,isIncrease,product.productName,product.productImage);
             }else {
               _onQuantityChanged(context, product, store, newQuantity, isIncrease);
             }
           },
           onAddToCartRequested: (product, store) {
-            if (store.storeIsOpen == false) {
+            if (store.storeIsOpen == false && store.type != FoodCategory.pharmacy.value) {
               print('Store is closed');
               BlackToastView.show(context, 'Store is closed. Please try again later');
               return;
             }
-            else if (product.instock == false && store.storeTypeId == FoodCategory.grocery.value) {
+            else if (product.instock == false && (store.storeTypeId == FoodCategory.grocery.value || store.storeTypeId == FoodCategory.pharmacy.value)) {
               print('Product is not in stock');
               BlackToastView.show(context, 'Product is not in stock. Please try again later');
               return;
             }
-              if (product.variantsCount > 1) {
-                if (store.storeTypeId == FoodCategory.grocery.value) {
+              if ((product.variantsCount > 1 && store.storeTypeId == FoodCategory.food.value) || (product.variantsCount > 0 && (store.storeTypeId == FoodCategory.grocery.value || store.storeTypeId == FoodCategory.pharmacy.value))) {
+                if (store.storeTypeId == FoodCategory.grocery.value || store.storeTypeId == FoodCategory.pharmacy.value) {
                     showModalBottomSheet(
                           context: context,
                           isScrollControlled: true,
@@ -1930,11 +1981,13 @@ void _onQuantityChangedForGrocery(
     int storeTypeId,
     int variantsCount,
     int newQuantity,
-    bool isIncrease) {
+    bool isIncrease,
+    String productName,
+    String productImage) {
     if (isIncrease == false && newQuantity == 1) {
       //TODO:- 0 Quantity
       int? addToCartOnId;
-      if (variantsCount > 1) {
+      if (variantsCount > 0) {
          addToCartOnId = _getAddToCartOnId(productId);
          print("addCartOnID: $addToCartOnId");
        }
@@ -1953,7 +2006,7 @@ void _onQuantityChangedForGrocery(
         needToShowLoaderForCartFetch: false,
       ));
     }else if (newQuantity > 0 && isIncrease == true) {
-      if (variantsCount > 1) {
+      if (variantsCount > 0) {
          showModalBottomSheet(
                         context: context,
                         isScrollControlled: true,
@@ -1962,7 +2015,7 @@ void _onQuantityChangedForGrocery(
                           // store: store,
                           // product: product,
                           onChooseClicked: () {
-                            _openGroceryCustomization(context,parentProductId,productId,unitId,storeId,storeCategoryId,storeTypeId);
+                            _openGroceryCustomization(context,parentProductId,productId,unitId,storeId,storeCategoryId,storeTypeId,productName,productImage);
                           },
                           onRepeatClicked: () {
                             //TODO:- Add Quantity
@@ -2008,7 +2061,7 @@ void _onQuantityChangedForGrocery(
     } else {
       //TODO:- Remove Quantity
       int? addToCartOnId;
-      if (variantsCount > 1) {
+      if (variantsCount > 0) {
         addToCartOnId = _getAddToCartOnId(productId);
         print("addCartOnID: $addToCartOnId");
       }
@@ -2030,7 +2083,7 @@ void _onQuantityChangedForGrocery(
   }
 
 
-void _openGroceryCustomization(BuildContext context, String parentProductId, String productId, String unitId, String storeId, String storeCategoryId, int storeTypeId) {
+void _openGroceryCustomization(BuildContext context, String parentProductId, String productId, String unitId, String storeId, String storeCategoryId, int storeTypeId, String productName, String productImage) {
   showModalBottomSheet(
                           context: context,
                           isScrollControlled: true,
@@ -2039,8 +2092,8 @@ void _openGroceryCustomization(BuildContext context, String parentProductId, Str
                             parentProductId: parentProductId,
                             productId: productId,
                             storeId: storeId,
-                            productName: 'productName',
-                            productImage: 'productImage',
+                            productName: productName,
+                            productImage: productImage,
                             onAddToCart: (parentProductId,productId,unitId) {
                               _onAddToCartForGrocery(parentProductId,productId,unitId,storeId,storeCategoryId,storeTypeId,null);
                             },
@@ -2206,7 +2259,7 @@ void _openGroceryCustomization(BuildContext context, String parentProductId, Str
             imageUrl: product.productImage.isNotEmpty ? product.productImage : null,
             productId: product.childProductId,
              centralProductId: product.parentProductId,
-                isCustomizable: product.variantsCount > 1,
+                isCustomizable: (product.variantsCount > 1 && product.storeTypeId == FoodCategory.food.value) || (product.variantsCount > 0 && (product.storeTypeId == FoodCategory.grocery.value || product.storeTypeId == FoodCategory.pharmacy.value)),
                 cartData: cartBloc.cartData,
             onClick: () {
               if (productsWidget != null) {
@@ -2215,24 +2268,24 @@ void _openGroceryCustomization(BuildContext context, String parentProductId, Str
               }
             },
             onQuantityChanged: (productId, centralProductId, quantity, isIncrease, isCustomizable) {
-              if (product.storeTypeId == FoodCategory.grocery.value) {
-                _onQuantityChangedForGrocery(context,product.parentProductId,product.childProductId,product.unitId,product.storeId ?? '',product.storeCategoryId ?? '',product.storeTypeId ?? -111,product.variantsCount,quantity,isIncrease);
+              if (product.storeTypeId == FoodCategory.grocery.value || product.storeTypeId == FoodCategory.pharmacy.value) {
+                _onQuantityChangedForGrocery(context,centralProductId,productId,product.unitId,product.storeId ?? '',product.storeCategoryId ?? '',product.storeTypeId ?? -111,product.variantsCount,quantity,isIncrease,product.productName,product.productImage);
               }else {
-              _onQuantityChangedMenuItem(productId, centralProductId, quantity, isIncrease, isCustomizable, product.storeId ?? '', product.storeCategoryId ?? '', product.storeTypeId ?? -111, context, product.productName, product.productImage);
+                _onQuantityChangedMenuItem(productId, centralProductId, quantity, isIncrease, isCustomizable, product.storeId ?? '', product.storeCategoryId ?? '', product.storeTypeId ?? -111, context, product.productName, product.productImage);
               }
             },
             onAddToCart: (productId, centralProductId, quantity, isCustomizable) {
-              if (product.storeIsOpen == false) {
+              if (product.storeIsOpen == false && product.storeTypeId != FoodCategory.pharmacy.value) {
                 print('STORE CLSOSED');
                 BlackToastView.show(context, 'Store is closed. Please try again later');
                 return;
               }
-              else if (product.instock == false && product.storeTypeId == FoodCategory.grocery.value) {
+              else if (product.instock == false && (product.storeTypeId == FoodCategory.grocery.value || product.storeTypeId == FoodCategory.pharmacy.value)) {
                 print('Product is not in stock');
                 BlackToastView.show(context, 'Product is not in stock. Please try again later');
                 return;
               }
-              if (product.storeTypeId == FoodCategory.grocery.value) {
+              if (product.storeTypeId == FoodCategory.grocery.value || product.storeTypeId == FoodCategory.pharmacy.value) {
                 if (isCustomizable) {
                         showModalBottomSheet(
                           context: context,
@@ -2547,8 +2600,8 @@ class _GreetingOptionTile extends StatelessWidget {
       borderRadius: BorderRadius.circular(8),
       child: Container(
         width: 162,
-        height: 84,
-        padding: const EdgeInsets.fromLTRB(10, 30, 10, 10),
+        height: 90,
+        padding: const EdgeInsets.fromLTRB(8, 0, 8, 5),
         decoration: BoxDecoration(
           color: const Color(0xFFF5F7FF),
           borderRadius: BorderRadius.circular(8),
@@ -2558,11 +2611,9 @@ class _GreetingOptionTile extends StatelessWidget {
           alignment: Alignment.bottomLeft,
           child: Text(
             text,
-            style: const TextStyle(
-              fontWeight: FontWeight.w400,
-              fontSize: 16,
-              height: 1.4,
-              color: Color(0xFF242424),
+            maxLines: 3,
+            style: AppTextStyles.bodyText.copyWith(
+              color: const Color(0xFF242424),
             ),
           ),
         ),

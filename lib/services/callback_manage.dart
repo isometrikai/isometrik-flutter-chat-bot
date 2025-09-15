@@ -6,6 +6,8 @@ class OrderService {
 
   Function(Map<String, dynamic>)? onOrderNow;
   Function(Map<String, dynamic>)? onStoreNow;
+  Function(Map<String, dynamic>)? onOrderDetails;
+  Function(Map<String, dynamic>)? onOrderTracking;
   Function()? onChatDismiss; // Add dismiss callback
 
   void setProductCallback(Function(Map<String, dynamic>) callback) {
@@ -16,22 +18,37 @@ class OrderService {
     onStoreNow = callback;
   }
 
+  void setOrderDetailsCallback(Function(Map<String, dynamic>) orderDetails) {
+    onOrderDetails = orderDetails;
+  }
+
+  void setOrderTrackingCallback(Function(Map<String, dynamic>) orderTracking) {
+    onOrderTracking = orderTracking;
+  }
+
   // Add dismiss callback setter
   void setDismissCallback(Function() callback) {
     onChatDismiss = callback;
+  }
+
+  void setonStoreCallback(Function(Map<String, dynamic>) callback) {
+    onStoreNow = callback;
   }
 
   void triggerProductOrder(Map<String, dynamic> product) {
     onOrderNow?.call(product);
   }
 
-
-  void setonStoreCallback(Function(Map<String, dynamic>) callback) {
-    onStoreNow = callback;
+  void triggerOrderDetails(Map<String, dynamic> orderDetails) {
+    onOrderDetails?.call(orderDetails);
   }
 
   void triggerStoreOrder(Map<String, dynamic> store) {
     onStoreNow?.call(store);
+  }
+
+  void triggerOrderTracking(Map<String, dynamic> orderTracking) {
+    onOrderTracking?.call(orderTracking);
   }
 
   // Add dismiss trigger
@@ -42,6 +59,7 @@ class OrderService {
   void clearCallback() {
     onOrderNow = null;
     onStoreNow = null;
+    onOrderDetails = null;
     onChatDismiss = null; // Clear dismiss callback
   }
 }

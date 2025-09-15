@@ -11,22 +11,24 @@ class HawkSearchService {
   /// Calls HawkSearch and returns a list of `Store` grouped with their `Product`s.
   /// Only required fields are bound. We do not bind the entire response.
   Future<List<Store>> fetchStoresGroupedByStoreId({
-    double latitude = 13.040803909301758,
-    double longitude = 77.562980651855469,
+    double latitude = 25.276987,
+    double longitude = 55.296249,
     String clientGuid = '528a7d439df44f2b9457342b7b865be2',
     String indexName = 'hitechnology.20250821.105131',//'hitechnology.20250626.060135',
     String visitId = '3c6b9339-c602-4af9-b454-0ec0df067181',
     String visitorId = '47daf829-b5df-4358-83ea-207aa4eaae15',
     String keyword = '',
     String storeCategoryName = '',
+    String storeCategoryId = '',
   }) async {
     final client = ChatApiServices.instance
         .createCustomClient('https://searchapi-dev.hawksearch.net');
 
     final body = {
-      'FacetSelections': {
-        'storeCategoryName': [storeCategoryName],
-      },
+      // 'FacetSelections': {
+      //   'storeCategoryName': [storeCategoryName],
+      // },
+      "SearchWithin": storeCategoryId,
       'ClientData': {
         'Origin': {
           'Latitude': latitude,
@@ -41,6 +43,11 @@ class HawkSearchService {
       'ClientGuid': clientGuid,
       'Keyword': keyword,
       'IndexName': indexName,
+      "FacetSelections": {
+        "storeLocation": [
+            "4"
+        ]
+    }
     };
 
     final ApiResult res = await client.post('/api/v2/search', body);

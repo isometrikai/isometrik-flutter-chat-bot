@@ -23,17 +23,26 @@ class RestaurantBloc extends Bloc<RestaurantEvent, RestaurantState> {
   ) async {
     String keyword = '';
     String storeCategoryName = '';
+    String storeCategoryId = '';
     if (event is RestaurantFetchRequested) {
       keyword = event.keyword;
       storeCategoryName = event.storeCategoryName;
+      storeCategoryId = event.storeCategoryId;
     } else if (event is RestaurantRefreshed) {
       keyword = event.keyword;
       storeCategoryName = event.storeCategoryName;
+      storeCategoryId = event.storeCategoryId;
     }
-    Utility.showLoader();
-    // emit(RestaurantLoadInProgress());
+    
+    // Only show global loader for initial load, not for search
+    if (keyword.isEmpty) {
+      Utility.showLoader();
+    } else {
+      emit(RestaurantLoadInProgress());
+    }
+    
     try {
-      final List<Store> stores = await repository.fetchStores(keyword: keyword, storeCategoryName: storeCategoryName);
+      final List<Store> stores = await repository.fetchStores(keyword: keyword, storeCategoryName: storeCategoryName, storeCategoryId: storeCategoryId);
       Utility.closeProgressDialog();
       emit(RestaurantLoadSuccess(restaurants: stores, keyword: keyword));
     } catch (e) {

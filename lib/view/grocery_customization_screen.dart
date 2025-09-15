@@ -7,6 +7,7 @@ import 'package:chat_bot/data/model/grocery_product_details_response.dart';
 import 'package:chat_bot/data/repositories/grocery_product_repository.dart';
 import 'package:chat_bot/data/services/universal_api_client.dart';
 import 'package:chat_bot/widgets/black_toast_view.dart';
+import '../utils/text_styles.dart';
 
 class GroceryCustomizationScreen extends StatefulWidget {
   final String parentProductId;
@@ -120,9 +121,8 @@ class _GroceryCustomizationScreenState extends State<GroceryCustomizationScreen>
                                     const SizedBox(height: 16),
                                     Text(
                                       state.message,
-                                      style: const TextStyle(
-                                        fontSize: 16,
-                                        color: Color(0xFF6E4185),
+                                      style: AppTextStyles.bodyText.copyWith(
+                                        color: const Color(0xFF6E4185),
                                       ),
                                       textAlign: TextAlign.center,
                                     ),
@@ -143,7 +143,12 @@ class _GroceryCustomizationScreenState extends State<GroceryCustomizationScreen>
                                         ),
                                         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                                       ),
-                                      child: const Text('Retry'),
+                                      child: Text(
+                                        'Retry',
+                                        style: AppTextStyles.button.copyWith(
+                                          color: Colors.white,
+                                        ),
+                                      ),
                                     ),
                                   ],
                                 ),
@@ -225,10 +230,8 @@ class _GroceryCustomizationScreenState extends State<GroceryCustomizationScreen>
               Expanded(
                 child: Text(
                   widget.productName,
-                  style: const TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w700,
-                    color: Color(0xFF242424),
+                  style: AppTextStyles.launchTitle.copyWith(
+                    color: const Color(0xFF242424),
                   ),
                 ),
               ),
@@ -263,8 +266,6 @@ class _GroceryCustomizationScreenState extends State<GroceryCustomizationScreen>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // _buildQuantitySection(state),
-          // const SizedBox(height: 16),
           _buildVariantSection(state),
           const SizedBox(height: 20),
         ],
@@ -272,113 +273,6 @@ class _GroceryCustomizationScreenState extends State<GroceryCustomizationScreen>
     );
   }
 
-  Widget _buildQuantitySection(GroceryCustomizationLoaded state) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          'Quantity*',
-          style: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w700,
-            color: Color(0xFF242424),
-          ),
-        ),
-        const SizedBox(height: 4),
-        const Text(
-          'Required | Select quantity',
-          style: TextStyle(
-            fontSize: 12,
-            fontWeight: FontWeight.w400,
-            color: Color(0xFF6E4185),
-          ),
-        ),
-        const SizedBox(height: 8),
-        Container(
-          padding: const EdgeInsets.all(15),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            border: Border.all(color: const Color(0xFFEEF4FF)),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text(
-                'Quantity',
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w400,
-                  color: Color(0xFF242424),
-                ),
-              ),
-              Row(
-                children: [
-                  GestureDetector(
-                    onTap: () {
-                      if (state.quantity > 1) {
-                        _bloc.add(UpdateGroceryQuantity(quantity: state.quantity - 1));
-                      }
-                    },
-                    child: Container(
-                      width: 32,
-                      height: 32,
-                      decoration: BoxDecoration(
-                        color: state.quantity > 1 ? const Color(0xFF8E2FFD) : const Color(0xFFE9DFFB),
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      child: Icon(
-                        Icons.remove,
-                        color: state.quantity > 1 ? Colors.white : const Color(0xFF8E2FFD),
-                        size: 16,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Text(
-                    state.quantity.toString(),
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: Color(0xFF242424),
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  GestureDetector(
-                    onTap: () {
-                      if (state.selectedSizeData != null && 
-                          state.quantity < state.selectedSizeData!.availableStock) {
-                        _bloc.add(UpdateGroceryQuantity(quantity: state.quantity + 1));
-                      }
-                    },
-                    child: Container(
-                      width: 32,
-                      height: 32,
-                      decoration: BoxDecoration(
-                        color: state.selectedSizeData != null && 
-                               state.quantity < state.selectedSizeData!.availableStock
-                            ? const Color(0xFF8E2FFD)
-                            : const Color(0xFFE9DFFB),
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      child: Icon(
-                        Icons.add,
-                        color: state.selectedSizeData != null && 
-                               state.quantity < state.selectedSizeData!.availableStock
-                            ? Colors.white
-                            : const Color(0xFF8E2FFD),
-                        size: 16,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
 
   Widget _buildVariantSection(GroceryCustomizationLoaded state) {
     if (state.product.variants.isEmpty) {
@@ -388,46 +282,89 @@ class _GroceryCustomizationScreenState extends State<GroceryCustomizationScreen>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           'Choose your variant*',
-          style: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w700,
-            color: Color(0xFF242424),
+          style: AppTextStyles.productTitle.copyWith(
+            color: const Color(0xFF242424),
           ),
         ),
         const SizedBox(height: 4),
-        const Text(
+        Text(
           'Required | Select any 1',
-          style: TextStyle(
-            fontSize: 12,
-            fontWeight: FontWeight.w400,
-            color: Color(0xFF6E4185),
+          style: AppTextStyles.restaurantDescription.copyWith(
+            color: const Color(0xFF6E4185),
           ),
         ),
         const SizedBox(height: 8),
-        Container(
-          padding: const EdgeInsets.all(15),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            border: Border.all(color: const Color(0xFFEEF4FF)),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Column(
-            children: [
-              ...state.product.variants.expand((variant) => 
-                variant.sizeData.map((sizeData) => _buildVariantOption(sizeData, state))
-              ),
-            ],
-          ),
-        ),
+        ...state.product.variants.map((variant) => _buildVariantTypeSection(variant, state)),
       ],
     );
   }
 
-  Widget _buildVariantOption(GroceryProductSizeData sizeData, GroceryCustomizationLoaded state) {
-    final isSelected = state.selectedSizeData?.childProductId == sizeData.childProductId;
-    final isOutOfStock = sizeData.outOfStock || sizeData.availableStock == 0;
+  Widget _buildVariantTypeSection(GroceryProductVariant variant, GroceryCustomizationLoaded state) {
+    final hasMultipleOptions = variant.sizeData.length > 1;
+    final isAutoSelected = !hasMultipleOptions;
+    
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(15),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border.all(color: const Color(0xFFEEF4FF)),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Variant type header
+          Row(
+            children: [
+              if (state.product.variants.length > 1) ...[
+              Text(
+                variant.name,
+                style: AppTextStyles.productTitle.copyWith(
+                  color: const Color(0xFF242424),
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              ]
+              // if (isAutoSelected) ...[
+              //   const SizedBox(width: 8),
+              //   Container(
+              //     padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+              //     decoration: BoxDecoration(
+              //       color: const Color(0xFFE9DFFB),
+              //       borderRadius: BorderRadius.circular(4),
+              //     ),
+              //     child: const Text(
+              //       'Auto-selected',
+              //       style: TextStyle(
+              //         fontSize: 10,
+              //         fontWeight: FontWeight.w500,
+              //         color: Color(0xFF8E2FFD),
+              //       ),
+              //     ),
+              //   ),
+              // ],
+            ],
+          ),
+          if (state.product.variants.length > 1) ...[
+          const SizedBox(height: 12),
+          ],
+          // Variant options
+          ...variant.sizeData.map((sizeData) => _buildVariantOption(sizeData, state, isAutoSelected)),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildVariantOption(GroceryProductSizeData sizeData, GroceryCustomizationLoaded state, bool isAutoSelected) {
+    final isOutOfStock = false;//sizeData.outOfStock || sizeData.availableStock == 0;
+    final isClickable = !isOutOfStock && !isAutoSelected;
+    // If not clickable (auto-selected), make it selected
+    final isSelected = isClickable 
+        ? state.selectedSizeData?.childProductId == sizeData.childProductId
+        : true;
     
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
@@ -440,27 +377,22 @@ class _GroceryCustomizationScreenState extends State<GroceryCustomizationScreen>
               children: [
                 Text(
                   '${sizeData.name} (${state.product.currencySymbol}${sizeData.finalPriceList.finalPrice.toStringAsFixed(0)})',
-                  style: TextStyle(
-                    fontSize: 14,
+                  style: AppTextStyles.productTitle.copyWith(
                     fontWeight: FontWeight.w400,
                     color: isOutOfStock ? const Color(0xFF979797) : const Color(0xFF242424),
                   ),
                 ),
                 if (isOutOfStock)
-                  const Text(
+                  Text(
                     'Out of Stock',
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w400,
+                    style: AppTextStyles.restaurantDescription.copyWith(
                       color: Colors.red,
                     ),
                   )
                 else if (sizeData.availableStock < 10)
                   Text(
                     'Only ${sizeData.availableStock} left',
-                    style: const TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w400,
+                    style: AppTextStyles.restaurantDescription.copyWith(
                       color: Colors.orange,
                     ),
                   ),
@@ -468,9 +400,9 @@ class _GroceryCustomizationScreenState extends State<GroceryCustomizationScreen>
             ),
           ),
           GestureDetector(
-            onTap: isOutOfStock ? null : () {
+            onTap: isClickable ? () {
               _bloc.add(SelectGroceryProductVariant(variant: sizeData));
-            },
+            } : null,
             child: Container(
               width: 20,
               height: 20,
@@ -544,15 +476,15 @@ class _GroceryCustomizationScreenState extends State<GroceryCustomizationScreen>
                       return;
                     }
                     
-                    if (state.selectedSizeData!.outOfStock) {
-                      BlackToastView.show(context, 'This item is out of stock');
-                      return;
-                    }
+                    // if (state.selectedSizeData!.outOfStock) {
+                    //   BlackToastView.show(context, 'This item is out of stock');
+                    //   return;
+                    // }
                     
-                    if (state.quantity > state.selectedSizeData!.availableStock) {
-                      BlackToastView.show(context, 'Not enough stock available');
-                      return;
-                    }
+                    // if (state.quantity > state.selectedSizeData!.availableStock) {
+                    //   BlackToastView.show(context, 'Not enough stock available');
+                    //   return;
+                    // }
                     
                     _bloc.add(AddGroceryToCart(
                       quantity: state.quantity,
@@ -568,11 +500,9 @@ class _GroceryCustomizationScreenState extends State<GroceryCustomizationScreen>
                       borderRadius: BorderRadius.circular(16),
                     ),
                   ),
-                  child: const Text(
+                  child: Text(
                     'Add',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
+                    style: AppTextStyles.button.copyWith(
                       color: Colors.white,
                     ),
                   ),

@@ -9,15 +9,14 @@ import '../data/model/universal_cart_response.dart';
 import '../widgets/black_toast_view.dart';
 import '../widgets/store_card.dart';
 import '../widgets/screen_header.dart';
-import 'package:chat_bot/bloc/chat_event.dart';
 import 'package:chat_bot/bloc/restaurant/restaurant_bloc.dart';
 import 'package:chat_bot/bloc/restaurant/restaurant_event.dart';
 import 'package:chat_bot/bloc/restaurant/restaurant_state.dart';
-import 'package:chat_bot/services/cart_manager.dart';
 import 'package:chat_bot/services/callback_manage.dart';
 import 'package:chat_bot/bloc/cart/cart_bloc.dart';
 import 'package:chat_bot/bloc/cart/cart_event.dart';
 import 'package:chat_bot/bloc/cart/cart_state.dart';
+import 'package:chat_bot/utils/text_styles.dart';
 
 class RestaurantScreen extends StatefulWidget {
   final chat.WidgetAction? actionData;
@@ -44,11 +43,7 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
   DateTime? _lastQueryAt;
   
   // Cart state
-  double _cartTotal = 0.00;
   int _cartItems = 0;
-  Map<String, int> _productQuantities = {}; // Track product quantities
-  Map<String, chat.Product> _productDetails = {}; // Track product details
-  Map<String, int> _initialQuantities = {}; // Track initial quantities when screen opened
   List<UniversalCartData> _cartData = []; // Store cart data from getCart API
 
   @override
@@ -62,11 +57,19 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
     _currentKeyword = value.trim();
     final now = DateTime.now();
     _lastQueryAt = now;
-    Future.delayed(const Duration(milliseconds: 400), () async {
+    
+    // Skip API call for empty queries - show all results
+    if (_currentKeyword.isEmpty) {
+      _bloc.add(RestaurantFetchRequested(keyword: '', storeCategoryName: widget.actionData?.storeCategoryName ?? '', storeCategoryId: widget.actionData?.storeCategoryId ?? ''));
+      return;
+    }
+    
+    // Reduced debounce delay for faster response
+    Future.delayed(const Duration(milliseconds: 300), () async {
       if (!mounted) return;
       // Debounce: only proceed if this is the latest input
       if (_lastQueryAt != now) return;
-      _bloc.add(RestaurantFetchRequested(keyword: _currentKeyword, storeCategoryName: widget.actionData?.storeCategoryName ?? ''));
+      _bloc.add(RestaurantFetchRequested(keyword: _currentKeyword, storeCategoryName: widget.actionData?.storeCategoryName ?? '', storeCategoryId: widget.actionData?.storeCategoryId ?? ''));
     });
   }
 
@@ -90,7 +93,7 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
 
   Future<void> _bootstrapData() async {
     cartBloc.add(CartFetchRequested(needToShowLoader: false));
-    _bloc.add(RestaurantFetchRequested(keyword: _currentKeyword, storeCategoryName: widget.actionData?.storeCategoryName ?? ''));
+    _bloc.add(RestaurantFetchRequested(keyword: _currentKeyword, storeCategoryName: widget.actionData?.storeCategoryName ?? '', storeCategoryId: widget.actionData?.storeCategoryId ?? ''));
     
   }
 
@@ -154,7 +157,7 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
     }
   }
 
-void _openGroceryCustomization(String parentProductId, String productId, String unitId, String storeId, String storeCategoryId, int storeTypeId) {
+void _openGroceryCustomization(String parentProductId, String productId, String unitId, String storeId, String storeCategoryId, int storeTypeId, String productName, String productImage) {
   showModalBottomSheet(
                           context: context,
                           isScrollControlled: true,
@@ -163,8 +166,8 @@ void _openGroceryCustomization(String parentProductId, String productId, String 
                             parentProductId: parentProductId,
                             productId: productId,
                             storeId: storeId,
-                            productName: 'productName',
-                            productImage: 'productImage',
+                            productName: productName,
+                            productImage: productImage,
                             onAddToCart: (parentProductId,productId,unitId) {
                               _onAddToCartForGrocery(parentProductId,productId,unitId,storeId,storeCategoryId,storeTypeId,null);
                             },
@@ -202,16 +205,6 @@ void _openGroceryCustomization(String parentProductId, String productId, String 
     }
   }
 
-  void _clearCart() {
-    setState(() {
-      _cartItems = 0;
-      _cartTotal = 0.00;
-      _productQuantities.clear();
-      _productDetails.clear();
-      _initialQuantities.clear();
-      _cartData.clear();
-    });
-  }
 
 void _onQuantityChangedForGrocery(String parentProductId,
     String productId,
@@ -221,11 +214,13 @@ void _onQuantityChangedForGrocery(String parentProductId,
     int storeTypeId,
     int variantsCount,
     int newQuantity,
-    bool isIncrease) {
+    bool isIncrease,
+    String productName,
+    String productImage) {
     if (isIncrease == false && newQuantity == 1) {
       //TODO:- 0 Quantity
       int? addToCartOnId;
-      if (variantsCount > 1) {
+      if (variantsCount > 0) {
          addToCartOnId = _getAddToCartOnId(productId);
          print("addCartOnID: $addToCartOnId");
        }
@@ -243,7 +238,7 @@ void _onQuantityChangedForGrocery(String parentProductId,
         addToCartOnId: addToCartOnId,
       ));
     }else if (newQuantity > 0 && isIncrease == true) {
-      if (variantsCount > 1) {
+      if (variantsCount > 0) {
          showModalBottomSheet(
                         context: context,
                         isScrollControlled: true,
@@ -252,7 +247,7 @@ void _onQuantityChangedForGrocery(String parentProductId,
                           // store: store,
                           // product: product,
                           onChooseClicked: () {
-                            _openGroceryCustomization(parentProductId,productId,unitId,storeId,storeCategoryId,storeTypeId);
+                            _openGroceryCustomization(parentProductId,productId,unitId,storeId,storeCategoryId,storeTypeId,productName,productImage);
                           },
                           onRepeatClicked: () {
                             //TODO:- Add Quantity
@@ -296,7 +291,7 @@ void _onQuantityChangedForGrocery(String parentProductId,
     } else {
       //TODO:- Remove Quantity
       int? addToCartOnId;
-      if (variantsCount > 1) {
+      if (variantsCount > 0) {
         addToCartOnId = _getAddToCartOnId(productId);
         print("addCartOnID: $addToCartOnId");
       }
@@ -320,7 +315,7 @@ void _onQuantityChangedForGrocery(String parentProductId,
     if (isIncrease == false && newQuantity == 1) {
       //TODO:- 0 Quantity
       int? addToCartOnId;
-      if (product.variantsCount > 1) {
+      if (product.variantsCount > 0) {
          addToCartOnId = _getAddToCartOnId(product.childProductId);
          print("addCartOnID: $addToCartOnId");
        }
@@ -338,7 +333,7 @@ void _onQuantityChangedForGrocery(String parentProductId,
         addToCartOnId: addToCartOnId,
       ));
     }else if (newQuantity > 0 && isIncrease == true) {
-      if (product.variantsCount > 1) {
+      if (product.variantsCount > 0) {
          showModalBottomSheet(
                         context: context,
                         isScrollControlled: true,
@@ -388,7 +383,7 @@ void _onQuantityChangedForGrocery(String parentProductId,
     } else {
       //TODO:- Remove Quantity
       int? addToCartOnId;
-      if (product.variantsCount > 1) {
+      if (product.variantsCount > 0) {
         addToCartOnId = _getAddToCartOnId(product.childProductId);
         print("addCartOnID: $addToCartOnId");
       }
@@ -562,8 +557,6 @@ void _onQuantityChangedForGrocery(String parentProductId,
   // }
 
 
-
-
   Widget _buildSearchBar() {
     return Container(
       height: 54,
@@ -577,15 +570,18 @@ void _onQuantityChangedForGrocery(String parentProductId,
           Expanded(
             child: TextField(
               controller: _searchController,
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 hintText: 'Search',
-                hintStyle: TextStyle(
-                  fontSize: 16,
-                  height: 1.4,
-                  color: Color(0xFF979797),
+                hintStyle: AppTextStyles.bodyText.copyWith(
+                  color: const Color(0xFF979797),
                 ),
                 border: InputBorder.none,
-                contentPadding: EdgeInsets.symmetric(horizontal: 17),
+                                enabledBorder: InputBorder.none,
+                                focusedBorder: InputBorder.none,
+                                errorBorder: InputBorder.none,
+                                focusedErrorBorder: InputBorder.none,
+                                disabledBorder: InputBorder.none,
+                contentPadding: const EdgeInsets.symmetric(horizontal: 17),
               ),
               onChanged: (value) {
                 _onSearchChanged(value);
@@ -623,9 +619,8 @@ void _onQuantityChangedForGrocery(String parentProductId,
           return Center(
             child: Text(
               state.message,
-              style: const TextStyle(
-                fontSize: 16,
-                color: Color(0xFF6E4185),
+              style: AppTextStyles.bodyText.copyWith(
+                color: const Color(0xFF6E4185),
               ),
             ),
           );
@@ -633,12 +628,11 @@ void _onQuantityChangedForGrocery(String parentProductId,
 
         final restaurants = (state as RestaurantLoadSuccess).restaurants;
         if (restaurants.isEmpty) {
-          return const Center(
+          return Center(
             child: Text(
               'No restaurants available',
-              style: TextStyle(
-                fontSize: 16,
-                color: Color(0xFF6E4185),
+              style: AppTextStyles.bodyText.copyWith(
+                color: const Color(0xFF6E4185),
               ),
             ),
           );
@@ -653,6 +647,7 @@ void _onQuantityChangedForGrocery(String parentProductId,
             padding: EdgeInsets.zero,
             itemCount: restaurants.length,
             separatorBuilder: (context, index) => const SizedBox(height: 16),
+            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
             itemBuilder: (context, index) {
               try {
                 return StoreCard(
@@ -667,7 +662,7 @@ void _onQuantityChangedForGrocery(String parentProductId,
                     // Navigator.pop(context);
                   },
                   onAddToCartRequested: (product, store) {
-                    if (store.storeIsOpen == false) {
+                    if (store.storeIsOpen == false && store.type == FoodCategory.grocery.value) {
                       print('STORE CLOSED');
                       BlackToastView.show(context, 'Store is closed. Please try again later');
                       return;
@@ -676,8 +671,8 @@ void _onQuantityChangedForGrocery(String parentProductId,
                       BlackToastView.show(context, 'Product is not in stock. Please try again later');
                       return;
                     }
-                    if (product.variantsCount > 1) {
-                      if (store.type == FoodCategory.grocery.value) {
+                    if (product.variantsCount > 0) {
+                      if (store.type == FoodCategory.grocery.value || store.type == 0) {
                         showModalBottomSheet(
                           context: context,
                           isScrollControlled: true,
@@ -726,7 +721,7 @@ void _onQuantityChangedForGrocery(String parentProductId,
                   },
                   onQuantityChanged: (product, store, newQuantity, isIncrease) {
                     if (store.type == FoodCategory.grocery.value) {
-                      _onQuantityChangedForGrocery(product.parentProductId,product.childProductId,product.unitId,store.storeId,store.storeCategoryId,store.type,product.variantsCount,newQuantity,isIncrease);
+                      _onQuantityChangedForGrocery(product.parentProductId,product.childProductId,product.unitId,store.storeId,store.storeCategoryId,store.type,product.variantsCount,newQuantity,isIncrease,product.productName,product.productImage);
                     }else {
                       _onQuantityChanged(product, store, newQuantity, isIncrease);
                     }
@@ -742,10 +737,8 @@ void _onQuantityChangedForGrocery(String parentProductId,
                   ),
                   child: Text(
                     restaurants[index].storename,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w700,
-                      fontSize: 18,
-                      color: Color(0xFF242424),
+                    style: AppTextStyles.restaurantTitle.copyWith(
+                      color: const Color(0xFF242424),
                     ),
                   ),
                 );

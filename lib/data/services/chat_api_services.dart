@@ -1,10 +1,9 @@
 import 'package:chat_bot/data/api_client.dart';
 import 'package:chat_bot/data/model/chat_response.dart';
-import 'package:chat_bot/data/model/mygpts_model.dart';
-import 'package:chat_bot/data/model/greeting_response.dart';
 import 'package:chat_bot/data/services/token_manager.dart';
 import 'package:chat_bot/data/services/universal_api_client.dart';
-import 'package:chat_bot/utils/api_result.dart';
+import 'package:chat_bot/utils/log.dart';
+import 'package:chat_bot/utils/utility.dart';
 
 /// Comprehensive API service that provides easy access to all APIs with automatic token refresh
 class ChatApiServices {
@@ -94,6 +93,48 @@ class ChatApiServices {
 
   ApiClient createCustomClient(String baseUrl) {
     return UniversalApiClient.instance.createClient(baseUrl);
+  }
+
+  /// Get order details and extract only the required fields
+  Future<Map<String, dynamic>?> getOrderDetails({
+    required String orderId,
+    required String type,
+  }) async {
+    try {
+      Utility.showLoader();
+      final queryParams = {
+        'orderId': orderId,
+        'type': type,
+      };
+
+      final res = await _appClient.get('/v1/orders/details', queryParameters: queryParams);
+      Utility.closeProgressDialog();
+      if (res.isSuccess && res.data != null) {
+        final responseData = res.data as Map<String, dynamic>;
+        final data = responseData['data'] as Map<String, dynamic>?;
+        
+        if (data != null && data['storeOrders'] != null) {
+          final storeOrders = data['storeOrders'] as List<dynamic>;
+          if (storeOrders.isNotEmpty) {
+            final storeOrder = storeOrders.first as Map<String, dynamic>;
+            
+            // Extract only the required 5 fields
+            return {
+              'storeOrderId': storeOrder['storeOrderId'] ?? '',
+              'storeType': storeOrder['storeType'] ?? 0,
+              'storeCategoryId': storeOrder['storeCategoryId'] ?? '',
+              // 'storeSubCategoryId': storeOrder['storeSubCategoryId'] ?? '',
+              // 'subStoreTypeId': storeOrder['subStoreTypeId'] ?? '',
+            };
+          }
+        }
+      }
+      return null;
+    } catch (e) {
+      AppLog.error('Error fetching order details: $e');
+      Utility.closeProgressDialog();
+      return null;
+    }
   }
 
 }

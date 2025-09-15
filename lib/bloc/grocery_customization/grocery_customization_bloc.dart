@@ -34,14 +34,15 @@ class GroceryCustomizationBloc extends Bloc<GroceryCustomizationEvent, GroceryCu
         final response = result.data as GroceryProductDetailsResponse;
         final product = response.data.productData.data.first;
         
-        // Select the primary variant by default
-        GroceryProductVariant? primaryVariant;
-        GroceryProductSizeData? primarySizeData;
+        // Auto-select variants with single options and primary variants
+        GroceryProductVariant? selectedVariant;
+        GroceryProductSizeData? selectedSizeData;
         
+        // First, try to find a primary variant
         for (final variant in product.variants) {
           if (variant.isPrimary) {
-            primaryVariant = variant;
-            primarySizeData = variant.sizeData.firstWhere(
+            selectedVariant = variant;
+            selectedSizeData = variant.sizeData.firstWhere(
               (sizeData) => sizeData.isPrimary,
               orElse: () => variant.sizeData.first,
             );
@@ -49,20 +50,32 @@ class GroceryCustomizationBloc extends Bloc<GroceryCustomizationEvent, GroceryCu
           }
         }
         
-        // If no primary variant found, use the first one
-        if (primaryVariant == null && product.variants.isNotEmpty) {
-          primaryVariant = product.variants.first;
-          primarySizeData = primaryVariant.sizeData.first;
+        // If no primary variant found, auto-select single-option variants
+        if (selectedVariant == null && product.variants.isNotEmpty) {
+          // Find the first variant with only one option (auto-select)
+          for (final variant in product.variants) {
+            if (variant.sizeData.length == 1) {
+              selectedVariant = variant;
+              selectedSizeData = variant.sizeData.first;
+              break;
+            }
+          }
+          
+          // If no single-option variant found, use the first variant's first option
+          if (selectedVariant == null) {
+            selectedVariant = product.variants.first;
+            selectedSizeData = selectedVariant.sizeData.first;
+          }
         }
 
-        final totalPrice = primarySizeData != null 
-            ? primarySizeData.finalPriceList.finalPrice 
+        final totalPrice = selectedSizeData != null 
+            ? selectedSizeData.finalPriceList.finalPrice 
             : product.finalPriceList.finalPrice;
 
         emit(GroceryCustomizationLoaded(
           product: product,
-          selectedVariant: primaryVariant,
-          selectedSizeData: primarySizeData,
+          selectedVariant: selectedVariant,
+          selectedSizeData: selectedSizeData,
           quantity: 1,
           totalPrice: totalPrice,
         ));

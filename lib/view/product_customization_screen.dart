@@ -8,6 +8,7 @@ import 'package:chat_bot/data/model/chat_response.dart';
 import 'package:chat_bot/data/repositories/product_portion_repository.dart';
 import 'package:chat_bot/data/services/universal_api_client.dart';
 import 'package:chat_bot/widgets/black_toast_view.dart';
+import 'package:chat_bot/utils/text_styles.dart';
 
 
 
@@ -401,10 +402,8 @@ class _ProductCustomizationScreenState extends State<ProductCustomizationScreen>
           children: [
             Text(
               addOnCategory.name,
-              style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w700,
-                color: Color(0xFF242424),
+              style: AppTextStyles.addonTitle.copyWith(
+                color: const Color(0xFF242424),
               ),
             ),
             if (addOnCategory.mandatory) 
@@ -423,10 +422,8 @@ class _ProductCustomizationScreenState extends State<ProductCustomizationScreen>
           addOnCategory.mandatory 
               ? 'Required | Select any ${addOnCategory.maximumLimit}'
               : 'Optional | You can select up to ${addOnCategory.maximumLimit} items',
-          style: const TextStyle(
-            fontSize: 12,
-            fontWeight: FontWeight.w400,
-            color: Color(0xFF6E4185),
+          style: AppTextStyles.addonDescription.copyWith(
+            color: const Color(0xFF6E4185),
           ),
         ),
         const SizedBox(height: 8),

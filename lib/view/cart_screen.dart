@@ -1,5 +1,5 @@
-import 'package:chat_bot/utils/asset_helper.dart';
 import 'package:chat_bot/utils/asset_path.dart';
+import 'package:chat_bot/utils/enum.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
@@ -9,6 +9,7 @@ import '../bloc/cart/cart_event.dart';
 import '../bloc/cart/cart_state.dart';
 import '../data/model/universal_cart_response.dart';
 import '../data/model/chat_response.dart';
+import '../utils/text_styles.dart';
 
 /// Data class to hold category-specific cart information
 class CategoryData {
@@ -38,7 +39,7 @@ class CartScreen extends StatefulWidget {
 }
 
 class _CartScreenState extends State<CartScreen> {
-  int selectedCategoryIndex = 0; // 0 for Restaurant, 1 for Grocery
+  int selectedCategoryIndex = 0; // 0 for Restaurant, 1 for Grocery, 2 for Pharmacy
 
   @override
   void initState() {
@@ -80,12 +81,10 @@ class _CartScreenState extends State<CartScreen> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          const Text(
+          Text(
             'Your cart',
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.w700,
-              color: Color(0xFF171212),
+            style: AppTextStyles.launchTitle.copyWith(
+              color: const Color(0xFF171212),
             ),
           ),
           GestureDetector(
@@ -117,8 +116,9 @@ class _CartScreenState extends State<CartScreen> {
         final categoryCounts = _calculateCategoryCounts(state);
         
         final categories = [
-          {'name': '🍕 Restaurant', 'count': categoryCounts['Restaurant']},
+          {'name': '🍕 Restaurant', 'count': categoryCounts['restaurant']},
           {'name': '🥑 Grocery', 'count': categoryCounts['grocery']},
+          {'name': '🥑 Pharmacy', 'count': categoryCounts['pharmacy']},
         ];
 
         return Container(
@@ -173,10 +173,8 @@ class _CartScreenState extends State<CartScreen> {
         children: [
           Text(
             name,
-            style: const TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-              color: Color(0xFF242424),
+            style: AppTextStyles.button.copyWith(
+              color: const Color(0xFF242424),
             ),
           ),
           // Only show count badge if count > 0
@@ -190,9 +188,8 @@ class _CartScreenState extends State<CartScreen> {
               ),
               child: Text(
                 count.toString().padLeft(2, '0'),
-                style: const TextStyle(
+                style: AppTextStyles.restaurantDescription.copyWith(
                   fontSize: 7.71,
-                  fontWeight: FontWeight.w600,
                   color: Colors.white,
                 ),
               ),
@@ -207,23 +204,27 @@ class _CartScreenState extends State<CartScreen> {
   Map<String, int> _calculateCategoryCounts(CartState state) {
     int foodCount = 0;
     int groceryCount = 0;
+    int pharmacyCount = 0;
 
     if (state is CartLoaded && state.rawCartData != null) {
       for (final cartData in state.rawCartData!.data) {
         for (final seller in cartData.sellers) {
           // storeTypeId 1 = Food, storeTypeId 2 = Grocery
-          if (seller.storeTypeId == 1) {
+          if (seller.storeTypeId == FoodCategory.food.value) {
             foodCount += seller.products.length;
-          } else if (seller.storeTypeId == 2) {
+          } else if (seller.storeTypeId == FoodCategory.grocery.value) {
             groceryCount += seller.products.length;
+          } else if (seller.storeTypeId == FoodCategory.pharmacy.value) {
+            pharmacyCount += seller.products.length;
           }
         }
       }
     }
 
     return {
-      'Restaurant': foodCount,
+      'restaurant': foodCount,
       'grocery': groceryCount,
+      'pharmacy': pharmacyCount,
     };
   }
 
@@ -290,26 +291,21 @@ class _CartScreenState extends State<CartScreen> {
           ),
           const SizedBox(height: 24),
           // "Your cart is empty" text
-          const Text(
+          Text(
             'Your cart is empty',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w700,
-              color: Color(0xFF242424),
+            style: AppTextStyles.restaurantTitle.copyWith(
+              color: const Color(0xFF242424),
             ),
           ),
           const SizedBox(height: 8),
           // Description text
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 40),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 40),
             child: Text(
               'Add items like food, groceries, medicines, services or other products to get started.',
               textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w400,
-                color: Color(0xFF6E4185),
-                height: 1.4,
+              style: AppTextStyles.restaurantDescription.copyWith(
+                color: const Color(0xFF6E4185),
               ),
             ),
           ),
@@ -325,7 +321,7 @@ class _CartScreenState extends State<CartScreen> {
     }
 
     // Map category index to storeId: 0=Food(storeId=1), 1=Grocery(storeId=2)
-    int targetStoreId = categoryIndex == 0 ? 1 : 2;
+    int targetStoreId = categoryIndex == 0 ? FoodCategory.food.value : categoryIndex == 1 ? FoodCategory.grocery.value : FoodCategory.pharmacy.value;
 
     // Find cart data with matching storeId
     UniversalCartData? matchingCartData;
@@ -374,7 +370,7 @@ class _CartScreenState extends State<CartScreen> {
         // Get unit price with tax from accounting
         double unitPrice = 0;
         if (product.accounting != null) {
-          unitPrice = product.accounting!.unitPriceWithTax;
+          unitPrice = product.accounting!.taxableAmount;
         }
         
         // Get product name
@@ -430,6 +426,24 @@ class _CartScreenState extends State<CartScreen> {
         currencySymbol: cartData.currencySymbol,
         productPrice: serviceFee,
       ));
+    }
+    
+    // Add tax information from cart accounting
+    if (cartData.accounting != null && cartData.accounting!.tax.isNotEmpty) {
+      for (final tax in cartData.accounting!.tax) {
+        if (tax.totalValue > 0) {
+          widgetActions.add(WidgetAction(
+            buttonText: '',
+            title: '',
+            subtitle: '',
+            storeCategoryId: cartData.storeCategoryId,
+            keyword: '',
+            productName: tax.taxName,
+            currencySymbol: cartData.currencySymbol,
+            productPrice: tax.totalValue,
+          ));
+        }
+      }
     }
     
     // Add total from cart accounting
@@ -489,10 +503,8 @@ class _CartScreenState extends State<CartScreen> {
                   children: [
                     Text(
                       categoryData.storeName,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700,
-                        color: Color(0xFF242424),
+                      style: AppTextStyles.bodyText.copyWith(
+                        color: const Color(0xFF242424),
                       ),
                     ),
                     // const SizedBox(height: 10),
@@ -592,12 +604,10 @@ class _CartScreenState extends State<CartScreen> {
                         ),
                         borderRadius: BorderRadius.circular(16),
                       ),
-                      child: const Center(
+                      child: Center(
                         child: Text(
                           'Proceed to checkout',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w700,
+                          style: AppTextStyles.button.copyWith(
                             color: Colors.white,
                           ),
                         ),

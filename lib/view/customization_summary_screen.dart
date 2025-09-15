@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:chat_bot/data/model/chat_response.dart';
+import '../utils/text_styles.dart';
 
 
 
@@ -70,10 +71,8 @@ class _CustomizationSummaryScreenState extends State<CustomizationSummaryScreen>
                   children: [
                     Text(
                       'Your customisations',
-                      style: const TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w700,
-                        color: Color(0xFF242424),
+                      style: AppTextStyles.launchTitle.copyWith(
+                        color: const Color(0xFF242424),
                       ),
                     ),
                     // const SizedBox(height: 4),
@@ -218,12 +217,10 @@ class _CustomizationSummaryScreenState extends State<CustomizationSummaryScreen>
                 ),
                 backgroundColor: Colors.white,
               ),
-              child: const Text(
+              child: Text(
                 "I'll choose",
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w700,
-                  color: Color(0xFF8E2FFD),
+                style: AppTextStyles.button.copyWith(
+                  color: const Color(0xFF8E2FFD),
                 ),
               ),
             ),
@@ -272,11 +269,9 @@ class _CustomizationSummaryScreenState extends State<CustomizationSummaryScreen>
                 child: Container(
                   height: 62,
                   alignment: Alignment.center,
-                  child: const Text(
+                  child: Text(
                     "Repeat last",
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
+                    style: AppTextStyles.button.copyWith(
                       color: Colors.white,
                     ),
                   ),

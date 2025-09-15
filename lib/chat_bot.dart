@@ -61,4 +61,8 @@ class ChatBot {
       ),
     );
   }
+
+  static void isCartUpdate(bool isCartUpdate) {
+    print('isCartUpdate: $isCartUpdate');
+  }
 }

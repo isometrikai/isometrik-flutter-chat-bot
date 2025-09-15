@@ -3,12 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:chat_bot/data/model/chat_response.dart' as chat;
 import 'package:chat_bot/data/model/universal_cart_response.dart';
 import 'package:chat_bot/services/callback_manage.dart';
-import 'package:chat_bot/bloc/chat_event.dart';
 import 'package:flutter_svg/svg.dart';
-import '../utils/asset_helper.dart';
-import '../utils/asset_helper_svg.dart';
 import '../utils/asset_path.dart';
 import 'black_toast_view.dart';
+import '../utils/text_styles.dart';
 
 class StoreCard extends StatelessWidget {
   final chat.Store store;
@@ -44,10 +42,10 @@ class StoreCard extends StatelessWidget {
           onTap!.call();
           return;
         }
-        if (storesWidget != null) {
-          final Map<String, dynamic>? storeJson = storesWidget!.getRawStore(index);
-          OrderService().triggerStoreOrder(storeJson ?? {});
-        }
+        // if (storesWidget != null) {
+        //   final Map<String, dynamic>? storeJson = storesWidget!.getRawStore(index);
+        //   OrderService().triggerStoreOrder(storeJson ?? {});
+        // }
       },
       child: Container(
         // margin: margin ?? const EdgeInsets.symmetric(horizontal: 16),
@@ -75,11 +73,8 @@ class StoreCard extends StatelessWidget {
                         store.storename,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.w800,
-                          fontSize: 18,
-                          height: 1.2,
-                          color: Color(0xFF242424),
+                        style: AppTextStyles.restaurantTitle.copyWith(
+                          color: const Color(0xFF242424),
                         ),
                       ),
                       const SizedBox(height: 3),
@@ -90,10 +85,8 @@ class StoreCard extends StatelessWidget {
                           const SizedBox(width: 4),
                           Text(
                             store.avgRating.toStringAsFixed(1),
-                            style: const TextStyle(
-                              fontSize: 12,
-                              height: 1.4,
-                              color: Color(0xFF242424),
+                            style: AppTextStyles.restaurantDescription.copyWith(
+                              color: const Color(0xFF242424),
                             ),
                           ),
                           const SizedBox(width: 7),
@@ -110,26 +103,35 @@ class StoreCard extends StatelessWidget {
                           const SizedBox(width: 4),
                           Text(
                             store.distance,
-                            style: const TextStyle(
-                              fontSize: 12,
-                              height: 1.4,
-                              color: Color(0xFF242424),
+                            style: AppTextStyles.restaurantDescription.copyWith(
+                              color: const Color(0xFF242424),
                             ),
                           ),
                         ],
                       ),
                       const SizedBox(height: 6),
                       // Cuisine subtitle
+                      if (store.storeIsOpen) ...[
                       Text(
                         store.cuisineDetails.isNotEmpty ? store.cuisineDetails : ' ',
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          fontSize: 12,
-                          height: 1.4,
-                          color: Color(0xFF6E4185),
+                        style: AppTextStyles.restaurantDescription.copyWith(
+                          color: const Color(0xFF6E4185),
                         ),
                       ),
+                      ]else ...[
+                        Text(
+                          'Store is closed',
+                          maxLines: 1,
+                          style: AppTextStyles.restaurantDescription.copyWith(
+                            color: const Color(0xFFF44336),
+                            fontWeight: FontWeight.w600,
+                            fontSize: 12,
+
+                          ),
+                        ),
+                      ]
                     ],
                   ),
                 ),
@@ -138,7 +140,7 @@ class StoreCard extends StatelessWidget {
             const SizedBox(height: 12),
             if (store.products.isNotEmpty)
               SizedBox(
-                height: 108,
+                height: 113,
                 child: ListView.separated(
                   scrollDirection: Axis.horizontal,
                   padding: EdgeInsets.zero,
@@ -153,6 +155,30 @@ class StoreCard extends StatelessWidget {
                   ),
                   separatorBuilder: (_, __) => const SizedBox(width: 10),
                   itemCount: store.products.length,
+                ),
+              ),
+              const SizedBox(height: 15),
+              GestureDetector(
+                onTap: () {
+                   if (storesWidget != null) {
+                    final Map<String, dynamic>? storeJson = storesWidget!.getRawStore(index);
+                    OrderService().triggerStoreOrder(storeJson ?? {});
+                  }
+                },
+                child: Row(
+                  children: [
+                    const SizedBox(width: 3),
+                   SvgPicture.asset(
+                            AssetPath.get('images/ic_eazy_app.svg'),
+                            fit: BoxFit.contain,
+                          ),
+                    const SizedBox(width: 5),
+                     Text('Open in Eazy app'
+                      ,style: AppTextStyles.restaurantDescription.copyWith(
+                        color: const Color(0xFF8E2FFD),
+                      ),
+                )
+                  ],
                 ),
               ),
           ],
@@ -195,14 +221,6 @@ class StoreCard extends StatelessWidget {
     );
   }
 
-  static String _formatEta(double distanceKm) {
-    // Very rough heuristic: 1 km ~ 2 min delivery time
-    if (distanceKm <= 0) return '15–20 min';
-    final int minutes = (distanceKm * 2).clamp(10, 45).round();
-    final int minLow = (minutes - 3).clamp(8, minutes);
-    final int minHigh = (minutes + 2).clamp(minutes, 50);
-    return '$minLow–$minHigh min';
-  }
 }
 
 class _ProductPreviewTile extends StatelessWidget {
@@ -244,15 +262,40 @@ class _ProductPreviewTile extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
+                    Positioned(
+                  left: 8,
+                  top: 8,
+                  child: Container(
+                    width: 14,
+                    height: 14,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      border: Border.all(
+                        color: product.containsMeat ? const Color(0xFFF44336) : const Color(0xFF66BB6A),
+                        width: 1.05,
+                      ),
+                      borderRadius: BorderRadius.circular(3.5),
+                    ),
+                    child: Center(
+                      child: Container(
+                        width: 8.4,
+                        height: 8.4,
+                        decoration: BoxDecoration(
+                          color: product.containsMeat ? const Color(0xFFF44336) : const Color(0xFF66BB6A),
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                    const SizedBox(height: 5),
                     Text(
                       product.productName,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.w700,
+                      style: AppTextStyles.productTitle.copyWith(
+                        color: const Color(0xFF242424),
                         fontSize: 14,
-                        height: 1.2,
-                        color: Color(0xFF242424),
                       ),
                     ),
                     const SizedBox(height: 5),
@@ -260,10 +303,9 @@ class _ProductPreviewTile extends StatelessWidget {
                       children: [
                         Text(
                           '${product.currencySymbol}${product.finalPrice.toStringAsFixed(0)}',
-                          style: const TextStyle(
+                          style: AppTextStyles.productPrice.copyWith(
+                            color: const Color(0xFF242424),
                             fontSize: 12,
-                            height: 1.4,
-                            color: Color(0xFF242424),
                           ),
                         ),
                         if (product.finalPriceList.basePrice != product.finalPriceList.finalPrice) ...[
@@ -272,11 +314,10 @@ class _ProductPreviewTile extends StatelessWidget {
                           child: Text(
                             '${product.currencySymbol}${product.finalPriceList.basePrice.toStringAsFixed(0)}',
                             overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                              fontSize: 12,
-                              height: 1.4,
+                            style: AppTextStyles.productPrice.copyWith(
                               decoration: TextDecoration.lineThrough,
-                              color: Color(0xFF979797),
+                              color: const Color(0xFF979797),
+                              fontSize: 12,
                             ),
                           ),
                         ),
@@ -308,11 +349,13 @@ class _ProductPreviewTile extends StatelessWidget {
               ),
             ],
           ),
-          Positioned(
-            right: 10,
-            bottom: -4,
-            child: _buildAddButton(context),
-          ),
+          // if (product.instock == true) ...[
+            Positioned(
+              right: 0,
+              bottom: -4,
+              child: _buildAddButton(context),
+            ),
+          // ],
         ],
       ),
     );
@@ -408,11 +451,8 @@ class _ProductPreviewTile extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 8),
               child: Text(
                 '$cartQuantity',
-                style: const TextStyle(
-                  fontWeight: FontWeight.w700,
-                  fontSize: 12,
-                  height: 1.2,
-                  color: Color(0xFF8E2FFD),
+                style: AppTextStyles.button.copyWith(
+                  color: const Color(0xFF8E2FFD),
                 ),
               ),
             ),
@@ -447,12 +487,11 @@ class _ProductPreviewTile extends StatelessWidget {
       // Show Add button when product is not in cart
       return GestureDetector(
         onTap: () {
-          if (store.storeIsOpen == false) {
+          if (store.storeIsOpen == false && store.type == FoodCategory.grocery.value) {
             print("STORE IS CLOSED");
             BlackToastView.show(context, 'Store is closed. Please try again later');
             return;
-          }
-          else if (product.instock == false && store.type == FoodCategory.grocery.value) {
+          }else if (product.instock == false && store.type == FoodCategory.grocery.value) {
             print('Product is not in stock');
             BlackToastView.show(context, 'Product is not in stock. Please try again later');
             return;
@@ -460,7 +499,6 @@ class _ProductPreviewTile extends StatelessWidget {
           if (onAddToCartRequested != null) {
             onAddToCartRequested!(product, store);
           }
-
           // Call onHide callback if provided
           if (onHide != null) {
             onHide!();
@@ -468,6 +506,7 @@ class _ProductPreviewTile extends StatelessWidget {
         },
         child: Container(
           height: 27,
+          width: 78,
           padding: const EdgeInsets.symmetric(horizontal: 17),
           decoration: BoxDecoration(
             color: Colors.white,
@@ -482,13 +521,10 @@ class _ProductPreviewTile extends StatelessWidget {
             ],
           ),
           alignment: Alignment.center,
-          child: const Text(
+          child: Text(
             'Add',
-            style: TextStyle(
-              fontWeight: FontWeight.w700,
-              fontSize: 12,
-              height: 1.2,
-              color: Color(0xFF8E2FFD),
+            style: AppTextStyles.button.copyWith(
+              color: const Color(0xFF8E2FFD),
             ),
           ),
         ),
