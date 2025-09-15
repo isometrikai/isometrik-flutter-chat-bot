@@ -308,9 +308,7 @@ class _ChatScreenState extends State<ChatScreen> {
     OrderService().setCartUpdateCallback((bool isCartUpdate) {
       if (mounted && isCartUpdate) {
         print('ChatScreen: Cart update received - $isCartUpdate');
-        // Refresh cart data when cart update is triggered
-        print('ChatScreen: Refreshing cart data');
-        _cartBloc.add(CartFetchRequested(needToShowLoader: true));
+        _sendMessage("I have updated the cart");
       }
     });
     
@@ -1609,7 +1607,7 @@ class _ChatScreenBody extends StatelessWidget {
                     if (landmark.isNotEmpty) addressParts.add(landmark);
                     
                     final String fullAddress = addressParts.join(', ');
-                    final String addressMessage = "My $tag address is:\n$fullAddress";
+                    final String addressMessage = "I have added a new address.\nMy $tag address is:\n$fullAddress";
                     
                     onSendMessage(addressMessage);
                   }

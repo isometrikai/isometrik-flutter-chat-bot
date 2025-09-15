@@ -38,10 +38,10 @@ class StoreCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: () {
-        if (onTap != null) {
-          onTap!.call();
-          return;
-        }
+        // if (onTap != null) {
+        //   onTap!.call();
+        //   return;
+        // }
         // if (storesWidget != null) {
         //   final Map<String, dynamic>? storeJson = storesWidget!.getRawStore(index);
         //   OrderService().triggerStoreOrder(storeJson ?? {});
@@ -160,6 +160,10 @@ class StoreCard extends StatelessWidget {
               const SizedBox(height: 15),
               GestureDetector(
                 onTap: () {
+                   if (onTap != null) {
+                      onTap!.call();
+                      return;
+                    }
                    if (storesWidget != null) {
                     final Map<String, dynamic>? storeJson = storesWidget!.getRawStore(index);
                     OrderService().triggerStoreOrder(storeJson ?? {});
@@ -262,32 +266,12 @@ class _ProductPreviewTile extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Positioned(
-                  left: 8,
-                  top: 8,
-                  child: Container(
+                      SvgPicture.asset(
+                    AssetPath.get(product.containsMeat ? 'images/ic_NonVeg.svg' : 'images/ic_Veg.svg'),
                     width: 14,
                     height: 14,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      border: Border.all(
-                        color: product.containsMeat ? const Color(0xFFF44336) : const Color(0xFF66BB6A),
-                        width: 1.05,
-                      ),
-                      borderRadius: BorderRadius.circular(3.5),
-                    ),
-                    child: Center(
-                      child: Container(
-                        width: 8.4,
-                        height: 8.4,
-                        decoration: BoxDecoration(
-                          color: product.containsMeat ? const Color(0xFFF44336) : const Color(0xFF66BB6A),
-                          shape: BoxShape.circle,
-                        ),
-                      ),
-                    ),
+                    fit: BoxFit.contain,
                   ),
-                ),
                     const SizedBox(height: 5),
                     Text(
                       product.productName,
@@ -298,7 +282,7 @@ class _ProductPreviewTile extends StatelessWidget {
                         fontSize: 14,
                       ),
                     ),
-                    const SizedBox(height: 5),
+                    const SizedBox(height: 4),
                     Row(
                       children: [
                         Text(

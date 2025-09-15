@@ -84,27 +84,11 @@ class MenuItemCard extends StatelessWidget {
                 Positioned(
                   left: 8,
                   top: 8,
-                  child: Container(
+                  child: SvgPicture.asset(
+                    AssetPath.get(isVeg ? 'images/ic_Veg.svg' : 'images/ic_NonVeg.svg'),
                     width: 14,
                     height: 14,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      border: Border.all(
-                        color: isVeg ? vegColor : nonVegColor,
-                        width: 1.05,
-                      ),
-                      borderRadius: BorderRadius.circular(3.5),
-                    ),
-                    child: Center(
-                      child: Container(
-                        width: 8.4,
-                        height: 8.4,
-                        decoration: BoxDecoration(
-                          color: isVeg ? vegColor : nonVegColor,
-                          shape: BoxShape.circle,
-                        ),
-                      ),
-                    ),
+                    fit: BoxFit.contain,
                   ),
                 ),
               ],
