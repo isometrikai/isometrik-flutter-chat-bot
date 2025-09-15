@@ -1,4 +1,3 @@
-import 'package:chat_bot/utils/asset_helper.dart';
 import 'package:chat_bot/utils/asset_path.dart';
 import 'package:chat_bot/utils/enum.dart';
 import 'package:flutter/material.dart';
@@ -371,7 +370,7 @@ class _CartScreenState extends State<CartScreen> {
         // Get unit price with tax from accounting
         double unitPrice = 0;
         if (product.accounting != null) {
-          unitPrice = product.accounting!.unitPriceWithTax;
+          unitPrice = product.accounting!.taxableAmount;
         }
         
         // Get product name
@@ -427,6 +426,24 @@ class _CartScreenState extends State<CartScreen> {
         currencySymbol: cartData.currencySymbol,
         productPrice: serviceFee,
       ));
+    }
+    
+    // Add tax information from cart accounting
+    if (cartData.accounting != null && cartData.accounting!.tax.isNotEmpty) {
+      for (final tax in cartData.accounting!.tax) {
+        if (tax.totalValue > 0) {
+          widgetActions.add(WidgetAction(
+            buttonText: '',
+            title: '',
+            subtitle: '',
+            storeCategoryId: cartData.storeCategoryId,
+            keyword: '',
+            productName: tax.taxName,
+            currencySymbol: cartData.currencySymbol,
+            productPrice: tax.totalValue,
+          ));
+        }
+      }
     }
     
     // Add total from cart accounting

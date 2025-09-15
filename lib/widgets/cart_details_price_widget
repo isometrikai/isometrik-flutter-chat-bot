@@ -20,6 +20,7 @@ class CartDetailsPriceWidget extends StatelessWidget {
         item.productName != "Total To Pay" &&
         item.productName != "Delivery fee" &&
         item.productName != "Service Fee" &&
+        !_isTaxItem(item.productName!) &&
         item.quantity != null && 
         item.quantity!.isNotEmpty).toList();
     
@@ -28,6 +29,9 @@ class CartDetailsPriceWidget extends StatelessWidget {
     
     final serviceFeeItem = cartItems.where((item) => 
         item.productName == "Service Fee").toList();
+    
+    final taxItems = cartItems.where((item) => 
+        item.productName != null && _isTaxItem(item.productName!)).toList();
     
     final totalItem = cartItems.lastWhere(
       (item) => item.productName == "Total To Pay",
@@ -78,6 +82,16 @@ class CartDetailsPriceWidget extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.all(16),
               child: _buildServiceFeeItem(serviceFeeItem.first),
+            ),
+          ],
+          
+          // Tax items section (if exists)
+          if (taxItems.isNotEmpty) ...[
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                children: taxItems.map((taxItem) => _buildTaxItem(taxItem)).toList(),
+              ),
             ),
           ],
           
@@ -194,6 +208,36 @@ class CartDetailsPriceWidget extends StatelessWidget {
     );
   }
 
+  Widget _buildTaxItem(WidgetAction taxItem) {
+    final currencySymbol = taxItem.currencySymbol ?? 'د.إ';
+    final price = taxItem.productPrice ?? 0;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            taxItem.productName ?? '',
+            style: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w400,
+              color: Color(0xFF242424),
+            ),
+          ),
+          Text(
+            '$currencySymbol${price}',
+            style: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w400,
+              color: Color(0xFF242424),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildTotalItem(WidgetAction totalItem) {
     final currencySymbol = totalItem.currencySymbol ?? 'د.إ';
     final price = totalItem.productPrice ?? 0;
@@ -219,6 +263,15 @@ class CartDetailsPriceWidget extends StatelessWidget {
         ),
       ],
     );
+  }
+
+  /// Helper method to identify tax items
+  bool _isTaxItem(String productName) {
+    // Tax items typically contain "GST", "VAT", "Tax", or have a percentage in the name
+    return productName.toLowerCase().contains('gst') ||
+           productName.toLowerCase().contains('vat') ||
+           productName.toLowerCase().contains('tax') ||
+           productName.contains('%');
   }
 }
 

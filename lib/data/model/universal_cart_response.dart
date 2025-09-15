@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'chat_response.dart';
 
 class UniversalCartResponse {
@@ -42,7 +41,7 @@ class UniversalCartResponse {
           // Get quantity from product.quantity or fallback
           int totalQuantity = 1;
           if (product.quantity != null) {
-            totalQuantity = product.quantity?.value ?? 1;
+            totalQuantity = product.quantity!.value;
           }
           
           // Get unit price with tax from accounting
@@ -52,7 +51,7 @@ class UniversalCartResponse {
           }
           
           // Get product name
-          String productName = product.name ?? 'Unknown Product';
+          String productName = product.name;
           
           widgetActions.add(WidgetAction(
             buttonText: '',
@@ -104,6 +103,24 @@ class UniversalCartResponse {
           currencySymbol: cartData.currencySymbol,
           productPrice: serviceFee,
         ));
+      }
+      
+      // Add tax information from cart accounting
+      if (cartData.accounting != null && cartData.accounting!.tax.isNotEmpty) {
+        for (final tax in cartData.accounting!.tax) {
+          if (tax.totalValue > 0) {
+            widgetActions.add(WidgetAction(
+              buttonText: '',
+              title: '',
+              subtitle: '',
+              storeCategoryId: cartData.storeCategoryId,
+              keyword: '',
+              productName: tax.taxName,
+              currencySymbol: cartData.currencySymbol,
+              productPrice: tax.totalValue,
+            ));
+          }
+        }
       }
       
       // Add total from cart accounting
@@ -550,28 +567,68 @@ class Product {
   }
 }
 
+class Tax {
+  final String taxId;
+  final String taxName;
+  final String taxValue;
+  final double totalValue;
+
+  Tax({
+    required this.taxId,
+    required this.taxName,
+    required this.taxValue,
+    required this.totalValue,
+  });
+
+  factory Tax.fromJson(Map<String, dynamic> json) {
+    return Tax(
+      taxId: json['taxId'] ?? '',
+      taxName: json['taxName'] ?? '',
+      taxValue: json['taxValue'] ?? '',
+      totalValue: json['totalValue']?.toDouble() ?? 0,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'taxId': taxId,
+      'taxName': taxName,
+      'taxValue': taxValue,
+      'totalValue': totalValue,
+    };
+  }
+}
+
 class Accounting {
   final int totalQuantity;
   final double unitPriceWithTax;
+  final double taxableAmount;
   final double finalTotal;
   final double deliveryFee;
   final double serviceFeeTotal;
+  final List<Tax> tax;
 
   Accounting({
     required this.totalQuantity,
     required this.unitPriceWithTax,
+    required this.taxableAmount,
     required this.finalTotal,
     required this.deliveryFee,
     required this.serviceFeeTotal,
+    required this.tax,
   });
 
   factory Accounting.fromJson(Map<String, dynamic> json) {
     return Accounting(
       totalQuantity: json['totalQuantity'] ?? 0,
       unitPriceWithTax: json['unitPriceWithTax']?.toDouble() ?? 0,
+      taxableAmount: json['taxableAmount']?.toDouble() ?? 0,
       finalTotal: json['finalTotal']?.toDouble() ?? 0,
       deliveryFee: json['deliveryFee']?.toDouble() ?? 0,
       serviceFeeTotal: json['serviceFeeTotal']?.toDouble() ?? 0,
+      tax: (json['tax'] as List<dynamic>?)
+          ?.map((e) => Tax.fromJson(e))
+          .toList() ?? [],
     );
   }
 
@@ -579,9 +636,11 @@ class Accounting {
     return {
       'totalQuantity': totalQuantity,
       'unitPriceWithTax': unitPriceWithTax,
+      'taxableAmount': taxableAmount,
       'finalTotal': finalTotal,
       'deliveryFee': deliveryFee,
       'serviceFeeTotal': serviceFeeTotal,
+      'tax': tax.map((e) => e.toJson()).toList(),
     };
   }
 }
