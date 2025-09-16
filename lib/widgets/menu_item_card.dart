@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:chat_bot/data/model/universal_cart_response.dart';
 import 'package:flutter_svg/svg.dart';
-import '../utils/asset_helper.dart';
 import '../utils/asset_path.dart';
 import '../utils/text_styles.dart';
 
@@ -24,7 +23,8 @@ class MenuItemCard extends StatelessWidget {
   final double? imageWidth;
   final double? imageHeight;
   final double? cardWidth;
-  
+  final bool instock;
+  final bool storeIsOpen;
 
   MenuItemCard({
     super.key,
@@ -46,6 +46,8 @@ class MenuItemCard extends StatelessWidget {
     this.imageWidth,
     this.imageHeight,
     this.cardWidth,
+    required this.instock,
+    required this.storeIsOpen,
   });
 
   @override
@@ -143,6 +145,14 @@ class MenuItemCard extends StatelessWidget {
   }
 
   Widget _buildQuantityControls() {
+    // Check if item is out of stock or store is closed first
+    if (!instock) {
+      return _buildOutOfStockButton();
+    }
+    if (!storeIsOpen) {
+      return Container();
+    }
+
     if (productId == null || productId!.isEmpty) {
       return _buildAddButton();
     }
@@ -264,6 +274,11 @@ class MenuItemCard extends StatelessWidget {
   }
 
   Widget _buildAddButton() {
+    // Check if item is out of stock or store is closed
+    if (!instock || !storeIsOpen) {
+      return _buildOutOfStockButton();
+    }
+    
     return OutlinedButton(
       style: OutlinedButton.styleFrom(
         side: BorderSide(color: purple, width: 1),
@@ -282,6 +297,30 @@ class MenuItemCard extends StatelessWidget {
         style: AppTextStyles.button.copyWith(
           color: purple,
         ),
+      ),
+    );
+  }
+
+  Widget _buildOutOfStockButton() {
+    return Container(
+      width: cardWidth ?? 108,
+      height: 37,
+      decoration: BoxDecoration(
+        color: const Color(0xFFF5DCE1), // Light pink background
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            storeIsOpen == false ? 'STORE CLOSED' : 'OUT OF STOCK',
+            style: AppTextStyles.button.copyWith(
+              fontWeight: cardWidth != null ? FontWeight.w700 : FontWeight.w500,
+              fontSize: cardWidth != null ? 14 : 12,
+              color: const Color(0xFFF44336), // Red color
+            ),
+          ),
+        ],
       ),
     );
   }

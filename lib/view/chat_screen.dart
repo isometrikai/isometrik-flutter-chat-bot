@@ -2271,6 +2271,8 @@ void _openGroceryCustomization(BuildContext context, String parentProductId, Str
              centralProductId: product.parentProductId,
                 isCustomizable: (product.variantsCount > 1 && product.storeTypeId == FoodCategory.food.value) || (product.variantsCount > 0 && (product.storeTypeId == FoodCategory.grocery.value || product.storeTypeId == FoodCategory.pharmacy.value)),
                 cartData: cartBloc.cartData,
+                instock: product.instock ?? true,
+                storeIsOpen: product.storeIsOpen ?? true,
             onClick: () {
               if (productsWidget != null) {
                 final Map<String, dynamic>? productJson = productsWidget.getRawProduct(index);
@@ -2611,7 +2613,7 @@ class _GreetingOptionTile extends StatelessWidget {
       child: Container(
         width: 162,
         height: 90,
-        padding: const EdgeInsets.fromLTRB(8, 0, 8, 5),
+        padding: const EdgeInsets.fromLTRB(8, 0, 8, 4),
         decoration: BoxDecoration(
           color: const Color(0xFFF5F7FF),
           borderRadius: BorderRadius.circular(8),
@@ -2623,7 +2625,9 @@ class _GreetingOptionTile extends StatelessWidget {
             text,
             maxLines: 3,
             style: AppTextStyles.bodyText.copyWith(
+              fontSize: 15,
               color: const Color(0xFF242424),
+              // fontWeight: FontWeight.w500,
             ),
           ),
         ),

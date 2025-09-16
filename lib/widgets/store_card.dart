@@ -312,34 +312,47 @@ class _ProductPreviewTile extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 10),
-              ClipRRect(
-                borderRadius: BorderRadius.circular(12),
-                child: Container(
-                  width: 78,
-                  height: 78,
-                  // color: const Color(0xFFD9D9D9),
-                  child: product.productImage.isNotEmpty
-                      ? Image.network(
-                          product.productImage,
-                          fit: BoxFit.cover,
-                          loadingBuilder: (context, child, loadingProgress) {
-                            if (loadingProgress == null) return child;
-                            return _placeholderProductImage();
-                          },
-                          errorBuilder: (context, error, stackTrace) => _placeholderProductImage(),
-                        )
-                      : _placeholderProductImage(),
-                ),
+              Stack(
+                children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: Container(
+                      width: 78,
+                      height: 78,
+                      // color: const Color(0xFFD9D9D9),
+                      child: product.productImage.isNotEmpty
+                          ? Image.network(
+                              product.productImage,
+                              fit: BoxFit.cover,
+                              loadingBuilder: (context, child, loadingProgress) {
+                                if (loadingProgress == null) return child;
+                                return _placeholderProductImage();
+                              },
+                              errorBuilder: (context, error, stackTrace) => _placeholderProductImage(),
+                            )
+                          : _placeholderProductImage(),
+                    ),
+                  ),
+                  if (store.storeIsOpen == true) ...[
+                    if (product.instock == false) ...[
+                      Positioned(
+                        right: 4,
+                        bottom: 4,
+                        child: _buildOutOfStockBadge()
+                      )
+                    ]
+                  ],
+                ],
               ),
             ],
           ),
-          // if (product.instock == true) ...[
+          if (product.instock == true && store.storeIsOpen == true) ...[
             Positioned(
               right: 0,
               bottom: -4,
               child: _buildAddButton(context),
             ),
-          // ],
+          ]
         ],
       ),
     );
@@ -379,6 +392,37 @@ class _ProductPreviewTile extends StatelessWidget {
         width: 78,
         height: 78,
         fit: BoxFit.cover,
+      ),
+    );
+  }
+
+  Widget _buildOutOfStockBadge() {
+    return Container(
+      width: 70,
+      height: 27,
+      padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 0),
+      decoration: BoxDecoration(
+        color: const Color(0xFFFFFAFB),
+        borderRadius: BorderRadius.circular(8),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 4,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Center(
+        child: Text(
+          'OUT OF STOCK',
+          style: TextStyle(
+            fontFamily: 'Plus Jakarta Sans',
+            fontWeight: FontWeight.w700,
+            fontSize: 8,
+            height: 1.2,
+            color: const Color(0xFFF44336),
+          ),
+        ),
       ),
     );
   }

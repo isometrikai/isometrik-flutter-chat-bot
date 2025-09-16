@@ -343,6 +343,8 @@ class _GroceriesMenuScreenState extends State<GroceriesMenuScreen> {
                 imageHeight: dimensions['itemWidth']! * 0.9, // Better proportion for taller cards
                 cardWidth: dimensions['itemWidth']!,
                 cartData: _cartData,
+                instock: product.instock ?? true,
+                storeIsOpen: widget.actionData?.storeIsOpen ?? true,
                 onQuantityChanged: (productId, centralProductId, quantity, isIncrease, isCustomizable) {
                   _onQuantityChangedForGrocery(product.parentProductId,product.childProductId,product.unitId,product.storeId ?? '',product.storeCategoryId ?? '',product.storeTypeId ?? -111,product.variantsCount,quantity,isIncrease,product.productName,product.productImage);
                 },

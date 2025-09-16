@@ -485,8 +485,8 @@ class Product {
       storeCategoryId: json['storeCategoryId']?.toString() ?? '',
       storeTypeId: json['storeTypeId'] ?? -111,
       storeId: json['storeId']?.toString() ?? '',
-        storeIsOpen: json['storeIsOpen'] ?? false,
-        instock: json['instock'] ?? false,
+        storeIsOpen: json['storeIsOpen'] ?? true,
+        instock: json['instock'] ?? true,
         variantCount: json['variantCount'] ?? false,
     );
   }

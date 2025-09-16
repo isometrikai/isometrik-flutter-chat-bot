@@ -609,7 +609,10 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
                 purple: _purple,
                 vegColor: _veg,
                 nonVegColor: _nonVeg,
-                cartData: _cartData, // Pass cart data to MenuItemCard
+                cartData: _cartData,
+                instock: item.instock,
+                storeIsOpen: widget.actionData?.storeIsOpen ?? true,
+                // Pass cart data to MenuItemCard
                 onQuantityChanged: (productId, centralProductId, quantity, isIncrease, isCustomizable) {
                   _onQuantityChanged(productId, centralProductId, quantity, isIncrease, isCustomizable, item.title, item.imageUrl ?? '');
                 }, // Pass quantity change callback
@@ -723,6 +726,8 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
       productId: p.childProductId,
       centralProductId: p.parentProductId,
       isCustomizable: p.variantsCount > 1,
+      instock: p.instock ?? true,
+      storeIsOpen: widget.actionData?.storeIsOpen ?? true,
     );
   }
 
@@ -1024,6 +1029,7 @@ class _MenuItem {
   final String? centralProductId;
   final bool isCustomizable;
   final bool instock;
+  final bool storeIsOpen;
 
   const _MenuItem({
     required this.title,
@@ -1036,6 +1042,7 @@ class _MenuItem {
     this.centralProductId,
     this.isCustomizable = false,
     this.instock = true,
+    this.storeIsOpen = true,
   });
 }
 
