@@ -153,9 +153,14 @@ class AuthService {
   Future<GreetingResponse?> getInitialOptionData() async {
     final res = await _chatClient.get(
       '/v2/home-screen',
-      queryParameters: { 'username': _name ?? '',
+       queryParameters: { 'username': _name ?? '',
         'timestamp': _timestamp ?? '',
-        'location': _location ?? '',},
+        'location': _location ?? '',
+          'latitude': _latitude.toString(),
+          'longitude': _longitude.toString(),
+          'user_id': _userId ?? '',
+          'username': _name ?? '',
+          },
     );
     if (res.isSuccess && res.data != null) {
       try {

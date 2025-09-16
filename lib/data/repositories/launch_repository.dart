@@ -12,4 +12,3 @@ class LaunchRepository {
   Future<GreetingResponse?> getInitialOptionData() => AuthService.instance.getInitialOptionData();
 }
 
-

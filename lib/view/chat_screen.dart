@@ -358,15 +358,6 @@ class _ChatScreenState extends State<ChatScreen> {
     // Haptic feedback for immediate response
     HapticFeedback.mediumImpact();
     
-    // Show recording indicator immediately
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Recording... Speak now'),
-        backgroundColor: Colors.red,
-        duration: Duration(seconds: 1),
-      ),
-    );
-
     // Ultra-fast start - fire and forget approach
     final bool started = _speechService.startListeningFast();
     if (!started) {
@@ -374,13 +365,7 @@ class _ChatScreenState extends State<ChatScreen> {
       setState(() {
         _isRecording = false;
       });
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Failed to start recording'),
-          backgroundColor: Colors.red,
-          duration: Duration(seconds: 2),
-        ),
-      );
+      // BlackToastView.show(context, 'Failed to start recording');
     }
   }
 
@@ -405,36 +390,38 @@ class _ChatScreenState extends State<ChatScreen> {
         // Set the recognized text to the text field
         _messageController.text = recognizedText.trim();
         
-        // Show success message
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Recognized: $recognizedText'),
-            backgroundColor: Colors.green,
-            duration: const Duration(seconds: 2),
-          ),
-        );
       } else {
-        // Show no speech detected message
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('No speech detected. Please try again.'),
-            backgroundColor: Colors.orange,
-            duration: Duration(seconds: 2),
-          ),
-        );
+        BlackToastView.show(context, 'No speech detected. Please try again.');
       }
     } catch (e) {
       debugPrint('Failed to stop speech recording: $e');
       setState(() {
         _isRecording = false;
       });
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Recording failed. Please try again.'),
-          backgroundColor: Colors.red,
-          duration: Duration(seconds: 2),
-        ),
-      );
+      BlackToastView.show(context, 'Recording failed. Please try again.');
+    }
+  }
+
+  Future<void> _cancelSpeechRecording() async {
+    if (!_isRecording) {
+      return;
+    }
+
+    // Haptic feedback for cancel
+    HapticFeedback.lightImpact();
+
+    try {
+      await _speechService.cancel();
+      
+      setState(() {
+        _isRecording = false;
+      });
+
+    } catch (e) {
+      debugPrint('Failed to cancel speech recording: $e');
+      setState(() {
+        _isRecording = false;
+      });
     }
   }
 
@@ -498,6 +485,7 @@ class _ChatScreenState extends State<ChatScreen> {
       cartBloc: _cartBloc, // Pass the cart bloc
       onStartSpeechRecording: _startSpeechRecording, // Add start speech handler
       onStopSpeechRecording: _stopSpeechRecording, // Add stop speech handler
+      onCancelSpeechRecording: _cancelSpeechRecording, // Add cancel speech handler
       isRecording: _isRecording, // Pass recording state
     );
   }
@@ -531,6 +519,7 @@ class _ChatScreenBody extends StatelessWidget {
   final CartBloc cartBloc; // Add cart bloc parameter
   final Future<void> Function() onStartSpeechRecording; // Add start speech handler
   final Future<void> Function() onStopSpeechRecording; // Add stop speech handler
+  final Future<void> Function() onCancelSpeechRecording; // Add cancel speech handler
   final bool isRecording; // Add recording state
 
   const _ChatScreenBody({
@@ -561,6 +550,7 @@ class _ChatScreenBody extends StatelessWidget {
     required this.cartBloc, // Add the cart bloc parameter
     required this.onStartSpeechRecording, // Add the start speech handler parameter
     required this.onStopSpeechRecording, // Add the stop speech handler parameter
+    required this.onCancelSpeechRecording, // Add the cancel speech handler parameter
     required this.isRecording, // Add the recording state parameter
   });
 
@@ -911,51 +901,7 @@ class _ChatScreenBody extends StatelessWidget {
               const SizedBox(height: 24),
               Row(
                 children: [
-                  // Expanded(
-                  //   child: TextButton(
-                  //     onPressed: () => Navigator.of(context).pop(),
-                  //     style: TextButton.styleFrom(
-                  //       backgroundColor: Colors.grey[100],
-                  //       foregroundColor: Colors.black,
-                  //       padding: const EdgeInsets.symmetric(vertical: 16),
-                  //       shape: RoundedRectangleBorder(
-                  //         borderRadius: BorderRadius.circular(12),
-                  //       ),
-                  //     ),
-                  //     child: const Text(
-                  //       'CANCEL',
-                  //       style: TextStyle(
-                  //         fontSize: 16,
-                  //         fontWeight: FontWeight.w600,
-                  //         color: Color(0xFF8E2FFD)
-                  //       ),
-                  //     ),
-                  //   ),
-                  // ),
-                  // const SizedBox(width: 16),
-                  // Expanded(
-                  //   child: TextButton(
-                  //     onPressed: () {
-                  //       Navigator.of(context).pop();
-                  //       onRestartChatAPI();
-                  //     },
-                  //     style: TextButton.styleFrom(
-                  //       backgroundColor: Color(0xFF8E2FFD),
-                  //       foregroundColor: Colors.white,
-                  //       padding: const EdgeInsets.symmetric(vertical: 16),
-                  //       shape: RoundedRectangleBorder(
-                  //         borderRadius: BorderRadius.circular(12),
-                  //       ),
-                  //     ),
-                  //     child: const Text(
-                  //       'YES',
-                  //       style: TextStyle(
-                  //         fontSize: 16,
-                  //         fontWeight: FontWeight.w600,
-                  //       ),
-                  //     ),
-                  //   ),
-                  // ),
+                
                   Expanded(
           child: SizedBox(
             height: 62,
@@ -1783,67 +1729,11 @@ class _ChatScreenBody extends StatelessWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // Recording indicator
-                if (isRecording)
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    margin: const EdgeInsets.only(bottom: 8),
-                    decoration: BoxDecoration(
-                      color: Colors.red.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: Colors.red, width: 1),
-                    ),
-                    child: Row(
-                      children: [
-                        Container(
-                          width: 12,
-                          height: 12,
-                          decoration: const BoxDecoration(
-                            color: Colors.red,
-                            shape: BoxShape.circle,
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        const Text(
-                          'Recording...',
-                          style: TextStyle(
-                            color: Colors.red,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                        const Spacer(),
-                        Container(
-                          width: 8,
-                          height: 8,
-                          decoration: const BoxDecoration(
-                            color: Colors.red,
-                            shape: BoxShape.circle,
-                          ),
-                        ),
-                        const SizedBox(width: 4),
-                        Container(
-                          width: 8,
-                          height: 8,
-                          decoration: const BoxDecoration(
-                            color: Colors.red,
-                            shape: BoxShape.circle,
-                          ),
-                        ),
-                        const SizedBox(width: 4),
-                        Container(
-                          width: 8,
-                          height: 8,
-                          decoration: const BoxDecoration(
-                            color: Colors.red,
-                            shape: BoxShape.circle,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+                
                 // Input field container
-                Center(
+                Stack(
+                  children: [
+                    Center(
                   child: ConstrainedBox(
                     constraints: BoxConstraints(
                       minHeight: 64,
@@ -1854,7 +1744,7 @@ class _ChatScreenBody extends StatelessWidget {
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: const Color(0xFFE9DFFB), width: 1),
+                        border: Border.all(color: isRecording ? Colors.transparent :Color(0xFFE9DFFB), width: 1),
                       ),
                       child: Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -1918,41 +1808,32 @@ class _ChatScreenBody extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(width: 10),
-                        // Speech button - Press and hold like WhatsApp
-                        Opacity(
-                          opacity: isApiLoading ? 0.4 : 1.0,
-                          child: GestureDetector(
-                            onLongPressStart: isApiLoading
-                                ? null
-                                : (details) async {
-                                    // Start recording when long press starts
-                                    await onStartSpeechRecording();
-                                  },
-                            onLongPressEnd: isApiLoading
-                                ? null
-                                : (details) async {
-                                    // Stop recording when long press ends
-                                    await onStopSpeechRecording();
-                                  },
-                            onLongPressCancel: isApiLoading
-                                ? null
-                                : () async {
-                                    // Cancel recording if long press is cancelled
-                                    await onStopSpeechRecording();
-                                  },
+                         // Speech button - Single tap to start/stop recording
+                         Opacity(
+                           opacity: isApiLoading ? 0.4 : 1.0,
+                           child: GestureDetector(
+                             onTap: isApiLoading
+                                 ? null
+                                 : () async {
+                                     if (isRecording) {
+                                       // Stop recording if currently recording
+                                       await onStopSpeechRecording();
+                                     } else {
+                                       // Start recording if not recording
+                                       await onStartSpeechRecording();
+                                     }
+                                   },
                             child: Container(
                               width: 34,
                               height: 34,
-                              decoration: BoxDecoration(
-                                color: isRecording ? Colors.red : Colors.transparent,
-                                shape: BoxShape.circle,
-                                border: isRecording 
-                                    ? Border.all(color: Colors.red, width: 2)
-                                    : null,
-                              ),
+                              // decoration: BoxDecoration(
+                              //   color:  Colors.transparent,
+                              //   shape: BoxShape.circle,
+                              //   border: null,
+                              // ),
                               child: Icon(
-                                isRecording ? Icons.stop : Icons.mic,
-                                color: isRecording ? Colors.white : const Color(0xFF7C3AED),
+                                 Icons.mic,
+                                color: const Color(0xFF7C3AED),
                                 size: 24,
                               ),
                             ),
@@ -1989,7 +1870,118 @@ class _ChatScreenBody extends StatelessWidget {
                 ),
                 ),
                 ),
-              ],
+                if (isRecording) ...[
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    margin: const EdgeInsets.only(bottom: 8),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: Color(0xFF7C3AED), width: 1),
+                    ),
+                    child: Row(
+                      children: [
+                        // Cancel button (X) on the left
+                        GestureDetector(
+                          onTap: () async {
+                            // Cancel recording without setting text
+                            await onCancelSpeechRecording();
+                          },
+                          child: Container(
+                            width: 32,
+                            height: 32,
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              shape: BoxShape.circle,
+                              border: Border.all(color: Color(0xFF7C3AED), width: 1),
+                            ),
+                            child: const Icon(
+                              Icons.close,
+                              color: Color(0xFF7C3AED),
+                              size: 18,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        // Recording indicator in the center
+                        Container(
+                          width: 12,
+                          height: 12,
+                          decoration: const BoxDecoration(
+                            color: Color(0xFF7C3AED),
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        const Text(
+                          'Recording...',
+                          style: TextStyle(
+                            color: Color(0xFF7C3AED),
+                            fontWeight: FontWeight.w500,
+                            fontSize: 16,
+                          ),
+                        ),
+                        const Spacer(),
+                        // Animated dots
+                        Row(
+                          children: [
+                            Container(
+                              width: 6,
+                              height: 6,
+                              decoration: const BoxDecoration(
+                                color: Color(0xFF7C3AED),
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                            const SizedBox(width: 3),
+                            Container(
+                              width: 6,
+                              height: 6,
+                              decoration: const BoxDecoration(
+                                color: Color(0xFF7C3AED),
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                            const SizedBox(width: 3),
+                            Container(
+                              width: 6,
+                              height: 6,
+                              decoration: const BoxDecoration(
+                                color: Color(0xFF7C3AED),
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(width: 12),
+                        // Done button on the right
+                        GestureDetector(
+                          onTap: () async {
+                            // Finish recording
+                            await onStopSpeechRecording();
+                          },
+                          child: Container(
+                            width: 32,
+                            height: 32,
+                            decoration: BoxDecoration(
+                              color: Color(0xFF7C3AED),
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                              Icons.check,
+                              color: Colors.white,
+                              size: 18,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+                  ],
+                )
+                ],
             ),
           ),
         );
