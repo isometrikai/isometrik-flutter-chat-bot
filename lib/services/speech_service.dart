@@ -64,7 +64,7 @@ class SpeechService {
       );
       
       // Immediately stop the pre-warming session
-      await Future.delayed(const Duration(milliseconds: 200));
+      // await Future.delayed(const Duration(milliseconds: 200));
       await _speechToText.stop();
       
       _isPreWarmed = true;

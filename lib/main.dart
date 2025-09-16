@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'utils/asset_path.dart';
 import 'utils/utility.dart';
 import 'utils/app_theme.dart';
+import 'dart:async';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -16,8 +17,8 @@ void main() async {
   
   await PlatformService.initializeFromPlatform();
   
-  // Pre-initialize speech service for ultra-fast response
-  SpeechService().initialize();
+  // Pre-initialize speech service for ultra-fast response (non-blocking)
+  // unawaited(SpeechService().initialize());
   
   runApp(const MyApp());
 }
@@ -31,8 +32,8 @@ void chatMain() async {
   
   await PlatformService.initializeFromPlatform();
   
-  // Pre-initialize speech service for ultra-fast response
-  SpeechService().initialize();
+  // Pre-initialize speech service for ultra-fast response (non-blocking)
+  // unawaited(SpeechService().initialize());
   
   runApp(const MyApp());
 }

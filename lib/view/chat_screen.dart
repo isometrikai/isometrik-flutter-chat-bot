@@ -702,7 +702,13 @@ class _ChatScreenBody extends StatelessWidget {
                       ),
                     ),
                     _buildActionButtons(context),
-                    _buildInputArea(context),
+                    Stack(
+                      children: [
+                        _buildInputArea(context),
+                        if (isRecording)
+                        _buildInputRecordingArea(context)
+                      ],
+                    )
                   ],
                 );
               },
@@ -1731,8 +1737,8 @@ class _ChatScreenBody extends StatelessWidget {
               children: [
                 
                 // Input field container
-                Stack(
-                  children: [
+                // Stack(
+                //   children: [
                     Center(
                   child: ConstrainedBox(
                     constraints: BoxConstraints(
@@ -1817,7 +1823,7 @@ class _ChatScreenBody extends StatelessWidget {
                                  : () async {
                                      if (isRecording) {
                                        // Stop recording if currently recording
-                                       await onStopSpeechRecording();
+                                      //  await onStopSpeechRecording();
                                      } else {
                                        // Start recording if not recording
                                        await onStartSpeechRecording();
@@ -1826,15 +1832,8 @@ class _ChatScreenBody extends StatelessWidget {
                             child: Container(
                               width: 34,
                               height: 34,
-                              // decoration: BoxDecoration(
-                              //   color:  Colors.transparent,
-                              //   shape: BoxShape.circle,
-                              //   border: null,
-                              // ),
-                              child: Icon(
-                                 Icons.mic,
-                                color: const Color(0xFF7C3AED),
-                                size: 24,
+                              child: SvgPicture.asset(
+                                AssetPath.get('images/ic_mic.svg'),
                               ),
                             ),
                           ),
@@ -1870,115 +1869,105 @@ class _ChatScreenBody extends StatelessWidget {
                 ),
                 ),
                 ),
-                if (isRecording) ...[
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                    margin: const EdgeInsets.only(bottom: 8),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: Color(0xFF7C3AED), width: 1),
+                ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildInputRecordingArea(BuildContext context) {
+    return BlocBuilder<ChatBloc, ChatState>(
+      builder: (context, state) {
+        bool isApiLoading = state is ChatLoading;
+
+        return Container(
+          padding: EdgeInsets.only(
+            left: 16,
+            right: 16,
+            top: 10,
+            bottom: 16 + MediaQuery.of(context).viewInsets.bottom,
+          ),
+          color: Colors.white,
+          child: SafeArea(
+            top: false,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                
+                // Input field container
+                Stack(
+                  children: [
+                    Center(
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      minHeight: 64,
+                      maxHeight: 570, // Allow up to 550 + 20 padding
                     ),
-                    child: Row(
-                      children: [
-                        // Cancel button (X) on the left
-                        GestureDetector(
-                          onTap: () async {
-                            // Cancel recording without setting text
-                            await onCancelSpeechRecording();
-                          },
-                          child: Container(
-                            width: 32,
-                            height: 32,
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              shape: BoxShape.circle,
-                              border: Border.all(color: Color(0xFF7C3AED), width: 1),
-                            ),
-                            child: const Icon(
-                              Icons.close,
-                              color: Color(0xFF7C3AED),
-                              size: 18,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        // Recording indicator in the center
-                        Container(
-                          width: 12,
-                          height: 12,
-                          decoration: const BoxDecoration(
-                            color: Color(0xFF7C3AED),
-                            shape: BoxShape.circle,
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        const Text(
-                          'Recording...',
-                          style: TextStyle(
-                            color: Color(0xFF7C3AED),
-                            fontWeight: FontWeight.w500,
-                            fontSize: 16,
-                          ),
-                        ),
-                        const Spacer(),
-                        // Animated dots
-                        Row(
+                    child: Container(
+                      height: textFieldHeight + 20, // Dynamic height based on text field
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: Color(0xFFE9DFFB), width: 1),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
-                            Container(
-                              width: 6,
-                              height: 6,
-                              decoration: const BoxDecoration(
-                                color: Color(0xFF7C3AED),
-                                shape: BoxShape.circle,
+                            Opacity(
+                              opacity: isApiLoading ? 0.4 : 1.0,
+                              child: GestureDetector(
+                                onTap: isApiLoading
+                                    ? null
+                                    : () async {
+                                  await onCancelSpeechRecording();
+                                },
+                                child: SizedBox(
+                                  width: 34,
+                                  height: 34,
+                                  child: SvgPicture.asset(
+                                    AssetPath.get('images/ic_RecClose.svg'),
+                                  ),
+                                ),
                               ),
                             ),
-                            const SizedBox(width: 3),
-                            Container(
-                              width: 6,
-                              height: 6,
-                              decoration: const BoxDecoration(
-                                color: Color(0xFF7C3AED),
-                                shape: BoxShape.circle,
+                            SvgPicture.asset(
+                              AssetPath.get('images/ic_Listening.svg'),
+                            ),
+                            Opacity(
+                              opacity: isApiLoading ? 0.4 : 1.0,
+                              child: GestureDetector(
+                                onTap: isApiLoading
+                                    ? null
+                                    : () async {
+                                  await onStopSpeechRecording();
+                                        // onSendMessage(messageController.text);
+                                        // if (messageController.text.trim().isNotEmpty) {
+                                        //   FocusScope.of(context).requestFocus(messageFocusNode);
+                                        // }
+                                        // Future.delayed(const Duration(milliseconds: 100), () {
+                                        //   onScrollToBottom();
+                                        // });
+                                      },
+                                child: SizedBox(
+                                  width: 34,
+                                  height: 34,
+                                  child: SvgPicture.asset(
+                                    AssetPath.get('images/ic_sendImg.svg'),
+                                  ),
+                                ),
                               ),
                             ),
-                            const SizedBox(width: 3),
-                            Container(
-                              width: 6,
-                              height: 6,
-                              decoration: const BoxDecoration(
-                                color: Color(0xFF7C3AED),
-                                shape: BoxShape.circle,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(width: 12),
-                        // Done button on the right
-                        GestureDetector(
-                          onTap: () async {
-                            // Finish recording
-                            await onStopSpeechRecording();
-                          },
-                          child: Container(
-                            width: 32,
-                            height: 32,
-                            decoration: BoxDecoration(
-                              color: Color(0xFF7C3AED),
-                              shape: BoxShape.circle,
-                            ),
-                            child: const Icon(
-                              Icons.check,
-                              color: Colors.white,
-                              size: 18,
-                            ),
-                          ),
-                        ),
                       ],
                     ),
                   ),
-                ],
+                ),
+                ),
+                ),
                   ],
                 )
                 ],
