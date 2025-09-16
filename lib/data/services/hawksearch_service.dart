@@ -228,6 +228,19 @@ class HawkSearchService {
       return false;
     })();
 
+     final bool tableReservations = (() {
+      final dynamic sd = storeData['tableReservations'];
+      if (sd == 'True' || sd == true) {
+        return true;
+      }
+      return false;
+    })();
+
+    final num supportedOrderTypes = (() {
+      final dynamic sd = storeData['supportedOrderTypes'];
+      return sd;
+    })();
+
     // Extra fields from storeData.metaData
     final Map<String, dynamic> metaData = (() {
       final dynamic raw = storeData['metaData'];
@@ -257,7 +270,9 @@ class HawkSearchService {
       isDoctored: isDoctored,
       storeListing: storeListing,
       hyperlocal: hyperlocal,
-        storeIsOpen: storeIsOpen
+        storeIsOpen: storeIsOpen,
+        supportedOrderTypes: supportedOrderTypes,
+        tableReservations: tableReservations,
     );
   }
 

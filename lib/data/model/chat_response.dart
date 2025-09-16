@@ -79,63 +79,7 @@ class ChatResponse {
     return 'ChatResponse(text: $text, requestId: $requestId, widgets: ${widgets.length})';
   }
 }
-// class ChatResponse {
-//   final String text;
-//   final String requestId;
-//   final List<ChatWidget> widgets;
-//   final int? cartCount;
 
-//   ChatResponse({
-//     required this.text,
-//     required this.requestId,
-//     required this.widgets,
-//     this.cartCount,
-//   });
-
-//   factory ChatResponse.fromJson(Map<String, dynamic> json) {
-//     return ChatResponse(
-//       text: json['text'] ?? '',
-//       requestId: json['request_id'] ?? '',
-//       widgets: (json['widgets'] as List<dynamic>?)
-//           ?.map((item) => ChatWidget.fromJson(item as Map<String, dynamic>))
-//           .toList() ??
-//           [],
-//       cartCount: json['cartCount'] ?? -1,
-//     );
-//   }
-
-//   Map<String, dynamic> toJson() {
-//     return {
-//       'text': text,
-//       'request_id': requestId,
-//       'widgets': widgets.map((widget) => widget.toJson()).toList(),
-//       'cartCount': cartCount,
-//     };
-//   }
-
-//   // Helper method to check if response has widgets
-//   bool get hasWidgets => widgets.isNotEmpty;
-
-//   // Helper method to get widgets by type
-//   List<ChatWidget> getWidgetsByType(String type) {
-//     return widgets.where((widget) => widget.type == type).toList();
-//   }
-
-//   // Helper method to get options widgets specifically
-//   List<ChatWidget> get optionsWidgets => getWidgetsByType('options');
-//   // Helper method to get see_more widgets specifically
-//   List<ChatWidget> get seeMoreWidgets => getWidgetsByType('see_more');
-//   List<ChatWidget> get cartWidgets => getWidgetsByType('cart');
-//   List<ChatWidget> get chooseAddressWidgets => getWidgetsByType('choose_address');
-//   List<ChatWidget> get chooseCardWidgets => getWidgetsByType('choose_card');
-//   List<ChatWidget> get orderSummaryWidgets => getWidgetsByType('order_summary');
-//   List<ChatWidget> get orderConfirmedWidgets => getWidgetsByType('order_confirmed');
-
-//   @override
-//   String toString() {
-//     return 'ChatResponse(text: $text, requestId: $requestId, widgets: ${widgets.length})';
-//   }
-// }
 
 // Chat Widget Model
 class ChatWidget {
@@ -368,39 +312,6 @@ class ChatWidget {
     return 'ChatWidget(id: $widgetId, type: $type, items: ${widget.length})';
   }
 }
-//
-// // Usage example extension
-// extension ChatWidgetUsage on ChatWidget {
-//   // Method to handle item click and get raw JSON
-//   String? handleItemClick(int index) {
-//     switch (type) {
-//       case 'products':
-//         return getRawProductAsJsonString(index);
-//       case 'stores':
-//         return getRawStoreAsJsonString(index);
-//       case 'see_more':
-//         return getRawItemAsJsonString(index);
-//       default:
-//         return getRawItemAsJsonString(index);
-//     }
-//   }
-//
-//   // Method to get display data for UI (you can still use models for display)
-//   List<dynamic> getDisplayItems() {
-//     switch (type) {
-//       case 'products':
-//         return products; // Use Product models for display
-//       case 'stores':
-//         return stores; // Use Store models for display
-//       case 'see_more':
-//         return seeMore; // Use SeeMoreAction models for display
-//       case 'options':
-//         return options;
-//       default:
-//         return widget;
-//     }
-//   }
-// }
 
 // Keep all your existing model classes (Product, Store, etc.) unchanged
 // ... (all your existing model classes remain the same)
@@ -578,6 +489,8 @@ class Store {
   final List<Product> products;
   final int? storeTypeId;
   final bool storeIsOpen;
+  final num supportedOrderTypes;
+  final bool tableReservations;
 
   Store({
     required this.storename,
@@ -595,6 +508,8 @@ class Store {
     required this.hyperlocal,
     this.storeTypeId,
     required this.storeIsOpen,
+    required this.supportedOrderTypes,
+    required this.tableReservations,
   });
 
   factory Store.fromJson(Map<String, dynamic> json) {
@@ -611,7 +526,8 @@ class Store {
     final bool hyperlocal = (json['hyperlocal'] ?? false);
     final int storeTypeId = (json['storeTypeId'] ?? 0);
     final bool storeIsOpen = (json['storeIsOpen'] ?? false);
-
+    final int supportedOrderTypes = (json['supportedOrderTypes'] ?? 0);
+    final bool tableReservations = (json['tableReservations'] ?? false);
     final List<Product> parsedProducts = (json['products'] as List<dynamic>? ?? [])
         .map((e) => Product.fromJson(e as Map<String, dynamic>))
         .toList();
@@ -632,6 +548,8 @@ class Store {
       hyperlocal: hyperlocal,
       storeTypeId: storeTypeId,
       storeIsOpen: storeIsOpen,
+      supportedOrderTypes: supportedOrderTypes,
+      tableReservations: tableReservations,
     );
   }
 
@@ -647,6 +565,8 @@ class Store {
       'products': products.map((p) => p.toJson()).toList(),
       'storeIsOpen': storeIsOpen,
       'storeTypeId': storeTypeId,
+      'supportedOrderTypes': supportedOrderTypes,
+      'tableReservations': tableReservations,
     };
   }
 }
