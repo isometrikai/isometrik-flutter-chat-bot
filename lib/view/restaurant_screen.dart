@@ -84,12 +84,16 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
     
     // Set up cart update callback - the mounted check handles if screen is active
     OrderService().setCartUpdateCallback((bool isCartUpdate) {
+      print('CALLBACK MANAGER 3');
       if (mounted && isCartUpdate) {
-        print('RestaurantScreen: Cart update received - $isCartUpdate');
+        print('CALLBACK MANAGER 4');
+        // print('RestaurantScreen: Cart update received - $isCartUpdate');
         // Refresh cart data when cart update is triggered
-        print('RestaurantScreen: Refreshing cart data');
+        // print('RestaurantScreen: Refreshing cart data');
         Future.delayed(const Duration(seconds: 3), () {
+          print('CALLBACK MANAGER 5');
         cartBloc.add(CartFetchRequested(needToShowLoader: true));
+        print('CALLBACK MANAGER 6');
         });
       }
     });
