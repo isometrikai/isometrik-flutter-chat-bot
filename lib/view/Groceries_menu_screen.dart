@@ -56,14 +56,14 @@ class _GroceriesMenuScreenState extends State<GroceriesMenuScreen> {
     cartBloc = CartBloc();
     cartBloc.add(CartFetchRequested(needToShowLoader: false));
     _fetchSubCategoryProducts();
-      OrderService().setCartUpdateCallback((bool isCartUpdate) {
-      if (mounted && isCartUpdate) {
-        print('GroceriesMenuScreen: Cart update received - $isCartUpdate');
-        // Refresh cart data when cart update is triggered
-        print('GroceriesMenuScreen: Refreshing cart data');
-        cartBloc.add(CartFetchRequested(needToShowLoader: true));
-      }
-    });
+    //   OrderService().setCartUpdateCallback((bool isCartUpdate) {
+    //   if (mounted && isCartUpdate) {
+    //     print('GroceriesMenuScreen: Cart update received - $isCartUpdate');
+    //     // Refresh cart data when cart update is triggered
+    //     print('GroceriesMenuScreen: Refreshing cart data');
+    //     cartBloc.add(CartFetchRequested(needToShowLoader: true));
+    //   }
+    // });
   }
 
   void _fetchSubCategoryProducts() {
