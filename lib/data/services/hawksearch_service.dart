@@ -267,6 +267,7 @@ class HawkSearchService {
       storeCategoryId: storeCategoryId,
       linkFromId: linkFromId,
       type: type,
+      storeTypeId: type,
       isDoctored: isDoctored,
       storeListing: storeListing,
       hyperlocal: hyperlocal,
