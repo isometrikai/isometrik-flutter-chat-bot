@@ -609,6 +609,13 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
                   if (foundProduct != null) {
                     // Pass the entire product object as JSON, just like in Chat screen
                     final Map<String, dynamic> productJson = foundProduct.toJson();
+                    
+                    // Add store information to the JSON
+                    productJson['storeId'] = widget.actionData?.storeId;
+                    productJson['storeCategoryId'] = widget.actionData?.storeCategoryId;
+                    productJson['storeTypeId'] = widget.actionData?.storeTypeId;
+                    
+                    print("productJson: $productJson");
                     OrderService().triggerProductOrder(productJson);
                   }
                 },
