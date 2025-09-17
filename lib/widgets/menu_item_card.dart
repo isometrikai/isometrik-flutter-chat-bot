@@ -1,3 +1,4 @@
+import 'package:chat_bot/utils/enum.dart';
 import 'package:flutter/material.dart';
 import 'package:chat_bot/data/model/universal_cart_response.dart';
 import 'package:flutter_svg/svg.dart';
@@ -25,6 +26,7 @@ class MenuItemCard extends StatelessWidget {
   final double? cardWidth;
   final bool instock;
   final bool storeIsOpen;
+  final int storeType;
 
   MenuItemCard({
     super.key,
@@ -48,6 +50,7 @@ class MenuItemCard extends StatelessWidget {
     this.cardWidth,
     required this.instock,
     required this.storeIsOpen,
+    required this.storeType,
   });
 
   @override
@@ -145,12 +148,11 @@ class MenuItemCard extends StatelessWidget {
   }
 
   Widget _buildQuantityControls() {
-    // Check if item is out of stock or store is closed first
-    if (!instock) {
-      return _buildOutOfStockButton();
-    }
-    if (!storeIsOpen) {
-      return Container();
+    
+    if (storeType != FoodCategory.food.value) {
+      if (!instock ) {
+        return _buildOutOfStockButton();
+      }
     }
 
     if (productId == null || productId!.isEmpty) {
@@ -274,9 +276,11 @@ class MenuItemCard extends StatelessWidget {
   }
 
   Widget _buildAddButton() {
-    // Check if item is out of stock or store is closed
-    if (!instock || !storeIsOpen) {
-      return _buildOutOfStockButton();
+    
+    if (storeType != FoodCategory.food.value) {
+      if (!instock ) {
+        return _buildOutOfStockButton();
+      }
     }
     
     return OutlinedButton(

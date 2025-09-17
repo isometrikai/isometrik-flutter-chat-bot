@@ -1857,16 +1857,6 @@ class _ChatScreenBody extends StatelessWidget {
             }
           },
           onAddToCartRequested: (product, store) {
-            if (store.storeIsOpen == false && store.type != FoodCategory.pharmacy.value) {
-              print('Store is closed');
-              BlackToastView.show(context, 'Store is closed. Please try again later');
-              return;
-            }
-            else if (product.instock == false && (store.storeTypeId == FoodCategory.grocery.value || store.storeTypeId == FoodCategory.pharmacy.value)) {
-              print('Product is not in stock');
-              BlackToastView.show(context, 'Product is not in stock. Please try again later');
-              return;
-            }
               if ((product.variantsCount > 1 && store.storeTypeId == FoodCategory.food.value) || (product.variantsCount > 0 && (store.storeTypeId == FoodCategory.grocery.value || store.storeTypeId == FoodCategory.pharmacy.value))) {
                 if (store.storeTypeId == FoodCategory.grocery.value || store.storeTypeId == FoodCategory.pharmacy.value) {
                     showModalBottomSheet(
@@ -2273,6 +2263,7 @@ void _openGroceryCustomization(BuildContext context, String parentProductId, Str
                 cartData: cartBloc.cartData,
                 instock: product.instock ?? true,
                 storeIsOpen: product.storeIsOpen ?? true,
+                storeType: product.storeTypeId ?? -111,
             onClick: () {
               if (productsWidget != null) {
                 final Map<String, dynamic>? productJson = productsWidget.getRawProduct(index);

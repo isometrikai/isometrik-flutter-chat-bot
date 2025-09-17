@@ -345,6 +345,7 @@ class _GroceriesMenuScreenState extends State<GroceriesMenuScreen> {
                 cartData: _cartData,
                 instock: product.instock ?? true,
                 storeIsOpen: widget.actionData?.storeIsOpen ?? true,
+                storeType: product.storeTypeId ?? -111,
                 onQuantityChanged: (productId, centralProductId, quantity, isIncrease, isCustomizable) {
                   _onQuantityChangedForGrocery(product.parentProductId,product.childProductId,product.unitId,product.storeId ?? '',product.storeCategoryId ?? '',product.storeTypeId ?? -111,product.variantsCount,quantity,isIncrease,product.productName,product.productImage);
                 },
@@ -354,16 +355,6 @@ class _GroceriesMenuScreenState extends State<GroceriesMenuScreen> {
                   OrderService().triggerProductOrder(productJson);
                 },
                 onAddToCart: (productId, centralProductId, quantity, isCustomizable) {
-                  if (widget.actionData?.storeIsOpen == false) {
-                    print('STORE CLOSED');
-                    BlackToastView.show(context, 'Store is closed. Please try again later');
-                    return;
-                  }
-                  else if (subCategoryProduct.outOfStock && widget.actionData?.storeTypeId == FoodCategory.grocery.value) {
-                    print('Product is not in stock');
-                    BlackToastView.show(context, 'Product is not in stock. Please try again later');
-                    return;
-                  }
                   if (isCustomizable) {
                      showModalBottomSheet(
                           context: context,

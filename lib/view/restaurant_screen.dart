@@ -673,15 +673,6 @@ void _onQuantityChangedForGrocery(String parentProductId,
                     // Navigator.pop(context);
                   },
                   onAddToCartRequested: (product, store) {
-                    if (store.storeIsOpen == false && store.type == FoodCategory.grocery.value) {
-                      print('STORE CLOSED');
-                      BlackToastView.show(context, 'Store is closed. Please try again later');
-                      return;
-                    }else if (product.instock == false && store.type == FoodCategory.grocery.value) {
-                      print('Product is not in stock');
-                      BlackToastView.show(context, 'Product is not in stock. Please try again later');
-                      return;
-                    }
                     if (product.variantsCount > 0) {
                       if (store.type == FoodCategory.grocery.value || store.type == 0) {
                         showModalBottomSheet(

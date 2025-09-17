@@ -120,7 +120,7 @@ class StoreCard extends StatelessWidget {
                         ],
                       ),
                       const SizedBox(height: 6),
-                      if (store.type == FoodCategory.food.value) ...[
+                      if ((store.storeTypeId ?? store.type) == FoodCategory.food.value) ...[
                         if (store.storeIsOpen) ...[
                           if (store.supportedOrderTypes == 4) ...[
                             Text(
@@ -403,7 +403,7 @@ class _ProductPreviewTile extends StatelessWidget {
                               : _placeholderProductImage(),
                     ),
                   ),
-                  if (store.type != FoodCategory.food.value) ...[
+                  if ((store.storeTypeId ?? store.type) != FoodCategory.food.value) ...[
                     if (product.instock == false) ...[
                       Positioned(
                         right: 4,
@@ -416,7 +416,7 @@ class _ProductPreviewTile extends StatelessWidget {
               ),
             ],
           ),
-          if (store.type == FoodCategory.food.value) ...[
+          if ((store.storeTypeId ?? store.type) == FoodCategory.food.value) ...[
             if (store.storeIsOpen == true) ...[
               if (store.supportedOrderTypes == 4)
                 ...[]
@@ -588,23 +588,6 @@ class _ProductPreviewTile extends StatelessWidget {
       // Show Add button when product is not in cart
       return GestureDetector(
         onTap: () {
-          // if (store.storeIsOpen == false &&
-          //     store.type == FoodCategory.grocery.value) {
-          //   print("STORE IS CLOSED");
-          //   BlackToastView.show(
-          //     context,
-          //     'Store is closed. Please try again later',
-          //   );
-          //   return;
-          // } else if (product.instock == false &&
-          //     store.type == FoodCategory.grocery.value) {
-          //   print('Product is not in stock');
-          //   BlackToastView.show(
-          //     context,
-          //     'Product is not in stock. Please try again later',
-          //   );
-          //   return;
-          // }
           if (onAddToCartRequested != null) {
             onAddToCartRequested!(product, store);
           }

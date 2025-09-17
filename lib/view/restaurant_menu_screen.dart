@@ -612,6 +612,7 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
                 cartData: _cartData,
                 instock: item.instock,
                 storeIsOpen: widget.actionData?.storeIsOpen ?? true,
+                storeType: widget.actionData?.storeTypeId ?? -111,
                 // Pass cart data to MenuItemCard
                 onQuantityChanged: (productId, centralProductId, quantity, isIncrease, isCustomizable) {
                   _onQuantityChanged(productId, centralProductId, quantity, isIncrease, isCustomizable, item.title, item.imageUrl ?? '');
@@ -644,16 +645,6 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
                   }
                 },
                 onAddToCart: (productId, centralProductId, quantity, isCustomizable) {
-                    if (widget.actionData?.storeIsOpen == false) {
-                      print('STORE CLOSED');
-                      BlackToastView.show(context, 'Store is closed. Please try again later');
-                      return;
-                    }
-                    else if (item.instock == false && widget.actionData?.storeTypeId == FoodCategory.grocery.value) {
-                      print('Product is not in stock');
-                      BlackToastView.show(context, 'Product is not in stock. Please try again later');
-                      return;
-                    }
                   if (isCustomizable) {
                      showModalBottomSheet(
                     context: context,
