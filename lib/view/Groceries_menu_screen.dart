@@ -352,6 +352,12 @@ class _GroceriesMenuScreenState extends State<GroceriesMenuScreen> {
                 onClick: () {
                   // Handle product click
                   final Map<String, dynamic> productJson = product.toJson();
+                   // Add store information to the JSON
+                    productJson['storeId'] = widget.actionData?.storeId;
+                    productJson['storeCategoryId'] = widget.actionData?.storeCategoryId;
+                    productJson['storeTypeId'] = widget.actionData?.storeTypeId;
+                    
+                    print("productJson: $productJson");
                   OrderService().triggerProductOrder(productJson);
                 },
                 onAddToCart: (productId, centralProductId, quantity, isCustomizable) {
