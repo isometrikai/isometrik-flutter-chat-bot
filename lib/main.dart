@@ -23,7 +23,7 @@ void chatMain() async {
   
   // Configure for package mode
   AssetPath.isPackageMode = true;
-  
+  print('STEP 2');
   await PlatformService.initializeFromPlatform();
   runApp(const MyApp());
 }
@@ -35,7 +35,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     // Set up callbacks when app initializes
     _setupCallbacks();
-    
+    print('STEP 1');
     // Set current context for fallback when navigator key is not available
     Utility.setCurrentContext(context);
     

@@ -54,7 +54,7 @@ class ChatBot {
   static void openChatBot(BuildContext context) {
     // Set current context for fallback when navigator key is not available
     Utility.setCurrentContext(context);
-    
+    print('STEP 3');
     Navigator.push(
       context,
       MaterialPageRoute(
