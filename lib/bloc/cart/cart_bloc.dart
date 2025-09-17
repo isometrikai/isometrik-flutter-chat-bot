@@ -35,18 +35,19 @@ class CartBloc extends Bloc<CartEvent, CartState> {
     CartFetchRequested event,
     Emitter<CartState> emit,
   ) async {
+    print('CALLBACK MANAGER cart bloc error 2: $event');
     if (event.needToShowLoader) { 
       Utility.showLoader();
     }
-
+    print('CALLBACK MANAGER cart bloc error 3');
     try {
       // Fetch raw cart data once and use it for both purposes
       final rawResult = await repository.fetchRawUniversalCart();
-
+      print('CALLBACK MANAGER cart bloc error 4');
        if (event.needToShowLoader) {
         Utility.closeProgressDialog();
       }
-      
+      print('CALLBACK MANAGER cart bloc error 5');
       if (rawResult.isSuccess) {
         final rawCartData = rawResult.data as UniversalCartResponse;
           cartId = rawCartData.data.first.id;
@@ -102,6 +103,7 @@ class CartBloc extends Bloc<CartEvent, CartState> {
         // emit(CartError(message: rawResult.message ?? 'Failed to fetch cart'));
       }
     } catch (e) {
+      print('CALLBACK MANAGER cart bloc error 1: $e');
       cartData.clear();
       globalCartData.clear();
       totalProductCount = 0;
