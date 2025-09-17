@@ -49,6 +49,7 @@ class CartBloc extends Bloc<CartEvent, CartState> {
       // }
       print('CALLBACK MANAGER cart bloc  5');
       if (rawResult.isSuccess) {
+        print('CALLBACK MANAGER cart bloc  6');
         final rawCartData = rawResult.data as UniversalCartResponse;
           cartId = rawCartData.data.first.id;
           print('cartId: $cartId');
