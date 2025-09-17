@@ -88,7 +88,9 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
         print('RestaurantScreen: Cart update received - $isCartUpdate');
         // Refresh cart data when cart update is triggered
         print('RestaurantScreen: Refreshing cart data');
+        Future.delayed(const Duration(seconds: 3), () {
         cartBloc.add(CartFetchRequested(needToShowLoader: true));
+        });
       }
     });
     
@@ -673,15 +675,6 @@ void _onQuantityChangedForGrocery(String parentProductId,
                     // Navigator.pop(context);
                   },
                   onAddToCartRequested: (product, store) {
-                    if (store.storeIsOpen == false && store.type == FoodCategory.grocery.value) {
-                      print('STORE CLOSED');
-                      BlackToastView.show(context, 'Store is closed. Please try again later');
-                      return;
-                    }else if (product.instock == false && store.type == FoodCategory.grocery.value) {
-                      print('Product is not in stock');
-                      BlackToastView.show(context, 'Product is not in stock. Please try again later');
-                      return;
-                    }
                     if (product.variantsCount > 0) {
                       if (store.type == FoodCategory.grocery.value || store.type == 0) {
                         showModalBottomSheet(

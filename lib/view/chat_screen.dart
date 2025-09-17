@@ -308,7 +308,9 @@ class _ChatScreenState extends State<ChatScreen> {
     OrderService().setCartUpdateCallback((bool isCartUpdate) {
       if (mounted && isCartUpdate) {
         print('ChatScreen: Cart update received - $isCartUpdate');
-        _sendMessage("I have updated the cart");
+        Future.delayed(const Duration(seconds: 3), () {
+          _sendMessage("I have updated the cart");
+        });
       }
     });
     
@@ -1857,16 +1859,6 @@ class _ChatScreenBody extends StatelessWidget {
             }
           },
           onAddToCartRequested: (product, store) {
-            if (store.storeIsOpen == false && store.type != FoodCategory.pharmacy.value) {
-              print('Store is closed');
-              BlackToastView.show(context, 'Store is closed. Please try again later');
-              return;
-            }
-            else if (product.instock == false && (store.storeTypeId == FoodCategory.grocery.value || store.storeTypeId == FoodCategory.pharmacy.value)) {
-              print('Product is not in stock');
-              BlackToastView.show(context, 'Product is not in stock. Please try again later');
-              return;
-            }
               if ((product.variantsCount > 1 && store.storeTypeId == FoodCategory.food.value) || (product.variantsCount > 0 && (store.storeTypeId == FoodCategory.grocery.value || store.storeTypeId == FoodCategory.pharmacy.value))) {
                 if (store.storeTypeId == FoodCategory.grocery.value || store.storeTypeId == FoodCategory.pharmacy.value) {
                     showModalBottomSheet(
@@ -2271,6 +2263,9 @@ void _openGroceryCustomization(BuildContext context, String parentProductId, Str
              centralProductId: product.parentProductId,
                 isCustomizable: (product.variantsCount > 1 && product.storeTypeId == FoodCategory.food.value) || (product.variantsCount > 0 && (product.storeTypeId == FoodCategory.grocery.value || product.storeTypeId == FoodCategory.pharmacy.value)),
                 cartData: cartBloc.cartData,
+                instock: product.instock ?? true,
+                storeIsOpen: product.storeIsOpen ?? true,
+                storeType: product.storeTypeId ?? -111,
             onClick: () {
               if (productsWidget != null) {
                 final Map<String, dynamic>? productJson = productsWidget.getRawProduct(index);
@@ -2611,7 +2606,7 @@ class _GreetingOptionTile extends StatelessWidget {
       child: Container(
         width: 162,
         height: 90,
-        padding: const EdgeInsets.fromLTRB(8, 0, 8, 5),
+        padding: const EdgeInsets.fromLTRB(8, 0, 8, 4),
         decoration: BoxDecoration(
           color: const Color(0xFFF5F7FF),
           borderRadius: BorderRadius.circular(8),
@@ -2623,7 +2618,9 @@ class _GreetingOptionTile extends StatelessWidget {
             text,
             maxLines: 3,
             style: AppTextStyles.bodyText.copyWith(
+              fontSize: 15,
               color: const Color(0xFF242424),
+              // fontWeight: FontWeight.w500,
             ),
           ),
         ),

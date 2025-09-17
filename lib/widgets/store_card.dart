@@ -16,11 +16,13 @@ class StoreCard extends StatelessWidget {
   final VoidCallback? onTap;
   final Function(String, chat.Product, chat.Store, int)? onAddToCart;
   final VoidCallback? onHide; // New callback to hide the widget
-  final Function(chat.Product, chat.Store)? onAddToCartRequested; // New callback for cart requests
+  final Function(chat.Product, chat.Store)?
+  onAddToCartRequested; // New callback for cart requests
   final List<UniversalCartData>? cartData; // Cart data from getCart API
-  final Function(chat.Product, chat.Store, int, bool)? onQuantityChanged; // Callback for quantity changes
+  final Function(chat.Product, chat.Store, int, bool)?
+  onQuantityChanged; // Callback for quantity changes
 
-   StoreCard({
+  StoreCard({
     super.key,
     required this.store,
     required this.storesWidget,
@@ -81,7 +83,11 @@ class StoreCard extends StatelessWidget {
                       // Rating | ETA
                       Row(
                         children: [
-                          const Icon(Icons.star, size: 14, color: Color(0xFFA674BF)),
+                          const Icon(
+                            Icons.star,
+                            size: 14,
+                            color: Color(0xFFA674BF),
+                          ),
                           const SizedBox(width: 4),
                           Text(
                             store.avgRating.toStringAsFixed(1),
@@ -99,7 +105,11 @@ class StoreCard extends StatelessWidget {
                             ),
                           ),
                           const SizedBox(width: 7),
-                          const Icon(Icons.access_time, size: 14, color: Color(0xFFA674BF)),
+                          const Icon(
+                            Icons.access_time,
+                            size: 14,
+                            color: Color(0xFFA674BF),
+                          ),
                           const SizedBox(width: 4),
                           Text(
                             store.distance,
@@ -110,28 +120,67 @@ class StoreCard extends StatelessWidget {
                         ],
                       ),
                       const SizedBox(height: 6),
-                      // Cuisine subtitle
-                      if (store.storeIsOpen) ...[
-                      Text(
-                        store.cuisineDetails.isNotEmpty ? store.cuisineDetails : ' ',
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: AppTextStyles.restaurantDescription.copyWith(
-                          color: const Color(0xFF6E4185),
-                        ),
-                      ),
-                      ]else ...[
-                        Text(
-                          'Store is closed',
-                          maxLines: 1,
-                          style: AppTextStyles.restaurantDescription.copyWith(
-                            color: const Color(0xFFF44336),
-                            fontWeight: FontWeight.w600,
-                            fontSize: 12,
-
+                      if ((store.storeTypeId ?? store.type) == FoodCategory.food.value) ...[
+                        if (store.storeIsOpen) ...[
+                          if (store.supportedOrderTypes == 4) ...[
+                            Text(
+                              store.tableReservations
+                                  ? 'Only table booking or preorders are available.'
+                                  : 'Delivery and self-pickup are not available.',
+                              maxLines: 1,
+                              style: AppTextStyles.restaurantDescription
+                                  .copyWith(
+                                    color: const Color(0xFFF44336),
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 12,
+                                  ),
+                            ),
+                          ] else ...[
+                            Text(
+                              store.cuisineDetails.isNotEmpty
+                                  ? store.cuisineDetails
+                                  : ' ',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: AppTextStyles.restaurantDescription
+                                  .copyWith(color: const Color(0xFF6E4185)),
+                            ),
+                          ],
+                        ] else ...[
+                          Text(
+                            'Store is closed',
+                            maxLines: 1,
+                            style: AppTextStyles.restaurantDescription.copyWith(
+                              color: const Color(0xFFF44336),
+                              fontWeight: FontWeight.w600,
+                              fontSize: 12,
+                            ),
                           ),
-                        ),
-                      ]
+                        ],
+                      ] else ...[
+                        if (store.storeIsOpen) ...[
+                          Text(
+                            store.cuisineDetails.isNotEmpty
+                                ? store.cuisineDetails
+                                : ' ',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: AppTextStyles.restaurantDescription.copyWith(
+                              color: const Color(0xFF6E4185),
+                            ),
+                          ),
+                        ] else ...[
+                          Text(
+                            'Store is closed',
+                            maxLines: 1,
+                            style: AppTextStyles.restaurantDescription.copyWith(
+                              color: const Color(0xFFF44336),
+                              fontWeight: FontWeight.w600,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ],
+                      ],
                     ],
                   ),
                 ),
@@ -144,47 +193,53 @@ class StoreCard extends StatelessWidget {
                 child: ListView.separated(
                   scrollDirection: Axis.horizontal,
                   padding: EdgeInsets.zero,
-                  itemBuilder: (context, i) => _ProductPreviewTile(
-                    product: store.products[i],
-                    store: store,
-                    onAddToCart: onAddToCart,
-                    onHide: onHide, // Pass the onHide callback
-                    onAddToCartRequested: onAddToCartRequested, // Pass the new callback
-                    cartData: cartData, // Pass cart data
-                    onQuantityChanged: onQuantityChanged, // Pass quantity change callback
-                  ),
+                  itemBuilder:
+                      (context, i) => _ProductPreviewTile(
+                        product: store.products[i],
+                        store: store,
+                        onAddToCart: onAddToCart,
+                        onHide: onHide,
+                        // Pass the onHide callback
+                        onAddToCartRequested: onAddToCartRequested,
+                        // Pass the new callback
+                        cartData: cartData,
+                        // Pass cart data
+                        onQuantityChanged:
+                            onQuantityChanged, // Pass quantity change callback
+                      ),
                   separatorBuilder: (_, __) => const SizedBox(width: 10),
                   itemCount: store.products.length,
                 ),
               ),
-              const SizedBox(height: 15),
-              GestureDetector(
-                onTap: () {
-                   if (onTap != null) {
-                      onTap!.call();
-                      return;
-                    }
-                   if (storesWidget != null) {
-                    final Map<String, dynamic>? storeJson = storesWidget!.getRawStore(index);
-                    OrderService().triggerStoreOrder(storeJson ?? {});
-                  }
-                },
-                child: Row(
-                  children: [
-                    const SizedBox(width: 3),
-                   SvgPicture.asset(
-                            AssetPath.get('images/ic_eazy_app.svg'),
-                            fit: BoxFit.contain,
-                          ),
-                    const SizedBox(width: 5),
-                     Text('Open in Eazy app'
-                      ,style: AppTextStyles.restaurantDescription.copyWith(
-                        color: const Color(0xFF8E2FFD),
-                      ),
-                )
-                  ],
-                ),
+            const SizedBox(height: 15),
+            GestureDetector(
+              onTap: () {
+                if (onTap != null) {
+                  onTap!.call();
+                  return;
+                }
+                if (storesWidget != null) {
+                  final Map<String, dynamic>? storeJson = storesWidget!.getRawStore(index);
+                  OrderService().triggerStoreOrder(storeJson ?? {});
+                }
+              },
+              child: Row(
+                children: [
+                  const SizedBox(width: 3),
+                  SvgPicture.asset(
+                    AssetPath.get('images/ic_eazy_app.svg'),
+                    fit: BoxFit.contain,
+                  ),
+                  const SizedBox(width: 5),
+                  Text(
+                    'Open in Eazy app',
+                    style: AppTextStyles.restaurantDescription.copyWith(
+                      color: const Color(0xFF8E2FFD),
+                    ),
+                  ),
+                ],
               ),
+            ),
           ],
         ),
       ),
@@ -197,17 +252,19 @@ class StoreCard extends StatelessWidget {
       child: Container(
         width: 69,
         height: 69,
-        child: store.storeImage.isNotEmpty
-            ? Image.network(
-          store.storeImage,
-          fit: BoxFit.cover,
-          loadingBuilder: (context, child, loadingProgress) {
-            if (loadingProgress == null) return child;
-            return _placeholderLogo();
-          },
-          errorBuilder: (context, error, stackTrace) => _placeholderLogo(),
-        )
-            : _placeholderLogo(),
+        child:
+            store.storeImage.isNotEmpty
+                ? Image.network(
+                  store.storeImage,
+                  fit: BoxFit.cover,
+                  loadingBuilder: (context, child, loadingProgress) {
+                    if (loadingProgress == null) return child;
+                    return _placeholderLogo();
+                  },
+                  errorBuilder:
+                      (context, error, stackTrace) => _placeholderLogo(),
+                )
+                : _placeholderLogo(),
       ),
     );
   }
@@ -215,16 +272,13 @@ class StoreCard extends StatelessWidget {
   Widget _placeholderLogo() {
     return Center(
       child: SvgPicture.asset(
-        AssetPath.get(
-        'images/ic_placeHolder.svg',
-        ),
+        AssetPath.get('images/ic_placeHolder.svg'),
         width: 69,
         height: 69,
         fit: BoxFit.cover,
       ),
     );
   }
-
 }
 
 class _ProductPreviewTile extends StatelessWidget {
@@ -232,9 +286,11 @@ class _ProductPreviewTile extends StatelessWidget {
   final chat.Store store;
   final Function(String, chat.Product, chat.Store, int)? onAddToCart;
   final VoidCallback? onHide; // New parameter for hiding the widget
-  final Function(chat.Product, chat.Store)? onAddToCartRequested; // New parameter for cart requests
+  final Function(chat.Product, chat.Store)?
+  onAddToCartRequested; // New parameter for cart requests
   final List<UniversalCartData>? cartData; // Cart data from getCart API
-  final Function(chat.Product, chat.Store, int, bool)? onQuantityChanged; // Callback for quantity changes
+  final Function(chat.Product, chat.Store, int, bool)?
+  onQuantityChanged; // Callback for quantity changes
 
   const _ProductPreviewTile({
     required this.product,
@@ -245,6 +301,7 @@ class _ProductPreviewTile extends StatelessWidget {
     this.cartData, // Add cart data parameter
     this.onQuantityChanged, // Add quantity change callback
   });
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -266,12 +323,16 @@ class _ProductPreviewTile extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                      SvgPicture.asset(
-                    AssetPath.get(product.containsMeat ? 'images/ic_NonVeg.svg' : 'images/ic_Veg.svg'),
-                    width: 14,
-                    height: 14,
-                    fit: BoxFit.contain,
-                  ),
+                    SvgPicture.asset(
+                      AssetPath.get(
+                        product.containsMeat
+                            ? 'images/ic_NonVeg.svg'
+                            : 'images/ic_Veg.svg',
+                      ),
+                      width: 14,
+                      height: 14,
+                      fit: BoxFit.contain,
+                    ),
                     const SizedBox(height: 5),
                     Text(
                       product.productName,
@@ -292,54 +353,87 @@ class _ProductPreviewTile extends StatelessWidget {
                             fontSize: 12,
                           ),
                         ),
-                        if (product.finalPriceList.basePrice != product.finalPriceList.finalPrice) ...[
-                        const SizedBox(width: 5),
-                        Flexible(
-                          child: Text(
-                            '${product.currencySymbol}${product.finalPriceList.basePrice.toStringAsFixed(0)}',
-                            overflow: TextOverflow.ellipsis,
-                            style: AppTextStyles.productPrice.copyWith(
-                              decoration: TextDecoration.lineThrough,
-                              color: const Color(0xFF979797),
-                              fontSize: 12,
+                        if (product.finalPriceList.basePrice !=
+                            product.finalPriceList.finalPrice) ...[
+                          const SizedBox(width: 5),
+                          Flexible(
+                            child: Text(
+                              '${product.currencySymbol}${product.finalPriceList.basePrice.toStringAsFixed(0)}',
+                              overflow: TextOverflow.ellipsis,
+                              style: AppTextStyles.productPrice.copyWith(
+                                decoration: TextDecoration.lineThrough,
+                                color: const Color(0xFF979797),
+                                fontSize: 12,
+                              ),
                             ),
                           ),
-                        ),
-                      ]
+                        ],
                       ],
-                    )
+                    ),
                   ],
                 ),
               ),
               const SizedBox(width: 10),
-              ClipRRect(
-                borderRadius: BorderRadius.circular(12),
-                child: Container(
-                  width: 78,
-                  height: 78,
-                  // color: const Color(0xFFD9D9D9),
-                  child: product.productImage.isNotEmpty
-                      ? Image.network(
-                          product.productImage,
-                          fit: BoxFit.cover,
-                          loadingBuilder: (context, child, loadingProgress) {
-                            if (loadingProgress == null) return child;
-                            return _placeholderProductImage();
-                          },
-                          errorBuilder: (context, error, stackTrace) => _placeholderProductImage(),
-                        )
-                      : _placeholderProductImage(),
-                ),
+              Stack(
+                children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: Container(
+                      width: 78,
+                      height: 78,
+                      // color: const Color(0xFFD9D9D9),
+                      child:
+                          product.productImage.isNotEmpty
+                              ? Image.network(
+                                product.productImage,
+                                fit: BoxFit.cover,
+                                loadingBuilder: (
+                                  context,
+                                  child,
+                                  loadingProgress,
+                                ) {
+                                  if (loadingProgress == null) return child;
+                                  return _placeholderProductImage();
+                                },
+                                errorBuilder:
+                                    (context, error, stackTrace) =>
+                                        _placeholderProductImage(),
+                              )
+                              : _placeholderProductImage(),
+                    ),
+                  ),
+                  if ((store.storeTypeId ?? store.type) != FoodCategory.food.value) ...[
+                    if (product.instock == false) ...[
+                      Positioned(
+                        right: 4,
+                        bottom: 4,
+                        child: _buildOutOfStockBadge(),
+                      ),
+                    ],
+                  ],
+                ],
               ),
             ],
           ),
-          // if (product.instock == true) ...[
-            Positioned(
-              right: 0,
-              bottom: -4,
-              child: _buildAddButton(context),
-            ),
-          // ],
+          if ((store.storeTypeId ?? store.type) == FoodCategory.food.value) ...[
+            if (store.storeIsOpen == true) ...[
+              if (store.supportedOrderTypes == 4)
+                ...[]
+              else
+                ...[
+                  Positioned(
+                      right: 0, bottom: -4, child: _buildAddButton(context)),
+                ],
+            ] else
+              ...[
+              ]
+          ] else
+            ...[
+              if (product.instock == true) ...[
+                Positioned(
+                    right: 0, bottom: -4, child: _buildAddButton(context)),
+              ],
+            ],
         ],
       ),
     );
@@ -348,7 +442,7 @@ class _ProductPreviewTile extends StatelessWidget {
   // Helper method to check if product is in cart and get its quantity
   int? _getProductCartQuantity() {
     if (cartData == null) return null;
-    
+
     try {
       // Use functional programming approach with firstWhere for better performance
       final cartProduct = cartData!
@@ -358,7 +452,7 @@ class _ProductPreviewTile extends StatelessWidget {
             (cartProduct) => cartProduct.id == product.childProductId,
             orElse: () => throw StateError('Product not found'),
           );
-      
+
       return cartProduct.quantity?.value ?? 0;
     } catch (e) {
       // Product not found in cart
@@ -374,8 +468,7 @@ class _ProductPreviewTile extends StatelessWidget {
   Widget _placeholderProductImage() {
     return Center(
       child: SvgPicture.asset(
-        AssetPath.get(
-        'images/ic_placeHolder.svg',),
+        AssetPath.get('images/ic_placeHolder.svg'),
         width: 78,
         height: 78,
         fit: BoxFit.cover,
@@ -383,10 +476,41 @@ class _ProductPreviewTile extends StatelessWidget {
     );
   }
 
+  Widget _buildOutOfStockBadge() {
+    return Container(
+      width: 70,
+      height: 27,
+      padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 0),
+      decoration: BoxDecoration(
+        color: const Color(0xFFFFFAFB),
+        borderRadius: BorderRadius.circular(8),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 4,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Center(
+        child: Text(
+          'OUT OF STOCK',
+          style: TextStyle(
+            fontFamily: 'Plus Jakarta Sans',
+            fontWeight: FontWeight.w700,
+            fontSize: 8,
+            height: 1.2,
+            color: const Color(0xFFF44336),
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildAddButton(BuildContext context) {
     final cartQuantity = _getProductCartQuantity();
     final isInCart = _isProductInCart();
-    
+
     if (isInCart && cartQuantity != null && cartQuantity > 0) {
       // Show quantity controls when product is in cart
       return Container(
@@ -423,11 +547,7 @@ class _ProductPreviewTile extends StatelessWidget {
                     bottomLeft: Radius.circular(8),
                   ),
                 ),
-                child: const Icon(
-                  Icons.remove,
-                  size: 16,
-                  color: Colors.white,
-                ),
+                child: const Icon(Icons.remove, size: 16, color: Colors.white),
               ),
             ),
             // Quantity display
@@ -457,11 +577,7 @@ class _ProductPreviewTile extends StatelessWidget {
                     bottomRight: Radius.circular(8),
                   ),
                 ),
-                child: const Icon(
-                  Icons.add,
-                  size: 16,
-                  color: Colors.white,
-                ),
+                child: const Icon(Icons.add, size: 16, color: Colors.white),
               ),
             ),
           ],
@@ -471,15 +587,6 @@ class _ProductPreviewTile extends StatelessWidget {
       // Show Add button when product is not in cart
       return GestureDetector(
         onTap: () {
-          if (store.storeIsOpen == false && store.type == FoodCategory.grocery.value) {
-            print("STORE IS CLOSED");
-            BlackToastView.show(context, 'Store is closed. Please try again later');
-            return;
-          }else if (product.instock == false && store.type == FoodCategory.grocery.value) {
-            print('Product is not in stock');
-            BlackToastView.show(context, 'Product is not in stock. Please try again later');
-            return;
-          }
           if (onAddToCartRequested != null) {
             onAddToCartRequested!(product, store);
           }

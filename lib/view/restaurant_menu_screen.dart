@@ -2,6 +2,7 @@ import 'package:chat_bot/bloc/cart/cart_bloc.dart';
 import 'package:chat_bot/bloc/cart/cart_event.dart';
 import 'package:chat_bot/bloc/cart/cart_state.dart';
 import 'package:chat_bot/data/model/chat_response.dart' as chat;
+import 'package:chat_bot/utils/asset_path.dart';
 import 'package:chat_bot/utils/enum.dart';
 import 'package:chat_bot/view/customization_summary_screen.dart';
 import 'package:chat_bot/view/product_customization_screen.dart';
@@ -15,6 +16,7 @@ import 'package:chat_bot/widgets/menu_item_card.dart';
 import 'package:chat_bot/widgets/screen_header.dart';
 import 'package:chat_bot/services/cart_manager.dart';
 import 'package:chat_bot/services/callback_manage.dart';
+import 'package:flutter_svg/svg.dart';
 import '../utils/asset_helper.dart';
 import 'package:chat_bot/data/model/universal_cart_response.dart';
 import '../utils/text_styles.dart';
@@ -77,7 +79,9 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
         print('RestaurantMenuScreen: Cart update received - $isCartUpdate');
         // Refresh cart data when cart update is triggered
         print('RestaurantMenuScreen: Refreshing cart data');
+        Future.delayed(const Duration(seconds: 3), () {
         cartBloc.add(CartFetchRequested(needToShowLoader: true));
+        });
       }
     });
 
@@ -273,32 +277,14 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
         // Non-veg switch
         Row(
           children: <Widget>[
-            Positioned(
-                  left: 8,
-                  top: 8,
-                  child: Container(
-                    width: 14,
-                    height: 14,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      border: Border.all(
-                        color: _nonVeg ,
-                        width: 1.05,
+             SvgPicture.asset(
+                      AssetPath.get(
+                        'images/ic_NonVeg.svg',
                       ),
-                      borderRadius: BorderRadius.circular(3.5),
+                      width: 14,
+                      height: 14,
+                      fit: BoxFit.contain,
                     ),
-                    child: Center(
-                      child: Container(
-                        width: 8.4,
-                        height: 8.4,
-                        decoration: BoxDecoration(
-                          color: _nonVeg ,
-                          shape: BoxShape.circle,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
             const SizedBox(width: 8),
             GestureDetector(
               onTap: () {
@@ -345,32 +331,14 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
         // Veg switch
         Row(
           children: <Widget>[
-            Positioned(
-                  left: 8,
-                  top: 8,
-                  child: Container(
-                    width: 14,
-                    height: 14,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      border: Border.all(
-                        color:  _veg ,
-                        width: 1.05,
+             SvgPicture.asset(
+                      AssetPath.get(
+                        'images/ic_Veg.svg',
                       ),
-                      borderRadius: BorderRadius.circular(3.5),
+                      width: 14,
+                      height: 14,
+                      fit: BoxFit.contain,
                     ),
-                    child: Center(
-                      child: Container(
-                        width: 8.4,
-                        height: 8.4,
-                        decoration: BoxDecoration(
-                          color: _veg ,
-                          shape: BoxShape.circle,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
             const SizedBox(width: 8),
             GestureDetector(
               onTap: () {
@@ -609,7 +577,11 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
                 purple: _purple,
                 vegColor: _veg,
                 nonVegColor: _nonVeg,
-                cartData: _cartData, // Pass cart data to MenuItemCard
+                cartData: _cartData,
+                instock: item.instock,
+                storeIsOpen: widget.actionData?.storeIsOpen ?? true,
+                storeType: widget.actionData?.storeTypeId ?? -111,
+                // Pass cart data to MenuItemCard
                 onQuantityChanged: (productId, centralProductId, quantity, isIncrease, isCustomizable) {
                   _onQuantityChanged(productId, centralProductId, quantity, isIncrease, isCustomizable, item.title, item.imageUrl ?? '');
                 }, // Pass quantity change callback
@@ -641,16 +613,6 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
                   }
                 },
                 onAddToCart: (productId, centralProductId, quantity, isCustomizable) {
-                    if (widget.actionData?.storeIsOpen == false) {
-                      print('STORE CLOSED');
-                      BlackToastView.show(context, 'Store is closed. Please try again later');
-                      return;
-                    }
-                    else if (item.instock == false && widget.actionData?.storeTypeId == FoodCategory.grocery.value) {
-                      print('Product is not in stock');
-                      BlackToastView.show(context, 'Product is not in stock. Please try again later');
-                      return;
-                    }
                   if (isCustomizable) {
                      showModalBottomSheet(
                     context: context,
@@ -723,6 +685,8 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
       productId: p.childProductId,
       centralProductId: p.parentProductId,
       isCustomizable: p.variantsCount > 1,
+      instock: p.instock ?? true,
+      storeIsOpen: widget.actionData?.storeIsOpen ?? true,
     );
   }
 
@@ -1024,6 +988,7 @@ class _MenuItem {
   final String? centralProductId;
   final bool isCustomizable;
   final bool instock;
+  final bool storeIsOpen;
 
   const _MenuItem({
     required this.title,
@@ -1036,6 +1001,7 @@ class _MenuItem {
     this.centralProductId,
     this.isCustomizable = false,
     this.instock = true,
+    this.storeIsOpen = true,
   });
 }
 
