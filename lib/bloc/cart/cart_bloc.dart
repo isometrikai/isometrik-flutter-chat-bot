@@ -95,8 +95,9 @@ class CartBloc extends Bloc<CartEvent, CartState> {
             storeType: storeType,
           ));
         }
-        
+        print('CALLBACK MANAGER cart bloc  8');
       } else {
+        print('CALLBACK MANAGER cart bloc  7');
         cartData.clear();
         globalCartData.clear();
         totalProductCount = 0;

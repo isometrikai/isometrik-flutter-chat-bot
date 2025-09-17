@@ -108,7 +108,7 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
               try {
                 if (mounted) {
                   print('CALLBACK MANAGER 5 - RestaurantScreen fetching cart data');
-                  cartBloc.add(CartFetchRequested(needToShowLoader: true));
+                  // cartBloc.add(CartFetchRequested(needToShowLoader: true));
                   print('CALLBACK MANAGER 6 - RestaurantScreen cart fetch requested');
                 } else {
                   print('CALLBACK MANAGER WARNING - RestaurantScreen not mounted, skipping cart fetch');
