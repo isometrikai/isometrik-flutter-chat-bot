@@ -41,7 +41,7 @@ class _TutorialScreenState extends State<TutorialScreen> {
       );
     } else {
       // Navigate to chat screen when tutorial is complete
-      Navigator.pushReplacementNamed(context, '/chat');
+      // Navigator.pushReplacementNamed(context, '/chat');
     }
   }
 
@@ -199,6 +199,12 @@ class _TutorialScreenState extends State<TutorialScreen> {
         return _buildServiceSelectionPage();
       case 2:
         return _buildChatTutorialPage();
+      case 3:
+        return _buildConversationExamplesPage();
+      case 4:
+        return _buildFeaturesPage();
+      case 5:
+        return _buildReadyToStartPage();
       default:
         return _buildWelcomePage();
     }
@@ -602,6 +608,690 @@ class _TutorialScreenState extends State<TutorialScreen> {
     );
   }
 
+  Widget _buildConversationExamplesPage() {
+    return SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 24.0),
+        child: Column(
+          children: [
+            const SizedBox(height: 40),
+            
+            // Title Section
+            _buildConversationTitleSection(),
+            
+            const SizedBox(height: 24),
+            
+            // Conversation Examples
+            _buildConversationExamples(),
+            
+            const SizedBox(height: 20),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildConversationTitleSection() {
+    return Column(
+      children: [
+        const Text(
+          'Example conversations',
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontFamily: 'Plus Jakarta Sans',
+            fontWeight: FontWeight.w700,
+            fontSize: 20,
+            height: 1.2,
+            color: Color(0xFF171212),
+          ),
+        ),
+        const SizedBox(height: 12),
+        const Text(
+          'See how easy it is to get things done',
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontFamily: 'Plus Jakarta Sans',
+            fontWeight: FontWeight.w400,
+            fontSize: 14,
+            height: 1.4,
+            color: Color(0xFF6E4185),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildConversationExamples() {
+    return Column(
+      children: [
+        // Food Order Conversation
+        _buildFoodOrderConversation(),
+        
+        const SizedBox(height: 16),
+        
+        // Grocery Shopping Conversation
+        _buildGroceryShoppingConversation(),
+      ],
+    );
+  }
+
+  Widget _buildFoodOrderConversation() {
+    return Stack(
+      children: [
+        Container(
+          width: 327,
+          padding: const EdgeInsets.all(15),
+          decoration: BoxDecoration(
+            color: const Color(0xFFF5F7FF),
+            border: Border.all(color: const Color(0xFFEEF4FF)),
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text(
+                'Food order',
+                style: TextStyle(
+                  fontFamily: 'Plus Jakarta Sans',
+                  fontWeight: FontWeight.w600,
+                  fontSize: 16,
+                  height: 1.4,
+                  color: Color(0xFF242424),
+                ),
+              ),
+              const SizedBox(height: 12),
+              
+              // Conversation flow
+              Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // User message 1
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      Flexible(
+                        child: _buildUserMessage("I want to order dinner for 4 people"),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 6),
+                  
+                  // Bot response 1
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Flexible(
+                        child: _buildBotMessage("Great! What type of cuisine are you in the mood for?"),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 6),
+                  
+                  // User message 2
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      Flexible(
+                        child: _buildUserMessage("Something spicy, maybe Arabic"),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 6),
+                  
+                  // Bot response 2
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Flexible(
+                        child: _buildBotMessage("Perfect! I found 5 top-rated Arabic restaurants nearby. Here are your options..."),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+        
+        // Pizza emoji decoration (top right)
+        Positioned(
+          right: 2,
+          top: 60,
+          child: Transform.rotate(
+            angle: 0.32, // 18.09 degrees in radians
+            child: const Text(
+              '🍕',
+              style: TextStyle(fontSize: 32),
+            ),
+          ),
+        ),
+        
+        // Hamburger emoji decoration (bottom left)
+        Positioned(
+          left: 2,
+          bottom: 10,
+          child: Transform.rotate(
+            angle: 0.32, // 18.09 degrees in radians
+            child: const Text(
+              '🍔',
+              style: TextStyle(fontSize: 32),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildGroceryShoppingConversation() {
+    return Stack(
+      children: [
+        Container(
+          width: 327,
+          padding: const EdgeInsets.all(15),
+          decoration: BoxDecoration(
+            color: const Color(0xFFF5F7FF),
+            border: Border.all(color: const Color(0xFFEEF4FF)),
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text(
+                'Grocery Shopping',
+                style: TextStyle(
+                  fontFamily: 'Plus Jakarta Sans',
+                  fontWeight: FontWeight.w600,
+                  fontSize: 16,
+                  height: 1.4,
+                  color: Color(0xFF242424),
+                ),
+              ),
+              const SizedBox(height: 12),
+              
+              // Conversation flow
+              Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // User message 1
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      Flexible(
+                        child: _buildUserMessage("Need groceries for breakfast this week"),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 6),
+                  
+                  // Bot response 1
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Flexible(
+                        child: _buildBotMessage("I can help! What do you usually have for breakfast?"),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 6),
+                  
+                  // User message 2
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      Flexible(
+                        child: _buildUserMessage("Bread, milk, eggs, and some fruits"),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 6),
+                  
+                  // Bot response 2
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Flexible(
+                        child: _buildBotMessage("Added to cart: Whole wheat bread, fresh milk, free-range eggs, and seasonal fruits. Total: \$24.99"),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+        
+        // Cucumber emoji decoration (top right)
+        Positioned(
+          right: 2,
+          top: 60,
+          child: Transform.rotate(
+            angle: 0.33, // 18.65 degrees in radians
+            child: const Text(
+              '🥒',
+              style: TextStyle(fontSize: 32),
+            ),
+          ),
+        ),
+        
+        // Avocado emoji decoration (bottom left)
+        Positioned(
+          left: 2,
+          bottom: 10,
+          child: Transform.rotate(
+            angle: 0.32, // 18.09 degrees in radians
+            child: const Text(
+              '🥑',
+              style: TextStyle(fontSize: 32),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildUserMessage(String text) {
+    return Container(
+      constraints: const BoxConstraints(maxWidth: 250),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF0DAFE).withOpacity(0.8),
+        border: Border.all(color: const Color(0xFFE9DFFB)),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Text(
+        text,
+        style: const TextStyle(
+          fontFamily: 'Plus Jakarta Sans',
+          fontStyle: FontStyle.italic,
+          fontWeight: FontWeight.w400,
+          fontSize: 12,
+          height: 1.3,
+          color: Color(0xFF242424),
+        ),
+        textAlign: TextAlign.right,
+        softWrap: true,
+        overflow: TextOverflow.visible,
+      ),
+    );
+  }
+
+  Widget _buildBotMessage(String text) {
+    return Container(
+      constraints: const BoxConstraints(maxWidth: 250),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.8),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Text(
+        text,
+        style: const TextStyle(
+          fontFamily: 'Plus Jakarta Sans',
+          fontStyle: FontStyle.italic,
+          fontWeight: FontWeight.w400,
+          fontSize: 12,
+          height: 1.3,
+          color: Color(0xFF242424),
+        ),
+        textAlign: TextAlign.left,
+        softWrap: true,
+        overflow: TextOverflow.visible,
+      ),
+    );
+  }
+
+  Widget _buildFeaturesPage() {
+    return SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 24.0),
+        child: Column(
+          children: [
+            const SizedBox(height: 40),
+            
+            // Title Section
+            _buildFeaturesTitleSection(),
+            
+            const SizedBox(height: 24),
+            
+            // Features List
+            _buildFeaturesList(),
+            
+            const SizedBox(height: 20),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFeaturesTitleSection() {
+    return Column(
+      children: [
+        const Text(
+          'Why choose zAIn AI?',
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontFamily: 'Plus Jakarta Sans',
+            fontWeight: FontWeight.w700,
+            fontSize: 20,
+            height: 1.2,
+            color: Color(0xFF171212),
+          ),
+        ),
+        const SizedBox(height: 12),
+        const Text(
+          'Smart features that make life easier',
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontFamily: 'Plus Jakarta Sans',
+            fontWeight: FontWeight.w400,
+            fontSize: 14,
+            height: 1.4,
+            color: Color(0xFF6E4185),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildFeaturesList() {
+    return Column(
+      children: [
+        _buildFeatureCard(
+          icon: '⏱️',
+          title: 'Available 24/7',
+          description: 'Order anytime, day or night. I never sleep!',
+        ),
+        const SizedBox(height: 16),
+        _buildFeatureCard(
+          icon: '📍',
+          title: 'Location Smart',
+          description: 'Finds the best options near you automatically',
+        ),
+        const SizedBox(height: 16),
+        _buildFeatureCard(
+          icon: '❤️',
+          title: 'Learns Your Preferences',
+          description: 'Remembers your favorite orders and suggests them',
+        ),
+        const SizedBox(height: 16),
+        _buildFeatureCard(
+          icon: '⭐',
+          title: 'Best Quality',
+          description: 'Partners with top-rated stores only',
+        ),
+        const SizedBox(height: 16),
+        _buildFeatureCard(
+          icon: '📞',
+          title: 'Real-time Updates',
+          description: 'Track your orders and get instant notifications',
+        ),
+        const SizedBox(height: 16),
+        _buildFeatureCard(
+          icon: '🎁',
+          title: 'Special Deals',
+          description: 'Exclusive discounts and offers just for you',
+        ),
+      ],
+    );
+  }
+
+  Widget _buildFeatureCard({
+    required String icon,
+    required String title,
+    required String description,
+  }) {
+    return Container(
+      width: 327,
+      constraints: const BoxConstraints(minHeight: 70),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF5F7FF),
+        border: Border.all(color: const Color(0xFFEEF4FF)),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Icon
+          Container(
+            width: 34,
+            height: 34,
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              shape: BoxShape.circle,
+            ),
+            child: Center(
+              child: Text(
+                icon,
+                style: const TextStyle(fontSize: 16),
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          
+          // Text content
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontFamily: 'Plus Jakarta Sans',
+                    fontWeight: FontWeight.w500,
+                    fontSize: 16,
+                    height: 1.4,
+                    color: Color(0xFF242424),
+                  ),
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  description,
+                  style: const TextStyle(
+                    fontFamily: 'Plus Jakarta Sans',
+                    fontWeight: FontWeight.w400,
+                    fontSize: 12,
+                    height: 1.4,
+                    color: Color(0xFF585C77),
+                  ),
+                  softWrap: true,
+                  overflow: TextOverflow.visible,
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildReadyToStartPage() {
+    return SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 24.0),
+        child: Column(
+          children: [
+            const SizedBox(height: 20),
+            
+            // Title Section
+            _buildReadyToStartTitleSection(),
+            
+            const SizedBox(height: 24),
+            
+            // Main Content
+            _buildReadyToStartContent(),
+            
+            const SizedBox(height: 20),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildReadyToStartTitleSection() {
+    return Column(
+      children: [
+        const Text(
+          'Ready to Get Started?',
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontFamily: 'Plus Jakarta Sans',
+            fontWeight: FontWeight.w700,
+            fontSize: 20,
+            height: 1.2,
+            color: Color(0xFF171212),
+          ),
+        ),
+        const SizedBox(height: 8),
+        const Text(
+          'Your AI assistant is ready to help!',
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontFamily: 'Plus Jakarta Sans',
+            fontWeight: FontWeight.w400,
+            fontSize: 14,
+            height: 1.4,
+            color: Color(0xFF6E4185),
+          ),
+        ),
+        const SizedBox(height: 16),
+        const Text(
+          'Start chatting with Zain AI to order food, shop for groceries, book services, and more. Just type what you need!',
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontFamily: 'Plus Jakarta Sans',
+            fontWeight: FontWeight.w400,
+            fontSize: 14,
+            height: 1.4,
+            color: Color(0xFF242424),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildReadyToStartContent() {
+    return Column(
+      children: [
+        // Try saying section
+        Container(
+          width: 327,
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: const Color(0xFFF5F7FF),
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Column(
+            children: [
+              // Try saying header
+              Row(
+                children: [
+                  const Text(
+                    'Try saying:',
+                    style: TextStyle(
+                      fontFamily: 'Plus Jakarta Sans',
+                      fontWeight: FontWeight.w600,
+                      fontSize: 16,
+                      height: 1.4,
+                      color: Color(0xFF242424),
+                    ),
+                  ),
+                  const Spacer(),
+                  // Chat bubble emoji
+                  Transform.rotate(
+                    angle: 0.32, // 18.09 degrees in radians
+                    child: const Text(
+                      '💬',
+                      style: TextStyle(fontSize: 32),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              
+              // Example messages
+              _buildExampleMessages(),
+            ],
+          ),
+        ),
+        
+        const SizedBox(height: 16),
+        
+        // Pro tip section
+        Container(
+          width: 327,
+          padding: const EdgeInsets.all(15),
+          decoration: BoxDecoration(
+            color: const Color(0xFFF5F7FF),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Row(
+            children: [
+              // Lightbulb emoji
+              const Text(
+                '💡',
+                style: TextStyle(fontSize: 36),
+              ),
+              const SizedBox(width: 11),
+              // Pro tip text
+              Expanded(
+                child: Text(
+                  'Pro tip: The more specific you are, the better I can help you!',
+                  style: const TextStyle(
+                    fontFamily: 'Plus Jakarta Sans',
+                    fontWeight: FontWeight.w600,
+                    fontSize: 14,
+                    height: 1.4,
+                    color: Color(0xFF242424),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildExampleMessages() {
+    return Column(
+      children: [
+        _buildExampleMessage('Order me a healthy lunch'),
+        const SizedBox(height: 4),
+        _buildExampleMessage('I need cleaning service this weekend'),
+        const SizedBox(height: 4),
+        _buildExampleMessage('Show me electronics deals'),
+      ],
+    );
+  }
+
+  Widget _buildExampleMessage(String text) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF0DAFE).withOpacity(0.8),
+        border: Border.all(color: const Color(0xFFE9DFFB)),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Text(
+        text,
+        textAlign: TextAlign.right,
+        style: const TextStyle(
+          fontFamily: 'Plus Jakarta Sans',
+          fontStyle: FontStyle.italic,
+          fontWeight: FontWeight.w400,
+          fontSize: 12,
+          height: 1.4,
+          color: Color(0xFF242424),
+        ),
+      ),
+    );
+  }
+
   Widget _buildCentralImage() {
     return SvgPicture.asset(
       AssetPath.get('images/ic_LogoTutorial.svg'),
@@ -681,6 +1371,9 @@ class _TutorialScreenState extends State<TutorialScreen> {
   }
 
   Widget _buildBottomNavigation() {
+    // if (widget.currentStep == 0) {
+    //   return Container();
+    // }
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.fromLTRB(24, 10, 24, 10),
@@ -693,18 +1386,10 @@ class _TutorialScreenState extends State<TutorialScreen> {
           // Back Button
           GestureDetector(
             onTap: _previousPage,
-            child: Container(
+            child: SvgPicture.asset(
+              AssetPath.get('images/ic_previous.svg'),
               width: 60,
               height: 60,
-              decoration: BoxDecoration(
-                color: const Color(0xFFF5F7FF),
-                borderRadius: BorderRadius.circular(30),
-              ),
-              child: const Icon(
-                Icons.arrow_back_ios,
-                color: Color(0xFF8E2FFD),
-                size: 24,
-              ),
             ),
           ),
           
@@ -713,29 +1398,10 @@ class _TutorialScreenState extends State<TutorialScreen> {
           // Next Button
           GestureDetector(
             onTap: _nextPage,
-            child: Container(
+            child: SvgPicture.asset(
+              AssetPath.get('images/ic_next.svg'),
               width: 60,
               height: 60,
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  begin: Alignment.centerLeft,
-                  end: Alignment.centerRight,
-                  colors: [
-                    Color(0xFFD445EC),
-                    Color(0xFFB02EFB),
-                    Color(0xFF8E2FFD),
-                    Color(0xFF5E3DFE),
-                    Color(0xFF5186E0),
-                  ],
-                  stops: [0.0, 0.27, 0.48, 0.76, 1.0],
-                ),
-                borderRadius: BorderRadius.circular(30),
-              ),
-              child: const Icon(
-                Icons.arrow_forward_ios,
-                color: Colors.white,
-                size: 24,
-              ),
             ),
           ),
         ],

@@ -46,7 +46,7 @@ class MyApp extends StatelessWidget {
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
       themeMode: ThemeMode.system,
-      home: TutorialScreen(currentStep: 1, totalSteps: 3),//TutorialScreen(),//LaunchScreen(),//ChatScreen(),
+      home: TutorialScreen(currentStep: 1, totalSteps: 6),//TutorialScreen(),//LaunchScreen(),//ChatScreen(),
       debugShowCheckedModeBanner: false,
     );
   }
