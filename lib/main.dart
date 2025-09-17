@@ -17,9 +17,6 @@ void main() async {
   
   await PlatformService.initializeFromPlatform();
   
-  // Pre-initialize speech service for ultra-fast response (non-blocking)
-  // unawaited(SpeechService().initialize());
-  
   runApp(const MyApp());
 }
 
@@ -31,9 +28,6 @@ void chatMain() async {
   AssetPath.isPackageMode = true;
   
   await PlatformService.initializeFromPlatform();
-  
-  // Pre-initialize speech service for ultra-fast response (non-blocking)
-  // unawaited(SpeechService().initialize());
   
   runApp(const MyApp());
 }

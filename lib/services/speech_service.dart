@@ -11,6 +11,7 @@ class SpeechService {
   bool _isAvailable = false;
   bool _isInitialized = false;
   bool _isPreWarmed = false;
+  bool _initializationStarted = false;
 
   /// Initialize speech to text service
   Future<bool> initialize() async {
@@ -18,7 +19,20 @@ class SpeechService {
       return _isAvailable;
     }
     
+    if (!_initializationStarted) {
+      _initializationStarted = true;
+      _initializeInBackground(); // Don't await this
+    }
+    
+    // Return immediately - don't block the UI
+    return _isAvailable;
+  }
+
+  /// Initialize speech recognition in background
+  void _initializeInBackground() async {
     try {
+      debugPrint('Starting speech recognition initialization in background...');
+      
       _isAvailable = await _speechToText.initialize(
         onError: (error) {
           debugPrint('Speech recognition error: ${error.errorMsg}');
@@ -30,18 +44,19 @@ class SpeechService {
           }
         },
       );
+      
       _isInitialized = true;
+      debugPrint('Speech recognition initialized: $_isAvailable');
       
       // Pre-warm the service for ultra-fast response
       if (_isAvailable) {
         _preWarmService();
       }
       
-      return _isAvailable;
     } catch (e) {
       debugPrint('Failed to initialize speech recognition: $e');
-      _isInitialized = true; // Mark as initialized even if failed
-      return false;
+      _isInitialized = true;
+      _isAvailable = false;
     }
   }
 
@@ -87,6 +102,13 @@ class SpeechService {
 
   /// Ultra-fast start listening - instant response
   bool startListeningFast() {
+    // If not initialized yet, start initialization and return false
+    if (!_isInitialized && !_initializationStarted) {
+      initialize();
+      return false;
+    }
+    
+    // If initialization is in progress or not available, return false
     if (!_isAvailable || _isListening) {
       return false;
     }
@@ -125,6 +147,21 @@ class SpeechService {
     Duration? pauseDuration,
     Duration? partialResults,
   }) async {
+    // If not initialized yet, start initialization and wait
+    if (!_isInitialized && !_initializationStarted) {
+      await initialize();
+    }
+    
+    // Wait for initialization to complete if it's in progress
+    if (!_isInitialized) {
+      // Wait a bit for initialization to complete
+      int attempts = 0;
+      while (!_isInitialized && attempts < 50) { // Wait up to 5 seconds
+        await Future.delayed(const Duration(milliseconds: 100));
+        attempts++;
+      }
+    }
+    
     if (!_isAvailable) {
       debugPrint('Speech recognition not available');
       return false;

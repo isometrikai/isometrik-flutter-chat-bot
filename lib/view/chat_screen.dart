@@ -305,10 +305,6 @@ class _ChatScreenState extends State<ChatScreen> {
     // Initialize cartBloc directly since it's provided by parent MultiBlocProvider
     _cartBloc = context.read<CartBloc>();
     
-    // Speech service is already initialized at app startup for ultra-fast response
-    // Just check availability
-    _initializeSpeechService();
-    
     // Add keyboard listener
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
@@ -316,6 +312,11 @@ class _ChatScreenState extends State<ChatScreen> {
       _messageFocusNode.addListener(_onFocusChange);
       // Fetch cart data after cartBloc is initialized
       _fetchCartData();
+      Future.delayed(const Duration(seconds: 1), () {
+        // Speech service is already initialized at app startup for ultra-fast response
+        // Just check availability
+        _initializeSpeechService();
+      });
     });
   }
 
@@ -324,39 +325,32 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   Future<void> _initializeSpeechService() async {
-    // Check if service is already available from app startup
-    _isSpeechAvailable = _speechService.isAvailable;
-    
-    if (_isSpeechAvailable) {
-      debugPrint('Speech service already initialized at app startup');
-    } else {
-      // Fallback initialization if not already done
-      try {
-        _isSpeechAvailable = await _speechService.initialize();
-        if (!_isSpeechAvailable) {
-          debugPrint('Speech recognition not available');
-        } else {
-          debugPrint('Speech service initialized successfully');
-        }
-      } catch (e) {
-        debugPrint('Failed to initialize speech service: $e');
-        _isSpeechAvailable = false;
+    // Start initialization in background - don't block UI
+    try {
+      _isSpeechAvailable = await _speechService.initialize();
+      if (!_isSpeechAvailable) {
+        debugPrint('Speech recognition not available');
+      } else {
+        debugPrint('Speech service initialized successfully');
       }
+    } catch (e) {
+      debugPrint('Failed to initialize speech service: $e');
+      _isSpeechAvailable = false;
     }
   }
 
   Future<void> _startSpeechRecording() async {
-    if (!_isSpeechAvailable || _isRecording) {
+    if (_isRecording) {
       return;
     }
-
+    
+    // Haptic feedback for stop
+    HapticFeedback.lightImpact();
+    
     // IMMEDIATE response - no async operations blocking UI
     setState(() {
       _isRecording = true;
     });
-    
-    // Haptic feedback for immediate response
-    HapticFeedback.mediumImpact();
     
     // Ultra-fast start - fire and forget approach
     final bool started = _speechService.startListeningFast();
@@ -365,7 +359,14 @@ class _ChatScreenState extends State<ChatScreen> {
       setState(() {
         _isRecording = false;
       });
-      // BlackToastView.show(context, 'Failed to start recording');
+      
+      // Update availability status
+      _isSpeechAvailable = _speechService.isAvailable;
+      
+      // Show user feedback if service is not available
+      if (!_isSpeechAvailable) {
+        BlackToastView.show(context, 'Speech recognition is not available');
+      }
     }
   }
 
