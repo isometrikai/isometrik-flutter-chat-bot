@@ -63,7 +63,7 @@ class ChatBot {
     );
   }
 
-  static void isCartUpdate(dynamic cartData) {
+   void isCartUpdate() {
     // print('isCartUpdate: $cartData');
     // Trigger the cart update callback to notify both ChatScreen and RestaurantScreen
     // OrderService().triggerCartUpdate(true);
