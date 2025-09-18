@@ -312,9 +312,9 @@ class _ChatScreenState extends State<ChatScreen> {
     OrderService().setCartUpdateCallback((bool isCartUpdate) {
       if (mounted && isCartUpdate) {
         print('ChatScreen: Cart update received - $isCartUpdate');
-        Future.delayed(const Duration(seconds: 3), () {
+        // Future.delayed(const Duration(seconds: 3), () {
           _sendMessage("I have updated the cart");
-        });
+        // });
       }
     });
 

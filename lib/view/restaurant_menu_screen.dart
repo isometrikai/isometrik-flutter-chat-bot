@@ -79,9 +79,9 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
         print('RestaurantMenuScreen: Cart update received - $isCartUpdate');
         // Refresh cart data when cart update is triggered
         print('RestaurantMenuScreen: Refreshing cart data');
-        Future.delayed(const Duration(seconds: 3), () {
+        // Future.delayed(const Duration(seconds: 3), () {
         cartBloc.add(CartFetchRequested(needToShowLoader: true));
-        });
+        // });
       }
     });
 
