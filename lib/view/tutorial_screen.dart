@@ -136,7 +136,7 @@ class _TutorialScreenState extends State<TutorialScreen> {
                   ),
                 ],
               ),
-          
+          if (_currentPage != 5) ...[
           // Skip button
           GestureDetector(
             onTap: () {
@@ -166,6 +166,7 @@ class _TutorialScreenState extends State<TutorialScreen> {
               ),
             ),
           ),
+          ]
         ],
       ),
     );
