@@ -64,9 +64,7 @@ class OrderService {
 
   // Add cart update trigger
   void triggerCartUpdate(bool isCartUpdate) {
-    print('CALLBACK MANAGER 1');
     onCartUpdate?.call(isCartUpdate);
-    print('CALLBACK MANAGER 2');
   }
 
   void clearCallback() {

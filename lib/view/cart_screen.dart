@@ -504,6 +504,8 @@ class _CartScreenState extends State<CartScreen> {
                     Text(
                       categoryData.storeName,
                       style: AppTextStyles.bodyText.copyWith(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 16,
                         color: const Color(0xFF242424),
                       ),
                     ),
