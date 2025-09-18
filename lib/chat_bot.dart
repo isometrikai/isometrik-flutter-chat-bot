@@ -71,8 +71,6 @@ class ChatBot {
         ),
       );
     }else{
-      Navigator.push(
-    print('STEP 3');
     Navigator.push(
       context,
       MaterialPageRoute(
