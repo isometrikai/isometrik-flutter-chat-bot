@@ -366,7 +366,7 @@ class _ChatScreenState extends State<ChatScreen> {
     });
     
     // Ultra-fast start - fire and forget approach
-    final bool started = _speechService.startListeningFast();
+    final bool started = _speechService.startListening();
     if (!started) {
       // If fast start failed, reset the UI state
       setState(() {
