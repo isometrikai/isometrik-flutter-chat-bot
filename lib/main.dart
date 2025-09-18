@@ -1,4 +1,5 @@
 import 'package:chat_bot/view/launch_screen.dart';
+import 'package:chat_bot/view/tutorial_screen.dart';
 import 'package:flutter/material.dart';
 import 'services/api_service.dart';
 import 'services/callback_manage.dart';
@@ -45,7 +46,7 @@ class MyApp extends StatelessWidget {
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
       themeMode: ThemeMode.system,
-      home:  LaunchScreen(),//ChatScreen(),
+      home: TutorialScreen(currentStep: 1, totalSteps: 6),//TutorialScreen(),//LaunchScreen(),//ChatScreen(),
       debugShowCheckedModeBanner: false,
     );
   }
