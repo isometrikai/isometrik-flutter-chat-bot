@@ -118,7 +118,7 @@ class _CartScreenState extends State<CartScreen> {
         final categories = [
           {'name': '🍕 Restaurant', 'count': categoryCounts['restaurant']},
           {'name': '🥑 Grocery', 'count': categoryCounts['grocery']},
-          {'name': '🥑 Pharmacy', 'count': categoryCounts['pharmacy']},
+          {'name': '💊 Pharmacy', 'count': categoryCounts['pharmacy']},
         ];
 
         return Container(
