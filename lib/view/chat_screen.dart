@@ -305,14 +305,14 @@ class _ChatScreenState extends State<ChatScreen> {
     _cartBloc = context.read<CartBloc>();
     
     // Set up cart update callback - the mounted check handles if screen is active
-    // OrderService().setCartUpdateCallback((bool isCartUpdate) {
-    //   if (mounted && isCartUpdate) {
-    //     print('ChatScreen: Cart update received - $isCartUpdate');
-    //     Future.delayed(const Duration(seconds: 3), () {
-    //       _sendMessage("I have updated the cart");
-    //     });
-    //   }
-    // });
+    OrderService().setCartUpdateCallback((bool isCartUpdate) {
+      if (mounted && isCartUpdate) {
+        print('ChatScreen: Cart update received - $isCartUpdate');
+        Future.delayed(const Duration(seconds: 3), () {
+          _sendMessage("I have updated the cart");
+        });
+      }
+    });
     
     // Add keyboard listener
     WidgetsBinding.instance.addPostFrameCallback((_) {

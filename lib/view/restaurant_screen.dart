@@ -81,52 +81,16 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
     _cartData = globalCartData;
     _bootstrapData();
     isCartAPICalled = false;
-    
-    // Set up cart update callback - the mounted check handles if screen is active
-    // OrderService().setCartUpdateCallback((bool isCartUpdate) {
-    //   print('CALLBACK MANAGER 3');
-    //   if (mounted && isCartUpdate) {
-    //     print('CALLBACK MANAGER 4');
-    //     // print('RestaurantScreen: Cart update received - $isCartUpdate');
-    //     // Refresh cart data when cart update is triggered
-    //     // print('RestaurantScreen: Refreshing cart data');
-    //     Future.delayed(const Duration(seconds: 3), () {
-    //       print('CALLBACK MANAGER 5');
-    //     cartBloc.add(CartFetchRequested(needToShowLoader: true));
-    //     print('CALLBACK MANAGER 6');
-    //     });
-    //   }
-    // });
-     try {
+
       OrderService().setCartUpdateCallback((bool isCartUpdate) {
-        try {
-          print('CALLBACK MANAGER 3 - RestaurantScreen received cart update: $isCartUpdate');
           if (mounted && isCartUpdate) {
-            print('CALLBACK MANAGER 4 - RestaurantScreen processing cart update');
             // Refresh cart data when cart update is triggered
             Future.delayed(const Duration(seconds: 3), () {
-              try {
-                if (mounted) {
-                  print('CALLBACK MANAGER 5 - RestaurantScreen fetching cart data');
-                  // cartBloc.add(CartFetchRequested(needToShowLoader: true));
-                  print('CALLBACK MANAGER 6 - RestaurantScreen cart fetch requested');
-                } else {
-                  print('CALLBACK MANAGER WARNING - RestaurantScreen not mounted, skipping cart fetch');
-                }
-              } catch (e) {
-                print('CALLBACK MANAGER ERROR - RestaurantScreen failed to fetch cart: $e');
-              }
+              cartBloc.add(CartFetchRequested(needToShowLoader: true));
             });
-          } else {
-            print('CALLBACK MANAGER INFO - RestaurantScreen skipping cart update (not mounted or not an update)');
           }
-        } catch (e) {
-          print('CALLBACK MANAGER ERROR - RestaurantScreen cart update callback failed: $e');
-        }
       });
-    } catch (e) {
-      print('CALLBACK MANAGER ERROR - RestaurantScreen failed to set cart update callback: $e');
-    }
+
     
     // Listen to cart state changes to update cart data
     cartBloc.stream.listen((state) {
