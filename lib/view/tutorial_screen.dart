@@ -41,7 +41,7 @@ class _TutorialScreenState extends State<TutorialScreen> {
         curve: Curves.easeInOut,
       );
     } else {
-       Navigator.push(
+       Navigator.pushReplacement(
       context,
       MaterialPageRoute(
         builder: (context) => const LaunchScreen(),
@@ -141,7 +141,7 @@ class _TutorialScreenState extends State<TutorialScreen> {
           GestureDetector(
             onTap: () {
               // Navigate to chat screen or main app
-              Navigator.push(
+              Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(
                   builder: (context) => const LaunchScreen(),
