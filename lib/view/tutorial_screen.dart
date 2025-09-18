@@ -1,3 +1,4 @@
+import 'package:chat_bot/view/launch_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import '../utils/asset_path.dart';
@@ -40,8 +41,12 @@ class _TutorialScreenState extends State<TutorialScreen> {
         curve: Curves.easeInOut,
       );
     } else {
-      // Navigate to chat screen when tutorial is complete
-      // Navigator.pushReplacementNamed(context, '/chat');
+       Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const LaunchScreen(),
+      ),
+    );
     }
   }
 
@@ -136,7 +141,12 @@ class _TutorialScreenState extends State<TutorialScreen> {
           GestureDetector(
             onTap: () {
               // Navigate to chat screen or main app
-              Navigator.pushReplacementNamed(context, '/chat');
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const LaunchScreen(),
+                ),
+              );
             },
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 6),
@@ -492,7 +502,7 @@ class _TutorialScreenState extends State<TutorialScreen> {
             // Sparkles emoji decoration
             Positioned(
               right: 2,
-              bottom: 20,
+              bottom: 0,
               child: Transform.rotate(
                 angle: 0.22, // 12.55 degrees in radians
                 child: const Text(
@@ -533,14 +543,32 @@ class _TutorialScreenState extends State<TutorialScreen> {
           
           // Chat examples
           Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
+            crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              _buildChatBubble("I'm hungry, order some pizza"),
+              // Left aligned bubble
+              Row(
+                children: [
+                  _buildChatBubble("I'm hungry, order some pizza"),
+                  const Spacer(),
+                ],
+              ),
               const SizedBox(height: 4),
-              _buildChatBubble("Need groceries for the week"),
+              // Right aligned bubble
+              Row(
+                children: [
+                  const Spacer(),
+                  _buildChatBubble("Need groceries for the week"),
+                ],
+              ),
               const SizedBox(height: 4),
-              _buildChatBubble("Book a haircut for tomorrow"),
+              // Left aligned bubble
+              Row(
+                children: [
+                  _buildChatBubble("Book a haircut for tomorrow"),
+                  const Spacer(),
+                ],
+              ),
             ],
           ),
         ],
@@ -757,7 +785,7 @@ class _TutorialScreenState extends State<TutorialScreen> {
         // Pizza emoji decoration (top right)
         Positioned(
           right: 2,
-          top: 60,
+          top: 65,
           child: Transform.rotate(
             angle: 0.32, // 18.09 degrees in radians
             child: const Text(
@@ -770,7 +798,7 @@ class _TutorialScreenState extends State<TutorialScreen> {
         // Hamburger emoji decoration (bottom left)
         Positioned(
           left: 2,
-          bottom: 10,
+          bottom: 60,
           child: Transform.rotate(
             angle: 0.32, // 18.09 degrees in radians
             child: const Text(
@@ -865,7 +893,7 @@ class _TutorialScreenState extends State<TutorialScreen> {
         // Cucumber emoji decoration (top right)
         Positioned(
           right: 2,
-          top: 60,
+          top: 70,
           child: Transform.rotate(
             angle: 0.33, // 18.65 degrees in radians
             child: const Text(
@@ -878,7 +906,7 @@ class _TutorialScreenState extends State<TutorialScreen> {
         // Avocado emoji decoration (bottom left)
         Positioned(
           left: 2,
-          bottom: 10,
+          bottom: 60,
           child: Transform.rotate(
             angle: 0.32, // 18.09 degrees in radians
             child: const Text(
@@ -1371,9 +1399,57 @@ class _TutorialScreenState extends State<TutorialScreen> {
   }
 
   Widget _buildBottomNavigation() {
-    // if (widget.currentStep == 0) {
-    //   return Container();
-    // }
+    // Show "Let's get started" button on the first page
+    if (_currentPage == 0) {
+      return Container(
+        width: double.infinity,
+        padding: const EdgeInsets.fromLTRB(24, 10, 24, 10),
+        decoration: const BoxDecoration(
+          color: Colors.white,
+        ),
+        child: Center(
+          child: GestureDetector(
+            onTap: () {
+              _nextPage();
+            },
+            child: Container(
+              width: 327,
+              height: 62,
+              padding: const EdgeInsets.symmetric(horizontal: 25),
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  begin: Alignment.centerLeft,
+                  end: Alignment.centerRight,
+                  colors: [
+                    Color(0xFFD445EC),
+                    Color(0xFFB02EFB),
+                    Color(0xFF8E2FFD),
+                    Color(0xFF5E3DFE),
+                    Color(0xFF5186E0),
+                  ],
+                  stops: [0.0, 0.27, 0.48, 0.76, 1.0],
+                ),
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: const Center(
+                child: Text(
+                  "Let's get started",
+                  style: TextStyle(
+                    fontFamily: 'Plus Jakarta Sans',
+                    fontWeight: FontWeight.w700,
+                    fontSize: 16,
+                    height: 1.2,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+    
+    // Regular navigation for other pages
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.fromLTRB(24, 10, 24, 10),
@@ -1398,7 +1474,11 @@ class _TutorialScreenState extends State<TutorialScreen> {
           // Next Button
           GestureDetector(
             onTap: _nextPage,
-            child: SvgPicture.asset(
+            child: _currentPage == 5 ? SvgPicture.asset(
+              AssetPath.get('images/ic_final.svg'),
+              width: 60,
+              height: 60,
+            ) : SvgPicture.asset(
               AssetPath.get('images/ic_next.svg'),
               width: 60,
               height: 60,
