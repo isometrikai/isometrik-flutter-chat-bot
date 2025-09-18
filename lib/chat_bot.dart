@@ -1,5 +1,6 @@
 library chat_bot;
 
+import 'package:chat_bot/utils/user_preferences.dart';
 import 'package:chat_bot/view/tutorial_screen.dart';
 import 'package:flutter/material.dart';
 import 'view/launch_screen.dart';
@@ -54,16 +55,29 @@ class ChatBot {
     );
   }
 
-  static void openChatBot(BuildContext context) {
+  static void openChatBot(BuildContext context) async {
     // Set current context for fallback when navigator key is not available
     Utility.setCurrentContext(context);
-    print('userId: $userId');
-    Navigator.push(
+      print('============================userId: $userId');
+
+    String? savedUserId = await UserPreferences.getUserId();
+    print('============================savedUserId: $savedUserId');
+    if (savedUserId == null || savedUserId.isEmpty || savedUserId != userId) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const TutorialScreen(),
+        ),
+      );
+    }else{
+      UserPreferences.saveUserId(userId);
+      Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => const TutorialScreen(),
-      ),
-    );
+          builder: (context) => const LaunchScreen(),
+        ),
+      );
+    }
   }
 
   static void isCartUpdate(dynamic cartData) {
