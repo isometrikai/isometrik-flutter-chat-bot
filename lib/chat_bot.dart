@@ -1,5 +1,7 @@
 library chat_bot;
 
+import 'package:chat_bot/utils/user_preferences.dart';
+import 'package:chat_bot/view/tutorial_screen.dart';
 import 'package:flutter/material.dart';
 import 'view/launch_screen.dart';
 import 'services/api_service.dart';
@@ -12,6 +14,8 @@ export 'data/model/mygpts_model.dart';
 export 'services/api_service.dart';
 
 class ChatBot {
+  static bool isTutorialShown = false;
+
   static void configure({
     required String chatBotId,
     required String appSecret,
@@ -24,6 +28,12 @@ class ChatBot {
     required String location,
     required double longitude,
     required double latitude,
+    required bool needToShowTutorial,
+    required String clientGuid,
+    required String indexName,
+    required String visitId,
+    required String visitorId,
+    required String searchApiUrl,
   }) {
     print('chatBotId: $chatBotId');
     print('appSecret: $appSecret');
@@ -36,6 +46,8 @@ class ChatBot {
     print('location: $location');
     print('longitude: $longitude');
     print('latitude: $latitude');
+    print('needToShowTutorial: $needToShowTutorial');
+    isTutorialShown = needToShowTutorial;
     ApiService.configure(
       chatBotId: chatBotId,
       appSecret: appSecret,
@@ -48,25 +60,30 @@ class ChatBot {
       location: location,
       longitude: longitude,
       latitude: latitude,
+        needToShowTutorial:needToShowTutorial
     );
   }
 
-  static void openChatBot(BuildContext context) {
+  static void openChatBot(BuildContext context) async {
     // Set current context for fallback when navigator key is not available
     Utility.setCurrentContext(context);
-    print('STEP 3');
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => const LaunchScreen(),
-      ),
-    );
+    print('isTutorialShown: $isTutorialShown');
+    if (isTutorialShown == true) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const TutorialScreen()),
+      );
+    } else {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const LaunchScreen()),
+      );
+    }
   }
 
-   static void isCartUpdate(dynamic cartData) {
-    // print('isCartUpdate: $cartData');
+  static void isCartUpdate(dynamic cartData) {
+    print('isCartUpdate: $cartData');
     // Trigger the cart update callback to notify both ChatScreen and RestaurantScreen
-    // OrderService().triggerCartUpdate(true);
+    OrderService().triggerCartUpdate(true);
   }
-
 }

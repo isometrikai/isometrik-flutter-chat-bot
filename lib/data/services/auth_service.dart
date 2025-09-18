@@ -48,6 +48,7 @@ class AuthService {
     String? location,
     double? longitude,
     double? latitude,
+    bool? needToShowTutorial
   }) {
     _chatBotId = chatBotId;
     _isProduction = isProduction;
@@ -153,7 +154,7 @@ class AuthService {
   Future<GreetingResponse?> getInitialOptionData() async {
     final res = await _chatClient.get(
       '/v2/home-screen',
-      queryParameters: { 'username': _name ?? '',
+       queryParameters: { 'username': _name ?? '',
         'timestamp': _timestamp ?? '',
         'location': _location ?? '',
           'latitude': _latitude.toString(),

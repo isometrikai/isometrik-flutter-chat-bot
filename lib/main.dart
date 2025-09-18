@@ -1,11 +1,14 @@
 import 'package:chat_bot/view/launch_screen.dart';
+import 'package:chat_bot/view/tutorial_screen.dart';
 import 'package:flutter/material.dart';
 import 'services/api_service.dart';
 import 'services/callback_manage.dart';
+import 'services/speech_service.dart';
 import 'package:flutter/services.dart';
 import 'utils/asset_path.dart';
 import 'utils/utility.dart';
 import 'utils/app_theme.dart';
+import 'dart:async';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -14,6 +17,7 @@ void main() async {
   // AssetPath.isPackageMode = true; // Set to true for package mode, false for normal project
   
   await PlatformService.initializeFromPlatform();
+  
   runApp(const MyApp());
 }
 
@@ -25,6 +29,7 @@ void chatMain() async {
   AssetPath.isPackageMode = true;
   print('STEP 2');
   await PlatformService.initializeFromPlatform();
+  
   runApp(const MyApp());
 }
 class MyApp extends StatelessWidget {
@@ -45,7 +50,7 @@ class MyApp extends StatelessWidget {
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
       themeMode: ThemeMode.system,
-      home:  LaunchScreen(),//ChatScreen(),
+      home: TutorialScreen(currentStep: 1, totalSteps: 6),//TutorialScreen(),//LaunchScreen(),//ChatScreen(),
       debugShowCheckedModeBanner: false,
     );
   }
@@ -112,6 +117,7 @@ class PlatformService {
         location: config['location'],
         longitude: longitude,
         latitude: latitude,
+        needToShowTutorial: config['needToShowTutorial']
       );
 
       print('✅ ApiService configured successfully');
@@ -131,6 +137,7 @@ class PlatformService {
             isProduction: false,
             latitude: 25.276987,
             longitude: 55.296249,
+
           );
       }
     }
