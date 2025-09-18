@@ -36,6 +36,7 @@ import 'package:chat_bot/widgets/choose_card_widget.dart';
 import 'package:chat_bot/widgets/order_summary_widget.dart';
 import 'package:chat_bot/widgets/order_confirmed_widget.dart';
 import '../utils/enum.dart';
+import '../services/speech_service.dart';
 
 class ChatScreen extends StatefulWidget {
   final MyGPTsResponse chatbotData;
@@ -59,6 +60,9 @@ class _ChatScreenState extends State<ChatScreen> {
   List<ChatMessage> messages = [];
   
   late final CartBloc _cartBloc;
+  final SpeechService _speechService = SpeechService();
+  bool _isSpeechAvailable = false;
+  bool _isRecording = false;
 
   // Returns index of the last bot message that shows stores, products, choose_address, choose_card, order_summary, or order_confirmed widgets; -1 if none
   // Cart widget is not considered for hiding
@@ -321,11 +325,118 @@ class _ChatScreenState extends State<ChatScreen> {
       _messageFocusNode.addListener(_onFocusChange);
       // Fetch cart data after cartBloc is initialized
       _fetchCartData();
+      Future.delayed(const Duration(seconds: 1), () {
+        // Speech service is already initialized at app startup for ultra-fast response
+        // Just check availability
+        _initializeSpeechService();
+      });
     });
   }
 
   void _initializeSession() {
     _sessionId = "${DateTime.now().millisecondsSinceEpoch ~/ 1000}";
+  }
+
+  Future<void> _initializeSpeechService() async {
+    // Start initialization in background - don't block UI
+    try {
+      _isSpeechAvailable = await _speechService.initialize();
+      if (!_isSpeechAvailable) {
+        debugPrint('Speech recognition not available');
+      } else {
+        debugPrint('Speech service initialized successfully');
+      }
+    } catch (e) {
+      debugPrint('Failed to initialize speech service: $e');
+      _isSpeechAvailable = false;
+    }
+  }
+
+  Future<void> _startSpeechRecording() async {
+    if (_isRecording) {
+      return;
+    }
+    
+    // Haptic feedback for stop
+    HapticFeedback.lightImpact();
+    
+    // IMMEDIATE response - no async operations blocking UI
+    setState(() {
+      _isRecording = true;
+    });
+    
+    // Ultra-fast start - fire and forget approach
+    final bool started = _speechService.startListeningFast();
+    if (!started) {
+      // If fast start failed, reset the UI state
+      setState(() {
+        _isRecording = false;
+      });
+      
+      // Update availability status
+      _isSpeechAvailable = _speechService.isAvailable;
+      
+      // Show user feedback if service is not available
+      if (!_isSpeechAvailable) {
+        BlackToastView.show(context, 'Speech recognition is not available');
+      }
+    }
+  }
+
+  Future<void> _stopSpeechRecording() async {
+    if (!_isRecording) {
+      return;
+    }
+
+    // Haptic feedback for stop
+    HapticFeedback.lightImpact();
+
+    try {
+      await _speechService.stopListening();
+      
+      setState(() {
+        _isRecording = false;
+      });
+
+      final String recognizedText = _speechService.currentRecognizedText;
+      
+      if (recognizedText.trim().isNotEmpty) {
+        // Set the recognized text to the text field
+        _messageController.text = recognizedText.trim();
+        
+      } else {
+        BlackToastView.show(context, 'No speech detected. Please try again.');
+      }
+    } catch (e) {
+      debugPrint('Failed to stop speech recording: $e');
+      setState(() {
+        _isRecording = false;
+      });
+      BlackToastView.show(context, 'Recording failed. Please try again.');
+    }
+  }
+
+  Future<void> _cancelSpeechRecording() async {
+    if (!_isRecording) {
+      return;
+    }
+
+    // Haptic feedback for cancel
+    HapticFeedback.lightImpact();
+
+    try {
+      await _speechService.cancel();
+      
+      setState(() {
+        _isRecording = false;
+      });
+
+    } catch (e) {
+      debugPrint('Failed to cancel speech recording: $e');
+      setState(() {
+        _isRecording = false;
+      });
+    }
   }
 
   Future<void> _restartChatAPI() async {
@@ -387,6 +498,10 @@ class _ChatScreenState extends State<ChatScreen> {
       onUpdateCartCount: _updateCartCount, // Add the callback
       totalCartCount: _totalCartCount, // Pass the cart count
       cartBloc: _cartBloc, // Pass the cart bloc
+      onStartSpeechRecording: _startSpeechRecording, // Add start speech handler
+      onStopSpeechRecording: _stopSpeechRecording, // Add stop speech handler
+      onCancelSpeechRecording: _cancelSpeechRecording, // Add cancel speech handler
+      isRecording: _isRecording, // Pass recording state
     );
   }
 }
@@ -417,6 +532,10 @@ class _ChatScreenBody extends StatelessWidget {
   final Function(int) onUpdateCartCount; // Add callback to update cart count
   final int totalCartCount; // Add cart count parameter
   final CartBloc cartBloc; // Add cart bloc parameter
+  final Future<void> Function() onStartSpeechRecording; // Add start speech handler
+  final Future<void> Function() onStopSpeechRecording; // Add stop speech handler
+  final Future<void> Function() onCancelSpeechRecording; // Add cancel speech handler
+  final bool isRecording; // Add recording state
 
   const _ChatScreenBody({
     required this.messageController,
@@ -444,6 +563,10 @@ class _ChatScreenBody extends StatelessWidget {
     required this.onUpdateCartCount, // Add the callback parameter
     required this.totalCartCount, // Add the cart count parameter
     required this.cartBloc, // Add the cart bloc parameter
+    required this.onStartSpeechRecording, // Add the start speech handler parameter
+    required this.onStopSpeechRecording, // Add the stop speech handler parameter
+    required this.onCancelSpeechRecording, // Add the cancel speech handler parameter
+    required this.isRecording, // Add the recording state parameter
   });
 
   @override
@@ -594,7 +717,13 @@ class _ChatScreenBody extends StatelessWidget {
                       ),
                     ),
                     _buildActionButtons(context),
-                    _buildInputArea(context),
+                    Stack(
+                      children: [
+                        _buildInputArea(context),
+                        if (isRecording)
+                        _buildInputRecordingArea(context)
+                      ],
+                    )
                   ],
                 );
               },
@@ -793,51 +922,7 @@ class _ChatScreenBody extends StatelessWidget {
               const SizedBox(height: 24),
               Row(
                 children: [
-                  // Expanded(
-                  //   child: TextButton(
-                  //     onPressed: () => Navigator.of(context).pop(),
-                  //     style: TextButton.styleFrom(
-                  //       backgroundColor: Colors.grey[100],
-                  //       foregroundColor: Colors.black,
-                  //       padding: const EdgeInsets.symmetric(vertical: 16),
-                  //       shape: RoundedRectangleBorder(
-                  //         borderRadius: BorderRadius.circular(12),
-                  //       ),
-                  //     ),
-                  //     child: const Text(
-                  //       'CANCEL',
-                  //       style: TextStyle(
-                  //         fontSize: 16,
-                  //         fontWeight: FontWeight.w600,
-                  //         color: Color(0xFF8E2FFD)
-                  //       ),
-                  //     ),
-                  //   ),
-                  // ),
-                  // const SizedBox(width: 16),
-                  // Expanded(
-                  //   child: TextButton(
-                  //     onPressed: () {
-                  //       Navigator.of(context).pop();
-                  //       onRestartChatAPI();
-                  //     },
-                  //     style: TextButton.styleFrom(
-                  //       backgroundColor: Color(0xFF8E2FFD),
-                  //       foregroundColor: Colors.white,
-                  //       padding: const EdgeInsets.symmetric(vertical: 16),
-                  //       shape: RoundedRectangleBorder(
-                  //         borderRadius: BorderRadius.circular(12),
-                  //       ),
-                  //     ),
-                  //     child: const Text(
-                  //       'YES',
-                  //       style: TextStyle(
-                  //         fontSize: 16,
-                  //         fontWeight: FontWeight.w600,
-                  //       ),
-                  //     ),
-                  //   ),
-                  // ),
+                
                   Expanded(
           child: SizedBox(
             height: 62,
@@ -1722,39 +1807,46 @@ class _ChatScreenBody extends StatelessWidget {
           color: Colors.white,
           child: SafeArea(
             top: false,
-            child: Center(
-                              child: ConstrainedBox(
-                  constraints: BoxConstraints(
-                    minHeight: 64,
-                    maxHeight: 570, // Allow up to 550 + 20 padding
-                  ),
-                child: Container(
-                  height: textFieldHeight + 20, // Dynamic height based on text field
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: const Color(0xFFE9DFFB), width: 1),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 12),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Expanded(
-                          child: Container(
-                            height: textFieldHeight,
-                            child: TextField(
-                              autofocus: false,
-                              controller: messageController,
-                              focusNode: messageFocusNode,
-                              enabled: !isApiLoading,
-                              textCapitalization: TextCapitalization.sentences,
-                              maxLines: null,
-                              minLines: 1,
-                              style: AppTextStyles.chatInput.copyWith(
-                                color: const Color(0xFF242424),
-                              ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                
+                // Input field container
+                // Stack(
+                //   children: [
+                    Center(
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      minHeight: 64,
+                      maxHeight: 570, // Allow up to 550 + 20 padding
+                    ),
+                    child: Container(
+                      height: textFieldHeight + 20, // Dynamic height based on text field
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: isRecording ? Colors.transparent :Color(0xFFE9DFFB), width: 1),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Expanded(
+                              child: Container(
+                                height: textFieldHeight,
+                                child: TextField(
+                                  autofocus: false,
+                                  controller: messageController,
+                                  focusNode: messageFocusNode,
+                                  enabled: !isApiLoading,
+                                  textCapitalization: TextCapitalization.sentences,
+                                  maxLines: null,
+                                  minLines: 1,
+                                  style: AppTextStyles.chatInput.copyWith(
+                                    color: const Color(0xFF242424),
+                                  ),
                               decoration: InputDecoration(
                                 hintText: 'How can zAIn help you today?',
                                 border: InputBorder.none,
@@ -1782,7 +1874,7 @@ class _ChatScreenBody extends StatelessWidget {
                                   textDirection: TextDirection.ltr,
                                   maxLines: null,
                                 );
-                                textPainter.layout(maxWidth: MediaQuery.of(context).size.width - 120);
+                                textPainter.layout(maxWidth: MediaQuery.of(context).size.width - 160);
                                 
                                 final newHeight = (textPainter.height + 20).clamp(50.0, 550.0);
                                 onUpdateTextFieldHeight(newHeight);
@@ -1797,6 +1889,32 @@ class _ChatScreenBody extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(width: 10),
+                         // Speech button - Single tap to start/stop recording
+                         Opacity(
+                           opacity: isApiLoading ? 0.4 : 1.0,
+                           child: GestureDetector(
+                             onTap: isApiLoading
+                                 ? null
+                                 : () async {
+                                     if (isRecording) {
+                                       // Stop recording if currently recording
+                                      //  await onStopSpeechRecording();
+                                     } else {
+                                       // Start recording if not recording
+                                       await onStartSpeechRecording();
+                                     }
+                                   },
+                            child: Container(
+                              width: 34,
+                              height: 34,
+                              child: SvgPicture.asset(
+                                AssetPath.get('images/ic_mic.svg'),
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        // Send button
                         Opacity(
                           opacity: isApiLoading ? 0.4 : 1.0,
                           child: GestureDetector(
@@ -1824,7 +1942,110 @@ class _ChatScreenBody extends StatelessWidget {
                     ),
                   ),
                 ),
-              ),
+                ),
+                ),
+                ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildInputRecordingArea(BuildContext context) {
+    return BlocBuilder<ChatBloc, ChatState>(
+      builder: (context, state) {
+        bool isApiLoading = state is ChatLoading;
+
+        return Container(
+          padding: EdgeInsets.only(
+            left: 16,
+            right: 16,
+            top: 10,
+            bottom: 16 + MediaQuery.of(context).viewInsets.bottom,
+          ),
+          color: Colors.white,
+          child: SafeArea(
+            top: false,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                
+                // Input field container
+                Stack(
+                  children: [
+                    Center(
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      minHeight: 64,
+                      maxHeight: 570, // Allow up to 550 + 20 padding
+                    ),
+                    child: Container(
+                      height: textFieldHeight + 20, // Dynamic height based on text field
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: Color(0xFFE9DFFB), width: 1),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Opacity(
+                              opacity: isApiLoading ? 0.4 : 1.0,
+                              child: GestureDetector(
+                                onTap: isApiLoading
+                                    ? null
+                                    : () async {
+                                  await onCancelSpeechRecording();
+                                },
+                                child: SizedBox(
+                                  width: 34,
+                                  height: 34,
+                                  child: SvgPicture.asset(
+                                    AssetPath.get('images/ic_RecClose.svg'),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            SvgPicture.asset(
+                              AssetPath.get('images/ic_Listening.svg'),
+                            ),
+                            Opacity(
+                              opacity: isApiLoading ? 0.4 : 1.0,
+                              child: GestureDetector(
+                                onTap: isApiLoading
+                                    ? null
+                                    : () async {
+                                  await onStopSpeechRecording();
+                                        // onSendMessage(messageController.text);
+                                        // if (messageController.text.trim().isNotEmpty) {
+                                        //   FocusScope.of(context).requestFocus(messageFocusNode);
+                                        // }
+                                        // Future.delayed(const Duration(milliseconds: 100), () {
+                                        //   onScrollToBottom();
+                                        // });
+                                      },
+                                child: SizedBox(
+                                  width: 34,
+                                  height: 34,
+                                  child: SvgPicture.asset(
+                                    AssetPath.get('images/ic_sendImg.svg'),
+                                  ),
+                                ),
+                              ),
+                            ),
+                      ],
+                    ),
+                  ),
+                ),
+                ),
+                ),
+                  ],
+                )
+                ],
             ),
           ),
         );

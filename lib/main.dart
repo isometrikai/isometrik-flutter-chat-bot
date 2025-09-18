@@ -3,10 +3,12 @@ import 'package:chat_bot/view/tutorial_screen.dart';
 import 'package:flutter/material.dart';
 import 'services/api_service.dart';
 import 'services/callback_manage.dart';
+import 'services/speech_service.dart';
 import 'package:flutter/services.dart';
 import 'utils/asset_path.dart';
 import 'utils/utility.dart';
 import 'utils/app_theme.dart';
+import 'dart:async';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -15,6 +17,7 @@ void main() async {
   // AssetPath.isPackageMode = true; // Set to true for package mode, false for normal project
   
   await PlatformService.initializeFromPlatform();
+  
   runApp(const MyApp());
 }
 
@@ -26,6 +29,7 @@ void chatMain() async {
   AssetPath.isPackageMode = true;
   print('STEP 2');
   await PlatformService.initializeFromPlatform();
+  
   runApp(const MyApp());
 }
 class MyApp extends StatelessWidget {
