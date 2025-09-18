@@ -63,6 +63,7 @@ class ChatBot {
     String? savedUserId = await UserPreferences.getUserId();
     print('============================savedUserId: $savedUserId');
     if (savedUserId == null || savedUserId.isEmpty || savedUserId != userId1) {
+      UserPreferences.saveUserId(userId1);
       Navigator.push(
         context,
         MaterialPageRoute(
@@ -70,7 +71,6 @@ class ChatBot {
         ),
       );
     }else{
-      UserPreferences.saveUserId(userId1);
       Navigator.push(
       context,
       MaterialPageRoute(
