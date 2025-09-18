@@ -61,28 +61,25 @@ class ChatBot {
     Utility.setCurrentContext(context);
     print('============================userId: $userId1');
 
-    String? savedUserId = userId1;
-    // print('============================savedUserId: $savedUserId');
-    // if (savedUserId == null || savedUserId.isEmpty || savedUserId != userId1) {
-    if (savedUserId == null || savedUserId.isEmpty || savedUserId == userId1) {
-    // UserPreferences.saveUserId(userId1);
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => const TutorialScreen()),
-    );
-    }else{
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-          builder: (context) => const LaunchScreen(),
-        ),
+    String? savedUserId = await UserPreferences.getUserId();
+    print('============================savedUserId: $savedUserId');
+    if (savedUserId == null || savedUserId.isEmpty || savedUserId != userId1) {
+      UserPreferences.saveUserId(userId1);
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const TutorialScreen()),
+      );
+    } else {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const LaunchScreen()),
       );
     }
   }
 
   static void isCartUpdate(dynamic cartData) {
-    // print('isCartUpdate: $cartData');
+    print('isCartUpdate: $cartData');
     // Trigger the cart update callback to notify both ChatScreen and RestaurantScreen
-    // OrderService().triggerCartUpdate(true);
+    OrderService().triggerCartUpdate(true);
   }
 }
