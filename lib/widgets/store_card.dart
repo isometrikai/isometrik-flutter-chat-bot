@@ -219,8 +219,7 @@ class StoreCard extends StatelessWidget {
                   return;
                 }
                 if (storesWidget != null) {
-                  final Map<String, dynamic>? storeJson = storesWidget!
-                      .getRawStore(index);
+                  final Map<String, dynamic>? storeJson = storesWidget!.getRawStore(index);
                   OrderService().triggerStoreOrder(storeJson ?? {});
                 }
               },

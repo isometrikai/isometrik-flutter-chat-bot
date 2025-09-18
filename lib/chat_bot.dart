@@ -72,6 +72,8 @@ class ChatBot {
       );
     }else{
       Navigator.push(
+    print('STEP 3');
+    Navigator.push(
       context,
       MaterialPageRoute(
           builder: (context) => const LaunchScreen(),
@@ -80,9 +82,10 @@ class ChatBot {
     }
   }
 
-  static void isCartUpdate(dynamic cartData) {
-    print('isCartUpdate: $cartData');
+   static void isCartUpdate(dynamic cartData) {
+    // print('isCartUpdate: $cartData');
     // Trigger the cart update callback to notify both ChatScreen and RestaurantScreen
-    OrderService().triggerCartUpdate(true);
+    // OrderService().triggerCartUpdate(true);
   }
+
 }
