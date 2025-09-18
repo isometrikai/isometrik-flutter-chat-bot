@@ -14,7 +14,7 @@ export 'data/model/mygpts_model.dart';
 export 'services/api_service.dart';
 
 class ChatBot {
-  static String userId1 = '';
+  static bool isTutorialShown = false;
 
   static void configure({
     required String chatBotId,
@@ -28,6 +28,7 @@ class ChatBot {
     required String location,
     required double longitude,
     required double latitude,
+    required bool needToShowTutorial,
   }) {
     print('chatBotId: $chatBotId');
     print('appSecret: $appSecret');
@@ -40,7 +41,8 @@ class ChatBot {
     print('location: $location');
     print('longitude: $longitude');
     print('latitude: $latitude');
-    userId1 = userId;
+    print('needToShowTutorial: $needToShowTutorial');
+    isTutorialShown = needToShowTutorial;
     ApiService.configure(
       chatBotId: chatBotId,
       appSecret: appSecret,
@@ -53,18 +55,15 @@ class ChatBot {
       location: location,
       longitude: longitude,
       latitude: latitude,
+        needToShowTutorial:needToShowTutorial
     );
   }
 
   static void openChatBot(BuildContext context) async {
     // Set current context for fallback when navigator key is not available
     Utility.setCurrentContext(context);
-    print('============================userId: $userId1');
-
-    String? savedUserId = await UserPreferences.getUserId();
-    print('============================savedUserId: $savedUserId');
-    if (savedUserId == null || savedUserId.isEmpty || savedUserId != userId1) {
-      UserPreferences.saveUserId(userId1);
+    print('isTutorialShown: $isTutorialShown');
+    if (isTutorialShown == true) {
       Navigator.push(
         context,
         MaterialPageRoute(builder: (context) => const TutorialScreen()),

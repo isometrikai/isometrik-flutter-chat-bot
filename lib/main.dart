@@ -117,6 +117,7 @@ class PlatformService {
         location: config['location'],
         longitude: longitude,
         latitude: latitude,
+        needToShowTutorial: config['needToShowTutorial']
       );
 
       print('✅ ApiService configured successfully');
@@ -136,6 +137,7 @@ class PlatformService {
             isProduction: false,
             latitude: 25.276987,
             longitude: 55.296249,
+
           );
       }
     }

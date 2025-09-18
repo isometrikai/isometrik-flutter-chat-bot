@@ -24,6 +24,7 @@ class ApiService {
     String? location,
     double? longitude,
     double? latitude,
+    bool? needToShowTutorial
   }) {
     // Configure AuthService (legacy support)
     AuthService.instance.configure(
@@ -38,6 +39,7 @@ class ApiService {
       location: location,
       longitude: longitude,
       latitude: latitude,
+        needToShowTutorial: needToShowTutorial
     );
 
     // Configure ComprehensiveApiService (new system)

@@ -48,6 +48,7 @@ class AuthService {
     String? location,
     double? longitude,
     double? latitude,
+    bool? needToShowTutorial
   }) {
     _chatBotId = chatBotId;
     _isProduction = isProduction;
