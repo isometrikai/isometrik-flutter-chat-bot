@@ -227,7 +227,7 @@ class _TutorialScreenState extends State<TutorialScreen> {
         padding: const EdgeInsets.symmetric(horizontal: 24.0),
         child: Column(
           children: [
-            const SizedBox(height: 10),
+            const SizedBox(height: 30),
             // Welcome Section
             _buildWelcomeSection(),
             
