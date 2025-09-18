@@ -321,15 +321,14 @@ class _ChatScreenState extends State<ChatScreen> {
     // Add keyboard listener
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      _initializeSpeechService();
       _messageFocusNode.addListener(_onFocusChange);
       // Fetch cart data after cartBloc is initialized
       _fetchCartData();
-      // Future.delayed(const Duration(seconds: 1), () {
-      //   // Speech service is already initialized at app startup for ultra-fast response
-      //   // Just check availability
-      //   _initializeSpeechService();
-      // });
+      Future.delayed(const Duration(seconds: 1), () {
+        // Speech service is already initialized at app startup for ultra-fast response
+        // Just check availability
+        _initializeSpeechService();
+      });
     });
   }
 

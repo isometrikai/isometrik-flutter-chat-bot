@@ -29,6 +29,11 @@ class ChatBot {
     required double longitude,
     required double latitude,
     required bool needToShowTutorial,
+    required String clientGuid,
+    required String indexName,
+    required String visitId,
+    required String visitorId,
+    required String searchApiUrl,
   }) {
     print('chatBotId: $chatBotId');
     print('appSecret: $appSecret');
