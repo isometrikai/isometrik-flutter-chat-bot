@@ -139,7 +139,7 @@ class _ChooseAddressWidgetState extends State<ChooseAddressWidget> {
                     addressOption.address,
                     style: const TextStyle(
                       fontFamily: 'Plus Jakarta Sans',
-                      fontSize: 14,
+                      fontSize: 13,
                       fontWeight: FontWeight.w400,
                       height: 1.2,
                       color: Color(0xFF242424),
