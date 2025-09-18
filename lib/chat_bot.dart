@@ -60,24 +60,24 @@ class ChatBot {
     Utility.setCurrentContext(context);
       print('============================userId: $userId1');
 
-    String? savedUserId = await UserPreferences.getUserId();
-    print('============================savedUserId: $savedUserId');
-    if (savedUserId == null || savedUserId.isEmpty || savedUserId != userId1) {
-      UserPreferences.saveUserId(userId1);
+    // String? savedUserId = await UserPreferences.getUserId();
+    // print('============================savedUserId: $savedUserId');
+    // if (savedUserId == null || savedUserId.isEmpty || savedUserId != userId1) {
+      // UserPreferences.saveUserId(userId1);
       Navigator.push(
         context,
         MaterialPageRoute(
           builder: (context) => const TutorialScreen(),
         ),
       );
-    }else{
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-          builder: (context) => const LaunchScreen(),
-        ),
-      );
-    }
+    // }else{
+    // Navigator.push(
+    //   context,
+    //   MaterialPageRoute(
+    //       builder: (context) => const LaunchScreen(),
+    //     ),
+    //   );
+    // }
   }
 
    static void isCartUpdate(dynamic cartData) {
