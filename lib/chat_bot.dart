@@ -14,7 +14,7 @@ export 'data/model/mygpts_model.dart';
 export 'services/api_service.dart';
 
 class ChatBot {
-  static String userId = '';
+  static String userId1 = '';
   static void configure({
     required String chatBotId,
     required String appSecret,
@@ -39,7 +39,7 @@ class ChatBot {
     print('location: $location');
     print('longitude: $longitude');
     print('latitude: $latitude');
-    userId = userId;
+    userId1 = userId;
     ApiService.configure(
       chatBotId: chatBotId,
       appSecret: appSecret,
@@ -58,11 +58,11 @@ class ChatBot {
   static void openChatBot(BuildContext context) async {
     // Set current context for fallback when navigator key is not available
     Utility.setCurrentContext(context);
-      print('============================userId: $userId');
+      print('============================userId: $userId1');
 
     String? savedUserId = await UserPreferences.getUserId();
     print('============================savedUserId: $savedUserId');
-    if (savedUserId == null || savedUserId.isEmpty || savedUserId != userId) {
+    if (savedUserId == null || savedUserId.isEmpty || savedUserId != userId1) {
       Navigator.push(
         context,
         MaterialPageRoute(
@@ -70,7 +70,7 @@ class ChatBot {
         ),
       );
     }else{
-      UserPreferences.saveUserId(userId);
+      UserPreferences.saveUserId(userId1);
       Navigator.push(
       context,
       MaterialPageRoute(
