@@ -342,7 +342,14 @@ class _ChatScreenState extends State<ChatScreen> {
     try {
       _isSpeechAvailable = await _speechService.initialize();
       if (!_isSpeechAvailable) {
-        debugPrint('Speech recognition not available');
+        debugPrint('Speech recognition not available - trying force re-initialization');
+        // Try force re-initialization for iOS integration issues
+        _isSpeechAvailable = await _speechService.forceReinitialize();
+        if (_isSpeechAvailable) {
+          debugPrint('Speech service force re-initialized successfully');
+        } else {
+          debugPrint('Speech recognition still not available after force re-initialization');
+        }
       } else {
         debugPrint('Speech service initialized successfully');
       }
@@ -368,16 +375,31 @@ class _ChatScreenState extends State<ChatScreen> {
     // Ultra-fast start - fire and forget approach
     final bool started = _speechService.startListeningFast();
     if (!started) {
-      // If fast start failed, reset the UI state
-      setState(() {
-        _isRecording = false;
-      });
+      // If fast start failed, try to re-initialize and retry
+      debugPrint('Fast start failed, attempting re-initialization...');
       
-      // Update availability status
-      _isSpeechAvailable = _speechService.isAvailable;
-      
-      // Show user feedback if service is not available
-      if (!_isSpeechAvailable) {
+      try {
+        _isSpeechAvailable = await _speechService.forceReinitialize();
+        if (_isSpeechAvailable) {
+          // Try starting again after re-initialization
+          final bool retryStarted = _speechService.startListeningFast();
+          if (!retryStarted) {
+            setState(() {
+              _isRecording = false;
+            });
+            BlackToastView.show(context, 'Speech recognition failed to start');
+          }
+        } else {
+          setState(() {
+            _isRecording = false;
+          });
+          BlackToastView.show(context, 'Speech recognition is not available');
+        }
+      } catch (e) {
+        debugPrint('Failed to re-initialize speech service: $e');
+        setState(() {
+          _isRecording = false;
+        });
         BlackToastView.show(context, 'Speech recognition is not available');
       }
     }

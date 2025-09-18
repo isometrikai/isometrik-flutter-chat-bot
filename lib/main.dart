@@ -1,4 +1,3 @@
-import 'package:chat_bot/view/launch_screen.dart';
 import 'package:chat_bot/view/tutorial_screen.dart';
 import 'package:flutter/material.dart';
 import 'services/api_service.dart';
@@ -18,6 +17,9 @@ void main() async {
   
   await PlatformService.initializeFromPlatform();
   
+  // Initialize speech service early for better integration
+  _initializeSpeechServiceEarly();
+  
   runApp(const MyApp());
 }
 
@@ -29,6 +31,9 @@ void chatMain() async {
   AssetPath.isPackageMode = true;
   print('STEP 2');
   await PlatformService.initializeFromPlatform();
+  
+  // Initialize speech service early for better integration
+  _initializeSpeechServiceEarly();
   
   runApp(const MyApp());
 }
@@ -80,6 +85,20 @@ class MyApp extends StatelessWidget {
   }
 }
 
+/// Initialize speech service early for better integration with iOS projects
+void _initializeSpeechServiceEarly() {
+  // Start speech service initialization in background
+  // This helps with iOS integration where permissions need to be requested early
+  SpeechService().initialize().then((isAvailable) {
+    if (isAvailable) {
+      print('✅ Speech service initialized successfully at startup');
+    } else {
+      print('⚠️ Speech service not available at startup - will retry later');
+    }
+  }).catchError((error) {
+    print('❌ Failed to initialize speech service at startup: $error');
+  });
+}
 
 class PlatformService {
   static const MethodChannel _channel = MethodChannel('chatbot_config');

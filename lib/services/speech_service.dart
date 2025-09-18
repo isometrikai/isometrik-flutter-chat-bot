@@ -24,7 +24,16 @@ class SpeechService {
       _initializeInBackground(); // Don't await this
     }
     
-    // Return immediately - don't block the UI
+    // For iOS integration, wait a bit for initialization to complete
+    // This helps when the service is initialized early in the app lifecycle
+    if (!_isInitialized) {
+      int attempts = 0;
+      while (!_isInitialized && attempts < 30) { // Wait up to 3 seconds
+        await Future.delayed(const Duration(milliseconds: 100));
+        attempts++;
+      }
+    }
+    
     return _isAvailable;
   }
 
@@ -229,5 +238,23 @@ class SpeechService {
   /// Request microphone permission
   Future<bool> requestPermission() async {
     return await _speechToText.initialize();
+  }
+
+  /// Force re-initialization for iOS integration issues
+  Future<bool> forceReinitialize() async {
+    debugPrint('Force re-initializing speech service...');
+    
+    // Reset all states
+    _isInitialized = false;
+    _isAvailable = false;
+    _isPreWarmed = false;
+    _initializationStarted = false;
+    _isListening = false;
+    
+    // Wait a bit before re-initializing
+    await Future.delayed(const Duration(milliseconds: 500));
+    
+    // Try to initialize again
+    return await initialize();
   }
 }
