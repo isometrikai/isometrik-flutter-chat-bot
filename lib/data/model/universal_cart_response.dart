@@ -527,6 +527,42 @@ class Quantity {
   }
 }
 
+class SelectedAddOn {
+  final String name;
+  final String price;
+  final String id;
+  final String addOnId;
+  final String addOnName;
+
+  SelectedAddOn({
+    required this.name,
+    required this.price,
+    required this.id,
+    required this.addOnId,
+    required this.addOnName,
+  });
+
+  factory SelectedAddOn.fromJson(Map<String, dynamic> json) {
+    return SelectedAddOn(
+      name: json['name'] ?? '',
+      price: json['price'] ?? '',
+      id: json['id'] ?? '',
+      addOnId: json['addOnId'] ?? '',
+      addOnName: json['addOnName'] ?? '',
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'name': name,
+      'price': price,
+      'id': id,
+      'addOnId': addOnId,
+      'addOnName': addOnName,
+    };
+  }
+}
+
 class Product {
   final String id;
   final String name;
@@ -534,6 +570,7 @@ class Product {
   final Quantity? quantity;
   final num? addToCartOnId;
   final String? storeId;
+  final List<SelectedAddOn>? selectedAddOns;
 
   Product({
     required this.id,
@@ -542,6 +579,7 @@ class Product {
     this.quantity,
     this.addToCartOnId,
     this.storeId,
+    this.selectedAddOns,
   });
 
   factory Product.fromJson(Map<String, dynamic> json) {
@@ -552,6 +590,11 @@ class Product {
       quantity: json['quantity'] != null ? Quantity.fromJson(json['quantity']) : null,
       addToCartOnId: json['addToCartOnId'] ?? 0,
       storeId: json['storeId'] ?? '',
+      selectedAddOns: json['selectedAddOns'] != null
+          ? (json['selectedAddOns'] as List)
+              .map((e) => SelectedAddOn.fromJson(e))
+              .toList()
+          : null,
     );
   }
 
@@ -563,6 +606,7 @@ class Product {
       'quantity': quantity?.toJson(),
       'addToCartOnId': addToCartOnId,
       'storeId': storeId,
+      'selectedAddOns': selectedAddOns?.map((e) => e.toJson()).toList(),
     };
   }
 }

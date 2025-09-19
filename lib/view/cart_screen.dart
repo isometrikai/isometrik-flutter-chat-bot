@@ -354,6 +354,27 @@ class _CartScreenState extends State<CartScreen> {
     );
   }
 
+  /// Format selectedAddOns by grouping them by addOnName
+  String _formatSelectedAddOns(List<SelectedAddOn> selectedAddOns) {
+    // Group add-ons by addOnName
+    Map<String, List<String>> groupedAddOns = {};
+    
+    for (final addOn in selectedAddOns) {
+      if (!groupedAddOns.containsKey(addOn.addOnName)) {
+        groupedAddOns[addOn.addOnName] = [];
+      }
+      groupedAddOns[addOn.addOnName]!.add(addOn.name);
+    }
+    
+    // Format the grouped add-ons
+    List<String> formattedGroups = [];
+    groupedAddOns.forEach((addOnName, addOnNames) {
+      formattedGroups.add('$addOnName:- ${addOnNames.join(',')}');
+    });
+    
+    return formattedGroups.join('\n');
+  }
+
   /// Convert UniversalCartData to WidgetAction list for specific seller
   List<WidgetAction> _convertToWidgetActions(UniversalCartData cartData, Seller seller) {
     List<WidgetAction> widgetActions = [];
@@ -376,6 +397,12 @@ class _CartScreenState extends State<CartScreen> {
         // Get product name
         String productName = product.name;
         
+        // Format selectedAddOns if they exist
+        String formattedAddOns = '';
+        if (product.selectedAddOns != null && product.selectedAddOns!.isNotEmpty) {
+          formattedAddOns = _formatSelectedAddOns(product.selectedAddOns!);
+        }
+        
         widgetActions.add(WidgetAction(
           buttonText: '',
           title: '',
@@ -386,6 +413,7 @@ class _CartScreenState extends State<CartScreen> {
           productName: productName,
           currencySymbol: cartData.currencySymbol,
           productPrice: unitPrice,
+          addOns: formattedAddOns,
         ));
       }
     }

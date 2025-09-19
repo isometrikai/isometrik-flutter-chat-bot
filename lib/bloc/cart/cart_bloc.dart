@@ -12,10 +12,7 @@ List<UniversalCartData> globalCartData = [];
 
 class CartBloc extends Bloc<CartEvent, CartState> {
   final CartRepository repository;
-  // final CartManager cartManager = CartManager();
   List<UniversalCartData> cartData = [];
-
-  
 
   // Getter for total product count
   int get getTotalProductCount {

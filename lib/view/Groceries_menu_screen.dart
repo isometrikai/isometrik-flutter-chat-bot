@@ -59,8 +59,7 @@ class _GroceriesMenuScreenState extends State<GroceriesMenuScreen> {
       OrderService().setCartUpdateCallback((bool isCartUpdate) {
       if (mounted && isCartUpdate) {
         print('GroceriesMenuScreen: Cart update received - $isCartUpdate');
-        // Refresh cart data when cart update is triggered
-        print('GroceriesMenuScreen: Refreshing cart data');
+        isCartAPICalled = true;
         cartBloc.add(CartFetchRequested(needToShowLoader: true));
       }
     });

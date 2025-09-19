@@ -84,10 +84,8 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
 
       OrderService().setCartUpdateCallback((bool isCartUpdate) {
           if (mounted && isCartUpdate) {
-            // Refresh cart data when cart update is triggered
-            // Future.delayed(const Duration(seconds: 3), () {
-              cartBloc.add(CartFetchRequested(needToShowLoader: true));
-            // });
+            isCartAPICalled = true;
+            cartBloc.add(CartFetchRequested(needToShowLoader: true));
           }
       });
 
