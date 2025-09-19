@@ -1506,7 +1506,6 @@ class _ChatScreenBody extends StatelessWidget {
     return html;
   }
 
-  // Removed welcome message UI
 
   Widget _buildGreetingOverlay(BuildContext context) {
     final String titleText =
@@ -1528,12 +1527,14 @@ class _ChatScreenBody extends StatelessWidget {
       onTap: () {
         FocusScope.of(context).unfocus();
       },
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 360),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
+      child: SingleChildScrollView(
+        // keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 360),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
             // Top graphic group
             SizedBox(
               width: 90,
@@ -1677,7 +1678,7 @@ class _ChatScreenBody extends StatelessWidget {
           ],
         ),
       ),
-    );
+    ));
   }
 
   Widget _buildOptionButtons(
