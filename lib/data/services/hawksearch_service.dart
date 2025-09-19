@@ -8,21 +8,43 @@ class HawkSearchService {
   HawkSearchService._internal();
   static final HawkSearchService instance = HawkSearchService._internal();
 
+  // Configuration parameters
+  String _clientGuid = '528a7d439df44f2b9457342b7b865be2';
+  String _indexName = 'hitechnology.20250821.105131';
+  String _visitId = '3c6b9339-c602-4af9-b454-0ec0df067181';
+  String _visitorId = '47daf829-b5df-4358-83ea-207aa4eaae15';
+  String _searchApiUrl = 'https://searchapi-dev.hawksearch.net';
+  double _latitude = 25.276987;
+  double _longitude = 55.296249;
+
+  /// Configure HawkSearch service with required parameters
+  void configure({
+    required String clientGuid,
+    required String indexName,
+    required String visitId,
+    required String visitorId,
+    required String searchApiUrl,
+    required double latitude,
+    required double longitude,
+  }) {
+    // _clientGuid = clientGuid;
+    // _indexName = indexName;
+    // _visitId = visitId;
+    // _visitorId = visitorId;
+    // _searchApiUrl = searchApiUrl;
+    _latitude = latitude;
+    _longitude = longitude;
+  }
+
   /// Calls HawkSearch and returns a list of `Store` grouped with their `Product`s.
   /// Only required fields are bound. We do not bind the entire response.
   Future<List<Store>> fetchStoresGroupedByStoreId({
-    double latitude = 25.276987,
-    double longitude = 55.296249,
-    String clientGuid = '528a7d439df44f2b9457342b7b865be2',
-    String indexName = 'hitechnology.20250821.105131',//'hitechnology.20250626.060135',
-    String visitId = '3c6b9339-c602-4af9-b454-0ec0df067181',
-    String visitorId = '47daf829-b5df-4358-83ea-207aa4eaae15',
     String keyword = '',
     String storeCategoryName = '',
     String storeCategoryId = '',
   }) async {
     final client = ChatApiServices.instance
-        .createCustomClient('https://searchapi-dev.hawksearch.net');
+        .createCustomClient(_searchApiUrl);
 
     final body = {
       // 'FacetSelections': {
@@ -31,18 +53,18 @@ class HawkSearchService {
       "SearchWithin": storeCategoryId,
       'ClientData': {
         'Origin': {
-          'Latitude': latitude,
-          'Longitude': longitude,
+          'Latitude': _latitude,
+          'Longitude': _longitude,
         },
-        'VisitId': visitId,
-        'VisitorId': visitorId,
+        'VisitId': _visitId,
+        'VisitorId': _visitorId,
         'UserAgent':
             'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
         'PreviewBuckets': [],
       },
-      'ClientGuid': clientGuid,
+      'ClientGuid': _clientGuid,
       'Keyword': keyword,
-      'IndexName': indexName,
+      'IndexName': _indexName,
       "FacetSelections": {
         "storeLocation": [
             "4"
@@ -94,7 +116,7 @@ class HawkSearchService {
   Product? _mapDocumentToProduct(Map<String, dynamic> doc) {
     try {
       
-      final String id = _firstString(doc['id']);
+      // final String id = _firstString(doc['id']); // Currently unused
       final String parentProductId = _firstString(doc['parentproductid']);
       final String childProductId = _firstString(doc['childproductid']);
       final int variantsCount = int.tryParse(_firstString(doc['variantcount'])) ?? 0;

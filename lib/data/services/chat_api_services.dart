@@ -32,6 +32,11 @@ class ChatApiServices {
     String? location,
     double? longitude,
     double? latitude,
+    required String clientGuid,
+    required String indexName,
+    required String visitId,
+    required String visitorId,
+    required String searchApiUrl,
   }) {
     _chatBotId = chatBotId;
     _userId = userId;

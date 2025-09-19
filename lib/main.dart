@@ -117,7 +117,12 @@ class PlatformService {
         location: config['location'],
         longitude: longitude,
         latitude: latitude,
-        needToShowTutorial: config['needToShowTutorial']
+        needToShowTutorial: config['needToShowTutorial'],
+        clientGuid: config['clientGuid'] ?? '',
+        indexName: config['indexName'] ?? '',
+        visitId: config['visitId'] ?? '',
+        visitorId: config['visitorId'] ?? '',
+        searchApiUrl: config['searchApiUrl'] ?? '',
       );
 
       print('✅ ApiService configured successfully');
@@ -137,7 +142,11 @@ class PlatformService {
             isProduction: false,
             latitude: 25.276987,
             longitude: 55.296249,
-
+            clientGuid: '528a7d439df44f2b9457342b7b865be2',
+            indexName: 'hitechnology.20250821.105131',
+            visitId: '3c6b9339-c602-4af9-b454-0ec0df067181',
+            visitorId: '47daf829-b5df-4358-83ea-207aa4eaae15',
+            searchApiUrl: 'https://searchapi-dev.hawksearch.net',
           );
       }
     }

@@ -47,6 +47,11 @@ class ChatBot {
     print('longitude: $longitude');
     print('latitude: $latitude');
     print('needToShowTutorial: $needToShowTutorial');
+    print('clientGuid: $clientGuid');
+    print('indexName: $indexName');
+    print('visitId: $visitId');
+    print('visitorId: $visitorId');
+    print('searchApiUrl: $searchApiUrl');
     isTutorialShown = needToShowTutorial;
     ApiService.configure(
       chatBotId: chatBotId,
@@ -60,14 +65,18 @@ class ChatBot {
       location: location,
       longitude: longitude,
       latitude: latitude,
-        needToShowTutorial:needToShowTutorial
+        needToShowTutorial:needToShowTutorial,
+      clientGuid: clientGuid,
+      indexName: indexName,
+      visitId: visitId,
+      visitorId: visitorId,
+      searchApiUrl: searchApiUrl,
     );
   }
 
   static void openChatBot(BuildContext context) async {
     // Set current context for fallback when navigator key is not available
     Utility.setCurrentContext(context);
-    print('isTutorialShown: $isTutorialShown');
     if (isTutorialShown == true) {
       Navigator.push(
         context,
@@ -83,7 +92,6 @@ class ChatBot {
 
   static void isCartUpdate(dynamic cartData) {
     print('isCartUpdate: $cartData');
-    // Trigger the cart update callback to notify both ChatScreen and RestaurantScreen
     OrderService().triggerCartUpdate(true);
   }
 }

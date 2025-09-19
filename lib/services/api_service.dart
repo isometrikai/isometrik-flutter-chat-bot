@@ -1,10 +1,6 @@
-import 'package:chat_bot/data/model/chat_response.dart';
-import 'package:chat_bot/data/model/mygpts_model.dart';
 import 'package:chat_bot/data/services/auth_service.dart';
 import 'package:chat_bot/data/services/chat_api_services.dart';
-import 'package:chat_bot/utils/api_result.dart';
-
-import '../data/model/greeting_response.dart';
+import 'package:chat_bot/data/services/hawksearch_service.dart';
 
 class ApiService {
   static Future<void> initialize() async {
@@ -24,7 +20,12 @@ class ApiService {
     String? location,
     double? longitude,
     double? latitude,
-    bool? needToShowTutorial
+    bool? needToShowTutorial,
+    required String clientGuid,
+    required String indexName,
+    required String visitId,
+    required String visitorId,
+    required String searchApiUrl,
   }) {
     // Configure AuthService (legacy support)
     AuthService.instance.configure(
@@ -39,7 +40,12 @@ class ApiService {
       location: location,
       longitude: longitude,
       latitude: latitude,
-        needToShowTutorial: needToShowTutorial
+        needToShowTutorial: needToShowTutorial,
+      clientGuid: clientGuid,
+      indexName: indexName,
+      visitId: visitId,
+      visitorId: visitorId,
+      searchApiUrl: searchApiUrl,
     );
 
     // Configure ComprehensiveApiService (new system)
@@ -52,6 +58,22 @@ class ApiService {
       location: location,
       longitude: longitude,
       latitude: latitude,
+      clientGuid: clientGuid,
+      indexName: indexName,
+      visitId: visitId,
+      visitorId: visitorId,
+      searchApiUrl: searchApiUrl,
+    );
+
+    // Configure HawkSearchService
+    HawkSearchService.instance.configure(
+      clientGuid: clientGuid,
+      indexName: indexName,
+      visitId: visitId,
+      visitorId: visitorId,
+      searchApiUrl: searchApiUrl,
+      latitude: latitude ?? 0.0,
+      longitude: longitude ?? 0.0,
     );
   }
 
