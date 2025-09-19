@@ -503,8 +503,11 @@ class _GroceryCustomizationScreenState extends State<GroceryCustomizationScreen>
                   child: Text(
                     'Add',
                     style: AppTextStyles.button.copyWith(
-                      color: Colors.white,
-                    ),
+                            color: Colors.white,
+                            fontWeight: FontWeight.w700,
+                            fontSize: 16,
+                            height: 1.2,
+                          ),
                   ),
                 ),
               ),

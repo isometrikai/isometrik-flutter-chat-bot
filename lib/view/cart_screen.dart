@@ -639,6 +639,9 @@ class _CartScreenState extends State<CartScreen> {
                           'Proceed to checkout',
                           style: AppTextStyles.button.copyWith(
                             color: Colors.white,
+                            fontWeight: FontWeight.w700,
+                            fontSize: 16,
+                            height: 1.2,
                           ),
                         ),
                       ),
