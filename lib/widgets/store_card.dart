@@ -347,7 +347,7 @@ class _ProductPreviewTile extends StatelessWidget {
                     Row(
                       children: [
                         Text(
-                          '${product.currencySymbol}${product.finalPrice.toStringAsFixed(0)}',
+                          '${product.currency} ${product.finalPrice.toStringAsFixed(0)}',
                           style: AppTextStyles.productPrice.copyWith(
                             color: const Color(0xFF242424),
                             fontSize: 12,

@@ -148,7 +148,7 @@ class CartDetailsPriceWidget extends StatelessWidget {
                 ),
               ),
               Text(
-                '$currencySymbol${price}',//toStringAsFixed(0)
+                '$currencySymbol ${price}',//toStringAsFixed(0)
                 style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w400,
@@ -182,7 +182,7 @@ class CartDetailsPriceWidget extends StatelessWidget {
   }
 
   Widget _buildDeliveryFeeItem(WidgetAction deliveryFeeItem) {
-    final currencySymbol = deliveryFeeItem.currencySymbol ?? 'د.إ';
+    final currency = deliveryFeeItem.currencySymbol ?? 'د.إ';
     final price = deliveryFeeItem.productPrice ?? 0;
 
     return Row(
@@ -197,7 +197,7 @@ class CartDetailsPriceWidget extends StatelessWidget {
           ),
         ),
         Text(
-          '$currencySymbol${price}',//toStringAsFixed(0)
+          '$currency ${price}',//toStringAsFixed(0)
           style: const TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w400,
@@ -209,7 +209,7 @@ class CartDetailsPriceWidget extends StatelessWidget {
   }
 
   Widget _buildServiceFeeItem(WidgetAction serviceFeeItem) {
-    final currencySymbol = serviceFeeItem.currencySymbol ?? 'د.إ';
+    final currency = serviceFeeItem.currencySymbol ?? 'د.إ';
     final price = serviceFeeItem.productPrice ?? 0;
 
     return Row(
@@ -224,7 +224,7 @@ class CartDetailsPriceWidget extends StatelessWidget {
           ),
         ),
         Text(
-          '$currencySymbol${price}',
+          '$currency ${price}',
           style: const TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w400,
@@ -236,7 +236,7 @@ class CartDetailsPriceWidget extends StatelessWidget {
   }
 
   Widget _buildTaxItem(WidgetAction taxItem) {
-    final currencySymbol = taxItem.currencySymbol ?? 'د.إ';
+    final currency = taxItem.currencySymbol ?? 'د.إ';
     final price = taxItem.productPrice ?? 0;
 
     return Padding(
@@ -253,7 +253,7 @@ class CartDetailsPriceWidget extends StatelessWidget {
             ),
           ),
           Text(
-            '$currencySymbol${price}',
+            '$currency ${price}',
             style: const TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w400,
@@ -266,7 +266,7 @@ class CartDetailsPriceWidget extends StatelessWidget {
   }
 
   Widget _buildTotalItem(WidgetAction totalItem) {
-    final currencySymbol = totalItem.currencySymbol ?? 'د.إ';
+    final currency = totalItem.currencySymbol ?? 'د.إ';
     final price = totalItem.productPrice ?? 0;
 
     return Row(
@@ -281,7 +281,7 @@ class CartDetailsPriceWidget extends StatelessWidget {
           ),
         ),
         Text(
-          '$currencySymbol${price}',//toStringAsFixed(0)
+          '$currency ${price}',//toStringAsFixed(0)
           style: const TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.w700,
