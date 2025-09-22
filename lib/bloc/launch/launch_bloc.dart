@@ -21,7 +21,7 @@ class LaunchBloc extends Bloc<LaunchEvent, LaunchState> {
     Emitter<LaunchState> emit,
   ) async {
     // emit(LaunchInProgress());
-    Utility.showLoader();
+    // Utility.showLoader();
     try {
       await repository.initialize();
       final chatbotData = await repository.getChatbotData();
@@ -29,10 +29,10 @@ class LaunchBloc extends Bloc<LaunchEvent, LaunchState> {
       // if (chatbotData == null) {
       if (greetingData == null || chatbotData == null) {
         emit(const LaunchFailure('Failed to load chatbot data'));
-        Utility.closeProgressDialog();
+        // Utility.closeProgressDialog();
         return;
       }
-      Utility.closeProgressDialog();
+      // Utility.closeProgressDialog();
       emit(LaunchSuccess(chatbotData: chatbotData, greetingData: greetingData));
     } catch (e) {
       emit(LaunchFailure(e.toString()));

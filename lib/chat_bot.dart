@@ -1,9 +1,11 @@
 library chat_bot;
 
-import 'package:chat_bot/utils/user_preferences.dart';
 import 'package:chat_bot/view/tutorial_screen.dart';
 import 'package:flutter/material.dart';
-import 'view/launch_screen.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:chat_bot/bloc/chat_bloc.dart';
+import 'package:chat_bot/bloc/cart/cart_bloc.dart';
+import 'view/chat_screen.dart';
 import 'services/api_service.dart';
 import 'services/callback_manage.dart';
 import 'utils/utility.dart';
@@ -85,7 +87,15 @@ class ChatBot {
     } else {
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => const LaunchScreen()),
+        MaterialPageRoute(
+          builder: (context) => MultiBlocProvider(
+            providers: [
+              BlocProvider(create: (context) => ChatBloc()),
+              BlocProvider(create: (context) => CartBloc()),
+            ],
+            child: const ChatScreen(),
+          ),
+        ),
       );
     }
   }
