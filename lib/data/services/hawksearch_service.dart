@@ -96,6 +96,7 @@ class HawkSearchService {
 
       final Product? product = _mapDocumentToProduct(doc);
       if (product == null) continue;
+      if (product.isPrimary == false) continue;
 
       storeIdToProducts.putIfAbsent(storeId, () => <Product>[]).add(product);
       // Keep one representative doc for store-level info
@@ -135,6 +136,18 @@ class HawkSearchService {
       final String currencySymbol = _firstString(doc['currencysymbol']);
       final String currency = _firstString(doc['currency']);
 
+      // Extract isPrimary from storedata.metaData
+      final String storeDataRaw = _firstString(doc['storedata']);
+      final Map<String, dynamic> storeData = _tryParseLooseJson(storeDataRaw);
+      final Map<String, dynamic> metaData = (() {
+        final dynamic raw = storeData['metaData'];
+        if (raw is Map) {
+          return Map<String, dynamic>.from(raw);
+        }
+        return <String, dynamic>{};
+      })();
+      final bool isPrimary = _toBool(metaData['isPrimary']);
+
       // Parse final price list (string with single quotes)
       final String finalPriceListRaw = _firstString(doc['finalpricelist']);
       final Map<String, dynamic> finalPriceMap = _tryParseLooseJson(finalPriceListRaw);
@@ -168,6 +181,7 @@ class HawkSearchService {
         unitId: unitId,
         customizable: false,
         instock: instock,
+        isPrimary: isPrimary,
       );
     } catch (_) {
       return null;
