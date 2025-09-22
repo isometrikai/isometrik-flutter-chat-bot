@@ -1,9 +1,11 @@
-import 'package:chat_bot/view/launch_screen.dart';
+import 'package:chat_bot/view/chat_screen.dart';
 import 'package:chat_bot/view/tutorial_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:chat_bot/bloc/chat_bloc.dart';
+import 'package:chat_bot/bloc/cart/cart_bloc.dart';
 import 'services/api_service.dart';
 import 'services/callback_manage.dart';
-import 'services/speech_service.dart';
 import 'package:flutter/services.dart';
 import 'utils/asset_path.dart';
 import 'utils/utility.dart';
@@ -50,7 +52,13 @@ class MyApp extends StatelessWidget {
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
       themeMode: ThemeMode.system,
-      home: TutorialScreen(currentStep: 1, totalSteps: 6),//TutorialScreen(),//LaunchScreen(),//ChatScreen(),
+      home: MultiBlocProvider(
+        providers: [
+          BlocProvider(create: (context) => ChatBloc()),
+          BlocProvider(create: (context) => CartBloc()),
+        ],
+        child: TutorialScreen(currentStep: 1, totalSteps: 6),//const ChatScreen(),
+      ),//TutorialScreen(currentStep: 1, totalSteps: 6),//TutorialScreen(),//LaunchScreen(),//ChatScreen(),
       debugShowCheckedModeBanner: false,
     );
   }
@@ -61,6 +69,10 @@ class MyApp extends StatelessWidget {
     
     OrderService().setStoreCallback((Map<String, dynamic> store) {
       _sendEventToiOS(store, 'store');
+    });
+
+    OrderService().setAddCardOpenCallback(() {
+      _sendEventToiOS({}, 'addCard');
     });
 
     // Add dismiss callback

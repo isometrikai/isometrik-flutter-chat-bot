@@ -3,7 +3,7 @@ import 'package:chat_bot/utils/enum.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
-import '../widgets/cart_details_price_widget';
+import '../widgets/cart_details_price_widget.dart';
 import '../bloc/cart/cart_bloc.dart';
 import '../bloc/cart/cart_event.dart';
 import '../bloc/cart/cart_state.dart';
@@ -350,7 +350,7 @@ class _CartScreenState extends State<CartScreen> {
       cartItems: cartItems,
       storeName: matchingSeller.name,
       storeType: matchingSeller.storeType,
-      currencySymbol: matchingCartData.currencySymbol,
+      currencySymbol: matchingCartData.currencyCode,
     );
   }
 
@@ -411,7 +411,7 @@ class _CartScreenState extends State<CartScreen> {
           keyword: '',
           quantity: '${totalQuantity}x',
           productName: productName,
-          currencySymbol: cartData.currencySymbol,
+          currencySymbol: cartData.currencyCode,
           productPrice: unitPrice,
           addOns: formattedAddOns,
         ));
@@ -432,7 +432,7 @@ class _CartScreenState extends State<CartScreen> {
         storeCategoryId: cartData.storeCategoryId,
         keyword: '',
         productName: 'Delivery fee',
-        currencySymbol: cartData.currencySymbol,
+        currencySymbol: cartData.currencyCode,
         productPrice: deliveryFee,
       ));
     }
@@ -451,7 +451,7 @@ class _CartScreenState extends State<CartScreen> {
         storeCategoryId: cartData.storeCategoryId,
         keyword: '',
         productName: 'Service Fee',
-        currencySymbol: cartData.currencySymbol,
+        currencySymbol: cartData.currencyCode,
         productPrice: serviceFee,
       ));
     }
@@ -467,7 +467,7 @@ class _CartScreenState extends State<CartScreen> {
             storeCategoryId: cartData.storeCategoryId,
             keyword: '',
             productName: tax.taxName,
-            currencySymbol: cartData.currencySymbol,
+            currencySymbol: cartData.currencyCode,
             productPrice: tax.totalValue,
           ));
         }
@@ -487,7 +487,7 @@ class _CartScreenState extends State<CartScreen> {
       storeCategoryId: cartData.storeCategoryId,
       keyword: '',
       productName: 'Total To Pay',
-      currencySymbol: cartData.currencySymbol,
+      currencySymbol: cartData.currencyCode,
       productPrice: finalTotal,
     ));
     

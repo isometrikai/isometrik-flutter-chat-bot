@@ -721,11 +721,11 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
 
   _MenuItem _mapProduct(chat.Product p) {
     final String priceText = _formatCurrency(
-      p.currencySymbol,
+      p.currency,
       p.finalPriceList.finalPrice,
     );
     final String basePriceText = _formatCurrency(
-      p.currencySymbol,
+      p.currency,
       p.finalPriceList.basePrice,
     );
     final String? imageUrl = _extractImageUrl(p.images);
@@ -749,7 +749,7 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
     if (symbol.isNotEmpty && symbol != 'AED') {
       return '$symbol ${value.toStringAsFixed(value.truncateToDouble() == value ? 0 : 2)}';
     }
-    return 'AED${value.toStringAsFixed(value.truncateToDouble() == value ? 0 : 2)}';
+    return '$symbol ${value.toStringAsFixed(value.truncateToDouble() == value ? 0 : 2)}';
   }
 
   String? _extractImageUrl(dynamic images) {

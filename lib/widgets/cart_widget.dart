@@ -86,31 +86,55 @@ class CartWidget extends StatelessWidget {
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      child: Column(
         children: [
-          Expanded(
-            child: Text(
-              quantity.isNotEmpty ? '$quantity× $productName' : productName,
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w400,
-                color: Color(0xFF242424),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: Text(
+                  quantity.isNotEmpty ? '$quantity× $productName' : productName,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w400,
+                    color: Color(0xFF242424),
+                  ),
+                  maxLines: 3,
+                  overflow: TextOverflow.ellipsis,
+                ),
               ),
-            ),
+              const SizedBox(width: 5),
+              Text(
+                '$currencySymbol$price',
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w400,
+                  color: Color(0xFF242424),
+                ),
+              ),
+            ],
           ),
-          const SizedBox(width: 5),
-          Text(
-            '$currencySymbol$price',
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w400,
-              color: Color(0xFF242424),
+          if(item.addOns != null && item.addOns!.isNotEmpty) ...[
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    item.addOns!,
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w300,
+                      color: Color(0xFF242424),
+                    ),
+                    maxLines: 5,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
             ),
-          ),
+          ],
         ],
       ),
-    );
+    );    
   }
 
   Widget _buildTotalItem(WidgetAction totalItem) {

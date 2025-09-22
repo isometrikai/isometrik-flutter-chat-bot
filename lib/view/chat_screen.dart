@@ -5,6 +5,9 @@ import 'package:chat_bot/bloc/chat_state.dart';
 import 'package:chat_bot/bloc/cart/cart_bloc.dart';
 import 'package:chat_bot/bloc/cart/cart_event.dart';
 import 'package:chat_bot/bloc/cart/cart_state.dart';
+import 'package:chat_bot/bloc/launch/launch_bloc.dart';
+import 'package:chat_bot/bloc/launch/launch_event.dart';
+import 'package:chat_bot/bloc/launch/launch_state.dart';
 import 'package:chat_bot/data/model/chat_response.dart';
 import 'package:chat_bot/data/model/chat_message.dart';
 import 'package:chat_bot/data/services/chat_api_services.dart';
@@ -22,6 +25,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:chat_bot/utils/asset_path.dart';
 import 'package:lottie/lottie.dart';
+import 'package:shimmer/shimmer.dart';
 import '../services/callback_manage.dart';
 import 'package:chat_bot/widgets/store_card.dart';
 import 'package:flutter/services.dart';
@@ -39,10 +43,10 @@ import '../utils/enum.dart';
 import '../services/speech_service.dart';
 
 class ChatScreen extends StatefulWidget {
-  final MyGPTsResponse chatbotData;
+  final MyGPTsResponse? chatbotData;
   final GreetingResponse? greetingData;
 
-  const ChatScreen({super.key, required this.chatbotData, this.greetingData});
+  const ChatScreen({super.key, this.chatbotData, this.greetingData});
 
   @override
   State<ChatScreen> createState() => _ChatScreenState();
@@ -64,6 +68,12 @@ class _ChatScreenState extends State<ChatScreen> {
   final SpeechService _speechService = SpeechService();
   bool _isSpeechAvailable = false;
   bool _isRecording = false;
+  
+  // LaunchBloc related variables
+  late final LaunchBloc _launchBloc;
+  MyGPTsResponse? _chatbotData;
+  GreetingResponse? _greetingData;
+  bool _isDataLoaded = false;
 
   // Returns index of the last bot message that shows stores, products, choose_address, choose_card, order_summary, or order_confirmed widgets; -1 if none
   // Cart widget is not considered for hiding
@@ -355,6 +365,19 @@ class _ChatScreenState extends State<ChatScreen> {
     super.initState();
     _initializeSession();
 
+    // Initialize LaunchBloc
+    _launchBloc = LaunchBloc();
+    
+    // Check if data is already provided via parameters
+    if (widget.chatbotData != null) {
+      _chatbotData = widget.chatbotData;
+      _greetingData = widget.greetingData;
+      _isDataLoaded = true;
+    } else {
+      // Fetch data using LaunchBloc
+      _launchBloc.add(const LaunchRequested());
+    }
+
     // Initialize cartBloc directly since it's provided by parent MultiBlocProvider
     _cartBloc = context.read<CartBloc>();
 
@@ -362,9 +385,14 @@ class _ChatScreenState extends State<ChatScreen> {
     OrderService().setCartUpdateCallback((bool isCartUpdate) {
       if (mounted && isCartUpdate) {
         print('ChatScreen: Cart update received - $isCartUpdate');
-        // Future.delayed(const Duration(seconds: 3), () {
         _sendMessage("I have updated the cart");
-        // });
+      }
+    });
+
+    OrderService().setStripePaymentCallback((String cartNumber) {
+      if (mounted) {
+        print('ChatScreen: Stripe payment received - $cartNumber');
+       _sendMessage('Card added successfully last 4 digits: ${cartNumber}');
       }
     });
 
@@ -504,6 +532,7 @@ class _ChatScreenState extends State<ChatScreen> {
     _messageController.dispose();
     _scrollController.dispose();
     _messageFocusNode.dispose();
+    _launchBloc.close();
 
     // OrderService().clearCallback();
     print("DISPOSE");
@@ -512,12 +541,67 @@ class _ChatScreenState extends State<ChatScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // If data is not loaded yet, show loading or handle LaunchBloc states
+    if (!_isDataLoaded) {
+      return BlocProvider.value(
+        value: _launchBloc,
+        child: BlocListener<LaunchBloc, LaunchState>(
+          listener: (context, state) {
+            if (state is LaunchSuccess) {
+              setState(() {
+                _chatbotData = state.chatbotData;
+                _greetingData = state.greetingData;
+                _isDataLoaded = true;
+              });
+            } else if (state is LaunchFailure) {
+              // Handle error - show error dialog or retry
+              showDialog(
+                context: context,
+                barrierDismissible: false,
+                builder: (BuildContext context) {
+                  return AlertDialog(
+                    title: const Text('Error'),
+                    content: const Text('Something went wrong please try again later'),
+                    actions: [
+                      TextButton(
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                          OrderService().triggerChatDismiss();
+                        },
+                        child: const Text('OK'),
+                      ),
+                    ],
+                  );
+                },
+              );
+            }
+          },
+          child: BlocBuilder<LaunchBloc, LaunchState>(
+            builder: (context, state) {
+              return Scaffold(
+                backgroundColor: Colors.white,
+                body: Container(
+                  color: Colors.white,
+                  width: double.infinity,
+                  height: double.infinity,
+                  child: Center(
+                    child: _buildShimmerGreetingOverlay(context),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      );
+    }
+
+    // Data is loaded, show the chat screen
     return _ChatScreenBody(
       messageController: _messageController,
       messageFocusNode: _messageFocusNode,
       scrollController: _scrollController,
-      chatbotData: widget.chatbotData,
-      greetingData: widget.greetingData,
+      chatbotData: _chatbotData!,
+      greetingData: _greetingData,
       selectedOptionMessages: _selectedOptionMessages,
       messages: messages,
       onSendMessage: _sendMessage,
@@ -557,6 +641,194 @@ class _ChatScreenState extends State<ChatScreen> {
       onCancelSpeechRecording: _cancelSpeechRecording,
       // Add cancel speech handler
       isRecording: _isRecording, // Pass recording state
+    );
+  }
+
+  Widget _buildShimmerGreetingOverlay(BuildContext context) {
+    return GestureDetector(
+      onTap: () {
+        FocusScope.of(context).unfocus();
+      },
+      child: SingleChildScrollView(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 360),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              // Top graphic group with shimmer
+              SizedBox(
+              width: 110,
+              height: 110,
+              child: Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  // Outer glow circle
+                  Container(
+                    width: 110,
+                    height: 110,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(110),
+                      gradient: const LinearGradient(
+                        begin: Alignment.centerLeft,
+                        end: Alignment.centerRight,
+                        colors: [
+                          Color(0x1AD445EC),
+                          Color(0x1AB02EFB),
+                          Color(0x1A8E2FFD),
+                          Color(0x1A5E3DFE),
+                          Color(0x1A5186E0),
+                        ],
+                      ),
+                    ),
+                  ),
+                  // Center asset
+                  Align(
+                    alignment: Alignment.center,
+                    child: Container(
+                      width: 90,
+                      height: 90,
+                      decoration: const BoxDecoration(
+                        shape: BoxShape.circle,
+                        gradient: LinearGradient(
+                          begin: Alignment.centerLeft,
+                          end: Alignment.centerRight,
+                          colors: [
+                            Color(0xFFD445EC),
+                            Color(0xFFB02EFB),
+                            Color(0xFF8E2FFD),
+                            Color(0xFF5E3DFE),
+                            Color(0xFF5186E0),
+                          ],
+                        ),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(12),
+                        child: SvgPicture.asset(
+                          AssetPath.get('images/ic_mainImg.svg'),
+                          fit: BoxFit.contain,
+                        ),
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    right: -6,
+                    top: -6,
+                    child: Opacity(
+                      opacity: 0.4,
+                      child: SvgPicture.asset(
+                        AssetPath.get('images/ic_topStar.svg'),
+                        width: 44,
+                        height: 44,
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    left: -10,
+                    bottom: -8,
+                    child: Opacity(
+                      opacity: 0.4,
+                      child: SvgPicture.asset(
+                        AssetPath.get('images/ic_topStar.svg'),
+                        width: 61,
+                        height: 61,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+              const SizedBox(height: 12),
+              
+              // Title shimmer
+              SizedBox(
+                width: double.infinity,
+                height: 60,
+                child: Shimmer.fromColors(
+                  baseColor: Colors.grey[300]!,
+                  highlightColor: Colors.grey[100]!,
+                  child: Container(
+                    width: 280,
+                    height: 24,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+              
+              // Subtitle shimmer
+              SizedBox(
+                width: double.infinity,
+                height: 40,
+                child: Shimmer.fromColors(
+                  baseColor: Colors.grey[300]!,
+                  highlightColor: Colors.grey[100]!,
+                  child: Container(
+                    width: 250,
+                    height: 18,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              
+              // Weather information shimmer
+              Container(
+                width: double.infinity,
+                height: 130,
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                // decoration: BoxDecoration(
+                //   color: Colors.grey[300]!,
+                //   borderRadius: BorderRadius.circular(12),
+                //   border: Border.all(color: Colors.grey[300]!, width: 1),
+                // ),
+                child: Shimmer.fromColors(
+                  baseColor: Colors.grey[300]!,
+                  highlightColor: Colors.grey[100]!,
+                  child: Container(
+                    width: 200,
+                    height: 16,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              
+              // Options grid shimmer 2x2
+              ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: double.infinity),
+                child: Wrap(
+                  spacing: 16,
+                  runSpacing: 16,
+                  children: List.generate(4, (index) {
+                    return Shimmer.fromColors(
+                      baseColor: Colors.grey[300]!,
+                      highlightColor: Colors.grey[100]!,
+                      child: Container(
+                        width: 172,
+                        height: 79,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(5),
+                        ),
+                      ),
+                    );
+                  }),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
@@ -1681,6 +1953,7 @@ class _ChatScreenBody extends StatelessWidget {
     ));
   }
 
+
   Widget _buildOptionButtons(
     List<String> options,
     String messageId,
@@ -2002,17 +2275,19 @@ class _ChatScreenBody extends StatelessWidget {
                 onTap:
                     isApiLoading
                         ? () {}
-                        : () async {
-                          final result = await AddCardBottomSheet.show(context);
-                          if (result != null) {
-                            debugPrint(
-                              'PM: ${result['paymentMethodId']} '
-                              '${result['brand']} **** ${result['last4']}',
-                            );
-                            onSendMessage(
-                              'Card added successfully last 4 digits: ${result['last4']}',
-                            );
-                          }
+                        : 
+                        () async {
+                          OrderService().triggerAddCardOpen();
+                          // final result = await AddCardBottomSheet.show(context);
+                          // if (result != null) {
+                          //   debugPrint(
+                          //     'PM: ${result['paymentMethodId']} '
+                          //     '${result['brand']} **** ${result['last4']}',
+                          //   );
+                          //   onSendMessage(
+                          //     'Card added successfully last 4 digits: ${result['last4']}',
+                          //   );
+                          // }
                         },
               );
             },

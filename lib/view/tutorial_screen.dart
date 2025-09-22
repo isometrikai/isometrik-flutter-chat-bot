@@ -1,5 +1,8 @@
-import 'package:chat_bot/view/launch_screen.dart';
+import 'package:chat_bot/view/chat_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:chat_bot/bloc/chat_bloc.dart';
+import 'package:chat_bot/bloc/cart/cart_bloc.dart';
 import 'package:flutter_svg/svg.dart';
 import '../utils/asset_path.dart';
 
@@ -44,7 +47,13 @@ class _TutorialScreenState extends State<TutorialScreen> {
        Navigator.pushReplacement(
       context,
       MaterialPageRoute(
-        builder: (context) => const LaunchScreen(),
+        builder: (context) => MultiBlocProvider(
+          providers: [
+            BlocProvider(create: (context) => ChatBloc()),
+            BlocProvider(create: (context) => CartBloc()),
+          ],
+          child: const ChatScreen(),
+        ),
       ),
     );
     }
@@ -144,7 +153,13 @@ class _TutorialScreenState extends State<TutorialScreen> {
               Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => const LaunchScreen(),
+                  builder: (context) => MultiBlocProvider(
+                    providers: [
+                      BlocProvider(create: (context) => ChatBloc()),
+                      BlocProvider(create: (context) => CartBloc()),
+                    ],
+                    child: const ChatScreen(),
+                  ),
                 ),
               );
             },

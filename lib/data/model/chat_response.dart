@@ -337,6 +337,7 @@ class Product {
   final bool? storeIsOpen;
   final bool? instock;
   final bool? variantCount;// For Grocery Only
+  final bool? isPrimary;
 
   const Product({
     // required this.id,
@@ -358,6 +359,7 @@ class Product {
      this.storeIsOpen,
      this.instock,
      this.variantCount,
+     this.isPrimary,
   });
 
   double get finalPrice => finalPriceList.finalPrice;
@@ -399,6 +401,7 @@ class Product {
         storeIsOpen: json['storeIsOpen'] ?? true,
         instock: json['instock'] ?? true,
         variantCount: json['variantCount'] ?? false,
+        isPrimary: json['isPrimary'] ?? true,
     );
   }
 
@@ -423,6 +426,7 @@ class Product {
       'storeIsOpen': storeIsOpen,
       'instock': instock,
       'variantCount': variantCount,
+      'isPrimary': isPrimary,
     };
   }
 }
