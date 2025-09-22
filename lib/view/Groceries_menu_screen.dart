@@ -56,18 +56,22 @@ class _GroceriesMenuScreenState extends State<GroceriesMenuScreen> {
     cartBloc = CartBloc();
     cartBloc.add(CartFetchRequested(needToShowLoader: false));
     _fetchSubCategoryProducts();
-      OrderService().setCartUpdateCallback((bool isCartUpdate) {
+    OrderService().setCartUpdateCallback((bool isCartUpdate) {
       if (mounted && isCartUpdate) {
         print('GroceriesMenuScreen: Cart update received - $isCartUpdate');
-        // Refresh cart data when cart update is triggered
-        print('GroceriesMenuScreen: Refreshing cart data');
+        isCartAPICalled = true;
         cartBloc.add(CartFetchRequested(needToShowLoader: true));
       }
     });
   }
 
   void _fetchSubCategoryProducts() {
-    _bloc.add(SubCategoryProductsRequested(storeId: widget.actionData?.storeId ?? '',subCategoryId: widget.actionData?.storeCategoryId ?? ''));
+    _bloc.add(
+      SubCategoryProductsRequested(
+        storeId: widget.actionData?.storeId ?? '',
+        subCategoryId: widget.actionData?.storeCategoryId ?? '',
+      ),
+    );
   }
 
   @override
@@ -76,7 +80,6 @@ class _GroceriesMenuScreenState extends State<GroceriesMenuScreen> {
     _bloc.close();
     super.dispose();
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -101,7 +104,7 @@ class _GroceriesMenuScreenState extends State<GroceriesMenuScreen> {
                         title: widget.actionData?.title ?? '',
                         subtitle: widget.actionData?.subtitle ?? '',
                         onClose: () {
-                          if (widget.onCheckout != null ) {
+                          if (widget.onCheckout != null) {
                             widget.onCheckout!(true);
                           }
                           Navigator.of(context).pop();
@@ -109,14 +112,15 @@ class _GroceriesMenuScreenState extends State<GroceriesMenuScreen> {
                       ),
                     ),
                     const SizedBox(height: 16),
-                    
+
                     // Content Area
                     Expanded(
                       child: BlocListener<CartBloc, CartState>(
                         listener: (context, state) {
-                          if (state is CartLoaded && state.rawCartData != null) {
+                          if (state is CartLoaded &&
+                              state.rawCartData != null) {
                             _updateCartData(state.rawCartData!.data);
-                          }else if (state is CartEmpty) {
+                          } else if (state is CartEmpty) {
                             _updateCartData([]);
                           }
                         },
@@ -124,33 +128,37 @@ class _GroceriesMenuScreenState extends State<GroceriesMenuScreen> {
                           listener: (context, state) {
                             if (state is SubCategoryProductsLoadFailure) {
                               // Optionally show error message
-                              print('SubCategoryProducts API Error: ${state.message}');
-                            }
-                          },
-                        child: BlocBuilder<GroceryMenuBloc, GroceryMenuState>(
-                          builder: (context, state) {
-                            if (state is SubCategoryProductsLoadInProgress) {
-                              return Container();
-                            }
-                            if (state is SubCategoryProductsLoadFailure) {
-                              return Padding(
-                                padding: const EdgeInsets.only(top: 32),
-                                child: Text(
-                                  state.message,
-                                  style: AppTextStyles.bodyText.copyWith(
-                                    color: Colors.red,
-                                  ),
-                                ),
+                              print(
+                                'SubCategoryProducts API Error: ${state.message}',
                               );
                             }
-                            if (state is SubCategoryProductsLoadSuccess) {
-                              return _buildNewGroceryUI(state.subCategoryProducts);
-                            }
-                            
-                            // Default loading state
-                            return  Container();
                           },
-                        ),
+                          child: BlocBuilder<GroceryMenuBloc, GroceryMenuState>(
+                            builder: (context, state) {
+                              if (state is SubCategoryProductsLoadInProgress) {
+                                return Container();
+                              }
+                              if (state is SubCategoryProductsLoadFailure) {
+                                return Padding(
+                                  padding: const EdgeInsets.only(top: 32),
+                                  child: Text(
+                                    state.message,
+                                    style: AppTextStyles.bodyText.copyWith(
+                                      color: Colors.red,
+                                    ),
+                                  ),
+                                );
+                              }
+                              if (state is SubCategoryProductsLoadSuccess) {
+                                return _buildNewGroceryUI(
+                                  state.subCategoryProducts,
+                                );
+                              }
+
+                              // Default loading state
+                              return Container();
+                            },
+                          ),
                         ),
                       ),
                     ),
@@ -164,7 +172,6 @@ class _GroceriesMenuScreenState extends State<GroceriesMenuScreen> {
     );
   }
 
-
   Widget _buildNewGroceryUI(SubCategoryProductsResponse subCategoryProducts) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -174,11 +181,11 @@ class _GroceriesMenuScreenState extends State<GroceriesMenuScreen> {
           // Search Bar
           // _buildSearchBar(),
           // const SizedBox(height: 16),
-          
+
           // Category Filter Chips
           _buildCategoryFilterChips(subCategoryProducts),
           const SizedBox(height: 16),
-          
+
           // Products Grid
           _buildProductsGrid(subCategoryProducts),
         ],
@@ -186,8 +193,9 @@ class _GroceriesMenuScreenState extends State<GroceriesMenuScreen> {
     );
   }
 
-
-  Widget _buildCategoryFilterChips(SubCategoryProductsResponse subCategoryProducts) {
+  Widget _buildCategoryFilterChips(
+    SubCategoryProductsResponse subCategoryProducts,
+  ) {
     return SizedBox(
       height: 34,
       child: ListView.separated(
@@ -198,9 +206,10 @@ class _GroceriesMenuScreenState extends State<GroceriesMenuScreen> {
           final categoryData = subCategoryProducts.categoryData[index];
           final bool isSelected = index == _selectedMainCategoryIndex;
           return GestureDetector(
-            onTap: () => setState(() {
-              _selectedMainCategoryIndex = index;
-            }),
+            onTap:
+                () => setState(() {
+                  _selectedMainCategoryIndex = index;
+                }),
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               decoration: BoxDecoration(
@@ -226,16 +235,16 @@ class _GroceriesMenuScreenState extends State<GroceriesMenuScreen> {
   // Calculate dynamic dimensions based on screen size
   Map<String, double> _calculateDynamicDimensions(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
-    
+
     // Calculate available width (screen width - horizontal padding - spacing)
     final horizontalPadding = 40.0; // 20px on each side
     final availableWidth = screenWidth - horizontalPadding;
-    
+
     // Calculate item width based on screen size
     double itemWidth;
     double itemHeight;
     double spacing;
-    
+
     if (screenWidth < 360) {
       // Small devices (like iPhone SE)
       itemWidth = (availableWidth - 12) / 2; // 12px spacing between items
@@ -256,7 +265,7 @@ class _GroceriesMenuScreenState extends State<GroceriesMenuScreen> {
       itemHeight = imageHeight + 112; // Fixed content height
       spacing = 12.0;
     }
-    
+
     return {
       'itemWidth': itemWidth,
       'itemHeight': itemHeight,
@@ -301,7 +310,10 @@ class _GroceriesMenuScreenState extends State<GroceriesMenuScreen> {
     // Get products from selected category or all categories
     List<SubCategoryProduct> allProducts = [];
     if (_selectedMainCategoryIndex < subCategoryProducts.categoryData.length) {
-      allProducts = subCategoryProducts.categoryData[_selectedMainCategoryIndex].subCategory;
+      allProducts =
+          subCategoryProducts
+              .categoryData[_selectedMainCategoryIndex]
+              .subCategory;
     } else {
       // Show all products from all categories
       for (final categoryData in subCategoryProducts.categoryData) {
@@ -326,7 +338,7 @@ class _GroceriesMenuScreenState extends State<GroceriesMenuScreen> {
               final subCategoryProduct = allProducts[index];
               final product = subCategoryProduct.toProduct();
               final menuItem = _mapProduct(product);
-              
+
               return MenuItemCard(
                 title: menuItem.title,
                 price: menuItem.price,
@@ -340,55 +352,92 @@ class _GroceriesMenuScreenState extends State<GroceriesMenuScreen> {
                 vegColor: _veg,
                 nonVegColor: _nonVeg,
                 imageWidth: dimensions['itemWidth']!,
-                imageHeight: dimensions['itemWidth']! * 0.9, // Better proportion for taller cards
+                imageHeight: dimensions['itemWidth']! * 0.9,
+                // Better proportion for taller cards
                 cardWidth: dimensions['itemWidth']!,
                 cartData: _cartData,
                 instock: product.instock ?? true,
                 storeIsOpen: widget.actionData?.storeIsOpen ?? true,
                 storeType: product.storeTypeId ?? -111,
-                onQuantityChanged: (productId, centralProductId, quantity, isIncrease, isCustomizable) {
-                  _onQuantityChangedForGrocery(product.parentProductId,product.childProductId,product.unitId,product.storeId ?? '',product.storeCategoryId ?? '',product.storeTypeId ?? -111,product.variantsCount,quantity,isIncrease,product.productName,product.productImage);
+                onQuantityChanged: (
+                  productId,
+                  centralProductId,
+                  quantity,
+                  isIncrease,
+                  isCustomizable,
+                ) {
+                  _onQuantityChangedForGrocery(
+                    product.parentProductId,
+                    product.childProductId,
+                    product.unitId,
+                    product.storeId ?? '',
+                    product.storeCategoryId ?? '',
+                    product.storeTypeId ?? -111,
+                    product.variantsCount,
+                    quantity,
+                    isIncrease,
+                    product.productName,
+                    product.productImage,
+                  );
                 },
                 onClick: () {
                   // Handle product click
                   final Map<String, dynamic> productJson = product.toJson();
-                   // Add store information to the JSON
-                    productJson['storeId'] = widget.actionData?.storeId;
-                    productJson['storeCategoryId'] = widget.actionData?.storeCategoryId;
-                    productJson['storeTypeId'] = widget.actionData?.storeTypeId;
-                    
-                    print("productJson: $productJson");
+                  // Add store information to the JSON
+                  productJson['storeId'] = widget.actionData?.storeId;
+                  productJson['storeCategoryId'] =
+                      widget.actionData?.storeCategoryId;
+                  productJson['storeTypeId'] = widget.actionData?.storeTypeId;
+
+                  print("productJson: $productJson");
                   OrderService().triggerProductOrder(productJson);
                 },
-                onAddToCart: (productId, centralProductId, quantity, isCustomizable) {
+                onAddToCart: (
+                  productId,
+                  centralProductId,
+                  quantity,
+                  isCustomizable,
+                ) {
                   if (isCustomizable) {
-                     showModalBottomSheet(
-                          context: context,
-                          isScrollControlled: true,
-                          backgroundColor: Colors.transparent,
-                          builder: (context) => GroceryCustomizationScreen(
+                    showModalBottomSheet(
+                      context: context,
+                      isScrollControlled: true,
+                      backgroundColor: Colors.transparent,
+                      builder:
+                          (context) => GroceryCustomizationScreen(
                             parentProductId: product.parentProductId,
                             productId: product.childProductId,
                             storeId: widget.actionData?.storeId ?? '',
                             productName: product.productName,
                             productImage: product.productImage,
-                            onAddToCart: (parentProductId,productId,unitId) {
-                              _onAddToCartForGrocery(parentProductId,productId,unitId,widget.actionData?.storeId ?? '',widget.actionData?.storeCategoryId ?? '',FoodCategory.grocery.value,null);
+                            onAddToCart: (parentProductId, productId, unitId) {
+                              _onAddToCartForGrocery(
+                                parentProductId,
+                                productId,
+                                unitId,
+                                widget.actionData?.storeId ?? '',
+                                widget.actionData?.storeCategoryId ?? '',
+                                FoodCategory.grocery.value,
+                                null,
+                              );
                             },
                           ),
-                        );
+                    );
                   } else {
-                    cartBloc.add(CartAddItemRequested(
-                      storeId: widget.actionData?.storeId ?? '',
-                      cartType: 1,
-                      action: 1,
-                      storeCategoryId: widget.actionData?.storeCategoryId ?? '',
-                      newQuantity: quantity,
-                      storeTypeId: widget.actionData?.storeTypeId ?? -111,
-                      productId: productId,
-                      centralProductId: centralProductId,
-                      unitId: '',
-                    ));
+                    cartBloc.add(
+                      CartAddItemRequested(
+                        storeId: widget.actionData?.storeId ?? '',
+                        cartType: 1,
+                        action: 1,
+                        storeCategoryId:
+                            widget.actionData?.storeCategoryId ?? '',
+                        newQuantity: quantity,
+                        storeTypeId: widget.actionData?.storeTypeId ?? -111,
+                        productId: productId,
+                        centralProductId: centralProductId,
+                        unitId: '',
+                      ),
+                    );
                   }
                 },
               );
@@ -398,7 +447,6 @@ class _GroceriesMenuScreenState extends State<GroceriesMenuScreen> {
       ),
     );
   }
-
 
   void _onAddToCartForGrocery(
     String parentProductId,
@@ -411,25 +459,30 @@ class _GroceriesMenuScreenState extends State<GroceriesMenuScreen> {
   ) {
     try {
       //TODO:- Add Quantity
-      cartBloc.add(CartAddItemRequested(
-        storeId: storeId,
-        cartType: 1, // Default cart type
-        action: 1, // Add action
-        storeCategoryId: storeCategoryId,
-        newQuantity: 1,
-        storeTypeId: storeTypeId,
-        productId: productId,
-        centralProductId: parentProductId,
-        unitId: unitId,
-        addToCartOnId: addToCartOnId,
-      ));
-      
+      cartBloc.add(
+        CartAddItemRequested(
+          storeId: storeId,
+          cartType: 1,
+          // Default cart type
+          action: 1,
+          // Add action
+          storeCategoryId: storeCategoryId,
+          newQuantity: 1,
+          storeTypeId: storeTypeId,
+          productId: productId,
+          centralProductId: parentProductId,
+          unitId: unitId,
+          addToCartOnId: addToCartOnId,
+        ),
+      );
+
       print("Added product to cart: ${productId}");
     } catch (e) {
-      print('RestaurantScreen: Error dispatching CartAddItemRequeste with addons: $e');
+      print(
+        'RestaurantScreen: Error dispatching CartAddItemRequeste with addons: $e',
+      );
     }
   }
-
 
   _MenuItem _mapProduct(chat.Product p) {
     final String priceText = _formatCurrency(
@@ -481,22 +534,22 @@ class _GroceriesMenuScreenState extends State<GroceriesMenuScreen> {
       if (mounted) {
         setState(() {
           _cartData = cartData;
-          
         });
       }
     });
   }
 
-   /// Get addToCartOnId from cart data for a specific product
+  /// Get addToCartOnId from cart data for a specific product
   dynamic _getAddToCartOnId(String productId) {
     try {
       // Use filter to find the product with matching ID
-      final cartData = cartBloc.cartData
-          .expand((cart) => cart.sellers)
-          .expand((seller) => seller.products)
-          .where((product) => product.id == productId)
-          .firstOrNull;
-      
+      final cartData =
+          cartBloc.cartData
+              .expand((cart) => cart.sellers)
+              .expand((seller) => seller.products)
+              .where((product) => product.id == productId)
+              .firstOrNull;
+
       return cartData?.addToCartOnId;
     } catch (e) {
       print('Error getting addToCartOnId: $e');
@@ -504,9 +557,8 @@ class _GroceriesMenuScreenState extends State<GroceriesMenuScreen> {
     }
   }
 
-  
-void _onQuantityChangedForGrocery(
-  String parentProductId,
+  void _onQuantityChangedForGrocery(
+    String parentProductId,
     String productId,
     String unitId,
     String storeId,
@@ -516,78 +568,96 @@ void _onQuantityChangedForGrocery(
     int newQuantity,
     bool isIncrease,
     String productName,
-    String productImage) {
+    String productImage,
+  ) {
     if (isIncrease == false && newQuantity == 1) {
       //TODO:- 0 Quantity
       int? addToCartOnId;
       if (variantsCount > 1) {
-         addToCartOnId = _getAddToCartOnId(productId);
-         print("addCartOnID: $addToCartOnId");
-       }
-
-      cartBloc.add(CartAddItemRequested(
-        storeId: storeId,
-        cartType: 2,
-        action: 3, // Add/Update action
-        storeCategoryId: storeCategoryId,
-        newQuantity: 0,
-        storeTypeId: storeTypeId,
-        productId: productId,
-        centralProductId: parentProductId,
-        unitId: unitId,
-        addToCartOnId: addToCartOnId,
-      ));
-    }else if (newQuantity > 0 && isIncrease == true) {
-      if (variantsCount > 1) {
-         showModalBottomSheet(
-                        context: context,
-                        isScrollControlled: true,
-                        backgroundColor: Colors.transparent,
-                        builder: (context) => CustomizationSummaryScreen(
-                          // store: store,
-                          // product: product,
-                          onChooseClicked: () {
-                            _openGroceryCustomization(parentProductId,productId,unitId,storeId,storeCategoryId,storeTypeId,productName,productImage);
-                          },
-                          onRepeatClicked: () {
-                            //TODO:- Add Quantity
-                            final addToCartOnId = _getAddToCartOnId(productId);
-                            print("addCartOnID: $addToCartOnId");
-
-                            cartBloc.add(CartAddItemRequested(
-                              storeId: storeId,
-                              cartType: 1,
-                              action: 2, // Add action
-                              storeCategoryId: storeCategoryId,
-                              newQuantity: newQuantity + 1,
-                              storeTypeId: storeTypeId,
-                              productId: productId,
-                              centralProductId: parentProductId,
-                              unitId: unitId,
-                              addToCartOnId: addToCartOnId,
-                            )); 
-                          
-                          },
-                        ),
-          );
-      }else {
-        //TODO:- Add Quantity
-         final addToCartOnId = _getAddToCartOnId(productId);
-          print("addCartOnID: $addToCartOnId");
-      cartBloc.add(CartAddItemRequested(
-        storeId: storeId,
-        cartType: 1,
-        action: 2, // Add action
-        storeCategoryId: storeCategoryId,
-        newQuantity: newQuantity + 1,
-        storeTypeId: storeTypeId,
-        productId: productId,
-        centralProductId: parentProductId,
-        unitId: unitId,
-        addToCartOnId: addToCartOnId,
-      ));        
+        addToCartOnId = _getAddToCartOnId(productId);
+        print("addCartOnID: $addToCartOnId");
       }
 
+      cartBloc.add(
+        CartAddItemRequested(
+          storeId: storeId,
+          cartType: 2,
+          action: 3,
+          // Add/Update action
+          storeCategoryId: storeCategoryId,
+          newQuantity: 0,
+          storeTypeId: storeTypeId,
+          productId: productId,
+          centralProductId: parentProductId,
+          unitId: unitId,
+          addToCartOnId: addToCartOnId,
+        ),
+      );
+    } else if (newQuantity > 0 && isIncrease == true) {
+      if (variantsCount > 1) {
+        showModalBottomSheet(
+          context: context,
+          isScrollControlled: true,
+          backgroundColor: Colors.transparent,
+          builder:
+              (context) => CustomizationSummaryScreen(
+                // store: store,
+                // product: product,
+                onChooseClicked: () {
+                  _openGroceryCustomization(
+                    parentProductId,
+                    productId,
+                    unitId,
+                    storeId,
+                    storeCategoryId,
+                    storeTypeId,
+                    productName,
+                    productImage,
+                  );
+                },
+                onRepeatClicked: () {
+                  //TODO:- Add Quantity
+                  final addToCartOnId = _getAddToCartOnId(productId);
+                  print("addCartOnID: $addToCartOnId");
+
+                  cartBloc.add(
+                    CartAddItemRequested(
+                      storeId: storeId,
+                      cartType: 1,
+                      action: 2,
+                      // Add action
+                      storeCategoryId: storeCategoryId,
+                      newQuantity: newQuantity + 1,
+                      storeTypeId: storeTypeId,
+                      productId: productId,
+                      centralProductId: parentProductId,
+                      unitId: unitId,
+                      addToCartOnId: addToCartOnId,
+                    ),
+                  );
+                },
+              ),
+        );
+      } else {
+        //TODO:- Add Quantity
+        final addToCartOnId = _getAddToCartOnId(productId);
+        print("addCartOnID: $addToCartOnId");
+        cartBloc.add(
+          CartAddItemRequested(
+            storeId: storeId,
+            cartType: 1,
+            action: 2,
+            // Add action
+            storeCategoryId: storeCategoryId,
+            newQuantity: newQuantity + 1,
+            storeTypeId: storeTypeId,
+            productId: productId,
+            centralProductId: parentProductId,
+            unitId: unitId,
+            addToCartOnId: addToCartOnId,
+          ),
+        );
+      }
     } else {
       //TODO:- Remove Quantity
       int? addToCartOnId;
@@ -595,74 +665,98 @@ void _onQuantityChangedForGrocery(
         addToCartOnId = _getAddToCartOnId(productId);
         print("addCartOnID: $addToCartOnId");
       }
-      cartBloc.add(CartAddItemRequested(
-        storeId: storeId,
-        cartType: 2,
-        action: 2, // Add/Update action
-        storeCategoryId: storeCategoryId,
-        newQuantity: newQuantity - 1,
-        storeTypeId: storeTypeId,
-        productId: productId,
-        centralProductId: parentProductId,
-        unitId: unitId,
-        addToCartOnId: addToCartOnId,
-      ));
+      cartBloc.add(
+        CartAddItemRequested(
+          storeId: storeId,
+          cartType: 2,
+          action: 2,
+          // Add/Update action
+          storeCategoryId: storeCategoryId,
+          newQuantity: newQuantity - 1,
+          storeTypeId: storeTypeId,
+          productId: productId,
+          centralProductId: parentProductId,
+          unitId: unitId,
+          addToCartOnId: addToCartOnId,
+        ),
+      );
     }
-  
   }
 
-
-void _openGroceryCustomization(String parentProductId, String productId, String unitId, String storeId, String storeCategoryId, int storeTypeId, String productName, String productImage) {
-  showModalBottomSheet(
-                          context: context,
-                          isScrollControlled: true,
-                          backgroundColor: Colors.transparent,
-                          builder: (context) => GroceryCustomizationScreen(
-                            parentProductId: parentProductId,
-                            productId: productId,
-                            storeId: storeId,
-                            productName: productName,
-                            productImage: productImage,
-                            onAddToCart: (parentProductId,productId,unitId) {
-                              _onAddToCartForGrocery(parentProductId,productId,unitId,storeId,storeCategoryId,storeTypeId,null);
-                            },
-                          ),
-                        );
+  void _openGroceryCustomization(
+    String parentProductId,
+    String productId,
+    String unitId,
+    String storeId,
+    String storeCategoryId,
+    int storeTypeId,
+    String productName,
+    String productImage,
+  ) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder:
+          (context) => GroceryCustomizationScreen(
+            parentProductId: parentProductId,
+            productId: productId,
+            storeId: storeId,
+            productName: productName,
+            productImage: productImage,
+            onAddToCart: (parentProductId, productId, unitId) {
+              _onAddToCartForGrocery(
+                parentProductId,
+                productId,
+                unitId,
+                storeId,
+                storeCategoryId,
+                storeTypeId,
+                null,
+              );
+            },
+          ),
+    );
   }
 
-   /// Handle adding products with addons to cart
+  /// Handle adding products with addons to cart
   void _onAddToCartWithAddOns(
-    String productId, 
-    String centralProductId, 
-    String storeId, 
+    String productId,
+    String centralProductId,
+    String storeId,
     String storeCategoryId,
     int storeTypeId,
     BuildContext context,
-    dynamic variant, 
-    List<Map<String, dynamic>> addOns
+    dynamic variant,
+    List<Map<String, dynamic>> addOns,
   ) {
     try {
       //TODO:- Add Quantity
-      cartBloc.add(CartAddItemRequested(
-        storeId: storeId,
-        cartType: 1, // Default cart type
-        action: 1, // Add action
-        storeCategoryId: storeCategoryId,
-        newQuantity: 1,
-        storeTypeId: storeTypeId,
-        productId: productId,
-        centralProductId: centralProductId,
-        unitId: variant.unitId,
-        newAddOns: addOns,
-      ));
-      
+      cartBloc.add(
+        CartAddItemRequested(
+          storeId: storeId,
+          cartType: 1,
+          // Default cart type
+          action: 1,
+          // Add action
+          storeCategoryId: storeCategoryId,
+          newQuantity: 1,
+          storeTypeId: storeTypeId,
+          productId: productId,
+          centralProductId: centralProductId,
+          unitId: variant.unitId,
+          newAddOns: addOns,
+        ),
+      );
+
       // print("Added product with addons to cart: ${product.productName}");
     } catch (e) {
-      print('RestaurantScreen: Error dispatching CartAddItemRequeste with addons: $e');
+      print(
+        'RestaurantScreen: Error dispatching CartAddItemRequeste with addons: $e',
+      );
     }
   }
 }
-
 
 // Replaced inline card with shared MenuItemCard
 
@@ -689,5 +783,3 @@ class _MenuItem {
     this.isCustomizable = false,
   });
 }
-
-

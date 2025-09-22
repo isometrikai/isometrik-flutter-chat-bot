@@ -56,10 +56,9 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
   int _cartItems = 0;
   Map<String, int> _productQuantities = {}; // Track product quantities
   Map<String, chat.Product> _productDetails = {}; // Track product details
-  Map<String, int> _initialQuantities = {}; // Track initial quantities when screen opened
+  Map<String, int> _initialQuantities =
+      {}; // Track initial quantities when screen opened
   List<UniversalCartData> _cartData = []; // Store cart data from getCart API
-
-  
 
   // Maintain subcategory selection per category for ALL view
   final Map<String, int> _subIndexByCategory = <String, int>{};
@@ -73,18 +72,14 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
     cartBloc = CartBloc();
     cartBloc.add(CartFetchRequested(needToShowLoader: false));
     _bloc.add(const RestaurantMenuRequested());
-    
-      OrderService().setCartUpdateCallback((bool isCartUpdate) {
+
+    OrderService().setCartUpdateCallback((bool isCartUpdate) {
       if (mounted && isCartUpdate) {
         print('RestaurantMenuScreen: Cart update received - $isCartUpdate');
-        // Refresh cart data when cart update is triggered
-        print('RestaurantMenuScreen: Refreshing cart data');
-        Future.delayed(const Duration(seconds: 3), () {
+        isCartAPICalled = true;
         cartBloc.add(CartFetchRequested(needToShowLoader: true));
-        });
       }
     });
-
   }
 
   @override
@@ -107,20 +102,19 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
   double _extractPriceFromString(String priceString) {
     // Remove all non-numeric characters except decimal point
     String cleanString = priceString.replaceAll(RegExp(r'[^\d.]'), '');
-    
+
     // Remove trailing decimal points
     cleanString = cleanString.replaceAll(RegExp(r'\.+$'), '');
-    
+
     // Handle cases where there might be multiple decimal points (keep only the first one)
     final parts = cleanString.split('.');
     if (parts.length > 2) {
       cleanString = '${parts[0]}.${parts[1]}';
     }
-    
+
     // Parse the cleaned string
     final price = double.tryParse(cleanString);
-    
-    
+
     return price ?? 0.0;
   }
 
@@ -140,7 +134,13 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
               // Main content
               Positioned.fill(
                 child: SingleChildScrollView(
-                  padding: EdgeInsets.fromLTRB(16, 16, 16, _cartItems > 0 ? 129 : 24), // Add bottom padding when cart is visible
+                  padding: EdgeInsets.fromLTRB(
+                    16,
+                    16,
+                    16,
+                    _cartItems > 0 ? 129 : 24,
+                  ),
+                  // Add bottom padding when cart is visible
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
@@ -149,7 +149,7 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
                         subtitle: widget.actionData?.subtitle ?? '',
                         onClose: () {
                           // _onAddToCart();
-                          if (widget.onCheckout != null ) {
+                          if (widget.onCheckout != null) {
                             widget.onCheckout!(true);
                           }
                           Navigator.of(context).pop();
@@ -162,15 +162,20 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
                       const SizedBox(height: 16),
                       BlocListener<CartBloc, CartState>(
                         listener: (context, state) {
-                          if (state is CartLoaded && state.rawCartData != null) {
+                          if (state is CartLoaded &&
+                              state.rawCartData != null) {
                             _updateCartData(state.rawCartData!.data);
-                          }else if (state is CartEmpty) {
+                          } else if (state is CartEmpty) {
                             _updateCartData([]);
                           }
                         },
-                        child: BlocBuilder<RestaurantMenuBloc, RestaurantMenuState>(
+                        child: BlocBuilder<
+                          RestaurantMenuBloc,
+                          RestaurantMenuState
+                        >(
                           builder: (context, state) {
-                            if (state is RestaurantMenuInitial || state is RestaurantMenuLoadInProgress) {
+                            if (state is RestaurantMenuInitial ||
+                                state is RestaurantMenuLoadInProgress) {
                               return Container();
                               // const Padding(
                               //   padding: EdgeInsets.only(top: 32),
@@ -188,9 +193,10 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
                                 ),
                               );
                             }
-                            final categories = (state as RestaurantMenuLoadSuccess).categories;
+                            final categories =
+                                (state as RestaurantMenuLoadSuccess).categories;
                             _categories = categories;
-                            
+
                             if (categories.isEmpty) {
                               return Padding(
                                 padding: const EdgeInsets.only(top: 32),
@@ -232,8 +238,6 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
     );
   }
 
-
-
   Widget _buildSearchBar(ThemeData theme) {
     return Container(
       height: 54,
@@ -250,9 +254,7 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
               controller: _searchController,
               decoration: InputDecoration(
                 hintText: 'Search',
-                hintStyle: AppTextStyles.bodyText.copyWith(
-                      color: _labelGrey,
-                    ),
+                hintStyle: AppTextStyles.bodyText.copyWith(color: _labelGrey),
                 border: InputBorder.none,
               ),
             ),
@@ -277,14 +279,12 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
         // Non-veg switch
         Row(
           children: <Widget>[
-             SvgPicture.asset(
-                      AssetPath.get(
-                        'images/ic_NonVeg.svg',
-                      ),
-                      width: 14,
-                      height: 14,
-                      fit: BoxFit.contain,
-                    ),
+            SvgPicture.asset(
+              AssetPath.get('images/ic_NonVeg.svg'),
+              width: 14,
+              height: 14,
+              fit: BoxFit.contain,
+            ),
             const SizedBox(width: 8),
             GestureDetector(
               onTap: () {
@@ -331,14 +331,12 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
         // Veg switch
         Row(
           children: <Widget>[
-             SvgPicture.asset(
-                      AssetPath.get(
-                        'images/ic_Veg.svg',
-                      ),
-                      width: 14,
-                      height: 14,
-                      fit: BoxFit.contain,
-                    ),
+            SvgPicture.asset(
+              AssetPath.get('images/ic_Veg.svg'),
+              width: 14,
+              height: 14,
+              fit: BoxFit.contain,
+            ),
             const SizedBox(width: 8),
             GestureDetector(
               onTap: () {
@@ -395,10 +393,11 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
         itemBuilder: (BuildContext context, int index) {
           final bool isSelected = index == _selectedMainCategoryIndex;
           return GestureDetector(
-            onTap: () => setState(() {
-              _selectedMainCategoryIndex = index;
-              _selectedBiriyaniSubIndex = 0;
-            }),
+            onTap:
+                () => setState(() {
+                  _selectedMainCategoryIndex = index;
+                  _selectedBiriyaniSubIndex = 0;
+                }),
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 15),
               decoration: BoxDecoration(
@@ -473,12 +472,11 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
           for (final ProductCategory c in _categories) ...<Widget>[
             _buildOneCategorySection(
               category: c,
-              selectedSubIndex:
-                  _subIndexByCategory[c.catName] ?? 0,
+              selectedSubIndex: _subIndexByCategory[c.catName] ?? 0,
               onSubSelected: (int idx) => _subIndexByCategory[c.catName] = idx,
             ),
             const SizedBox(height: 24),
-          ]
+          ],
         ],
       );
     }
@@ -498,10 +496,11 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
   }) {
     final List<_MenuItem> items = <_MenuItem>[];
     if (category.isSubCategories && category.subCategories.isNotEmpty) {
-      final int subIndex = (selectedSubIndex >= 0 &&
-              selectedSubIndex < category.subCategories.length)
-          ? selectedSubIndex
-          : 0;
+      final int subIndex =
+          (selectedSubIndex >= 0 &&
+                  selectedSubIndex < category.subCategories.length)
+              ? selectedSubIndex
+              : 0;
       final List<chat.Product> products =
           category.subCategories[subIndex].products;
       items.addAll(products.map(_mapProduct));
@@ -509,35 +508,36 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
       items.addAll(category.products.map(_mapProduct));
     }
 
-    final List<_MenuItem> filtered = items.where((menuItem) {
-      // If both filters are off, show all items
-      if (!_filterVeg && !_filterNonVeg) {
-        // Only apply search filter
-        if (_searchController.text.trim().isNotEmpty &&
-            !menuItem.title
-                .toLowerCase()
-                .contains(_searchController.text.trim().toLowerCase())) {
-          return false;
-        }
-        return true;
-      }
-      
-      // If only veg filter is on, show only veg items
-      if (_filterVeg && !_filterNonVeg && !menuItem.isVeg) return false;
-      
-      // If only non-veg filter is on, show only non-veg items
-      if (_filterNonVeg && !_filterVeg && menuItem.isVeg) return false;
-      
-      // If both filters are on, show all items (both veg and non-veg)
-      // Apply search filter
-      if (_searchController.text.trim().isNotEmpty &&
-          !menuItem.title
-              .toLowerCase()
-              .contains(_searchController.text.trim().toLowerCase())) {
-        return false;
-      }
-      return true;
-    }).toList();
+    final List<_MenuItem> filtered =
+        items.where((menuItem) {
+          // If both filters are off, show all items
+          if (!_filterVeg && !_filterNonVeg) {
+            // Only apply search filter
+            if (_searchController.text.trim().isNotEmpty &&
+                !menuItem.title.toLowerCase().contains(
+                  _searchController.text.trim().toLowerCase(),
+                )) {
+              return false;
+            }
+            return true;
+          }
+
+          // If only veg filter is on, show only veg items
+          if (_filterVeg && !_filterNonVeg && !menuItem.isVeg) return false;
+
+          // If only non-veg filter is on, show only non-veg items
+          if (_filterNonVeg && !_filterVeg && menuItem.isVeg) return false;
+
+          // If both filters are on, show all items (both veg and non-veg)
+          // Apply search filter
+          if (_searchController.text.trim().isNotEmpty &&
+              !menuItem.title.toLowerCase().contains(
+                _searchController.text.trim().toLowerCase(),
+              )) {
+            return false;
+          }
+          return true;
+        }).toList();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -549,7 +549,8 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
           ),
         ),
         const SizedBox(height: 8),
-        if (category.isSubCategories && category.subCategories.isNotEmpty) ...<Widget>[
+        if (category.isSubCategories &&
+            category.subCategories.isNotEmpty) ...<Widget>[
           _buildSubcategoryChips(
             category: category,
             selectedIndex: selectedSubIndex,
@@ -582,14 +583,30 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
                 storeIsOpen: widget.actionData?.storeIsOpen ?? true,
                 storeType: widget.actionData?.storeTypeId ?? -111,
                 // Pass cart data to MenuItemCard
-                onQuantityChanged: (productId, centralProductId, quantity, isIncrease, isCustomizable) {
-                  _onQuantityChanged(productId, centralProductId, quantity, isIncrease, isCustomizable, item.title, item.imageUrl ?? '');
-                }, // Pass quantity change callback
+                onQuantityChanged: (
+                  productId,
+                  centralProductId,
+                  quantity,
+                  isIncrease,
+                  isCustomizable,
+                ) {
+                  _onQuantityChanged(
+                    productId,
+                    centralProductId,
+                    quantity,
+                    isIncrease,
+                    isCustomizable,
+                    item.title,
+                    item.imageUrl ?? '',
+                  );
+                },
+                // Pass quantity change callback
                 onClick: () {
                   // Find the product data and trigger order
                   chat.Product? foundProduct;
                   for (final category in _categories) {
-                    if (category.isSubCategories && category.subCategories.isNotEmpty) {
+                    if (category.isSubCategories &&
+                        category.subCategories.isNotEmpty) {
                       for (final subCategory in category.subCategories) {
                         foundProduct = subCategory.products.firstWhere(
                           (p) => p.childProductId == item.productId,
@@ -605,64 +622,94 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
                     }
                     if (foundProduct != null) break;
                   }
-                  
+
                   if (foundProduct != null) {
                     // Pass the entire product object as JSON, just like in Chat screen
-                    final Map<String, dynamic> productJson = foundProduct.toJson();
-                    
+                    final Map<String, dynamic> productJson =
+                        foundProduct.toJson();
+
                     // Add store information to the JSON
                     productJson['storeId'] = widget.actionData?.storeId;
-                    productJson['storeCategoryId'] = widget.actionData?.storeCategoryId;
+                    productJson['storeCategoryId'] =
+                        widget.actionData?.storeCategoryId;
                     productJson['storeTypeId'] = widget.actionData?.storeTypeId;
-                    
+
                     print("productJson: $productJson");
                     OrderService().triggerProductOrder(productJson);
                   }
                 },
-                onAddToCart: (productId, centralProductId, quantity, isCustomizable) {
+                onAddToCart: (
+                  productId,
+                  centralProductId,
+                  quantity,
+                  isCustomizable,
+                ) {
                   if (isCustomizable) {
-                     showModalBottomSheet(
-                    context: context,
-                    isScrollControlled: true,
-                    backgroundColor: Colors.transparent,
-                    builder: (context) => ProductCustomizationScreen(
-                      productId: productId,
-                      centralProductId: centralProductId,
-                      storeId: widget.actionData?.storeId ?? '',
-                      productName: item.title,
-                      productImage: item.imageUrl?.isNotEmpty ?? false ? item.imageUrl : null,
-                      isFromMenuScreen: true,
-                      onAddToCartWithAddOns: (product, store, variant, addOns, selectedProductId) {
-                        //TODO:- Add Quantity
-                        cartBloc.add(CartAddItemRequested(
-                       storeId: widget.actionData?.storeId ?? '',
-                       cartType: 1, // Default cart type
-                       action: 1, // Add action
-                       storeCategoryId: widget.actionData?.storeCategoryId ?? '',
-                       newQuantity: quantity , // Add 1 item
-                       storeTypeId: widget.actionData?.storeTypeId ?? -111,
-                        productId: selectedProductId,
-                        centralProductId: centralProductId,
-                        unitId: variant.unitId,
-                        newAddOns: addOns,
-                    ));
-                      },
-                    ),
-                  );
-                  }else {
+                    showModalBottomSheet(
+                      context: context,
+                      isScrollControlled: true,
+                      backgroundColor: Colors.transparent,
+                      builder:
+                          (context) => ProductCustomizationScreen(
+                            productId: productId,
+                            centralProductId: centralProductId,
+                            storeId: widget.actionData?.storeId ?? '',
+                            productName: item.title,
+                            productImage:
+                                item.imageUrl?.isNotEmpty ?? false
+                                    ? item.imageUrl
+                                    : null,
+                            isFromMenuScreen: true,
+                            onAddToCartWithAddOns: (
+                              product,
+                              store,
+                              variant,
+                              addOns,
+                              selectedProductId,
+                            ) {
+                              //TODO:- Add Quantity
+                              cartBloc.add(
+                                CartAddItemRequested(
+                                  storeId: widget.actionData?.storeId ?? '',
+                                  cartType: 1,
+                                  // Default cart type
+                                  action: 1,
+                                  // Add action
+                                  storeCategoryId:
+                                      widget.actionData?.storeCategoryId ?? '',
+                                  newQuantity: quantity,
+                                  // Add 1 item
+                                  storeTypeId:
+                                      widget.actionData?.storeTypeId ?? -111,
+                                  productId: selectedProductId,
+                                  centralProductId: centralProductId,
+                                  unitId: variant.unitId,
+                                  newAddOns: addOns,
+                                ),
+                              );
+                            },
+                          ),
+                    );
+                  } else {
                     //TODO:- Add Quantity
-                  cartBloc.add(CartAddItemRequested(
-                       storeId: widget.actionData?.storeId ?? '',
-                       cartType: 1, // Default cart type
-                       action: 1, // Add action
-                       storeCategoryId: widget.actionData?.storeCategoryId ?? '',
-                       newQuantity: quantity , // Add 1 item
-                       storeTypeId: widget.actionData?.storeTypeId ?? -111,
+                    cartBloc.add(
+                      CartAddItemRequested(
+                        storeId: widget.actionData?.storeId ?? '',
+                        cartType: 1,
+                        // Default cart type
+                        action: 1,
+                        // Add action
+                        storeCategoryId:
+                            widget.actionData?.storeCategoryId ?? '',
+                        newQuantity: quantity,
+                        // Add 1 item
+                        storeTypeId: widget.actionData?.storeTypeId ?? -111,
                         productId: productId,
                         centralProductId: centralProductId,
                         unitId: '',
-                    ));
-                  }                 
+                      ),
+                    );
+                  }
                 },
               );
             },
@@ -808,22 +855,22 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
       if (mounted) {
         setState(() {
           _cartData = cartData;
-          
         });
       }
     });
   }
 
-   /// Get addToCartOnId from cart data for a specific product
+  /// Get addToCartOnId from cart data for a specific product
   dynamic _getAddToCartOnId(String productId) {
     try {
       // Use filter to find the product with matching ID
-      final cartData = cartBloc.cartData
-          .expand((cart) => cart.sellers)
-          .expand((seller) => seller.products)
-          .where((product) => product.id == productId)
-          .firstOrNull;
-      
+      final cartData =
+          cartBloc.cartData
+              .expand((cart) => cart.sellers)
+              .expand((seller) => seller.products)
+              .where((product) => product.id == productId)
+              .firstOrNull;
+
       return cartData?.addToCartOnId;
     } catch (e) {
       print('Error getting addToCartOnId: $e');
@@ -832,79 +879,101 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
   }
 
   // Handle quantity changes for products
-  void _onQuantityChanged(String productId, String centralProductId, int currentQuantity, bool isIncrease, bool isCustomizable, String productName, String productImage) {
+  void _onQuantityChanged(
+    String productId,
+    String centralProductId,
+    int currentQuantity,
+    bool isIncrease,
+    bool isCustomizable,
+    String productName,
+    String productImage,
+  ) {
     try {
       if (isIncrease == false && currentQuantity == 1) {
-          //TODO:- 0 Quantity
+        //TODO:- 0 Quantity
         int? addToCartOnId;
         if (isCustomizable == true) {
           addToCartOnId = _getAddToCartOnId(productId);
           print("addCartOnID: $addToCartOnId");
         }
 
-         cartBloc.add(CartAddItemRequested(
-          storeId: widget.actionData?.storeId ?? '',
-          cartType: 2,
-          action: 3, // Add action
-          storeCategoryId: widget.actionData?.storeCategoryId ?? '',
-          newQuantity: 0,
-          storeTypeId: widget.actionData?.storeTypeId ?? -111,
-          productId: productId,
-          centralProductId: centralProductId,
-          unitId: '',
-          addToCartOnId: addToCartOnId,
-        ));
-      }else if (currentQuantity > 0 && isIncrease == true) {
+        cartBloc.add(
+          CartAddItemRequested(
+            storeId: widget.actionData?.storeId ?? '',
+            cartType: 2,
+            action: 3,
+            // Add action
+            storeCategoryId: widget.actionData?.storeCategoryId ?? '',
+            newQuantity: 0,
+            storeTypeId: widget.actionData?.storeTypeId ?? -111,
+            productId: productId,
+            centralProductId: centralProductId,
+            unitId: '',
+            addToCartOnId: addToCartOnId,
+          ),
+        );
+      } else if (currentQuantity > 0 && isIncrease == true) {
+        if (isCustomizable) {
+          showModalBottomSheet(
+            context: context,
+            isScrollControlled: true,
+            backgroundColor: Colors.transparent,
+            builder:
+                (context) => CustomizationSummaryScreen(
+                  onChooseClicked: () {
+                    // When "I'll choose" is clicked, open ProductCustomizationScreen
+                    _openProductCustomization(
+                      productId,
+                      centralProductId,
+                      widget.actionData?.storeId ?? '',
+                      widget.actionData?.storeCategoryId ?? '',
+                      widget.actionData?.storeTypeId ?? -111,
+                      context,
+                      productName,
+                      productImage,
+                    );
+                  },
+                  onRepeatClicked: () {
+                    //TODO:- Add Quantity
+                    final addToCartOnId = _getAddToCartOnId(productId);
+                    print("addCartOnID: $addToCartOnId");
 
-          if (isCustomizable) {
-
-            showModalBottomSheet(
-                        context: context,
-                        isScrollControlled: true,
-                        backgroundColor: Colors.transparent,
-                        builder: (context) => CustomizationSummaryScreen(
-                          
-                          onChooseClicked: () {
-                            // When "I'll choose" is clicked, open ProductCustomizationScreen
-                            _openProductCustomization(productId, centralProductId,widget.actionData?.storeId ?? '', widget.actionData?.storeCategoryId ?? '', widget.actionData?.storeTypeId ?? -111, context, productName, productImage);
-                          },
-                          onRepeatClicked: () {
-                            //TODO:- Add Quantity
-                            final addToCartOnId = _getAddToCartOnId(productId);
-                            print("addCartOnID: $addToCartOnId");
-
-                            cartBloc.add(CartAddItemRequested(
-                              storeId: widget.actionData?.storeId ?? '',
-                              cartType: 1,
-                              action: 2, // Add action
-                              storeCategoryId: widget.actionData?.storeCategoryId ?? '',
-                              newQuantity: currentQuantity + 1,
-                              storeTypeId: widget.actionData?.storeTypeId ?? -111,
-                              productId: productId,
-                              centralProductId: centralProductId,
-                              unitId: '',
-                              addToCartOnId: addToCartOnId,
-                            )); 
-                          
-                          },
-                        ),
+                    cartBloc.add(
+                      CartAddItemRequested(
+                        storeId: widget.actionData?.storeId ?? '',
+                        cartType: 1,
+                        action: 2,
+                        // Add action
+                        storeCategoryId:
+                            widget.actionData?.storeCategoryId ?? '',
+                        newQuantity: currentQuantity + 1,
+                        storeTypeId: widget.actionData?.storeTypeId ?? -111,
+                        productId: productId,
+                        centralProductId: centralProductId,
+                        unitId: '',
+                        addToCartOnId: addToCartOnId,
+                      ),
+                    );
+                  },
+                ),
           );
-             
-          }else {
-            //TODO:- Add Quantity
-             cartBloc.add(CartAddItemRequested(
-          storeId: widget.actionData?.storeId ?? '',
-          cartType: 1,
-          action: 2, // Remove action
-          storeCategoryId: widget.actionData?.storeCategoryId ?? '',
-          newQuantity: currentQuantity + 1,
-          storeTypeId: widget.actionData?.storeTypeId ?? -111,
-          productId: productId,
-          centralProductId: centralProductId,
-          unitId: '',
-        ));
-          }
-    
+        } else {
+          //TODO:- Add Quantity
+          cartBloc.add(
+            CartAddItemRequested(
+              storeId: widget.actionData?.storeId ?? '',
+              cartType: 1,
+              action: 2,
+              // Remove action
+              storeCategoryId: widget.actionData?.storeCategoryId ?? '',
+              newQuantity: currentQuantity + 1,
+              storeTypeId: widget.actionData?.storeTypeId ?? -111,
+              productId: productId,
+              centralProductId: centralProductId,
+              unitId: '',
+            ),
+          );
+        }
       } else {
         //TODO:- Remove Quantity
         int? addToCartOnId;
@@ -912,75 +981,105 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
           addToCartOnId = _getAddToCartOnId(productId);
           print("addCartOnID: $addToCartOnId");
         }
-        cartBloc.add(CartAddItemRequested(
-          storeId: widget.actionData?.storeId ?? '',
-          cartType: 2,
-          action: 2, // Add action
-          storeCategoryId: widget.actionData?.storeCategoryId ?? '',
-          newQuantity: currentQuantity - 1,
-          storeTypeId: widget.actionData?.storeTypeId ?? -111,
-          productId: productId,
-          centralProductId: centralProductId,
-          unitId: '',
-          addToCartOnId: addToCartOnId,
-        ));
+        cartBloc.add(
+          CartAddItemRequested(
+            storeId: widget.actionData?.storeId ?? '',
+            cartType: 2,
+            action: 2,
+            // Add action
+            storeCategoryId: widget.actionData?.storeCategoryId ?? '',
+            newQuantity: currentQuantity - 1,
+            storeTypeId: widget.actionData?.storeTypeId ?? -111,
+            productId: productId,
+            centralProductId: centralProductId,
+            unitId: '',
+            addToCartOnId: addToCartOnId,
+          ),
+        );
       }
     } catch (e) {
       print('Error changing quantity: $e');
     }
   }
 
-  void _openProductCustomization(String productId, String centralProductId, String storeId,String storeCategoryId,int storeTypeId, BuildContext context, String productName, String productImage) {
+  void _openProductCustomization(
+    String productId,
+    String centralProductId,
+    String storeId,
+    String storeCategoryId,
+    int storeTypeId,
+    BuildContext context,
+    String productName,
+    String productImage,
+  ) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => ProductCustomizationScreen(
-        productId: productId,
-        centralProductId: centralProductId,
-        storeId: storeId,
-        productName: productName,
-        productImage: productImage,
-        isFromMenuScreen: true,
-        onAddToCartWithAddOns: (product, store, variant, addOns, selectedProductId) => _onAddToCartWithAddOns(productId, centralProductId, storeId, storeCategoryId, storeTypeId, context, variant, addOns,selectedProductId),
-      ),
+      builder:
+          (context) => ProductCustomizationScreen(
+            productId: productId,
+            centralProductId: centralProductId,
+            storeId: storeId,
+            productName: productName,
+            productImage: productImage,
+            isFromMenuScreen: true,
+            onAddToCartWithAddOns:
+                (product, store, variant, addOns, selectedProductId) =>
+                    _onAddToCartWithAddOns(
+                      productId,
+                      centralProductId,
+                      storeId,
+                      storeCategoryId,
+                      storeTypeId,
+                      context,
+                      variant,
+                      addOns,
+                      selectedProductId,
+                    ),
+          ),
     );
   }
 
-   /// Handle adding products with addons to cart
+  /// Handle adding products with addons to cart
   void _onAddToCartWithAddOns(
-    String productId, 
-    String centralProductId, 
-    String storeId, 
+    String productId,
+    String centralProductId,
+    String storeId,
     String storeCategoryId,
     int storeTypeId,
     BuildContext context,
-    dynamic variant, 
+    dynamic variant,
     List<Map<String, dynamic>> addOns,
-    String selectedProductId
+    String selectedProductId,
   ) {
     try {
       //TODO:- Add Quantity
-      cartBloc.add(CartAddItemRequested(
-        storeId: storeId,
-        cartType: 1, // Default cart type
-        action: 1, // Add action
-        storeCategoryId: storeCategoryId,
-        newQuantity: 1,
-        storeTypeId: storeTypeId,
-        productId: selectedProductId,
-        centralProductId: centralProductId,
-        unitId: variant.unitId,
-        newAddOns: addOns,
-      ));
-      
+      cartBloc.add(
+        CartAddItemRequested(
+          storeId: storeId,
+          cartType: 1,
+          // Default cart type
+          action: 1,
+          // Add action
+          storeCategoryId: storeCategoryId,
+          newQuantity: 1,
+          storeTypeId: storeTypeId,
+          productId: selectedProductId,
+          centralProductId: centralProductId,
+          unitId: variant.unitId,
+          newAddOns: addOns,
+        ),
+      );
+
       // print("Added product with addons to cart: ${product.productName}");
     } catch (e) {
-      print('RestaurantScreen: Error dispatching CartAddItemRequeste with addons: $e');
+      print(
+        'RestaurantScreen: Error dispatching CartAddItemRequeste with addons: $e',
+      );
     }
   }
 }
-
 
 // Replaced inline card with shared MenuItemCard
 
@@ -1011,5 +1110,3 @@ class _MenuItem {
     this.storeIsOpen = true,
   });
 }
-
-

@@ -12,10 +12,7 @@ List<UniversalCartData> globalCartData = [];
 
 class CartBloc extends Bloc<CartEvent, CartState> {
   final CartRepository repository;
-  // final CartManager cartManager = CartManager();
   List<UniversalCartData> cartData = [];
-
-  
 
   // Getter for total product count
   int get getTotalProductCount {
@@ -35,18 +32,15 @@ class CartBloc extends Bloc<CartEvent, CartState> {
     CartFetchRequested event,
     Emitter<CartState> emit,
   ) async {
-    if (event.needToShowLoader) { 
+    if (event.needToShowLoader) {
       Utility.showLoader();
     }
-
     try {
       // Fetch raw cart data once and use it for both purposes
       final rawResult = await repository.fetchRawUniversalCart();
-
        if (event.needToShowLoader) {
         Utility.closeProgressDialog();
       }
-      
       if (rawResult.isSuccess) {
         final rawCartData = rawResult.data as UniversalCartResponse;
           cartId = rawCartData.data.first.id;
@@ -93,7 +87,6 @@ class CartBloc extends Bloc<CartEvent, CartState> {
             storeType: storeType,
           ));
         }
-        
       } else {
         cartData.clear();
         globalCartData.clear();

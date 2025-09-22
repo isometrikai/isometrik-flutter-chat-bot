@@ -720,13 +720,14 @@ class _ProductCustomizationScreenState extends State<ProductCustomizationScreen>
                       borderRadius: BorderRadius.circular(16),
                     ),
                   ),
-                  child: const Text(
+                  child:  Text(
                     'Add',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                      color: Colors.white,
-                    ),
+                     style: AppTextStyles.button.copyWith(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w700,
+                            fontSize: 16,
+                            height: 1.2,
+                          ),
                   ),
                 ),
               ),

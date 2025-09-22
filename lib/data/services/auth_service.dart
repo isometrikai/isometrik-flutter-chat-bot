@@ -48,6 +48,12 @@ class AuthService {
     String? location,
     double? longitude,
     double? latitude,
+    bool? needToShowTutorial,
+    required String clientGuid,
+    required String indexName,
+    required String visitId,
+    required String visitorId,
+    required String searchApiUrl,
   }) {
     _chatBotId = chatBotId;
     _isProduction = isProduction;
@@ -72,24 +78,6 @@ class AuthService {
   Future<void> initialize() async {
     await TokenManager.instance.initialize();
   }
-
-  // Chatbot API
-  // Future<MyGPTsResponse?> getChatbotData() async {
-  //   final res = await _serviceClient.get(
-  //     '/v1/guest/mygpts',
-  //     queryParameters: {'id': _chatBotId},
-  //   );
-  //   if (res.isSuccess && res.data != null) {
-  //     try {
-  //       final parsed = MyGPTsResponse.fromJson(res.data as Map<String, dynamic>);
-  //       return parsed;
-  //     } catch (e) {
-  //       AppLog.info('Parsing error (getChatbotData): $e');
-  //       return null;
-  //     }
-  //   }
-  //   return null;
-  // }
 
   Future<MyGPTsResponse?> getChatbotData() async {
     // Temporary: Direct data loading (remove this when API is ready)
@@ -139,9 +127,6 @@ class AuthService {
         "count": 1
       };
 
-      // Simulate network delay (optional)
-      await Future.delayed(Duration(milliseconds: 300));
-
       final parsed = MyGPTsResponse.fromJson(mockResponseData);
       return parsed;
     } catch (e) {
@@ -153,7 +138,7 @@ class AuthService {
   Future<GreetingResponse?> getInitialOptionData() async {
     final res = await _chatClient.get(
       '/v2/home-screen',
-      queryParameters: { 'username': _name ?? '',
+       queryParameters: { 'username': _name ?? '',
         'timestamp': _timestamp ?? '',
         'location': _location ?? '',
           'latitude': _latitude.toString(),

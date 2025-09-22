@@ -742,6 +742,7 @@ class WidgetAction {
   final bool? storeIsOpen;
   final String? storeCategoryName;
   final String? orderId;
+  final String? addOns;
 
   WidgetAction({
     required this.buttonText,
@@ -763,6 +764,7 @@ class WidgetAction {
     this.storeIsOpen,
     this.storeCategoryName,
     this.orderId,
+    this.addOns,
   });
 
   factory WidgetAction.fromJson(Map<String, dynamic> json) {
@@ -790,6 +792,7 @@ class WidgetAction {
         storeIsOpen: json['storeIsOpen'] ?? true,
         storeCategoryName: json['storeCategoryName']?.toString(),
         orderId: json['orderId']?.toString(),
+        addOns: json['addOns']?.toString(),
     );
   }
 
@@ -814,6 +817,7 @@ class WidgetAction {
       'storeIsOpen': storeIsOpen,
       'storeCategoryName': storeCategoryName,
       'orderId': orderId,
+      'addOns': addOns,
     };
   }
 }

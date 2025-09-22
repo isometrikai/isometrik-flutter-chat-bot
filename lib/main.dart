@@ -1,11 +1,14 @@
 import 'package:chat_bot/view/launch_screen.dart';
+import 'package:chat_bot/view/tutorial_screen.dart';
 import 'package:flutter/material.dart';
 import 'services/api_service.dart';
 import 'services/callback_manage.dart';
+import 'services/speech_service.dart';
 import 'package:flutter/services.dart';
 import 'utils/asset_path.dart';
 import 'utils/utility.dart';
 import 'utils/app_theme.dart';
+import 'dart:async';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -14,6 +17,7 @@ void main() async {
   // AssetPath.isPackageMode = true; // Set to true for package mode, false for normal project
   
   await PlatformService.initializeFromPlatform();
+  
   runApp(const MyApp());
 }
 
@@ -23,8 +27,9 @@ void chatMain() async {
   
   // Configure for package mode
   AssetPath.isPackageMode = true;
-  
+  print('STEP 2');
   await PlatformService.initializeFromPlatform();
+  
   runApp(const MyApp());
 }
 class MyApp extends StatelessWidget {
@@ -35,7 +40,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     // Set up callbacks when app initializes
     _setupCallbacks();
-    
+    print('STEP 1');
     // Set current context for fallback when navigator key is not available
     Utility.setCurrentContext(context);
     
@@ -45,7 +50,7 @@ class MyApp extends StatelessWidget {
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
       themeMode: ThemeMode.system,
-      home:  LaunchScreen(),//ChatScreen(),
+      home: TutorialScreen(currentStep: 1, totalSteps: 6),//TutorialScreen(),//LaunchScreen(),//ChatScreen(),
       debugShowCheckedModeBanner: false,
     );
   }
@@ -112,6 +117,12 @@ class PlatformService {
         location: config['location'],
         longitude: longitude,
         latitude: latitude,
+        needToShowTutorial: config['needToShowTutorial'],
+        clientGuid: config['clientGuid'] ?? '',
+        indexName: config['indexName'] ?? '',
+        visitId: config['visitId'] ?? '',
+        visitorId: config['visitorId'] ?? '',
+        searchApiUrl: config['searchApiUrl'] ?? '',
       );
 
       print('✅ ApiService configured successfully');
@@ -131,6 +142,11 @@ class PlatformService {
             isProduction: false,
             latitude: 25.276987,
             longitude: 55.296249,
+            clientGuid: '528a7d439df44f2b9457342b7b865be2',
+            indexName: 'hitechnology.20250821.105131',
+            visitId: '3c6b9339-c602-4af9-b454-0ec0df067181',
+            visitorId: '47daf829-b5df-4358-83ea-207aa4eaae15',
+            searchApiUrl: 'https://searchapi-dev.hawksearch.net',
           );
       }
     }

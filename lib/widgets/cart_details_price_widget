@@ -125,30 +125,51 @@ class CartDetailsPriceWidget extends StatelessWidget {
     final productName = item.productName ?? '';
     final currencySymbol = item.currencySymbol ?? 'د.إ';
     final price = item.productPrice ?? 0;
+    final addOns = item.addOns ?? '';
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      child: Column(
         children: [
-          Expanded(
-            child: Text(
-              quantity.isNotEmpty ? '$quantity $productName' : productName,
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w400,
-                color: Color(0xFF242424),
+          // Main product row
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: Text(
+                  quantity.isNotEmpty ? '$quantity $productName' : productName,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w400,
+                    color: Color(0xFF242424),
+                  ),
+                ),
               ),
-            ),
+              Text(
+                '$currencySymbol${price}',//toStringAsFixed(0)
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w400,
+                  color: Color(0xFF242424),
+                ),
+              ),
+            ],
           ),
-          Text(
-            '$currencySymbol${price}',//toStringAsFixed(0)
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w400,
-              color: Color(0xFF242424),
+          if(addOns.isNotEmpty) ...[
+            // Add Ons label row
+            Row(
+              children: [
+                Text(
+                  addOns,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w300,
+                    color: Color(0xFF242424),
+                  ),
+                ),
+              ],
             ),
-          ),
+          ],
         ],
       ),
     );

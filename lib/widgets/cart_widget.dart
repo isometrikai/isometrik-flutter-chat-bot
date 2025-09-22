@@ -99,6 +99,7 @@ class CartWidget extends StatelessWidget {
               ),
             ),
           ),
+          const SizedBox(width: 5),
           Text(
             '$currencySymbol$price',
             style: const TextStyle(

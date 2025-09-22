@@ -3,6 +3,9 @@ PODS:
   - shared_preferences_foundation (0.0.1):
     - Flutter
     - FlutterMacOS
+  - speech_to_text (0.0.1):
+    - Flutter
+    - Try
   - Stripe (23.27.6):
     - StripeApplePay (= 23.27.6)
     - StripeCore (= 23.27.6)
@@ -39,12 +42,14 @@ PODS:
     - StripeUICore (= 23.27.6)
   - StripeUICore (23.27.6):
     - StripeCore (= 23.27.6)
+  - Try (2.1.1)
   - unique_identifier (0.0.1):
     - Flutter
 
 DEPENDENCIES:
   - Flutter (from `Flutter`)
   - shared_preferences_foundation (from `.symlinks/plugins/shared_preferences_foundation/darwin`)
+  - speech_to_text (from `.symlinks/plugins/speech_to_text/ios`)
   - stripe_ios (from `.symlinks/plugins/stripe_ios/ios`)
   - unique_identifier (from `.symlinks/plugins/unique_identifier/ios`)
 
@@ -58,12 +63,15 @@ SPEC REPOS:
     - StripePaymentSheet
     - StripePaymentsUI
     - StripeUICore
+    - Try
 
 EXTERNAL SOURCES:
   Flutter:
     :path: Flutter
   shared_preferences_foundation:
     :path: ".symlinks/plugins/shared_preferences_foundation/darwin"
+  speech_to_text:
+    :path: ".symlinks/plugins/speech_to_text/ios"
   stripe_ios:
     :path: ".symlinks/plugins/stripe_ios/ios"
   unique_identifier:
@@ -72,6 +80,7 @@ EXTERNAL SOURCES:
 SPEC CHECKSUMS:
   Flutter: cabc95a1d2626b1b06e7179b784ebcf0c0cde467
   shared_preferences_foundation: 9e1978ff2562383bd5676f64ec4e9aa8fa06a6f7
+  speech_to_text: ae2abc312e619ff1c53e675a9fc4d785a15c03bb
   Stripe: 9fec845645e39f371e6898926d096fd9c2feb5a5
   stripe_ios: 5accba1ff472f89300e1676c351166f29dc93ced
   StripeApplePay: 5f017e8dfe259fafbab70137776189deef754bb2
@@ -81,8 +90,9 @@ SPEC CHECKSUMS:
   StripePaymentSheet: 3eaf870c4388e44b0cc37e4c69d00b6957fd8bd7
   StripePaymentsUI: 59ccddeacad592b09fa67e8d641340820ddb4751
   StripeUICore: 879bbf5889265db13f52fac8aad7a176ba62481f
+  Try: 5ef669ae832617b3cee58cb2c6f99fb767a4ff96
   unique_identifier: 759d781cf134d96de2161628a1d52014df19599c
 
-PODFILE CHECKSUM: 3c63482e143d1b91d2d2560aee9fb04ecc74ac7e
+PODFILE CHECKSUM: 198be3bdd0ca202819cd93d3dbee92cea9d303ab
 
 COCOAPODS: 1.16.2

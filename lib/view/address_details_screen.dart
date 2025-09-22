@@ -1,3 +1,4 @@
+import 'package:chat_bot/utils/text_styles.dart';
 import 'package:flutter/material.dart';
 import '../widgets/screen_header.dart';
 
@@ -137,13 +138,14 @@ class _AddressDetailsScreenState extends State<AddressDetailsScreen> {
               child: _GradientButton(
                 enabled: _allFilled,
                 onPressed: _onSubmit,
-                child: const Text(
+                child:  Text(
                   'Deliver here',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w700,
-                    fontSize: 16,
-                  ),
+                   style: AppTextStyles.button.copyWith(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w700,
+                            fontSize: 16,
+                            height: 1.2,
+                          ),
                 ),
               ),
             ),

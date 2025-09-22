@@ -36,10 +36,12 @@ import 'package:chat_bot/widgets/choose_card_widget.dart';
 import 'package:chat_bot/widgets/order_summary_widget.dart';
 import 'package:chat_bot/widgets/order_confirmed_widget.dart';
 import '../utils/enum.dart';
+import '../services/speech_service.dart';
 
 class ChatScreen extends StatefulWidget {
   final MyGPTsResponse chatbotData;
   final GreetingResponse? greetingData;
+
   const ChatScreen({super.key, required this.chatbotData, this.greetingData});
 
   @override
@@ -57,15 +59,24 @@ class _ChatScreenState extends State<ChatScreen> {
   List<ChatWidget> _latestActionWidgets = []; // Track latest action widgets
   int _totalCartCount = 0; // Track total cart count
   List<ChatMessage> messages = [];
-  
+
   late final CartBloc _cartBloc;
+  final SpeechService _speechService = SpeechService();
+  bool _isSpeechAvailable = false;
+  bool _isRecording = false;
 
   // Returns index of the last bot message that shows stores, products, choose_address, choose_card, order_summary, or order_confirmed widgets; -1 if none
   // Cart widget is not considered for hiding
   int _indexOfLastBotCatalogMessage() {
     for (int i = messages.length - 1; i >= 0; i--) {
       final ChatMessage message = messages[i];
-      if (message.isBot && (message.hasStoreCards || message.hasProductCards || message.hasChooseAddressWidget || message.hasChooseCardWidget || message.hasOrderSummaryWidget || message.hasOrderConfirmedWidget)) {
+      if (message.isBot &&
+          (message.hasStoreCards ||
+              message.hasProductCards ||
+              message.hasChooseAddressWidget ||
+              message.hasChooseCardWidget ||
+              message.hasOrderSummaryWidget ||
+              message.hasOrderConfirmedWidget)) {
         return i;
       }
     }
@@ -75,14 +86,20 @@ class _ChatScreenState extends State<ChatScreen> {
   // Produces a hidden version of catalog widgets for a message (non-destructive to data)
   // Only hides stores, products, and order confirmed, keeps cart widget visible
   ChatMessage _hideCatalogInMessage(ChatMessage message) {
-    if (!(message.hasStoreCards || message.hasProductCards || message.hasChooseAddressWidget || message.hasChooseCardWidget || message.hasOrderSummaryWidget || message.hasOrderConfirmedWidget)) return message;
+    if (!(message.hasStoreCards ||
+        message.hasProductCards ||
+        message.hasChooseAddressWidget ||
+        message.hasChooseCardWidget ||
+        message.hasOrderSummaryWidget ||
+        message.hasOrderConfirmedWidget))
+      return message;
     return message.copyWith(
       hasStoreCards: false,
       hasProductCards: false,
       hasChooseAddressWidget: false,
       hasChooseCardWidget: false,
-              hasOrderSummaryWidget: false,
-        hasOrderConfirmedWidget: false,
+      hasOrderSummaryWidget: false,
+      hasOrderConfirmedWidget: false,
       // Keep cart widget visible
       hasCartWidget: message.hasCartWidget,
     );
@@ -108,11 +125,13 @@ class _ChatScreenState extends State<ChatScreen> {
       if (catalogIdx >= 0) {
         messages[catalogIdx] = _hideCatalogInMessage(messages[catalogIdx]);
       }
-      messages.add(ChatMessage(
+      messages.add(
+        ChatMessage(
           id: DateTime.now().millisecondsSinceEpoch.toString(),
           text: text,
-          isBot: false
-      ));
+          isBot: false,
+        ),
+      );
       _pendingMessage = text;
       _textFieldHeight = 50.0; // Reset to default height when sending message
     });
@@ -143,11 +162,11 @@ class _ChatScreenState extends State<ChatScreen> {
 
   void _fetchCartData() {
     if (!mounted) return;
-    
+
     _cartBloc.add(CartFetchRequested(needToShowLoader: false));
     // Cart count will be updated via the CartBloc listener
     print('Cart data fetch requested');
-    
+
     // Also update cart count directly from cart bloc after a short delay
     Future.delayed(const Duration(milliseconds: 500), () {
       if (mounted) {
@@ -168,13 +187,17 @@ class _ChatScreenState extends State<ChatScreen> {
     ChatWidget? orderSummaryWidget;
     ChatWidget? orderConfirmedWidget;
     try {
-      storesWidget = response.widgets.firstWhere((widget) => widget.isStoresWidget);
+      storesWidget = response.widgets.firstWhere(
+        (widget) => widget.isStoresWidget,
+      );
     } catch (e) {
       storesWidget = null;
     }
 
     try {
-      productsWidget = response.widgets.firstWhere((widget) => widget.isProductsWidget);
+      productsWidget = response.widgets.firstWhere(
+        (widget) => widget.isProductsWidget,
+      );
     } catch (e) {
       productsWidget = null;
     }
@@ -186,25 +209,33 @@ class _ChatScreenState extends State<ChatScreen> {
     }
 
     try {
-      chooseAddressWidget = response.widgets.firstWhere((widget) => widget.isChooseAddressWidget);
+      chooseAddressWidget = response.widgets.firstWhere(
+        (widget) => widget.isChooseAddressWidget,
+      );
     } catch (e) {
       chooseAddressWidget = null;
     }
 
     try {
-      chooseCardWidget = response.widgets.firstWhere((widget) => widget.isChooseCardWidget);
+      chooseCardWidget = response.widgets.firstWhere(
+        (widget) => widget.isChooseCardWidget,
+      );
     } catch (e) {
       chooseCardWidget = null;
     }
 
     try {
-      orderSummaryWidget = response.widgets.firstWhere((widget) => widget.isOrderSummaryWidget);
+      orderSummaryWidget = response.widgets.firstWhere(
+        (widget) => widget.isOrderSummaryWidget,
+      );
     } catch (e) {
       orderSummaryWidget = null;
     }
 
     try {
-      orderConfirmedWidget = response.widgets.firstWhere((widget) => widget.isOrderConfirmedWidget);
+      orderConfirmedWidget = response.widgets.firstWhere(
+        (widget) => widget.isOrderConfirmedWidget,
+      );
     } catch (e) {
       orderConfirmedWidget = null;
     }
@@ -219,56 +250,79 @@ class _ChatScreenState extends State<ChatScreen> {
     bool hasOrderConfirmed = orderConfirmedWidget != null;
 
     setState(() {
-      messages.add(ChatMessage(
-        id: messageId,
-        text: response.text,
-        isBot: true,
-        showAvatar: true,
-        hasStoreCards: hasStores,
-        hasProductCards: hasProducts,
-        hasCartWidget: hasCart,
-        hasChooseAddressWidget: hasChooseAddress,
-        hasChooseCardWidget: hasChooseCard,
-        hasOrderSummaryWidget: hasOrderSummary,
-        hasOrderConfirmedWidget: hasOrderConfirmed,
-        // Don't show option buttons if stores, products, cart, choose_address, choose_card, order_summary, or order_confirmed are present
-        hasOptionButtons: !hasStores && !hasProducts && !hasCart && !hasChooseAddress && !hasChooseCard && !hasOrderSummary && !hasOrderConfirmed && response.hasWidgets && response.optionsWidgets.isNotEmpty,
-        optionButtons: !hasStores && !hasProducts && !hasCart && !hasChooseAddress && !hasChooseCard && !hasOrderSummary && !hasOrderConfirmed && response.hasWidgets && response.optionsWidgets.isNotEmpty
-            ? response.optionsWidgets.first.options
-            : [],
-        stores: storesWidget?.stores ?? [],
-        products: productsWidget?.products ?? [],
-        cartItems: cartWidget?.getCartItems() ?? [],
-        addressOptions: chooseAddressWidget?.getAddressOptions() ?? [],
-        cardOptions: chooseCardWidget?.getCardOptions() ?? [],
-        orderSummaryItems: orderSummaryWidget?.getOrderSummaryItems() ?? [],
-        storesWidget: storesWidget,
-        productsWidget: productsWidget,
-        cartWidget: cartWidget,
-        chooseAddressWidget: chooseAddressWidget,
-        chooseCardWidget: chooseCardWidget,
-        orderSummaryWidget: orderSummaryWidget,
-        orderConfirmedWidget: orderConfirmedWidget,
-      ));
-      
+      messages.add(
+        ChatMessage(
+          id: messageId,
+          text: response.text,
+          isBot: true,
+          showAvatar: true,
+          hasStoreCards: hasStores,
+          hasProductCards: hasProducts,
+          hasCartWidget: hasCart,
+          hasChooseAddressWidget: hasChooseAddress,
+          hasChooseCardWidget: hasChooseCard,
+          hasOrderSummaryWidget: hasOrderSummary,
+          hasOrderConfirmedWidget: hasOrderConfirmed,
+          // Don't show option buttons if stores, products, cart, choose_address, choose_card, order_summary, or order_confirmed are present
+          hasOptionButtons:
+              !hasStores &&
+              !hasProducts &&
+              !hasCart &&
+              !hasChooseAddress &&
+              !hasChooseCard &&
+              !hasOrderSummary &&
+              !hasOrderConfirmed &&
+              response.hasWidgets &&
+              response.optionsWidgets.isNotEmpty,
+          optionButtons:
+              !hasStores &&
+                      !hasProducts &&
+                      !hasCart &&
+                      !hasChooseAddress &&
+                      !hasChooseCard &&
+                      !hasOrderSummary &&
+                      !hasOrderConfirmed &&
+                      response.hasWidgets &&
+                      response.optionsWidgets.isNotEmpty
+                  ? response.optionsWidgets.first.options
+                  : [],
+          stores: storesWidget?.stores ?? [],
+          products: productsWidget?.products ?? [],
+          cartItems: cartWidget?.getCartItems() ?? [],
+          addressOptions: chooseAddressWidget?.getAddressOptions() ?? [],
+          cardOptions: chooseCardWidget?.getCardOptions() ?? [],
+          orderSummaryItems: orderSummaryWidget?.getOrderSummaryItems() ?? [],
+          storesWidget: storesWidget,
+          productsWidget: productsWidget,
+          cartWidget: cartWidget,
+          chooseAddressWidget: chooseAddressWidget,
+          chooseCardWidget: chooseCardWidget,
+          orderSummaryWidget: orderSummaryWidget,
+          orderConfirmedWidget: orderConfirmedWidget,
+        ),
+      );
+
       // Store action widgets for the action buttons
-      _latestActionWidgets = response.widgets.where((widget) => 
-        widget.type == WidgetEnum.see_more.value ||
-        widget.type == WidgetEnum.menu.value ||
-        widget.type == WidgetEnum.add_more.value ||
-        widget.type == WidgetEnum.proceed_to_checkout.value ||
-        widget.type == WidgetEnum.add_address.value ||
-        widget.type == WidgetEnum.add_payment.value ||
-        widget.type == WidgetEnum.cart.value ||
-        widget.type == WidgetEnum.choose_address.value ||
-        widget.type == WidgetEnum.choose_card.value ||
-        widget.type == WidgetEnum.cash_on_delivery.value ||
-          widget.type == WidgetEnum.order_tracking.value ||
-            widget.type == WidgetEnum.order_details.value
-      ).toList();
+      _latestActionWidgets =
+          response.widgets
+              .where(
+                (widget) =>
+                    widget.type == WidgetEnum.see_more.value ||
+                    widget.type == WidgetEnum.menu.value ||
+                    widget.type == WidgetEnum.add_more.value ||
+                    widget.type == WidgetEnum.proceed_to_checkout.value ||
+                    widget.type == WidgetEnum.add_address.value ||
+                    widget.type == WidgetEnum.add_payment.value ||
+                    widget.type == WidgetEnum.cart.value ||
+                    widget.type == WidgetEnum.choose_address.value ||
+                    widget.type == WidgetEnum.choose_card.value ||
+                    widget.type == WidgetEnum.cash_on_delivery.value ||
+                    widget.type == WidgetEnum.order_tracking.value ||
+                    widget.type == WidgetEnum.order_details.value,
+              )
+              .toList();
     });
     _scrollToBottom();
-   
   }
 
   void _scrollToBottom() {
@@ -300,32 +354,136 @@ class _ChatScreenState extends State<ChatScreen> {
   void initState() {
     super.initState();
     _initializeSession();
-    
+
     // Initialize cartBloc directly since it's provided by parent MultiBlocProvider
     _cartBloc = context.read<CartBloc>();
-    
+
     // Set up cart update callback - the mounted check handles if screen is active
     OrderService().setCartUpdateCallback((bool isCartUpdate) {
       if (mounted && isCartUpdate) {
         print('ChatScreen: Cart update received - $isCartUpdate');
-        Future.delayed(const Duration(seconds: 3), () {
-          _sendMessage("I have updated the cart");
-        });
+        // Future.delayed(const Duration(seconds: 3), () {
+        _sendMessage("I have updated the cart");
+        // });
       }
     });
-    
+
     // Add keyboard listener
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      
       _messageFocusNode.addListener(_onFocusChange);
       // Fetch cart data after cartBloc is initialized
       _fetchCartData();
+      Future.delayed(const Duration(seconds: 1), () {
+        // Speech service is already initialized at app startup for ultra-fast response
+        // Just check availability
+        _initializeSpeechService();
+      });
     });
   }
 
   void _initializeSession() {
     _sessionId = "${DateTime.now().millisecondsSinceEpoch ~/ 1000}";
+  }
+
+  Future<void> _initializeSpeechService() async {
+    // Start initialization in background - don't block UI
+    try {
+      _isSpeechAvailable = await _speechService.initialize();
+      if (!_isSpeechAvailable) {
+        debugPrint('Speech recognition not available');
+      } else {
+        debugPrint('Speech service initialized successfully');
+      }
+    } catch (e) {
+      debugPrint('Failed to initialize speech service: $e');
+      _isSpeechAvailable = false;
+    }
+  }
+
+  Future<void> _startSpeechRecording() async {
+    if (_isRecording) {
+      return;
+    }
+
+    // Haptic feedback for stop
+    HapticFeedback.lightImpact();
+
+    // IMMEDIATE response - no async operations blocking UI
+    setState(() {
+      _isRecording = true;
+    });
+
+    // Ultra-fast start - fire and forget approach
+    final bool started = _speechService.startListening();
+    if (!started) {
+      // If fast start failed, reset the UI state
+      setState(() {
+        _isRecording = false;
+      });
+
+      // Update availability status
+      _isSpeechAvailable = _speechService.isAvailable;
+
+      // Show user feedback if service is not available
+      if (!_isSpeechAvailable) {
+        BlackToastView.show(context, 'Speech recognition is not available');
+      }
+    }
+  }
+
+  Future<void> _stopSpeechRecording() async {
+    if (!_isRecording) {
+      return;
+    }
+
+    // Haptic feedback for stop
+    HapticFeedback.lightImpact();
+
+    try {
+      await _speechService.stopListening();
+
+      setState(() {
+        _isRecording = false;
+      });
+
+      final String recognizedText = _speechService.currentRecognizedText;
+
+      if (recognizedText.trim().isNotEmpty) {
+        // Set the recognized text to the text field
+        _messageController.text = recognizedText.trim();
+      } else {
+        BlackToastView.show(context, 'No speech detected. Please try again.');
+      }
+    } catch (e) {
+      debugPrint('Failed to stop speech recording: $e');
+      setState(() {
+        _isRecording = false;
+      });
+      BlackToastView.show(context, 'Recording failed. Please try again.');
+    }
+  }
+
+  Future<void> _cancelSpeechRecording() async {
+    if (!_isRecording) {
+      return;
+    }
+
+    // Haptic feedback for cancel
+    HapticFeedback.lightImpact();
+
+    try {
+      await _speechService.cancel();
+
+      setState(() {
+        _isRecording = false;
+      });
+    } catch (e) {
+      debugPrint('Failed to cancel speech recording: $e');
+      setState(() {
+        _isRecording = false;
+      });
+    }
   }
 
   Future<void> _restartChatAPI() async {
@@ -346,7 +504,7 @@ class _ChatScreenState extends State<ChatScreen> {
     _messageController.dispose();
     _scrollController.dispose();
     _messageFocusNode.dispose();
-    
+
     // OrderService().clearCallback();
     print("DISPOSE");
     super.dispose();
@@ -379,14 +537,26 @@ class _ChatScreenState extends State<ChatScreen> {
       },
       pendingMessage: _pendingMessage,
       onClearPendingMessage: _clearPendingMessage,
-      sessionId: _sessionId, // Pass session ID
+      sessionId: _sessionId,
+      // Pass session ID
       textFieldHeight: _textFieldHeight,
       onUpdateTextFieldHeight: _updateTextFieldHeight,
       latestActionWidgets: _latestActionWidgets,
-      onHideStoreCards: _hideStoreCards, // Add the callback
-      onUpdateCartCount: _updateCartCount, // Add the callback
-      totalCartCount: _totalCartCount, // Pass the cart count
-      cartBloc: _cartBloc, // Pass the cart bloc
+      onHideStoreCards: _hideStoreCards,
+      // Add the callback
+      onUpdateCartCount: _updateCartCount,
+      // Add the callback
+      totalCartCount: _totalCartCount,
+      // Pass the cart count
+      cartBloc: _cartBloc,
+      // Pass the cart bloc
+      onStartSpeechRecording: _startSpeechRecording,
+      // Add start speech handler
+      onStopSpeechRecording: _stopSpeechRecording,
+      // Add stop speech handler
+      onCancelSpeechRecording: _cancelSpeechRecording,
+      // Add cancel speech handler
+      isRecording: _isRecording, // Pass recording state
     );
   }
 }
@@ -417,6 +587,13 @@ class _ChatScreenBody extends StatelessWidget {
   final Function(int) onUpdateCartCount; // Add callback to update cart count
   final int totalCartCount; // Add cart count parameter
   final CartBloc cartBloc; // Add cart bloc parameter
+  final Future<void> Function()
+  onStartSpeechRecording; // Add start speech handler
+  final Future<void> Function()
+  onStopSpeechRecording; // Add stop speech handler
+  final Future<void> Function()
+  onCancelSpeechRecording; // Add cancel speech handler
+  final bool isRecording; // Add recording state
 
   const _ChatScreenBody({
     required this.messageController,
@@ -444,164 +621,190 @@ class _ChatScreenBody extends StatelessWidget {
     required this.onUpdateCartCount, // Add the callback parameter
     required this.totalCartCount, // Add the cart count parameter
     required this.cartBloc, // Add the cart bloc parameter
+    required this.onStartSpeechRecording, // Add the start speech handler parameter
+    required this.onStopSpeechRecording, // Add the stop speech handler parameter
+    required this.onCancelSpeechRecording, // Add the cancel speech handler parameter
+    required this.isRecording, // Add the recording state parameter
   });
 
   @override
   Widget build(BuildContext context) {
     return PopScope(
-        canPop: false,
-        child: Scaffold(
-          backgroundColor: Colors.white,
-          resizeToAvoidBottomInset: true,
-          appBar: _buildAppBar(context),
-          body: MultiBlocListener(
-            listeners: [
-              BlocListener<ChatBloc, ChatState>(
-                listener: (context, state) {
-                  if (state is ChatLoaded) {
-                      int cartCount = cartBloc.getTotalProductCount;
-                      onUpdateCartCount(cartCount);
-                    onHandleChatResponse(state.messages);
-                    if (state.messages.orderConfirmedWidgets.isNotEmpty) {
-                      context.read<CartBloc>().add(CartFetchRequested(needToShowLoader: false));
-                    }
-                    if (state.messages.cartCount != null && state.messages.cartCount == 0) {
-                      context.read<CartBloc>().add(CartFetchRequested(needToShowLoader: false));
-                    }
-                  } else if (state is ChatError) {
-                    // Check if it's a timeout error
-                    if (state.error.contains(
-                        "Something went wrong please try again latter")) {
-                      // Add timeout error message to chat
-                      final messageId = DateTime
-                          .now()
-                          .millisecondsSinceEpoch
-                          .toString();
-                      final errorMessage = ChatMessage(
-                        id: messageId,
-                        text: "Something went wrong please try again latter",
-                        isBot: true,
-                        showAvatar: true,
-                      );
-            
-                      final updatedMessages = [...messages, errorMessage];
-                      onUpdateMessages(updatedMessages);
-                      onScrollToBottom();
-                    } else {
-                      BlackToastView.show(context, 'Something went wrong please try again later');
-                    }
-                  }
-                },
-              ),
-              BlocListener<CartBloc, CartState>(
-                listener: (context, state) {
-                  if (state is CartProductAdded) {
-                    // onHideStoreCards();
-                    // Product added to cart successfully
-                    onSendMessage("I have updated the cart");
-                  } else if (state is CartLoaded) {
-                    int cartCount = cartBloc.getTotalProductCount;
-                    onUpdateCartCount(cartCount);
-                  } else if (state is CartEmpty) {
-                    // Cart is empty, set count to 0
-                    print('CartBloc CartEmpty: Setting cart count to 0');
-                    onUpdateCartCount(0);
-                  }
-                },
-              ),
-            ],
-            child: BlocConsumer<ChatBloc, ChatState>(
+      canPop: false,
+      child: Scaffold(
+        backgroundColor: Colors.white,
+        resizeToAvoidBottomInset: true,
+        appBar: _buildAppBar(context),
+        body: MultiBlocListener(
+          listeners: [
+            BlocListener<ChatBloc, ChatState>(
               listener: (context, state) {
-                // This listener is now handled by the MultiBlocListener above
-              },
-              builder: (context, state) {
-                // Send pending message if any (schedule after build; avoid async directly in builder)
-                if (pendingMessage != null) {
-                  final bloc = context.read<ChatBloc>();
-                  final String msg = pendingMessage!;
-                  final String sid = sessionId;
-                  WidgetsBinding.instance.addPostFrameCallback((_) async {
-                    final event = await ChatLoadEvent.create(
-                      message: msg.trim(),
-                      sessionId: sid,
+                if (state is ChatLoaded) {
+                  int cartCount = cartBloc.getTotalProductCount;
+                  onUpdateCartCount(cartCount);
+                  onHandleChatResponse(state.messages);
+                  if (state.messages.orderConfirmedWidgets.isNotEmpty) {
+                    context.read<CartBloc>().add(
+                      CartFetchRequested(needToShowLoader: false),
                     );
-                    bloc.add(event);
-                    onClearPendingMessage();
-                  });
-                }
-        
-                if (state is ChatLoading) {
-                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                  }
+                  if (state.messages.cartCount != null &&
+                      state.messages.cartCount == 0) {
+                    context.read<CartBloc>().add(
+                      CartFetchRequested(needToShowLoader: false),
+                    );
+                  }
+                } else if (state is ChatError) {
+                  // Check if it's a timeout error
+                  if (state.error.contains(
+                    "Something went wrong please try again latter",
+                  )) {
+                    // Add timeout error message to chat
+                    final messageId =
+                        DateTime.now().millisecondsSinceEpoch.toString();
+                    final errorMessage = ChatMessage(
+                      id: messageId,
+                      text: "Something went wrong please try again latter",
+                      isBot: true,
+                      showAvatar: true,
+                    );
+
+                    final updatedMessages = [...messages, errorMessage];
+                    onUpdateMessages(updatedMessages);
                     onScrollToBottom();
-                  });
+                  } else {
+                    BlackToastView.show(
+                      context,
+                      'Something went wrong please try again later',
+                    );
+                  }
                 }
-        
-                final bool showGreetingOverlay = messages.isEmpty && greetingData != null;
-                return Column(
-                  children: [
-                    Expanded(
-                      child: Stack(
-                        children: [
-                          NotificationListener<ScrollNotification>(
-                            onNotification: (ScrollNotification scrollInfo) {
-                              return false;
-                            },
-                            child: ListView.builder(
-                              controller: scrollController,
-                              padding: const EdgeInsets.all(16),
-                              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-                              itemCount: messages.length + (state is ChatLoading ? 1 : 0),
-                              itemBuilder: (context, index) {
-                                if (index < messages.length) {
-                                  return _buildMessageBubble(messages[index], context);
-                                }
-        
-                                if (state is ChatLoading) {
-                                  return Padding(
-                                    padding: const EdgeInsets.only(bottom: 16),
-                                    child: Row(
-                                      crossAxisAlignment: CrossAxisAlignment.end,
-                                      children: [
-                                        Container(
-                                          child: SizedBox(
-                                            width: 80,
-                                            height: 40,
-                                            child: Transform.scale(
-                                              scale: 3.5,
-                                              child: Lottie.asset(
-                                                  AssetPath.get('lottie/bubble-wave-black.json'),
-                                                  fit: BoxFit.contain
+              },
+            ),
+            BlocListener<CartBloc, CartState>(
+              listener: (context, state) {
+                if (state is CartProductAdded) {
+                  // onHideStoreCards();
+                  // Product added to cart successfully
+                  onSendMessage("I have updated the cart");
+                } else if (state is CartLoaded) {
+                  int cartCount = cartBloc.getTotalProductCount;
+                  onUpdateCartCount(cartCount);
+                } else if (state is CartEmpty) {
+                  // Cart is empty, set count to 0
+                  print('CartBloc CartEmpty: Setting cart count to 0');
+                  onUpdateCartCount(0);
+                }
+              },
+            ),
+          ],
+          child: BlocConsumer<ChatBloc, ChatState>(
+            listener: (context, state) {
+              // This listener is now handled by the MultiBlocListener above
+            },
+            builder: (context, state) {
+              // Send pending message if any (schedule after build; avoid async directly in builder)
+              if (pendingMessage != null) {
+                final bloc = context.read<ChatBloc>();
+                final String msg = pendingMessage!;
+                final String sid = sessionId;
+                WidgetsBinding.instance.addPostFrameCallback((_) async {
+                  final event = await ChatLoadEvent.create(
+                    message: msg.trim(),
+                    sessionId: sid,
+                  );
+                  bloc.add(event);
+                  onClearPendingMessage();
+                });
+              }
+
+              if (state is ChatLoading) {
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  onScrollToBottom();
+                });
+              }
+
+              final bool showGreetingOverlay =
+                  messages.isEmpty && greetingData != null;
+              return Column(
+                children: [
+                  Expanded(
+                    child: Stack(
+                      children: [
+                        NotificationListener<ScrollNotification>(
+                          onNotification: (ScrollNotification scrollInfo) {
+                            return false;
+                          },
+                          child: ListView.builder(
+                            controller: scrollController,
+                            padding: const EdgeInsets.all(16),
+                            keyboardDismissBehavior:
+                                ScrollViewKeyboardDismissBehavior.onDrag,
+                            itemCount:
+                                messages.length +
+                                (state is ChatLoading ? 1 : 0),
+                            itemBuilder: (context, index) {
+                              if (index < messages.length) {
+                                return _buildMessageBubble(
+                                  messages[index],
+                                  context,
+                                );
+                              }
+
+                              if (state is ChatLoading) {
+                                return Padding(
+                                  padding: const EdgeInsets.only(bottom: 16),
+                                  child: Row(
+                                    crossAxisAlignment: CrossAxisAlignment.end,
+                                    children: [
+                                      Container(
+                                        child: SizedBox(
+                                          width: 80,
+                                          height: 40,
+                                          child: Transform.scale(
+                                            scale: 3.5,
+                                            child: Lottie.asset(
+                                              AssetPath.get(
+                                                'lottie/bubble-wave-black.json',
                                               ),
+                                              fit: BoxFit.contain,
                                             ),
                                           ),
                                         ),
-                                      ],
-                                    ),
-                                  );
-                                }
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              }
 
-                                return const SizedBox.shrink();
-                              },
-                            ),
+                              return const SizedBox.shrink();
+                            },
                           ),
-                          if (showGreetingOverlay) Positioned.fill(
+                        ),
+                        if (showGreetingOverlay)
+                          Positioned.fill(
                             child: IgnorePointer(
                               ignoring: false,
                               child: _buildGreetingOverlay(context),
                             ),
                           ),
-                        ],
-                      ),
+                      ],
                     ),
-                    _buildActionButtons(context),
-                    _buildInputArea(context),
-                  ],
-                );
-              },
-            ),
+                  ),
+                  _buildActionButtons(context),
+                  Stack(
+                    children: [
+                      _buildInputArea(context),
+                      if (isRecording) _buildInputRecordingArea(context),
+                    ],
+                  ),
+                ],
+              );
+            },
           ),
         ),
-      );
+      ),
+    );
     // );
   }
 
@@ -629,19 +832,20 @@ class _ChatScreenBody extends StatelessWidget {
       title: Row(
         children: [
           Container(
-            child: (chatbotData.data.isNotEmpty &&
-                   chatbotData.data.first.profileImage.isNotEmpty)
-                ? SvgPicture.asset(
-                    AssetPath.get('images/ic_header_logo.svg'),
-                    width: 80,
-                    height: 23,
-                    fit: BoxFit.cover,
-                  )
-                : const Icon(
-                    Icons.calendar_today,
-                    color: Colors.white,
-                    size: 20,
-                  ),
+            child:
+                (chatbotData.data.isNotEmpty &&
+                        chatbotData.data.first.profileImage.isNotEmpty)
+                    ? SvgPicture.asset(
+                      AssetPath.get('images/ic_header_logo.svg'),
+                      width: 80,
+                      height: 23,
+                      fit: BoxFit.cover,
+                    )
+                    : const Icon(
+                      Icons.calendar_today,
+                      color: Colors.white,
+                      size: 20,
+                    ),
           ),
         ],
       ),
@@ -660,85 +864,99 @@ class _ChatScreenBody extends StatelessWidget {
                   });
                 }
                 return Row(
-              children: [
-                // Only show reload and cart icons if there are messages
-                if (messages.isNotEmpty) ...[
-                  IconButton(
-                    icon: Opacity(
-                      opacity: 1.0,
-                      child: SvgPicture.asset(
-                        AssetPath.get('images/ic_reload.svg'),
-                        width: 40,
-                        height: 40,
-                      ),
-                    ),
-                    onPressed: isApiLoading ? null : () => _showNewChatConfirmation(context),
-                  ),
-                  IconButton(
-                    icon: Opacity(
-                      opacity: 1.0,
-                      child: Stack(
-                        children: [
-                          SvgPicture.asset(
-                            AssetPath.get('images/ic_cart.svg'),
+                  children: [
+                    // Only show reload and cart icons if there are messages
+                    if (messages.isNotEmpty) ...[
+                      IconButton(
+                        icon: Opacity(
+                          opacity: 1.0,
+                          child: SvgPicture.asset(
+                            AssetPath.get('images/ic_reload.svg'),
                             width: 40,
                             height: 40,
                           ),
-                          if (cartCount > 0 || directCartCount > 0)
-                            Positioned(
-                              right: 0,
-                              top: 0,
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-                                decoration: BoxDecoration(
-                                  color: const Color(0xFF6B46C1), // Purple color
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                constraints: const BoxConstraints(
-                                  minWidth: 20,
-                                  minHeight: 20,
-                                ),
-                                child: Text(
-                                  (cartCount > 0 ? cartCount : directCartCount).toString(),
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                  textAlign: TextAlign.center,
-                                ),
-                              ),
-                            ),
-                        ],
+                        ),
+                        onPressed:
+                            isApiLoading
+                                ? null
+                                : () => _showNewChatConfirmation(context),
                       ),
-                    ),
-                    onPressed: isApiLoading ? null : () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => BlocProvider(
-                            create: (context) => CartBloc(),
-                            child: CartScreen(
-                              onCheckout: (message) {
-                                onSendMessage(message);
-                              },
-                            ),
+                      IconButton(
+                        icon: Opacity(
+                          opacity: 1.0,
+                          child: Stack(
+                            children: [
+                              SvgPicture.asset(
+                                AssetPath.get('images/ic_cart.svg'),
+                                width: 40,
+                                height: 40,
+                              ),
+                              if (cartCount > 0 || directCartCount > 0)
+                                Positioned(
+                                  right: 0,
+                                  top: 0,
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 4,
+                                      vertical: 2,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFF6B46C1),
+                                      // Purple color
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                    constraints: const BoxConstraints(
+                                      minWidth: 20,
+                                      minHeight: 20,
+                                    ),
+                                    child: Text(
+                                      (cartCount > 0
+                                              ? cartCount
+                                              : directCartCount)
+                                          .toString(),
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  ),
+                                ),
+                            ],
                           ),
                         ),
-                      );
-                    },
-                  ),
-                ],
-                IconButton(
-                  icon: SvgPicture.asset(
-                    AssetPath.get('images/ic_close.svg'),
-                    width: 40,
-                    height: 40,
-                  ),
-                  onPressed: () => _showExitChatConfirmation(context),
-                ),
-              ],
-            );
+                        onPressed:
+                            isApiLoading
+                                ? null
+                                : () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder:
+                                          (context) => BlocProvider(
+                                            create: (context) => CartBloc(),
+                                            child: CartScreen(
+                                              onCheckout: (message) {
+                                                onSendMessage(message);
+                                              },
+                                            ),
+                                          ),
+                                    ),
+                                  );
+                                },
+                      ),
+                    ],
+                    IconButton(
+                      icon: SvgPicture.asset(
+                        AssetPath.get('images/ic_close.svg'),
+                        width: 40,
+                        height: 40,
+                      ),
+                      onPressed: () => _showExitChatConfirmation(context),
+                    ),
+                  ],
+                );
               },
             );
           },
@@ -746,10 +964,7 @@ class _ChatScreenBody extends StatelessWidget {
       ],
       bottom: PreferredSize(
         preferredSize: const Size.fromHeight(0.5),
-        child: Container(
-          color: Colors.grey.shade300,
-          height: 0,
-        ),
+        child: Container(color: Colors.grey.shade300, height: 0),
       ),
     );
   }
@@ -767,7 +982,8 @@ class _ChatScreenBody extends StatelessWidget {
           padding: const EdgeInsets.all(24),
           child: Column(
             mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start, // Add this for left alignment
+            crossAxisAlignment: CrossAxisAlignment.start,
+            // Add this for left alignment
             children: [
               // Handle bar
               Center(
@@ -793,130 +1009,88 @@ class _ChatScreenBody extends StatelessWidget {
               const SizedBox(height: 24),
               Row(
                 children: [
-                  // Expanded(
-                  //   child: TextButton(
-                  //     onPressed: () => Navigator.of(context).pop(),
-                  //     style: TextButton.styleFrom(
-                  //       backgroundColor: Colors.grey[100],
-                  //       foregroundColor: Colors.black,
-                  //       padding: const EdgeInsets.symmetric(vertical: 16),
-                  //       shape: RoundedRectangleBorder(
-                  //         borderRadius: BorderRadius.circular(12),
-                  //       ),
-                  //     ),
-                  //     child: const Text(
-                  //       'CANCEL',
-                  //       style: TextStyle(
-                  //         fontSize: 16,
-                  //         fontWeight: FontWeight.w600,
-                  //         color: Color(0xFF8E2FFD)
-                  //       ),
-                  //     ),
-                  //   ),
-                  // ),
-                  // const SizedBox(width: 16),
-                  // Expanded(
-                  //   child: TextButton(
-                  //     onPressed: () {
-                  //       Navigator.of(context).pop();
-                  //       onRestartChatAPI();
-                  //     },
-                  //     style: TextButton.styleFrom(
-                  //       backgroundColor: Color(0xFF8E2FFD),
-                  //       foregroundColor: Colors.white,
-                  //       padding: const EdgeInsets.symmetric(vertical: 16),
-                  //       shape: RoundedRectangleBorder(
-                  //         borderRadius: BorderRadius.circular(12),
-                  //       ),
-                  //     ),
-                  //     child: const Text(
-                  //       'YES',
-                  //       style: TextStyle(
-                  //         fontSize: 16,
-                  //         fontWeight: FontWeight.w600,
-                  //       ),
-                  //     ),
-                  //   ),
-                  // ),
                   Expanded(
-          child: SizedBox(
-            height: 62,
-            child: OutlinedButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              style: OutlinedButton.styleFrom(
-                side: const BorderSide(color: Color(0xFF8E2FFD), width: 2),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                backgroundColor: Colors.white,
-              ),
-              child: const Text(
-                "CANCEL",
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w700,
-                  color: Color(0xFF8E2FFD),
-                ),
-              ),
-            ),
-          ),
-        ),
-        
-        // Spacing between buttons
-        const SizedBox(width: 16),
-        
-        // Right button - "Repeat last" (Gradient)
-        Expanded(
-          child: SizedBox(
-            height: 62,
-            child: ElevatedButton(
-              onPressed: () {
-                   Navigator.of(context).pop();
-                   onRestartChatAPI();
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.transparent,
-                elevation: 0,
-                shadowColor: Colors.transparent,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                padding: EdgeInsets.zero,
-              ),
-              child: Ink(
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [
-                      Color(0xFF5186E0),
-                      Color(0xFF5E3DFE),
-                      Color(0xFF8E2FFD),
-                      Color(0xFFB02EFB),
-                      Color(0xFFD445EC),
-                    ],
-                    stops: [0.0, 0.24, 0.52, 0.73, 1.0],
-                    begin: Alignment.centerLeft,
-                    end: Alignment.centerRight,
-                  ),
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: Container(
-                  height: 62,
-                  alignment: Alignment.center,
-                  child: const Text(
-                    "YES",
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                      color: Colors.white,
+                    child: SizedBox(
+                      height: 62,
+                      child: OutlinedButton(
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                        style: OutlinedButton.styleFrom(
+                          side: const BorderSide(
+                            color: Color(0xFF8E2FFD),
+                            width: 2,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          backgroundColor: Colors.white,
+                        ),
+                        child: const Text(
+                          "CANCEL",
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                            color: Color(0xFF8E2FFD),
+                          ),
+                        ),
+                      ),
                     ),
                   ),
-                ),
-              ),
-            ),
-          ),
-        ),
+
+                  // Spacing between buttons
+                  const SizedBox(width: 16),
+
+                  // Right button - "Repeat last" (Gradient)
+                  Expanded(
+                    child: SizedBox(
+                      height: 62,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                          onRestartChatAPI();
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.transparent,
+                          elevation: 0,
+                          shadowColor: Colors.transparent,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          padding: EdgeInsets.zero,
+                        ),
+                        child: Ink(
+                          decoration: BoxDecoration(
+                            gradient: const LinearGradient(
+                              colors: [
+                                Color(0xFF5186E0),
+                                Color(0xFF5E3DFE),
+                                Color(0xFF8E2FFD),
+                                Color(0xFFB02EFB),
+                                Color(0xFFD445EC),
+                              ],
+                              stops: [0.0, 0.24, 0.52, 0.73, 1.0],
+                              begin: Alignment.centerLeft,
+                              end: Alignment.centerRight,
+                            ),
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: Container(
+                            height: 62,
+                            alignment: Alignment.center,
+                            child: const Text(
+                              "YES",
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w700,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
                 ],
               ),
               SizedBox(height: MediaQuery.of(context).padding.bottom + 8),
@@ -966,11 +1140,7 @@ class _ChatScreenBody extends StatelessWidget {
               const SizedBox(height: 12),
               const Text(
                 'You will lose your current chat context. Are you sure you want to exit?',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.grey,
-                  height: 1.4,
-                ),
+                style: TextStyle(fontSize: 14, color: Colors.grey, height: 1.4),
                 textAlign: TextAlign.left,
               ),
               const SizedBox(height: 24),
@@ -999,13 +1169,15 @@ class _ChatScreenBody extends StatelessWidget {
                   const SizedBox(width: 16),
                   Expanded(
                     child: TextButton(
-                      onPressed: ()  {
+                      onPressed: () {
                         Navigator.of(context).pop(); // Close bottom sheet
                         try {
                           // onRestartChatAPI();
                           OrderService().triggerChatDismiss();
                         } catch (e) {
-                          Navigator.of(context).pop(); // Fallback to Flutter navigation
+                          Navigator.of(
+                            context,
+                          ).pop(); // Fallback to Flutter navigation
                         }
                       },
                       style: TextButton.styleFrom(
@@ -1053,23 +1225,57 @@ class _ChatScreenBody extends StatelessWidget {
               // ],
               Expanded(
                 child: Column(
-                  crossAxisAlignment: message.isBot
-                      ? CrossAxisAlignment.start
-                      : CrossAxisAlignment.end,
+                  crossAxisAlignment:
+                      message.isBot
+                          ? CrossAxisAlignment.start
+                          : CrossAxisAlignment.end,
                   children: [
                     Container(
-                      padding: EdgeInsets.only(top: 10,bottom: 10,left: message.isBot ? 0 : 14,right: 14),
+                      padding: EdgeInsets.only(
+                        top: 10,
+                        bottom: 10,
+                        left: message.isBot ? 0 : 14,
+                        right: 14,
+                      ),
                       decoration: BoxDecoration(
-                        color: message.isBot
-                          ? Color(int.parse(chatbotData.data.first.uiPreferences.botBubbleColor.replaceFirst('#', '0xFF')))
-                          : Color(int.parse(chatbotData.data.first.uiPreferences.userBubbleColor.replaceFirst('#', '0xFF'))),
+                        color:
+                            message.isBot
+                                ? Color(
+                                  int.parse(
+                                    chatbotData
+                                        .data
+                                        .first
+                                        .uiPreferences
+                                        .botBubbleColor
+                                        .replaceFirst('#', '0xFF'),
+                                  ),
+                                )
+                                : Color(
+                                  int.parse(
+                                    chatbotData
+                                        .data
+                                        .first
+                                        .uiPreferences
+                                        .userBubbleColor
+                                        .replaceFirst('#', '0xFF'),
+                                  ),
+                                ),
                         // borderRadius: BorderRadius.circular(16),
-                        borderRadius: (message.isBot == false) ? BorderRadius.only(
-                          topLeft:  const Radius.circular(8),
-                          topRight: const Radius.circular(8),
-                          bottomLeft: message.isBot ? Radius.circular(0) : Radius.circular(8),
-                          bottomRight: message.isBot ? Radius.circular(8) : Radius.circular(0),
-                        ) : null,
+                        borderRadius:
+                            (message.isBot == false)
+                                ? BorderRadius.only(
+                                  topLeft: const Radius.circular(8),
+                                  topRight: const Radius.circular(8),
+                                  bottomLeft:
+                                      message.isBot
+                                          ? Radius.circular(0)
+                                          : Radius.circular(8),
+                                  bottomRight:
+                                      message.isBot
+                                          ? Radius.circular(8)
+                                          : Radius.circular(0),
+                                )
+                                : null,
                         // border: Border.all(
                         //   color: Colors.grey.shade300, // light gray
                         //   width: 0.5,
@@ -1082,46 +1288,126 @@ class _ChatScreenBody extends StatelessWidget {
                         //   ),
                         // ],
                       ),
-                      child: _hasMarkdownSyntax(message.text)
-                          ? Html(
-                              data: _markdownToHtml(message.text),
-                              style: {
-                                "body": Style(
-                                  margin: Margins.zero,
-                                  padding: HtmlPaddings.zero,
-                                  fontSize: FontSize(16),
-                                  fontFamily: "Plus Jakarta Sans",
-                                  color: message.isBot
-                                      ? Color(int.parse(chatbotData.data.first.uiPreferences.botBubbleFontColor.replaceFirst('#', '0xFF')))
-                                      : Color(int.parse(chatbotData.data.first.uiPreferences.userBubbleFontColor.replaceFirst('#', '0xFF'))),
+                      child:
+                          _hasMarkdownSyntax(message.text)
+                              ? Html(
+                                data: _markdownToHtml(message.text),
+                                style: {
+                                  "body": Style(
+                                    margin: Margins.zero,
+                                    padding: HtmlPaddings.zero,
+                                    fontSize: FontSize(16),
+                                    fontFamily: "Plus Jakarta Sans",
+                                    color:
+                                        message.isBot
+                                            ? Color(
+                                              int.parse(
+                                                chatbotData
+                                                    .data
+                                                    .first
+                                                    .uiPreferences
+                                                    .botBubbleFontColor
+                                                    .replaceFirst('#', '0xFF'),
+                                              ),
+                                            )
+                                            : Color(
+                                              int.parse(
+                                                chatbotData
+                                                    .data
+                                                    .first
+                                                    .uiPreferences
+                                                    .userBubbleFontColor
+                                                    .replaceFirst('#', '0xFF'),
+                                              ),
+                                            ),
+                                  ),
+                                  "strong": Style(
+                                    fontWeight: FontWeight.bold,
+                                    color:
+                                        message.isBot
+                                            ? Color(
+                                              int.parse(
+                                                chatbotData
+                                                    .data
+                                                    .first
+                                                    .uiPreferences
+                                                    .botBubbleFontColor
+                                                    .replaceFirst('#', '0xFF'),
+                                              ),
+                                            )
+                                            : Color(
+                                              int.parse(
+                                                chatbotData
+                                                    .data
+                                                    .first
+                                                    .uiPreferences
+                                                    .userBubbleFontColor
+                                                    .replaceFirst('#', '0xFF'),
+                                              ),
+                                            ),
+                                  ),
+                                  "em": Style(
+                                    fontStyle: FontStyle.italic,
+                                    color:
+                                        message.isBot
+                                            ? Color(
+                                              int.parse(
+                                                chatbotData
+                                                    .data
+                                                    .first
+                                                    .uiPreferences
+                                                    .botBubbleFontColor
+                                                    .replaceFirst('#', '0xFF'),
+                                              ),
+                                            )
+                                            : Color(
+                                              int.parse(
+                                                chatbotData
+                                                    .data
+                                                    .first
+                                                    .uiPreferences
+                                                    .userBubbleFontColor
+                                                    .replaceFirst('#', '0xFF'),
+                                              ),
+                                            ),
+                                  ),
+                                  "code": Style(
+                                    backgroundColor: Colors.grey.shade200,
+                                    padding: HtmlPaddings.symmetric(
+                                      horizontal: 4,
+                                      vertical: 2,
+                                    ),
+                                    fontFamily: "monospace",
+                                  ),
+                                },
+                              )
+                              : Text(
+                                message.text,
+                                style: AppTextStyles.chatMessage.copyWith(
+                                  color:
+                                      message.isBot
+                                          ? Color(
+                                            int.parse(
+                                              chatbotData
+                                                  .data
+                                                  .first
+                                                  .uiPreferences
+                                                  .botBubbleFontColor
+                                                  .replaceFirst('#', '0xFF'),
+                                            ),
+                                          )
+                                          : Color(
+                                            int.parse(
+                                              chatbotData
+                                                  .data
+                                                  .first
+                                                  .uiPreferences
+                                                  .userBubbleFontColor
+                                                  .replaceFirst('#', '0xFF'),
+                                            ),
+                                          ),
                                 ),
-                                "strong": Style(
-                                  fontWeight: FontWeight.bold,
-                                  color: message.isBot
-                                      ? Color(int.parse(chatbotData.data.first.uiPreferences.botBubbleFontColor.replaceFirst('#', '0xFF')))
-                                      : Color(int.parse(chatbotData.data.first.uiPreferences.userBubbleFontColor.replaceFirst('#', '0xFF'))),
-                                ),
-                                "em": Style(
-                                  fontStyle: FontStyle.italic,
-                                  color: message.isBot
-                                      ? Color(int.parse(chatbotData.data.first.uiPreferences.botBubbleFontColor.replaceFirst('#', '0xFF')))
-                                      : Color(int.parse(chatbotData.data.first.uiPreferences.userBubbleFontColor.replaceFirst('#', '0xFF'))),
-                                ),
-                                "code": Style(
-                                  backgroundColor: Colors.grey.shade200,
-                                  padding: HtmlPaddings.symmetric(horizontal: 4, vertical: 2),
-                                  fontFamily: "monospace",
-                                ),
-                              },
-                            )
-                          : Text(
-                              message.text,
-                              style: AppTextStyles.chatMessage.copyWith(
-                                color: message.isBot
-                                    ? Color(int.parse(chatbotData.data.first.uiPreferences.botBubbleFontColor.replaceFirst('#', '0xFF')))
-                                    : Color(int.parse(chatbotData.data.first.uiPreferences.userBubbleFontColor.replaceFirst('#', '0xFF'))),
                               ),
-                            ),
                     ),
                   ],
                 ),
@@ -1132,7 +1418,11 @@ class _ChatScreenBody extends StatelessWidget {
             const SizedBox(height: 12),
             Padding(
               padding: const EdgeInsets.only(left: 50.0),
-              child: _buildOptionButtons(message.optionButtons, message.id, context),
+              child: _buildOptionButtons(
+                message.optionButtons,
+                message.id,
+                context,
+              ),
             ),
           ],
           // Store cards outside the row to avoid constraints
@@ -1144,7 +1434,10 @@ class _ChatScreenBody extends StatelessWidget {
             const SizedBox(height: 12),
             Transform.translate(
               offset: const Offset(0, 0),
-              child: _buildProductCards(message.products, message.productsWidget),
+              child: _buildProductCards(
+                message.products,
+                message.productsWidget,
+              ),
             ),
           ],
           if (message.hasCartWidget) ...[
@@ -1176,53 +1469,57 @@ class _ChatScreenBody extends StatelessWidget {
   bool _hasMarkdownSyntax(String text) {
     // Check for common markdown patterns
     return text.contains('**') || // Bold text
-           text.contains('*') ||  // Italic text
-           text.contains('`') ||  // Code
-           text.contains('#') ||  // Headers
-           text.contains('- ') || // Lists
-           text.contains('1. ') || // Numbered lists
-           text.contains('[') ||  // Links
-           text.contains('](');   // Links
+        text.contains('*') || // Italic text
+        text.contains('`') || // Code
+        text.contains('#') || // Headers
+        text.contains('- ') || // Lists
+        text.contains('1. ') || // Numbered lists
+        text.contains('[') || // Links
+        text.contains(']('); // Links
   }
 
   // Helper method to convert markdown to HTML
   String _markdownToHtml(String text) {
     String html = text;
-    
+
     // Convert bold text **text** to <strong>text</strong>
     html = html.replaceAllMapped(
       RegExp(r'\*\*(.*?)\*\*'),
-      (match) => '<strong>${match.group(1)}</strong>'
+      (match) => '<strong>${match.group(1)}</strong>',
     );
-    
+
     // Convert italic text *text* to <em>text</em>
     html = html.replaceAllMapped(
       RegExp(r'\*(.*?)\*'),
-      (match) => '<em>${match.group(1)}</em>'
+      (match) => '<em>${match.group(1)}</em>',
     );
-    
+
     // Convert code `text` to <code>text</code>
     html = html.replaceAllMapped(
       RegExp(r'`(.*?)`'),
-      (match) => '<code>${match.group(1)}</code>'
+      (match) => '<code>${match.group(1)}</code>',
     );
-    
+
     // Convert line breaks \n to <br>
     html = html.replaceAll('\n', '<br>');
-    
+
     return html;
   }
 
-  // Removed welcome message UI
 
   Widget _buildGreetingOverlay(BuildContext context) {
-    final String titleText = greetingData?.greeting.isNotEmpty == true
-        ? greetingData!.greeting
-        : 'Good evening';
-    final String subtitleText = greetingData?.subtitle.isNotEmpty == true
-        ? greetingData!.subtitle
-        : 'Your intelligent life assistant is ready to help';
-    final String weatherText = greetingData?.weatherText.isNotEmpty == true ? greetingData!.weatherText : 'dsada';
+    final String titleText =
+        greetingData?.greeting.isNotEmpty == true
+            ? greetingData!.greeting
+            : 'Good evening';
+    final String subtitleText =
+        greetingData?.subtitle.isNotEmpty == true
+            ? greetingData!.subtitle
+            : 'Your intelligent life assistant is ready to help';
+    final String weatherText =
+        greetingData?.weatherText.isNotEmpty == true
+            ? greetingData!.weatherText
+            : 'dsada';
 
     final List<String> opts = (greetingData?.options ?? []).take(4).toList();
 
@@ -1230,12 +1527,14 @@ class _ChatScreenBody extends StatelessWidget {
       onTap: () {
         FocusScope.of(context).unfocus();
       },
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 360),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
+      child: SingleChildScrollView(
+        // keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 360),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
             // Top graphic group
             SizedBox(
               width: 90,
@@ -1348,10 +1647,7 @@ class _ChatScreenBody extends StatelessWidget {
               decoration: BoxDecoration(
                 color: const Color(0xFFF5F0FF), // Light purple background
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: const Color(0xFFE8D5FF),
-                  width: 1,
-                ),
+                border: Border.all(color: const Color(0xFFE8D5FF), width: 1),
               ),
               child: Text(
                 weatherText,
@@ -1368,24 +1664,28 @@ class _ChatScreenBody extends StatelessWidget {
               child: Wrap(
                 spacing: 16,
                 runSpacing: 16,
-                children: opts.map((opt) {
-                  return _GreetingOptionTile(
-                    text: opt,
-                    onTap: () {
-                      onSendMessage(opt);
-                    },
-                  );
-                }).toList(),
+                children:
+                    opts.map((opt) {
+                      return _GreetingOptionTile(
+                        text: opt,
+                        onTap: () {
+                          onSendMessage(opt);
+                        },
+                      );
+                    }).toList(),
               ),
             ),
           ],
         ),
       ),
-    );
+    ));
   }
 
-
-  Widget _buildOptionButtons(List<String> options, String messageId, BuildContext context) {
+  Widget _buildOptionButtons(
+    List<String> options,
+    String messageId,
+    BuildContext context,
+  ) {
     if (selectedOptionMessages.contains(messageId)) {
       return const SizedBox.shrink();
     }
@@ -1393,33 +1693,52 @@ class _ChatScreenBody extends StatelessWidget {
     return Wrap(
       spacing: 8.0,
       runSpacing: 8.0,
-      children: options.map((option) =>
-          Container(
-            decoration: BoxDecoration(
-              border: Border.all(
-                  color: Color(
-                      int.parse(chatbotData.data.first.uiPreferences.primaryColor.replaceFirst('#', '0xFF')))),
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: InkWell(
-              onTap: () {
-                onUpdateSelectedOptions({...selectedOptionMessages, messageId});
-                onSendMessage(option);
-              },
-              borderRadius: BorderRadius.circular(20),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                child: Text(
-                  option,
-                  style: TextStyle(
-                    color: Color(
-                        int.parse(chatbotData.data.first.uiPreferences.primaryColor.replaceFirst('#', '0xFF'))),
-                    fontSize: 14,
+      children:
+          options
+              .map(
+                (option) => Container(
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                      color: Color(
+                        int.parse(
+                          chatbotData.data.first.uiPreferences.primaryColor
+                              .replaceFirst('#', '0xFF'),
+                        ),
+                      ),
+                    ),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: InkWell(
+                    onTap: () {
+                      onUpdateSelectedOptions({
+                        ...selectedOptionMessages,
+                        messageId,
+                      });
+                      onSendMessage(option);
+                    },
+                    borderRadius: BorderRadius.circular(20),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 8,
+                      ),
+                      child: Text(
+                        option,
+                        style: TextStyle(
+                          color: Color(
+                            int.parse(
+                              chatbotData.data.first.uiPreferences.primaryColor
+                                  .replaceFirst('#', '0xFF'),
+                            ),
+                          ),
+                          fontSize: 14,
+                        ),
+                      ),
+                    ),
                   ),
                 ),
-              ),
-            ),
-          )).toList(),
+              )
+              .toList(),
     );
   }
 
@@ -1432,7 +1751,9 @@ class _ChatScreenBody extends StatelessWidget {
 
     List<Widget> actionButtons = [];
     // Handle see_more widgets
-    for (final widget in latestActionWidgets.where((w) => w.type == WidgetEnum.see_more.value)) {
+    for (final widget in latestActionWidgets.where(
+      (w) => w.type == WidgetEnum.see_more.value,
+    )) {
       for (final action in widget.seeMore) {
         actionButtons.add(
           BlocBuilder<ChatBloc, ChatState>(
@@ -1440,26 +1761,30 @@ class _ChatScreenBody extends StatelessWidget {
               bool isApiLoading = state is ChatLoading;
               return _buildActionButton(
                 text: action.buttonText,
-                onTap: isApiLoading ? () {} : () {
-                  
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) {
-                          return RestaurantScreen(
-                            actionData: action,
-                            onCheckout: (value) {
-                             if (isCartAPICalled == true) {
-                              onUpdateCartCount(cartBloc.getTotalProductCount);
-                               onSendMessage("I have updated the cart");
-                               isCartAPICalled = false;
-                             }
-                            },
+                onTap:
+                    isApiLoading
+                        ? () {}
+                        : () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) {
+                                return RestaurantScreen(
+                                  actionData: action,
+                                  onCheckout: (value) {
+                                    if (isCartAPICalled == true) {
+                                      onUpdateCartCount(
+                                        cartBloc.getTotalProductCount,
+                                      );
+                                      onSendMessage("I have updated the cart");
+                                      isCartAPICalled = false;
+                                    }
+                                  },
+                                );
+                              },
+                            ),
                           );
-                        }
-                    ),
-                  );
-                },
+                        },
               );
             },
           ),
@@ -1467,7 +1792,9 @@ class _ChatScreenBody extends StatelessWidget {
       }
     }
 
-    for (final widget in latestActionWidgets.where((w) => w.type == WidgetEnum.order_tracking.value)) {
+    for (final widget in latestActionWidgets.where(
+      (w) => w.type == WidgetEnum.order_tracking.value,
+    )) {
       for (final action in widget.orderTracking) {
         actionButtons.add(
           BlocBuilder<ChatBloc, ChatState>(
@@ -1475,21 +1802,25 @@ class _ChatScreenBody extends StatelessWidget {
               bool isApiLoading = state is ChatLoading;
               return _buildActionButton(
                 text: action.buttonText,
-                onTap: isApiLoading ? () {} : () async {
-                  print("Order Tracking: ${action.orderId}");
-                  
-                  // Call the order details API
-                  final orderDetails = await ChatApiServices.instance.getOrderDetails(
-                    orderId: action.orderId ?? '',
-                    type: 'masterOrder',
-                  );
-                  
-                  if (orderDetails != null) {
-                    OrderService().triggerOrderTracking(orderDetails);
-                  } else {
-                    print("Failed to fetch order details");
-                  }
-                },
+                onTap:
+                    isApiLoading
+                        ? () {}
+                        : () async {
+                          print("Order Tracking: ${action.orderId}");
+
+                          // Call the order details API
+                          final orderDetails = await ChatApiServices.instance
+                              .getOrderDetails(
+                                orderId: action.orderId ?? '',
+                                type: 'masterOrder',
+                              );
+
+                          if (orderDetails != null) {
+                            OrderService().triggerOrderTracking(orderDetails);
+                          } else {
+                            print("Failed to fetch order details");
+                          }
+                        },
               );
             },
           ),
@@ -1497,7 +1828,9 @@ class _ChatScreenBody extends StatelessWidget {
       }
     }
 
-    for (final widget in latestActionWidgets.where((w) => w.type == WidgetEnum.order_details.value)) {
+    for (final widget in latestActionWidgets.where(
+      (w) => w.type == WidgetEnum.order_details.value,
+    )) {
       for (final action in widget.orderDetails) {
         actionButtons.add(
           BlocBuilder<ChatBloc, ChatState>(
@@ -1505,20 +1838,24 @@ class _ChatScreenBody extends StatelessWidget {
               bool isApiLoading = state is ChatLoading;
               return _buildActionButton(
                 text: action.buttonText,
-                onTap: isApiLoading ? () {} : () async {
-                  print("Order Details: ${action.orderId}");
-                  // Call the order details API
-                  final orderDetails = await ChatApiServices.instance.getOrderDetails(
-                    orderId: action.orderId ?? '',
-                    type: 'masterOrder',
-                  );
-                  
-                  if (orderDetails != null) {
-                    OrderService().triggerOrderDetails(orderDetails);
-                  } else {
-                    print("Failed to fetch order details");
-                  }
-                },
+                onTap:
+                    isApiLoading
+                        ? () {}
+                        : () async {
+                          print("Order Details: ${action.orderId}");
+                          // Call the order details API
+                          final orderDetails = await ChatApiServices.instance
+                              .getOrderDetails(
+                                orderId: action.orderId ?? '',
+                                type: 'masterOrder',
+                              );
+
+                          if (orderDetails != null) {
+                            OrderService().triggerOrderDetails(orderDetails);
+                          } else {
+                            print("Failed to fetch order details");
+                          }
+                        },
               );
             },
           ),
@@ -1526,7 +1863,9 @@ class _ChatScreenBody extends StatelessWidget {
       }
     }
 
-    for (final widget in latestActionWidgets.where((w) => w.type == WidgetEnum.menu.value)) {
+    for (final widget in latestActionWidgets.where(
+      (w) => w.type == WidgetEnum.menu.value,
+    )) {
       for (final action in widget.menu) {
         actionButtons.add(
           BlocBuilder<ChatBloc, ChatState>(
@@ -1534,41 +1873,57 @@ class _ChatScreenBody extends StatelessWidget {
               bool isApiLoading = state is ChatLoading;
               return _buildActionButton(
                 text: action.buttonText,
-                onTap: isApiLoading ? () {} : () {
-                  if (action.storeTypeId == FoodCategory.grocery.value || action.storeTypeId == FoodCategory.pharmacy.value) {
-                      Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => GroceriesMenuScreen(
-                        actionData: action,
-                        onCheckout: (value) {
-                          if (isCartAPICalled == true) {
-                            onUpdateCartCount(cartBloc.getTotalProductCount);
-                            onSendMessage("I have updated the cart");
-                            isCartAPICalled = false;
+                onTap:
+                    isApiLoading
+                        ? () {}
+                        : () {
+                          if (action.storeTypeId ==
+                                  FoodCategory.grocery.value ||
+                              action.storeTypeId ==
+                                  FoodCategory.pharmacy.value) {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder:
+                                    (context) => GroceriesMenuScreen(
+                                      actionData: action,
+                                      onCheckout: (value) {
+                                        if (isCartAPICalled == true) {
+                                          onUpdateCartCount(
+                                            cartBloc.getTotalProductCount,
+                                          );
+                                          onSendMessage(
+                                            "I have updated the cart",
+                                          );
+                                          isCartAPICalled = false;
+                                        }
+                                      },
+                                    ),
+                              ),
+                            );
+                          } else {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder:
+                                    (context) => RestaurantMenuScreen(
+                                      actionData: action,
+                                      onCheckout: (value) {
+                                        if (isCartAPICalled == true) {
+                                          onUpdateCartCount(
+                                            cartBloc.getTotalProductCount,
+                                          );
+                                          onSendMessage(
+                                            "I have updated the cart",
+                                          );
+                                          isCartAPICalled = false;
+                                        }
+                                      },
+                                    ),
+                              ),
+                            );
                           }
                         },
-                      ),
-                    ),
-                  );
-                  }else {
-                     Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => RestaurantMenuScreen(
-                        actionData: action,
-                        onCheckout: (value) {
-                          if (isCartAPICalled == true) {
-                            onUpdateCartCount(cartBloc.getTotalProductCount);
-                            onSendMessage("I have updated the cart");
-                            isCartAPICalled = false;
-                          }
-                        },
-                      ),
-                    ),
-                  );
-                  }
-                },
               );
             },
           ),
@@ -1576,7 +1931,9 @@ class _ChatScreenBody extends StatelessWidget {
       }
     }
 
-    for (final widget in latestActionWidgets.where((w) => w.type == WidgetEnum.add_address.value)) {
+    for (final widget in latestActionWidgets.where(
+      (w) => w.type == WidgetEnum.add_address.value,
+    )) {
       for (final action in widget.addAddress) {
         actionButtons.add(
           BlocBuilder<ChatBloc, ChatState>(
@@ -1584,37 +1941,47 @@ class _ChatScreenBody extends StatelessWidget {
               bool isApiLoading = state is ChatLoading;
               return _buildActionButton(
                 text: action.buttonText,
-                onTap: isApiLoading ? () {} : () {
-                Navigator.push(
-                  context,
-                    MaterialPageRoute(builder: (_) => const AddressDetailsScreen()),
-                ).then((result) {
-                  if (result != null) {
-                    print("Result: $result");
-                    
-                    // Create a formatted address string
-                    final String building = result['building'] ?? '';
-                    final String landmark = result['landmark'] ?? '';
-                    final String area = result['area'] ?? '';
-                    final String city = result['city'] ?? '';
-                    final String country = result['country'] ?? '';
-                    final String tag = result['tag'] ?? '';
-                    
-                    // Build the full address string
-                    final List<String> addressParts = [];
-                    if (country.isNotEmpty) addressParts.add(country);
-                    if (area.isNotEmpty) addressParts.add(area);
-                    if (city.isNotEmpty) addressParts.add(city);
-                    if (building.isNotEmpty) addressParts.add(building);
-                    if (landmark.isNotEmpty) addressParts.add(landmark);
-                    
-                    final String fullAddress = addressParts.join(', ');
-                    final String addressMessage = "I have added a new address.\nMy $tag address is:\n$fullAddress";
-                    
-                    onSendMessage(addressMessage);
-                  }
-             });
-                },
+                onTap:
+                    isApiLoading
+                        ? () {}
+                        : () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const AddressDetailsScreen(),
+                            ),
+                          ).then((result) {
+                            if (result != null) {
+                              print("Result: $result");
+
+                              // Create a formatted address string
+                              final String building = result['building'] ?? '';
+                              final String landmark = result['landmark'] ?? '';
+                              final String area = result['area'] ?? '';
+                              final String city = result['city'] ?? '';
+                              final String country = result['country'] ?? '';
+                              final String tag = result['tag'] ?? '';
+
+                              // Build the full address string
+                              final List<String> addressParts = [];
+                              if (country.isNotEmpty) addressParts.add(country);
+                              if (area.isNotEmpty) addressParts.add(area);
+                              if (city.isNotEmpty) addressParts.add(city);
+                              if (building.isNotEmpty)
+                                addressParts.add(building);
+                              if (landmark.isNotEmpty)
+                                addressParts.add(landmark);
+
+                              final String fullAddress = addressParts.join(
+                                ', ',
+                              );
+                              final String addressMessage =
+                                  "I have added a new address.\nMy $tag address is:\n$fullAddress";
+
+                              onSendMessage(addressMessage);
+                            }
+                          });
+                        },
               );
             },
           ),
@@ -1622,7 +1989,9 @@ class _ChatScreenBody extends StatelessWidget {
       }
     }
 
-     for (final widget in latestActionWidgets.where((w) => w.type == WidgetEnum.add_payment.value)) {
+    for (final widget in latestActionWidgets.where(
+      (w) => w.type == WidgetEnum.add_payment.value,
+    )) {
       for (final action in widget.addPayment) {
         actionButtons.add(
           BlocBuilder<ChatBloc, ChatState>(
@@ -1630,15 +1999,21 @@ class _ChatScreenBody extends StatelessWidget {
               bool isApiLoading = state is ChatLoading;
               return _buildActionButton(
                 text: action.buttonText,
-                onTap: isApiLoading ? () {} : () async {
-                  
-              final result = await AddCardBottomSheet.show(context);
-                if (result != null) {
-                  debugPrint('PM: ${result['paymentMethodId']} '
-                      '${result['brand']} **** ${result['last4']}');
-                      onSendMessage('Card added successfully last 4 digits: ${result['last4']}');
-                }
-                },
+                onTap:
+                    isApiLoading
+                        ? () {}
+                        : () async {
+                          final result = await AddCardBottomSheet.show(context);
+                          if (result != null) {
+                            debugPrint(
+                              'PM: ${result['paymentMethodId']} '
+                              '${result['brand']} **** ${result['last4']}',
+                            );
+                            onSendMessage(
+                              'Card added successfully last 4 digits: ${result['last4']}',
+                            );
+                          }
+                        },
               );
             },
           ),
@@ -1646,7 +2021,11 @@ class _ChatScreenBody extends StatelessWidget {
       }
     }
 
-    for (final widgetType in [WidgetEnum.add_more.value, WidgetEnum.proceed_to_checkout.value, WidgetEnum.cash_on_delivery.value]) {
+    for (final widgetType in [
+      WidgetEnum.add_more.value,
+      WidgetEnum.proceed_to_checkout.value,
+      WidgetEnum.cash_on_delivery.value,
+    ]) {
       final widgets = latestActionWidgets.where((w) => w.type == widgetType);
       for (final widget in widgets) {
         for (final item in widget.rawItems) {
@@ -1722,109 +2101,295 @@ class _ChatScreenBody extends StatelessWidget {
           color: Colors.white,
           child: SafeArea(
             top: false,
-            child: Center(
-                              child: ConstrainedBox(
-                  constraints: BoxConstraints(
-                    minHeight: 64,
-                    maxHeight: 570, // Allow up to 550 + 20 padding
-                  ),
-                child: Container(
-                  height: textFieldHeight + 20, // Dynamic height based on text field
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: const Color(0xFFE9DFFB), width: 1),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 12),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Expanded(
-                          child: Container(
-                            height: textFieldHeight,
-                            child: TextField(
-                              autofocus: false,
-                              controller: messageController,
-                              focusNode: messageFocusNode,
-                              enabled: !isApiLoading,
-                              textCapitalization: TextCapitalization.sentences,
-                              maxLines: null,
-                              minLines: 1,
-                              style: AppTextStyles.chatInput.copyWith(
-                                color: const Color(0xFF242424),
-                              ),
-                              decoration: InputDecoration(
-                                hintText: 'How can zAIn help you today?',
-                                border: InputBorder.none,
-                                enabledBorder: InputBorder.none,
-                                focusedBorder: InputBorder.none,
-                                errorBorder: InputBorder.none,
-                                focusedErrorBorder: InputBorder.none,
-                                disabledBorder: InputBorder.none,
-                                hintStyle: AppTextStyles.chatInput.copyWith(color: Colors.grey),
-                                isCollapsed: true,
-                                contentPadding: EdgeInsets.zero,
-                              ),
-                              onChanged: (text) {
-                                // Calculate new height based on text content
-                                final textSpan = TextSpan(
-                                  text: text.isEmpty ? 'How can zAIn help you today?' : text,
-                                  style: const TextStyle(
-                                    fontSize: 16,
-                                    height: 1.4,
-                                    color: Color(0xFF242424),
-                                  ),
-                                );
-                                final textPainter = TextPainter(
-                                  text: textSpan,
-                                  textDirection: TextDirection.ltr,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Input field container
+                // Stack(
+                //   children: [
+                Center(
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      minHeight: 64,
+                      maxHeight: 570, // Allow up to 550 + 20 padding
+                    ),
+                    child: Container(
+                      height: textFieldHeight + 20,
+                      // Dynamic height based on text field
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                          color:
+                              isRecording
+                                  ? Colors.transparent
+                                  : Color(0xFFE9DFFB),
+                          width: 1,
+                        ),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Expanded(
+                              child: Container(
+                                height: textFieldHeight,
+                                child: TextField(
+                                  autofocus: false,
+                                  controller: messageController,
+                                  focusNode: messageFocusNode,
+                                  enabled: !isApiLoading,
+                                  textCapitalization:
+                                      TextCapitalization.sentences,
                                   maxLines: null,
-                                );
-                                textPainter.layout(maxWidth: MediaQuery.of(context).size.width - 120);
-                                
-                                final newHeight = (textPainter.height + 20).clamp(50.0, 550.0);
-                                onUpdateTextFieldHeight(newHeight);
-                              },
-                              onSubmitted: isApiLoading ? null : (text) {
-                                onSendMessage(text);
-                                Future.delayed(const Duration(milliseconds: 100), () {
-                                  onScrollToBottom();
-                                });
-                              },
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 10),
-                        Opacity(
-                          opacity: isApiLoading ? 0.4 : 1.0,
-                          child: GestureDetector(
-                            onTap: isApiLoading
-                                ? null
-                                : () {
-                                    onSendMessage(messageController.text);
-                                    if (messageController.text.trim().isNotEmpty) {
-                                      FocusScope.of(context).requestFocus(messageFocusNode);
-                                    }
-                                    Future.delayed(const Duration(milliseconds: 100), () {
-                                      onScrollToBottom();
-                                    });
+                                  minLines: 1,
+                                  style: AppTextStyles.chatInput.copyWith(
+                                    color: const Color(0xFF242424),
+                                  ),
+                                  decoration: InputDecoration(
+                                    hintText: 'How can zAIn help you today?',
+                                    border: InputBorder.none,
+                                    enabledBorder: InputBorder.none,
+                                    focusedBorder: InputBorder.none,
+                                    errorBorder: InputBorder.none,
+                                    focusedErrorBorder: InputBorder.none,
+                                    disabledBorder: InputBorder.none,
+                                    hintStyle: AppTextStyles.chatInput.copyWith(
+                                      color: Colors.grey,
+                                    ),
+                                    isCollapsed: true,
+                                    contentPadding: EdgeInsets.zero,
+                                  ),
+                                  onChanged: (text) {
+                                    // Calculate new height based on text content
+                                    final textSpan = TextSpan(
+                                      text:
+                                          text.isEmpty
+                                              ? 'How can zAIn help you today?'
+                                              : text,
+                                      style: const TextStyle(
+                                        fontSize: 16,
+                                        height: 1.4,
+                                        color: Color(0xFF242424),
+                                      ),
+                                    );
+                                    final textPainter = TextPainter(
+                                      text: textSpan,
+                                      textDirection: TextDirection.ltr,
+                                      maxLines: null,
+                                    );
+                                    textPainter.layout(
+                                      maxWidth:
+                                          MediaQuery.of(context).size.width -
+                                          160,
+                                    );
+
+                                    final newHeight = (textPainter.height + 20)
+                                        .clamp(50.0, 550.0);
+                                    onUpdateTextFieldHeight(newHeight);
                                   },
-                            child: SizedBox(
-                              width: 34,
-                              height: 34,
-                              child: SvgPicture.asset(
-                                AssetPath.get('images/ic_sendImg.svg'),
+                                  onSubmitted:
+                                      isApiLoading
+                                          ? null
+                                          : (text) {
+                                            onSendMessage(text);
+                                            Future.delayed(
+                                              const Duration(milliseconds: 100),
+                                              () {
+                                                onScrollToBottom();
+                                              },
+                                            );
+                                          },
+                                ),
                               ),
                             ),
-                          ),
+                            const SizedBox(width: 10),
+                            // Speech button - Single tap to start/stop recording
+                            Opacity(
+                              opacity: isApiLoading ? 0.4 : 1.0,
+                              child: GestureDetector(
+                                onTap:
+                                    isApiLoading
+                                        ? null
+                                        : () async {
+                                          if (isRecording) {
+                                            // Stop recording if currently recording
+                                            //  await onStopSpeechRecording();
+                                          } else {
+                                            // Start recording if not recording
+                                            await onStartSpeechRecording();
+                                          }
+                                        },
+                                child: Container(
+                                  width: 34,
+                                  height: 34,
+                                  child: SvgPicture.asset(
+                                    AssetPath.get('images/ic_mic.svg'),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            // Send button
+                            Opacity(
+                              opacity: isApiLoading ? 0.4 : 1.0,
+                              child: GestureDetector(
+                                onTap:
+                                    isApiLoading
+                                        ? null
+                                        : () {
+                                          onSendMessage(messageController.text);
+                                          if (messageController.text
+                                              .trim()
+                                              .isNotEmpty) {
+                                            FocusScope.of(
+                                              context,
+                                            ).requestFocus(messageFocusNode);
+                                          }
+                                          Future.delayed(
+                                            const Duration(milliseconds: 100),
+                                            () {
+                                              onScrollToBottom();
+                                            },
+                                          );
+                                        },
+                                child: SizedBox(
+                                  width: 34,
+                                  height: 34,
+                                  child: SvgPicture.asset(
+                                    AssetPath.get('images/ic_sendImg.svg'),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
-                      ],
+                      ),
                     ),
                   ),
                 ),
-              ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildInputRecordingArea(BuildContext context) {
+    return BlocBuilder<ChatBloc, ChatState>(
+      builder: (context, state) {
+        bool isApiLoading = state is ChatLoading;
+
+        return Container(
+          padding: EdgeInsets.only(
+            left: 16,
+            right: 16,
+            top: 10,
+            bottom: 16 + MediaQuery.of(context).viewInsets.bottom,
+          ),
+          color: Colors.white,
+          child: SafeArea(
+            top: false,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Input field container
+                Stack(
+                  children: [
+                    Center(
+                      child: ConstrainedBox(
+                        constraints: BoxConstraints(
+                          minHeight: 64,
+                          maxHeight: 570, // Allow up to 550 + 20 padding
+                        ),
+                        child: Container(
+                          height: textFieldHeight + 20,
+                          // Dynamic height based on text field
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(
+                              color: Color(0xFFE9DFFB),
+                              width: 1,
+                            ),
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 12),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Opacity(
+                                  opacity: isApiLoading ? 0.4 : 1.0,
+                                  child: GestureDetector(
+                                    onTap:
+                                        isApiLoading
+                                            ? null
+                                            : () async {
+                                              await onCancelSpeechRecording();
+                                            },
+                                    child: SizedBox(
+                                      width: 34,
+                                      height: 34,
+                                      child: SvgPicture.asset(
+                                        AssetPath.get('images/ic_RecClose.svg'),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                SvgPicture.asset(
+                                  AssetPath.get('images/ic_Listening.svg'),
+                                ),
+                                Opacity(
+                                  opacity: isApiLoading ? 0.4 : 1.0,
+                                  child: GestureDetector(
+                                    onTap:
+                                        isApiLoading
+                                            ? null
+                                            : () async {
+                                              await onStopSpeechRecording();
+                                              onSendMessage(
+                                                messageController.text,
+                                              );
+                                              if (messageController.text
+                                                  .trim()
+                                                  .isNotEmpty) {
+                                                FocusScope.of(
+                                                  context,
+                                                ).requestFocus(
+                                                  messageFocusNode,
+                                                );
+                                              }
+                                              Future.delayed(
+                                                const Duration(
+                                                  milliseconds: 100,
+                                                ),
+                                                () {
+                                                  onScrollToBottom();
+                                                },
+                                              );
+                                            },
+                                    child: SizedBox(
+                                      width: 34,
+                                      height: 34,
+                                      child: SvgPicture.asset(
+                                        AssetPath.get('images/ic_sendImg.svg'),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
           ),
         );
@@ -1847,97 +2412,141 @@ class _ChatScreenBody extends StatelessWidget {
           storesWidget: storesWidget,
           index: index,
           cartData: cartBloc.cartData,
-          onAddToCart: (message, product, store, quantity) {  
+          onAddToCart: (message, product, store, quantity) {
             onSendMessage(message);
           },
-          // onHide: onHideStoreCards, 
+          // onHide: onHideStoreCards,
           onQuantityChanged: (product, store, newQuantity, isIncrease) {
-            if (store.storeTypeId == FoodCategory.grocery.value || store.storeTypeId == FoodCategory.pharmacy.value) {
-              _onQuantityChangedForGrocery(context,product.parentProductId,product.childProductId,product.unitId,store.storeId,store.storeCategoryId,store.storeTypeId ?? -111,product.variantsCount,newQuantity,isIncrease,product.productName,product.productImage);
-            }else {
-              _onQuantityChanged(context, product, store, newQuantity, isIncrease);
+            if (store.storeTypeId == FoodCategory.grocery.value ||
+                store.storeTypeId == FoodCategory.pharmacy.value) {
+              _onQuantityChangedForGrocery(
+                context,
+                product.parentProductId,
+                product.childProductId,
+                product.unitId,
+                store.storeId,
+                store.storeCategoryId,
+                store.storeTypeId ?? -111,
+                product.variantsCount,
+                newQuantity,
+                isIncrease,
+                product.productName,
+                product.productImage,
+              );
+            } else {
+              _onQuantityChanged(
+                context,
+                product,
+                store,
+                newQuantity,
+                isIncrease,
+              );
             }
           },
           onAddToCartRequested: (product, store) {
-              if ((product.variantsCount > 1 && store.storeTypeId == FoodCategory.food.value) || (product.variantsCount > 0 && (store.storeTypeId == FoodCategory.grocery.value || store.storeTypeId == FoodCategory.pharmacy.value))) {
-                if (store.storeTypeId == FoodCategory.grocery.value || store.storeTypeId == FoodCategory.pharmacy.value) {
-                    showModalBottomSheet(
-                          context: context,
-                          isScrollControlled: true,
-                          backgroundColor: Colors.transparent,
-                          builder: (context) => GroceryCustomizationScreen(
-                            parentProductId: product.parentProductId,
-                            productId: product.childProductId,
-                            storeId: store.storeId,
-                            productName: product.productName,
-                            productImage: product.productImage,
-                            onAddToCart: (parentProductId,productId,unitId) {
-                              _onAddToCartForGrocery(parentProductId,productId,unitId,store.storeId,store.storeCategoryId,store.storeTypeId ?? -111,null);
-                            },
-                          ),
-                        );
-                }else {
-                    showModalBottomSheet(
-                    context: context,
-                    isScrollControlled: true,
-                    backgroundColor: Colors.transparent,
-                    builder: (context) => ProductCustomizationScreen(
-                      product: product,
-                      store: store,
-                      onAddToCartWithAddOns: _onAddToCartWithAddOns,
-                    ),
-                  );
-                }
-                    }else {
-                //TODO:- Add Quantity
-                      cartBloc.add(CartAddItemRequested(
-                          storeId: store.storeId,
-                          cartType: 1, // Default cart type
-                          action: 1, // Add action
-                          storeCategoryId: store.storeCategoryId,
-                          newQuantity: 1, // Add 1 item
-                          storeTypeId: store.storeTypeId ?? -111,
-                          productId: product.childProductId,
-                          centralProductId: product.parentProductId,
-                          unitId: product.unitId,
-                          needToShowLoaderForCartFetch: false,
-                        )); 
-                    }
-                        
+            if ((product.variantsCount > 1 &&
+                    store.storeTypeId == FoodCategory.food.value) ||
+                (product.variantsCount > 0 &&
+                    (store.storeTypeId == FoodCategory.grocery.value ||
+                        store.storeTypeId == FoodCategory.pharmacy.value))) {
+              if (store.storeTypeId == FoodCategory.grocery.value ||
+                  store.storeTypeId == FoodCategory.pharmacy.value) {
+                showModalBottomSheet(
+                  context: context,
+                  isScrollControlled: true,
+                  backgroundColor: Colors.transparent,
+                  builder:
+                      (context) => GroceryCustomizationScreen(
+                        parentProductId: product.parentProductId,
+                        productId: product.childProductId,
+                        storeId: store.storeId,
+                        productName: product.productName,
+                        productImage: product.productImage,
+                        onAddToCart: (parentProductId, productId, unitId) {
+                          _onAddToCartForGrocery(
+                            parentProductId,
+                            productId,
+                            unitId,
+                            store.storeId,
+                            store.storeCategoryId,
+                            store.storeTypeId ?? -111,
+                            null,
+                          );
+                        },
+                      ),
+                );
+              } else {
+                showModalBottomSheet(
+                  context: context,
+                  isScrollControlled: true,
+                  backgroundColor: Colors.transparent,
+                  builder:
+                      (context) => ProductCustomizationScreen(
+                        product: product,
+                        store: store,
+                        onAddToCartWithAddOns: _onAddToCartWithAddOns,
+                      ),
+                );
+              }
+            } else {
+              //TODO:- Add Quantity
+              cartBloc.add(
+                CartAddItemRequested(
+                  storeId: store.storeId,
+                  cartType: 1,
+                  // Default cart type
+                  action: 1,
+                  // Add action
+                  storeCategoryId: store.storeCategoryId,
+                  newQuantity: 1,
+                  // Add 1 item
+                  storeTypeId: store.storeTypeId ?? -111,
+                  productId: product.childProductId,
+                  centralProductId: product.parentProductId,
+                  unitId: product.unitId,
+                  needToShowLoaderForCartFetch: false,
+                ),
+              );
+            }
           },
         );
       },
     );
   }
 
-
   /// Handle adding products with addons to cart
   void _onAddToCartWithAddOns(
-    Product product, 
-    Store store, 
-    dynamic variant, 
+    Product product,
+    Store store,
+    dynamic variant,
     List<Map<String, dynamic>> addOns,
-    String selectedProductId
+    String selectedProductId,
   ) {
     try {
       //TODO:- Add Quantity
-      cartBloc.add(CartAddItemRequested(
-        storeId: store.storeId,
-        cartType: 1, // Default cart type
-        action: 1, // Add action
-        storeCategoryId: store.storeCategoryId,
-        newQuantity: 1,
-        storeTypeId: store.storeTypeId ?? -111,
-        productId: selectedProductId,
-        centralProductId: product.parentProductId,
-        unitId: variant.unitId,
-        newAddOns: addOns,
-        needToShowLoaderForCartFetch: false,
-      ));
-      
+      cartBloc.add(
+        CartAddItemRequested(
+          storeId: store.storeId,
+          cartType: 1,
+          // Default cart type
+          action: 1,
+          // Add action
+          storeCategoryId: store.storeCategoryId,
+          newQuantity: 1,
+          storeTypeId: store.storeTypeId ?? -111,
+          productId: selectedProductId,
+          centralProductId: product.parentProductId,
+          unitId: variant.unitId,
+          newAddOns: addOns,
+          needToShowLoaderForCartFetch: false,
+        ),
+      );
+
       print("Added product with addons to cart: ${product.productName}");
     } catch (e) {
-      print('RestaurantScreen: Error dispatching CartAddItemRequeste with addons: $e');
+      print(
+        'RestaurantScreen: Error dispatching CartAddItemRequeste with addons: $e',
+      );
     }
   }
 
@@ -1952,30 +2561,35 @@ class _ChatScreenBody extends StatelessWidget {
   ) {
     try {
       //TODO:- Add Quantity
-      cartBloc.add(CartAddItemRequested(
-        storeId: storeId,
-        cartType: 1, // Default cart type
-        action: 1, // Add action
-        storeCategoryId: storeCategoryId,
-        newQuantity: 1,
-        storeTypeId: storeTypeId,
-        productId: productId,
-        centralProductId: parentProductId,
-        unitId: unitId,
-        addToCartOnId: addToCartOnId,
-        needToShowLoaderForCartFetch: false,
-      ));
-      
+      cartBloc.add(
+        CartAddItemRequested(
+          storeId: storeId,
+          cartType: 1,
+          // Default cart type
+          action: 1,
+          // Add action
+          storeCategoryId: storeCategoryId,
+          newQuantity: 1,
+          storeTypeId: storeTypeId,
+          productId: productId,
+          centralProductId: parentProductId,
+          unitId: unitId,
+          addToCartOnId: addToCartOnId,
+          needToShowLoaderForCartFetch: false,
+        ),
+      );
+
       print("Added product to cart: ${productId}");
     } catch (e) {
-      print('RestaurantScreen: Error dispatching CartAddItemRequeste with addons: $e');
+      print(
+        'RestaurantScreen: Error dispatching CartAddItemRequeste with addons: $e',
+      );
     }
   }
 
-
-void _onQuantityChangedForGrocery(
-  BuildContext context,
-  String parentProductId,
+  void _onQuantityChangedForGrocery(
+    BuildContext context,
+    String parentProductId,
     String productId,
     String unitId,
     String storeId,
@@ -1985,81 +2599,100 @@ void _onQuantityChangedForGrocery(
     int newQuantity,
     bool isIncrease,
     String productName,
-    String productImage) {
+    String productImage,
+  ) {
     if (isIncrease == false && newQuantity == 1) {
       //TODO:- 0 Quantity
       int? addToCartOnId;
       if (variantsCount > 0) {
-         addToCartOnId = _getAddToCartOnId(productId);
-         print("addCartOnID: $addToCartOnId");
-       }
-
-      cartBloc.add(CartAddItemRequested(
-        storeId: storeId,
-        cartType: 2,
-        action: 3, // Add/Update action
-        storeCategoryId: storeCategoryId,
-        newQuantity: 0,
-        storeTypeId: storeTypeId,
-        productId: productId,
-        centralProductId: parentProductId,
-        unitId: unitId,
-        addToCartOnId: addToCartOnId,
-        needToShowLoaderForCartFetch: false,
-      ));
-    }else if (newQuantity > 0 && isIncrease == true) {
-      if (variantsCount > 0) {
-         showModalBottomSheet(
-                        context: context,
-                        isScrollControlled: true,
-                        backgroundColor: Colors.transparent,
-                        builder: (context) => CustomizationSummaryScreen(
-                          // store: store,
-                          // product: product,
-                          onChooseClicked: () {
-                            _openGroceryCustomization(context,parentProductId,productId,unitId,storeId,storeCategoryId,storeTypeId,productName,productImage);
-                          },
-                          onRepeatClicked: () {
-                            //TODO:- Add Quantity
-                            final addToCartOnId = _getAddToCartOnId(productId);
-                            print("addCartOnID: $addToCartOnId");
-
-                            cartBloc.add(CartAddItemRequested(
-                              storeId: storeId,
-                              cartType: 1,
-                              action: 2, // Add action
-                              storeCategoryId: storeCategoryId,
-                              newQuantity: newQuantity + 1,
-                              storeTypeId: storeTypeId,
-                              productId: productId,
-                              centralProductId: parentProductId,
-                              unitId: unitId,
-                              addToCartOnId: addToCartOnId,
-                              needToShowLoaderForCartFetch: false,
-                            )); 
-                          
-                          },
-                        ),
-          );
-      }else {
-        //TODO:- Add Quantity
-         final addToCartOnId = _getAddToCartOnId(productId);
-          print("addCartOnID: $addToCartOnId");
-      cartBloc.add(CartAddItemRequested(
-        storeId: storeId,
-        cartType: 1,
-        action: 2, // Add action
-        storeCategoryId: storeCategoryId,
-        newQuantity: newQuantity + 1,
-        storeTypeId: storeTypeId,
-        productId: productId,
-        centralProductId: parentProductId,
-        unitId: unitId,
-        addToCartOnId: addToCartOnId,
-        needToShowLoaderForCartFetch: false,
-      ));        
+        addToCartOnId = _getAddToCartOnId(productId);
+        print("addCartOnID: $addToCartOnId");
       }
 
+      cartBloc.add(
+        CartAddItemRequested(
+          storeId: storeId,
+          cartType: 2,
+          action: 3,
+          // Add/Update action
+          storeCategoryId: storeCategoryId,
+          newQuantity: 0,
+          storeTypeId: storeTypeId,
+          productId: productId,
+          centralProductId: parentProductId,
+          unitId: unitId,
+          addToCartOnId: addToCartOnId,
+          needToShowLoaderForCartFetch: false,
+        ),
+      );
+    } else if (newQuantity > 0 && isIncrease == true) {
+      if (variantsCount > 0) {
+        showModalBottomSheet(
+          context: context,
+          isScrollControlled: true,
+          backgroundColor: Colors.transparent,
+          builder:
+              (context) => CustomizationSummaryScreen(
+                // store: store,
+                // product: product,
+                onChooseClicked: () {
+                  _openGroceryCustomization(
+                    context,
+                    parentProductId,
+                    productId,
+                    unitId,
+                    storeId,
+                    storeCategoryId,
+                    storeTypeId,
+                    productName,
+                    productImage,
+                  );
+                },
+                onRepeatClicked: () {
+                  //TODO:- Add Quantity
+                  final addToCartOnId = _getAddToCartOnId(productId);
+                  print("addCartOnID: $addToCartOnId");
+
+                  cartBloc.add(
+                    CartAddItemRequested(
+                      storeId: storeId,
+                      cartType: 1,
+                      action: 2,
+                      // Add action
+                      storeCategoryId: storeCategoryId,
+                      newQuantity: newQuantity + 1,
+                      storeTypeId: storeTypeId,
+                      productId: productId,
+                      centralProductId: parentProductId,
+                      unitId: unitId,
+                      addToCartOnId: addToCartOnId,
+                      needToShowLoaderForCartFetch: false,
+                    ),
+                  );
+                },
+              ),
+        );
+      } else {
+        //TODO:- Add Quantity
+        final addToCartOnId = _getAddToCartOnId(productId);
+        print("addCartOnID: $addToCartOnId");
+        cartBloc.add(
+          CartAddItemRequested(
+            storeId: storeId,
+            cartType: 1,
+            action: 2,
+            // Add action
+            storeCategoryId: storeCategoryId,
+            newQuantity: newQuantity + 1,
+            storeTypeId: storeTypeId,
+            productId: productId,
+            centralProductId: parentProductId,
+            unitId: unitId,
+            addToCartOnId: addToCartOnId,
+            needToShowLoaderForCartFetch: false,
+          ),
+        );
+      }
     } else {
       //TODO:- Remove Quantity
       int? addToCartOnId;
@@ -2067,43 +2700,69 @@ void _onQuantityChangedForGrocery(
         addToCartOnId = _getAddToCartOnId(productId);
         print("addCartOnID: $addToCartOnId");
       }
-      cartBloc.add(CartAddItemRequested(
-        storeId: storeId,
-        cartType: 2,
-        action: 2, // Add/Update action
-        storeCategoryId: storeCategoryId,
-        newQuantity: newQuantity - 1,
-        storeTypeId: storeTypeId,
-        productId: productId,
-        centralProductId: parentProductId,
-        unitId: unitId,
-        addToCartOnId: addToCartOnId,
-        needToShowLoaderForCartFetch: false,
-      ));
+      cartBloc.add(
+        CartAddItemRequested(
+          storeId: storeId,
+          cartType: 2,
+          action: 2,
+          // Add/Update action
+          storeCategoryId: storeCategoryId,
+          newQuantity: newQuantity - 1,
+          storeTypeId: storeTypeId,
+          productId: productId,
+          centralProductId: parentProductId,
+          unitId: unitId,
+          addToCartOnId: addToCartOnId,
+          needToShowLoaderForCartFetch: false,
+        ),
+      );
     }
-  
   }
 
-
-void _openGroceryCustomization(BuildContext context, String parentProductId, String productId, String unitId, String storeId, String storeCategoryId, int storeTypeId, String productName, String productImage) {
-  showModalBottomSheet(
-                          context: context,
-                          isScrollControlled: true,
-                          backgroundColor: Colors.transparent,
-                          builder: (context) => GroceryCustomizationScreen(
-                            parentProductId: parentProductId,
-                            productId: productId,
-                            storeId: storeId,
-                            productName: productName,
-                            productImage: productImage,
-                            onAddToCart: (parentProductId,productId,unitId) {
-                              _onAddToCartForGrocery(parentProductId,productId,unitId,storeId,storeCategoryId,storeTypeId,null);
-                            },
-                          ),
-                        );
+  void _openGroceryCustomization(
+    BuildContext context,
+    String parentProductId,
+    String productId,
+    String unitId,
+    String storeId,
+    String storeCategoryId,
+    int storeTypeId,
+    String productName,
+    String productImage,
+  ) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder:
+          (context) => GroceryCustomizationScreen(
+            parentProductId: parentProductId,
+            productId: productId,
+            storeId: storeId,
+            productName: productName,
+            productImage: productImage,
+            onAddToCart: (parentProductId, productId, unitId) {
+              _onAddToCartForGrocery(
+                parentProductId,
+                productId,
+                unitId,
+                storeId,
+                storeCategoryId,
+                storeTypeId,
+                null,
+              );
+            },
+          ),
+    );
   }
 
-  void _onQuantityChanged(BuildContext context, Product product, Store store, int newQuantity, bool isIncrease) {
+  void _onQuantityChanged(
+    BuildContext context,
+    Product product,
+    Store store,
+    int newQuantity,
+    bool isIncrease,
+  ) {
     if (isIncrease == false && newQuantity == 1) {
       //TODO:- 0 Quantity
       int? addToCartOnId;
@@ -2111,70 +2770,80 @@ void _openGroceryCustomization(BuildContext context, String parentProductId, Str
         addToCartOnId = _getAddToCartOnId(product.childProductId);
         print("addCartOnID: $addToCartOnId");
       }
-      cartBloc.add(CartAddItemRequested(
-        storeId: store.storeId,
-        cartType: 2,
-        action: 3, // Add/Update action
-        storeCategoryId: store.storeCategoryId,
-        newQuantity: 0,
-        storeTypeId: store.storeTypeId ?? -111,
-        productId: product.childProductId,
-        centralProductId: product.parentProductId,
-        unitId: product.unitId,
-        addToCartOnId: addToCartOnId,
-        needToShowLoaderForCartFetch: false,
-      ));
-    }else if (newQuantity > 0 && isIncrease == true) {
+      cartBloc.add(
+        CartAddItemRequested(
+          storeId: store.storeId,
+          cartType: 2,
+          action: 3,
+          // Add/Update action
+          storeCategoryId: store.storeCategoryId,
+          newQuantity: 0,
+          storeTypeId: store.storeTypeId ?? -111,
+          productId: product.childProductId,
+          centralProductId: product.parentProductId,
+          unitId: product.unitId,
+          addToCartOnId: addToCartOnId,
+          needToShowLoaderForCartFetch: false,
+        ),
+      );
+    } else if (newQuantity > 0 && isIncrease == true) {
       if (product.variantsCount > 1) {
-         showModalBottomSheet(
-                        context: context,
-                        isScrollControlled: true,
-                        backgroundColor: Colors.transparent,
-                        builder: (context) => CustomizationSummaryScreen(
-                          store: store,
-                          product: product,
-                          onChooseClicked: () {
-                            // When "I'll choose" is clicked, open ProductCustomizationScreen
-                            _openProductCustomization(context, product, store);
-                          },
-                          onRepeatClicked: () {
-                            //TODO:- Add Quantity
-                            final addToCartOnId = _getAddToCartOnId(product.childProductId);
-                            print("addCartOnID: $addToCartOnId");
+        showModalBottomSheet(
+          context: context,
+          isScrollControlled: true,
+          backgroundColor: Colors.transparent,
+          builder:
+              (context) => CustomizationSummaryScreen(
+                store: store,
+                product: product,
+                onChooseClicked: () {
+                  // When "I'll choose" is clicked, open ProductCustomizationScreen
+                  _openProductCustomization(context, product, store);
+                },
+                onRepeatClicked: () {
+                  //TODO:- Add Quantity
+                  final addToCartOnId = _getAddToCartOnId(
+                    product.childProductId,
+                  );
+                  print("addCartOnID: $addToCartOnId");
 
-                            cartBloc.add(CartAddItemRequested(
-                              storeId: store.storeId,
-                              cartType: 1,
-                              action: 2, // Add action
-                              storeCategoryId: store.storeCategoryId,
-                              newQuantity: newQuantity + 1,
-                              storeTypeId: store.storeTypeId ?? -111,
-                              productId: product.childProductId,
-                              centralProductId: product.parentProductId,
-                              unitId: product.unitId,
-                              addToCartOnId: addToCartOnId,
-                              needToShowLoaderForCartFetch: false,
-                            )); 
-                          
-                          },
-                        ),
-          );
-      }else {
+                  cartBloc.add(
+                    CartAddItemRequested(
+                      storeId: store.storeId,
+                      cartType: 1,
+                      action: 2,
+                      // Add action
+                      storeCategoryId: store.storeCategoryId,
+                      newQuantity: newQuantity + 1,
+                      storeTypeId: store.storeTypeId ?? -111,
+                      productId: product.childProductId,
+                      centralProductId: product.parentProductId,
+                      unitId: product.unitId,
+                      addToCartOnId: addToCartOnId,
+                      needToShowLoaderForCartFetch: false,
+                    ),
+                  );
+                },
+              ),
+        );
+      } else {
         //TODO:- Add Quantity
-      cartBloc.add(CartAddItemRequested(
-        storeId: store.storeId,
-        cartType: 1,
-        action: 2, // Add action
-        storeCategoryId: store.storeCategoryId,
-        newQuantity: newQuantity + 1,
-        storeTypeId: store.storeTypeId ?? -111,
-        productId: product.childProductId,
-        centralProductId: product.parentProductId,
-        unitId: product.unitId,
-        needToShowLoaderForCartFetch: false,
-      ));        
+        cartBloc.add(
+          CartAddItemRequested(
+            storeId: store.storeId,
+            cartType: 1,
+            action: 2,
+            // Add action
+            storeCategoryId: store.storeCategoryId,
+            newQuantity: newQuantity + 1,
+            storeTypeId: store.storeTypeId ?? -111,
+            productId: product.childProductId,
+            centralProductId: product.parentProductId,
+            unitId: product.unitId,
+            needToShowLoaderForCartFetch: false,
+          ),
+        );
       }
-
     } else {
       //TODO:- Remove Quantity
       int? addToCartOnId;
@@ -2182,36 +2851,39 @@ void _openGroceryCustomization(BuildContext context, String parentProductId, Str
         addToCartOnId = _getAddToCartOnId(product.childProductId);
         print("addCartOnID: $addToCartOnId");
       }
-      cartBloc.add(CartAddItemRequested(
-        storeId: store.storeId,
-        cartType: 2,
-        action: 2, // Add/Update action
-        storeCategoryId: store.storeCategoryId,
-        newQuantity: newQuantity - 1,
-        storeTypeId: store.storeTypeId ?? -111,
-        productId: product.childProductId,
-        centralProductId: product.parentProductId,
-        unitId: product.unitId,
-        addToCartOnId: addToCartOnId,
-        needToShowLoaderForCartFetch: false,
-      ));
+      cartBloc.add(
+        CartAddItemRequested(
+          storeId: store.storeId,
+          cartType: 2,
+          action: 2,
+          // Add/Update action
+          storeCategoryId: store.storeCategoryId,
+          newQuantity: newQuantity - 1,
+          storeTypeId: store.storeTypeId ?? -111,
+          productId: product.childProductId,
+          centralProductId: product.parentProductId,
+          unitId: product.unitId,
+          addToCartOnId: addToCartOnId,
+          needToShowLoaderForCartFetch: false,
+        ),
+      );
     }
-    
+
     // Update cart totals
     // _updateCartTotals();
   }
-
 
   /// Get addToCartOnId from cart data for a specific product
   dynamic _getAddToCartOnId(String productId) {
     try {
       // Use filter to find the product with matching ID
-      final cartData = cartBloc.cartData
-          .expand((cart) => cart.sellers)
-          .expand((seller) => seller.products)
-          .where((product) => product.id == productId)
-          .firstOrNull;
-      
+      final cartData =
+          cartBloc.cartData
+              .expand((cart) => cart.sellers)
+              .expand((seller) => seller.products)
+              .where((product) => product.id == productId)
+              .firstOrNull;
+
       return cartData?.addToCartOnId;
     } catch (e) {
       print('Error getting addToCartOnId: $e');
@@ -2219,21 +2891,29 @@ void _openGroceryCustomization(BuildContext context, String parentProductId, Str
     }
   }
 
-   /// Open ProductCustomizationScreen with proper callbacks
-  void _openProductCustomization(BuildContext context, Product product, Store store) {
+  /// Open ProductCustomizationScreen with proper callbacks
+  void _openProductCustomization(
+    BuildContext context,
+    Product product,
+    Store store,
+  ) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => ProductCustomizationScreen(
-        product: product,
-        store: store,
-        onAddToCartWithAddOns: _onAddToCartWithAddOns,
-      ),
+      builder:
+          (context) => ProductCustomizationScreen(
+            product: product,
+            store: store,
+            onAddToCartWithAddOns: _onAddToCartWithAddOns,
+          ),
     );
   }
 
-  Widget _buildProductCards(List<Product> products, ChatWidget? productsWidget) {
+  Widget _buildProductCards(
+    List<Product> products,
+    ChatWidget? productsWidget,
+  ) {
     return Container(
       height: 222,
       // color: Colors.red,
@@ -2258,129 +2938,226 @@ void _openGroceryCustomization(BuildContext context, String parentProductId, Str
             price: priceText,
             originalPrice: basePriceText,
             isVeg: !product.containsMeat,
-            imageUrl: product.productImage.isNotEmpty ? product.productImage : null,
+            imageUrl:
+                product.productImage.isNotEmpty ? product.productImage : null,
             productId: product.childProductId,
-             centralProductId: product.parentProductId,
-                isCustomizable: (product.variantsCount > 1 && product.storeTypeId == FoodCategory.food.value) || (product.variantsCount > 0 && (product.storeTypeId == FoodCategory.grocery.value || product.storeTypeId == FoodCategory.pharmacy.value)),
-                cartData: cartBloc.cartData,
-                instock: product.instock ?? true,
-                storeIsOpen: product.storeIsOpen ?? true,
-                storeType: product.storeTypeId ?? -111,
+            centralProductId: product.parentProductId,
+            isCustomizable:
+                (product.variantsCount > 1 &&
+                    product.storeTypeId == FoodCategory.food.value) ||
+                (product.variantsCount > 0 &&
+                    (product.storeTypeId == FoodCategory.grocery.value ||
+                        product.storeTypeId == FoodCategory.pharmacy.value)),
+            cartData: cartBloc.cartData,
+            instock: product.instock ?? true,
+            storeIsOpen: product.storeIsOpen ?? true,
+            storeType: product.storeTypeId ?? -111,
             onClick: () {
               if (productsWidget != null) {
-                final Map<String, dynamic>? productJson = productsWidget.getRawProduct(index);
+                final Map<String, dynamic>? productJson = productsWidget
+                    .getRawProduct(index);
                 OrderService().triggerProductOrder(productJson ?? {});
               }
             },
-            onQuantityChanged: (productId, centralProductId, quantity, isIncrease, isCustomizable) {
-              if (product.storeTypeId == FoodCategory.grocery.value || product.storeTypeId == FoodCategory.pharmacy.value) {
-                _onQuantityChangedForGrocery(context,centralProductId,productId,product.unitId,product.storeId ?? '',product.storeCategoryId ?? '',product.storeTypeId ?? -111,product.variantsCount,quantity,isIncrease,product.productName,product.productImage);
-              }else {
-                _onQuantityChangedMenuItem(productId, centralProductId, quantity, isIncrease, isCustomizable, product.storeId ?? '', product.storeCategoryId ?? '', product.storeTypeId ?? -111, context, product.productName, product.productImage);
+            onQuantityChanged: (
+              productId,
+              centralProductId,
+              quantity,
+              isIncrease,
+              isCustomizable,
+            ) {
+              if (product.storeTypeId == FoodCategory.grocery.value ||
+                  product.storeTypeId == FoodCategory.pharmacy.value) {
+                _onQuantityChangedForGrocery(
+                  context,
+                  centralProductId,
+                  productId,
+                  product.unitId,
+                  product.storeId ?? '',
+                  product.storeCategoryId ?? '',
+                  product.storeTypeId ?? -111,
+                  product.variantsCount,
+                  quantity,
+                  isIncrease,
+                  product.productName,
+                  product.productImage,
+                );
+              } else {
+                _onQuantityChangedMenuItem(
+                  productId,
+                  centralProductId,
+                  quantity,
+                  isIncrease,
+                  isCustomizable,
+                  product.storeId ?? '',
+                  product.storeCategoryId ?? '',
+                  product.storeTypeId ?? -111,
+                  context,
+                  product.productName,
+                  product.productImage,
+                );
               }
             },
-            onAddToCart: (productId, centralProductId, quantity, isCustomizable) {
-              if (product.storeIsOpen == false && product.storeTypeId != FoodCategory.pharmacy.value) {
+            onAddToCart: (
+              productId,
+              centralProductId,
+              quantity,
+              isCustomizable,
+            ) {
+              if (product.storeIsOpen == false &&
+                  product.storeTypeId != FoodCategory.pharmacy.value) {
                 print('STORE CLSOSED');
-                BlackToastView.show(context, 'Store is closed. Please try again later');
+                BlackToastView.show(
+                  context,
+                  'Store is closed. Please try again later',
+                );
                 return;
-              }
-              else if (product.instock == false && (product.storeTypeId == FoodCategory.grocery.value || product.storeTypeId == FoodCategory.pharmacy.value)) {
+              } else if (product.instock == false &&
+                  (product.storeTypeId == FoodCategory.grocery.value ||
+                      product.storeTypeId == FoodCategory.pharmacy.value)) {
                 print('Product is not in stock');
-                BlackToastView.show(context, 'Product is not in stock. Please try again later');
+                BlackToastView.show(
+                  context,
+                  'Product is not in stock. Please try again later',
+                );
                 return;
               }
-              if (product.storeTypeId == FoodCategory.grocery.value || product.storeTypeId == FoodCategory.pharmacy.value) {
+              if (product.storeTypeId == FoodCategory.grocery.value ||
+                  product.storeTypeId == FoodCategory.pharmacy.value) {
                 if (isCustomizable) {
-                        showModalBottomSheet(
-                          context: context,
-                          isScrollControlled: true,
-                          backgroundColor: Colors.transparent,
-                          builder: (context) => GroceryCustomizationScreen(
-                            parentProductId: product.parentProductId,
-                            productId: product.childProductId,
-                            storeId: product.storeId ?? '',
-                            productName: product.productName,
-                            productImage: product.productImage,
-                            onAddToCart: (parentProductId,productId,unitId) {
-                              _onAddToCartForGrocery(parentProductId,productId,unitId,product.storeId ?? '',product.storeCategoryId ?? '',product.storeTypeId ?? -111,null);
-                            },
-                          ),
-                        );
-                }else {
-                  //TODO:- Add Quantity
-                  final addToCartOnId = _getAddToCartOnId(productId);
-                    print("addCartOnID: $addToCartOnId");
-                cartBloc.add(CartAddItemRequested(
-                  storeId: product.storeId ?? '',
-                  cartType: 1,
-                  action: 2, // Add action
-                  storeCategoryId: product.storeCategoryId ?? '',
-                  newQuantity: quantity + 1,
-                  storeTypeId: product.storeTypeId ?? -111,
-                  productId: productId,
-                  centralProductId: product.parentProductId,
-                  unitId: product.unitId,
-                  addToCartOnId: addToCartOnId,
-                  needToShowLoaderForCartFetch: false,
-                )); 
-                }
-              }else {
-                if (isCustomizable) {
-                     showModalBottomSheet(
+                  showModalBottomSheet(
                     context: context,
                     isScrollControlled: true,
                     backgroundColor: Colors.transparent,
-                    builder: (context) => ProductCustomizationScreen(
+                    builder:
+                        (context) => GroceryCustomizationScreen(
+                          parentProductId: product.parentProductId,
+                          productId: product.childProductId,
+                          storeId: product.storeId ?? '',
+                          productName: product.productName,
+                          productImage: product.productImage,
+                          onAddToCart: (parentProductId, productId, unitId) {
+                            _onAddToCartForGrocery(
+                              parentProductId,
+                              productId,
+                              unitId,
+                              product.storeId ?? '',
+                              product.storeCategoryId ?? '',
+                              product.storeTypeId ?? -111,
+                              null,
+                            );
+                          },
+                        ),
+                  );
+                } else {
+                  //TODO:- Add Quantity
+                  final addToCartOnId = _getAddToCartOnId(productId);
+                  print("addCartOnID: $addToCartOnId");
+                  cartBloc.add(
+                    CartAddItemRequested(
+                      storeId: product.storeId ?? '',
+                      cartType: 1,
+                      action: 2,
+                      // Add action
+                      storeCategoryId: product.storeCategoryId ?? '',
+                      newQuantity: quantity + 1,
+                      storeTypeId: product.storeTypeId ?? -111,
                       productId: productId,
-                      centralProductId: centralProductId,
-                      storeId: product.storeId,
-                      productName: product.productName,
-                      productImage: product.productImage.isNotEmpty ? product.productImage : null,
-                      isFromMenuScreen: true,
-                      onAddToCartWithAddOns: (product, store, variant, addOns, selectedProductId) {
-                        //TODO:- Add Quantity
-                        cartBloc.add(CartAddItemRequested(
-                       storeId: product.storeId ?? '',
-                       cartType: 1, // Default cart type
-                       action: 1, // Add action
-                       storeCategoryId: product.storeCategoryId ?? '',
-                       newQuantity: quantity , // Add 1 item
-                       storeTypeId: product.storeTypeId ?? -111,
-                        productId: selectedProductId,
-                        centralProductId: centralProductId,
-                        unitId: variant.unitId,
-                        newAddOns: addOns,
-                        needToShowLoaderForCartFetch: false,
-                    ));
-                      },
+                      centralProductId: product.parentProductId,
+                      unitId: product.unitId,
+                      addToCartOnId: addToCartOnId,
+                      needToShowLoaderForCartFetch: false,
                     ),
                   );
-                  }else {
-                    //TODO:- Add Quantity
-                    print("product.storeId: ${product.productName}");
-                  cartBloc.add(CartAddItemRequested(
-                       storeId: product.storeId ?? '',
-                       cartType: 1, // Default cart type
-                       action: 1, // Add action
-                       storeCategoryId: product.storeCategoryId ?? '',
-                       newQuantity: quantity , // Add 1 item
-                       storeTypeId: product.storeTypeId ?? -111,
-                        productId: productId,
-                        centralProductId: centralProductId,
-                        unitId: '',
-                        needToShowLoaderForCartFetch: false,
-                    ));
-                  } 
-              }                
-                },
+                }
+              } else {
+                if (isCustomizable) {
+                  showModalBottomSheet(
+                    context: context,
+                    isScrollControlled: true,
+                    backgroundColor: Colors.transparent,
+                    builder:
+                        (context) => ProductCustomizationScreen(
+                          productId: productId,
+                          centralProductId: centralProductId,
+                          storeId: product.storeId,
+                          productName: product.productName,
+                          productImage:
+                              product.productImage.isNotEmpty
+                                  ? product.productImage
+                                  : null,
+                          isFromMenuScreen: true,
+                          onAddToCartWithAddOns: (
+                            product,
+                            store,
+                            variant,
+                            addOns,
+                            selectedProductId,
+                          ) {
+                            //TODO:- Add Quantity
+                            cartBloc.add(
+                              CartAddItemRequested(
+                                storeId: product.storeId ?? '',
+                                cartType: 1,
+                                // Default cart type
+                                action: 1,
+                                // Add action
+                                storeCategoryId: product.storeCategoryId ?? '',
+                                newQuantity: quantity,
+                                // Add 1 item
+                                storeTypeId: product.storeTypeId ?? -111,
+                                productId: selectedProductId,
+                                centralProductId: centralProductId,
+                                unitId: variant.unitId,
+                                newAddOns: addOns,
+                                needToShowLoaderForCartFetch: false,
+                              ),
+                            );
+                          },
+                        ),
+                  );
+                } else {
+                  //TODO:- Add Quantity
+                  print("product.storeId: ${product.productName}");
+                  cartBloc.add(
+                    CartAddItemRequested(
+                      storeId: product.storeId ?? '',
+                      cartType: 1,
+                      // Default cart type
+                      action: 1,
+                      // Add action
+                      storeCategoryId: product.storeCategoryId ?? '',
+                      newQuantity: quantity,
+                      // Add 1 item
+                      storeTypeId: product.storeTypeId ?? -111,
+                      productId: productId,
+                      centralProductId: centralProductId,
+                      unitId: '',
+                      needToShowLoaderForCartFetch: false,
+                    ),
+                  );
+                }
+              }
+            },
           );
         },
       ),
     );
   }
 
-   void _onQuantityChangedMenuItem(String productId, String centralProductId, int currentQuantity, bool isIncrease, bool isCustomizable, String storeId,String storeCategoryId,int storeTypeId, BuildContext context, String productName, String productImage) {
+  void _onQuantityChangedMenuItem(
+    String productId,
+    String centralProductId,
+    int currentQuantity,
+    bool isIncrease,
+    bool isCustomizable,
+    String storeId,
+    String storeCategoryId,
+    int storeTypeId,
+    BuildContext context,
+    String productName,
+    String productImage,
+  ) {
     try {
       if (isIncrease == false && currentQuantity == 1) {
         //TODO:- 0 Quantity
@@ -2390,72 +3167,85 @@ void _openGroceryCustomization(BuildContext context, String parentProductId, Str
           print("addCartOnID: $addToCartOnId");
         }
 
-         cartBloc.add(CartAddItemRequested(
-          storeId: storeId,
-          cartType: 2,
-          action: 3, // Add action
-          storeCategoryId: storeCategoryId,
-          newQuantity: 0,
-          storeTypeId: storeTypeId,
-          productId: productId,
-          centralProductId: centralProductId,
-          unitId: '',
-          addToCartOnId: addToCartOnId,
-          needToShowLoaderForCartFetch: false,
-        ));
-      }else if (currentQuantity > 0 && isIncrease == true) {
+        cartBloc.add(
+          CartAddItemRequested(
+            storeId: storeId,
+            cartType: 2,
+            action: 3,
+            // Add action
+            storeCategoryId: storeCategoryId,
+            newQuantity: 0,
+            storeTypeId: storeTypeId,
+            productId: productId,
+            centralProductId: centralProductId,
+            unitId: '',
+            addToCartOnId: addToCartOnId,
+            needToShowLoaderForCartFetch: false,
+          ),
+        );
+      } else if (currentQuantity > 0 && isIncrease == true) {
+        if (isCustomizable) {
+          showModalBottomSheet(
+            context: context,
+            isScrollControlled: true,
+            backgroundColor: Colors.transparent,
+            builder:
+                (context) => CustomizationSummaryScreen(
+                  onChooseClicked: () {
+                    // When "I'll choose" is clicked, open ProductCustomizationScreen
+                    _openProductCustomizationMenuItem(
+                      productId,
+                      centralProductId,
+                      storeId,
+                      storeCategoryId,
+                      storeTypeId,
+                      context,
+                      productName,
+                      productImage,
+                    );
+                  },
+                  onRepeatClicked: () {
+                    //TODO:- Add Quantity
+                    final addToCartOnId = _getAddToCartOnId(productId);
+                    print("addCartOnID: $addToCartOnId");
 
-          if (isCustomizable) {
-
-            showModalBottomSheet(
-                        context: context,
-                        isScrollControlled: true,
-                        backgroundColor: Colors.transparent,
-                        builder: (context) => CustomizationSummaryScreen(
-                          
-                          onChooseClicked: () {
-                            // When "I'll choose" is clicked, open ProductCustomizationScreen
-                            _openProductCustomizationMenuItem(productId, centralProductId,storeId, storeCategoryId, storeTypeId, context, productName, productImage);
-                          },
-                          onRepeatClicked: () {
-                            //TODO:- Add Quantity
-                            final addToCartOnId = _getAddToCartOnId(productId);
-                            print("addCartOnID: $addToCartOnId");
-
-                            cartBloc.add(CartAddItemRequested(
-                              storeId: storeId,
-                              cartType: 1,
-                              action: 2, // Add action
-                              storeCategoryId: storeCategoryId,
-                              newQuantity: currentQuantity + 1,
-                              storeTypeId: storeTypeId,
-                              productId: productId,
-                              centralProductId: centralProductId,
-                              unitId: '',
-                              addToCartOnId: addToCartOnId,
-                              needToShowLoaderForCartFetch: false,
-                            )); 
-                          
-                          },
-                        ),
+                    cartBloc.add(
+                      CartAddItemRequested(
+                        storeId: storeId,
+                        cartType: 1,
+                        action: 2,
+                        // Add action
+                        storeCategoryId: storeCategoryId,
+                        newQuantity: currentQuantity + 1,
+                        storeTypeId: storeTypeId,
+                        productId: productId,
+                        centralProductId: centralProductId,
+                        unitId: '',
+                        addToCartOnId: addToCartOnId,
+                        needToShowLoaderForCartFetch: false,
+                      ),
+                    );
+                  },
+                ),
           );
-             
-          }else {
-            //TODO:- Add Quantity
-             cartBloc.add(CartAddItemRequested(
-          storeId: storeId,
-          cartType: 1,
-          action: 2, // Remove action
-          storeCategoryId: storeCategoryId,
-          newQuantity: currentQuantity + 1,
-          storeTypeId: storeTypeId,
-          productId: productId,
-          centralProductId: centralProductId,
-          unitId: '',
-          needToShowLoaderForCartFetch: false,
-        ));
-          }
-    
+        } else {
+          //TODO:- Add Quantity
+          cartBloc.add(
+            CartAddItemRequested(
+              storeId: storeId,
+              cartType: 1,
+              action: 2,
+              // Remove action
+              storeCategoryId: storeCategoryId,
+              newQuantity: currentQuantity + 1,
+              storeTypeId: storeTypeId,
+              productId: productId,
+              centralProductId: centralProductId,
+              unitId: '',
+              needToShowLoaderForCartFetch: false,
+            ),
+          );
+        }
       } else {
         //TODO:- Remove Quantity
         int? addToCartOnId;
@@ -2463,73 +3253,104 @@ void _openGroceryCustomization(BuildContext context, String parentProductId, Str
           addToCartOnId = _getAddToCartOnId(productId);
           print("addCartOnID: $addToCartOnId");
         }
-        cartBloc.add(CartAddItemRequested(
-          storeId: storeId,
-          cartType: 2,
-          action: 2, // Add action
-          storeCategoryId: storeCategoryId,
-          newQuantity: currentQuantity - 1,
-          storeTypeId: storeTypeId,
-          productId: productId,
-          centralProductId: centralProductId,
-          unitId: '',
-          addToCartOnId: addToCartOnId,
-          needToShowLoaderForCartFetch: false,
-        ));
+        cartBloc.add(
+          CartAddItemRequested(
+            storeId: storeId,
+            cartType: 2,
+            action: 2,
+            // Add action
+            storeCategoryId: storeCategoryId,
+            newQuantity: currentQuantity - 1,
+            storeTypeId: storeTypeId,
+            productId: productId,
+            centralProductId: centralProductId,
+            unitId: '',
+            addToCartOnId: addToCartOnId,
+            needToShowLoaderForCartFetch: false,
+          ),
+        );
       }
     } catch (e) {
       print('Error changing quantity: $e');
     }
   }
 
-  void _openProductCustomizationMenuItem(String productId, String centralProductId, String storeId,String storeCategoryId,int storeTypeId, BuildContext context, String productName, String productImage) {
+  void _openProductCustomizationMenuItem(
+    String productId,
+    String centralProductId,
+    String storeId,
+    String storeCategoryId,
+    int storeTypeId,
+    BuildContext context,
+    String productName,
+    String productImage,
+  ) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => ProductCustomizationScreen(
-        productId: productId,
-        centralProductId: centralProductId,
-        storeId: storeId,
-        productName: productName,
-        productImage: productImage,
-        isFromMenuScreen: true,
-        onAddToCartWithAddOns: (product, store, variant, addOns, selectedProductId) => _onAddToCartWithAddOnsMenuItem(productId, centralProductId, storeId, storeCategoryId, storeTypeId, context, variant, addOns,selectedProductId),
-      ),
+      builder:
+          (context) => ProductCustomizationScreen(
+            productId: productId,
+            centralProductId: centralProductId,
+            storeId: storeId,
+            productName: productName,
+            productImage: productImage,
+            isFromMenuScreen: true,
+            onAddToCartWithAddOns:
+                (product, store, variant, addOns, selectedProductId) =>
+                    _onAddToCartWithAddOnsMenuItem(
+                      productId,
+                      centralProductId,
+                      storeId,
+                      storeCategoryId,
+                      storeTypeId,
+                      context,
+                      variant,
+                      addOns,
+                      selectedProductId,
+                    ),
+          ),
     );
   }
 
-   /// Handle adding products with addons to cart
+  /// Handle adding products with addons to cart
   void _onAddToCartWithAddOnsMenuItem(
-    String productId, 
-    String centralProductId, 
-    String storeId, 
+    String productId,
+    String centralProductId,
+    String storeId,
     String storeCategoryId,
     int storeTypeId,
     BuildContext context,
-    dynamic variant, 
+    dynamic variant,
     List<Map<String, dynamic>> addOns,
-    String selectedProductId
+    String selectedProductId,
   ) {
     try {
       //TODO:- Add Quantity
-      cartBloc.add(CartAddItemRequested(
-        storeId: storeId,
-        cartType: 1, // Default cart type
-        action: 1, // Add action
-        storeCategoryId: storeCategoryId,
-        newQuantity: 1,
-        storeTypeId: storeTypeId,
-        productId: selectedProductId,
-        centralProductId: centralProductId,
-        unitId: variant.unitId,
-        newAddOns: addOns,
-        needToShowLoaderForCartFetch: false,
-      ));
-      
+      cartBloc.add(
+        CartAddItemRequested(
+          storeId: storeId,
+          cartType: 1,
+          // Default cart type
+          action: 1,
+          // Add action
+          storeCategoryId: storeCategoryId,
+          newQuantity: 1,
+          storeTypeId: storeTypeId,
+          productId: selectedProductId,
+          centralProductId: centralProductId,
+          unitId: variant.unitId,
+          newAddOns: addOns,
+          needToShowLoaderForCartFetch: false,
+        ),
+      );
+
       // print("Added product with addons to cart: ${product.productName}");
     } catch (e) {
-      print('RestaurantScreen: Error dispatching CartAddItemRequeste with addons: $e');
+      print(
+        'RestaurantScreen: Error dispatching CartAddItemRequeste with addons: $e',
+      );
     }
   }
 
@@ -2549,7 +3370,9 @@ void _openGroceryCustomization(BuildContext context, String parentProductId, Str
       addressOptions: addressOptions,
       onAddressSelected: (selectedAddress) {
         // Handle address selection
-        print('Selected address: ${selectedAddress.name} - ${selectedAddress.address}');
+        print(
+          'Selected address: ${selectedAddress.name} - ${selectedAddress.address}',
+        );
       },
       onSendMessage: (message) {
         // Automatically send the selected address message
@@ -2580,10 +3403,8 @@ void _openGroceryCustomization(BuildContext context, String parentProductId, Str
     final orderData = orderConfirmedWidget.getOrderConfirmedData();
     if (orderData != null) {
       final title = orderData['title'] as String? ?? '';
-      
-      return OrderConfirmedWidget(
-        title: title,
-      );
+
+      return OrderConfirmedWidget(title: title);
     }
     return const SizedBox.shrink();
   }
@@ -2593,10 +3414,7 @@ class _GreetingOptionTile extends StatelessWidget {
   final String text;
   final VoidCallback onTap;
 
-  const _GreetingOptionTile({
-    required this.text,
-    required this.onTap,
-  });
+  const _GreetingOptionTile({required this.text, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
