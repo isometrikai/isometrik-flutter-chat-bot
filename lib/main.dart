@@ -71,6 +71,10 @@ class MyApp extends StatelessWidget {
       _sendEventToiOS(store, 'store');
     });
 
+    OrderService().setAddCardOpenCallback(() {
+      _sendEventToiOS({}, 'addCard');
+    });
+
     // Add dismiss callback
     OrderService().setDismissCallback(() {
       _sendEventToiOS({}, 'dismissChat');

@@ -104,4 +104,9 @@ class ChatBot {
     print('isCartUpdate: $cartData');
     OrderService().triggerCartUpdate(true);
   }
+
+  static void openStripePayment(String cartNumber) {
+    print('openStripePayment: $cartNumber');
+    OrderService().triggerStripePayment(cartNumber);
+  }
 }

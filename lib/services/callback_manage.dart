@@ -5,11 +5,13 @@ class OrderService {
   OrderService._internal();
 
   Function(Map<String, dynamic>)? onOrderNow;
+  Function()? onAddCardOpen;
   Function(Map<String, dynamic>)? onStoreNow;
   Function(Map<String, dynamic>)? onOrderDetails;
   Function(Map<String, dynamic>)? onOrderTracking;
   Function()? onChatDismiss; // Add dismiss callback
   Function(bool)? onCartUpdate; // Add cart update callback
+  Function(String)? onStripePayment; // Add stripe payment callback
 
   void setProductCallback(Function(Map<String, dynamic>) callback) {
     onOrderNow = callback;
@@ -17,6 +19,10 @@ class OrderService {
 
   void setStoreCallback(Function(Map<String, dynamic>) callback) {
     onStoreNow = callback;
+  }
+
+  void setAddCardOpenCallback(Function() callback) {
+    onAddCardOpen = callback;
   }
 
   void setOrderDetailsCallback(Function(Map<String, dynamic>) orderDetails) {
@@ -37,12 +43,20 @@ class OrderService {
     onCartUpdate = callback;
   }
 
+  void setStripePaymentCallback(Function(String) callback) {
+    onStripePayment = callback;
+  }
+
   void setonStoreCallback(Function(Map<String, dynamic>) callback) {
     onStoreNow = callback;
   }
 
   void triggerProductOrder(Map<String, dynamic> product) {
     onOrderNow?.call(product);
+  }
+
+  void triggerAddCardOpen() {
+    onAddCardOpen?.call();
   }
 
   void triggerOrderDetails(Map<String, dynamic> orderDetails) {
@@ -67,11 +81,17 @@ class OrderService {
     onCartUpdate?.call(isCartUpdate);
   }
 
+  void triggerStripePayment(String cartNumber) {
+    onStripePayment?.call(cartNumber);
+  }
+
   void clearCallback() {
     onOrderNow = null;
+    onAddCardOpen = null;
     onStoreNow = null;
     onOrderDetails = null;
     onChatDismiss = null; // Clear dismiss callback
     onCartUpdate = null; // Clear cart update callback
+    onStripePayment = null; // Clear stripe payment callback
   }
 }

@@ -385,9 +385,14 @@ class _ChatScreenState extends State<ChatScreen> {
     OrderService().setCartUpdateCallback((bool isCartUpdate) {
       if (mounted && isCartUpdate) {
         print('ChatScreen: Cart update received - $isCartUpdate');
-        // Future.delayed(const Duration(seconds: 3), () {
         _sendMessage("I have updated the cart");
-        // });
+      }
+    });
+
+    OrderService().setStripePaymentCallback((String cartNumber) {
+      if (mounted) {
+        print('ChatScreen: Stripe payment received - $cartNumber');
+       _sendMessage('Card added successfully last 4 digits: ${cartNumber}');
       }
     });
 
@@ -2270,17 +2275,19 @@ class _ChatScreenBody extends StatelessWidget {
                 onTap:
                     isApiLoading
                         ? () {}
-                        : () async {
-                          final result = await AddCardBottomSheet.show(context);
-                          if (result != null) {
-                            debugPrint(
-                              'PM: ${result['paymentMethodId']} '
-                              '${result['brand']} **** ${result['last4']}',
-                            );
-                            onSendMessage(
-                              'Card added successfully last 4 digits: ${result['last4']}',
-                            );
-                          }
+                        : 
+                        () async {
+                          OrderService().triggerAddCardOpen();
+                          // final result = await AddCardBottomSheet.show(context);
+                          // if (result != null) {
+                          //   debugPrint(
+                          //     'PM: ${result['paymentMethodId']} '
+                          //     '${result['brand']} **** ${result['last4']}',
+                          //   );
+                          //   onSendMessage(
+                          //     'Card added successfully last 4 digits: ${result['last4']}',
+                          //   );
+                          // }
                         },
               );
             },
