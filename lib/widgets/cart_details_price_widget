@@ -143,6 +143,8 @@ class CartDetailsPriceWidget extends StatelessWidget {
                     fontWeight: FontWeight.w400,
                     color: Color(0xFF242424),
                   ),
+                  maxLines: 3,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
               Text(
@@ -156,17 +158,21 @@ class CartDetailsPriceWidget extends StatelessWidget {
             ],
           ),
           if(addOns.isNotEmpty) ...[
-            // Add Ons label row
             Row(
               children: [
-                Text(
-                  addOns,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w300,
-                    color: Color(0xFF242424),
+                Expanded(
+                  child: Text(
+                    addOns,
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w300,
+                      color: Color(0xFF242424),
+                    ),
+                    maxLines: 5,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
+                
               ],
             ),
           ],
