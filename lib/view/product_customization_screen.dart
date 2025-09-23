@@ -355,7 +355,7 @@ class _ProductCustomizationScreenState extends State<ProductCustomizationScreen>
         children: [
           Expanded(
             child: Text(
-              '${variant.name} (${variant.currencySymbol}${variant.price.toStringAsFixed(0)})',
+              '${variant.name} (${variant.currency}${variant.price.toStringAsFixed(0)})',
               style: const TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w400,
