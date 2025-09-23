@@ -90,6 +90,7 @@ class CartWidget extends StatelessWidget {
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Expanded(
                 child: Text(
@@ -99,7 +100,7 @@ class CartWidget extends StatelessWidget {
                     fontWeight: FontWeight.w400,
                     color: Color(0xFF242424),
                   ),
-                  maxLines: 3,
+                  maxLines: 4,
                   overflow: TextOverflow.ellipsis,
                 ),
               ),

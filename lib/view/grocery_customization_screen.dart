@@ -376,7 +376,7 @@ class _GroceryCustomizationScreenState extends State<GroceryCustomizationScreen>
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  '${sizeData.name} (${state.product.currencySymbol}${sizeData.finalPriceList.finalPrice.toStringAsFixed(0)})',
+                  '${sizeData.name} (${state.product.currency}${sizeData.finalPriceList.finalPrice.toStringAsFixed(0)})',
                   style: AppTextStyles.productTitle.copyWith(
                     fontWeight: FontWeight.w400,
                     color: isOutOfStock ? const Color(0xFF979797) : const Color(0xFF242424),
