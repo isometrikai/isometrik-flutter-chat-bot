@@ -121,8 +121,8 @@ class HawkSearchService {
       final String parentProductId = _firstString(doc['parentproductid']);
       final String childProductId = _firstString(doc['childproductid']);
       final int variantsCount = int.tryParse(_firstString(doc['variantcount'])) ?? 0;
-      final String productName = _firstString(doc['productunitname']).isNotEmpty
-          ? _firstString(doc['productunitname'])
+      final String productName = _firstString(doc['metadata']).isNotEmpty
+          ? _firstString(doc['metadata'])
           : _firstString(doc['size']);
 
       final List<String> images = (doc['image'] as List<dynamic>? ?? [])
@@ -274,7 +274,8 @@ class HawkSearchService {
 
     final num supportedOrderTypes = (() {
       final dynamic sd = storeData['supportedOrderTypes'];
-      return sd;
+      if (sd is num) return sd;
+      return 0; 
     })();
 
     // Extra fields from storeData.metaData

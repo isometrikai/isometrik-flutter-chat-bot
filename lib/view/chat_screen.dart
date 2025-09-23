@@ -385,16 +385,16 @@ class _ChatScreenState extends State<ChatScreen> {
     OrderService().setCartUpdateCallback((bool isCartUpdate) {
       if (mounted && isCartUpdate) {
         print('ChatScreen: Cart update received - $isCartUpdate');
+        Future.delayed(const Duration(seconds: 1), () {
         _sendMessage("I have updated the cart");
+        });
       }
     });
 
     OrderService().setStripePaymentCallback((String cartNumber) {
       if (mounted) {
         print('ChatScreen: Stripe payment received - $cartNumber');
-        Future.delayed(const Duration(seconds: 2), () {
-          _sendMessage('Card added successfully last 4 digits: ${cartNumber}');
-        });
+        _sendMessage('Card added successfully last 4 digits: ${cartNumber}');
       }
     });
 
