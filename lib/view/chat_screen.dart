@@ -402,7 +402,7 @@ class _ChatScreenState extends State<ChatScreen> {
     OrderService().setAddressSummaryCallback((String addressSummary) {
       if (mounted) {
         print('ChatScreen: Address summary received - $addressSummary');
-        _sendMessage('I have added a new address. $addressSummary');
+        _sendMessage('I have added a new address.\n$addressSummary');
       }
     });
 
