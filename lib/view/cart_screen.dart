@@ -375,6 +375,17 @@ class _CartScreenState extends State<CartScreen> {
     return formattedGroups.join('\n');
   }
 
+  String _formatProductAttributes(List<ProductAttribute> attributes) {
+    List<String> formattedAttributes = [];
+    
+    for (final attribute in attributes) {
+      if (attribute.value.isEmpty) continue;
+      formattedAttributes.add('${attribute.attrname}: ${attribute.value}');
+    }
+    
+    return formattedAttributes.join('\n');
+  }
+
   /// Convert UniversalCartData to WidgetAction list for specific seller
   List<WidgetAction> _convertToWidgetActions(UniversalCartData cartData, Seller seller) {
     List<WidgetAction> widgetActions = [];
@@ -401,6 +412,8 @@ class _CartScreenState extends State<CartScreen> {
         String formattedAddOns = '';
         if (product.selectedAddOns != null && product.selectedAddOns!.isNotEmpty) {
           formattedAddOns = _formatSelectedAddOns(product.selectedAddOns!);
+        }else if (product.attributes != null && product.attributes!.isNotEmpty) {
+          formattedAddOns = _formatProductAttributes(product.attributes!);
         }
         
         widgetActions.add(WidgetAction(

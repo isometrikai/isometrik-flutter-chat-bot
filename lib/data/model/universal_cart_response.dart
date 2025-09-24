@@ -563,6 +563,30 @@ class SelectedAddOn {
   }
 }
 
+class ProductAttribute {
+  final String attrname;
+  final String value;
+
+  ProductAttribute({
+    required this.attrname,
+    required this.value,
+  });
+
+  factory ProductAttribute.fromJson(Map<String, dynamic> json) {
+    return ProductAttribute(
+      attrname: json['attrname'] ?? '',
+      value: json['value'] ?? '',
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'attrname': attrname,
+      'value': value,
+    };
+  }
+}
+
 class Product {
   final String id;
   final String name;
@@ -571,6 +595,7 @@ class Product {
   final num? addToCartOnId;
   final String? storeId;
   final List<SelectedAddOn>? selectedAddOns;
+  final List<ProductAttribute>? attributes;
 
   Product({
     required this.id,
@@ -580,6 +605,7 @@ class Product {
     this.addToCartOnId,
     this.storeId,
     this.selectedAddOns,
+    this.attributes,
   });
 
   factory Product.fromJson(Map<String, dynamic> json) {
@@ -595,6 +621,11 @@ class Product {
               .map((e) => SelectedAddOn.fromJson(e))
               .toList()
           : null,
+      attributes: json['attributes'] != null
+          ? (json['attributes'] as List)
+              .map((e) => ProductAttribute.fromJson(e))
+              .toList()
+          : null,
     );
   }
 
@@ -607,6 +638,7 @@ class Product {
       'addToCartOnId': addToCartOnId,
       'storeId': storeId,
       'selectedAddOns': selectedAddOns?.map((e) => e.toJson()).toList(),
+      'attributes': attributes?.map((e) => e.toJson()).toList(),
     };
   }
 }
