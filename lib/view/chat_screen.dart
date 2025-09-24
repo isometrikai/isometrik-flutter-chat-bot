@@ -108,7 +108,7 @@ class _ChatScreenState extends State<ChatScreen> {
       hasProductCards: false,
       hasChooseAddressWidget: false,
       hasChooseCardWidget: false,
-      hasOrderSummaryWidget: false,
+      hasOrderSummaryWidget: message.hasOrderSummaryWidget,
       hasOrderConfirmedWidget: false,
       // Keep cart widget visible
       hasCartWidget: message.hasCartWidget,
@@ -235,9 +235,7 @@ class _ChatScreenState extends State<ChatScreen> {
     }
 
     try {
-      orderSummaryWidget = response.widgets.firstWhere(
-        (widget) => widget.isOrderSummaryWidget,
-      );
+      orderSummaryWidget = response.widgets.firstWhere((widget) => widget.isOrderSummaryWidget);
     } catch (e) {
       orderSummaryWidget = null;
     }
@@ -324,6 +322,7 @@ class _ChatScreenState extends State<ChatScreen> {
                     widget.type == WidgetEnum.add_address.value ||
                     widget.type == WidgetEnum.add_payment.value ||
                     widget.type == WidgetEnum.cart.value ||
+                    widget.type == WidgetEnum.order_summary.value ||
                     widget.type == WidgetEnum.choose_address.value ||
                     widget.type == WidgetEnum.choose_card.value ||
                     widget.type == WidgetEnum.cash_on_delivery.value ||

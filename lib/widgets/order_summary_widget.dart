@@ -155,7 +155,7 @@ class OrderSummaryWidget extends StatelessWidget {
                             '${item.quantity}x ${item.productName}',
                             style: const TextStyle(
                               fontFamily: 'Plus Jakarta Sans',
-                              fontSize: 16,
+                              fontSize: 14,
                               fontWeight: FontWeight.w400,
                               color: Color(0xFF242424),
                             ),
@@ -169,8 +169,8 @@ class OrderSummaryWidget extends StatelessWidget {
                           child: Text(
                             _formatCurrency(item.currencySymbol ?? 'د.إ', item.productPrice ?? 0),
                             style: const TextStyle(
-                              fontFamily: 'aed',
-                              fontSize: 16,
+                              fontFamily: 'Plus Jakarta Sans',
+                              fontSize: 14,
                               fontWeight: FontWeight.w400,
                               color: Color(0xFF242424),
                             ),
@@ -223,9 +223,9 @@ class OrderSummaryWidget extends StatelessWidget {
                       SizedBox(
                         width: 80,
                         child: Text(
-                          _formatCurrency(totalItem.currencySymbol ?? 'د.إ', totalItem.productPrice ?? 0),
+                          _formatCurrency(totalItem.currencySymbol ?? '', totalItem.productPrice ?? 0),
                           style: const TextStyle(
-                            fontFamily: 'aed',
+                            fontFamily: 'Plus Jakarta Sans',
                             fontSize: 14,
                             fontWeight: FontWeight.w400,
                             color: Color(0xFF242424),
