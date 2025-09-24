@@ -68,7 +68,7 @@ class OrderSummaryWidget extends StatelessWidget {
             children: [
               // Header - Order summary
               const Text(
-                'Order summary',
+                'Order Summary',
                 style: TextStyle(
                   fontFamily: 'Plus Jakarta Sans',
                   fontSize: 14,
@@ -92,9 +92,8 @@ class OrderSummaryWidget extends StatelessWidget {
                     // Store name with icon
                     Row(
                       children: [
-                        const Text('🍽️ ', style: TextStyle(fontSize: 16)),
                         Text(
-                          storeInfo.storeName ?? 'Restaurant',
+                          storeInfo.storeName ?? '',
                           style: const TextStyle(
                             fontFamily: 'Plus Jakarta Sans',
                             fontSize: 16,
@@ -183,38 +182,7 @@ class OrderSummaryWidget extends StatelessWidget {
                   );
                 }).toList(),
               ),
-              
-              // Delivery fee
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Expanded(
-                    child: Text(
-                      'Delivery fee',
-                      style: TextStyle(
-                        fontFamily: 'Plus Jakarta Sans',
-                        fontSize: 16,
-                        fontWeight: FontWeight.w400,
-                        color: Color(0xFF242424),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  const SizedBox(
-                    width: 80,
-                    child: Text(
-                      'د.إ5',
-                      style: TextStyle(
-                        fontFamily: 'aed',
-                        fontSize: 16,
-                        fontWeight: FontWeight.w400,
-                        color: Color(0xFF242424),
-                      ),
-                      textAlign: TextAlign.right,
-                    ),
-                  ),
-                ],
-              ),
+
               const SizedBox(height: 12),
               
               // Dotted line
@@ -274,7 +242,7 @@ class OrderSummaryWidget extends StatelessWidget {
                       const Text('💳 ', style: TextStyle(fontSize: 14)),
                       Expanded(
                         child: Text(
-                          totalItem.paymentTypeText ?? '',
+                          storeInfo.paymentTypeText ?? '',
                           style: const TextStyle(
                             fontFamily: 'Plus Jakarta Sans',
                             fontSize: 14,
