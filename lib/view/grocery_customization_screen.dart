@@ -122,6 +122,7 @@ class _GroceryCustomizationScreenState extends State<GroceryCustomizationScreen>
                                     Text(
                                       state.message,
                                       style: AppTextStyles.bodyText.copyWith(
+                                        fontSize: 16,
                                         color: const Color(0xFF6E4185),
                                       ),
                                       textAlign: TextAlign.center,
@@ -323,6 +324,7 @@ class _GroceryCustomizationScreenState extends State<GroceryCustomizationScreen>
               Text(
                 variant.name,
                 style: AppTextStyles.productTitle.copyWith(
+                  fontSize: 16,
                   color: const Color(0xFF242424),
                   fontWeight: FontWeight.w600,
                 ),
@@ -378,6 +380,7 @@ class _GroceryCustomizationScreenState extends State<GroceryCustomizationScreen>
                 Text(
                   '${sizeData.name} (${state.product.currency}${sizeData.finalPriceList.finalPrice.toStringAsFixed(0)})',
                   style: AppTextStyles.productTitle.copyWith(
+                    fontSize: 14,
                     fontWeight: FontWeight.w400,
                     color: isOutOfStock ? const Color(0xFF979797) : const Color(0xFF242424),
                   ),

@@ -2771,7 +2771,7 @@ class _ChatScreenBody extends StatelessWidget {
               cartBloc.add(
                 CartAddItemRequested(
                   storeId: store.storeId,
-                  cartType: 1,
+                  cartType: store.storeTypeId == FoodCategory.food.value ? 1 : 2,
                   // Default cart type
                   action: 1,
                   // Add action
