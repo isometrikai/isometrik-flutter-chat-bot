@@ -6,12 +6,14 @@ class OrderService {
 
   Function(Map<String, dynamic>)? onOrderNow;
   Function()? onAddCardOpen;
+  Function()? onAddressScreenOpen;
   Function(Map<String, dynamic>)? onStoreNow;
   Function(Map<String, dynamic>)? onOrderDetails;
   Function(Map<String, dynamic>)? onOrderTracking;
   Function()? onChatDismiss; // Add dismiss callback
   Function(bool)? onCartUpdate; // Add cart update callback
   Function(String)? onStripePayment; // Add stripe payment callback
+  Function(String)? onAddressSummary; // Add order summary callback
 
   void setProductCallback(Function(Map<String, dynamic>) callback) {
     onOrderNow = callback;
@@ -23,6 +25,10 @@ class OrderService {
 
   void setAddCardOpenCallback(Function() callback) {
     onAddCardOpen = callback;
+  }
+  
+  void setAddressScreenOpenCallback(Function() callback) {
+    onAddressScreenOpen = callback;
   }
 
   void setOrderDetailsCallback(Function(Map<String, dynamic>) orderDetails) {
@@ -47,6 +53,10 @@ class OrderService {
     onStripePayment = callback;
   }
 
+  void setAddressSummaryCallback(Function(String) callback) {
+    onAddressSummary = callback;
+  }
+
   void setonStoreCallback(Function(Map<String, dynamic>) callback) {
     onStoreNow = callback;
   }
@@ -57,6 +67,10 @@ class OrderService {
 
   void triggerAddCardOpen() {
     onAddCardOpen?.call();
+  }
+
+  void triggerAddressScreenOpen() {
+    onAddressScreenOpen?.call();
   }
 
   void triggerOrderDetails(Map<String, dynamic> orderDetails) {
@@ -84,6 +98,11 @@ class OrderService {
   void triggerStripePayment(String cartNumber) {
     onStripePayment?.call(cartNumber);
   }
+  
+  void triggerAddressSummary(String addressSummary) {
+    onAddressSummary?.call(addressSummary);
+  }
+
 
   void clearCallback() {
     onOrderNow = null;
@@ -93,5 +112,7 @@ class OrderService {
     onChatDismiss = null; // Clear dismiss callback
     onCartUpdate = null; // Clear cart update callback
     onStripePayment = null; // Clear stripe payment callback
+    onAddressSummary = null; // Clear address summary callback
+    onAddressScreenOpen = null; // Clear address screen open callback
   }
 }

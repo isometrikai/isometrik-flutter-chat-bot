@@ -399,6 +399,13 @@ class _ChatScreenState extends State<ChatScreen> {
       }
     });
 
+    OrderService().setAddressSummaryCallback((String addressSummary) {
+      if (mounted) {
+        print('ChatScreen: Address summary received - $addressSummary');
+        _sendMessage('I have added a new address. $addressSummary');
+      }
+    });
+
     // Add keyboard listener
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
@@ -2221,42 +2228,43 @@ class _ChatScreenBody extends StatelessWidget {
                     isApiLoading
                         ? () {}
                         : () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => const AddressDetailsScreen(),
-                            ),
-                          ).then((result) {
-                            if (result != null) {
-                              print("Result: $result");
+                          OrderService().triggerAddressScreenOpen();
+                          // Navigator.push(
+                          //   context,
+                          //   MaterialPageRoute(
+                          //     builder: (_) => const AddressDetailsScreen(),
+                          //   ),
+                          // ).then((result) {
+                          //   if (result != null) {
+                          //     print("Result: $result");
 
-                              // Create a formatted address string
-                              final String building = result['building'] ?? '';
-                              final String landmark = result['landmark'] ?? '';
-                              final String area = result['area'] ?? '';
-                              final String city = result['city'] ?? '';
-                              final String country = result['country'] ?? '';
-                              final String tag = result['tag'] ?? '';
+                          //     // Create a formatted address string
+                          //     final String building = result['building'] ?? '';
+                          //     final String landmark = result['landmark'] ?? '';
+                          //     final String area = result['area'] ?? '';
+                          //     final String city = result['city'] ?? '';
+                          //     final String country = result['country'] ?? '';
+                          //     final String tag = result['tag'] ?? '';
 
-                              // Build the full address string
-                              final List<String> addressParts = [];
-                              if (country.isNotEmpty) addressParts.add(country);
-                              if (area.isNotEmpty) addressParts.add(area);
-                              if (city.isNotEmpty) addressParts.add(city);
-                              if (building.isNotEmpty)
-                                addressParts.add(building);
-                              if (landmark.isNotEmpty)
-                                addressParts.add(landmark);
+                          //     // Build the full address string
+                          //     final List<String> addressParts = [];
+                          //     if (country.isNotEmpty) addressParts.add(country);
+                          //     if (area.isNotEmpty) addressParts.add(area);
+                          //     if (city.isNotEmpty) addressParts.add(city);
+                          //     if (building.isNotEmpty)
+                          //       addressParts.add(building);
+                          //     if (landmark.isNotEmpty)
+                          //       addressParts.add(landmark);
 
-                              final String fullAddress = addressParts.join(
-                                ', ',
-                              );
-                              final String addressMessage =
-                                  "I have added a new address.\nMy $tag address is:\n$fullAddress";
+                          //     final String fullAddress = addressParts.join(
+                          //       ', ',
+                          //     );
+                          //     final String addressMessage =
+                          //         "I have added a new address.\nMy $tag address is:\n$fullAddress";
 
-                              onSendMessage(addressMessage);
-                            }
-                          });
+                          //     onSendMessage(addressMessage);
+                          //   }
+                          // });
                         },
               );
             },

@@ -109,4 +109,9 @@ class ChatBot {
     print('openStripePayment: $cartNumber');
     OrderService().triggerStripePayment(cartNumber);
   }
+
+  static void openAddressSummary(String addressSummary) {
+    print('openAddressSummary: $addressSummary');
+    OrderService().triggerAddressSummary(addressSummary);
+  }
 }
