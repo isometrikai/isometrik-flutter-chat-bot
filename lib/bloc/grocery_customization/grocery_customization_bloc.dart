@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:chat_bot/utils/utility.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:chat_bot/bloc/grocery_customization/grocery_customization_event.dart';
 import 'package:chat_bot/bloc/grocery_customization/grocery_customization_state.dart';
@@ -7,6 +8,7 @@ import 'package:chat_bot/data/model/grocery_product_details_response.dart';
 
 class GroceryCustomizationBloc extends Bloc<GroceryCustomizationEvent, GroceryCustomizationState> {
   final GroceryProductRepository _repository;
+  String? _currentStoreId;
 
   GroceryCustomizationBloc({required GroceryProductRepository repository})
       : _repository = repository,
@@ -22,6 +24,7 @@ class GroceryCustomizationBloc extends Bloc<GroceryCustomizationEvent, GroceryCu
     Emitter<GroceryCustomizationState> emit,
   ) async {
     emit(GroceryCustomizationLoading());
+    _currentStoreId = event.storeId; // Store the storeId for later use
 
     try {
       final result = await _repository.getGroceryProductDetails(
@@ -87,31 +90,92 @@ class GroceryCustomizationBloc extends Bloc<GroceryCustomizationEvent, GroceryCu
     }
   }
 
-  void _onSelectGroceryProductVariant(
+  Future<void> _onSelectGroceryProductVariant(
     SelectGroceryProductVariant event,
     Emitter<GroceryCustomizationState> emit,
-  ) {
+  ) async {
     if (state is GroceryCustomizationLoaded) {
       final currentState = state as GroceryCustomizationLoaded;
+
+      // Check if this variant has multiple options
+      final hasMultipleOptions = currentState.product.variants.length > 1;
       
-      // Find the variant that contains this size data
-      GroceryProductVariant? selectedVariant;
-      for (final variant in currentState.product.variants) {
-        if (variant.sizeData.any((sizeData) => sizeData.childProductId == event.variant.childProductId)) {
-          selectedVariant = variant;
-          break;
+      if (hasMultipleOptions) {
+        Utility.showLoader();
+        
+        try {
+          final result = await _repository.getGroceryProductDetails(
+            parentProductId: currentState.product.parentProductId,
+            productId: event.variant.childProductId,
+            storeId: _currentStoreId ?? currentState.product.supplier.id,
+          );
+
+          if (result.isSuccess) {
+            final response = result.data as GroceryProductDetailsResponse;
+            final product = response.data.productData.data.first;
+            
+            // Auto-select primary variant or first available
+            GroceryProductVariant? newSelectedVariant;
+            GroceryProductSizeData? newSelectedSizeData;
+            
+            // Find primary variant
+            for (final variant in product.variants) {
+              if (variant.isPrimary) {
+                newSelectedVariant = variant;
+                newSelectedSizeData = variant.sizeData.firstWhere(
+                  (sizeData) => sizeData.isPrimary,
+                  orElse: () => variant.sizeData.first,
+                );
+                break;
+              }
+            }
+            
+            // If no primary found, use first variant's first option
+            if (newSelectedVariant == null && product.variants.isNotEmpty) {
+              newSelectedVariant = product.variants.first;
+              newSelectedSizeData = newSelectedVariant.sizeData.first;
+            }
+
+            final totalPrice = newSelectedSizeData != null 
+                ? newSelectedSizeData.finalPriceList.finalPrice 
+                : product.finalPriceList.finalPrice;
+
+            Utility.closeProgressDialog();
+            emit(GroceryCustomizationLoaded(
+              product: product,
+              selectedVariant: newSelectedVariant,
+              selectedSizeData: newSelectedSizeData,
+              quantity: currentState.quantity,
+              totalPrice: totalPrice,
+            ));
+          } else {
+            Utility.closeProgressDialog();
+            emit(GroceryCustomizationError(message: result.message ?? 'Failed to load product details'));
+          }
+        } catch (e) {
+          Utility.closeProgressDialog();
+          emit(GroceryCustomizationError(message: 'Error loading product details: $e'));
         }
+      } else {
+         // Find the variant that contains this size data
+        GroceryProductVariant? selectedVariant;
+        for (final variant in currentState.product.variants) {
+          if (variant.sizeData.any((sizeData) => sizeData.childProductId == event.variant.childProductId)) {
+            selectedVariant = variant;
+            break;
+          }
+        }
+        // For single option, just update the selection
+        final totalPrice = event.variant.finalPriceList.finalPrice * currentState.quantity;
+
+        emit(GroceryCustomizationLoaded(
+          product: currentState.product,
+          selectedVariant: selectedVariant,
+          selectedSizeData: event.variant,
+          quantity: currentState.quantity,
+          totalPrice: totalPrice,
+        ));
       }
-
-      final totalPrice = event.variant.finalPriceList.finalPrice * currentState.quantity;
-
-      emit(GroceryCustomizationLoaded(
-        product: currentState.product,
-        selectedVariant: selectedVariant,
-        selectedSizeData: event.variant,
-        quantity: currentState.quantity,
-        totalPrice: totalPrice,
-      ));
     }
   }
 

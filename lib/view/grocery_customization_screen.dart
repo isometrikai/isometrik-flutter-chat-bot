@@ -15,6 +15,7 @@ class GroceryCustomizationScreen extends StatefulWidget {
   final String storeId;
   final String productName;
   final String productImage;
+  // final int storeTypeId;
   final Function(String,String,String)? onAddToCart;
 
   const GroceryCustomizationScreen({
@@ -24,6 +25,7 @@ class GroceryCustomizationScreen extends StatefulWidget {
     required this.storeId,
     required this.productName,
     required this.productImage,
+    // required this.storeTypeId,
     this.onAddToCart,
   });
 
@@ -361,12 +363,10 @@ class _GroceryCustomizationScreenState extends State<GroceryCustomizationScreen>
   }
 
   Widget _buildVariantOption(GroceryProductSizeData sizeData, GroceryCustomizationLoaded state, bool isAutoSelected) {
-    final isOutOfStock = false;//sizeData.outOfStock || sizeData.availableStock == 0;
-    final isClickable = !isOutOfStock && !isAutoSelected;
-    // If not clickable (auto-selected), make it selected
-    final isSelected = isClickable 
-        ? state.selectedSizeData?.childProductId == sizeData.childProductId
-        : true;
+    final isOutOfStock = sizeData.outOfStock || sizeData.availableStock == 0;
+    final isClickable = !isOutOfStock;
+    // Check if this option is selected
+    final isSelected = state.selectedSizeData?.childProductId == sizeData.childProductId;
     
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
