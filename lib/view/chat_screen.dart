@@ -478,7 +478,7 @@ class _ChatScreenState extends State<ChatScreen> {
     HapticFeedback.lightImpact();
 
     try {
-      await _speechService.stopListening();
+      // await _speechService.stopListening();
 
       setState(() {
         _isRecording = false;
@@ -510,7 +510,7 @@ class _ChatScreenState extends State<ChatScreen> {
     HapticFeedback.lightImpact();
 
     try {
-      await _speechService.cancel();
+      // await _speechService.cancel();
 
       setState(() {
         _isRecording = false;
