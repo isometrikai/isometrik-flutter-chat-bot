@@ -1,4 +1,5 @@
 import 'package:chat_bot/utils/enum.dart';
+import 'package:chat_bot/utils/utility.dart';
 import 'package:chat_bot/view/customization_summary_screen.dart';
 import 'package:chat_bot/view/product_customization_screen.dart';
 import 'package:chat_bot/view/grocery_customization_screen.dart';
@@ -115,11 +116,13 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
 
   Future<void> _bootstrapData() async {
     cartBloc.add(CartFetchRequested(needToShowLoader: false));
+    _currentKeyword = widget.actionData?.keyword ?? '';
     _bloc.add(
       RestaurantFetchRequested(
         keyword: _currentKeyword,
         storeCategoryName: widget.actionData?.storeCategoryName ?? '',
         storeCategoryId: widget.actionData?.storeCategoryId ?? '',
+        needToShowLoader: true,
       ),
     );
   }

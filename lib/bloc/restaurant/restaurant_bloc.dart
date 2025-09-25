@@ -24,20 +24,25 @@ class RestaurantBloc extends Bloc<RestaurantEvent, RestaurantState> {
     String keyword = '';
     String storeCategoryName = '';
     String storeCategoryId = '';
+    bool needToShowLoader = false;
     if (event is RestaurantFetchRequested) {
       keyword = event.keyword;
       storeCategoryName = event.storeCategoryName;
       storeCategoryId = event.storeCategoryId;
+      needToShowLoader = event.needToShowLoader;
     } else if (event is RestaurantRefreshed) {
       keyword = event.keyword;
       storeCategoryName = event.storeCategoryName;
       storeCategoryId = event.storeCategoryId;
+      needToShowLoader = event.needToShowLoader;
     }
     
     // Only show global loader for initial load, not for search
     if (keyword.isEmpty) {
       Utility.showLoader();
-    } else {
+    }else if (needToShowLoader == true) {
+      Utility.showLoader();
+    }else{
       emit(RestaurantLoadInProgress());
     }
     
