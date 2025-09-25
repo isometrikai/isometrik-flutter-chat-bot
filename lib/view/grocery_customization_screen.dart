@@ -356,13 +356,13 @@ class _GroceryCustomizationScreenState extends State<GroceryCustomizationScreen>
           const SizedBox(height: 12),
           ],
           // Variant options
-          ...variant.sizeData.map((sizeData) => _buildVariantOption(sizeData, state, isAutoSelected)),
+          ...variant.sizeData.map((sizeData) => _buildVariantOption(sizeData, state, isAutoSelected, variant.sizeData.length == 1)),
         ],
       ),
     );
   }
 
-  Widget _buildVariantOption(GroceryProductSizeData sizeData, GroceryCustomizationLoaded state, bool isAutoSelected) {
+  Widget _buildVariantOption(GroceryProductSizeData sizeData, GroceryCustomizationLoaded state, bool isAutoSelected, bool isSelectedAlways) {
     final isOutOfStock = sizeData.outOfStock || sizeData.availableStock == 0;
     final isClickable = !isOutOfStock;
     // Check if this option is selected
@@ -378,7 +378,7 @@ class _GroceryCustomizationScreenState extends State<GroceryCustomizationScreen>
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  '${sizeData.name} (${state.product.currency}${sizeData.finalPriceList.finalPrice.toStringAsFixed(0)})',
+                  isSelectedAlways == false ? '${sizeData.name} (${state.product.currency}${sizeData.finalPriceList.finalPrice.toStringAsFixed(0)})' : sizeData.name,
                   style: AppTextStyles.productTitle.copyWith(
                     fontSize: 14,
                     fontWeight: FontWeight.w400,
@@ -406,7 +406,27 @@ class _GroceryCustomizationScreenState extends State<GroceryCustomizationScreen>
             onTap: isClickable ? () {
               _bloc.add(SelectGroceryProductVariant(variant: sizeData));
             } : null,
-            child: Container(
+            child: 
+            isSelectedAlways ? Container(
+              width: 20,
+              height: 20,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color:  const Color(0xFF8E2FFD),
+                  width: 0.83,
+                ),
+                color: 
+                    const Color(0xFF8E2FFD) 
+              ),
+              child: Container(
+                      margin: const EdgeInsets.all(3),
+                      decoration: const BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+            ) : Container(
               width: 20,
               height: 20,
               decoration: BoxDecoration(
