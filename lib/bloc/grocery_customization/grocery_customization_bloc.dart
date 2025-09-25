@@ -98,7 +98,7 @@ class GroceryCustomizationBloc extends Bloc<GroceryCustomizationEvent, GroceryCu
       final currentState = state as GroceryCustomizationLoaded;
 
       // Check if this variant has multiple options
-      final hasMultipleOptions = currentState.product.variants.length > 1;
+      final hasMultipleOptions = currentState.product.variants.length > 1;//currentState.product.variants.every((variant) => variant.sizeData.length > 1) && 
       
       if (hasMultipleOptions) {
         Utility.showLoader();
