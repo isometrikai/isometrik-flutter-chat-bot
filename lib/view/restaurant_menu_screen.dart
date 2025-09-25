@@ -683,7 +683,7 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
                                       widget.actionData?.storeTypeId ?? -111,
                                   productId: selectedProductId,
                                   centralProductId: centralProductId,
-                                  unitId: variant.unitId,
+                                  unitId: variant?.unitId ?? '',
                                   newAddOns: addOns,
                                 ),
                               );
@@ -738,7 +738,7 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
       imageUrl: imageUrl,
       productId: p.childProductId,
       centralProductId: p.parentProductId,
-      isCustomizable: p.variantsCount > 1,
+      isCustomizable: p.customizable ?? false,
       instock: p.instock ?? true,
       storeIsOpen: widget.actionData?.storeIsOpen ?? true,
     );

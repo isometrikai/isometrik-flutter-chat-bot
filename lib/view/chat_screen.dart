@@ -1696,7 +1696,7 @@ class _ChatScreenBody extends StatelessWidget {
             ],
           ),
           if (message.hasOptionButtons) ...[
-            const SizedBox(height: 12),
+            const SizedBox(height: 4),//12
             Padding(
               padding: const EdgeInsets.only(left: 50.0),
               child: _buildOptionButtons(
@@ -1708,11 +1708,11 @@ class _ChatScreenBody extends StatelessWidget {
           ],
           // Store cards outside the row to avoid constraints
           if (message.hasStoreCards) ...[
-            const SizedBox(height: 12),
+            const SizedBox(height: 4),//12
             _buildStoreCards(message.stores, message.storesWidget),
           ],
           if (message.hasProductCards) ...[
-            const SizedBox(height: 12),
+            const SizedBox(height: 4),//12
             Transform.translate(
               offset: const Offset(0, 0),
               child: _buildProductCards(
@@ -1722,23 +1722,23 @@ class _ChatScreenBody extends StatelessWidget {
             ),
           ],
           if (message.hasCartWidget) ...[
-            const SizedBox(height: 12),
+            const SizedBox(height: 4),//12
             _buildCartWidget(message.cartItems),
           ],
           if (message.hasChooseAddressWidget) ...[
-            const SizedBox(height: 12),
+            const SizedBox(height: 4),//12
             _buildChooseAddressWidget(message.addressOptions),
           ],
           if (message.hasChooseCardWidget) ...[
-            const SizedBox(height: 12),
+            const SizedBox(height: 4),//12
             _buildChooseCardWidget(message.cardOptions),
           ],
           if (message.hasOrderSummaryWidget) ...[
-            const SizedBox(height: 12),
+            const SizedBox(height: 4),//12
             _buildOrderSummaryWidget(message.orderSummaryItems),
           ],
           if (message.hasOrderConfirmedWidget) ...[
-            const SizedBox(height: 12),
+            const SizedBox(height: 4),//12
             _buildOrderConfirmedWidget(message.orderConfirmedWidget!),
           ],
         ],
@@ -2801,8 +2801,8 @@ class _ChatScreenBody extends StatelessWidget {
 
   /// Handle adding products with addons to cart
   void _onAddToCartWithAddOns(
-    Product product,
-    Store store,
+    Product? product,
+    Store? store,
     dynamic variant,
     List<Map<String, dynamic>> addOns,
     String selectedProductId,
@@ -2811,23 +2811,23 @@ class _ChatScreenBody extends StatelessWidget {
       //TODO:- Add Quantity
       cartBloc.add(
         CartAddItemRequested(
-          storeId: store.storeId,
+          storeId: store?.storeId ?? '',
           cartType: 1,
           // Default cart type
           action: 1,
           // Add action
-          storeCategoryId: store.storeCategoryId,
+          storeCategoryId: store?.storeCategoryId ?? '',
           newQuantity: 1,
-          storeTypeId: store.storeTypeId ?? -111,
+          storeTypeId: store?.storeTypeId ?? -111,
           productId: selectedProductId,
-          centralProductId: product.parentProductId,
+          centralProductId: product?.parentProductId ?? '',
           unitId: variant.unitId,
           newAddOns: addOns,
           needToShowLoaderForCartFetch: false,
         ),
       );
 
-      print("Added product with addons to cart: ${product.productName}");
+      print("Added product with addons to cart: ${product?.productName ?? ''}");
     } catch (e) {
       print(
         'RestaurantScreen: Error dispatching CartAddItemRequeste with addons: $e',
@@ -3373,7 +3373,7 @@ class _ChatScreenBody extends StatelessWidget {
                                   : null,
                           isFromMenuScreen: true,
                           onAddToCartWithAddOns: (
-                            product,
+                            prdt,
                             store,
                             variant,
                             addOns,
@@ -3393,7 +3393,7 @@ class _ChatScreenBody extends StatelessWidget {
                                 storeTypeId: product.storeTypeId ?? -111,
                                 productId: selectedProductId,
                                 centralProductId: centralProductId,
-                                unitId: variant.unitId,
+                                unitId: variant?.unitId ?? '',
                                 newAddOns: addOns,
                                 needToShowLoaderForCartFetch: false,
                               ),

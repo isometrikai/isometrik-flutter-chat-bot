@@ -126,8 +126,8 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
 
   /// Handle adding products with addons to cart
   void _onAddToCartWithAddOns(
-    chat.Product product,
-    chat.Store store,
+    chat.Product? product,
+    chat.Store? store,
     dynamic variant,
     List<Map<String, dynamic>> addOns,
     String selectedProductId,
@@ -136,22 +136,22 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
       //TODO:- Add Quantity
       cartBloc.add(
         CartAddItemRequested(
-          storeId: store.storeId,
+          storeId: store?.storeId ?? '',
           cartType: 1,
           // Default cart type
           action: 1,
           // Add action
-          storeCategoryId: store.storeCategoryId,
+          storeCategoryId: store?.storeCategoryId ?? '' ,
           newQuantity: 1,
-          storeTypeId: store.type,
+          storeTypeId: store?.type ?? -111,
           productId: selectedProductId,
-          centralProductId: product.parentProductId,
+          centralProductId: product?.parentProductId ?? '',
           unitId: variant.unitId,
           newAddOns: addOns,
         ),
       );
 
-      print("Added product with addons to cart: ${product.productName}");
+      print("Added product with addons to cart: ${product?.productName ?? ''}");
     } catch (e) {
       print(
         'RestaurantScreen: Error dispatching CartAddItemRequeste with addons: $e',

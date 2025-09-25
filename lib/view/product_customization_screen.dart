@@ -22,14 +22,14 @@ class ProductCustomizationScreen extends StatefulWidget {
   final String? productName;
   final String? productImage;
   
-  final Function(String)? onAddToCart;
-  final Function(Product, Store, ProductPortion, List<Map<String, dynamic>>,String)? onAddToCartWithAddOns;
+  // final Function(String)? onAddToCart;
+  final Function(Product?, Store?, ProductPortion?, List<Map<String, dynamic>>,String)? onAddToCartWithAddOns;
 
   const ProductCustomizationScreen({
     super.key,
     this.product,
     this.store,
-    this.onAddToCart,
+    // this.onAddToCart,
     this.onAddToCartWithAddOns,
     this.isFromMenuScreen,
     this.storeId,
@@ -621,31 +621,32 @@ class _ProductCustomizationScreenState extends State<ProductCustomizationScreen>
                         // Addons selected, use the new callback
                         if (widget.onAddToCartWithAddOns != null) {
                           if (widget.isFromMenuScreen == true) {
-                          // widget.onAddToCartWithAddOns!(
-                          //   widget.product!,
-                          //     widget.store!,
-                          //     state.selectedVariant!,
-                          //     formattedAddOns,
-                          //   );
+                          widget.onAddToCartWithAddOns!(
+                              widget.product,
+                              widget.store,
+                              state.selectedVariant,
+                              formattedAddOns,
+                              state.selectedVariant?.childProductId ?? '',
+                          );
                           }else {
                             widget.onAddToCartWithAddOns!(
-                              widget.product!,
-                              widget.store!,
-                              state.selectedVariant!,
+                              widget.product,
+                              widget.store,
+                              state.selectedVariant,
                               formattedAddOns,
-                              state.selectedVariant!.childProductId,
+                              state.selectedVariant?.childProductId ?? '',
                           );
                           }
                           Navigator.of(context).pop();
                         }
                       } else {
-                        widget.onAddToCartWithAddOns!(
-                              widget.product!,
-                              widget.store!,
-                              state.selectedVariant!,
+                            widget.onAddToCartWithAddOns!(
+                              widget.product,
+                              widget.store,
+                              state.selectedVariant,
                               formattedAddOns,
-                              state.selectedVariant!.childProductId,
-                        );
+                              state.selectedVariant?.childProductId ?? '',
+                            );
                         Navigator.of(context).pop();
                         // No addons selected, proceed with original logic
                         // final customizations = <String, List<String>>{};
