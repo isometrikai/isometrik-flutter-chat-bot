@@ -493,6 +493,32 @@ class _ChatScreenState extends State<ChatScreen> {
       if (recognizedText.trim().isNotEmpty) {
         // Set the recognized text to the text field
         _messageController.text = recognizedText.trim();
+        // ADDED For Text Field Height
+         final textSpan = TextSpan(
+                                      text:
+                                          _messageController.text.isEmpty
+                                              ? 'How can zAIn help you today?'
+                                              : _messageController.text,
+                                      style: const TextStyle(
+                                        fontSize: 16,
+                                        height: 1.4,
+                                        color: Color(0xFF242424),
+                                      ),
+                                    );
+                                    final textPainter = TextPainter(
+                                      text: textSpan,
+                                      textDirection: TextDirection.ltr,
+                                      maxLines: null,
+                                    );
+                                    textPainter.layout(
+                                      maxWidth:
+                                          MediaQuery.of(context).size.width -
+                                          160,
+                                    );
+
+                                    final newHeight = (textPainter.height + 20)
+                                        .clamp(50.0, 550.0);
+                                    _updateTextFieldHeight(newHeight);
       } else {
         BlackToastView.show(context, 'No speech detected. Please try again.');
       }
@@ -2403,7 +2429,8 @@ class _ChatScreenBody extends StatelessWidget {
                         ),
                       ),
                       child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        // padding: const EdgeInsets.symmetric(horizontal: 12),
+                        padding: const EdgeInsets.symmetric(horizontal: 12,vertical: 20),// ADDED For Text Field Height
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           crossAxisAlignment: CrossAxisAlignment.center,
