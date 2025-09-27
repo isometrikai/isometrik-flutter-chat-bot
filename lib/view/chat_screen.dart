@@ -1808,7 +1808,7 @@ class _ChatScreenBody extends StatelessWidget {
             ? greetingData!.weatherText
             : 'dsada';
 
-    final List<String> opts = (greetingData?.options ?? []).take(4).toList();
+    final List<String> opts = (greetingData?.options ?? []).toList();
 
     return GestureDetector(
       onTap: () {
@@ -1948,19 +1948,20 @@ class _ChatScreenBody extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 16),
-              // Options grid 2x2
+              // Options grid 1x1
               ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 360),
-                child: Wrap(
-                  spacing: 16,
-                  runSpacing: 16,
+                constraints: const BoxConstraints(maxWidth: 340),
+                child: Column(
                   children:
                       opts.map((opt) {
-                        return _GreetingOptionTile(
-                          text: opt,
-                          onTap: () {
-                            onSendMessage(opt);
-                          },
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 10),
+                          child: _GreetingOptionTile(
+                            text: opt,
+                            onTap: () {
+                              onSendMessage(opt);
+                            },
+                          ),
                         );
                       }).toList(),
                 ),
@@ -3692,31 +3693,90 @@ class _GreetingOptionTile extends StatelessWidget {
 
   const _GreetingOptionTile({required this.text, required this.onTap});
 
+  List<TextSpan> _buildTextWithLargeEmojis(String text) {
+    List<TextSpan> spans = [];
+    // Comprehensive emoji regex covering all major emoji ranges
+    RegExp emojiRegex = RegExp(
+      r'[\u{1F600}-\u{1F64F}]|' // Emoticons
+      r'[\u{1F300}-\u{1F5FF}]|' // Misc Symbols and Pictographs
+      r'[\u{1F680}-\u{1F6FF}]|' // Transport and Map
+      r'[\u{1F1E0}-\u{1F1FF}]|' // Regional indicator symbols
+      r'[\u{2600}-\u{26FF}]|'   // Misc symbols
+      r'[\u{2700}-\u{27BF}]|'   // Dingbats
+      r'[\u{1F900}-\u{1F9FF}]|' // Supplemental Symbols and Pictographs
+      r'[\u{1FA70}-\u{1FAFF}]|' // Symbols and Pictographs Extended-A
+      r'[\u{1F018}-\u{1F0F5}]|' // Playing cards
+      r'[\u{1F200}-\u{1F2FF}]', // Enclosed CJK Letters and Months
+      unicode: true
+    );
+    
+    int lastIndex = 0;
+    for (Match match in emojiRegex.allMatches(text)) {
+     
+      // Add emoji with larger font size
+      spans.add(TextSpan(
+        text: match.group(0),
+        style: const TextStyle(fontSize: 24), // Larger emoji size
+      ));
+
+
+      // Add space after emoji
+      spans.add(const TextSpan(text: '  '));
+
+       // Add text before emoji
+      if (match.start > lastIndex) {
+        spans.add(TextSpan(text: text.substring(lastIndex, match.start)));
+      }
+      
+      lastIndex = match.end;
+    }
+    
+    // Add remaining text
+    if (lastIndex < text.length) {
+      spans.add(TextSpan(text: text.substring(lastIndex)));
+    }
+    
+    return spans;
+  }
+
   @override
   Widget build(BuildContext context) {
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(8),
       child: Container(
-        width: 162,
-        height: 90,
-        padding: const EdgeInsets.fromLTRB(8, 0, 8, 4),
+        width: double.infinity,
+        height: 74,
+        padding: const EdgeInsets.fromLTRB(16, 0, 0, 0),
         decoration: BoxDecoration(
           color: const Color(0xFFF5F7FF),
           borderRadius: BorderRadius.circular(8),
           border: Border.all(color: const Color(0xFFEEF4FF), width: 1),
         ),
-        child: Align(
-          alignment: Alignment.bottomLeft,
-          child: Text(
-            text,
-            maxLines: 3,
-            style: AppTextStyles.bodyText.copyWith(
-              fontSize: 15,
-              color: const Color(0xFF242424),
-              // fontWeight: FontWeight.w500,
+        child: Row(
+          children: [
+            Expanded(
+              child: RichText(
+                maxLines: 2,
+                text: TextSpan(
+                  children: _buildTextWithLargeEmojis(text),
+                  style: AppTextStyles.bodyText.copyWith(
+                    fontSize: 14,
+                    color: const Color(0xFF242424),
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
             ),
-          ),
+            Padding(
+              padding: const EdgeInsets.only(right: 16),
+              child: SvgPicture.asset(
+                AssetPath.get('images/ic_side_arrow.svg'),
+                width: 20,
+                height: 20,
+              ),
+            ),
+          ],
         ),
       ),
     );
