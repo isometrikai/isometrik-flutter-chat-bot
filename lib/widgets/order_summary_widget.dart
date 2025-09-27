@@ -28,9 +28,11 @@ class OrderSummaryWidget extends StatelessWidget {
     final regularItems = orderItems.where((item) => 
         item.productName != null && 
         item.productName!.isNotEmpty && 
-        item.productName != "Total To Pay" &&
-        item.quantity != null && 
-        item.quantity!.isNotEmpty).toList();
+        item.productName != "Total To Pay" 
+        // &&
+        // item.quantity != null && 
+        // item.quantity!.isNotEmpty
+        ).toList();
     
     final totalItem = orderItems.lastWhere(
       (item) => item.productName == "Total To Pay",
@@ -121,22 +123,6 @@ class OrderSummaryWidget extends StatelessWidget {
                         ),
                       ],
                     ),
-                    // const SizedBox(height: 10),
-                    // // Delivery time with icon
-                    // Row(
-                    //   children: [
-                    //     const Text('⏰ ', style: TextStyle(fontSize: 14, color: Colors.red)),
-                    //     const Text(
-                    //       'Deliver in 30-40 minutes',
-                    //       style: TextStyle(
-                    //         fontFamily: 'Plus Jakarta Sans',
-                    //         fontSize: 14,
-                    //         fontWeight: FontWeight.w400,
-                    //         color: Color(0xFF242424),
-                    //       ),
-                    //     ),
-                    //   ],
-                    // ),
                   ],
                 ),
               ),
@@ -147,36 +133,60 @@ class OrderSummaryWidget extends StatelessWidget {
                 children: regularItems.map((item) {
                   return Padding(
                     padding: const EdgeInsets.only(bottom: 12),
-                    child: Row(
+                    child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Expanded(
-                          child: Text(
-                            '${item.quantity}x ${item.productName}',
-                            style: const TextStyle(
-                              fontFamily: 'Plus Jakarta Sans',
-                              fontSize: 14,
-                              fontWeight: FontWeight.w400,
-                              color: Color(0xFF242424),
+                        // Main item
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(
+                              child: Text(
+                                item.quantity?.isNotEmpty ?? false ? '${item.quantity}x ${item.productName}' : item.productName ?? '',
+                                // '${item.quantity}x ${item.productName}',
+                                style: const TextStyle(
+                                  fontFamily: 'Plus Jakarta Sans',
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w400,
+                                  color: Color(0xFF242424),
+                                ),
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                              ),
                             ),
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        SizedBox(
-                          width: 80,
-                          child: Text(
-                            _formatCurrency(item.currencySymbol ?? 'د.إ', item.productPrice ?? 0),
-                            style: const TextStyle(
-                              fontFamily: 'Plus Jakarta Sans',
-                              fontSize: 14,
-                              fontWeight: FontWeight.w400,
-                              color: Color(0xFF242424),
+                            const SizedBox(width: 8),
+                            SizedBox(
+                              width: 80,
+                              child: Text(
+                                _formatCurrency(item.currencySymbol ?? 'د.إ', item.productPrice ?? 0),
+                                style: const TextStyle(
+                                  fontFamily: 'Plus Jakarta Sans',
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w400,
+                                  color: Color(0xFF242424),
+                                ),
+                                textAlign: TextAlign.right,
+                              ),
                             ),
-                            textAlign: TextAlign.right,
-                          ),
+                          ],
                         ),
+                        // Add-ons section
+                        if(item.addOns != null && item.addOns!.isNotEmpty) ...[
+                          const SizedBox(height: 4),
+                          Padding(
+                            padding: const EdgeInsets.only(left: 0.0),
+                            child: Text(
+                              '${item.addOns}',
+                              maxLines: 5,
+                              style: const TextStyle(
+                                fontFamily: 'Plus Jakarta Sans',
+                                fontSize: 12,
+                                fontWeight: FontWeight.w300,
+                                color: Color(0xFF242424),
+                              ),
+                            ),
+                          ),
+                        ],
                       ],
                     ),
                   );
