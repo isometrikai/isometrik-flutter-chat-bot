@@ -68,7 +68,7 @@ class _ChatScreenState extends State<ChatScreen> {
   final SpeechService _speechService = SpeechService();
   bool _isSpeechAvailable = false;
   bool _isRecording = false;
-  
+
   // LaunchBloc related variables
   late final LaunchBloc _launchBloc;
   MyGPTsResponse? _chatbotData;
@@ -235,7 +235,9 @@ class _ChatScreenState extends State<ChatScreen> {
     }
 
     try {
-      orderSummaryWidget = response.widgets.firstWhere((widget) => widget.isOrderSummaryWidget);
+      orderSummaryWidget = response.widgets.firstWhere(
+        (widget) => widget.isOrderSummaryWidget,
+      );
     } catch (e) {
       orderSummaryWidget = null;
     }
@@ -366,7 +368,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
     // Initialize LaunchBloc
     _launchBloc = LaunchBloc();
-    
+
     // Check if data is already provided via parameters
     if (widget.chatbotData != null) {
       _chatbotData = widget.chatbotData;
@@ -382,11 +384,13 @@ class _ChatScreenState extends State<ChatScreen> {
 
     // Set up cart update callback - the mounted check handles if screen is active
     OrderService().setCartUpdateCallback((bool isCartUpdate) {
-      print('ChatScreen: Cart update received 0 - $isCartUpdate, mounted: $mounted');
+      print(
+        'ChatScreen: Cart update received 0 - $isCartUpdate, mounted: $mounted',
+      );
       if (mounted && isCartUpdate) {
         print('ChatScreen: Cart update received - $isCartUpdate');
         Future.delayed(const Duration(seconds: 1), () {
-        _sendMessage("I have updated the cart");
+          _sendMessage("I have updated the cart");
         });
       }
     });
@@ -570,7 +574,9 @@ class _ChatScreenState extends State<ChatScreen> {
                 builder: (BuildContext context) {
                   return AlertDialog(
                     title: const Text('Error'),
-                    content: const Text('Something went wrong please try again later'),
+                    content: const Text(
+                      'Something went wrong please try again later',
+                    ),
                     actions: [
                       TextButton(
                         onPressed: () {
@@ -593,9 +599,7 @@ class _ChatScreenState extends State<ChatScreen> {
                   color: Colors.white,
                   width: double.infinity,
                   height: double.infinity,
-                  child: Center(
-                    child: _buildShimmerGreetingOverlay(context),
-                  ),
+                  child: Center(child: _buildShimmerGreetingOverlay(context)),
                 ),
               );
             },
@@ -667,88 +671,88 @@ class _ChatScreenState extends State<ChatScreen> {
             children: [
               // Top graphic group with shimmer
               SizedBox(
-              width: 110,
-              height: 110,
-              child: Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  // Outer glow circle
-                  Container(
-                    width: 110,
-                    height: 110,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(110),
-                      gradient: const LinearGradient(
-                        begin: Alignment.centerLeft,
-                        end: Alignment.centerRight,
-                        colors: [
-                          Color(0x1AD445EC),
-                          Color(0x1AB02EFB),
-                          Color(0x1A8E2FFD),
-                          Color(0x1A5E3DFE),
-                          Color(0x1A5186E0),
-                        ],
-                      ),
-                    ),
-                  ),
-                  // Center asset
-                  Align(
-                    alignment: Alignment.center,
-                    child: Container(
-                      width: 90,
-                      height: 90,
-                      decoration: const BoxDecoration(
-                        shape: BoxShape.circle,
-                        gradient: LinearGradient(
+                width: 110,
+                height: 110,
+                child: Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    // Outer glow circle
+                    Container(
+                      width: 110,
+                      height: 110,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(110),
+                        gradient: const LinearGradient(
                           begin: Alignment.centerLeft,
                           end: Alignment.centerRight,
                           colors: [
-                            Color(0xFFD445EC),
-                            Color(0xFFB02EFB),
-                            Color(0xFF8E2FFD),
-                            Color(0xFF5E3DFE),
-                            Color(0xFF5186E0),
+                            Color(0x1AD445EC),
+                            Color(0x1AB02EFB),
+                            Color(0x1A8E2FFD),
+                            Color(0x1A5E3DFE),
+                            Color(0x1A5186E0),
                           ],
                         ),
                       ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(12),
-                        child: SvgPicture.asset(
-                          AssetPath.get('images/ic_mainImg.svg'),
-                          fit: BoxFit.contain,
+                    ),
+                    // Center asset
+                    Align(
+                      alignment: Alignment.center,
+                      child: Container(
+                        width: 90,
+                        height: 90,
+                        decoration: const BoxDecoration(
+                          shape: BoxShape.circle,
+                          gradient: LinearGradient(
+                            begin: Alignment.centerLeft,
+                            end: Alignment.centerRight,
+                            colors: [
+                              Color(0xFFD445EC),
+                              Color(0xFFB02EFB),
+                              Color(0xFF8E2FFD),
+                              Color(0xFF5E3DFE),
+                              Color(0xFF5186E0),
+                            ],
+                          ),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(12),
+                          child: SvgPicture.asset(
+                            AssetPath.get('images/ic_mainImg.svg'),
+                            fit: BoxFit.contain,
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                  Positioned(
-                    right: -6,
-                    top: -6,
-                    child: Opacity(
-                      opacity: 0.4,
-                      child: SvgPicture.asset(
-                        AssetPath.get('images/ic_topStar.svg'),
-                        width: 44,
-                        height: 44,
+                    Positioned(
+                      right: -6,
+                      top: -6,
+                      child: Opacity(
+                        opacity: 0.4,
+                        child: SvgPicture.asset(
+                          AssetPath.get('images/ic_topStar.svg'),
+                          width: 44,
+                          height: 44,
+                        ),
                       ),
                     ),
-                  ),
-                  Positioned(
-                    left: -10,
-                    bottom: -8,
-                    child: Opacity(
-                      opacity: 0.4,
-                      child: SvgPicture.asset(
-                        AssetPath.get('images/ic_topStar.svg'),
-                        width: 61,
-                        height: 61,
+                    Positioned(
+                      left: -10,
+                      bottom: -8,
+                      child: Opacity(
+                        opacity: 0.4,
+                        child: SvgPicture.asset(
+                          AssetPath.get('images/ic_topStar.svg'),
+                          width: 61,
+                          height: 61,
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
               const SizedBox(height: 12),
-              
+
               // Title shimmer
               SizedBox(
                 width: double.infinity,
@@ -767,7 +771,7 @@ class _ChatScreenState extends State<ChatScreen> {
                 ),
               ),
               const SizedBox(height: 12),
-              
+
               // Subtitle shimmer
               SizedBox(
                 width: double.infinity,
@@ -786,12 +790,15 @@ class _ChatScreenState extends State<ChatScreen> {
                 ),
               ),
               const SizedBox(height: 16),
-              
+
               // Weather information shimmer
               Container(
                 width: double.infinity,
                 height: 130,
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 16,
+                ),
                 // decoration: BoxDecoration(
                 //   color: Colors.grey[300]!,
                 //   borderRadius: BorderRadius.circular(12),
@@ -811,7 +818,7 @@ class _ChatScreenState extends State<ChatScreen> {
                 ),
               ),
               const SizedBox(height: 16),
-              
+
               // Options grid shimmer 2x2
               ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: double.infinity),
@@ -1696,7 +1703,7 @@ class _ChatScreenBody extends StatelessWidget {
             ],
           ),
           if (message.hasOptionButtons) ...[
-            const SizedBox(height: 4),//12
+            const SizedBox(height: 4), //12
             Padding(
               padding: const EdgeInsets.only(left: 50.0),
               child: _buildOptionButtons(
@@ -1708,11 +1715,11 @@ class _ChatScreenBody extends StatelessWidget {
           ],
           // Store cards outside the row to avoid constraints
           if (message.hasStoreCards) ...[
-            const SizedBox(height: 4),//12
+            const SizedBox(height: 4), //12
             _buildStoreCards(message.stores, message.storesWidget),
           ],
           if (message.hasProductCards) ...[
-            const SizedBox(height: 4),//12
+            const SizedBox(height: 4), //12
             Transform.translate(
               offset: const Offset(0, 0),
               child: _buildProductCards(
@@ -1722,23 +1729,23 @@ class _ChatScreenBody extends StatelessWidget {
             ),
           ],
           if (message.hasCartWidget) ...[
-            const SizedBox(height: 4),//12
+            const SizedBox(height: 4), //12
             _buildCartWidget(message.cartItems),
           ],
           if (message.hasChooseAddressWidget) ...[
-            const SizedBox(height: 4),//12
+            const SizedBox(height: 4), //12
             _buildChooseAddressWidget(message.addressOptions),
           ],
           if (message.hasChooseCardWidget) ...[
-            const SizedBox(height: 4),//12
+            const SizedBox(height: 4), //12
             _buildChooseCardWidget(message.cardOptions),
           ],
           if (message.hasOrderSummaryWidget) ...[
-            const SizedBox(height: 4),//12
+            const SizedBox(height: 4), //12
             _buildOrderSummaryWidget(message.orderSummaryItems),
           ],
           if (message.hasOrderConfirmedWidget) ...[
-            const SizedBox(height: 4),//12
+            const SizedBox(height: 4), //12
             _buildOrderConfirmedWidget(message.orderConfirmedWidget!),
           ],
         ],
@@ -1787,7 +1794,6 @@ class _ChatScreenBody extends StatelessWidget {
     return html;
   }
 
-
   Widget _buildGreetingOverlay(BuildContext context) {
     final String titleText =
         greetingData?.greeting.isNotEmpty == true
@@ -1816,152 +1822,155 @@ class _ChatScreenBody extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-            // Top graphic group
-            SizedBox(
-              width: 90,
-              height: 90,
-              child: Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  // Outer glow circle
-                  Container(
-                    width: 90,
-                    height: 90,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(110),
-                      gradient: const LinearGradient(
-                        begin: Alignment.centerLeft,
-                        end: Alignment.centerRight,
-                        colors: [
-                          Color(0x1AD445EC),
-                          Color(0x1AB02EFB),
-                          Color(0x1A8E2FFD),
-                          Color(0x1A5E3DFE),
-                          Color(0x1A5186E0),
-                        ],
-                      ),
-                    ),
-                  ),
-                  // Center asset
-                  Align(
-                    alignment: Alignment.center,
-                    child: Container(
-                      width: 70,
-                      height: 70,
-                      decoration: const BoxDecoration(
-                        shape: BoxShape.circle,
-                        gradient: LinearGradient(
+              // Top graphic group
+              SizedBox(
+                width: 90,
+                height: 90,
+                child: Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    // Outer glow circle
+                    Container(
+                      width: 90,
+                      height: 90,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(110),
+                        gradient: const LinearGradient(
                           begin: Alignment.centerLeft,
                           end: Alignment.centerRight,
                           colors: [
-                            Color(0xFFD445EC),
-                            Color(0xFFB02EFB),
-                            Color(0xFF8E2FFD),
-                            Color(0xFF5E3DFE),
-                            Color(0xFF5186E0),
+                            Color(0x1AD445EC),
+                            Color(0x1AB02EFB),
+                            Color(0x1A8E2FFD),
+                            Color(0x1A5E3DFE),
+                            Color(0x1A5186E0),
                           ],
                         ),
                       ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(12),
-                        child: SvgPicture.asset(
-                          AssetPath.get('images/ic_mainImg.svg'),
-                          fit: BoxFit.contain,
+                    ),
+                    // Center asset
+                    Align(
+                      alignment: Alignment.center,
+                      child: Container(
+                        width: 70,
+                        height: 70,
+                        decoration: const BoxDecoration(
+                          shape: BoxShape.circle,
+                          gradient: LinearGradient(
+                            begin: Alignment.centerLeft,
+                            end: Alignment.centerRight,
+                            colors: [
+                              Color(0xFFD445EC),
+                              Color(0xFFB02EFB),
+                              Color(0xFF8E2FFD),
+                              Color(0xFF5E3DFE),
+                              Color(0xFF5186E0),
+                            ],
+                          ),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(12),
+                          child: SvgPicture.asset(
+                            AssetPath.get('images/ic_mainImg.svg'),
+                            fit: BoxFit.contain,
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                  Positioned(
-                    right: -6,
-                    top: -6,
-                    child: Opacity(
-                      opacity: 0.4,
-                      child: SvgPicture.asset(
-                        AssetPath.get('images/ic_topStar.svg'),
-                        width: 34,
-                        height: 34,
+                    Positioned(
+                      right: -6,
+                      top: -6,
+                      child: Opacity(
+                        opacity: 0.4,
+                        child: SvgPicture.asset(
+                          AssetPath.get('images/ic_topStar.svg'),
+                          width: 34,
+                          height: 34,
+                        ),
                       ),
                     ),
-                  ),
-                  Positioned(
-                    left: -10,
-                    bottom: -8,
-                    child: Opacity(
-                      opacity: 0.4,
-                      child: SvgPicture.asset(
-                        AssetPath.get('images/ic_topStar.svg'),
-                        width: 51,
-                        height: 51,
+                    Positioned(
+                      left: -10,
+                      bottom: -8,
+                      child: Opacity(
+                        opacity: 0.4,
+                        child: SvgPicture.asset(
+                          AssetPath.get('images/ic_topStar.svg'),
+                          width: 51,
+                          height: 51,
+                        ),
                       ),
                     ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 12),
+              SizedBox(
+                width: 304,
+                child: Text(
+                  titleText,
+                  textAlign: TextAlign.center,
+                  style: AppTextStyles.launchTitle.copyWith(
+                    color: const Color(0xFF171212),
                   ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 12),
-            SizedBox(
-              width: 304,
-              child: Text(
-                titleText,
-                textAlign: TextAlign.center,
-                style: AppTextStyles.launchTitle.copyWith(
-                  color: const Color(0xFF171212),
                 ),
               ),
-            ),
-            const SizedBox(height: 12),
-            SizedBox(
-              width: 323,
-              child: Text(
-                subtitleText,
-                textAlign: TextAlign.center,
-                style: AppTextStyles.launchSubtitle.copyWith(
-                  color: const Color(0xFF6E4185),
+              const SizedBox(height: 12),
+              SizedBox(
+                width: 323,
+                child: Text(
+                  subtitleText,
+                  textAlign: TextAlign.center,
+                  style: AppTextStyles.launchSubtitle.copyWith(
+                    color: const Color(0xFF6E4185),
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(height: 16),
-            // Weather information view
-            Container(
-              width: 340,
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-              decoration: BoxDecoration(
-                color: const Color(0xFFF5F0FF), // Light purple background
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: const Color(0xFFE8D5FF), width: 1),
-              ),
-              child: Text(
-                weatherText,
-                textAlign: TextAlign.center,
-                style: AppTextStyles.launchWeather.copyWith(
-                  color: const Color(0xFF6E4185), // Darker purple text
+              const SizedBox(height: 16),
+              // Weather information view
+              Container(
+                width: 340,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 16,
+                ),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF5F0FF), // Light purple background
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: const Color(0xFFE8D5FF), width: 1),
+                ),
+                child: Text(
+                  weatherText,
+                  textAlign: TextAlign.center,
+                  style: AppTextStyles.launchWeather.copyWith(
+                    color: const Color(0xFF6E4185), // Darker purple text
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(height: 16),
-            // Options grid 2x2
-            ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 360),
-              child: Wrap(
-                spacing: 16,
-                runSpacing: 16,
-                children:
-                    opts.map((opt) {
-                      return _GreetingOptionTile(
-                        text: opt,
-                        onTap: () {
-                          onSendMessage(opt);
-                        },
-                      );
-                    }).toList(),
+              const SizedBox(height: 16),
+              // Options grid 2x2
+              ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 360),
+                child: Wrap(
+                  spacing: 16,
+                  runSpacing: 16,
+                  children:
+                      opts.map((opt) {
+                        return _GreetingOptionTile(
+                          text: opt,
+                          onTap: () {
+                            onSendMessage(opt);
+                          },
+                        );
+                      }).toList(),
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
-    ));
+    );
   }
-
 
   Widget _buildOptionButtons(
     List<String> options,
@@ -2031,17 +2040,21 @@ class _ChatScreenBody extends StatelessWidget {
       return const SizedBox.shrink();
     }
 
-    List<Widget> actionButtons = [];
-    // Handle see_more widgets
-    for (final widget in latestActionWidgets.where(
-      (w) => w.type == WidgetEnum.see_more.value,
-    )) {
-      for (final action in widget.seeMore) {
-        actionButtons.add(
-          BlocBuilder<ChatBloc, ChatState>(
-            builder: (context, state) {
-              bool isApiLoading = state is ChatLoading;
-              return _buildActionButton(
+    return BlocBuilder<ChatBloc, ChatState>(
+      builder: (context, state) {
+        bool isApiLoading = state is ChatLoading;
+        if (isApiLoading == true) {
+          return const SizedBox.shrink();
+        }
+
+        List<Widget> actionButtons = [];
+        // Handle see_more widgets
+        for (final widget in latestActionWidgets.where(
+          (w) => w.type == WidgetEnum.see_more.value,
+        )) {
+          for (final action in widget.seeMore) {
+            actionButtons.add(
+              _buildActionButton(
                 text: action.buttonText,
                 onTap:
                     isApiLoading
@@ -2067,22 +2080,17 @@ class _ChatScreenBody extends StatelessWidget {
                             ),
                           );
                         },
-              );
-            },
-          ),
-        );
-      }
-    }
+              ),
+            );
+          }
+        }
 
-    for (final widget in latestActionWidgets.where(
-      (w) => w.type == WidgetEnum.order_tracking.value,
-    )) {
-      for (final action in widget.orderTracking) {
-        actionButtons.add(
-          BlocBuilder<ChatBloc, ChatState>(
-            builder: (context, state) {
-              bool isApiLoading = state is ChatLoading;
-              return _buildActionButton(
+        for (final widget in latestActionWidgets.where(
+          (w) => w.type == WidgetEnum.order_tracking.value,
+        )) {
+          for (final action in widget.orderTracking) {
+            actionButtons.add(
+              _buildActionButton(
                 text: action.buttonText,
                 onTap:
                     isApiLoading
@@ -2103,22 +2111,17 @@ class _ChatScreenBody extends StatelessWidget {
                             print("Failed to fetch order details");
                           }
                         },
-              );
-            },
-          ),
-        );
-      }
-    }
+              ),
+            );
+          }
+        }
 
-    for (final widget in latestActionWidgets.where(
-      (w) => w.type == WidgetEnum.order_details.value,
-    )) {
-      for (final action in widget.orderDetails) {
-        actionButtons.add(
-          BlocBuilder<ChatBloc, ChatState>(
-            builder: (context, state) {
-              bool isApiLoading = state is ChatLoading;
-              return _buildActionButton(
+        for (final widget in latestActionWidgets.where(
+          (w) => w.type == WidgetEnum.order_details.value,
+        )) {
+          for (final action in widget.orderDetails) {
+            actionButtons.add(
+              _buildActionButton(
                 text: action.buttonText,
                 onTap:
                     isApiLoading
@@ -2138,22 +2141,17 @@ class _ChatScreenBody extends StatelessWidget {
                             print("Failed to fetch order details");
                           }
                         },
-              );
-            },
-          ),
-        );
-      }
-    }
+              ),
+            );
+          }
+        }
 
-    for (final widget in latestActionWidgets.where(
-      (w) => w.type == WidgetEnum.menu.value,
-    )) {
-      for (final action in widget.menu) {
-        actionButtons.add(
-          BlocBuilder<ChatBloc, ChatState>(
-            builder: (context, state) {
-              bool isApiLoading = state is ChatLoading;
-              return _buildActionButton(
+        for (final widget in latestActionWidgets.where(
+          (w) => w.type == WidgetEnum.menu.value,
+        )) {
+          for (final action in widget.menu) {
+            actionButtons.add(
+              _buildActionButton(
                 text: action.buttonText,
                 onTap:
                     isApiLoading
@@ -2206,22 +2204,17 @@ class _ChatScreenBody extends StatelessWidget {
                             );
                           }
                         },
-              );
-            },
-          ),
-        );
-      }
-    }
+              ),
+            );
+          }
+        }
 
-    for (final widget in latestActionWidgets.where(
-      (w) => w.type == WidgetEnum.add_address.value,
-    )) {
-      for (final action in widget.addAddress) {
-        actionButtons.add(
-          BlocBuilder<ChatBloc, ChatState>(
-            builder: (context, state) {
-              bool isApiLoading = state is ChatLoading;
-              return _buildActionButton(
+        for (final widget in latestActionWidgets.where(
+          (w) => w.type == WidgetEnum.add_address.value,
+        )) {
+          for (final action in widget.addAddress) {
+            actionButtons.add(
+              _buildActionButton(
                 text: action.buttonText,
                 onTap:
                     isApiLoading
@@ -2265,28 +2258,22 @@ class _ChatScreenBody extends StatelessWidget {
                           //   }
                           // });
                         },
-              );
-            },
-          ),
-        );
-      }
-    }
+              ),
+            );
+          }
+        }
 
-    for (final widget in latestActionWidgets.where(
-      (w) => w.type == WidgetEnum.add_payment.value,
-    )) {
-      for (final action in widget.addPayment) {
-        actionButtons.add(
-          BlocBuilder<ChatBloc, ChatState>(
-            builder: (context, state) {
-              bool isApiLoading = state is ChatLoading;
-              return _buildActionButton(
+        for (final widget in latestActionWidgets.where(
+          (w) => w.type == WidgetEnum.add_payment.value,
+        )) {
+          for (final action in widget.addPayment) {
+            actionButtons.add(
+              _buildActionButton(
                 text: action.buttonText,
                 onTap:
                     isApiLoading
                         ? () {}
-                        : 
-                        () async {
+                        : () async {
                           OrderService().triggerAddCardOpen();
                           // final result = await AddCardBottomSheet.show(context);
                           // if (result != null) {
@@ -2299,51 +2286,54 @@ class _ChatScreenBody extends StatelessWidget {
                           //   );
                           // }
                         },
+              ),
+            );
+          }
+        }
+
+        for (final widgetType in [
+          WidgetEnum.add_more.value,
+          WidgetEnum.proceed_to_checkout.value,
+          WidgetEnum.cash_on_delivery.value,
+        ]) {
+          final widgets = latestActionWidgets.where(
+            (w) => w.type == widgetType,
+          );
+          for (final widget in widgets) {
+            for (final item in widget.rawItems) {
+              final buttonText =
+                  item['button_text'] ?? item['title'] ?? 'Action';
+              actionButtons.add(
+                _buildActionButton(
+                  text: buttonText,
+                  onTap: () {
+                    onSendMessage(buttonText);
+                  },
+                ),
               );
-            },
+            }
+          }
+        }
+
+        if (actionButtons.isEmpty) {
+          return const SizedBox.shrink();
+        }
+
+        return Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          width: double.infinity,
+          child: Align(
+            alignment: Alignment.centerLeft,
+            child: Wrap(
+              spacing: 10,
+              runSpacing: 8,
+              alignment: WrapAlignment.start,
+              crossAxisAlignment: WrapCrossAlignment.start,
+              children: actionButtons,
+            ),
           ),
         );
-      }
-    }
-
-    for (final widgetType in [
-      WidgetEnum.add_more.value,
-      WidgetEnum.proceed_to_checkout.value,
-      WidgetEnum.cash_on_delivery.value,
-    ]) {
-      final widgets = latestActionWidgets.where((w) => w.type == widgetType);
-      for (final widget in widgets) {
-        for (final item in widget.rawItems) {
-          final buttonText = item['button_text'] ?? item['title'] ?? 'Action';
-          actionButtons.add(
-            _buildActionButton(
-              text: buttonText,
-              onTap: () {
-                onSendMessage(buttonText);
-              },
-            ),
-          );
-        }
-      }
-    }
-
-    if (actionButtons.isEmpty) {
-      return const SizedBox.shrink();
-    }
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      width: double.infinity,
-      child: Align(
-        alignment: Alignment.centerLeft,
-        child: Wrap(
-          spacing: 10,
-          runSpacing: 8,
-          alignment: WrapAlignment.start,
-          crossAxisAlignment: WrapCrossAlignment.start,
-          children: actionButtons,
-        ),
-      ),
+      },
     );
   }
 
@@ -2778,7 +2768,8 @@ class _ChatScreenBody extends StatelessWidget {
               cartBloc.add(
                 CartAddItemRequested(
                   storeId: store.storeId,
-                  cartType: store.storeTypeId == FoodCategory.food.value ? 1 : 2,
+                  cartType:
+                      store.storeTypeId == FoodCategory.food.value ? 1 : 2,
                   // Default cart type
                   action: 1,
                   // Add action
