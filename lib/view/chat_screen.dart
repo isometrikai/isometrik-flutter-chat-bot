@@ -751,7 +751,7 @@ class _ChatScreenState extends State<ChatScreen> {
                   ],
                 ),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 10),
 
               // Title shimmer
               SizedBox(
@@ -770,7 +770,7 @@ class _ChatScreenState extends State<ChatScreen> {
                   ),
                 ),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 10),
 
               // Subtitle shimmer
               SizedBox(
@@ -789,7 +789,7 @@ class _ChatScreenState extends State<ChatScreen> {
                   ),
                 ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 14),
 
               // Weather information shimmer
               Container(
@@ -817,21 +817,20 @@ class _ChatScreenState extends State<ChatScreen> {
                   ),
                 ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 14),
 
               // Options grid shimmer 2x2
               ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: double.infinity),
-                child: Wrap(
-                  spacing: 16,
-                  runSpacing: 16,
-                  children: List.generate(4, (index) {
+                constraints: const BoxConstraints(maxWidth: 340),
+                child: Column(
+                  children: List.generate(3, (index) {
                     return Shimmer.fromColors(
                       baseColor: Colors.grey[300]!,
                       highlightColor: Colors.grey[100]!,
                       child: Container(
-                        width: 172,
-                        height: 79,
+                        width: double.infinity,
+                        height: 70,
+                        margin: const EdgeInsets.only(bottom: 10),
                         decoration: BoxDecoration(
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(5),
@@ -3706,7 +3705,8 @@ class _GreetingOptionTile extends StatelessWidget {
       r'[\u{1F900}-\u{1F9FF}]|' // Supplemental Symbols and Pictographs
       r'[\u{1FA70}-\u{1FAFF}]|' // Symbols and Pictographs Extended-A
       r'[\u{1F018}-\u{1F0F5}]|' // Playing cards
-      r'[\u{1F200}-\u{1F2FF}]', // Enclosed CJK Letters and Months
+      r'[\u{1F200}-\u{1F2FF}]|' // Enclosed CJK Letters and Months
+      r'[\u{1F964}]', // Cup with straw emoji (🥤)
       unicode: true
     );
     
@@ -3747,7 +3747,7 @@ class _GreetingOptionTile extends StatelessWidget {
       child: Container(
         width: double.infinity,
         height: 74,
-        padding: const EdgeInsets.fromLTRB(16, 0, 0, 0),
+        padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
         decoration: BoxDecoration(
           color: const Color(0xFFF5F7FF),
           borderRadius: BorderRadius.circular(8),
@@ -3768,14 +3768,14 @@ class _GreetingOptionTile extends StatelessWidget {
                 ),
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.only(right: 16),
-              child: SvgPicture.asset(
-                AssetPath.get('images/ic_side_arrow.svg'),
-                width: 20,
-                height: 20,
-              ),
-            ),
+            // Padding(
+            //   padding: const EdgeInsets.only(right: 16,left: 16),
+            //   child: SvgPicture.asset(
+            //     AssetPath.get('images/ic_side_arrow.svg'),
+            //     width: 20,
+            //     height: 20,
+            //   ),
+            // ),
           ],
         ),
       ),
