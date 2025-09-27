@@ -1,5 +1,8 @@
+import 'package:chat_bot/utils/asset_path.dart';
 import 'package:flutter/material.dart';
 import 'package:chat_bot/data/model/chat_response.dart';
+import 'package:chat_bot/utils/text_styles.dart';
+import 'package:flutter_svg/svg.dart' show SvgPicture;
 
 class CartWidget extends StatelessWidget {
   final List<WidgetAction> cartItems;
@@ -12,6 +15,10 @@ class CartWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (cartItems.isEmpty) return const SizedBox.shrink();
+
+    final storeNameItem = cartItems.cast<WidgetAction?>().firstWhere(
+        (item) => item?.storeName != null && item!.storeName!.isNotEmpty,
+        orElse: () => null);
 
     // Separate regular items from total
     final regularItems = cartItems.where((item) => 
@@ -45,6 +52,44 @@ class CartWidget extends StatelessWidget {
       ),
       child: Column(
         children: [
+          // Store name section
+          if (storeNameItem != null) ...[
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Row(
+                children: [
+                  SvgPicture.asset(
+                    AssetPath.get('images/ic_storeCart.svg'),
+                    width: 30,
+                    height: 30,
+                    fit: BoxFit.cover,
+                  ),
+                  const SizedBox(width: 12),
+                  Text(
+                    storeNameItem.storeName!,
+                    maxLines: 2,
+                    style: AppTextStyles.restaurantTitle.copyWith(
+                      color: const Color(0xFF242424),
+                      fontSize: 14,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Container(
+              height: 1,
+              margin: const EdgeInsets.symmetric(horizontal: 16),
+              decoration: BoxDecoration(
+                border: Border(
+                  bottom: BorderSide(
+                    color: const Color(0xFFE6E6FA),
+                    width: 1,
+                    style: BorderStyle.solid,
+                  ),
+                ),
+              ),
+            ),
+          ],
           // Regular items section
           if (regularItems.isNotEmpty) ...[
             Padding(
