@@ -103,7 +103,7 @@ class ChatBot {
   static void isCartUpdate(dynamic cartData) {
     print('ChatBot.isCartUpdate called with cartData: $cartData');
     print('Checking callback status before triggering...');
-    // OrderService().debugCallbackStatus();
+    OrderService().debugCallbackStatus();
     print('About to call OrderService().triggerCartUpdate(true)');
     OrderService().triggerCartUpdate(true);
     print('OrderService().triggerCartUpdate(true) completed');

@@ -107,6 +107,8 @@ class MyApp extends StatelessWidget {
       OrderService().triggerSendMessage('I have added a new address.\n$addressSummary');
     });
 
+    // Debug callback status
+    OrderService().debugCallbackStatus();
   }
   Future<void> _sendEventToiOS(Map<String, dynamic> data, String type) async {
     try {
