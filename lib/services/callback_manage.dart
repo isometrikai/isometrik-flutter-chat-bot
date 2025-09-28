@@ -1,4 +1,6 @@
 
+import 'package:chat_bot/utils/utility.dart';
+
 class OrderService {
   static final OrderService _instance = OrderService._internal();
   factory OrderService() => _instance;
@@ -47,6 +49,7 @@ class OrderService {
 
   // Add cart update callback setter
   void setCartUpdateCallback(Function(bool) callback) {
+    print('kNavigatorKey.currentContext: ${kNavigatorKey.currentContext}');
     print('setCartUpdateCallback called with callback: $callback');
     onSendMessage = null;
     onCartUpdate = callback;
