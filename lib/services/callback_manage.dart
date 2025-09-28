@@ -46,11 +46,11 @@ class OrderService {
   }
 
   // Add cart update callback setter
-  // void setCartUpdateCallback(Function(bool) callback) {
-  //   print('setCartUpdateCallback called with callback: $callback');
-  //   onCartUpdate = callback;
-  //   print('onCartUpdate set to: $onCartUpdate');
-  // }
+  void setCartUpdateCallback(Function(bool) callback) {// add
+    print('setCartUpdateCallback called with callback: $callback');
+    onCartUpdate = callback;
+    print('onCartUpdate set to: $onCartUpdate');
+  }
 
   void setStripePaymentCallback(Function(String) callback) {
     onStripePayment = callback;
