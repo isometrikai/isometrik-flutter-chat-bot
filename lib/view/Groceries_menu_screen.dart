@@ -56,13 +56,13 @@ class _GroceriesMenuScreenState extends State<GroceriesMenuScreen> {
     cartBloc = CartBloc();
     cartBloc.add(CartFetchRequested(needToShowLoader: false));
     _fetchSubCategoryProducts();
-    OrderService().setSendMessageCallback((String message) {
-      if (mounted) {
-        print('GroceriesMenuScreen: Cart update received - $message');
-        isCartAPICalled = true;
-        cartBloc.add(CartFetchRequested(needToShowLoader: true));
-      }
-    });
+    // OrderService().setSendMessageCallback((String message) {
+    //   if (mounted) {
+    //     print('GroceriesMenuScreen: Cart update received - $message');
+    //     isCartAPICalled = true;
+    //     cartBloc.add(CartFetchRequested(needToShowLoader: true));
+    //   }
+    // });
   }
 
   void _fetchSubCategoryProducts() {

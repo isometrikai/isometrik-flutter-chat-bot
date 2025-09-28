@@ -73,13 +73,13 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
     cartBloc.add(CartFetchRequested(needToShowLoader: false));
     _bloc.add(const RestaurantMenuRequested());
 
-    OrderService().setSendMessageCallback((String message) {
-      if (mounted) {
-        print('RestaurantMenuScreen: Cart update received - $message');
-        isCartAPICalled = true;
-        cartBloc.add(CartFetchRequested(needToShowLoader: true));
-      }
-    });
+    // OrderService().setSendMessageCallback((String message) {
+    //   if (mounted) {
+    //     print('RestaurantMenuScreen: Cart update received - $message');
+    //     isCartAPICalled = true;
+    //     cartBloc.add(CartFetchRequested(needToShowLoader: true));
+    //   }
+    // });
   }
 
   @override
