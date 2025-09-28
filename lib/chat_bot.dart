@@ -100,8 +100,15 @@ class ChatBot {
     }
   }
 
-  static void isCartUpdate(dynamic cartData) {// add
-   
+  static void isCartUpdate(dynamic cartData) {
+    print('ChatBot.isCartUpdate called with cartData: $cartData');
+    print('Checking callback status before triggering...');
+    print('About to call OrderService().triggerCartUpdate(true)');
+    OrderService().triggerCartUpdate(true);
+    print('OrderService().triggerCartUpdate(true) completed');
+    
+    // Send message to chat after cart update
+    print('Sending message to chat after cart update...');
     OrderService().triggerSendMessage("I have updated the cart");
     print('Message sent to chat');
   }

@@ -99,17 +99,17 @@ class OrderService {
   }
 
   // Add cart update trigger
-  // void triggerCartUpdate(bool isCartUpdate) {
-  //   print('triggerCartUpdate called with: $isCartUpdate');
-  //   print('onCartUpdate callback is: $onCartUpdate');
-  //   if (onCartUpdate != null) {
-  //     print('Calling onCartUpdate callback...');
-  //     onCartUpdate?.call(isCartUpdate);
-  //     print('onCartUpdate callback completed');
-  //   } else {
-  //     print('ERROR: onCartUpdate callback is null!');
-  //   }
-  // }
+  void triggerCartUpdate(bool isCartUpdate) {
+    print('triggerCartUpdate called with: $isCartUpdate');
+    print('onCartUpdate callback is: $onCartUpdate');
+    if (onCartUpdate != null) {
+      print('Calling onCartUpdate callback...');
+      onCartUpdate?.call(isCartUpdate);
+      print('onCartUpdate callback completed');
+    } else {
+      print('ERROR: onCartUpdate callback is null!');
+    }
+  }
 
   void triggerStripePayment(String cartNumber) {
     onStripePayment?.call(cartNumber);
