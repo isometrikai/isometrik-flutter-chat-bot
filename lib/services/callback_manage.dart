@@ -14,7 +14,7 @@ class OrderService {
   Function(bool)? onCartUpdate; // Add cart update callback
   Function(String)? onStripePayment; // Add stripe payment callback
   Function(String)? onAddressSummary; // Add order summary callback
-  Function(String)? onSendMessage; // Add send message callback // add
+  Function(String)? onSendMessage; // Add send message callback
 
   void setProductCallback(Function(Map<String, dynamic>) callback) {
     onOrderNow = callback;
@@ -46,7 +46,7 @@ class OrderService {
   }
 
   // Add cart update callback setter
-  void setCartUpdateCallback(Function(bool) callback) {// add
+  void setCartUpdateCallback(Function(bool) callback) {
     print('setCartUpdateCallback called with callback: $callback');
     onCartUpdate = callback;
     print('onCartUpdate set to: $onCartUpdate');
@@ -60,8 +60,7 @@ class OrderService {
     onAddressSummary = callback;
   }
 
-  void setSendMessageCallback(Function(String) callback) {//add
-    print('setSendMessageCallback called with callback: $callback');
+  void setSendMessageCallback(Function(String) callback) {
     onSendMessage = callback;
   }
 
@@ -119,7 +118,7 @@ class OrderService {
     onAddressSummary?.call(addressSummary);
   }
 
-  void triggerSendMessage(String message) {//add
+  void triggerSendMessage(String message) {
     onSendMessage?.call(message);
   }
 
@@ -135,8 +134,23 @@ class OrderService {
     onStripePayment = null; // Clear stripe payment callback
     onAddressSummary = null; // Clear address summary callback
     onAddressScreenOpen = null; // Clear address screen open callback
-    onSendMessage = null; // Clear send message callback // add
+    onSendMessage = null; // Clear send message callback
   }
 
-  
+  // Debug method to check callback status
+  void debugCallbackStatus() {
+    print('=== OrderService Callback Status ===');
+    print('onOrderNow: ${onOrderNow != null ? "SET" : "NULL"}');
+    print('onAddCardOpen: ${onAddCardOpen != null ? "SET" : "NULL"}');
+    print('onAddressScreenOpen: ${onAddressScreenOpen != null ? "SET" : "NULL"}');
+    print('onStoreNow: ${onStoreNow != null ? "SET" : "NULL"}');
+    print('onOrderDetails: ${onOrderDetails != null ? "SET" : "NULL"}');
+    print('onOrderTracking: ${onOrderTracking != null ? "SET" : "NULL"}');
+    print('onChatDismiss: ${onChatDismiss != null ? "SET" : "NULL"}');
+    print('onCartUpdate: ${onCartUpdate != null ? "SET" : "NULL"}');
+    print('onStripePayment: ${onStripePayment != null ? "SET" : "NULL"}');
+    print('onAddressSummary: ${onAddressSummary != null ? "SET" : "NULL"}');
+    print('onSendMessage: ${onSendMessage != null ? "SET" : "NULL"}');
+    print('=====================================');
+  }
 }
