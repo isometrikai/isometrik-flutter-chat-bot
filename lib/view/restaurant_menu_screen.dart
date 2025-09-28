@@ -129,37 +129,41 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
       child: Scaffold(
         backgroundColor: Colors.white,
         body: SafeArea(
-          child: Stack(
+          child: Column(
             children: <Widget>[
-              // Main content
-              Positioned.fill(
+              // Fixed header
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                child: ScreenHeader(
+                  title: widget.actionData?.title ?? '',
+                  subtitle: widget.actionData?.subtitle ?? '',
+                  onClose: () {
+                    if (widget.onCheckout != null) {
+                      widget.onCheckout!(true);
+                    }
+                    Navigator.of(context).pop();
+                  },
+                ),
+              ),
+                const SizedBox(height: 8),
+                 Padding(
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                 child: _buildDietToggles(),
+                 ),
+                  const SizedBox(height: 16),
+            
+              // Main scrollable content
+              Expanded(
                 child: SingleChildScrollView(
-                  padding: EdgeInsets.fromLTRB(
-                    16,
-                    16,
-                    16,
-                    _cartItems > 0 ? 129 : 24,
-                  ),
-                  // Add bottom padding when cart is visible
+                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
-                      ScreenHeader(
-                        title: widget.actionData?.title ?? '',
-                        subtitle: widget.actionData?.subtitle ?? '',
-                        onClose: () {
-                          // _onAddToCart();
-                          if (widget.onCheckout != null) {
-                            widget.onCheckout!(true);
-                          }
-                          Navigator.of(context).pop();
-                        },
-                      ),
                       // const SizedBox(height: 16),
                       // _buildSearchBar(theme),
-                      const SizedBox(height: 16),
-                      _buildDietToggles(),
-                      const SizedBox(height: 16),
+                      // const SizedBox(height: 16),
+                      // _buildDietToggles(),
+                      // const SizedBox(height: 16),
                       BlocListener<CartBloc, CartState>(
                         listener: (context, state) {
                           if (state is CartLoaded &&
@@ -223,14 +227,6 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
                   ),
                 ),
               ),
-              // Bottom cart bar - positioned absolutely at the bottom (only show when items exist)
-              // if (_cartItems > 0)
-              //   Positioned(
-              //     left: 0,
-              //     right: 0,
-              //     bottom: 0,
-              //     child: _buildBottomCartBar(),
-              //   ),
             ],
           ),
         ),
