@@ -40,7 +40,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Set up callbacks when app initializes
-    // _setupCallbacks();
+    _setupCallbacks();
     print('STEP 1');
     // Set current context for fallback when navigator key is not available
     Utility.setCurrentContext(context);
@@ -61,53 +61,53 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
     );
   }
-  // void _setupCallbacks() {
-  //   OrderService().setProductCallback((Map<String, dynamic> product) {
-  //     _sendEventToiOS(product, 'product');
-  //   });
+  void _setupCallbacks() {
+    OrderService().setProductCallback((Map<String, dynamic> product) {
+      _sendEventToiOS(product, 'product');
+    });
     
-  //   OrderService().setStoreCallback((Map<String, dynamic> store) {
-  //     _sendEventToiOS(store, 'store');
-  //   });
+    OrderService().setStoreCallback((Map<String, dynamic> store) {
+      _sendEventToiOS(store, 'store');
+    });
 
-  //   OrderService().setAddCardOpenCallback(() {
-  //     _sendEventToiOS({}, 'addCard');
-  //   });
+    OrderService().setAddCardOpenCallback(() {
+      _sendEventToiOS({}, 'addCard');
+    });
     
-  //   OrderService().setAddressScreenOpenCallback(() {
-  //     _sendEventToiOS({}, 'addressScreen');
-  //   });
+    OrderService().setAddressScreenOpenCallback(() {
+      _sendEventToiOS({}, 'addressScreen');
+    });
 
-  //   // Add dismiss callback
-  //   OrderService().setDismissCallback(() {
-  //     _sendEventToiOS({}, 'dismissChat');
-  //   });
+    // Add dismiss callback
+    OrderService().setDismissCallback(() {
+      _sendEventToiOS({}, 'dismissChat');
+    });
 
-  //   // Add cart update callback
-  //   OrderService().setCartUpdateCallback((bool isCartUpdate) {
-  //     print('Main project: Cart update received - $isCartUpdate');
-  //     _sendEventToiOS({'isCartUpdate': isCartUpdate}, 'cartUpdate');
-  //   });
+    // Add cart update callback
+    OrderService().setCartUpdateCallback((bool isCartUpdate) {
+      print('Main project: Cart update received - $isCartUpdate');
+      _sendEventToiOS({'isCartUpdate': isCartUpdate}, 'cartUpdate');
+    });
 
-  //   // Add stripe payment callback
-  //   OrderService().setStripePaymentCallback((String cartNumber) {
-  //     print('Main project: Stripe payment received - $cartNumber');
-  //     _sendEventToiOS({'cartNumber': cartNumber}, 'stripePayment');
+    // Add stripe payment callback
+    OrderService().setStripePaymentCallback((String cartNumber) {
+      print('Main project: Stripe payment received - $cartNumber');
+      _sendEventToiOS({'cartNumber': cartNumber}, 'stripePayment');
       
-  //     // Also send a message to the chat
-  //     OrderService().triggerSendMessage('Card added successfully last 4 digits: $cartNumber');
-  //   });
+      // Also send a message to the chat
+      OrderService().triggerSendMessage('Card added successfully last 4 digits: $cartNumber');
+    });
 
-  //   // Add address summary callback
-  //   OrderService().setAddressSummaryCallback((String addressSummary) {
-  //     print('Main project: Address summary received - $addressSummary');
-  //     _sendEventToiOS({'addressSummary': addressSummary}, 'addressSummary');
+    // Add address summary callback
+    OrderService().setAddressSummaryCallback((String addressSummary) {
+      print('Main project: Address summary received - $addressSummary');
+      _sendEventToiOS({'addressSummary': addressSummary}, 'addressSummary');
       
-  //     // Also send a message to the chat
-  //     OrderService().triggerSendMessage('I have added a new address.\n$addressSummary');
-  //   });
+      // Also send a message to the chat
+      OrderService().triggerSendMessage('I have added a new address.\n$addressSummary');
+    });
 
-  // }
+  }
   Future<void> _sendEventToiOS(Map<String, dynamic> data, String type) async {
     try {
       await platform.invokeMethod('handleOrder', {
