@@ -101,8 +101,17 @@ class ChatBot {
   }
 
   static void isCartUpdate(dynamic cartData) {
-    print('isCartUpdate: $cartData');
+    print('ChatBot.isCartUpdate called with cartData: $cartData');
+    print('Checking callback status before triggering...');
+    OrderService().debugCallbackStatus();
+    print('About to call OrderService().triggerCartUpdate(true)');
     OrderService().triggerCartUpdate(true);
+    print('OrderService().triggerCartUpdate(true) completed');
+    
+    // Send message to chat after cart update
+    print('Sending message to chat after cart update...');
+    OrderService().triggerSendMessage("I have updated the cart");
+    print('Message sent to chat');
   }
 
   static void openStripePayment(String cartNumber) {
@@ -113,5 +122,10 @@ class ChatBot {
   static void openAddressSummary(String addressSummary) {
     print('openAddressSummary: $addressSummary');
     OrderService().triggerAddressSummary(addressSummary);
+  }
+
+  static void sendMessage(String message) {
+    print('sendMessage: $message');
+    OrderService().triggerSendMessage(message);
   }
 }

@@ -1,4 +1,3 @@
-import 'package:chat_bot/view/chat_screen.dart';
 import 'package:chat_bot/view/tutorial_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -83,6 +82,33 @@ class MyApp extends StatelessWidget {
     OrderService().setDismissCallback(() {
       _sendEventToiOS({}, 'dismissChat');
     });
+
+    // Add cart update callback
+    OrderService().setCartUpdateCallback((bool isCartUpdate) {
+      print('Main project: Cart update received - $isCartUpdate');
+      _sendEventToiOS({'isCartUpdate': isCartUpdate}, 'cartUpdate');
+    });
+
+    // Add stripe payment callback
+    OrderService().setStripePaymentCallback((String cartNumber) {
+      print('Main project: Stripe payment received - $cartNumber');
+      _sendEventToiOS({'cartNumber': cartNumber}, 'stripePayment');
+      
+      // Also send a message to the chat
+      OrderService().triggerSendMessage('Card added successfully last 4 digits: $cartNumber');
+    });
+
+    // Add address summary callback
+    OrderService().setAddressSummaryCallback((String addressSummary) {
+      print('Main project: Address summary received - $addressSummary');
+      _sendEventToiOS({'addressSummary': addressSummary}, 'addressSummary');
+      
+      // Also send a message to the chat
+      OrderService().triggerSendMessage('I have added a new address.\n$addressSummary');
+    });
+
+    // Debug callback status
+    OrderService().debugCallbackStatus();
   }
   Future<void> _sendEventToiOS(Map<String, dynamic> data, String type) async {
     try {

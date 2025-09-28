@@ -12,8 +12,6 @@ import 'package:chat_bot/data/model/chat_response.dart';
 import 'package:chat_bot/data/model/chat_message.dart';
 import 'package:chat_bot/data/services/chat_api_services.dart';
 import 'package:chat_bot/view/Groceries_menu_screen.dart';
-import 'package:chat_bot/view/add_card_sheet.dart';
-import 'package:chat_bot/view/address_details_screen.dart';
 import 'package:chat_bot/view/popup_overlay_screen.dart';
 import 'package:chat_bot/view/customization_summary_screen.dart';
 import 'package:chat_bot/view/grocery_customization_screen.dart';
@@ -384,30 +382,17 @@ class _ChatScreenState extends State<ChatScreen> {
     // Initialize cartBloc directly since it's provided by parent MultiBlocProvider
     _cartBloc = context.read<CartBloc>();
 
-    // Set up cart update callback - the mounted check handles if screen is active
-    OrderService().setCartUpdateCallback((bool isCartUpdate) {
-      print(
-        'ChatScreen: Cart update received 0 - $isCartUpdate, mounted: $mounted',
-      );
-      if (mounted && isCartUpdate) {
-        print('ChatScreen: Cart update received - $isCartUpdate');
-        Future.delayed(const Duration(seconds: 1), () {
-          _sendMessage("I have updated the cart");
-        });
-      }
-    });
+    // Note: Cart update callback is set up in main.dart to avoid conflicts
+    // The main project handles cart updates via _sendEventToiOS
 
-    OrderService().setStripePaymentCallback((String cartNumber) {
-      if (mounted) {
-        print('ChatScreen: Stripe payment received - $cartNumber');
-        _sendMessage('Card added successfully last 4 digits: ${cartNumber}');
-      }
-    });
+    // Note: Stripe payment and address summary callbacks are set up in main.dart
+    // to avoid conflicts. The main project handles these via _sendEventToiOS
 
-    OrderService().setAddressSummaryCallback((String addressSummary) {
+    // Set up send message callback for external message sending
+    OrderService().setSendMessageCallback((String message) {
       if (mounted) {
-        print('ChatScreen: Address summary received - $addressSummary');
-        _sendMessage('I have added a new address.\n$addressSummary');
+        print('ChatScreen: External message received - $message');
+        _sendMessage(message);
       }
     });
 
