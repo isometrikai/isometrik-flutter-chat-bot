@@ -98,6 +98,7 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
     isCartAPICalled = false;
 
     OrderService().setCartUpdateCallback((bool isCartUpdate) {
+      print('RestaurantScreen CHINTU');
       if (mounted && isCartUpdate) {
         // isCartAPICalled = true;
         cartBloc.add(CartFetchRequested(needToShowLoader: true));

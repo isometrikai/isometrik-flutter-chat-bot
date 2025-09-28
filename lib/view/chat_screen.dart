@@ -391,6 +391,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
     // Set up send message callback for external message sending
     OrderService().setSendMessageCallback((String message) {
+      print('ChatScreen CHINTU');
       if (mounted) {
         print('ChatScreen: External message received - $message');
         _sendMessage(message);
