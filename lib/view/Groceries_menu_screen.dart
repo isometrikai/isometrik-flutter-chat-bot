@@ -56,9 +56,9 @@ class _GroceriesMenuScreenState extends State<GroceriesMenuScreen> {
     cartBloc = CartBloc();
     cartBloc.add(CartFetchRequested(needToShowLoader: false));
     _fetchSubCategoryProducts();
-    OrderService().setCartUpdateCallback((bool isCartUpdate) {
-      if (mounted && isCartUpdate) {
-        print('GroceriesMenuScreen: Cart update received - $isCartUpdate');
+    OrderService().setSendMessageCallback((String message) {
+      if (mounted) {
+        print('GroceriesMenuScreen: Cart update received - $message');
         isCartAPICalled = true;
         cartBloc.add(CartFetchRequested(needToShowLoader: true));
       }

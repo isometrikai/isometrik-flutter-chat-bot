@@ -14,7 +14,7 @@ class OrderService {
   Function(bool)? onCartUpdate; // Add cart update callback
   Function(String)? onStripePayment; // Add stripe payment callback
   Function(String)? onAddressSummary; // Add order summary callback
-  Function(String)? onSendMessage; // Add send message callback
+  Function(String)? onSendMessage; // Add send message callback // add
 
   void setProductCallback(Function(Map<String, dynamic>) callback) {
     onOrderNow = callback;
@@ -46,11 +46,11 @@ class OrderService {
   }
 
   // Add cart update callback setter
-  void setCartUpdateCallback(Function(bool) callback) {
-    print('setCartUpdateCallback called with callback: $callback');
-    onCartUpdate = callback;
-    print('onCartUpdate set to: $onCartUpdate');
-  }
+  // void setCartUpdateCallback(Function(bool) callback) {
+  //   print('setCartUpdateCallback called with callback: $callback');
+  //   onCartUpdate = callback;
+  //   print('onCartUpdate set to: $onCartUpdate');
+  // }
 
   void setStripePaymentCallback(Function(String) callback) {
     onStripePayment = callback;
@@ -60,7 +60,7 @@ class OrderService {
     onAddressSummary = callback;
   }
 
-  void setSendMessageCallback(Function(String) callback) {
+  void setSendMessageCallback(Function(String) callback) {//add
     print('setSendMessageCallback called with callback: $callback');
     onSendMessage = callback;
   }
@@ -99,17 +99,17 @@ class OrderService {
   }
 
   // Add cart update trigger
-  void triggerCartUpdate(bool isCartUpdate) {
-    print('triggerCartUpdate called with: $isCartUpdate');
-    print('onCartUpdate callback is: $onCartUpdate');
-    if (onCartUpdate != null) {
-      print('Calling onCartUpdate callback...');
-      onCartUpdate?.call(isCartUpdate);
-      print('onCartUpdate callback completed');
-    } else {
-      print('ERROR: onCartUpdate callback is null!');
-    }
-  }
+  // void triggerCartUpdate(bool isCartUpdate) {
+  //   print('triggerCartUpdate called with: $isCartUpdate');
+  //   print('onCartUpdate callback is: $onCartUpdate');
+  //   if (onCartUpdate != null) {
+  //     print('Calling onCartUpdate callback...');
+  //     onCartUpdate?.call(isCartUpdate);
+  //     print('onCartUpdate callback completed');
+  //   } else {
+  //     print('ERROR: onCartUpdate callback is null!');
+  //   }
+  // }
 
   void triggerStripePayment(String cartNumber) {
     onStripePayment?.call(cartNumber);
@@ -119,7 +119,7 @@ class OrderService {
     onAddressSummary?.call(addressSummary);
   }
 
-  void triggerSendMessage(String message) {
+  void triggerSendMessage(String message) {//add
     onSendMessage?.call(message);
   }
 
@@ -135,7 +135,7 @@ class OrderService {
     onStripePayment = null; // Clear stripe payment callback
     onAddressSummary = null; // Clear address summary callback
     onAddressScreenOpen = null; // Clear address screen open callback
-    onSendMessage = null; // Clear send message callback
+    onSendMessage = null; // Clear send message callback // add
   }
 
   

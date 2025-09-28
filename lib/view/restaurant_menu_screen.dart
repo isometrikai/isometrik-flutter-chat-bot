@@ -73,9 +73,9 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
     cartBloc.add(CartFetchRequested(needToShowLoader: false));
     _bloc.add(const RestaurantMenuRequested());
 
-    OrderService().setCartUpdateCallback((bool isCartUpdate) {
-      if (mounted && isCartUpdate) {
-        print('RestaurantMenuScreen: Cart update received - $isCartUpdate');
+    OrderService().setSendMessageCallback((String message) {
+      if (mounted) {
+        print('RestaurantMenuScreen: Cart update received - $message');
         isCartAPICalled = true;
         cartBloc.add(CartFetchRequested(needToShowLoader: true));
       }
