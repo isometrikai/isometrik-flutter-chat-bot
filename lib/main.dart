@@ -108,7 +108,7 @@ class MyApp extends StatelessWidget {
     });
 
     // Debug callback status
-    OrderService().debugCallbackStatus();
+    // OrderService().debugCallbackStatus();
   }
   Future<void> _sendEventToiOS(Map<String, dynamic> data, String type) async {
     try {
