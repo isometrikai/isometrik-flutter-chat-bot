@@ -1874,7 +1874,7 @@ class _ChatScreenBody extends StatelessWidget {
             ? greetingData!.weatherText
             : 'dsada';
 
-    final List<String> opts = (greetingData?.options ?? []).toList();
+    final List<GreetingOption> opts = (greetingData?.options ?? []).toList();
 
     return GestureDetector(
       onTap: () {
@@ -2023,9 +2023,9 @@ class _ChatScreenBody extends StatelessWidget {
                         return Padding(
                           padding: const EdgeInsets.only(bottom: 10),
                           child: _GreetingOptionTile(
-                            text: opt,
+                            option: opt,
                             onTap: () {
-                              onSendMessage(opt);
+                              onSendMessage(opt.title);
                             },
                           ),
                         );
@@ -3755,57 +3755,57 @@ class _ChatScreenBody extends StatelessWidget {
 }
 
 class _GreetingOptionTile extends StatelessWidget {
-  final String text;
+  final GreetingOption option;
   final VoidCallback onTap;
 
-  const _GreetingOptionTile({required this.text, required this.onTap});
+  const _GreetingOptionTile({required this.option, required this.onTap});
 
-  List<TextSpan> _buildTextWithLargeEmojis(String text) {
-    List<TextSpan> spans = [];
-    // Comprehensive emoji regex covering all major emoji ranges
-    RegExp emojiRegex = RegExp(
-      r'[\u{1F600}-\u{1F64F}]|' // Emoticons
-      r'[\u{1F300}-\u{1F5FF}]|' // Misc Symbols and Pictographs
-      r'[\u{1F680}-\u{1F6FF}]|' // Transport and Map
-      r'[\u{1F1E0}-\u{1F1FF}]|' // Regional indicator symbols
-      r'[\u{2600}-\u{26FF}]|'   // Misc symbols
-      r'[\u{2700}-\u{27BF}]|'   // Dingbats
-      r'[\u{1F900}-\u{1F9FF}]|' // Supplemental Symbols and Pictographs
-      r'[\u{1FA70}-\u{1FAFF}]|' // Symbols and Pictographs Extended-A
-      r'[\u{1F018}-\u{1F0F5}]|' // Playing cards
-      r'[\u{1F200}-\u{1F2FF}]|' // Enclosed CJK Letters and Months
-      r'[\u{1F964}]', // Cup with straw emoji (🥤)
-      unicode: true
-    );
+  // List<TextSpan> _buildTextWithLargeEmojis(String text) {
+  //   List<TextSpan> spans = [];
+  //   // Comprehensive emoji regex covering all major emoji ranges
+  //   RegExp emojiRegex = RegExp(
+  //     r'[\u{1F600}-\u{1F64F}]|' // Emoticons
+  //     r'[\u{1F300}-\u{1F5FF}]|' // Misc Symbols and Pictographs
+  //     r'[\u{1F680}-\u{1F6FF}]|' // Transport and Map
+  //     r'[\u{1F1E0}-\u{1F1FF}]|' // Regional indicator symbols
+  //     r'[\u{2600}-\u{26FF}]|'   // Misc symbols
+  //     r'[\u{2700}-\u{27BF}]|'   // Dingbats
+  //     r'[\u{1F900}-\u{1F9FF}]|' // Supplemental Symbols and Pictographs
+  //     r'[\u{1FA70}-\u{1FAFF}]|' // Symbols and Pictographs Extended-A
+  //     r'[\u{1F018}-\u{1F0F5}]|' // Playing cards
+  //     r'[\u{1F200}-\u{1F2FF}]|' // Enclosed CJK Letters and Months
+  //     r'[\u{1F964}]', // Cup with straw emoji (🥤)
+  //     unicode: true
+  //   );
     
-    int lastIndex = 0;
-    for (Match match in emojiRegex.allMatches(text)) {
+  //   int lastIndex = 0;
+  //   for (Match match in emojiRegex.allMatches(text)) {
      
-      // Add emoji with larger font size
-      spans.add(TextSpan(
-        text: match.group(0),
-        style: const TextStyle(fontSize: 24), // Larger emoji size
-      ));
+  //     // Add emoji with larger font size
+  //     spans.add(TextSpan(
+  //       text: match.group(0),
+  //       style: const TextStyle(fontSize: 24), // Larger emoji size
+  //     ));
 
 
-      // Add space after emoji
-      spans.add(const TextSpan(text: '  '));
+  //     // Add space after emoji
+  //     spans.add(const TextSpan(text: '  '));
 
-       // Add text before emoji
-      if (match.start > lastIndex) {
-        spans.add(TextSpan(text: text.substring(lastIndex, match.start)));
-      }
+  //      // Add text before emoji
+  //     if (match.start > lastIndex) {
+  //       spans.add(TextSpan(text: text.substring(lastIndex, match.start)));
+  //     }
       
-      lastIndex = match.end;
-    }
+  //     lastIndex = match.end;
+  //   }
     
-    // Add remaining text
-    if (lastIndex < text.length) {
-      spans.add(TextSpan(text: text.substring(lastIndex)));
-    }
+  //   // Add remaining text
+  //   if (lastIndex < text.length) {
+  //     spans.add(TextSpan(text: text.substring(lastIndex)));
+  //   }
     
-    return spans;
-  }
+  //   return spans;
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -3815,35 +3815,84 @@ class _GreetingOptionTile extends StatelessWidget {
       child: Container(
         width: double.infinity,
         height: 74,
-        padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),//20,16
         decoration: BoxDecoration(
           color: const Color(0xFFF5F7FF),
           borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: const Color(0xFFEEF4FF), width: 1),
         ),
         child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
+            // Left side: Emoji and text content
             Expanded(
-              child: RichText(
-                maxLines: 2,
-                text: TextSpan(
-                  children: _buildTextWithLargeEmojis(text),
-                  style: AppTextStyles.bodyText.copyWith(
-                    fontSize: 14,
-                    color: const Color(0xFF242424),
-                    fontWeight: FontWeight.w600,
+              child: Row(
+                children: [
+                  // Emoji in circular background
+                  Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(63.6364),
+                    ),
+                    child: Center(
+                      child: Text(
+                        option.emoji,
+                        style: const TextStyle(
+                          fontSize: 26,
+                          height: 1.4,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
                   ),
+                  const SizedBox(width: 8),
+                  // Text content
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          option.title,
+                          maxLines: 2,
+                          style: const TextStyle(
+                            fontFamily: 'Plus Jakarta Sans',
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            height: 1.4,
+                            color: Color(0xFF242424),
+                          ),
+                        ),
+                        const SizedBox(height: 3),
+                        Text(
+                          option.subTitle,
+                          maxLines: 2,
+                          style: const TextStyle(
+                            fontFamily: 'Plus Jakarta Sans',
+                            fontSize: 12,
+                            fontWeight: FontWeight.w400,
+                            height: 1.4,
+                            color: Color(0xFF585C77),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            SizedBox(
+              width: 14,
+              height: 14,
+              child: Center(
+                child: SvgPicture.asset(
+                  AssetPath.get('images/ic_side_arrow.svg'),
+                  width: 14,
+                  height: 14,
                 ),
               ),
             ),
-            // Padding(
-            //   padding: const EdgeInsets.only(right: 16,left: 16),
-            //   child: SvgPicture.asset(
-            //     AssetPath.get('images/ic_side_arrow.svg'),
-            //     width: 20,
-            //     height: 20,
-            //   ),
-            // ),
           ],
         ),
       ),
