@@ -61,6 +61,7 @@ class OrderService {
   }
 
   void setSendMessageCallback(Function(String) callback) {
+    print('setSendMessageCallback called with callback: $callback');
     onSendMessage = callback;
   }
 
@@ -137,20 +138,5 @@ class OrderService {
     onSendMessage = null; // Clear send message callback
   }
 
-  // Debug method to check callback status
-  void debugCallbackStatus() {
-    print('=== OrderService Callback Status ===');
-    print('onOrderNow: ${onOrderNow != null ? "SET" : "NULL"}');
-    print('onAddCardOpen: ${onAddCardOpen != null ? "SET" : "NULL"}');
-    print('onAddressScreenOpen: ${onAddressScreenOpen != null ? "SET" : "NULL"}');
-    print('onStoreNow: ${onStoreNow != null ? "SET" : "NULL"}');
-    print('onOrderDetails: ${onOrderDetails != null ? "SET" : "NULL"}');
-    print('onOrderTracking: ${onOrderTracking != null ? "SET" : "NULL"}');
-    print('onChatDismiss: ${onChatDismiss != null ? "SET" : "NULL"}');
-    print('onCartUpdate: ${onCartUpdate != null ? "SET" : "NULL"}');
-    print('onStripePayment: ${onStripePayment != null ? "SET" : "NULL"}');
-    print('onAddressSummary: ${onAddressSummary != null ? "SET" : "NULL"}');
-    print('onSendMessage: ${onSendMessage != null ? "SET" : "NULL"}');
-    print('=====================================');
-  }
+  
 }
