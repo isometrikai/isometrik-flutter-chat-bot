@@ -237,7 +237,7 @@ class OrderSummaryWidget extends StatelessWidget {
                           style: const TextStyle(
                             fontFamily: 'Plus Jakarta Sans',
                             fontSize: 14,
-                            fontWeight: FontWeight.w400,
+                            fontWeight: FontWeight.w700,
                             color: Color(0xFF242424),
                           ),
                           textAlign: TextAlign.right,
