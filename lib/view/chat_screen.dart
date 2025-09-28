@@ -1406,7 +1406,7 @@ class _ChatScreenBody extends StatelessWidget {
                   ),
                 ],
               ),
-              SizedBox(height: MediaQuery.of(context).padding.bottom + 8),
+              SizedBox(height: 8),
             ],
           ),
         );
@@ -1424,7 +1424,7 @@ class _ChatScreenBody extends StatelessWidget {
       builder: (BuildContext context) {
         return Container(
           width: double.infinity,
-          padding: const EdgeInsets.all(24),
+          padding: const EdgeInsets.fromLTRB(24, 16, 24, 16),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -1440,79 +1440,118 @@ class _ChatScreenBody extends StatelessWidget {
                   ),
                 ),
               ),
-              const SizedBox(height: 20),
-              const Text(
-                'Exit Chat',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
+              const SizedBox(height: 16),
+               Text(
+                'Exit zAIn?',
+                style: AppTextStyles.bodyText.copyWith(
+                  fontSize: 24,
+                  fontWeight: FontWeight.w700,
                   color: Colors.black,
                 ),
                 textAlign: TextAlign.left,
               ),
-              const SizedBox(height: 12),
-              const Text(
-                'You will lose your current chat context. Are you sure you want to exit?',
-                style: TextStyle(fontSize: 14, color: Colors.grey, height: 1.4),
+              const SizedBox(height: 20),
+               Text(
+                'Are you sure you want to leave the chat? Your conversation history will be saved, but you will lose your current context.',
+                style: AppTextStyles.subtitle.copyWith(
+                  fontSize: 14, 
+                  color: Color(0xFF242424), 
+                  fontWeight: FontWeight.w400
+                  ),
                 textAlign: TextAlign.left,
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 40),
               Row(
                 children: [
                   Expanded(
-                    child: TextButton(
-                      onPressed: () => Navigator.of(context).pop(),
-                      style: TextButton.styleFrom(
-                        backgroundColor: Colors.grey[100],
-                        foregroundColor: Colors.black,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
+                    child: SizedBox(
+                      height: 62,
+                      child: TextButton(
+                        onPressed: () => Navigator.of(context).pop(),
+                        style: TextButton.styleFrom(
+                          backgroundColor: Colors.white,
+                          foregroundColor: Color(0xFF8E2FFD),
+                          padding: EdgeInsets.zero,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                            side: BorderSide(
+                              color: Color(0xFF8E2FFD),
+                              width: 1,
+                            ),
+                          ),
                         ),
-                      ),
-                      child: const Text(
-                        'CANCEL',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
+                        child: Text(
+                          'Stay in chat',
+                          style: AppTextStyles.button.copyWith(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                            color: Color(0xFF8E2FFD),
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
                         ),
                       ),
                     ),
                   ),
-                  const SizedBox(width: 16),
+                  const SizedBox(width: 8),
                   Expanded(
-                    child: TextButton(
-                      onPressed: () {
-                        Navigator.of(context).pop(); // Close bottom sheet
-                        try {
-                          // onRestartChatAPI();
-                          OrderService().triggerChatDismiss();
-                        } catch (e) {
-                          Navigator.of(
-                            context,
-                          ).pop(); // Fallback to Flutter navigation
-                        }
-                      },
-                      style: TextButton.styleFrom(
-                        backgroundColor: Colors.red,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
+                    child: SizedBox(
+                      height: 62,
+                      child: TextButton(
+                        onPressed: () {
+                          Navigator.of(context).pop(); // Close bottom sheet
+                          try {
+                            // onRestartChatAPI();
+                            OrderService().triggerChatDismiss();
+                          } catch (e) {
+                            Navigator.of(
+                              context,
+                            ).pop(); // Fallback to Flutter navigation
+                          }
+                        },
+                        style: TextButton.styleFrom(
+                          backgroundColor: Colors.transparent,
+                          foregroundColor: Colors.white,
+                          padding: EdgeInsets.zero,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
                         ),
-                      ),
-                      child: const Text(
-                        'EXIT CHAT',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [
+                                Color(0xFF5186E0),
+                                Color(0xFF5E3DFE),
+                                Color(0xFF8E2FFD),
+                                Color(0xFFB02EFB),
+                                Color(0xFFD445EC),
+                              ],
+                              stops: [0.0, 0.24, 0.52, 0.73, 1.0],
+                              begin: Alignment.centerLeft,
+                              end: Alignment.centerRight,
+                            ),
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: Center(
+                            child: Text(
+                              'Continue to app',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w700,
+                                color: Colors.white,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 1,
+                            ),
+                          ),
                         ),
                       ),
                     ),
                   ),
                 ],
               ),
-              SizedBox(height: MediaQuery.of(context).padding.bottom + 8),
+              const SizedBox(height: 30),
             ],
           ),
         );
