@@ -1144,6 +1144,7 @@ class _ChatScreenBody extends StatelessWidget {
       ),
       title: Row(
         children: [
+          if (messages.isNotEmpty) ...[
           Container(
             child:
                 (chatbotData.data.isNotEmpty &&
@@ -1160,6 +1161,7 @@ class _ChatScreenBody extends StatelessWidget {
                       size: 20,
                     ),
           ),
+          ]
         ],
       ),
       actions: [
@@ -1194,7 +1196,8 @@ class _ChatScreenBody extends StatelessWidget {
                                 ? null
                                 : () => _showNewChatConfirmation(context),
                       ),
-                      IconButton(
+                    ],
+                    IconButton(
                         icon: Opacity(
                           opacity: 1.0,
                           child: Stack(
@@ -1259,7 +1262,6 @@ class _ChatScreenBody extends StatelessWidget {
                                   );
                                 },
                       ),
-                    ],
                     IconButton(
                       icon: SvgPicture.asset(
                         AssetPath.get('images/ic_close.svg'),
