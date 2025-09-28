@@ -390,18 +390,18 @@ class _ChatScreenState extends State<ChatScreen> {
     // to avoid conflicts. The main project handles these via _sendEventToiOS
 
     // Set up send message callback for external message sending
-    // OrderService().setSendMessageCallback((String message) {
-    //   if (mounted) {
-    //     print('ChatScreen: External message received - $message');
-    //     _sendMessage(message);
-    //   }
-    // });
-    OrderService().setCartUpdateCallback((bool isCartUpdate) {
-  
-      if (mounted && isCartUpdate) {
-        _sendMessage('I have updated the cart');
+    OrderService().setSendMessageCallback((String message) {
+      if (mounted) {
+        print('ChatScreen: External message received - $message');
+        _sendMessage(message);
       }
     });
+    // OrderService().setCartUpdateCallback((bool isCartUpdate) {
+  
+    //   if (mounted && isCartUpdate) {
+    //     _sendMessage('I have updated the cart');
+    //   }
+    // });
 
     // Add keyboard listener
     WidgetsBinding.instance.addPostFrameCallback((_) {
