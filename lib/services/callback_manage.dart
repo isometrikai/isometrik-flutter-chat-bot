@@ -46,6 +46,7 @@ class OrderService {
 
   // Add cart update callback setter
   void setCartUpdateCallback(Function(bool) callback) {
+    print('setCartUpdateCallback: $callback');
     onCartUpdate = callback;
   }
 
@@ -92,6 +93,8 @@ class OrderService {
 
   // Add cart update trigger
   void triggerCartUpdate(bool isCartUpdate) {
+    print('triggerCartUpdate: $onCartUpdate');
+    print('triggerCartUpdate: $isCartUpdate');
     onCartUpdate?.call(isCartUpdate);
   }
 
@@ -105,6 +108,7 @@ class OrderService {
 
 
   void clearCallback() {
+    print('clearCallback');
     onOrderNow = null;
     onAddCardOpen = null;
     onStoreNow = null;
