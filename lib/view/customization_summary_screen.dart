@@ -69,6 +69,7 @@ class _CustomizationSummaryScreenState extends State<CustomizationSummaryScreen>
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    const SizedBox(height: 10),
                     Text(
                       'Your customisations',
                       style: AppTextStyles.launchTitle.copyWith(
@@ -220,6 +221,7 @@ class _CustomizationSummaryScreenState extends State<CustomizationSummaryScreen>
               child: Text(
                 "I'll choose",
                 style: AppTextStyles.button.copyWith(
+                  fontSize: 16,
                   color: const Color(0xFF8E2FFD),
                 ),
               ),
@@ -272,6 +274,7 @@ class _CustomizationSummaryScreenState extends State<CustomizationSummaryScreen>
                   child: Text(
                     "Repeat last",
                     style: AppTextStyles.button.copyWith(
+                      fontSize: 16,
                       color: Colors.white,
                     ),
                   ),
