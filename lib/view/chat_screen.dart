@@ -14,6 +14,7 @@ import 'package:chat_bot/data/services/chat_api_services.dart';
 import 'package:chat_bot/view/Groceries_menu_screen.dart';
 import 'package:chat_bot/view/add_card_sheet.dart';
 import 'package:chat_bot/view/address_details_screen.dart';
+import 'package:chat_bot/view/popup_overlay_screen.dart';
 import 'package:chat_bot/view/customization_summary_screen.dart';
 import 'package:chat_bot/view/grocery_customization_screen.dart';
 import 'package:chat_bot/view/product_customization_screen.dart';
@@ -74,6 +75,7 @@ class _ChatScreenState extends State<ChatScreen> {
   MyGPTsResponse? _chatbotData;
   GreetingResponse? _greetingData;
   bool _isDataLoaded = false;
+  
 
   // Returns index of the last bot message that shows stores, products, choose_address, choose_card, order_summary, or order_confirmed widgets; -1 if none
   // Cart widget is not considered for hiding
@@ -1118,7 +1120,6 @@ class _ChatScreenBody extends StatelessWidget {
         ),
       ),
     );
-    // );
   }
 
   // Calculate total cart count from all messages
@@ -1261,6 +1262,29 @@ class _ChatScreenBody extends StatelessWidget {
                                     ),
                                   );
                                 },
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.person, size: 30),
+                        // SvgPicture.asset(
+                        //   AssetPath.get('images/ic_close.svg'),
+                            // width: 40,
+                          // height: 40,
+                        // ),
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            PageRouteBuilder(
+                              opaque: false,
+                              pageBuilder: (context, animation, secondaryAnimation) => PopupOverlayScreen(greetingData: greetingData),
+                              transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                                return FadeTransition(
+                                  opacity: animation,
+                                  child: child,
+                                );
+                              },
+                            ),
+                          );
+                        },
                       ),
                     IconButton(
                       icon: SvgPicture.asset(
