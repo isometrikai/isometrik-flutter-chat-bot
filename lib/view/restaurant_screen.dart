@@ -97,12 +97,12 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
     _bootstrapData();
     isCartAPICalled = false;
 
-    // OrderService().setSendMessageCallback((String message) {  
-    //   if (mounted ) {
-    //     isCartAPICalled = true;
-    //     cartBloc.add(CartFetchRequested(needToShowLoader: true));
-    //   }
-    // });
+    OrderService().setCartUpdateCallback((bool isCartUpdate) {
+      if (mounted && isCartUpdate) {
+        isCartAPICalled = true;
+        cartBloc.add(CartFetchRequested(needToShowLoader: true));
+      }
+    });
 
     // Listen to cart state changes to update cart data
     cartBloc.stream.listen((state) {
