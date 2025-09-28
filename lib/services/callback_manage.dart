@@ -49,9 +49,7 @@ class OrderService {
 
   // Add cart update callback setter
   void setCartUpdateCallback(Function(bool) callback) {
-    print('kNavigatorKey.currentContext: ${kNavigatorKey.currentContext}');
     print('setCartUpdateCallback called with callback: $callback');
-    onSendMessage = null;
     onCartUpdate = callback;
     print('onCartUpdate set to: $onCartUpdate');
   }

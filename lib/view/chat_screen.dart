@@ -11,6 +11,7 @@ import 'package:chat_bot/bloc/launch/launch_state.dart';
 import 'package:chat_bot/data/model/chat_response.dart';
 import 'package:chat_bot/data/model/chat_message.dart';
 import 'package:chat_bot/data/services/chat_api_services.dart';
+import 'package:chat_bot/utils/utility.dart';
 import 'package:chat_bot/view/Groceries_menu_screen.dart';
 import 'package:chat_bot/view/popup_overlay_screen.dart';
 import 'package:chat_bot/view/customization_summary_screen.dart';
@@ -396,6 +397,7 @@ class _ChatScreenState extends State<ChatScreen> {
     //   }
     // });
     OrderService().setCartUpdateCallback((bool isCartUpdate) {
+  
       if (mounted && isCartUpdate) {
         _sendMessage('I have updated the cart');
       }
