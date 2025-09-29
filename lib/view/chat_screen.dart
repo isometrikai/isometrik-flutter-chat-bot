@@ -12,8 +12,7 @@ import 'package:chat_bot/data/model/chat_response.dart';
 import 'package:chat_bot/data/model/chat_message.dart';
 import 'package:chat_bot/data/services/chat_api_services.dart';
 import 'package:chat_bot/view/Groceries_menu_screen.dart';
-import 'package:chat_bot/view/add_card_sheet.dart';
-import 'package:chat_bot/view/address_details_screen.dart';
+import 'package:chat_bot/view/chat_history_screen.dart';
 import 'package:chat_bot/view/popup_overlay_screen.dart';
 import 'package:chat_bot/view/customization_summary_screen.dart';
 import 'package:chat_bot/view/grocery_customization_screen.dart';
@@ -1147,7 +1146,14 @@ class _ChatScreenBody extends StatelessWidget {
           height: 40,
           fit: BoxFit.cover,
         ),
-        onPressed: () {},
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const ChatHistoryScreen(),
+            ),
+          );
+        },
       ),
       title: Row(
         children: [
