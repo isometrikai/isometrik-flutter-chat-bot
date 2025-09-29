@@ -385,15 +385,21 @@ class _ChatScreenState extends State<ChatScreen> {
     _cartBloc = context.read<CartBloc>();
 
     // Set up cart update callback - the mounted check handles if screen is active
-    OrderService().setCartUpdateCallback((bool isCartUpdate) {
-      print(
-        'ChatScreen: Cart update received 0 - $isCartUpdate, mounted: $mounted',
-      );
-      if (mounted && isCartUpdate) {
-        print('ChatScreen: Cart update received - $isCartUpdate');
-        Future.delayed(const Duration(seconds: 1), () {
-          _sendMessage("I have updated the cart");
-        });
+    // OrderService().setCartUpdateCallback((bool isCartUpdate) {
+    //   print(
+    //     'ChatScreen: Cart update received 0 - $isCartUpdate, mounted: $mounted',
+    //   );
+    //   if (mounted && isCartUpdate) {
+    //     print('ChatScreen: Cart update received - $isCartUpdate');
+    //     Future.delayed(const Duration(seconds: 1), () {
+    //       _sendMessage("I have updated the cart");
+    //     });
+    //   }
+    // });
+    OrderService().setSendMessageCallback((String message) {// CHANGE CALLBACK
+      if (mounted && needToCallChatScreenSendMessageAPI) {
+        print('ChatScreen: External message received - $message');
+        _sendMessage(message);
       }
     });
 
@@ -2164,6 +2170,7 @@ class _ChatScreenBody extends StatelessWidget {
                                       );
                                       onSendMessage("I have updated the cart");
                                       isCartAPICalled = false;
+                                      needToCallChatScreenSendMessageAPI = true;
                                     }
                                   },
                                 );
@@ -2267,6 +2274,7 @@ class _ChatScreenBody extends StatelessWidget {
                                             "I have updated the cart",
                                           );
                                           isCartAPICalled = false;
+                                          needToCallChatScreenSendMessageAPI = true;
                                         }
                                       },
                                     ),
@@ -2288,6 +2296,7 @@ class _ChatScreenBody extends StatelessWidget {
                                             "I have updated the cart",
                                           );
                                           isCartAPICalled = false;
+                                          needToCallChatScreenSendMessageAPI = true;
                                         }
                                       },
                                     ),

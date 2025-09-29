@@ -41,7 +41,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Set up callbacks when app initializes
-    _setupCallbacks();
+    // _setupCallbacks();
     print('STEP 1');
     // Set current context for fallback when navigator key is not available
     Utility.setCurrentContext(context);
@@ -62,28 +62,28 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
     );
   }
-  void _setupCallbacks() {
-    OrderService().setProductCallback((Map<String, dynamic> product) {
-      _sendEventToiOS(product, 'product');
-    });
+  // void _setupCallbacks() {
+  //   OrderService().setProductCallback((Map<String, dynamic> product) {
+  //     _sendEventToiOS(product, 'product');
+  //   });
     
-    OrderService().setStoreCallback((Map<String, dynamic> store) {
-      _sendEventToiOS(store, 'store');
-    });
+  //   OrderService().setStoreCallback((Map<String, dynamic> store) {
+  //     _sendEventToiOS(store, 'store');
+  //   });
 
-    OrderService().setAddCardOpenCallback(() {
-      _sendEventToiOS({}, 'addCard');
-    });
+  //   OrderService().setAddCardOpenCallback(() {
+  //     _sendEventToiOS({}, 'addCard');
+  //   });
     
-    OrderService().setAddressScreenOpenCallback(() {
-      _sendEventToiOS({}, 'addressScreen');
-    });
+  //   OrderService().setAddressScreenOpenCallback(() {
+  //     _sendEventToiOS({}, 'addressScreen');
+  //   });
 
-    // Add dismiss callback
-    OrderService().setDismissCallback(() {
-      _sendEventToiOS({}, 'dismissChat');
-    });
-  }
+  //   // Add dismiss callback
+  //   OrderService().setDismissCallback(() {
+  //     _sendEventToiOS({}, 'dismissChat');
+  //   });
+  // }
   Future<void> _sendEventToiOS(Map<String, dynamic> data, String type) async {
     try {
       await platform.invokeMethod('handleOrder', {

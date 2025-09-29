@@ -77,6 +77,7 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
       if (mounted && isCartUpdate) {
         print('RestaurantMenuScreen: Cart update received - $isCartUpdate');
         isCartAPICalled = true;
+        needToCallChatScreenSendMessageAPI = false;
         cartBloc.add(CartFetchRequested(needToShowLoader: true));
       }
     });

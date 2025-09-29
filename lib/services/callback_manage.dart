@@ -14,6 +14,7 @@ class OrderService {
   Function(bool)? onCartUpdate; // Add cart update callback
   Function(String)? onStripePayment; // Add stripe payment callback
   Function(String)? onAddressSummary; // Add order summary callback
+  Function(String)? onSendMessage; // Add send message callback // CHANGE CALLBACK
 
   void setProductCallback(Function(Map<String, dynamic>) callback) {
     onOrderNow = callback;
@@ -55,6 +56,10 @@ class OrderService {
 
   void setAddressSummaryCallback(Function(String) callback) {
     onAddressSummary = callback;
+  }
+
+   void setSendMessageCallback(Function(String) callback) { // CHANGE CALLBACK
+    onSendMessage = callback;
   }
 
   void setonStoreCallback(Function(Map<String, dynamic>) callback) {
@@ -103,6 +108,10 @@ class OrderService {
     onAddressSummary?.call(addressSummary);
   }
 
+  void triggerSendMessage(String message) { // CHANGE CALLBACK
+    onSendMessage?.call(message);
+  }
+
 
   void clearCallback() {
     onOrderNow = null;
@@ -114,5 +123,6 @@ class OrderService {
     onStripePayment = null; // Clear stripe payment callback
     onAddressSummary = null; // Clear address summary callback
     onAddressScreenOpen = null; // Clear address screen open callback
+    onSendMessage = null; // Clear send message callback // CHANGE CALLBACK
   }
 }
