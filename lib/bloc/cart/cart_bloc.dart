@@ -242,6 +242,7 @@ class CartBloc extends Bloc<CartEvent, CartState> {
 var cartId = '';
 var isCartAPICalled = false;
 int totalProductCount = 0;
+var needToCallChatScreenSendMessageAPI = true;
 
 /// Result class for cart validation
 class CartValidationResult {

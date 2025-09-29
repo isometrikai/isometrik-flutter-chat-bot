@@ -12,8 +12,7 @@ import 'package:chat_bot/data/model/chat_response.dart';
 import 'package:chat_bot/data/model/chat_message.dart';
 import 'package:chat_bot/data/services/chat_api_services.dart';
 import 'package:chat_bot/view/Groceries_menu_screen.dart';
-import 'package:chat_bot/view/add_card_sheet.dart';
-import 'package:chat_bot/view/address_details_screen.dart';
+import 'package:chat_bot/view/chat_history_screen.dart';
 import 'package:chat_bot/view/popup_overlay_screen.dart';
 import 'package:chat_bot/view/customization_summary_screen.dart';
 import 'package:chat_bot/view/grocery_customization_screen.dart';
@@ -385,15 +384,21 @@ class _ChatScreenState extends State<ChatScreen> {
     _cartBloc = context.read<CartBloc>();
 
     // Set up cart update callback - the mounted check handles if screen is active
-    OrderService().setCartUpdateCallback((bool isCartUpdate) {
-      print(
-        'ChatScreen: Cart update received 0 - $isCartUpdate, mounted: $mounted',
-      );
-      if (mounted && isCartUpdate) {
-        print('ChatScreen: Cart update received - $isCartUpdate');
-        Future.delayed(const Duration(seconds: 1), () {
-          _sendMessage("I have updated the cart");
-        });
+    // OrderService().setCartUpdateCallback((bool isCartUpdate) {
+    //   print(
+    //     'ChatScreen: Cart update received 0 - $isCartUpdate, mounted: $mounted',
+    //   );
+    //   if (mounted && isCartUpdate) {
+    //     print('ChatScreen: Cart update received - $isCartUpdate');
+    //     Future.delayed(const Duration(seconds: 1), () {
+    //       _sendMessage("I have updated the cart");
+    //     });
+    //   }
+    // });
+    OrderService().setSendMessageCallback((String message) {// CHANGE CALLBACK
+      if (mounted && needToCallChatScreenSendMessageAPI) {
+        print('ChatScreen: External message received - $message');
+        _sendMessage(message);
       }
     });
 
@@ -1141,7 +1146,14 @@ class _ChatScreenBody extends StatelessWidget {
           height: 40,
           fit: BoxFit.cover,
         ),
-        onPressed: () {},
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const ChatHistoryScreen(),
+            ),
+          );
+        },
       ),
       title: Row(
         children: [
@@ -1152,7 +1164,7 @@ class _ChatScreenBody extends StatelessWidget {
                         chatbotData.data.first.profileImage.isNotEmpty)
                     ? SvgPicture.asset(
                       AssetPath.get('images/ic_header_logo.svg'),
-                      width: 80,
+                      width: 75,
                       height: 23,
                       fit: BoxFit.cover,
                     )
@@ -1196,6 +1208,30 @@ class _ChatScreenBody extends StatelessWidget {
                             isApiLoading
                                 ? null
                                 : () => _showNewChatConfirmation(context),
+                      ),
+                    ],
+                    if (greetingData?.personaTitle.isNotEmpty ?? false) ...[
+                      IconButton(
+                        icon: SvgPicture.asset(
+                        AssetPath.get('images/ic_chat_profile.svg'),
+                        width: 40,
+                        height: 40,
+                      ),
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            PageRouteBuilder(
+                              opaque: false,
+                              pageBuilder: (context, animation, secondaryAnimation) => PopupOverlayScreen(greetingData: greetingData),
+                              transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                                return FadeTransition(
+                                  opacity: animation,
+                                  child: child,
+                                );
+                              },
+                            ),
+                          );
+                        },
                       ),
                     ],
                     IconButton(
@@ -1262,29 +1298,6 @@ class _ChatScreenBody extends StatelessWidget {
                                     ),
                                   );
                                 },
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.person, size: 30),
-                        // SvgPicture.asset(
-                        //   AssetPath.get('images/ic_close.svg'),
-                            // width: 40,
-                          // height: 40,
-                        // ),
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            PageRouteBuilder(
-                              opaque: false,
-                              pageBuilder: (context, animation, secondaryAnimation) => PopupOverlayScreen(greetingData: greetingData),
-                              transitionsBuilder: (context, animation, secondaryAnimation, child) {
-                                return FadeTransition(
-                                  opacity: animation,
-                                  child: child,
-                                );
-                              },
-                            ),
-                          );
-                        },
                       ),
                     IconButton(
                       icon: SvgPicture.asset(
@@ -2164,6 +2177,7 @@ class _ChatScreenBody extends StatelessWidget {
                                       );
                                       onSendMessage("I have updated the cart");
                                       isCartAPICalled = false;
+                                      needToCallChatScreenSendMessageAPI = true;
                                     }
                                   },
                                 );
@@ -2267,6 +2281,7 @@ class _ChatScreenBody extends StatelessWidget {
                                             "I have updated the cart",
                                           );
                                           isCartAPICalled = false;
+                                          needToCallChatScreenSendMessageAPI = true;
                                         }
                                       },
                                     ),
@@ -2288,6 +2303,7 @@ class _ChatScreenBody extends StatelessWidget {
                                             "I have updated the cart",
                                           );
                                           isCartAPICalled = false;
+                                          needToCallChatScreenSendMessageAPI = true;
                                         }
                                       },
                                     ),
@@ -3324,6 +3340,7 @@ class _ChatScreenBody extends StatelessWidget {
               if (productsWidget != null) {
                 final Map<String, dynamic>? productJson = productsWidget
                     .getRawProduct(index);
+                    print("productJson: $productJson");
                 OrderService().triggerProductOrder(productJson ?? {});
               }
             },
@@ -3879,25 +3896,27 @@ class _GreetingOptionTile extends StatelessWidget {
                       children: [
                         Text(
                           option.title,
-                          maxLines: 2,
+                          maxLines: 1,
                           style: const TextStyle(
                             fontFamily: 'Plus Jakarta Sans',
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
                             height: 1.4,
                             color: Color(0xFF242424),
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
                         const SizedBox(height: 3),
                         Text(
                           option.subTitle,
-                          maxLines: 2,
+                          maxLines: 1,
                           style: const TextStyle(
                             fontFamily: 'Plus Jakarta Sans',
                             fontSize: 12,
                             fontWeight: FontWeight.w400,
                             height: 1.4,
                             color: Color(0xFF585C77),
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
                       ],

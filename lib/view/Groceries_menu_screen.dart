@@ -60,6 +60,7 @@ class _GroceriesMenuScreenState extends State<GroceriesMenuScreen> {
       if (mounted && isCartUpdate) {
         print('GroceriesMenuScreen: Cart update received - $isCartUpdate');
         isCartAPICalled = true;
+        needToCallChatScreenSendMessageAPI = false;
         cartBloc.add(CartFetchRequested(needToShowLoader: true));
       }
     });

@@ -231,7 +231,7 @@ class OrderSummaryWidget extends StatelessWidget {
                       ),
                       const SizedBox(width: 8),
                       SizedBox(
-                        width: 80,
+                        width: 130,
                         child: Text(
                           _formatCurrency(totalItem.currencySymbol ?? '', totalItem.productPrice ?? 0),
                           style: const TextStyle(
