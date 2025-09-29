@@ -76,7 +76,8 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
    OrderService().setCartUpdateCallback((bool isCartUpdate) {
       if (mounted && isCartUpdate) {
         print('RestaurantMenuScreen: Cart update received - $isCartUpdate');
-        // isCartAPICalled = true;
+        isCartAPICalled = true;
+        needToCallChatScreenSendMessageAPI = false;
         cartBloc.add(CartFetchRequested(needToShowLoader: true));
       }
     });

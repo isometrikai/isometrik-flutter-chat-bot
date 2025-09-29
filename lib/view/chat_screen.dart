@@ -392,7 +392,7 @@ class _ChatScreenState extends State<ChatScreen> {
     // Set up send message callback for external message sending
     OrderService().setSendMessageCallback((String message) {
       print('ChatScreen CHINTU');
-      if (mounted) {
+      if (mounted && needToCallChatScreenSendMessageAPI) {
         print('ChatScreen: External message received - $message');
         _sendMessage(message);
       }
@@ -2157,6 +2157,7 @@ class _ChatScreenBody extends StatelessWidget {
                                       );
                                       onSendMessage("I have updated the cart");
                                       isCartAPICalled = false;
+                                      needToCallChatScreenSendMessageAPI = true;
                                     }
                                   },
                                 );
@@ -2260,6 +2261,7 @@ class _ChatScreenBody extends StatelessWidget {
                                             "I have updated the cart",
                                           );
                                           isCartAPICalled = false;
+                                          needToCallChatScreenSendMessageAPI = true;
                                         }
                                       },
                                     ),
@@ -2281,6 +2283,7 @@ class _ChatScreenBody extends StatelessWidget {
                                             "I have updated the cart",
                                           );
                                           isCartAPICalled = false;
+                                          needToCallChatScreenSendMessageAPI = true;
                                         }
                                       },
                                     ),

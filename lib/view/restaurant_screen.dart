@@ -100,7 +100,8 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
     OrderService().setCartUpdateCallback((bool isCartUpdate) {
       print('RestaurantScreen CHINTU');
       if (mounted && isCartUpdate) {
-        // isCartAPICalled = true;
+        isCartAPICalled = true;
+        needToCallChatScreenSendMessageAPI = false;
         cartBloc.add(CartFetchRequested(needToShowLoader: true));
       }
     });
