@@ -3896,25 +3896,27 @@ class _GreetingOptionTile extends StatelessWidget {
                       children: [
                         Text(
                           option.title,
-                          maxLines: 2,
+                          maxLines: 1,
                           style: const TextStyle(
                             fontFamily: 'Plus Jakarta Sans',
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
                             height: 1.4,
                             color: Color(0xFF242424),
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
                         const SizedBox(height: 3),
                         Text(
                           option.subTitle,
-                          maxLines: 2,
+                          maxLines: 1,
                           style: const TextStyle(
                             fontFamily: 'Plus Jakarta Sans',
                             fontSize: 12,
                             fontWeight: FontWeight.w400,
                             height: 1.4,
                             color: Color(0xFF585C77),
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
                       ],
