@@ -38,7 +38,7 @@ class PopupOverlayScreen extends StatelessWidget {
     return Container(
       width: double.infinity,
       constraints: BoxConstraints(
-        maxHeight: 550,
+        maxHeight: 580,
         minHeight: 200,
       ),
       // margin: const EdgeInsets.only(bottom: 34),
