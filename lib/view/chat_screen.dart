@@ -1158,7 +1158,7 @@ class _ChatScreenBody extends StatelessWidget {
                         chatbotData.data.first.profileImage.isNotEmpty)
                     ? SvgPicture.asset(
                       AssetPath.get('images/ic_header_logo.svg'),
-                      width: 80,
+                      width: 75,
                       height: 23,
                       fit: BoxFit.cover,
                     )
@@ -1202,6 +1202,30 @@ class _ChatScreenBody extends StatelessWidget {
                             isApiLoading
                                 ? null
                                 : () => _showNewChatConfirmation(context),
+                      ),
+                    ],
+                    if (greetingData?.personaTitle.isNotEmpty ?? false) ...[
+                      IconButton(
+                        icon: SvgPicture.asset(
+                        AssetPath.get('images/ic_chat_profile.svg'),
+                        width: 40,
+                        height: 40,
+                      ),
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            PageRouteBuilder(
+                              opaque: false,
+                              pageBuilder: (context, animation, secondaryAnimation) => PopupOverlayScreen(greetingData: greetingData),
+                              transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                                return FadeTransition(
+                                  opacity: animation,
+                                  child: child,
+                                );
+                              },
+                            ),
+                          );
+                        },
                       ),
                     ],
                     IconButton(
@@ -1268,29 +1292,6 @@ class _ChatScreenBody extends StatelessWidget {
                                     ),
                                   );
                                 },
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.person, size: 30),
-                        // SvgPicture.asset(
-                        //   AssetPath.get('images/ic_close.svg'),
-                            // width: 40,
-                          // height: 40,
-                        // ),
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            PageRouteBuilder(
-                              opaque: false,
-                              pageBuilder: (context, animation, secondaryAnimation) => PopupOverlayScreen(greetingData: greetingData),
-                              transitionsBuilder: (context, animation, secondaryAnimation, child) {
-                                return FadeTransition(
-                                  opacity: animation,
-                                  child: child,
-                                );
-                              },
-                            ),
-                          );
-                        },
                       ),
                     IconButton(
                       icon: SvgPicture.asset(
