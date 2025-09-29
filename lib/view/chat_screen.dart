@@ -3333,6 +3333,7 @@ class _ChatScreenBody extends StatelessWidget {
               if (productsWidget != null) {
                 final Map<String, dynamic>? productJson = productsWidget
                     .getRawProduct(index);
+                    print("productJson: $productJson");
                 OrderService().triggerProductOrder(productJson ?? {});
               }
             },
