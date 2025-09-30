@@ -12,7 +12,7 @@ class OrderConfirmedWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: 294,
-      height: 100,
+      height: 110,
       padding: const EdgeInsets.fromLTRB(15, 20, 15, 20),
       decoration: BoxDecoration(
         color: const Color(0xFFFFFFFF),

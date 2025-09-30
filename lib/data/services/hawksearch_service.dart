@@ -334,17 +334,146 @@ class HawkSearchService {
   Map<String, dynamic> _tryParseLooseJson(String raw) {
     if (raw.isEmpty) return {};
     try {
-      // Normalize: single quotes -> double quotes, Python booleans -> JSON booleans
-      String fixed = raw
-          .replaceAll("'", '"')
-          .replaceAll('False', 'false')
-          .replaceAll('True', 'true');
+      // Handle Python dictionary string format
+      String fixed = raw;
+      
+      // Replace Python boolean values with JSON boolean values
+      fixed = fixed.replaceAll('True', 'true');
+      fixed = fixed.replaceAll('False', 'false');
+      
+      // Handle None values
+      fixed = fixed.replaceAll('None', 'null');
+      
+      // Replace single quotes with double quotes, but be careful with nested quotes
+      // First, let's handle the outer structure
+      fixed = fixed.replaceAll("'", '"');
+      
+      // Handle any remaining Python-specific formatting
+      // Remove any trailing commas before closing braces/brackets
+      fixed = fixed.replaceAll(RegExp(r',\s*}'), '}');
+      fixed = fixed.replaceAll(RegExp(r',\s*]'), ']');
+      
       final decoded = jsonDecode(fixed);
       if (decoded is Map<String, dynamic>) return decoded;
       return {};
-    } catch (_) {
-      return {};
+    } catch (e) {
+      // If JSON parsing fails, try a more robust approach
+      try {
+        return _parsePythonDict(raw);
+      } catch (_) {
+        return {};
+      }
     }
+  }
+
+  /// Fallback method to parse Python dictionary strings more robustly
+  Map<String, dynamic> _parsePythonDict(String raw) {
+    final Map<String, dynamic> result = {};
+    
+    // Remove outer braces
+    String content = raw.trim();
+    if (content.startsWith('{') && content.endsWith('}')) {
+      content = content.substring(1, content.length - 1);
+    }
+    
+    // Split by comma, but be careful with nested structures
+    final List<String> pairs = [];
+    int braceCount = 0;
+    int bracketCount = 0;
+    int quoteCount = 0;
+    String currentPair = '';
+    
+    for (int i = 0; i < content.length; i++) {
+      final char = content[i];
+      
+      if (char == "'" && (i == 0 || content[i - 1] != '\\')) {
+        quoteCount++;
+      } else if (char == '{' && quoteCount % 2 == 0) {
+        braceCount++;
+      } else if (char == '}' && quoteCount % 2 == 0) {
+        braceCount--;
+      } else if (char == '[' && quoteCount % 2 == 0) {
+        bracketCount++;
+      } else if (char == ']' && quoteCount % 2 == 0) {
+        bracketCount--;
+      } else if (char == ',' && braceCount == 0 && bracketCount == 0 && quoteCount % 2 == 0) {
+        pairs.add(currentPair.trim());
+        currentPair = '';
+        continue;
+      }
+      
+      currentPair += char;
+    }
+    
+    if (currentPair.trim().isNotEmpty) {
+      pairs.add(currentPair.trim());
+    }
+    
+    // Parse each key-value pair
+    for (final pair in pairs) {
+      final colonIndex = pair.indexOf(':');
+      if (colonIndex == -1) continue;
+      
+      String key = pair.substring(0, colonIndex).trim();
+      String value = pair.substring(colonIndex + 1).trim();
+      
+      // Remove quotes from key
+      if (key.startsWith("'") && key.endsWith("'")) {
+        key = key.substring(1, key.length - 1);
+      }
+      
+      // Parse value
+      dynamic parsedValue = _parseValue(value);
+      result[key] = parsedValue;
+    }
+    
+    return result;
+  }
+  
+  /// Parse individual values from Python dictionary
+  dynamic _parseValue(String value) {
+    value = value.trim();
+    
+    // Handle strings
+    if (value.startsWith("'") && value.endsWith("'")) {
+      return value.substring(1, value.length - 1);
+    }
+    
+    // Handle booleans
+    if (value == 'True') return true;
+    if (value == 'False') return false;
+    
+    // Handle None
+    if (value == 'None') return null;
+    
+    // Handle numbers
+    if (RegExp(r'^-?\d+$').hasMatch(value)) {
+      return int.tryParse(value);
+    }
+    if (RegExp(r'^-?\d+\.\d+$').hasMatch(value)) {
+      return double.tryParse(value);
+    }
+    
+    // Handle lists
+    if (value.startsWith('[') && value.endsWith(']')) {
+      final List<dynamic> list = [];
+      final content = value.substring(1, value.length - 1).trim();
+      if (content.isNotEmpty) {
+        final items = content.split(',');
+        for (final item in items) {
+          list.add(_parseValue(item.trim()));
+        }
+      }
+      return list;
+    }
+    
+    // Handle dictionaries
+    if (value.startsWith('{') && value.endsWith('}')) {
+      return _parsePythonDict(value);
+    }
+    
+    // Default to string
+    return value;
   }
 
   double _toDouble(dynamic value) {
