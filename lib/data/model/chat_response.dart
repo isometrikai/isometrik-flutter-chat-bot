@@ -10,12 +10,14 @@ class ChatResponse {
   final String requestId;
   final List<ChatWidget> widgets;
   final int? cartCount;
+  final bool needToEndThisChat;
 
   ChatResponse({
     required this.text,
     required this.requestId,
     required this.widgets,
     this.cartCount,
+    this.needToEndThisChat = false,
   });
 
   factory ChatResponse.fromJson(Map<String, dynamic> json) {
@@ -42,6 +44,7 @@ class ChatResponse {
       requestId: json['request_id'] ?? '',
       widgets: widgetsList,
       cartCount: json['cartCount'] ?? -1,
+      needToEndThisChat: json['needToEndThisChat'] ?? false,
     );
   }
 
@@ -51,6 +54,7 @@ class ChatResponse {
       'request_id': requestId,
       'widgets': widgets.map((widget) => widget.toJson()).toList(),
       'cartCount': cartCount,
+      'needToEndThisChat': needToEndThisChat,
     };
   }
 
