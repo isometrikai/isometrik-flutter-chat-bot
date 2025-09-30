@@ -1,7 +1,6 @@
 import 'package:chat_bot/utils/asset_path.dart';
 import 'package:flutter/material.dart';
 import 'package:chat_bot/data/model/chat_response.dart';
-import 'package:chat_bot/utils/text_styles.dart';
 import 'package:flutter_svg/svg.dart' show SvgPicture;
 
 class CartWidget extends StatelessWidget {
@@ -54,41 +53,54 @@ class CartWidget extends StatelessWidget {
         children: [
           // Store name section
           if (storeNameItem != null) ...[
-            Padding(
-              padding: const EdgeInsets.all(16),
+
+            Container(
+              margin: const EdgeInsets.fromLTRB(16, 18, 16, 0),
+              height: 50,
+              decoration: BoxDecoration(
+                color: const Color(0xFFF5F7FF),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              padding: const EdgeInsets.all(10),
               child: Row(
                 children: [
                   SvgPicture.asset(
-                    AssetPath.get('images/ic_storeCart.svg'),
-                    width: 30,
-                    height: 30,
-                    fit: BoxFit.cover,
-                  ),
-                  const SizedBox(width: 12),
-                  Text(
-                    storeNameItem.storeName!,
-                    maxLines: 2,
-                    style: AppTextStyles.restaurantTitle.copyWith(
-                      color: const Color(0xFF242424),
-                      fontSize: 14,
+                        AssetPath.get('images/ic_storeCart.svg'),
+                        width: 30,
+                        height: 30,
+                        fit: BoxFit.cover,
+                      ),
+                  const SizedBox(width: 10),
+                  Flexible(
+                    child: Text(
+                      storeNameItem.storeName!,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontFamily: 'Plus Jakarta Sans',
+                        fontWeight: FontWeight.w600,
+                        fontSize: 14,
+                        height: 1.4,
+                        color: Color(0xFF242424),
+                      ),
                     ),
                   ),
                 ],
               ),
             ),
-            Container(
-              height: 1,
-              margin: const EdgeInsets.symmetric(horizontal: 16),
-              decoration: BoxDecoration(
-                border: Border(
-                  bottom: BorderSide(
-                    color: const Color(0xFFE6E6FA),
-                    width: 1,
-                    style: BorderStyle.solid,
-                  ),
-                ),
-              ),
-            ),
+            // Container(
+            //   height: 1,
+            //   margin: const EdgeInsets.symmetric(horizontal: 16),
+            //   decoration: BoxDecoration(
+            //     border: Border(
+            //       bottom: BorderSide(
+            //         color: const Color(0xFFE6E6FA),
+            //         width: 1,
+            //         style: BorderStyle.solid,
+            //       ),
+            //     ),
+            //   ),
+            // ),
           ],
           // Regular items section
           if (regularItems.isNotEmpty) ...[
