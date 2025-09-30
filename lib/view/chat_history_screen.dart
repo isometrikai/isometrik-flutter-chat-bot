@@ -1,4 +1,5 @@
-  import 'package:chat_bot/widgets/screen_header.dart';
+import 'package:chat_bot/view/chat_screen.dart';
+import 'package:chat_bot/widgets/screen_header.dart';
 import 'package:flutter/material.dart'; 
 import '../utils/text_styles.dart';
 
@@ -174,34 +175,34 @@ class ChatHistoryScreen extends StatelessWidget {
             child: ListView(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               children: [
-                _buildChatHistorySection('1 day ago', [
+                _buildChatHistorySection(context, '1 day ago', [
                   'Order pizza from pizza hut',
                   'Buy fresh avocados from the Mintfresh',
                 ]),
                 const SizedBox(height: 16),
-                _buildChatHistorySection('3 days ago', [
+                _buildChatHistorySection(context, '3 days ago', [
                   'Schedule a delivery for organic groceries',
                   'Pick up a cake for a friend\'s birthday',
                 ]),
                 const SizedBox(height: 16),
-                _buildChatHistorySection('5 days ago', [
+                _buildChatHistorySection(context, '5 days ago', [
                   'Order sushi from the new restaurant in to...',
                 ]),
                 const SizedBox(height: 16),
-                _buildChatHistorySection('6 days ago', [
+                _buildChatHistorySection(context, '6 days ago', [
                   'Purchase a weekly meal prep service',
                 ]),
                 const SizedBox(height: 16),
-                _buildChatHistorySection('6 days ago', [
+                _buildChatHistorySection(context, '6 days ago', [
                   'Purchase a weekly meal prep service',
                 ]),
                 const SizedBox(height: 16),
-                _buildChatHistorySection('6 days ago', [
+                _buildChatHistorySection(context, '6 days ago', [
                   'Get ingredients for homemade pasta',
                   'Reserve a table at a new vegan cafe',
                 ]),
                 const SizedBox(height: 16),
-                _buildChatHistorySection('2 weeks ago', [
+                _buildChatHistorySection(context, '2 weeks ago', [
                   'Sign up for a wine tasting event',
                   'Purchase a weekly meal prep service',
                   'Order burger from the new restaurant in ...',
@@ -216,27 +217,7 @@ class ChatHistoryScreen extends StatelessWidget {
     }
   }
 
-  Widget _buildFilterChip(String label, bool isSelected) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 12),
-      decoration: BoxDecoration(
-        color: isSelected ? const Color(0xFFF0DAFE) : Colors.white,
-        border: Border.all(
-          color: isSelected ? const Color(0xFFE9DFFB) : const Color(0xFFE9DFFB),
-        ),
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: Text(
-        label,
-        style: AppTextStyles.bodyText.copyWith(
-          fontSize: 14,
-          color: const Color(0xFF242424),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildChatHistorySection(String timeLabel, List<String> messages) {
+  Widget _buildChatHistorySection(BuildContext context, String timeLabel, List<String> messages) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -250,14 +231,21 @@ class ChatHistoryScreen extends StatelessWidget {
         ),
         const SizedBox(height: 4),
         Column(
-          children: messages.map((message) => _buildChatHistoryItem(message)).toList(),
+          children: messages.map((message) => _buildChatHistoryItem(context, message)).toList(),
         ),
       ],
     );
   }
 
-  Widget _buildChatHistoryItem(String message) {
-    return Container(
+  Widget _buildChatHistoryItem(BuildContext context, String message) {
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => ChatScreen(isFromHistory: true)),
+        );
+      },
+      child: Container(
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
@@ -276,6 +264,7 @@ class ChatHistoryScreen extends StatelessWidget {
             ),
           ),
         ],
+      ),
       ),
     );
   }

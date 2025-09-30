@@ -45,8 +45,8 @@ import '../services/speech_service.dart';
 class ChatScreen extends StatefulWidget {
   final MyGPTsResponse? chatbotData;
   final GreetingResponse? greetingData;
-
-  const ChatScreen({super.key, this.chatbotData, this.greetingData});
+  final bool isFromHistory;
+  const ChatScreen({super.key, this.chatbotData, this.greetingData, this.isFromHistory = false});
 
   @override
   State<ChatScreen> createState() => _ChatScreenState();
@@ -365,6 +365,10 @@ class _ChatScreenState extends State<ChatScreen> {
   @override
   void initState() {
     super.initState();
+    // if (widget.isFromHistory == true) {
+    //   print('ChatScreen: isFromHistory - ${widget.isFromHistory}');
+    //   return;
+    // }
     _initializeSession();
 
     // Initialize LaunchBloc
