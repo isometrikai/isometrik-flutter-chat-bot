@@ -243,6 +243,7 @@ var cartId = '';
 var isCartAPICalled = false;
 int totalProductCount = 0;
 var needToCallChatScreenSendMessageAPI = true;
+String sessionId = "";
 
 /// Result class for cart validation
 class CartValidationResult {

@@ -58,7 +58,7 @@ class _ChatScreenState extends State<ChatScreen> {
   final FocusNode _messageFocusNode = FocusNode();
   Set<String> _selectedOptionMessages = {};
   String? _pendingMessage;
-  String _sessionId = "";
+  
   double _textFieldHeight = 50.0; // Add height state variable
   List<ChatWidget> _latestActionWidgets = []; // Track latest action widgets
   int _totalCartCount = 0; // Track total cart count
@@ -369,6 +369,7 @@ class _ChatScreenState extends State<ChatScreen> {
   @override
   void initState() {
     super.initState();
+
     if (widget.isFromHistory == true) {
       print('ChatScreen: isFromHistory - ${widget.isFromHistory}');
       return;
@@ -438,8 +439,9 @@ class _ChatScreenState extends State<ChatScreen> {
     });
   }
 
-  void _initializeSession() {
-    _sessionId = "${DateTime.now().millisecondsSinceEpoch ~/ 1000}";
+  void _initializeSession(bool needToShowLoader) {
+    sessionId = "";
+    context.read<ChatBloc>().add(ChatSessionIdEvent(needToShowLoader: needToShowLoader));
   }
 
   Future<void> _initializeSpeechService() async {
@@ -574,7 +576,7 @@ class _ChatScreenState extends State<ChatScreen> {
       messages = [];
 
       _selectedOptionMessages.clear();
-      _sessionId = "${DateTime.now().millisecondsSinceEpoch ~/ 1000}";
+      _initializeSession(true);
       _pendingMessage = null;
       _latestActionWidgets.clear(); // Clear action widgets when restarting
       _cartBloc.add(CartFetchRequested(needToShowLoader: false));
@@ -678,7 +680,7 @@ class _ChatScreenState extends State<ChatScreen> {
       },
       pendingMessage: _pendingMessage,
       onClearPendingMessage: _clearPendingMessage,
-      sessionId: _sessionId,
+      sessionId: sessionId,
       // Pass session ID
       textFieldHeight: _textFieldHeight,
       onUpdateTextFieldHeight: _updateTextFieldHeight,

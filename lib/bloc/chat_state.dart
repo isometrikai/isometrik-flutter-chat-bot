@@ -21,6 +21,15 @@ class ChatLoaded extends ChatState {
   List<Object> get props => [messages];
 }
 
+class ChatLoadedWithSessionId extends ChatState {
+  final String sessionId;
+
+  const ChatLoadedWithSessionId(this.sessionId);
+
+  @override
+  List<Object> get props => [sessionId];
+}
+
 class ChatError extends ChatState {
   final String error;
 
