@@ -369,10 +369,10 @@ class _ChatScreenState extends State<ChatScreen> {
   @override
   void initState() {
     super.initState();
-    // if (widget.isFromHistory == true) {
-    //   print('ChatScreen: isFromHistory - ${widget.isFromHistory}');
-    //   return;
-    // }
+    if (widget.isFromHistory == true) {
+      print('ChatScreen: isFromHistory - ${widget.isFromHistory}');
+      return;
+    }
     _initializeSession();
 
     // Initialize LaunchBloc
@@ -583,11 +583,13 @@ class _ChatScreenState extends State<ChatScreen> {
 
   @override
   void dispose() {
-    _messageFocusNode.removeListener(_onFocusChange);
-    _messageController.dispose();
-    _scrollController.dispose();
-    _messageFocusNode.dispose();
-    _launchBloc.close();
+    if (widget.isFromHistory == false) {
+      _messageFocusNode.removeListener(_onFocusChange);
+      _messageController.dispose();
+      _scrollController.dispose();
+      _messageFocusNode.dispose();
+      _launchBloc.close();
+    }
 
     // OrderService().clearCallback();
     print("DISPOSE");
