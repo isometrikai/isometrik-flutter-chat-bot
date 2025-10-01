@@ -105,10 +105,11 @@ class StoreCard extends StatelessWidget {
                             ),
                           ),
                           const SizedBox(width: 7),
-                          const Icon(
-                            Icons.access_time,
-                            size: 14,
-                            color: Color(0xFFA674BF),
+                          SvgPicture.asset(
+                            AssetPath.get('images/ic_pin.svg'),
+                            width: 14,
+                            height: 14,
+                            fit: BoxFit.contain,
                           ),
                           const SizedBox(width: 4),
                           Text(

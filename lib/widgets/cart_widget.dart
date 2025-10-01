@@ -1,5 +1,7 @@
+import 'package:chat_bot/utils/asset_path.dart';
 import 'package:flutter/material.dart';
 import 'package:chat_bot/data/model/chat_response.dart';
+import 'package:flutter_svg/svg.dart' show SvgPicture;
 
 class CartWidget extends StatelessWidget {
   final List<WidgetAction> cartItems;
@@ -12,6 +14,10 @@ class CartWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (cartItems.isEmpty) return const SizedBox.shrink();
+
+    final storeNameItem = cartItems.cast<WidgetAction?>().firstWhere(
+        (item) => item?.storeName != null && item!.storeName!.isNotEmpty,
+        orElse: () => null);
 
     // Separate regular items from total
     final regularItems = cartItems.where((item) => 
@@ -45,6 +51,57 @@ class CartWidget extends StatelessWidget {
       ),
       child: Column(
         children: [
+          // Store name section
+          if (storeNameItem != null) ...[
+
+            Container(
+              margin: const EdgeInsets.fromLTRB(16, 18, 16, 0),
+              height: 50,
+              decoration: BoxDecoration(
+                color: const Color(0xFFF5F7FF),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              padding: const EdgeInsets.all(10),
+              child: Row(
+                children: [
+                  SvgPicture.asset(
+                        AssetPath.get('images/ic_storeCart.svg'),
+                        width: 30,
+                        height: 30,
+                        fit: BoxFit.cover,
+                      ),
+                  const SizedBox(width: 10),
+                  Flexible(
+                    child: Text(
+                      storeNameItem.storeName!,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontFamily: 'Plus Jakarta Sans',
+                        fontWeight: FontWeight.w600,
+                        fontSize: 14,
+                        height: 1.4,
+                        color: Color(0xFF242424),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            // Container(
+            //   height: 1,
+            //   margin: const EdgeInsets.symmetric(horizontal: 16),
+            //   decoration: BoxDecoration(
+            //     border: Border(
+            //       bottom: BorderSide(
+            //         color: const Color(0xFFE6E6FA),
+            //         width: 1,
+            //         style: BorderStyle.solid,
+            //       ),
+            //     ),
+            //   ),
+            // ),
+          ],
           // Regular items section
           if (regularItems.isNotEmpty) ...[
             Padding(

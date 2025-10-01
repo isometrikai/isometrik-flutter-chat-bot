@@ -12,8 +12,8 @@ import 'package:chat_bot/data/model/chat_response.dart';
 import 'package:chat_bot/data/model/chat_message.dart';
 import 'package:chat_bot/data/services/chat_api_services.dart';
 import 'package:chat_bot/view/Groceries_menu_screen.dart';
-import 'package:chat_bot/view/add_card_sheet.dart';
-import 'package:chat_bot/view/address_details_screen.dart';
+import 'package:chat_bot/view/chat_history_screen.dart';
+import 'package:chat_bot/view/popup_overlay_screen.dart';
 import 'package:chat_bot/view/customization_summary_screen.dart';
 import 'package:chat_bot/view/grocery_customization_screen.dart';
 import 'package:chat_bot/view/product_customization_screen.dart';
@@ -63,17 +63,19 @@ class _ChatScreenState extends State<ChatScreen> {
   List<ChatWidget> _latestActionWidgets = []; // Track latest action widgets
   int _totalCartCount = 0; // Track total cart count
   List<ChatMessage> messages = [];
+  bool _needToEndThisChat = false; // Track if chat should be ended
 
   late final CartBloc _cartBloc;
   final SpeechService _speechService = SpeechService();
   bool _isSpeechAvailable = false;
   bool _isRecording = false;
-  
+
   // LaunchBloc related variables
   late final LaunchBloc _launchBloc;
   MyGPTsResponse? _chatbotData;
   GreetingResponse? _greetingData;
   bool _isDataLoaded = false;
+  
 
   // Returns index of the last bot message that shows stores, products, choose_address, choose_card, order_summary, or order_confirmed widgets; -1 if none
   // Cart widget is not considered for hiding
@@ -196,6 +198,9 @@ class _ChatScreenState extends State<ChatScreen> {
     ChatWidget? chooseCardWidget;
     ChatWidget? orderSummaryWidget;
     ChatWidget? orderConfirmedWidget;
+    
+    // Capture needToEndThisChat from API response
+    _needToEndThisChat = response.needToEndThisChat;
     try {
       storesWidget = response.widgets.firstWhere(
         (widget) => widget.isStoresWidget,
@@ -235,7 +240,9 @@ class _ChatScreenState extends State<ChatScreen> {
     }
 
     try {
-      orderSummaryWidget = response.widgets.firstWhere((widget) => widget.isOrderSummaryWidget);
+      orderSummaryWidget = response.widgets.firstWhere(
+        (widget) => widget.isOrderSummaryWidget,
+      );
     } catch (e) {
       orderSummaryWidget = null;
     }
@@ -366,7 +373,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
     // Initialize LaunchBloc
     _launchBloc = LaunchBloc();
-    
+
     // Check if data is already provided via parameters
     if (widget.chatbotData != null) {
       _chatbotData = widget.chatbotData;
@@ -381,13 +388,21 @@ class _ChatScreenState extends State<ChatScreen> {
     _cartBloc = context.read<CartBloc>();
 
     // Set up cart update callback - the mounted check handles if screen is active
-    OrderService().setCartUpdateCallback((bool isCartUpdate) {
-      print('ChatScreen: Cart update received 0 - $isCartUpdate, mounted: $mounted');
-      if (mounted && isCartUpdate) {
-        print('ChatScreen: Cart update received - $isCartUpdate');
-        Future.delayed(const Duration(seconds: 1), () {
-        _sendMessage("I have updated the cart");
-        });
+    // OrderService().setCartUpdateCallback((bool isCartUpdate) {
+    //   print(
+    //     'ChatScreen: Cart update received 0 - $isCartUpdate, mounted: $mounted',
+    //   );
+    //   if (mounted && isCartUpdate) {
+    //     print('ChatScreen: Cart update received - $isCartUpdate');
+    //     Future.delayed(const Duration(seconds: 1), () {
+    //       _sendMessage("I have updated the cart");
+    //     });
+    //   }
+    // });
+    OrderService().setSendMessageCallback((String message) {// CHANGE CALLBACK
+      if (mounted && needToCallChatScreenSendMessageAPI) {
+        print('ChatScreen: External message received - $message');
+        _sendMessage(message);
       }
     });
 
@@ -489,6 +504,32 @@ class _ChatScreenState extends State<ChatScreen> {
       if (recognizedText.trim().isNotEmpty) {
         // Set the recognized text to the text field
         _messageController.text = recognizedText.trim();
+        // ADDED For Text Field Height
+         final textSpan = TextSpan(
+                                      text:
+                                          _messageController.text.isEmpty
+                                              ? 'How can zAIn help you today?'
+                                              : _messageController.text,
+                                      style: const TextStyle(
+                                        fontSize: 16,
+                                        height: 1.4,
+                                        color: Color(0xFF242424),
+                                      ),
+                                    );
+                                    final textPainter = TextPainter(
+                                      text: textSpan,
+                                      textDirection: TextDirection.ltr,
+                                      maxLines: null,
+                                    );
+                                    textPainter.layout(
+                                      maxWidth:
+                                          MediaQuery.of(context).size.width -
+                                          160,
+                                    );
+
+                                    final newHeight = (textPainter.height + 20)
+                                        .clamp(50.0, 550.0);
+                                    _updateTextFieldHeight(newHeight);
       } else {
         BlackToastView.show(context, 'No speech detected. Please try again.');
       }
@@ -525,6 +566,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
   Future<void> _restartChatAPI() async {
     setState(() {
+      _needToEndThisChat = false;
       messages = [];
 
       _selectedOptionMessages.clear();
@@ -570,7 +612,9 @@ class _ChatScreenState extends State<ChatScreen> {
                 builder: (BuildContext context) {
                   return AlertDialog(
                     title: const Text('Error'),
-                    content: const Text('Something went wrong please try again later'),
+                    content: const Text(
+                      'Something went wrong please try again later',
+                    ),
                     actions: [
                       TextButton(
                         onPressed: () {
@@ -593,9 +637,7 @@ class _ChatScreenState extends State<ChatScreen> {
                   color: Colors.white,
                   width: double.infinity,
                   height: double.infinity,
-                  child: Center(
-                    child: _buildShimmerGreetingOverlay(context),
-                  ),
+                  child: Center(child: _buildShimmerGreetingOverlay(context)),
                 ),
               );
             },
@@ -650,6 +692,7 @@ class _ChatScreenState extends State<ChatScreen> {
       onCancelSpeechRecording: _cancelSpeechRecording,
       // Add cancel speech handler
       isRecording: _isRecording, // Pass recording state
+      needToEndThisChat: _needToEndThisChat, // Pass needToEndThisChat state
     );
   }
 
@@ -667,88 +710,88 @@ class _ChatScreenState extends State<ChatScreen> {
             children: [
               // Top graphic group with shimmer
               SizedBox(
-              width: 110,
-              height: 110,
-              child: Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  // Outer glow circle
-                  Container(
-                    width: 110,
-                    height: 110,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(110),
-                      gradient: const LinearGradient(
-                        begin: Alignment.centerLeft,
-                        end: Alignment.centerRight,
-                        colors: [
-                          Color(0x1AD445EC),
-                          Color(0x1AB02EFB),
-                          Color(0x1A8E2FFD),
-                          Color(0x1A5E3DFE),
-                          Color(0x1A5186E0),
-                        ],
-                      ),
-                    ),
-                  ),
-                  // Center asset
-                  Align(
-                    alignment: Alignment.center,
-                    child: Container(
-                      width: 90,
-                      height: 90,
-                      decoration: const BoxDecoration(
-                        shape: BoxShape.circle,
-                        gradient: LinearGradient(
+                width: 110,
+                height: 110,
+                child: Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    // Outer glow circle
+                    Container(
+                      width: 110,
+                      height: 110,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(110),
+                        gradient: const LinearGradient(
                           begin: Alignment.centerLeft,
                           end: Alignment.centerRight,
                           colors: [
-                            Color(0xFFD445EC),
-                            Color(0xFFB02EFB),
-                            Color(0xFF8E2FFD),
-                            Color(0xFF5E3DFE),
-                            Color(0xFF5186E0),
+                            Color(0x1AD445EC),
+                            Color(0x1AB02EFB),
+                            Color(0x1A8E2FFD),
+                            Color(0x1A5E3DFE),
+                            Color(0x1A5186E0),
                           ],
                         ),
                       ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(12),
-                        child: SvgPicture.asset(
-                          AssetPath.get('images/ic_mainImg.svg'),
-                          fit: BoxFit.contain,
+                    ),
+                    // Center asset
+                    Align(
+                      alignment: Alignment.center,
+                      child: Container(
+                        width: 90,
+                        height: 90,
+                        decoration: const BoxDecoration(
+                          shape: BoxShape.circle,
+                          gradient: LinearGradient(
+                            begin: Alignment.centerLeft,
+                            end: Alignment.centerRight,
+                            colors: [
+                              Color(0xFFD445EC),
+                              Color(0xFFB02EFB),
+                              Color(0xFF8E2FFD),
+                              Color(0xFF5E3DFE),
+                              Color(0xFF5186E0),
+                            ],
+                          ),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(12),
+                          child: SvgPicture.asset(
+                            AssetPath.get('images/ic_mainImg.svg'),
+                            fit: BoxFit.contain,
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                  Positioned(
-                    right: -6,
-                    top: -6,
-                    child: Opacity(
-                      opacity: 0.4,
-                      child: SvgPicture.asset(
-                        AssetPath.get('images/ic_topStar.svg'),
-                        width: 44,
-                        height: 44,
+                    Positioned(
+                      right: -6,
+                      top: -6,
+                      child: Opacity(
+                        opacity: 0.4,
+                        child: SvgPicture.asset(
+                          AssetPath.get('images/ic_topStar.svg'),
+                          width: 44,
+                          height: 44,
+                        ),
                       ),
                     ),
-                  ),
-                  Positioned(
-                    left: -10,
-                    bottom: -8,
-                    child: Opacity(
-                      opacity: 0.4,
-                      child: SvgPicture.asset(
-                        AssetPath.get('images/ic_topStar.svg'),
-                        width: 61,
-                        height: 61,
+                    Positioned(
+                      left: -10,
+                      bottom: -8,
+                      child: Opacity(
+                        opacity: 0.4,
+                        child: SvgPicture.asset(
+                          AssetPath.get('images/ic_topStar.svg'),
+                          width: 61,
+                          height: 61,
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-              const SizedBox(height: 12),
-              
+              const SizedBox(height: 10),
+
               // Title shimmer
               SizedBox(
                 width: double.infinity,
@@ -766,8 +809,8 @@ class _ChatScreenState extends State<ChatScreen> {
                   ),
                 ),
               ),
-              const SizedBox(height: 12),
-              
+              const SizedBox(height: 10),
+
               // Subtitle shimmer
               SizedBox(
                 width: double.infinity,
@@ -785,13 +828,16 @@ class _ChatScreenState extends State<ChatScreen> {
                   ),
                 ),
               ),
-              const SizedBox(height: 16),
-              
+              const SizedBox(height: 14),
+
               // Weather information shimmer
               Container(
                 width: double.infinity,
                 height: 130,
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 16,
+                ),
                 // decoration: BoxDecoration(
                 //   color: Colors.grey[300]!,
                 //   borderRadius: BorderRadius.circular(12),
@@ -810,21 +856,20 @@ class _ChatScreenState extends State<ChatScreen> {
                   ),
                 ),
               ),
-              const SizedBox(height: 16),
-              
+              const SizedBox(height: 14),
+
               // Options grid shimmer 2x2
               ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: double.infinity),
-                child: Wrap(
-                  spacing: 16,
-                  runSpacing: 16,
-                  children: List.generate(4, (index) {
+                constraints: const BoxConstraints(maxWidth: 340),
+                child: Column(
+                  children: List.generate(3, (index) {
                     return Shimmer.fromColors(
                       baseColor: Colors.grey[300]!,
                       highlightColor: Colors.grey[100]!,
                       child: Container(
-                        width: 172,
-                        height: 79,
+                        width: double.infinity,
+                        height: 70,
+                        margin: const EdgeInsets.only(bottom: 10),
                         decoration: BoxDecoration(
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(5),
@@ -875,6 +920,7 @@ class _ChatScreenBody extends StatelessWidget {
   final Future<void> Function()
   onCancelSpeechRecording; // Add cancel speech handler
   final bool isRecording; // Add recording state
+  final bool needToEndThisChat; // Add needToEndThisChat parameter
 
   const _ChatScreenBody({
     required this.messageController,
@@ -906,6 +952,7 @@ class _ChatScreenBody extends StatelessWidget {
     required this.onStopSpeechRecording, // Add the stop speech handler parameter
     required this.onCancelSpeechRecording, // Add the cancel speech handler parameter
     required this.isRecording, // Add the recording state parameter
+    required this.needToEndThisChat, // Add the needToEndThisChat parameter
   });
 
   @override
@@ -1075,8 +1122,31 @@ class _ChatScreenBody extends StatelessWidget {
                   _buildActionButtons(context),
                   Stack(
                     children: [
-                      _buildInputArea(context),
-                      if (isRecording) _buildInputRecordingArea(context),
+                      if (needToEndThisChat == true)
+                        Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                          margin: const EdgeInsets.fromLTRB(16, 10, 16, 40),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFF5F0FF), // Light purple background
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: const Color(0xFFE8D5FF), width: 1),
+                          ),
+                          child: Text(
+                            'This session has ended. Please click the reload button to begin a new chat',
+                            style: AppTextStyles.bodyText.copyWith(
+                              fontSize: 14,
+                              color: const Color(0xFF6E4185), // Darker purple text
+                              fontWeight: FontWeight.w500,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        )
+                         
+                      else ...[
+                        _buildInputArea(context),
+                        if (isRecording) _buildInputRecordingArea(context),
+                      ]
                     ],
                   ),
                 ],
@@ -1086,7 +1156,6 @@ class _ChatScreenBody extends StatelessWidget {
         ),
       ),
     );
-    // );
   }
 
   // Calculate total cart count from all messages
@@ -1108,17 +1177,25 @@ class _ChatScreenBody extends StatelessWidget {
           height: 40,
           fit: BoxFit.cover,
         ),
-        onPressed: () {},
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const ChatHistoryScreen(),
+            ),
+          );
+        },
       ),
       title: Row(
         children: [
+          if (messages.isNotEmpty) ...[
           Container(
             child:
                 (chatbotData.data.isNotEmpty &&
                         chatbotData.data.first.profileImage.isNotEmpty)
                     ? SvgPicture.asset(
                       AssetPath.get('images/ic_header_logo.svg'),
-                      width: 80,
+                      width: 75,
                       height: 23,
                       fit: BoxFit.cover,
                     )
@@ -1128,6 +1205,7 @@ class _ChatScreenBody extends StatelessWidget {
                       size: 20,
                     ),
           ),
+          ]
         ],
       ),
       actions: [
@@ -1162,7 +1240,32 @@ class _ChatScreenBody extends StatelessWidget {
                                 ? null
                                 : () => _showNewChatConfirmation(context),
                       ),
+                    ],
+                    if (greetingData?.personaTitle.isNotEmpty ?? false) ...[
                       IconButton(
+                        icon: SvgPicture.asset(
+                        AssetPath.get('images/ic_chat_profile.svg'),
+                        width: 40,
+                        height: 40,
+                      ),
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            PageRouteBuilder(
+                              opaque: false,
+                              pageBuilder: (context, animation, secondaryAnimation) => PopupOverlayScreen(greetingData: greetingData),
+                              transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                                return FadeTransition(
+                                  opacity: animation,
+                                  child: child,
+                                );
+                              },
+                            ),
+                          );
+                        },
+                      ),
+                    ],
+                    IconButton(
                         icon: Opacity(
                           opacity: 1.0,
                           child: Stack(
@@ -1227,7 +1330,6 @@ class _ChatScreenBody extends StatelessWidget {
                                   );
                                 },
                       ),
-                    ],
                     IconButton(
                       icon: SvgPicture.asset(
                         AssetPath.get('images/ic_close.svg'),
@@ -1374,7 +1476,7 @@ class _ChatScreenBody extends StatelessWidget {
                   ),
                 ],
               ),
-              SizedBox(height: MediaQuery.of(context).padding.bottom + 8),
+              SizedBox(height: 8),
             ],
           ),
         );
@@ -1392,7 +1494,7 @@ class _ChatScreenBody extends StatelessWidget {
       builder: (BuildContext context) {
         return Container(
           width: double.infinity,
-          padding: const EdgeInsets.all(24),
+          padding: const EdgeInsets.fromLTRB(24, 16, 24, 16),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -1408,79 +1510,118 @@ class _ChatScreenBody extends StatelessWidget {
                   ),
                 ),
               ),
-              const SizedBox(height: 20),
-              const Text(
-                'Exit Chat',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
+              const SizedBox(height: 16),
+               Text(
+                'Exit zAIn?',
+                style: AppTextStyles.bodyText.copyWith(
+                  fontSize: 24,
+                  fontWeight: FontWeight.w700,
                   color: Colors.black,
                 ),
                 textAlign: TextAlign.left,
               ),
-              const SizedBox(height: 12),
-              const Text(
-                'You will lose your current chat context. Are you sure you want to exit?',
-                style: TextStyle(fontSize: 14, color: Colors.grey, height: 1.4),
+              const SizedBox(height: 20),
+               Text(
+                'Are you sure you want to leave the chat? Your conversation history will be saved, but you will lose your current context.',
+                style: AppTextStyles.subtitle.copyWith(
+                  fontSize: 14, 
+                  color: Color(0xFF242424), 
+                  fontWeight: FontWeight.w400
+                  ),
                 textAlign: TextAlign.left,
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 40),
               Row(
                 children: [
                   Expanded(
-                    child: TextButton(
-                      onPressed: () => Navigator.of(context).pop(),
-                      style: TextButton.styleFrom(
-                        backgroundColor: Colors.grey[100],
-                        foregroundColor: Colors.black,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
+                    child: SizedBox(
+                      height: 62,
+                      child: TextButton(
+                        onPressed: () => Navigator.of(context).pop(),
+                        style: TextButton.styleFrom(
+                          backgroundColor: Colors.white,
+                          foregroundColor: Color(0xFF8E2FFD),
+                          padding: EdgeInsets.zero,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                            side: BorderSide(
+                              color: Color(0xFF8E2FFD),
+                              width: 1,
+                            ),
+                          ),
                         ),
-                      ),
-                      child: const Text(
-                        'CANCEL',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
+                        child: Text(
+                          'Stay in chat',
+                          style: AppTextStyles.button.copyWith(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                            color: Color(0xFF8E2FFD),
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
                         ),
                       ),
                     ),
                   ),
-                  const SizedBox(width: 16),
+                  const SizedBox(width: 8),
                   Expanded(
-                    child: TextButton(
-                      onPressed: () {
-                        Navigator.of(context).pop(); // Close bottom sheet
-                        try {
-                          // onRestartChatAPI();
-                          OrderService().triggerChatDismiss();
-                        } catch (e) {
-                          Navigator.of(
-                            context,
-                          ).pop(); // Fallback to Flutter navigation
-                        }
-                      },
-                      style: TextButton.styleFrom(
-                        backgroundColor: Colors.red,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
+                    child: SizedBox(
+                      height: 62,
+                      child: TextButton(
+                        onPressed: () {
+                          Navigator.of(context).pop(); // Close bottom sheet
+                          try {
+                            // onRestartChatAPI();
+                            OrderService().triggerChatDismiss();
+                          } catch (e) {
+                            Navigator.of(
+                              context,
+                            ).pop(); // Fallback to Flutter navigation
+                          }
+                        },
+                        style: TextButton.styleFrom(
+                          backgroundColor: Colors.transparent,
+                          foregroundColor: Colors.white,
+                          padding: EdgeInsets.zero,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
                         ),
-                      ),
-                      child: const Text(
-                        'EXIT CHAT',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [
+                                Color(0xFF5186E0),
+                                Color(0xFF5E3DFE),
+                                Color(0xFF8E2FFD),
+                                Color(0xFFB02EFB),
+                                Color(0xFFD445EC),
+                              ],
+                              stops: [0.0, 0.24, 0.52, 0.73, 1.0],
+                              begin: Alignment.centerLeft,
+                              end: Alignment.centerRight,
+                            ),
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: Center(
+                            child: Text(
+                              'Continue to app',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w700,
+                                color: Colors.white,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 1,
+                            ),
+                          ),
                         ),
                       ),
                     ),
                   ),
                 ],
               ),
-              SizedBox(height: MediaQuery.of(context).padding.bottom + 8),
+              const SizedBox(height: 30),
             ],
           ),
         );
@@ -1696,7 +1837,7 @@ class _ChatScreenBody extends StatelessWidget {
             ],
           ),
           if (message.hasOptionButtons) ...[
-            const SizedBox(height: 4),//12
+            const SizedBox(height: 4), //12
             Padding(
               padding: const EdgeInsets.only(left: 50.0),
               child: _buildOptionButtons(
@@ -1708,11 +1849,11 @@ class _ChatScreenBody extends StatelessWidget {
           ],
           // Store cards outside the row to avoid constraints
           if (message.hasStoreCards) ...[
-            const SizedBox(height: 4),//12
+            const SizedBox(height: 4), //12
             _buildStoreCards(message.stores, message.storesWidget),
           ],
           if (message.hasProductCards) ...[
-            const SizedBox(height: 4),//12
+            const SizedBox(height: 4), //12
             Transform.translate(
               offset: const Offset(0, 0),
               child: _buildProductCards(
@@ -1722,23 +1863,23 @@ class _ChatScreenBody extends StatelessWidget {
             ),
           ],
           if (message.hasCartWidget) ...[
-            const SizedBox(height: 4),//12
+            const SizedBox(height: 4), //12
             _buildCartWidget(message.cartItems),
           ],
           if (message.hasChooseAddressWidget) ...[
-            const SizedBox(height: 4),//12
+            const SizedBox(height: 4), //12
             _buildChooseAddressWidget(message.addressOptions),
           ],
           if (message.hasChooseCardWidget) ...[
-            const SizedBox(height: 4),//12
+            const SizedBox(height: 4), //12
             _buildChooseCardWidget(message.cardOptions),
           ],
           if (message.hasOrderSummaryWidget) ...[
-            const SizedBox(height: 4),//12
+            const SizedBox(height: 4), //12
             _buildOrderSummaryWidget(message.orderSummaryItems),
           ],
           if (message.hasOrderConfirmedWidget) ...[
-            const SizedBox(height: 4),//12
+            const SizedBox(height: 4), //12
             _buildOrderConfirmedWidget(message.orderConfirmedWidget!),
           ],
         ],
@@ -1787,7 +1928,6 @@ class _ChatScreenBody extends StatelessWidget {
     return html;
   }
 
-
   Widget _buildGreetingOverlay(BuildContext context) {
     final String titleText =
         greetingData?.greeting.isNotEmpty == true
@@ -1802,7 +1942,7 @@ class _ChatScreenBody extends StatelessWidget {
             ? greetingData!.weatherText
             : 'dsada';
 
-    final List<String> opts = (greetingData?.options ?? []).take(4).toList();
+    final List<GreetingOption> opts = (greetingData?.options ?? []).toList();
 
     return GestureDetector(
       onTap: () {
@@ -1816,152 +1956,156 @@ class _ChatScreenBody extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-            // Top graphic group
-            SizedBox(
-              width: 90,
-              height: 90,
-              child: Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  // Outer glow circle
-                  Container(
-                    width: 90,
-                    height: 90,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(110),
-                      gradient: const LinearGradient(
-                        begin: Alignment.centerLeft,
-                        end: Alignment.centerRight,
-                        colors: [
-                          Color(0x1AD445EC),
-                          Color(0x1AB02EFB),
-                          Color(0x1A8E2FFD),
-                          Color(0x1A5E3DFE),
-                          Color(0x1A5186E0),
-                        ],
-                      ),
-                    ),
-                  ),
-                  // Center asset
-                  Align(
-                    alignment: Alignment.center,
-                    child: Container(
-                      width: 70,
-                      height: 70,
-                      decoration: const BoxDecoration(
-                        shape: BoxShape.circle,
-                        gradient: LinearGradient(
+              // Top graphic group
+              SizedBox(
+                width: 90,
+                height: 90,
+                child: Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    // Outer glow circle
+                    Container(
+                      width: 90,
+                      height: 90,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(110),
+                        gradient: const LinearGradient(
                           begin: Alignment.centerLeft,
                           end: Alignment.centerRight,
                           colors: [
-                            Color(0xFFD445EC),
-                            Color(0xFFB02EFB),
-                            Color(0xFF8E2FFD),
-                            Color(0xFF5E3DFE),
-                            Color(0xFF5186E0),
+                            Color(0x1AD445EC),
+                            Color(0x1AB02EFB),
+                            Color(0x1A8E2FFD),
+                            Color(0x1A5E3DFE),
+                            Color(0x1A5186E0),
                           ],
                         ),
                       ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(12),
-                        child: SvgPicture.asset(
-                          AssetPath.get('images/ic_mainImg.svg'),
-                          fit: BoxFit.contain,
+                    ),
+                    // Center asset
+                    Align(
+                      alignment: Alignment.center,
+                      child: Container(
+                        width: 70,
+                        height: 70,
+                        decoration: const BoxDecoration(
+                          shape: BoxShape.circle,
+                          gradient: LinearGradient(
+                            begin: Alignment.centerLeft,
+                            end: Alignment.centerRight,
+                            colors: [
+                              Color(0xFFD445EC),
+                              Color(0xFFB02EFB),
+                              Color(0xFF8E2FFD),
+                              Color(0xFF5E3DFE),
+                              Color(0xFF5186E0),
+                            ],
+                          ),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(12),
+                          child: SvgPicture.asset(
+                            AssetPath.get('images/ic_mainImg.svg'),
+                            fit: BoxFit.contain,
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                  Positioned(
-                    right: -6,
-                    top: -6,
-                    child: Opacity(
-                      opacity: 0.4,
-                      child: SvgPicture.asset(
-                        AssetPath.get('images/ic_topStar.svg'),
-                        width: 34,
-                        height: 34,
+                    Positioned(
+                      right: -6,
+                      top: -6,
+                      child: Opacity(
+                        opacity: 0.4,
+                        child: SvgPicture.asset(
+                          AssetPath.get('images/ic_topStar.svg'),
+                          width: 34,
+                          height: 34,
+                        ),
                       ),
                     ),
-                  ),
-                  Positioned(
-                    left: -10,
-                    bottom: -8,
-                    child: Opacity(
-                      opacity: 0.4,
-                      child: SvgPicture.asset(
-                        AssetPath.get('images/ic_topStar.svg'),
-                        width: 51,
-                        height: 51,
+                    Positioned(
+                      left: -10,
+                      bottom: -8,
+                      child: Opacity(
+                        opacity: 0.4,
+                        child: SvgPicture.asset(
+                          AssetPath.get('images/ic_topStar.svg'),
+                          width: 51,
+                          height: 51,
+                        ),
                       ),
                     ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 12),
+              SizedBox(
+                width: 304,
+                child: Text(
+                  titleText,
+                  textAlign: TextAlign.center,
+                  style: AppTextStyles.launchTitle.copyWith(
+                    color: const Color(0xFF171212),
                   ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 12),
-            SizedBox(
-              width: 304,
-              child: Text(
-                titleText,
-                textAlign: TextAlign.center,
-                style: AppTextStyles.launchTitle.copyWith(
-                  color: const Color(0xFF171212),
                 ),
               ),
-            ),
-            const SizedBox(height: 12),
-            SizedBox(
-              width: 323,
-              child: Text(
-                subtitleText,
-                textAlign: TextAlign.center,
-                style: AppTextStyles.launchSubtitle.copyWith(
-                  color: const Color(0xFF6E4185),
+              const SizedBox(height: 12),
+              SizedBox(
+                width: 323,
+                child: Text(
+                  subtitleText,
+                  textAlign: TextAlign.center,
+                  style: AppTextStyles.launchSubtitle.copyWith(
+                    color: const Color(0xFF6E4185),
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(height: 16),
-            // Weather information view
-            Container(
-              width: 340,
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-              decoration: BoxDecoration(
-                color: const Color(0xFFF5F0FF), // Light purple background
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: const Color(0xFFE8D5FF), width: 1),
-              ),
-              child: Text(
-                weatherText,
-                textAlign: TextAlign.center,
-                style: AppTextStyles.launchWeather.copyWith(
-                  color: const Color(0xFF6E4185), // Darker purple text
+              const SizedBox(height: 16),
+              // Weather information view
+              Container(
+                width: 340,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 16,
+                ),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF5F0FF), // Light purple background
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: const Color(0xFFE8D5FF), width: 1),
+                ),
+                child: Text(
+                  weatherText,
+                  textAlign: TextAlign.center,
+                  style: AppTextStyles.launchWeather.copyWith(
+                    color: const Color(0xFF6E4185), // Darker purple text
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(height: 16),
-            // Options grid 2x2
-            ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 360),
-              child: Wrap(
-                spacing: 16,
-                runSpacing: 16,
-                children:
-                    opts.map((opt) {
-                      return _GreetingOptionTile(
-                        text: opt,
-                        onTap: () {
-                          onSendMessage(opt);
-                        },
-                      );
-                    }).toList(),
+              const SizedBox(height: 16),
+              // Options grid 1x1
+              ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 340),
+                child: Column(
+                  children:
+                      opts.map((opt) {
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 10),
+                          child: _GreetingOptionTile(
+                            option: opt,
+                            onTap: () {
+                              onSendMessage(opt.title);
+                            },
+                          ),
+                        );
+                      }).toList(),
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
-    ));
+    );
   }
-
 
   Widget _buildOptionButtons(
     List<String> options,
@@ -2031,17 +2175,21 @@ class _ChatScreenBody extends StatelessWidget {
       return const SizedBox.shrink();
     }
 
-    List<Widget> actionButtons = [];
-    // Handle see_more widgets
-    for (final widget in latestActionWidgets.where(
-      (w) => w.type == WidgetEnum.see_more.value,
-    )) {
-      for (final action in widget.seeMore) {
-        actionButtons.add(
-          BlocBuilder<ChatBloc, ChatState>(
-            builder: (context, state) {
-              bool isApiLoading = state is ChatLoading;
-              return _buildActionButton(
+    return BlocBuilder<ChatBloc, ChatState>(
+      builder: (context, state) {
+        bool isApiLoading = state is ChatLoading;
+        if (isApiLoading == true) {
+          return const SizedBox.shrink();
+        }
+
+        List<Widget> actionButtons = [];
+        // Handle see_more widgets
+        for (final widget in latestActionWidgets.where(
+          (w) => w.type == WidgetEnum.see_more.value,
+        )) {
+          for (final action in widget.seeMore) {
+            actionButtons.add(
+              _buildActionButton(
                 text: action.buttonText,
                 onTap:
                     isApiLoading
@@ -2060,6 +2208,7 @@ class _ChatScreenBody extends StatelessWidget {
                                       );
                                       onSendMessage("I have updated the cart");
                                       isCartAPICalled = false;
+                                      needToCallChatScreenSendMessageAPI = true;
                                     }
                                   },
                                 );
@@ -2067,22 +2216,17 @@ class _ChatScreenBody extends StatelessWidget {
                             ),
                           );
                         },
-              );
-            },
-          ),
-        );
-      }
-    }
+              ),
+            );
+          }
+        }
 
-    for (final widget in latestActionWidgets.where(
-      (w) => w.type == WidgetEnum.order_tracking.value,
-    )) {
-      for (final action in widget.orderTracking) {
-        actionButtons.add(
-          BlocBuilder<ChatBloc, ChatState>(
-            builder: (context, state) {
-              bool isApiLoading = state is ChatLoading;
-              return _buildActionButton(
+        for (final widget in latestActionWidgets.where(
+          (w) => w.type == WidgetEnum.order_tracking.value,
+        )) {
+          for (final action in widget.orderTracking) {
+            actionButtons.add(
+              _buildActionButton(
                 text: action.buttonText,
                 onTap:
                     isApiLoading
@@ -2103,22 +2247,17 @@ class _ChatScreenBody extends StatelessWidget {
                             print("Failed to fetch order details");
                           }
                         },
-              );
-            },
-          ),
-        );
-      }
-    }
+              ),
+            );
+          }
+        }
 
-    for (final widget in latestActionWidgets.where(
-      (w) => w.type == WidgetEnum.order_details.value,
-    )) {
-      for (final action in widget.orderDetails) {
-        actionButtons.add(
-          BlocBuilder<ChatBloc, ChatState>(
-            builder: (context, state) {
-              bool isApiLoading = state is ChatLoading;
-              return _buildActionButton(
+        for (final widget in latestActionWidgets.where(
+          (w) => w.type == WidgetEnum.order_details.value,
+        )) {
+          for (final action in widget.orderDetails) {
+            actionButtons.add(
+              _buildActionButton(
                 text: action.buttonText,
                 onTap:
                     isApiLoading
@@ -2138,22 +2277,17 @@ class _ChatScreenBody extends StatelessWidget {
                             print("Failed to fetch order details");
                           }
                         },
-              );
-            },
-          ),
-        );
-      }
-    }
+              ),
+            );
+          }
+        }
 
-    for (final widget in latestActionWidgets.where(
-      (w) => w.type == WidgetEnum.menu.value,
-    )) {
-      for (final action in widget.menu) {
-        actionButtons.add(
-          BlocBuilder<ChatBloc, ChatState>(
-            builder: (context, state) {
-              bool isApiLoading = state is ChatLoading;
-              return _buildActionButton(
+        for (final widget in latestActionWidgets.where(
+          (w) => w.type == WidgetEnum.menu.value,
+        )) {
+          for (final action in widget.menu) {
+            actionButtons.add(
+              _buildActionButton(
                 text: action.buttonText,
                 onTap:
                     isApiLoading
@@ -2178,6 +2312,7 @@ class _ChatScreenBody extends StatelessWidget {
                                             "I have updated the cart",
                                           );
                                           isCartAPICalled = false;
+                                          needToCallChatScreenSendMessageAPI = true;
                                         }
                                       },
                                     ),
@@ -2199,6 +2334,7 @@ class _ChatScreenBody extends StatelessWidget {
                                             "I have updated the cart",
                                           );
                                           isCartAPICalled = false;
+                                          needToCallChatScreenSendMessageAPI = true;
                                         }
                                       },
                                     ),
@@ -2206,22 +2342,17 @@ class _ChatScreenBody extends StatelessWidget {
                             );
                           }
                         },
-              );
-            },
-          ),
-        );
-      }
-    }
+              ),
+            );
+          }
+        }
 
-    for (final widget in latestActionWidgets.where(
-      (w) => w.type == WidgetEnum.add_address.value,
-    )) {
-      for (final action in widget.addAddress) {
-        actionButtons.add(
-          BlocBuilder<ChatBloc, ChatState>(
-            builder: (context, state) {
-              bool isApiLoading = state is ChatLoading;
-              return _buildActionButton(
+        for (final widget in latestActionWidgets.where(
+          (w) => w.type == WidgetEnum.add_address.value,
+        )) {
+          for (final action in widget.addAddress) {
+            actionButtons.add(
+              _buildActionButton(
                 text: action.buttonText,
                 onTap:
                     isApiLoading
@@ -2265,28 +2396,22 @@ class _ChatScreenBody extends StatelessWidget {
                           //   }
                           // });
                         },
-              );
-            },
-          ),
-        );
-      }
-    }
+              ),
+            );
+          }
+        }
 
-    for (final widget in latestActionWidgets.where(
-      (w) => w.type == WidgetEnum.add_payment.value,
-    )) {
-      for (final action in widget.addPayment) {
-        actionButtons.add(
-          BlocBuilder<ChatBloc, ChatState>(
-            builder: (context, state) {
-              bool isApiLoading = state is ChatLoading;
-              return _buildActionButton(
+        for (final widget in latestActionWidgets.where(
+          (w) => w.type == WidgetEnum.add_payment.value,
+        )) {
+          for (final action in widget.addPayment) {
+            actionButtons.add(
+              _buildActionButton(
                 text: action.buttonText,
                 onTap:
                     isApiLoading
                         ? () {}
-                        : 
-                        () async {
+                        : () async {
                           OrderService().triggerAddCardOpen();
                           // final result = await AddCardBottomSheet.show(context);
                           // if (result != null) {
@@ -2299,51 +2424,54 @@ class _ChatScreenBody extends StatelessWidget {
                           //   );
                           // }
                         },
+              ),
+            );
+          }
+        }
+
+        for (final widgetType in [
+          WidgetEnum.add_more.value,
+          WidgetEnum.proceed_to_checkout.value,
+          WidgetEnum.cash_on_delivery.value,
+        ]) {
+          final widgets = latestActionWidgets.where(
+            (w) => w.type == widgetType,
+          );
+          for (final widget in widgets) {
+            for (final item in widget.rawItems) {
+              final buttonText =
+                  item['button_text'] ?? item['title'] ?? 'Action';
+              actionButtons.add(
+                _buildActionButton(
+                  text: buttonText,
+                  onTap: () {
+                    onSendMessage(buttonText);
+                  },
+                ),
               );
-            },
+            }
+          }
+        }
+
+        if (actionButtons.isEmpty) {
+          return const SizedBox.shrink();
+        }
+
+        return Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          width: double.infinity,
+          child: Align(
+            alignment: Alignment.centerLeft,
+            child: Wrap(
+              spacing: 10,
+              runSpacing: 8,
+              alignment: WrapAlignment.start,
+              crossAxisAlignment: WrapCrossAlignment.start,
+              children: actionButtons,
+            ),
           ),
         );
-      }
-    }
-
-    for (final widgetType in [
-      WidgetEnum.add_more.value,
-      WidgetEnum.proceed_to_checkout.value,
-      WidgetEnum.cash_on_delivery.value,
-    ]) {
-      final widgets = latestActionWidgets.where((w) => w.type == widgetType);
-      for (final widget in widgets) {
-        for (final item in widget.rawItems) {
-          final buttonText = item['button_text'] ?? item['title'] ?? 'Action';
-          actionButtons.add(
-            _buildActionButton(
-              text: buttonText,
-              onTap: () {
-                onSendMessage(buttonText);
-              },
-            ),
-          );
-        }
-      }
-    }
-
-    if (actionButtons.isEmpty) {
-      return const SizedBox.shrink();
-    }
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      width: double.infinity,
-      child: Align(
-        alignment: Alignment.centerLeft,
-        child: Wrap(
-          spacing: 10,
-          runSpacing: 8,
-          alignment: WrapAlignment.start,
-          crossAxisAlignment: WrapCrossAlignment.start,
-          children: actionButtons,
-        ),
-      ),
+      },
     );
   }
 
@@ -2413,7 +2541,8 @@ class _ChatScreenBody extends StatelessWidget {
                         ),
                       ),
                       child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        // padding: const EdgeInsets.symmetric(horizontal: 12),
+                        padding: const EdgeInsets.symmetric(horizontal: 12,vertical: 20),// ADDED For Text Field Height
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           crossAxisAlignment: CrossAxisAlignment.center,
@@ -2636,26 +2765,26 @@ class _ChatScreenBody extends StatelessWidget {
                                             ? null
                                             : () async {
                                               await onStopSpeechRecording();
-                                              onSendMessage(
-                                                messageController.text,
-                                              );
-                                              if (messageController.text
-                                                  .trim()
-                                                  .isNotEmpty) {
-                                                FocusScope.of(
-                                                  context,
-                                                ).requestFocus(
-                                                  messageFocusNode,
-                                                );
-                                              }
-                                              Future.delayed(
-                                                const Duration(
-                                                  milliseconds: 100,
-                                                ),
-                                                () {
-                                                  onScrollToBottom();
-                                                },
-                                              );
+                                              // onSendMessage(
+                                              //   messageController.text,
+                                              // );
+                                              // if (messageController.text
+                                              //     .trim()
+                                              //     .isNotEmpty) {
+                                              //   FocusScope.of(
+                                              //     context,
+                                              //   ).requestFocus(
+                                              //     messageFocusNode,
+                                              //   );
+                                              // }
+                                              // Future.delayed(
+                                              //   const Duration(
+                                              //     milliseconds: 100,
+                                              //   ),
+                                              //   () {
+                                              //     onScrollToBottom();
+                                              //   },
+                                              // );
                                             },
                                     child: SizedBox(
                                       width: 34,
@@ -2778,7 +2907,8 @@ class _ChatScreenBody extends StatelessWidget {
               cartBloc.add(
                 CartAddItemRequested(
                   storeId: store.storeId,
-                  cartType: store.storeTypeId == FoodCategory.food.value ? 1 : 2,
+                  cartType:
+                      store.storeTypeId == FoodCategory.food.value ? 1 : 2,
                   // Default cart type
                   action: 1,
                   // Add action
@@ -3241,6 +3371,7 @@ class _ChatScreenBody extends StatelessWidget {
               if (productsWidget != null) {
                 final Map<String, dynamic>? productJson = productsWidget
                     .getRawProduct(index);
+                    print("productJson: $productJson");
                 OrderService().triggerProductOrder(productJson ?? {});
               }
             },
@@ -3696,10 +3827,57 @@ class _ChatScreenBody extends StatelessWidget {
 }
 
 class _GreetingOptionTile extends StatelessWidget {
-  final String text;
+  final GreetingOption option;
   final VoidCallback onTap;
 
-  const _GreetingOptionTile({required this.text, required this.onTap});
+  const _GreetingOptionTile({required this.option, required this.onTap});
+
+  // List<TextSpan> _buildTextWithLargeEmojis(String text) {
+  //   List<TextSpan> spans = [];
+  //   // Comprehensive emoji regex covering all major emoji ranges
+  //   RegExp emojiRegex = RegExp(
+  //     r'[\u{1F600}-\u{1F64F}]|' // Emoticons
+  //     r'[\u{1F300}-\u{1F5FF}]|' // Misc Symbols and Pictographs
+  //     r'[\u{1F680}-\u{1F6FF}]|' // Transport and Map
+  //     r'[\u{1F1E0}-\u{1F1FF}]|' // Regional indicator symbols
+  //     r'[\u{2600}-\u{26FF}]|'   // Misc symbols
+  //     r'[\u{2700}-\u{27BF}]|'   // Dingbats
+  //     r'[\u{1F900}-\u{1F9FF}]|' // Supplemental Symbols and Pictographs
+  //     r'[\u{1FA70}-\u{1FAFF}]|' // Symbols and Pictographs Extended-A
+  //     r'[\u{1F018}-\u{1F0F5}]|' // Playing cards
+  //     r'[\u{1F200}-\u{1F2FF}]|' // Enclosed CJK Letters and Months
+  //     r'[\u{1F964}]', // Cup with straw emoji (🥤)
+  //     unicode: true
+  //   );
+    
+  //   int lastIndex = 0;
+  //   for (Match match in emojiRegex.allMatches(text)) {
+     
+  //     // Add emoji with larger font size
+  //     spans.add(TextSpan(
+  //       text: match.group(0),
+  //       style: const TextStyle(fontSize: 24), // Larger emoji size
+  //     ));
+
+
+  //     // Add space after emoji
+  //     spans.add(const TextSpan(text: '  '));
+
+  //      // Add text before emoji
+  //     if (match.start > lastIndex) {
+  //       spans.add(TextSpan(text: text.substring(lastIndex, match.start)));
+  //     }
+      
+  //     lastIndex = match.end;
+  //   }
+    
+  //   // Add remaining text
+  //   if (lastIndex < text.length) {
+  //     spans.add(TextSpan(text: text.substring(lastIndex)));
+  //   }
+    
+  //   return spans;
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -3707,25 +3885,89 @@ class _GreetingOptionTile extends StatelessWidget {
       onTap: onTap,
       borderRadius: BorderRadius.circular(8),
       child: Container(
-        width: 162,
-        height: 90,
-        padding: const EdgeInsets.fromLTRB(8, 0, 8, 4),
+        width: double.infinity,
+        height: 74,
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),//20,16
         decoration: BoxDecoration(
           color: const Color(0xFFF5F7FF),
           borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: const Color(0xFFEEF4FF), width: 1),
         ),
-        child: Align(
-          alignment: Alignment.bottomLeft,
-          child: Text(
-            text,
-            maxLines: 3,
-            style: AppTextStyles.bodyText.copyWith(
-              fontSize: 15,
-              color: const Color(0xFF242424),
-              // fontWeight: FontWeight.w500,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            // Left side: Emoji and text content
+            Expanded(
+              child: Row(
+                children: [
+                  // Emoji in circular background
+                  Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(63.6364),
+                    ),
+                    child: Center(
+                      child: Text(
+                        option.emoji,
+                        style: const TextStyle(
+                          fontSize: 26,
+                          height: 1.4,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  // Text content
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          option.title,
+                          maxLines: 1,
+                          style: const TextStyle(
+                            fontFamily: 'Plus Jakarta Sans',
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            height: 1.4,
+                            color: Color(0xFF242424),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        const SizedBox(height: 3),
+                        Text(
+                          option.subTitle,
+                          maxLines: 1,
+                          style: const TextStyle(
+                            fontFamily: 'Plus Jakarta Sans',
+                            fontSize: 12,
+                            fontWeight: FontWeight.w400,
+                            height: 1.4,
+                            color: Color(0xFF585C77),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
+            SizedBox(
+              width: 14,
+              height: 14,
+              child: Center(
+                child: SvgPicture.asset(
+                  AssetPath.get('images/ic_side_arrow.svg'),
+                  width: 14,
+                  height: 14,
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
