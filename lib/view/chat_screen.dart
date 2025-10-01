@@ -374,7 +374,7 @@ class _ChatScreenState extends State<ChatScreen> {
       print('ChatScreen: isFromHistory - ${widget.isFromHistory}');
       return;
     }
-    _initializeSession();
+    _initializeSession(false);
 
     // Initialize LaunchBloc
     _launchBloc = LaunchBloc();
