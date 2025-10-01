@@ -63,6 +63,7 @@ class _ChatScreenState extends State<ChatScreen> {
   List<ChatWidget> _latestActionWidgets = []; // Track latest action widgets
   int _totalCartCount = 0; // Track total cart count
   List<ChatMessage> messages = [];
+  bool _needToEndThisChat = false; // Track if chat should be ended
 
   late final CartBloc _cartBloc;
   final SpeechService _speechService = SpeechService();
@@ -197,6 +198,9 @@ class _ChatScreenState extends State<ChatScreen> {
     ChatWidget? chooseCardWidget;
     ChatWidget? orderSummaryWidget;
     ChatWidget? orderConfirmedWidget;
+    
+    // Capture needToEndThisChat from API response
+    _needToEndThisChat = response.needToEndThisChat;
     try {
       storesWidget = response.widgets.firstWhere(
         (widget) => widget.isStoresWidget,
@@ -566,6 +570,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
   Future<void> _restartChatAPI() async {
     setState(() {
+      _needToEndThisChat = false;
       messages = [];
 
       _selectedOptionMessages.clear();
@@ -691,6 +696,7 @@ class _ChatScreenState extends State<ChatScreen> {
       onCancelSpeechRecording: _cancelSpeechRecording,
       // Add cancel speech handler
       isRecording: _isRecording, // Pass recording state
+      needToEndThisChat: _needToEndThisChat, // Pass needToEndThisChat state
     );
   }
 
@@ -918,6 +924,7 @@ class _ChatScreenBody extends StatelessWidget {
   final Future<void> Function()
   onCancelSpeechRecording; // Add cancel speech handler
   final bool isRecording; // Add recording state
+  final bool needToEndThisChat; // Add needToEndThisChat parameter
 
   const _ChatScreenBody({
     required this.messageController,
@@ -949,6 +956,7 @@ class _ChatScreenBody extends StatelessWidget {
     required this.onStopSpeechRecording, // Add the stop speech handler parameter
     required this.onCancelSpeechRecording, // Add the cancel speech handler parameter
     required this.isRecording, // Add the recording state parameter
+    required this.needToEndThisChat, // Add the needToEndThisChat parameter
   });
 
   @override
@@ -1118,8 +1126,31 @@ class _ChatScreenBody extends StatelessWidget {
                   _buildActionButtons(context),
                   Stack(
                     children: [
-                      _buildInputArea(context),
-                      if (isRecording) _buildInputRecordingArea(context),
+                      if (needToEndThisChat == true)
+                        Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                          margin: const EdgeInsets.fromLTRB(16, 10, 16, 40),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFF5F0FF), // Light purple background
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: const Color(0xFFE8D5FF), width: 1),
+                          ),
+                          child: Text(
+                            'This session has ended. Please click the reload button to begin a new chat',
+                            style: AppTextStyles.bodyText.copyWith(
+                              fontSize: 14,
+                              color: const Color(0xFF6E4185), // Darker purple text
+                              fontWeight: FontWeight.w500,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        )
+                         
+                      else ...[
+                        _buildInputArea(context),
+                        if (isRecording) _buildInputRecordingArea(context),
+                      ]
                     ],
                   ),
                 ],
