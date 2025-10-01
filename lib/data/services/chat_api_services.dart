@@ -1,9 +1,11 @@
 import 'package:chat_bot/data/api_client.dart';
 import 'package:chat_bot/data/model/chat_response.dart';
+import 'package:chat_bot/data/model/session_id_response.dart';
 import 'package:chat_bot/data/services/token_manager.dart';
 import 'package:chat_bot/data/services/universal_api_client.dart';
 import 'package:chat_bot/utils/log.dart';
 import 'package:chat_bot/utils/utility.dart';
+import 'package:unique_identifier/unique_identifier.dart';
 
 /// Comprehensive API service that provides easy access to all APIs with automatic token refresh
 class ChatApiServices {
@@ -94,6 +96,27 @@ class ChatApiServices {
     return null;
   }
 
+  Future<SessionIdResponse?> getSessionId() async {
+    final body = {
+      'user_id': _userId,
+      'device_id': await _getDeviceId(),
+      'user_name': _name
+    };
+
+    final res = await _chatClient.post('/v2/create_session', body);
+    if (res.isSuccess && res.data != null) {
+      return SessionIdResponse.fromJson(res.data as Map<String, dynamic>);
+    }
+    return null;
+  }
+
+  static Future<String> _getDeviceId() async {
+    try {
+      return await UniqueIdentifier.serial ?? "default-device-id";
+    } catch (e) {
+      return "default-device-id";
+    }
+  }
 
 
   ApiClient createCustomClient(String baseUrl) {
