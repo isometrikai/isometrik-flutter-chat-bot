@@ -9,8 +9,8 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
 
   ChatBloc() : super(ChatInitial()) {
     on<ChatLoadEvent>(_onFetchChat);
-    // on<AddToCartEvent>(_addToCart);
     on<ChatSessionIdEvent>(_onFetchChatWithSessionId);
+    on<ChatHistorySessionIdEvent>(_onFetchChatWithHistorySessionId);
   }
 
   Future<void> _onFetchChat(ChatLoadEvent event, Emitter<ChatState> emit) async {
@@ -55,6 +55,23 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
       if (event.needToShowLoader) {
         Utility.closeProgressDialog();
       }
+    }
+  }
+
+
+  Future<void> _onFetchChatWithHistorySessionId(ChatHistorySessionIdEvent event, Emitter<ChatState> emit) async {
+    try {
+      Utility.showLoader();
+      final response = await ChatService.instance.fetchChatHistory(event.sessionId);
+      print('response: $response');
+      Utility.closeProgressDialog();
+      // TODO: Handle the chat history response - emit appropriate state
+      emit(ChatLoadedWithHistorySessionId(response));
+    } catch (e) {
+      // if (event.needToShowLoader) {
+      //   Utility.closeProgressDialog();
+      // }
+      // emit(ChatError(e.toString()));
     }
   }
 

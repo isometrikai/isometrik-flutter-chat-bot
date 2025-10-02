@@ -220,6 +220,7 @@ class StoreCard extends StatelessWidget {
                   return;
                 }
                 if (storesWidget != null) {
+                  print('StoreCard: onTap called - $index');
                   final Map<String, dynamic>? storeJson = storesWidget!.getRawStore(index);
                   OrderService().triggerStoreOrder(storeJson ?? {});
                 }

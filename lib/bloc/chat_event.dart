@@ -102,3 +102,11 @@ class ChatSessionIdEvent extends ChatEvent {
     required this.needToShowLoader,
   });
 }
+
+class ChatHistorySessionIdEvent extends ChatEvent {
+  final String sessionId;
+
+  const ChatHistorySessionIdEvent({
+    required this.sessionId,
+  });
+}

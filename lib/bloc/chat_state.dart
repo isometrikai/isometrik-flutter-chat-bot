@@ -1,3 +1,4 @@
+import 'package:chat_bot/data/model/chat_history_response.dart';
 import 'package:chat_bot/data/model/chat_response.dart';
 import 'package:equatable/equatable.dart';
 
@@ -28,6 +29,15 @@ class ChatLoadedWithSessionId extends ChatState {
 
   @override
   List<Object> get props => [sessionId];
+}
+
+class ChatLoadedWithHistorySessionId extends ChatState {
+  final List<ChatHistoryDetail> history;
+
+  const ChatLoadedWithHistorySessionId(this.history);
+
+  @override
+  List<Object> get props => [history];
 }
 
 class ChatError extends ChatState {

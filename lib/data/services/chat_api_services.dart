@@ -1,5 +1,6 @@
 import 'package:chat_bot/data/api_client.dart';
 import 'package:chat_bot/data/model/chat_response.dart';
+import 'package:chat_bot/data/model/chat_history_response.dart';
 import 'package:chat_bot/data/model/session_id_response.dart';
 import 'package:chat_bot/data/services/token_manager.dart';
 import 'package:chat_bot/data/services/universal_api_client.dart';
@@ -108,6 +109,24 @@ class ChatApiServices {
       return SessionIdResponse.fromJson(res.data as Map<String, dynamic>);
     }
     return null;
+  }
+
+  Future<List<ChatHistoryDetail>> fetchChatHistory(String sessionId) async {
+    final res = await _chatClient.get('/v2/history/$sessionId');
+    if (res.isSuccess && res.data != null) {
+      try {
+        // The API returns a list of chat history items
+        if (res.data is List) {
+          return (res.data as List)
+              .map((item) => ChatHistoryDetail.fromJson(item as Map<String, dynamic>))
+              .toList();
+        }
+      } catch (e) {
+        AppLog.error('Error parsing chat history: $e');
+        return [];
+      }
+    }
+    return [];
   }
 
   static Future<String> _getDeviceId() async {
