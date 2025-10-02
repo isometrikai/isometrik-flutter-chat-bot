@@ -10,7 +10,7 @@ class ChatHistoryBloc extends Bloc<ChatHistoryEvent, ChatHistoryState> {
   final ChatHistoryRepository repository;
 
   ChatHistoryBloc({ChatHistoryRepository? repository})
-      : repository = repository ?? const ChatHistoryRepository(),
+      : repository = repository ?? ChatHistoryRepository.instance,
         super(ChatHistoryInitial()) {
     on<ChatHistoryFetchRequested>(_onFetchRequested);
     on<ChatHistoryRefreshed>(_onRefreshed);

@@ -4,15 +4,23 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 class ChatHistoryRepository {
-  const ChatHistoryRepository();
+  static final ChatHistoryRepository _instance = ChatHistoryRepository._internal();
+  static ChatHistoryRepository get instance => _instance;
+  
+  ChatHistoryRepository._internal();
 
   static const String baseUrl = 'https://easyagentapi.isometrik.ai';
+  String userIds = '';
+
+  void configure({
+    required String userId,
+  }) {
+    userIds = userId;
+  }
 
   Future<List<ChatHistoryResponse>> fetchChatHistory() async {
-    // Get user ID from preferences, fallback to default if not available
-    final userId = await UserPreferences.getUserId() ?? '68c129ebbdaeb6000f7ed53c';
     
-    final url = Uri.parse('$baseUrl/v2/sessions/$userId');
+    final url = Uri.parse('$baseUrl/v2/sessions/$userIds');
     
     try {
       final response = await http.get(url);

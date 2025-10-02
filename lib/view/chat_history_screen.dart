@@ -255,6 +255,7 @@ class ChatHistoryScreen extends StatelessWidget {
               child: ChatScreen(
                 isFromHistory: true,
                 historySessionId: session.sessionId.toString(),
+                chatHistoryTitle: displayText,
               ),
             ),
           ),

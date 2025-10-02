@@ -48,7 +48,8 @@ class ChatScreen extends StatefulWidget {
   final GreetingResponse? greetingData;
   final bool isFromHistory;
   final String? historySessionId;
-  const ChatScreen({super.key, this.chatbotData, this.greetingData, this.isFromHistory = false, this.historySessionId});
+  final String? chatHistoryTitle;
+  const ChatScreen({super.key, this.chatbotData, this.greetingData, this.isFromHistory = false, this.historySessionId, this.chatHistoryTitle});
 
   @override
   State<ChatScreen> createState() => _ChatScreenState();
@@ -275,7 +276,7 @@ class _ChatScreenState extends State<ChatScreen> {
         bool hasCart = cartWidget != null;
         bool hasChooseAddress = false;//chooseAddressWidget != null;
         bool hasChooseCard = false;//chooseCardWidget != null;
-        bool hasOrderSummary = false;//orderSummaryWidget != null;
+        bool hasOrderSummary = orderSummaryWidget != null;
         bool hasOrderConfirmed = orderConfirmedWidget != null;
 
         historyMessages.add(
@@ -890,6 +891,7 @@ class _ChatScreenState extends State<ChatScreen> {
       isRecording: _isRecording, // Pass recording state
       needToEndThisChat: _needToEndThisChat, // Pass needToEndThisChat state
       isFromHistory: widget.isFromHistory, // Pass isFromHistory parameter
+      chatHistoryTitle: widget.chatHistoryTitle,
     );
   }
 
@@ -1120,6 +1122,7 @@ class _ChatScreenBody extends StatelessWidget {
   final bool isRecording; // Add recording state
   final bool needToEndThisChat; // Add needToEndThisChat parameter
   final bool isFromHistory; // Add isFromHistory parameter
+  final String? chatHistoryTitle; // Add chatHistoryTitle parameter
 
   const _ChatScreenBody({
     required this.messageController,
@@ -1154,6 +1157,7 @@ class _ChatScreenBody extends StatelessWidget {
     required this.isRecording, // Add the recording state parameter
     required this.needToEndThisChat, // Add the needToEndThisChat parameter
     required this.isFromHistory, // Add the isFromHistory parameter
+    required this.chatHistoryTitle, // Add the chatHistoryTitle parameter
   });
 
   @override
@@ -1563,8 +1567,8 @@ class _ChatScreenBody extends StatelessWidget {
       elevation: 1,
       leadingWidth: 0,
       leading: const SizedBox.shrink(), // Remove leading widget
-      title: const Text(
-        'Chats History',
+      title:  Text(
+        chatHistoryTitle ?? '',
         style: const TextStyle(
                     fontWeight: FontWeight.w700,
                     fontSize: 24,
