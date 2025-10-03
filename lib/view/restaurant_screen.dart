@@ -1,3 +1,4 @@
+import 'package:chat_bot/utils/asset_path.dart';
 import 'package:chat_bot/utils/enum.dart';
 import 'package:chat_bot/utils/utility.dart';
 import 'package:chat_bot/view/customization_summary_screen.dart';
@@ -5,6 +6,7 @@ import 'package:chat_bot/view/product_customization_screen.dart';
 import 'package:chat_bot/view/grocery_customization_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import '../data/model/chat_response.dart' as chat;
 import '../data/model/universal_cart_response.dart';
 import '../widgets/black_toast_view.dart';
@@ -570,6 +572,45 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
     );
   }
 
+  Widget _buildEmptyCart() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          // Empty cart SVG icon
+          SvgPicture.asset(
+            AssetPath.get('images/ic_emptyRestaurents.svg'),
+            width: 120,
+            height: 120,
+          ),
+          const SizedBox(height: 24),
+          // "Your cart is empty" text
+          Text(
+            'No restaurants found!',
+            style: AppTextStyles.restaurantTitle.copyWith(
+              color: const Color(0xFF242424),
+              fontWeight: FontWeight.w700,
+              fontSize: 16,
+              height: 1.2,
+            ),
+          ),
+          // const SizedBox(height: 8),
+          // // Description text
+          // Padding(
+          //   padding: const EdgeInsets.symmetric(horizontal: 40),
+          //   child: Text(
+          //     'Add items like food, groceries, medicines, services or other products to get started.',
+          //     textAlign: TextAlign.center,
+          //     style: AppTextStyles.restaurantDescription.copyWith(
+          //       color: const Color(0xFF6E4185),
+          //     ),
+          //   ),
+          // ),
+        ],
+      ),
+    );
+  }
+
   // Widget _buildBottomCartBar() {
   //   return GestureDetector(
   //     onTap: _onAddToCart,
@@ -720,14 +761,7 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
 
         final restaurants = (state as RestaurantLoadSuccess).restaurants;
         if (restaurants.isEmpty) {
-          return Center(
-            child: Text(
-              'No restaurants available',
-              style: AppTextStyles.bodyText.copyWith(
-                color: const Color(0xFF6E4185),
-              ),
-            ),
-          );
+          return _buildEmptyCart();
         }
 
         return RefreshIndicator(

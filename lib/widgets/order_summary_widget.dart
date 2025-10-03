@@ -277,7 +277,8 @@ class OrderSummaryWidget extends StatelessWidget {
 
   String _formatCurrency(String symbol, num value) {
     if (symbol.isNotEmpty) {
-      return '$symbol${value.toStringAsFixed(value.truncateToDouble() == value ? 0 : 2)}';
+      // return '$symbol${value.toStringAsFixed(value.truncateToDouble() == value ? 0 : 2)}';
+      return '$symbol${value.toString()}';
     }
     return 'د.إ${value.toStringAsFixed(value.truncateToDouble() == value ? 0 : 2)}';
   }

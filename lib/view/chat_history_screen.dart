@@ -46,37 +46,11 @@ class ChatHistoryScreen extends StatelessWidget {
                   );
                 } else if (state is ChatHistoryLoadSuccess) {
                   if (state.sessions.isEmpty) {
-                    return Center(
-                      child: Text(
-                        'No chat history available',
-                        style: AppTextStyles.bodyText.copyWith(
-                          color: const Color(0xFF979797),
-                        ),
-                      ),
-                    );
+                    return _buildEmptyCart();
                   }
                   return _buildChatHistoryList(context, state.sessions);
                 } else if (state is ChatHistoryLoadFailure) {
-                  return Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          'Failed to load chat history',
-                          style: AppTextStyles.bodyText.copyWith(
-                            color: const Color(0xFFFF0000),
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        ElevatedButton(
-                          onPressed: () {
-                            context.read<ChatHistoryBloc>().add(const ChatHistoryRefreshed());
-                          },
-                          child: const Text('Retry'),
-                        ),
-                      ],
-                    ),
-                  );
+                  return _buildEmptyCart();
                 }
                 return const SizedBox.shrink();
               },
@@ -152,6 +126,45 @@ class ChatHistoryScreen extends StatelessWidget {
             ],
           );
         },
+      ),
+    );
+  }
+
+  Widget _buildEmptyCart() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          // Empty cart SVG icon
+          SvgPicture.asset(
+            AssetPath.get('images/ic_chat_empty.svg'),
+            width: 120,
+            height: 120,
+          ),
+          const SizedBox(height: 24),
+          // "Your cart is empty" text
+          Text(
+            'No conversations yet!',
+            style: AppTextStyles.restaurantTitle.copyWith(
+              color: const Color(0xFF242424),
+              fontWeight: FontWeight.w700,
+              fontSize: 16,
+              height: 1.2,
+            ),
+          ),
+          // const SizedBox(height: 8),
+          // // Description text
+          // Padding(
+          //   padding: const EdgeInsets.symmetric(horizontal: 40),
+          //   child: Text(
+          //     'Add items like food, groceries, medicines, services or other products to get started.',
+          //     textAlign: TextAlign.center,
+          //     style: AppTextStyles.restaurantDescription.copyWith(
+          //       color: const Color(0xFF6E4185),
+          //     ),
+          //   ),
+          // ),
+        ],
       ),
     );
   }
