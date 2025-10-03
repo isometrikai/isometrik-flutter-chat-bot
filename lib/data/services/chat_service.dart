@@ -1,4 +1,6 @@
 import 'package:chat_bot/data/model/chat_response.dart';
+import 'package:chat_bot/data/model/chat_history_response.dart';
+import 'package:chat_bot/data/model/session_id_response.dart';
 import 'package:chat_bot/data/services/chat_api_services.dart';
 
 class ChatService {
@@ -23,6 +25,14 @@ class ChatService {
       longitude: longitude,
       latitude: latitude,
     );
+  }
+
+  Future<SessionIdResponse?> getSessionId() {
+    return ChatApiServices.instance.getSessionId();
+  }
+
+  Future<List<ChatHistoryDetail>> fetchChatHistory(String sessionId) {
+    return ChatApiServices.instance.fetchChatHistory(sessionId);
   }
 
   // Future<ChatResponse?> addToCart({

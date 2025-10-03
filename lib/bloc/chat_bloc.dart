@@ -2,13 +2,15 @@ import 'package:chat_bot/bloc/cart/cart_bloc.dart';
 import 'package:chat_bot/bloc/chat_event.dart';
 import 'package:chat_bot/bloc/chat_state.dart';
 import 'package:chat_bot/data/services/chat_service.dart';
+import 'package:chat_bot/utils/utility.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class ChatBloc extends Bloc<ChatEvent, ChatState> {
 
   ChatBloc() : super(ChatInitial()) {
     on<ChatLoadEvent>(_onFetchChat);
-    // on<AddToCartEvent>(_addToCart);
+    on<ChatSessionIdEvent>(_onFetchChatWithSessionId);
+    on<ChatHistorySessionIdEvent>(_onFetchChatWithHistorySessionId);
   }
 
   Future<void> _onFetchChat(ChatLoadEvent event, Emitter<ChatState> emit) async {
@@ -33,29 +35,45 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     }
   }
 
-  // Future<void> _addToCart(AddToCartEvent event, Emitter<ChatState> emit) async {
-  //   try {
-  //     emit(ChatLoading());
-  //     final chat = await ChatService.instance.addToCart(
-  //       storeId: event.storeId,
-  //       cartType: event.cartType,
-  //       action: event.action,
-  //       storeCategoryId: event.storeCategoryId,
-  //       newQuantity: event.newQuantity,
-  //       storeTypeId: event.storeTypeId,
-  //       productId: event.productId,
-  //       centralProductId: event.centralProductId,
-  //       unitId: event.unitId,
-  //     );
-  //     if (chat != null) {
-  //       emit(ChatLoaded(chat));
-  //     } else {
-  //       emit(ChatError('Failed to send message'));
-  //     }
-  //   } catch (e) {
-  //     emit(ChatError(e.toString()));
-  //   }
-  // }
+  Future<void> _onFetchChatWithSessionId(ChatSessionIdEvent event, Emitter<ChatState> emit) async {
+    try {
+      if (event.needToShowLoader) {
+        Utility.showLoader();
+      }
+      // No loading state - background API call only
+      final response = await ChatService.instance.getSessionId();
+      if (response != null) {
+        sessionId = response.sessionId.toString();
+        // emit(ChatLoadedWithSessionId(response.sessionId.toString()));
+      }
+      if (event.needToShowLoader) {
+        Utility.closeProgressDialog();
+      }
+      // Silently fail - no error emission
+    } catch (e) {
+      // Silently handle error - background call should not show errors
+      if (event.needToShowLoader) {
+        Utility.closeProgressDialog();
+      }
+    }
+  }
+
+
+  Future<void> _onFetchChatWithHistorySessionId(ChatHistorySessionIdEvent event, Emitter<ChatState> emit) async {
+    try {
+      Utility.showLoader();
+      final response = await ChatService.instance.fetchChatHistory(event.sessionId);
+      print('response: $response');
+      Utility.closeProgressDialog();
+      // TODO: Handle the chat history response - emit appropriate state
+      emit(ChatLoadedWithHistorySessionId(response));
+    } catch (e) {
+      // if (event.needToShowLoader) {
+      //   Utility.closeProgressDialog();
+      // }
+      // emit(ChatError(e.toString()));
+    }
+  }
 
 
 }

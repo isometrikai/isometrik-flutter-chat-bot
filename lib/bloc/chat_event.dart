@@ -69,7 +69,6 @@ class ChatLoadEvent extends ChatEvent {
   ];
 }
 
-
 class AddToCartEvent extends ChatEvent {
   final String storeId;
   final int cartType;
@@ -93,5 +92,21 @@ class AddToCartEvent extends ChatEvent {
     required this.newQuantity,
     required this.storeTypeId,
     required this.unitId,
+  });
+}
+
+class ChatSessionIdEvent extends ChatEvent {
+  final bool needToShowLoader;
+
+  const ChatSessionIdEvent({
+    required this.needToShowLoader,
+  });
+}
+
+class ChatHistorySessionIdEvent extends ChatEvent {
+  final String sessionId;
+
+  const ChatHistorySessionIdEvent({
+    required this.sessionId,
   });
 }

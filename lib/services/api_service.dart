@@ -1,3 +1,4 @@
+import 'package:chat_bot/data/repositories/chat_history_repository.dart';
 import 'package:chat_bot/data/services/auth_service.dart';
 import 'package:chat_bot/data/services/chat_api_services.dart';
 import 'package:chat_bot/data/services/hawksearch_service.dart';
@@ -74,6 +75,10 @@ class ApiService {
       searchApiUrl: searchApiUrl,
       latitude: latitude ?? 0.0,
       longitude: longitude ?? 0.0,
+    );
+
+    ChatHistoryRepository.instance.configure(
+      userId: userId,
     );
   }
 

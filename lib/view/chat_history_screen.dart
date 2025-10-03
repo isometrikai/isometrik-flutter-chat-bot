@@ -1,242 +1,231 @@
-  import 'package:chat_bot/widgets/screen_header.dart';
-import 'package:flutter/material.dart'; 
+import 'package:chat_bot/bloc/chat_history/chat_history_bloc.dart';
+import 'package:chat_bot/bloc/chat_history/chat_history_event.dart';
+import 'package:chat_bot/bloc/chat_history/chat_history_state.dart';
+import 'package:chat_bot/bloc/cart/cart_bloc.dart';
+import 'package:chat_bot/bloc/chat_bloc.dart';
+import 'package:chat_bot/data/model/chat_history_response.dart';
+import 'package:chat_bot/view/chat_screen.dart';
+import 'package:chat_bot/widgets/screen_header.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import '../utils/text_styles.dart';
+import '../utils/asset_path.dart';
 
 class ChatHistoryScreen extends StatelessWidget {
   const ChatHistoryScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      // appBar: AppBar(
-      //   leading: IconButton(
-      //     icon: SvgPicture.asset(
-      //       AssetPath.get('images/ic_previous.svg'),
-      //       width: 24,
-      //       height: 24,
-      //     ),
-      //     onPressed: () => Navigator.pop(context),
-      //   ),
-      //   backgroundColor: Colors.white,
-      //   elevation: 0,
-      //   leading: IconButton(
-      //     icon: SvgPicture.asset(
-      //       AssetPath.get('images/ic_previous.svg'),
-      //       width: 24,
-      //       height: 24,
-      //     ),
-      //     onPressed: () => Navigator.pop(context),
-      //   ),
-      //   title: Text(
-      //     'Chats',
-      //     style: AppTextStyles.launchTitle.copyWith(
-      //       color: const Color(0xFF171212),
-      //     ),
-      //   ),
-      //   centerTitle: true,
-      //   actions: [
-      //     Container(
-      //       margin: const EdgeInsets.only(right: 16),
-      //       child: Row(
-      //         children: [
-      //           Container(
-      //             width: 40,
-      //             height: 40,
-      //             decoration: const BoxDecoration(
-      //               gradient: LinearGradient(
-      //                 colors: [
-      //                   Color(0xFFD445EC),
-      //                   Color(0xFFB02EFB),
-      //                   Color(0xFF8E2FFD),
-      //                   Color(0xFF5E3DFE),
-      //                   Color(0xFF5186E0),
-      //                 ],
-      //                 stops: [0.0, 0.27, 0.48, 0.76, 1.0],
-      //               ),
-      //               shape: BoxShape.circle,
-      //             ),
-      //             child: Center(
-      //               child: SvgPicture.asset(
-      //                 AssetPath.get('images/ic_chat_profile.svg'),
-      //                 width: 20,
-      //                 height: 20,
-      //                 colorFilter: const ColorFilter.mode(
-      //                   Colors.white,
-      //                   BlendMode.srcIn,
-      //                 ),
-      //               ),
-      //             ),
-      //           ),
-      //           const SizedBox(width: 10),
-      //           Container(
-      //             width: 40,
-      //             height: 40,
-      //             decoration: BoxDecoration(
-      //               color: Colors.white.withValues(alpha: 0.1),
-      //               shape: BoxShape.circle,
-      //             ),
-      //             child: Center(
-      //               child: SvgPicture.asset(
-      //                 AssetPath.get('images/ic_close.svg'),
-      //                 width: 16,
-      //                 height: 16,
-      //                 colorFilter: const ColorFilter.mode(
-      //                   Color(0xFF585C77),
-      //                   BlendMode.srcIn,
-      //                 ),
-      //               ),
-      //             ),
-      //           ),
-      //         ],
-      //       ),
-      //     ),
-      //   ],
-      // ),
+    return BlocProvider(
+      create: (context) => ChatHistoryBloc()..add(const ChatHistoryFetchRequested()),
+      child: Scaffold(
+        backgroundColor: Colors.white,
+      appBar: _buildAppBar(context),
       body: SafeArea(     
       child:  Column(
         children: [
-          const SizedBox(height: 24),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: ScreenHeader(
-              title: 'Chats',
-              onClose: () => Navigator.pop(context),
-            ),
-          ),
-          const SizedBox(height: 10),
-          // Search Bar
-          // Container(
-          //   margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-          //   child: Container(
-          //     height: 54,
-          //     decoration: BoxDecoration(
-          //       color: Colors.white,
-          //       border: Border.all(color: const Color(0xFFD8DEF3)),
-          //       borderRadius: BorderRadius.circular(16),
-          //     ),
-          //     child: Row(
-          //       children: [
-          //         const SizedBox(width: 16),
-          //         Expanded(
-          //           child: Text(
-          //             'Search',
-          //             style: AppTextStyles.bodyText.copyWith(
-          //               color: const Color(0xFF979797),
-          //             ),
-          //           ),
-          //         ),
-          //         Container(
-          //           width: 34,
-          //           height: 34,
-          //           margin: const EdgeInsets.only(right: 10),
-          //           decoration: BoxDecoration(
-          //             color: const Color(0xFFF6F6F6),
-          //             shape: BoxShape.circle,
-          //           ),
-          //           child: Center(
-          //             child: const Icon(
-          //               Icons.search, 
-          //               size: 17, 
-          //               color: Color(0xFF585C77)
-          //             ),
-          //           ),
-          //         ),
-          //       ],
-          //     ),
+          // const SizedBox(height: 24),
+          // Padding(
+          //   padding: const EdgeInsets.symmetric(horizontal: 16),
+          //   child: ScreenHeader(
+          //     title: 'Chats',
+          //     onClose: () => Navigator.pop(context),
           //   ),
           // ),
-          
-          // Filter Chips
-          // Container(
-          //   height: 50,
-          //   margin: const EdgeInsets.only(bottom: 16),
-          //   child: Center(
-          //     child: ListView(
-          //       scrollDirection: Axis.horizontal,
-          //       padding: const EdgeInsets.symmetric(horizontal: 16),
-          //       children: [
-          //       _buildFilterChip('All', true),
-          //       const SizedBox(width: 8),
-          //       _buildFilterChip('Food', false),
-          //       const SizedBox(width: 8),
-          //       _buildFilterChip('Grocery', false),
-          //       const SizedBox(width: 8),
-          //       _buildFilterChip('Pharmacy', false),
-          //       const SizedBox(width: 8),
-          //       ],
-          //     ),
-          //   ),
-          // ),
+          // const SizedBox(height: 10),
           
           // Chat History List
           Expanded(
-            child: ListView(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              children: [
-                _buildChatHistorySection('1 day ago', [
-                  'Order pizza from pizza hut',
-                  'Buy fresh avocados from the Mintfresh',
-                ]),
-                const SizedBox(height: 16),
-                _buildChatHistorySection('3 days ago', [
-                  'Schedule a delivery for organic groceries',
-                  'Pick up a cake for a friend\'s birthday',
-                ]),
-                const SizedBox(height: 16),
-                _buildChatHistorySection('5 days ago', [
-                  'Order sushi from the new restaurant in to...',
-                ]),
-                const SizedBox(height: 16),
-                _buildChatHistorySection('6 days ago', [
-                  'Purchase a weekly meal prep service',
-                ]),
-                const SizedBox(height: 16),
-                _buildChatHistorySection('6 days ago', [
-                  'Purchase a weekly meal prep service',
-                ]),
-                const SizedBox(height: 16),
-                _buildChatHistorySection('6 days ago', [
-                  'Get ingredients for homemade pasta',
-                  'Reserve a table at a new vegan cafe',
-                ]),
-                const SizedBox(height: 16),
-                _buildChatHistorySection('2 weeks ago', [
-                  'Sign up for a wine tasting event',
-                  'Purchase a weekly meal prep service',
-                  'Order burger from the new restaurant in ...',
-                ]),
-              ],
+            child: BlocBuilder<ChatHistoryBloc, ChatHistoryState>(
+              builder: (context, state) {
+                if (state is ChatHistoryLoadInProgress) {
+                  return const Center(
+                    child: CircularProgressIndicator(),
+                  );
+                } else if (state is ChatHistoryLoadSuccess) {
+                  if (state.sessions.isEmpty) {
+                    return _buildEmptyCart();
+                  }
+                  return _buildChatHistoryList(context, state.sessions);
+                } else if (state is ChatHistoryLoadFailure) {
+                  return _buildEmptyCart();
+                }
+                return const SizedBox.shrink();
+              },
             ),
           ),
         ],
       ),
-      )
-      );
-    }
-  }
-
-  Widget _buildFilterChip(String label, bool isSelected) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 12),
-      decoration: BoxDecoration(
-        color: isSelected ? const Color(0xFFF0DAFE) : Colors.white,
-        border: Border.all(
-          color: isSelected ? const Color(0xFFE9DFFB) : const Color(0xFFE9DFFB),
-        ),
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: Text(
-        label,
-        style: AppTextStyles.bodyText.copyWith(
-          fontSize: 14,
-          color: const Color(0xFF242424),
-        ),
+    ),
       ),
     );
   }
 
-  Widget _buildChatHistorySection(String timeLabel, List<String> messages) {
+  PreferredSizeWidget _buildAppBar(BuildContext context) {
+    return AppBar(
+      backgroundColor: Colors.white,
+      surfaceTintColor: Colors.transparent,
+      scrolledUnderElevation: 0,
+      systemOverlayStyle: SystemUiOverlayStyle.dark,
+      elevation: 1,
+      leadingWidth: 0,
+      leading: const SizedBox.shrink(), // Remove leading widget
+      title: const Text(
+        'Chats History',
+        style: const TextStyle(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 24,
+                    height: 1.2,
+                    color: Color(0xFF171212),
+                  ),
+      ),
+      centerTitle: false, // Align title to the left
+      titleSpacing: 16, // Add left padding for proper alignment
+      actions: [
+        IconButton(
+          icon: SvgPicture.asset(
+            AssetPath.get('images/ic_close.svg'),
+            width: 40,
+            height: 40,
+            fit: BoxFit.cover,
+          ),
+          onPressed: () => Navigator.pop(context),
+        ),
+      ],
+      bottom: PreferredSize(
+        preferredSize: const Size.fromHeight(0.5),
+        child: Container(color: Colors.grey.shade300, height: 0),
+      ),
+    );
+  }
+
+  Widget _buildChatHistoryList(BuildContext context, List<ChatHistoryResponse> sessions) {
+    // Group sessions by date
+    final groupedSessions = _groupSessionsByDate(sessions);
+    
+    return RefreshIndicator(
+      onRefresh: () async {
+        context.read<ChatHistoryBloc>().add(const ChatHistoryRefreshed());
+        // Wait for the state to change
+        await Future.delayed(const Duration(seconds: 1));
+      },
+      child: ListView.builder(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        itemCount: groupedSessions.length,
+        itemBuilder: (context, index) {
+          final entry = groupedSessions[index];
+          final timeLabel = entry['label'] as String;
+          final sessionsForDate = entry['sessions'] as List<ChatHistoryResponse>;
+          
+          return Column(
+            children: [
+              _buildChatHistorySection(context, timeLabel, sessionsForDate),
+              if (index < groupedSessions.length - 1) const SizedBox(height: 16),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildEmptyCart() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          // Empty cart SVG icon
+          SvgPicture.asset(
+            AssetPath.get('images/ic_chat_empty.svg'),
+            width: 120,
+            height: 120,
+          ),
+          const SizedBox(height: 24),
+          // "Your cart is empty" text
+          Text(
+            'No conversations yet!',
+            style: AppTextStyles.restaurantTitle.copyWith(
+              color: const Color(0xFF242424),
+              fontWeight: FontWeight.w700,
+              fontSize: 16,
+              height: 1.2,
+            ),
+          ),
+          // const SizedBox(height: 8),
+          // // Description text
+          // Padding(
+          //   padding: const EdgeInsets.symmetric(horizontal: 40),
+          //   child: Text(
+          //     'Add items like food, groceries, medicines, services or other products to get started.',
+          //     textAlign: TextAlign.center,
+          //     style: AppTextStyles.restaurantDescription.copyWith(
+          //       color: const Color(0xFF6E4185),
+          //     ),
+          //   ),
+          // ),
+        ],
+      ),
+    );
+  }
+
+  List<Map<String, dynamic>> _groupSessionsByDate(List<ChatHistoryResponse> sessions) {
+    // Filter out sessions with null timestamps
+    final validSessions = sessions.where((s) => s.timestamp != null).toList();
+    
+    // Sort by timestamp descending (most recent first)
+    validSessions.sort((a, b) {
+      final aDate = DateTime.parse(a.timestamp!).toLocal();
+      final bDate = DateTime.parse(b.timestamp!).toLocal();
+      return bDate.compareTo(aDate);
+    });
+    
+    // Group by relative date
+    final Map<String, List<ChatHistoryResponse>> grouped = {};
+    final now = DateTime.now();
+    
+    for (final session in validSessions) {
+      // Convert UTC timestamp to local time
+      final sessionDate = DateTime.parse(session.timestamp!).toLocal();
+      final difference = now.difference(sessionDate);
+      
+      String label;
+      if (difference.inDays == 0) {
+        label = 'Today';
+      } else if (difference.inDays == 1) {
+        label = '1 day ago';
+      } else if (difference.inDays < 7) {
+        label = '${difference.inDays} days ago';
+      } else if (difference.inDays < 14) {
+        label = '1 week ago';
+      } else if (difference.inDays < 21) {
+        label = '2 weeks ago';
+      } else if (difference.inDays < 30) {
+        label = '3 weeks ago';
+      } else if (difference.inDays < 60) {
+        label = '1 month ago';
+      } else {
+        final months = ['January', 'February', 'March', 'April', 'May', 'June', 
+                       'July', 'August', 'September', 'October', 'November', 'December'];
+        label = '${months[sessionDate.month - 1]} ${sessionDate.year}';
+      }
+      
+      if (!grouped.containsKey(label)) {
+        grouped[label] = [];
+      }
+      grouped[label]!.add(session);
+    }
+    
+    // Convert to list of maps for ListView
+    return grouped.entries.map((entry) {
+      return {
+        'label': entry.key,
+        'sessions': entry.value,
+      };
+    }).toList();
+  }
+
+  Widget _buildChatHistorySection(BuildContext context, String timeLabel, List<ChatHistoryResponse> sessions) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -250,32 +239,64 @@ class ChatHistoryScreen extends StatelessWidget {
         ),
         const SizedBox(height: 4),
         Column(
-          children: messages.map((message) => _buildChatHistoryItem(message)).toList(),
+          children: sessions.map((session) => _buildChatHistoryItem(context, session)).toList(),
         ),
       ],
     );
   }
 
-  Widget _buildChatHistoryItem(String message) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      padding: const EdgeInsets.all(10),
-      decoration: BoxDecoration(
-        color: const Color(0xFFF5F7FF),
-        border: Border.all(color: const Color(0xFFEEF4FF)),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: Text(
-              message,
-              style: AppTextStyles.chatMessage.copyWith(
-                color: const Color(0xFF242424),
+  Widget _buildChatHistoryItem(BuildContext context, ChatHistoryResponse session) {
+    // Use title if available, otherwise show session ID
+    final displayText = session.title.isNotEmpty 
+        ? session.title 
+        : 'Session ${session.sessionId}';
+        
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            // builder: (context) => ChatScreen(
+            //   isFromHistory: true,
+            //   historySessionId: session.sessionId.toString(),
+            // ),
+            builder: (context) => MultiBlocProvider(
+              providers: [
+                BlocProvider(create: (context) => ChatBloc()),
+                BlocProvider(create: (context) => CartBloc()),
+              ],
+              child: ChatScreen(
+                isFromHistory: true,
+                historySessionId: session.sessionId.toString(),
+                chatHistoryTitle: displayText,
               ),
             ),
           ),
-        ],
+        );
+      },
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 10),
+        padding: const EdgeInsets.all(10),
+        decoration: BoxDecoration(
+          color: const Color(0xFFF5F7FF),
+          border: Border.all(color: const Color(0xFFEEF4FF)),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: Text(
+                displayText,
+                style: AppTextStyles.chatMessage.copyWith(
+                  color: const Color(0xFF242424),
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
+}

@@ -10,6 +10,7 @@ import 'package:chat_bot/bloc/launch/launch_event.dart';
 import 'package:chat_bot/bloc/launch/launch_state.dart';
 import 'package:chat_bot/data/model/chat_response.dart';
 import 'package:chat_bot/data/model/chat_message.dart';
+import 'package:chat_bot/data/model/chat_history_response.dart';
 import 'package:chat_bot/data/services/chat_api_services.dart';
 import 'package:chat_bot/view/Groceries_menu_screen.dart';
 import 'package:chat_bot/view/chat_history_screen.dart';
@@ -45,8 +46,10 @@ import '../services/speech_service.dart';
 class ChatScreen extends StatefulWidget {
   final MyGPTsResponse? chatbotData;
   final GreetingResponse? greetingData;
-
-  const ChatScreen({super.key, this.chatbotData, this.greetingData});
+  final bool isFromHistory;
+  final String? historySessionId;
+  final String? chatHistoryTitle;
+  const ChatScreen({super.key, this.chatbotData, this.greetingData, this.isFromHistory = false, this.historySessionId, this.chatHistoryTitle});
 
   @override
   State<ChatScreen> createState() => _ChatScreenState();
@@ -58,7 +61,7 @@ class _ChatScreenState extends State<ChatScreen> {
   final FocusNode _messageFocusNode = FocusNode();
   Set<String> _selectedOptionMessages = {};
   String? _pendingMessage;
-  String _sessionId = "";
+  
   double _textFieldHeight = 50.0; // Add height state variable
   List<ChatWidget> _latestActionWidgets = []; // Track latest action widgets
   int _totalCartCount = 0; // Track total cart count
@@ -187,6 +190,176 @@ class _ChatScreenState extends State<ChatScreen> {
         _updateCartCount(directCount);
       }
     });
+  }
+
+  void _handleChatHistoryResponse(List<ChatHistoryDetail> historyList) {
+    List<ChatMessage> historyMessages = [];
+    
+    for (var historyDetail in historyList) {
+      // Add user message
+      historyMessages.add(
+        ChatMessage(
+          id: DateTime.now().millisecondsSinceEpoch.toString() + '_user',
+          text: historyDetail.userMessage,
+          isBot: false,
+        ),
+      );
+      
+      // Add bot responses
+      for (var botResponse in historyDetail.response) {
+        // Extract widgets similar to _handleChatResponse
+        ChatWidget? storesWidget;
+        ChatWidget? productsWidget;
+        ChatWidget? cartWidget;
+        ChatWidget? chooseAddressWidget;
+        ChatWidget? chooseCardWidget;
+        ChatWidget? orderSummaryWidget;
+        ChatWidget? orderConfirmedWidget;
+        
+        try {
+          storesWidget = botResponse.widgets.firstWhere(
+            (widget) => widget.isStoresWidget,
+          );
+        } catch (e) {
+          storesWidget = null;
+        }
+
+        try {
+          productsWidget = botResponse.widgets.firstWhere(
+            (widget) => widget.isProductsWidget,
+          );
+        } catch (e) {
+          productsWidget = null;
+        }
+
+        try {
+          cartWidget = botResponse.widgets.firstWhere((widget) => widget.isCartWidget);
+        } catch (e) {
+          cartWidget = null;
+        }
+
+        try {
+          chooseAddressWidget = botResponse.widgets.firstWhere(
+            (widget) => widget.isChooseAddressWidget,
+          );
+        } catch (e) {
+          chooseAddressWidget = null;
+        }
+
+        try {
+          chooseCardWidget = botResponse.widgets.firstWhere(
+            (widget) => widget.isChooseCardWidget,
+          );
+        } catch (e) {
+          chooseCardWidget = null;
+        }
+
+        try {
+          orderSummaryWidget = botResponse.widgets.firstWhere(
+            (widget) => widget.isOrderSummaryWidget,
+          );
+        } catch (e) {
+          orderSummaryWidget = null;
+        }
+
+        try {
+          orderConfirmedWidget = botResponse.widgets.firstWhere(
+            (widget) => widget.isOrderConfirmedWidget,
+          );
+        } catch (e) {
+          orderConfirmedWidget = null;
+        }
+
+        // Check if stores, products, cart, etc. are present
+        bool hasStores = false;//storesWidget != null;
+        bool hasProducts = false;//productsWidget != null;
+        bool hasCart = cartWidget != null;
+        bool hasChooseAddress = false;//chooseAddressWidget != null;
+        bool hasChooseCard = false;//chooseCardWidget != null;
+        bool hasOrderSummary = orderSummaryWidget != null;
+        bool hasOrderConfirmed = orderConfirmedWidget != null;
+
+        historyMessages.add(
+          ChatMessage(
+            id: DateTime.now().millisecondsSinceEpoch.toString() + '_bot',
+            text: botResponse.text,
+            isBot: true,
+            showAvatar: true,
+            hasStoreCards: hasStores,
+            hasProductCards: hasProducts,
+            hasCartWidget: hasCart,
+            hasChooseAddressWidget: hasChooseAddress,
+            hasChooseCardWidget: hasChooseCard,
+            hasOrderSummaryWidget: hasOrderSummary,
+            hasOrderConfirmedWidget: hasOrderConfirmed,
+            // Don't show option buttons if stores, products, cart, etc. are present
+            hasOptionButtons:
+                !hasStores &&
+                !hasProducts &&
+                !hasCart &&
+                !hasChooseAddress &&
+                !hasChooseCard &&
+                !hasOrderSummary &&
+                !hasOrderConfirmed &&
+                botResponse.hasWidgets &&
+                botResponse.optionsWidgets.isNotEmpty,
+            optionButtons:
+                !hasStores &&
+                        !hasProducts &&
+                        !hasCart &&
+                        !hasChooseAddress &&
+                        !hasChooseCard &&
+                        !hasOrderSummary &&
+                        !hasOrderConfirmed &&
+                        botResponse.hasWidgets &&
+                        botResponse.optionsWidgets.isNotEmpty
+                    ? botResponse.optionsWidgets.first.options
+                    : [],
+            stores: storesWidget?.stores ?? [],
+            products: productsWidget?.products ?? [],
+            cartItems: cartWidget?.getCartItems() ?? [],
+            addressOptions: chooseAddressWidget?.getAddressOptions() ?? [],
+            cardOptions: chooseCardWidget?.getCardOptions() ?? [],
+            orderSummaryItems: orderSummaryWidget?.getOrderSummaryItems() ?? [],
+            storesWidget: storesWidget,
+            productsWidget: productsWidget,
+            cartWidget: cartWidget,
+            chooseAddressWidget: chooseAddressWidget,
+            chooseCardWidget: chooseCardWidget,
+            orderSummaryWidget: orderSummaryWidget,
+            orderConfirmedWidget: orderConfirmedWidget,
+          ),
+        );
+        
+        // Store action widgets for the action buttons (from the last bot response)
+        if (historyDetail == historyList.last && botResponse == historyDetail.response.last) {
+          _latestActionWidgets =
+              botResponse.widgets
+                  .where(
+                    (widget) =>
+                        // widget.type == WidgetEnum.see_more.value ||
+                        // widget.type == WidgetEnum.menu.value ||
+                        // widget.type == WidgetEnum.add_more.value ||
+                        // widget.type == WidgetEnum.proceed_to_checkout.value ||
+                        // widget.type == WidgetEnum.add_address.value ||
+                        // widget.type == WidgetEnum.add_payment.value ||
+                        // widget.type == WidgetEnum.cart.value ||
+                        // widget.type == WidgetEnum.order_summary.value ||
+                        // widget.type == WidgetEnum.choose_address.value ||
+                        // widget.type == WidgetEnum.choose_card.value ||
+                        // widget.type == WidgetEnum.cash_on_delivery.value ||
+                        widget.type == WidgetEnum.order_tracking.value ||
+                        widget.type == WidgetEnum.order_details.value,
+                  )
+                  .toList();
+        }
+      }
+    }
+    
+    setState(() {
+      messages.addAll(historyMessages);
+    });
+    // _scrollToBottom();
   }
 
   void _handleChatResponse(ChatResponse response) {
@@ -369,9 +542,25 @@ class _ChatScreenState extends State<ChatScreen> {
   @override
   void initState() {
     super.initState();
-    _initializeSession();
 
-    // Initialize LaunchBloc
+     // Handle history mode
+    if (widget.isFromHistory == true && widget.historySessionId != null) {
+      print('ChatScreen: isFromHistory - ${widget.isFromHistory}');
+      print('ChatScreen: historySessionId - ${widget.historySessionId}');
+      
+      // Don't initialize new session, just fetch history
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        context.read<ChatBloc>().add(ChatHistorySessionIdEvent(sessionId: widget.historySessionId!));
+      });
+      _cartBloc = context.read<CartBloc>();
+      _launchBloc = LaunchBloc();
+      
+    }else {
+
+    // Initialize cartBloc directly since it's provided by parent MultiBlocProvider
+    _cartBloc = context.read<CartBloc>();
+
+    // Always initialize LaunchBloc to fetch chatbot data
     _launchBloc = LaunchBloc();
 
     // Check if data is already provided via parameters
@@ -384,8 +573,10 @@ class _ChatScreenState extends State<ChatScreen> {
       _launchBloc.add(const LaunchRequested());
     }
 
-    // Initialize cartBloc directly since it's provided by parent MultiBlocProvider
-    _cartBloc = context.read<CartBloc>();
+   
+    
+    // Normal mode initialization
+    _initializeSession(false);
 
     // Set up cart update callback - the mounted check handles if screen is active
     // OrderService().setCartUpdateCallback((bool isCartUpdate) {
@@ -432,10 +623,13 @@ class _ChatScreenState extends State<ChatScreen> {
         _initializeSpeechService();
       });
     });
+    }
+
   }
 
-  void _initializeSession() {
-    _sessionId = "${DateTime.now().millisecondsSinceEpoch ~/ 1000}";
+  void _initializeSession(bool needToShowLoader) {
+    sessionId = "";
+    context.read<ChatBloc>().add(ChatSessionIdEvent(needToShowLoader: needToShowLoader));
   }
 
   Future<void> _initializeSpeechService() async {
@@ -570,7 +764,7 @@ class _ChatScreenState extends State<ChatScreen> {
       messages = [];
 
       _selectedOptionMessages.clear();
-      _sessionId = "${DateTime.now().millisecondsSinceEpoch ~/ 1000}";
+      _initializeSession(true);
       _pendingMessage = null;
       _latestActionWidgets.clear(); // Clear action widgets when restarting
       _cartBloc.add(CartFetchRequested(needToShowLoader: false));
@@ -579,11 +773,13 @@ class _ChatScreenState extends State<ChatScreen> {
 
   @override
   void dispose() {
-    _messageFocusNode.removeListener(_onFocusChange);
-    _messageController.dispose();
-    _scrollController.dispose();
-    _messageFocusNode.dispose();
-    _launchBloc.close();
+    if (widget.isFromHistory == false) {
+      _messageFocusNode.removeListener(_onFocusChange);
+      _messageController.dispose();
+      _scrollController.dispose();
+      _messageFocusNode.dispose();
+      _launchBloc.close();
+    }
 
     // OrderService().clearCallback();
     print("DISPOSE");
@@ -593,7 +789,7 @@ class _ChatScreenState extends State<ChatScreen> {
   @override
   Widget build(BuildContext context) {
     // If data is not loaded yet, show loading or handle LaunchBloc states
-    if (!_isDataLoaded) {
+    if (!_isDataLoaded && widget.isFromHistory == false) {
       return BlocProvider.value(
         value: _launchBloc,
         child: BlocListener<LaunchBloc, LaunchState>(
@@ -651,12 +847,13 @@ class _ChatScreenState extends State<ChatScreen> {
       messageController: _messageController,
       messageFocusNode: _messageFocusNode,
       scrollController: _scrollController,
-      chatbotData: _chatbotData!,
+      chatbotData: _chatbotData,
       greetingData: _greetingData,
       selectedOptionMessages: _selectedOptionMessages,
       messages: messages,
       onSendMessage: _sendMessage,
       onHandleChatResponse: _handleChatResponse,
+      onHandleChatHistoryResponse: _handleChatHistoryResponse,
       onScrollToBottom: _scrollToBottom,
       onLoadChatbotData: () {},
       onRestartChatAPI: _restartChatAPI,
@@ -672,7 +869,7 @@ class _ChatScreenState extends State<ChatScreen> {
       },
       pendingMessage: _pendingMessage,
       onClearPendingMessage: _clearPendingMessage,
-      sessionId: _sessionId,
+      sessionId: sessionId,
       // Pass session ID
       textFieldHeight: _textFieldHeight,
       onUpdateTextFieldHeight: _updateTextFieldHeight,
@@ -693,6 +890,8 @@ class _ChatScreenState extends State<ChatScreen> {
       // Add cancel speech handler
       isRecording: _isRecording, // Pass recording state
       needToEndThisChat: _needToEndThisChat, // Pass needToEndThisChat state
+      isFromHistory: widget.isFromHistory, // Pass isFromHistory parameter
+      chatHistoryTitle: widget.chatHistoryTitle,
     );
   }
 
@@ -892,12 +1091,13 @@ class _ChatScreenBody extends StatelessWidget {
   final TextEditingController messageController;
   final FocusNode messageFocusNode;
   final ScrollController scrollController;
-  final MyGPTsResponse chatbotData;
+  final MyGPTsResponse? chatbotData;
   final GreetingResponse? greetingData;
   final Set<String> selectedOptionMessages;
   final List<ChatMessage> messages;
   final Function(String) onSendMessage;
   final Function(ChatResponse) onHandleChatResponse;
+  final Function(List<ChatHistoryDetail>) onHandleChatHistoryResponse;
   final VoidCallback onScrollToBottom;
   final VoidCallback onLoadChatbotData;
   final VoidCallback onRestartChatAPI;
@@ -921,18 +1121,21 @@ class _ChatScreenBody extends StatelessWidget {
   onCancelSpeechRecording; // Add cancel speech handler
   final bool isRecording; // Add recording state
   final bool needToEndThisChat; // Add needToEndThisChat parameter
+  final bool isFromHistory; // Add isFromHistory parameter
+  final String? chatHistoryTitle; // Add chatHistoryTitle parameter
 
   const _ChatScreenBody({
     required this.messageController,
     required this.messageFocusNode,
     required this.scrollController,
-    required this.chatbotData,
+    this.chatbotData,
     required this.greetingData,
     // required this.isLoadingData,
     required this.selectedOptionMessages,
     required this.messages,
     required this.onSendMessage,
     required this.onHandleChatResponse,
+    required this.onHandleChatHistoryResponse,
     required this.onScrollToBottom,
     required this.onLoadChatbotData,
     required this.onRestartChatAPI,
@@ -953,6 +1156,8 @@ class _ChatScreenBody extends StatelessWidget {
     required this.onCancelSpeechRecording, // Add the cancel speech handler parameter
     required this.isRecording, // Add the recording state parameter
     required this.needToEndThisChat, // Add the needToEndThisChat parameter
+    required this.isFromHistory, // Add the isFromHistory parameter
+    required this.chatHistoryTitle, // Add the chatHistoryTitle parameter
   });
 
   @override
@@ -962,7 +1167,7 @@ class _ChatScreenBody extends StatelessWidget {
       child: Scaffold(
         backgroundColor: Colors.white,
         resizeToAvoidBottomInset: true,
-        appBar: _buildAppBar(context),
+        appBar: isFromHistory ? _buildAppBarForHistory(context) : _buildAppBar(context),
         body: MultiBlocListener(
           listeners: [
             BlocListener<ChatBloc, ChatState>(
@@ -982,6 +1187,10 @@ class _ChatScreenBody extends StatelessWidget {
                       CartFetchRequested(needToShowLoader: false),
                     );
                   }
+                } else if (state is ChatLoadedWithHistorySessionId) {
+                  // Handle chat history response
+                  print('ChatScreen: Chat history loaded with ${state.history.length} items');
+                  onHandleChatHistoryResponse(state.history);
                 } else if (state is ChatError) {
                   // Check if it's a timeout error
                   if (state.error.contains(
@@ -1120,6 +1329,7 @@ class _ChatScreenBody extends StatelessWidget {
                     ),
                   ),
                   _buildActionButtons(context),
+                  if (isFromHistory == false) ...[
                   Stack(
                     children: [
                       if (needToEndThisChat == true)
@@ -1149,6 +1359,9 @@ class _ChatScreenBody extends StatelessWidget {
                       ]
                     ],
                   ),
+                  ]else ...[
+                    const SizedBox(height: 50),
+                  ]
                 ],
               );
             },
@@ -1164,7 +1377,7 @@ class _ChatScreenBody extends StatelessWidget {
   }
 
   PreferredSizeWidget _buildAppBar(BuildContext context) {
-    return AppBar(
+    return  AppBar(
       backgroundColor: Colors.white,
       surfaceTintColor: Colors.transparent,
       scrolledUnderElevation: 0,
@@ -1191,19 +1404,12 @@ class _ChatScreenBody extends StatelessWidget {
           if (messages.isNotEmpty) ...[
           Container(
             child:
-                (chatbotData.data.isNotEmpty &&
-                        chatbotData.data.first.profileImage.isNotEmpty)
-                    ? SvgPicture.asset(
+                    SvgPicture.asset(
                       AssetPath.get('images/ic_header_logo.svg'),
                       width: 75,
                       height: 23,
                       fit: BoxFit.cover,
                     )
-                    : const Icon(
-                      Icons.calendar_today,
-                      color: Colors.white,
-                      size: 20,
-                    ),
           ),
           ]
         ],
@@ -1343,6 +1549,44 @@ class _ChatScreenBody extends StatelessWidget {
               },
             );
           },
+        ),
+      ],
+      bottom: PreferredSize(
+        preferredSize: const Size.fromHeight(0.5),
+        child: Container(color: Colors.grey.shade300, height: 0),
+      ),
+    );
+  }
+
+  PreferredSizeWidget _buildAppBarForHistory(BuildContext context) {
+    return AppBar(
+      backgroundColor: Colors.white,
+      surfaceTintColor: Colors.transparent,
+      scrolledUnderElevation: 0,
+      systemOverlayStyle: SystemUiOverlayStyle.dark,
+      elevation: 1,
+      leadingWidth: 0,
+      leading: const SizedBox.shrink(), // Remove leading widget
+      title:  Text(
+        chatHistoryTitle ?? '',
+        style: const TextStyle(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 24,
+                    height: 1.2,
+                    color: Color(0xFF171212),
+                  ),
+      ),
+      centerTitle: false, // Align title to the left
+      titleSpacing: 16, // Add left padding for proper alignment
+      actions: [
+        IconButton(
+          icon: SvgPicture.asset(
+            AssetPath.get('images/ic_close.svg'),
+            width: 40,
+            height: 40,
+            fit: BoxFit.cover,
+          ),
+          onPressed: () => Navigator.pop(context),
         ),
       ],
       bottom: PreferredSize(
@@ -1662,26 +1906,8 @@ class _ChatScreenBody extends StatelessWidget {
                       decoration: BoxDecoration(
                         color:
                             message.isBot
-                                ? Color(
-                                  int.parse(
-                                    chatbotData
-                                        .data
-                                        .first
-                                        .uiPreferences
-                                        .botBubbleColor
-                                        .replaceFirst('#', '0xFF'),
-                                  ),
-                                )
-                                : Color(
-                                  int.parse(
-                                    chatbotData
-                                        .data
-                                        .first
-                                        .uiPreferences
-                                        .userBubbleColor
-                                        .replaceFirst('#', '0xFF'),
-                                  ),
-                                ),
+                                ? Color(int.parse('0xFFFFFFFF'))
+                                : Color(int.parse('0xFFF0DAFE')),
                         // borderRadius: BorderRadius.circular(16),
                         borderRadius:
                             (message.isBot == false)
@@ -1722,76 +1948,22 @@ class _ChatScreenBody extends StatelessWidget {
                                     fontFamily: "Plus Jakarta Sans",
                                     color:
                                         message.isBot
-                                            ? Color(
-                                              int.parse(
-                                                chatbotData
-                                                    .data
-                                                    .first
-                                                    .uiPreferences
-                                                    .botBubbleFontColor
-                                                    .replaceFirst('#', '0xFF'),
-                                              ),
-                                            )
-                                            : Color(
-                                              int.parse(
-                                                chatbotData
-                                                    .data
-                                                    .first
-                                                    .uiPreferences
-                                                    .userBubbleFontColor
-                                                    .replaceFirst('#', '0xFF'),
-                                              ),
-                                            ),
+                                            ? Color(int.parse('0xFF000000'))
+                                            : Color(int.parse('0xFF242424')),
                                   ),
                                   "strong": Style(
                                     fontWeight: FontWeight.bold,
                                     color:
                                         message.isBot
-                                            ? Color(
-                                              int.parse(
-                                                chatbotData
-                                                    .data
-                                                    .first
-                                                    .uiPreferences
-                                                    .botBubbleFontColor
-                                                    .replaceFirst('#', '0xFF'),
-                                              ),
-                                            )
-                                            : Color(
-                                              int.parse(
-                                                chatbotData
-                                                    .data
-                                                    .first
-                                                    .uiPreferences
-                                                    .userBubbleFontColor
-                                                    .replaceFirst('#', '0xFF'),
-                                              ),
-                                            ),
+                                            ? Color(int.parse('0xFF000000'))
+                                            : Color(int.parse('0xFF242424')),
                                   ),
                                   "em": Style(
                                     fontStyle: FontStyle.italic,
                                     color:
                                         message.isBot
-                                            ? Color(
-                                              int.parse(
-                                                chatbotData
-                                                    .data
-                                                    .first
-                                                    .uiPreferences
-                                                    .botBubbleFontColor
-                                                    .replaceFirst('#', '0xFF'),
-                                              ),
-                                            )
-                                            : Color(
-                                              int.parse(
-                                                chatbotData
-                                                    .data
-                                                    .first
-                                                    .uiPreferences
-                                                    .userBubbleFontColor
-                                                    .replaceFirst('#', '0xFF'),
-                                              ),
-                                            ),
+                                            ? Color(int.parse('0xFF000000'))
+                                            : Color(int.parse('0xFF242424')),
                                   ),
                                   "code": Style(
                                     backgroundColor: Colors.grey.shade200,
@@ -1808,26 +1980,8 @@ class _ChatScreenBody extends StatelessWidget {
                                 style: AppTextStyles.chatMessage.copyWith(
                                   color:
                                       message.isBot
-                                          ? Color(
-                                            int.parse(
-                                              chatbotData
-                                                  .data
-                                                  .first
-                                                  .uiPreferences
-                                                  .botBubbleFontColor
-                                                  .replaceFirst('#', '0xFF'),
-                                            ),
-                                          )
-                                          : Color(
-                                            int.parse(
-                                              chatbotData
-                                                  .data
-                                                  .first
-                                                  .uiPreferences
-                                                  .userBubbleFontColor
-                                                  .replaceFirst('#', '0xFF'),
-                                            ),
-                                          ),
+                                          ? Color(int.parse('0xFF000000'))
+                                          : Color(int.parse('0xFF242424')),
                                 ),
                               ),
                     ),
@@ -2125,12 +2279,7 @@ class _ChatScreenBody extends StatelessWidget {
                 (option) => Container(
                   decoration: BoxDecoration(
                     border: Border.all(
-                      color: Color(
-                        int.parse(
-                          chatbotData.data.first.uiPreferences.primaryColor
-                              .replaceFirst('#', '0xFF'),
-                        ),
-                      ),
+                      color: Color(int.parse('0xFF3F51B5')),
                     ),
                     borderRadius: BorderRadius.circular(20),
                   ),
@@ -2151,12 +2300,7 @@ class _ChatScreenBody extends StatelessWidget {
                       child: Text(
                         option,
                         style: TextStyle(
-                          color: Color(
-                            int.parse(
-                              chatbotData.data.first.uiPreferences.primaryColor
-                                  .replaceFirst('#', '0xFF'),
-                            ),
-                          ),
+                          color: Color(int.parse('0xFF3F51B5')),
                           fontSize: 14,
                         ),
                       ),
