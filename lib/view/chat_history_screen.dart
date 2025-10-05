@@ -111,7 +111,7 @@ class _ChatHistoryContentState extends State<_ChatHistoryContent> {
       leadingWidth: 0,
       leading: const SizedBox.shrink(), // Remove leading widget
       title: const Text(
-        'Chats History',
+        'Chat History',
         style: const TextStyle(
                     fontWeight: FontWeight.w700,
                     fontSize: 24,

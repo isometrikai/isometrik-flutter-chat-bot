@@ -540,20 +540,45 @@ class _GroceriesMenuScreenState extends State<GroceriesMenuScreen> {
     });
   }
 
-  /// Get addToCartOnId from cart data for a specific product
+   /// Get addToCartOnId from cart data for a specific product
   dynamic _getAddToCartOnId(String productId) {
     try {
-      // Use filter to find the product with matching ID
-      final cartData =
-          cartBloc.cartData
-              .expand((cart) => cart.sellers)
-              .expand((seller) => seller.products)
-              .where((product) => product.id == productId)
-              .firstOrNull;
+      // Find all products with matching ID and get the last one's addToCartOnId
+      final matchingProducts = cartBloc.cartData
+          .expand((cart) => cart.sellers)
+          .expand((seller) => seller.products)
+          .where((product) => product.id == productId)
+          .toList();
 
-      return cartData?.addToCartOnId;
+      if (matchingProducts.isEmpty) {
+        return null;
+      }
+
+      // Return addToCartOnId from the last matching product
+      return matchingProducts.last.addToCartOnId;
     } catch (e) {
       print('Error getting addToCartOnId: $e');
+      return null;
+    }
+  }
+
+  dynamic _getExistingProductQuantity(String productId, num addToCartOnId) {
+    try {
+      // Find all products with matching ID and addToCartOnId
+      final matchingProducts = cartBloc.cartData
+          .expand((cart) => cart.sellers)
+          .expand((seller) => seller.products)
+          .where((product) => product.id == productId && product.addToCartOnId == addToCartOnId)
+          .toList();
+
+      if (matchingProducts.isEmpty) {
+        return null;
+      }
+
+      // Return quantity from the last matching product
+      return matchingProducts.last.quantity?.value ?? 0;
+    } catch (e) {
+      print('Error getting existing product quantity: $e');
       return null;
     }
   }
@@ -602,6 +627,10 @@ class _GroceriesMenuScreenState extends State<GroceriesMenuScreen> {
           backgroundColor: Colors.transparent,
           builder:
               (context) => CustomizationSummaryScreen(
+                cartData: _cartData,
+                productId: productId,
+                centralProductId: parentProductId,
+                storeTypeId: storeTypeId,
                 // store: store,
                 // product: product,
                 onChooseClicked: () {
@@ -620,6 +649,9 @@ class _GroceriesMenuScreenState extends State<GroceriesMenuScreen> {
                   //TODO:- Add Quantity
                   final addToCartOnId = _getAddToCartOnId(productId);
                   print("addCartOnID: $addToCartOnId");
+
+                  final existingProductQuantity = _getExistingProductQuantity(productId, addToCartOnId);
+                  print("existingProductQuantity: $existingProductQuantity");
 
                   cartBloc.add(
                     CartAddItemRequested(
@@ -666,14 +698,20 @@ class _GroceriesMenuScreenState extends State<GroceriesMenuScreen> {
         addToCartOnId = _getAddToCartOnId(productId);
         print("addCartOnID: $addToCartOnId");
       }
+      int? existingProductQuantity;
+      existingProductQuantity = newQuantity;
+      if (addToCartOnId != null) {
+        existingProductQuantity = _getExistingProductQuantity(productId, addToCartOnId);
+        print("existingProductQuantity: $existingProductQuantity");
+      }
       cartBloc.add(
         CartAddItemRequested(
           storeId: storeId,
           cartType: 2,
-          action: 2,
+          action: (existingProductQuantity == 1) ? 3 : 2,
           // Add/Update action
           storeCategoryId: storeCategoryId,
-          newQuantity: newQuantity - 1,
+          newQuantity: (existingProductQuantity == 1) ? 0 : (existingProductQuantity ?? 0) - 1,
           storeTypeId: storeTypeId,
           productId: productId,
           centralProductId: parentProductId,

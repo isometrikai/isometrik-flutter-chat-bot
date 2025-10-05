@@ -857,20 +857,45 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
     });
   }
 
-  /// Get addToCartOnId from cart data for a specific product
+   /// Get addToCartOnId from cart data for a specific product
   dynamic _getAddToCartOnId(String productId) {
     try {
-      // Use filter to find the product with matching ID
-      final cartData =
-          cartBloc.cartData
-              .expand((cart) => cart.sellers)
-              .expand((seller) => seller.products)
-              .where((product) => product.id == productId)
-              .firstOrNull;
+      // Find all products with matching ID and get the last one's addToCartOnId
+      final matchingProducts = cartBloc.cartData
+          .expand((cart) => cart.sellers)
+          .expand((seller) => seller.products)
+          .where((product) => product.id == productId)
+          .toList();
 
-      return cartData?.addToCartOnId;
+      if (matchingProducts.isEmpty) {
+        return null;
+      }
+
+      // Return addToCartOnId from the last matching product
+      return matchingProducts.last.addToCartOnId;
     } catch (e) {
       print('Error getting addToCartOnId: $e');
+      return null;
+    }
+  }
+
+  dynamic _getExistingProductQuantity(String productId, num addToCartOnId) {
+    try {
+      // Find all products with matching ID and addToCartOnId
+      final matchingProducts = cartBloc.cartData
+          .expand((cart) => cart.sellers)
+          .expand((seller) => seller.products)
+          .where((product) => product.id == productId && product.addToCartOnId == addToCartOnId)
+          .toList();
+
+      if (matchingProducts.isEmpty) {
+        return null;
+      }
+
+      // Return quantity from the last matching product
+      return matchingProducts.last.quantity?.value ?? 0;
+    } catch (e) {
+      print('Error getting existing product quantity: $e');
       return null;
     }
   }
@@ -917,6 +942,10 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
             backgroundColor: Colors.transparent,
             builder:
                 (context) => CustomizationSummaryScreen(
+                  cartData: cartBloc.cartData,
+                  productId: productId,
+                  centralProductId: centralProductId,
+                  storeTypeId: widget.actionData?.storeTypeId ?? -111,
                   onChooseClicked: () {
                     // When "I'll choose" is clicked, open ProductCustomizationScreen
                     _openProductCustomization(
@@ -935,6 +964,9 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
                     final addToCartOnId = _getAddToCartOnId(productId);
                     print("addCartOnID: $addToCartOnId");
 
+                    final existingProductQuantity = _getExistingProductQuantity(productId, addToCartOnId);
+                    print("existingProductQuantity: $existingProductQuantity");
+
                     cartBloc.add(
                       CartAddItemRequested(
                         storeId: widget.actionData?.storeId ?? '',
@@ -943,7 +975,7 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
                         // Add action
                         storeCategoryId:
                             widget.actionData?.storeCategoryId ?? '',
-                        newQuantity: currentQuantity + 1,
+                        newQuantity: existingProductQuantity + 1,
                         storeTypeId: widget.actionData?.storeTypeId ?? -111,
                         productId: productId,
                         centralProductId: centralProductId,
@@ -978,14 +1010,20 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
           addToCartOnId = _getAddToCartOnId(productId);
           print("addCartOnID: $addToCartOnId");
         }
+        int? existingProductQuantity;
+        existingProductQuantity = currentQuantity;
+        if (addToCartOnId != null) {
+          existingProductQuantity = _getExistingProductQuantity(productId, addToCartOnId);
+          print("existingProductQuantity: $existingProductQuantity");
+        }
         cartBloc.add(
           CartAddItemRequested(
             storeId: widget.actionData?.storeId ?? '',
             cartType: 2,
-            action: 2,
+            action: (existingProductQuantity == 1) ? 3 : 2,
             // Add action
             storeCategoryId: widget.actionData?.storeCategoryId ?? '',
-            newQuantity: currentQuantity - 1,
+            newQuantity: (existingProductQuantity == 1) ? 0 : (existingProductQuantity ?? 0) - 1,
             storeTypeId: widget.actionData?.storeTypeId ?? -111,
             productId: productId,
             centralProductId: centralProductId,
