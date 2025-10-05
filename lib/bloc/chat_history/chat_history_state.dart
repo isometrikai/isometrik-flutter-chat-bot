@@ -14,11 +14,29 @@ class ChatHistoryLoadInProgress extends ChatHistoryState {}
 
 class ChatHistoryLoadSuccess extends ChatHistoryState {
   final List<ChatHistoryResponse> sessions;
+  final bool hasMore;
+  final bool isLoadingMore;
 
-  const ChatHistoryLoadSuccess({required this.sessions});
+  const ChatHistoryLoadSuccess({
+    required this.sessions,
+    this.hasMore = true,
+    this.isLoadingMore = false,
+  });
+
+  ChatHistoryLoadSuccess copyWith({
+    List<ChatHistoryResponse>? sessions,
+    bool? hasMore,
+    bool? isLoadingMore,
+  }) {
+    return ChatHistoryLoadSuccess(
+      sessions: sessions ?? this.sessions,
+      hasMore: hasMore ?? this.hasMore,
+      isLoadingMore: isLoadingMore ?? this.isLoadingMore,
+    );
+  }
 
   @override
-  List<Object?> get props => [sessions];
+  List<Object?> get props => [sessions, hasMore, isLoadingMore];
 }
 
 class ChatHistoryLoadFailure extends ChatHistoryState {

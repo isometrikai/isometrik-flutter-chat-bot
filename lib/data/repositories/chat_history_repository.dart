@@ -18,9 +18,12 @@ class ChatHistoryRepository {
     userIds = userId;
   }
 
-  Future<List<ChatHistoryResponse>> fetchChatHistory() async {
+  Future<List<ChatHistoryResponse>> fetchChatHistory({
+    int limit = 15,
+    int skip = 0,
+  }) async {
     
-    final url = Uri.parse('$baseUrl/v2/sessions/$userIds');
+    final url = Uri.parse('$baseUrl/v2/sessions/$userIds?limit=$limit&skip=$skip');
     
     try {
       final response = await http.get(url);

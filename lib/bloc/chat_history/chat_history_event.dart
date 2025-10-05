@@ -15,5 +15,9 @@ class ChatHistoryRefreshed extends ChatHistoryEvent {
   const ChatHistoryRefreshed();
 }
 
+class ChatHistoryLoadMoreRequested extends ChatHistoryEvent {
+  const ChatHistoryLoadMoreRequested();
+}
+
 
 
