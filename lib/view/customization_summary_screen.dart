@@ -1,3 +1,5 @@
+import 'package:chat_bot/data/model/universal_cart_response.dart' as cart_models;
+import 'package:chat_bot/utils/enum.dart';
 import 'package:flutter/material.dart';
 import 'package:chat_bot/data/model/chat_response.dart';
 import '../utils/text_styles.dart';
@@ -7,15 +9,23 @@ import '../utils/text_styles.dart';
 class CustomizationSummaryScreen extends StatefulWidget {
   final Store? store;
   final Product? product;
+  final String? productId;
+  final String? centralProductId;
+  final int? storeTypeId;
   final VoidCallback? onChooseClicked; 
-  final VoidCallback? onRepeatClicked; // Callback when "I'll choose" is clicked
+  final VoidCallback? onRepeatClicked;
+  final List<cart_models.UniversalCartData> cartData; // Callback when "I'll choose" is clicked
 
   const CustomizationSummaryScreen({
     super.key,
     this.store,
     this.product,
+    this.productId,
+    this.centralProductId,
+    required this.storeTypeId,
     this.onChooseClicked,
     this.onRepeatClicked,
+    required this.cartData,
   });
 
   @override
@@ -26,32 +36,56 @@ class _CustomizationSummaryScreenState extends State<CustomizationSummaryScreen>
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: 250,
-      child: ClipRRect(
-        borderRadius: const BorderRadius.only(
-          topLeft: Radius.circular(16),
-          topRight: Radius.circular(16),
+    return ClipRRect(
+      borderRadius: const BorderRadius.only(
+        topLeft: Radius.circular(16),
+        topRight: Radius.circular(16),
+      ),
+      child: Container(
+        constraints: BoxConstraints(
+          maxHeight: MediaQuery.of(context).size.height * 0.6, // Max 60% of screen height
+          minHeight: 250, // Minimum height
         ),
-        child: Container(
-          decoration: const BoxDecoration(
-            color: Colors.white,
-          ),
-          child: SafeArea(
-            child: Column(
-              children: [
-                _buildHeader(),
-                const SizedBox(height: 30),
-                // Expanded(
-                //   child: _buildCustomizationsList(),
-                // ),
-                _buildBottomButtons(),
-              ],
-            ),
+        decoration: const BoxDecoration(
+          color: Colors.white,
+        ),
+        child: SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _buildHeader(),
+              const SizedBox(height: 16),
+              Flexible(
+                child: _buildCustomizationsList(),
+              ),
+              _buildBottomButtons(),
+            ],
           ),
         ),
       ),
     );
+  }
+
+    /// Get product object from cart data for a specific product ID
+  cart_models.Product? _getCartProductObject(String productId, String centralProductId) {
+    try {
+      // Use filter to find the product with matching ID
+      final cartProduct =
+          widget.cartData
+              .expand((cart) => cart.sellers)
+              .expand((seller) => seller.products)
+              .where((product) => product.id == productId && product.centralProductId == centralProductId)
+              .toList();
+
+      if (cartProduct.isEmpty) {
+        return null;
+      }
+
+      return cartProduct.last;
+    } catch (e) {
+      print('Error getting cart product object: $e');
+      return null;
+    }
   }
 
   Widget _buildHeader() {
@@ -71,20 +105,32 @@ class _CustomizationSummaryScreenState extends State<CustomizationSummaryScreen>
                   children: [
                     const SizedBox(height: 10),
                     Text(
-                      'Your customisations',
+                      // 'Your customisations',
+                      _getCartProductObject(widget.productId ?? '', widget.centralProductId ?? '')?.name ?? '',
                       style: AppTextStyles.launchTitle.copyWith(
                         color: const Color(0xFF242424),
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
                       ),
                     ),
                     // const SizedBox(height: 4),
                     // Text(
-                    //   '${widget.product?.productName}',
+                    //   _getCartProductObject(widget.productId ?? '', widget.centralProductId ?? '')?.name ?? '',
                     //   style: const TextStyle(
                     //     fontSize: 12,
                     //     fontWeight: FontWeight.w400,
                     //     color: Color(0xFF6E4185),
                     //   ),
                     // ),
+                    const SizedBox(height: 4),
+                     Text(
+                      '${'AED'} ${_getCartProductObject(widget.productId ?? '', widget.centralProductId ?? '')?.singleUnitPrice?.unitPriceWithTax.toString() ?? ''}',
+                      style: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w400,
+                        color: Color(0xFF6E4185),
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -113,74 +159,155 @@ class _CustomizationSummaryScreenState extends State<CustomizationSummaryScreen>
     );
   }
 
+  /// Group add-ons by category and combine options
+  List<Map<String, String>> _groupAddOnsByCategory(List<cart_models.SelectedAddOn> addOns) {
+    Map<String, List<String>> groupedAddOns = {};
+    
+    for (final addOn in addOns) {
+      final category = addOn.addOnName;
+      final option = addOn.name;
+      
+      if (!groupedAddOns.containsKey(category)) {
+        groupedAddOns[category] = [];
+      }
+      groupedAddOns[category]!.add(option);
+    }
+    
+    return groupedAddOns.entries.map((entry) => {
+      'category': entry.key,
+      'options': entry.value.join(', '),
+    }).toList();
+  }
+
   Widget _buildCustomizationsList() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Customization item
-          Container(
-            padding: const EdgeInsets.all(15),
-            decoration: BoxDecoration(
-              color: const Color(0xFFF5F7FF),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Column(
-              children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Quarter - 1 Pc',
-                            style: const TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w400,
-                              color: Color(0xFF242424),
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Row(
-                            children: [
-                              Text(
-                                'Kubboos',
-                                style: const TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w400,
-                                  color: Color(0xFF242424),
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              Container(
-                                width: 7,
-                                height: 7,
-                                decoration: const BoxDecoration(
-                                  color: Color(0xFFCBCBCB),
-                                  shape: BoxShape.circle,
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                'Mashed Potato',
-                                style: const TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w400,
-                                  color: Color(0xFF242424),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ],
+    final cartProduct = _getCartProductObject(widget.productId ?? '', widget.centralProductId ?? '');
+    
+    // Debug information
+    print('CustomizationSummaryScreen Debug:');
+    print('Product ID: ${widget.productId}');
+    print('Central Product ID: ${widget.centralProductId}');
+    print('Cart Product found: ${cartProduct != null}');
+    if (cartProduct != null) {
+      print('Cart Product Name: ${cartProduct.name}');
+      print('Selected Add-ons: ${cartProduct.selectedAddOns?.length ?? 0}');
+      print('Attributes: ${cartProduct.attributes?.length ?? 0}');
+    }
+    
+    if (cartProduct == null) {
+      return const Padding(
+        padding: EdgeInsets.all(16),
+        child: Center(
+          child: Text(
+            'No customizations found',
+            style: TextStyle(
+              fontSize: 14,
+              color: Color(0xFF666666),
             ),
           ),
+        ),
+      );
+    }
+
+    // Get selected add-ons from the cart product
+    final selectedAddOns = cartProduct.selectedAddOns ?? [];
+    final attributes = cartProduct.attributes ?? [];
+    
+    if (selectedAddOns.isEmpty && attributes.isEmpty) {
+      return const Padding(
+        padding: EdgeInsets.all(16),
+        child: Center(
+          child: Text(
+            'No customizations available',
+            style: TextStyle(
+              fontSize: 14,
+              color: Color(0xFF666666),
+            ),
+          ),
+        ),
+      );
+    }
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: ListView(
+        shrinkWrap: true,
+        children: [
+          // Display selected add-ons grouped by category
+          if (selectedAddOns.isNotEmpty) ...[
+            ..._groupAddOnsByCategory(selectedAddOns).map((entry) => Container(
+              margin: const EdgeInsets.only(bottom: 8),
+              padding: const EdgeInsets.all(15),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF5F7FF),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          entry['category']!,
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: Color(0xFF242424),
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          entry['options']!,
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w400,
+                            color: Color(0xFF6E4185),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            )).toList(),
+           ] else if (attributes.isNotEmpty && widget.storeTypeId != FoodCategory.food.value) ...[
+             ...attributes.where((attribute) => attribute.value.isNotEmpty).map((attribute) => Container(
+               margin: const EdgeInsets.only(bottom: 8),
+               padding: const EdgeInsets.all(15),
+               decoration: BoxDecoration(
+                 color: const Color(0xFFF5F7FF),
+                 borderRadius: BorderRadius.circular(10),
+               ),
+               child: Row(
+                 children: [
+                   Expanded(
+                     child: Column(
+                       crossAxisAlignment: CrossAxisAlignment.start,
+                       children: [
+                         Text(
+                           attribute.attrname,
+                           style: const TextStyle(
+                             fontSize: 14,
+                             fontWeight: FontWeight.w600,
+                             color: Color(0xFF242424),
+                           ),
+                         ),
+                         const SizedBox(height: 4),
+                         Text(
+                           attribute.value,
+                           style: const TextStyle(
+                             fontSize: 14,
+                             fontWeight: FontWeight.w400,
+                             color: Color(0xFF6E4185),
+                           ),
+                         ),
+                       ],
+                     ),
+                   ),
+                 ],
+               ),
+             )).toList(),
+           ],
         ],
       ),
     );

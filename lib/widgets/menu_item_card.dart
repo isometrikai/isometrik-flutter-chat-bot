@@ -177,16 +177,23 @@ class MenuItemCard extends StatelessWidget {
     if (cartData == null || productId == null) return null;
     
     try {
-      // Use functional programming approach with firstWhere for better performance
-      final cartProduct = cartData!
+      // Find all products with matching ID and sum their quantities
+      final matchingProducts = cartData!
           .expand((cartItem) => cartItem.sellers)
           .expand((seller) => seller.products)
-          .firstWhere(
-            (cartProduct) => cartProduct.id == productId,
-            orElse: () => throw StateError('Product not found'),
-          );
+          .where((cartProduct) => cartProduct.id == productId);
       
-      return cartProduct.quantity?.value ?? 0;
+      if (matchingProducts.isEmpty) {
+        return null;
+      }
+      
+      // Sum up all quantities for products with the same ID
+      int totalQuantity = 0;
+      for (final product in matchingProducts) {
+        totalQuantity += product.quantity?.value ?? 0;
+      }
+      
+      return totalQuantity;
     } catch (e) {
       // Product not found in cart
       return null;

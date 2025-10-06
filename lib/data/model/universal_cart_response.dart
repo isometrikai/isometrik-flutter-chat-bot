@@ -340,7 +340,7 @@ class Seller {
   final bool autoAcceptOrders;
   final bool allowSellerShipToBuyer;
   final bool allowSellerBillingToBuyer;
-  final int totalProductWeightInKG;
+  // final int totalProductWeightInKG;
   final bool storeIsOpen;
   final List<Product> products;
 
@@ -375,7 +375,7 @@ class Seller {
     required this.autoAcceptOrders,
     required this.allowSellerShipToBuyer,
     required this.allowSellerBillingToBuyer,
-    required this.totalProductWeightInKG,
+    // required this.totalProductWeightInKG,
     required this.storeIsOpen,
     required this.products,
   });
@@ -412,7 +412,7 @@ class Seller {
       autoAcceptOrders: json['autoAcceptOrders'] ?? false,
       allowSellerShipToBuyer: json['allowSellerShipToBuyer'] ?? false,
       allowSellerBillingToBuyer: json['allowSellerBillingToBuyer'] ?? false,
-      totalProductWeightInKG: json['totalProductWeightInKG'] ?? 0,
+      // totalProductWeightInKG: json['totalProductWeightInKG'] ?? 0,
       storeIsOpen: json['storeIsOpen'] ?? false,
       products: (json['products'] as List<dynamic>?)
           ?.map((e) => Product.fromJson(e))
@@ -452,7 +452,7 @@ class Seller {
       'autoAcceptOrders': autoAcceptOrders,
       'allowSellerShipToBuyer': allowSellerShipToBuyer,
       'allowSellerBillingToBuyer': allowSellerBillingToBuyer,
-      'totalProductWeightInKG': totalProductWeightInKG,
+      // 'totalProductWeightInKG': totalProductWeightInKG,
       'storeIsOpen': storeIsOpen,
       'products': products.map((e) => e.toJson()).toList(),
     };
@@ -589,8 +589,10 @@ class ProductAttribute {
 
 class Product {
   final String id;
+  final String centralProductId;
   final String name;
   final Accounting? accounting;
+  final Accounting? singleUnitPrice;
   final Quantity? quantity;
   final num? addToCartOnId;
   final String? storeId;
@@ -599,8 +601,10 @@ class Product {
 
   Product({
     required this.id,
+    required this.centralProductId,
     required this.name,
     required this.accounting,
+    required this.singleUnitPrice,
     this.quantity,
     this.addToCartOnId,
     this.storeId,
@@ -611,8 +615,10 @@ class Product {
   factory Product.fromJson(Map<String, dynamic> json) {
     return Product(
       id: json['_id'] ?? '',
+      centralProductId: json['centralProductId'] ?? '',
       name: json['name'] ?? '',
       accounting: json['accounting'] != null ? Accounting.fromJson(json['accounting']) : null,
+      singleUnitPrice: json['singleUnitPrice'] != null ? Accounting.fromJson(json['singleUnitPrice']) : null,
       quantity: json['quantity'] != null ? Quantity.fromJson(json['quantity']) : null,
       addToCartOnId: json['addToCartOnId'] ?? 0,
       storeId: json['storeId'] ?? '',
@@ -632,8 +638,10 @@ class Product {
   Map<String, dynamic> toJson() {
     return {
       '_id': id,
+      'centralProductId': centralProductId,
       'name': name,
       'accounting': accounting?.toJson(),
+      'singleUnitPrice': singleUnitPrice?.toJson(),
       'quantity': quantity?.toJson(),
       'addToCartOnId': addToCartOnId,
       'storeId': storeId,

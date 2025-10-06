@@ -5,7 +5,6 @@ import 'package:chat_bot/bloc/cart/cart_bloc.dart';
 import 'package:chat_bot/bloc/chat_bloc.dart';
 import 'package:chat_bot/data/model/chat_history_response.dart';
 import 'package:chat_bot/view/chat_screen.dart';
-import 'package:chat_bot/widgets/screen_header.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -13,52 +12,91 @@ import 'package:flutter_svg/flutter_svg.dart';
 import '../utils/text_styles.dart';
 import '../utils/asset_path.dart';
 
-class ChatHistoryScreen extends StatelessWidget {
+class ChatHistoryScreen extends StatefulWidget {
   const ChatHistoryScreen({super.key});
+
+  @override
+  State<ChatHistoryScreen> createState() => _ChatHistoryScreenState();
+}
+
+class _ChatHistoryScreenState extends State<ChatHistoryScreen> {
+  final ScrollController _scrollController = ScrollController();
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (context) => ChatHistoryBloc()..add(const ChatHistoryFetchRequested()),
-      child: Scaffold(
-        backgroundColor: Colors.white,
+      child: _ChatHistoryContent(scrollController: _scrollController),
+    );
+  }
+}
+
+class _ChatHistoryContent extends StatefulWidget {
+  final ScrollController scrollController;
+
+  const _ChatHistoryContent({required this.scrollController});
+
+  @override
+  State<_ChatHistoryContent> createState() => _ChatHistoryContentState();
+}
+
+class _ChatHistoryContentState extends State<_ChatHistoryContent> {
+  @override
+  void initState() {
+    super.initState();
+    widget.scrollController.addListener(_onScroll);
+  }
+
+  @override
+  void dispose() {
+    widget.scrollController.removeListener(_onScroll);
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (widget.scrollController.position.pixels >=
+        widget.scrollController.position.maxScrollExtent - 200) {
+      // Load more when user is 200 pixels from the bottom
+      context.read<ChatHistoryBloc>().add(const ChatHistoryLoadMoreRequested());
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.white,
       appBar: _buildAppBar(context),
       body: SafeArea(     
-      child:  Column(
-        children: [
-          // const SizedBox(height: 24),
-          // Padding(
-          //   padding: const EdgeInsets.symmetric(horizontal: 16),
-          //   child: ScreenHeader(
-          //     title: 'Chats',
-          //     onClose: () => Navigator.pop(context),
-          //   ),
-          // ),
-          // const SizedBox(height: 10),
-          
-          // Chat History List
-          Expanded(
-            child: BlocBuilder<ChatHistoryBloc, ChatHistoryState>(
-              builder: (context, state) {
-                if (state is ChatHistoryLoadInProgress) {
-                  return const Center(
-                    child: CircularProgressIndicator(),
-                  );
-                } else if (state is ChatHistoryLoadSuccess) {
-                  if (state.sessions.isEmpty) {
+        child: Column(
+          children: [
+            // Chat History List
+            Expanded(
+              child: BlocBuilder<ChatHistoryBloc, ChatHistoryState>(
+                builder: (context, state) {
+                  if (state is ChatHistoryLoadInProgress) {
+                    return const Center(
+                      child: CircularProgressIndicator(),
+                    );
+                  } else if (state is ChatHistoryLoadSuccess) {
+                    if (state.sessions.isEmpty) {
+                      return _buildEmptyCart();
+                    }
+                    return _buildChatHistoryList(context, state.sessions, state);
+                  } else if (state is ChatHistoryLoadFailure) {
                     return _buildEmptyCart();
                   }
-                  return _buildChatHistoryList(context, state.sessions);
-                } else if (state is ChatHistoryLoadFailure) {
-                  return _buildEmptyCart();
-                }
-                return const SizedBox.shrink();
-              },
+                  return const SizedBox.shrink();
+                },
+              ),
             ),
-          ),
-        ],
-      ),
-    ),
+          ],
+        ),
       ),
     );
   }
@@ -73,7 +111,7 @@ class ChatHistoryScreen extends StatelessWidget {
       leadingWidth: 0,
       leading: const SizedBox.shrink(), // Remove leading widget
       title: const Text(
-        'Chats History',
+        'Chat History',
         style: const TextStyle(
                     fontWeight: FontWeight.w700,
                     fontSize: 24,
@@ -101,20 +139,28 @@ class ChatHistoryScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildChatHistoryList(BuildContext context, List<ChatHistoryResponse> sessions) {
+  Widget _buildChatHistoryList(BuildContext context, List<ChatHistoryResponse> sessions, ChatHistoryLoadSuccess state) {
     // Group sessions by date
     final groupedSessions = _groupSessionsByDate(sessions);
     
-    return RefreshIndicator(
+    return 
+    RefreshIndicator(
       onRefresh: () async {
         context.read<ChatHistoryBloc>().add(const ChatHistoryRefreshed());
         // Wait for the state to change
         await Future.delayed(const Duration(seconds: 1));
       },
-      child: ListView.builder(
+      child: 
+      ListView.builder(
+        controller: widget.scrollController,
         padding: const EdgeInsets.symmetric(horizontal: 16),
-        itemCount: groupedSessions.length,
+        itemCount: groupedSessions.length + (state.hasMore ? 1 : 0),
         itemBuilder: (context, index) {
+          if (index == groupedSessions.length) {
+            // Load more indicator
+            return _buildLoadMoreIndicator(state);
+          }
+          
           final entry = groupedSessions[index];
           final timeLabel = entry['label'] as String;
           final sessionsForDate = entry['sessions'] as List<ChatHistoryResponse>;
@@ -128,6 +174,38 @@ class ChatHistoryScreen extends StatelessWidget {
         },
       ),
     );
+  }
+
+  Widget _buildLoadMoreIndicator(ChatHistoryLoadSuccess state) {
+    if (state.isLoadingMore) {
+      return const Padding(
+        padding: EdgeInsets.all(16.0),
+        child: Center(
+          child: SizedBox(
+            width: 25,
+            height: 25,
+            child: CircularProgressIndicator(
+              color: Color(0xFF8E2FFD),
+              // strokeWidth: 2.0,
+            ),
+          ),
+        ),
+      );
+    } else if (state.hasMore) {
+      return Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Center(
+          child: Text(
+            'Scroll down to load more',
+            style: AppTextStyles.caption.copyWith(
+              color: const Color(0xFF6E4185),
+            ),
+          ),
+        ),
+      );
+    } else {
+      return const SizedBox.shrink();
+    }
   }
 
   Widget _buildEmptyCart() {
@@ -152,18 +230,6 @@ class ChatHistoryScreen extends StatelessWidget {
               height: 1.2,
             ),
           ),
-          // const SizedBox(height: 8),
-          // // Description text
-          // Padding(
-          //   padding: const EdgeInsets.symmetric(horizontal: 40),
-          //   child: Text(
-          //     'Add items like food, groceries, medicines, services or other products to get started.',
-          //     textAlign: TextAlign.center,
-          //     style: AppTextStyles.restaurantDescription.copyWith(
-          //       color: const Color(0xFF6E4185),
-          //     ),
-          //   ),
-          // ),
         ],
       ),
     );
@@ -256,10 +322,6 @@ class ChatHistoryScreen extends StatelessWidget {
         Navigator.push(
           context,
           MaterialPageRoute(
-            // builder: (context) => ChatScreen(
-            //   isFromHistory: true,
-            //   historySessionId: session.sessionId.toString(),
-            // ),
             builder: (context) => MultiBlocProvider(
               providers: [
                 BlocProvider(create: (context) => ChatBloc()),
