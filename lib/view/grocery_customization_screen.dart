@@ -378,7 +378,7 @@ class _GroceryCustomizationScreenState extends State<GroceryCustomizationScreen>
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  isSelectedAlways == false ? '${sizeData.name} (${state.product.currency}${sizeData.finalPriceList.finalPrice.toStringAsFixed(0)})' : sizeData.name,
+                  isSelectedAlways == false ? '${sizeData.name} (${state.product.currency} ${sizeData.finalPriceList.finalPrice.toStringAsFixed(0)})' : sizeData.name,
                   style: AppTextStyles.productTitle.copyWith(
                     fontSize: 14,
                     fontWeight: FontWeight.w400,

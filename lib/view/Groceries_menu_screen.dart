@@ -511,7 +511,7 @@ class _GroceriesMenuScreenState extends State<GroceriesMenuScreen> {
   String _formatCurrency(String symbol, double value) {
     // Format currency with proper symbol
     if (symbol.isNotEmpty) {
-      return '$symbol${value.toStringAsFixed(value.truncateToDouble() == value ? 0 : 2)}';
+      return '$symbol ${value.toStringAsFixed(value.truncateToDouble() == value ? 0 : 2)}';
     }
     return '$symbol ${value.toStringAsFixed(value.truncateToDouble() == value ? 0 : 2)}';
   }
