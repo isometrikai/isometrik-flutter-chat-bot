@@ -1570,6 +1570,8 @@ class _ChatScreenBody extends StatelessWidget {
       leading: const SizedBox.shrink(), // Remove leading widget
       title:  Text(
         chatHistoryTitle ?? '',
+        maxLines: 2,
+        overflow: TextOverflow.ellipsis,
         style: const TextStyle(
                     fontWeight: FontWeight.w700,
                     fontSize: 24,
@@ -3148,6 +3150,36 @@ class _ChatScreenBody extends StatelessWidget {
     int? addToCartOnId,
   ) {
     try {
+
+         num? addToCartId = _getAddToCartOnId(productId);
+        if (addToCartId != null) {
+          
+          print("addToCartId: $addToCartId");
+          final existingProductQuantity = _getExistingProductQuantity(productId, addToCartId);
+          print("existingProductQuantity: $existingProductQuantity");
+
+
+      //TODO:- Add Quantity
+      cartBloc.add(
+        CartAddItemRequested(
+          storeId: storeId,
+          cartType: 1,
+          // Default cart type
+          action: 2,
+          // Add action
+          storeCategoryId: storeCategoryId,
+          newQuantity: existingProductQuantity + 1,
+          storeTypeId: storeTypeId,
+          productId: productId,
+          centralProductId: parentProductId,
+          unitId: unitId,
+          addToCartOnId: addToCartId,
+          needToShowLoaderForCartFetch: false,
+        ),
+      );
+
+        }else {
+
       //TODO:- Add Quantity
       cartBloc.add(
         CartAddItemRequested(
@@ -3166,6 +3198,7 @@ class _ChatScreenBody extends StatelessWidget {
           needToShowLoaderForCartFetch: false,
         ),
       );
+        }
 
       print("Added product to cart: ${productId}");
     } catch (e) {
