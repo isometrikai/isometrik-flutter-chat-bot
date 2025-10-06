@@ -139,7 +139,32 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
     String selectedProductId,
   ) {
     try {
-      //TODO:- Add Quantity
+        num? addToCartId = _getAddToCartOnId(selectedProductId);
+        if (addToCartId != null) {
+           print("addToCartId: $addToCartId");
+          final existingProductQuantity = _getExistingProductQuantity(selectedProductId, addToCartId);
+          print("existingProductQuantity: $existingProductQuantity");
+          
+            cartBloc.add(
+        CartAddItemRequested(
+          storeId: store?.storeId ?? '',
+          cartType: 1,
+          // Default cart type
+          action: 2,
+          // Add action
+          storeCategoryId: store?.storeCategoryId ?? '' ,
+          newQuantity: existingProductQuantity + 1,
+          storeTypeId: store?.type ?? -111,
+          productId: selectedProductId,
+          centralProductId: product?.parentProductId ?? '',
+          unitId: variant.unitId,
+          addToCartOnId: addToCartId,
+          // newAddOns: addOns,
+        ),
+      );
+
+        }else {
+           //TODO:- Add Quantity
       cartBloc.add(
         CartAddItemRequested(
           storeId: store?.storeId ?? '',
@@ -156,6 +181,7 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
           newAddOns: addOns,
         ),
       );
+        }
 
       print("Added product with addons to cart: ${product?.productName ?? ''}");
     } catch (e) {
@@ -175,23 +201,47 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
     int? addToCartOnId,
   ) {
     try {
-      //TODO:- Add Quantity
-      cartBloc.add(
-        CartAddItemRequested(
-          storeId: storeId,
-          cartType: 1,
-          // Default cart type
-          action: 1,
-          // Add action
-          storeCategoryId: storeCategoryId,
-          newQuantity: 1,
-          storeTypeId: storeTypeId,
-          productId: productId,
-          centralProductId: parentProductId,
-          unitId: unitId,
-          addToCartOnId: addToCartOnId,
-        ),
-      );
+          num? addToCartId = _getAddToCartOnId(productId);
+        if (addToCartId != null) {
+          
+          print("addToCartId: $addToCartId");
+          final existingProductQuantity = _getExistingProductQuantity(productId, addToCartId);
+          print("existingProductQuantity: $existingProductQuantity");
+          
+          cartBloc.add(
+          CartAddItemRequested(
+            storeId: storeId,
+            cartType: 1,
+            action: 2,
+            // Add action
+            storeCategoryId: storeCategoryId,
+            newQuantity: existingProductQuantity + 1,
+            storeTypeId: storeTypeId,
+            productId: productId,
+            centralProductId: parentProductId,
+            unitId: unitId,
+            addToCartOnId: addToCartId,
+          ),
+        );
+        }else {
+           //TODO:- Add Quantity
+            cartBloc.add(
+              CartAddItemRequested(
+                storeId: storeId,
+                cartType: 1,
+                // Default cart type
+                action: 1,
+                // Add action
+                storeCategoryId: storeCategoryId,
+                newQuantity: 1,
+                storeTypeId: storeTypeId,
+                productId: productId,
+                centralProductId: parentProductId,
+                unitId: unitId,
+                addToCartOnId: addToCartOnId,
+              ),
+            );
+        }
 
       print("Added product to cart: ${productId}");
     } catch (e) {

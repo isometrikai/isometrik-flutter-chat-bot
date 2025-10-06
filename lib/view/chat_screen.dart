@@ -3083,8 +3083,35 @@ class _ChatScreenBody extends StatelessWidget {
     String selectedProductId,
   ) {
     try {
-      //TODO:- Add Quantity
-      cartBloc.add(
+
+      
+        num? addToCartId = _getAddToCartOnId(selectedProductId);
+        if (addToCartId != null) {
+          
+          print("addToCartId: $addToCartId");
+          final existingProductQuantity = _getExistingProductQuantity(selectedProductId, addToCartId);
+          print("existingProductQuantity: $existingProductQuantity");
+
+           cartBloc.add(
+        CartAddItemRequested(
+          storeId: store?.storeId ?? '',
+          cartType: 1,
+          // Default cart type
+          action: 2,
+          // Add action
+          storeCategoryId: store?.storeCategoryId ?? '',
+          newQuantity: existingProductQuantity + 1,
+          storeTypeId: store?.storeTypeId ?? -111,
+          productId: selectedProductId,
+          centralProductId: product?.parentProductId ?? '',
+          unitId: variant.unitId,
+          addToCartOnId: addToCartId,
+          // newAddOns: addOns,
+          needToShowLoaderForCartFetch: false,
+        ),
+      );
+        }else {
+            cartBloc.add(
         CartAddItemRequested(
           storeId: store?.storeId ?? '',
           cartType: 1,
@@ -3101,6 +3128,7 @@ class _ChatScreenBody extends StatelessWidget {
           needToShowLoaderForCartFetch: false,
         ),
       );
+        }
 
       print("Added product with addons to cart: ${product?.productName ?? ''}");
     } catch (e) {
@@ -3706,6 +3734,38 @@ class _ChatScreenBody extends StatelessWidget {
                             addOns,
                             selectedProductId,
                           ) {
+
+                            num? addToCartId = _getAddToCartOnId(selectedProductId);
+                            if (addToCartId != null) {
+                              
+                              print("addToCartId: $addToCartId");
+                              final existingProductQuantity = _getExistingProductQuantity(selectedProductId, addToCartId);
+                              print("existingProductQuantity: $existingProductQuantity");
+
+
+                              
+                            //TODO:- Add Quantity
+                            cartBloc.add(
+                              CartAddItemRequested(
+                                storeId: product.storeId ?? '',
+                                cartType: 1,
+                                // Default cart type
+                                action: 2,
+                                // Add action
+                                storeCategoryId: product.storeCategoryId ?? '',
+                                newQuantity: existingProductQuantity + 1,
+                                // Add 1 item
+                                storeTypeId: product.storeTypeId ?? -111,
+                                productId: selectedProductId,
+                                centralProductId: centralProductId,
+                                unitId: variant?.unitId ?? '',
+                                // newAddOns: addOns,
+                                addToCartOnId: addToCartId, 
+                                needToShowLoaderForCartFetch: false,
+                              ),
+                            );
+                            }else {
+
                             //TODO:- Add Quantity
                             cartBloc.add(
                               CartAddItemRequested(
@@ -3725,6 +3785,7 @@ class _ChatScreenBody extends StatelessWidget {
                                 needToShowLoaderForCartFetch: false,
                               ),
                             );
+                            }
                           },
                         ),
                   );
@@ -3946,6 +4007,39 @@ class _ChatScreenBody extends StatelessWidget {
     String selectedProductId,
   ) {
     try {
+
+        num? addToCartId = _getAddToCartOnId(selectedProductId);
+        if (addToCartId != null) {
+          
+          print("addToCartId: $addToCartId");
+          final existingProductQuantity = _getExistingProductQuantity(selectedProductId, addToCartId);
+          print("existingProductQuantity: $existingProductQuantity");
+
+
+
+      //TODO:- Add Quantity
+      cartBloc.add(
+        CartAddItemRequested(
+          storeId: storeId,
+          cartType: 1,
+          // Default cart type
+          action: 2,
+          // Add action
+          storeCategoryId: storeCategoryId,
+          newQuantity: existingProductQuantity + 1,
+          storeTypeId: storeTypeId,
+          productId: selectedProductId,
+          centralProductId: centralProductId,
+          unitId: variant.unitId,
+          // newAddOns: addOns,
+          addToCartOnId: addToCartId,
+          needToShowLoaderForCartFetch: false,
+        ),
+      );
+
+        }else {
+          
+          
       //TODO:- Add Quantity
       cartBloc.add(
         CartAddItemRequested(
@@ -3964,6 +4058,8 @@ class _ChatScreenBody extends StatelessWidget {
           needToShowLoaderForCartFetch: false,
         ),
       );
+        }
+
 
       // print("Added product with addons to cart: ${product.productName}");
     } catch (e) {

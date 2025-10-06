@@ -379,6 +379,7 @@ class _GroceriesMenuScreenState extends State<GroceriesMenuScreen> {
                     isIncrease,
                     product.productName,
                     product.productImage,
+                    isCustomizable,
                   );
                 },
                 onClick: () {
@@ -459,7 +460,33 @@ class _GroceriesMenuScreenState extends State<GroceriesMenuScreen> {
     int? addToCartOnId,
   ) {
     try {
-      //TODO:- Add Quantity
+      num? addToCartId = _getAddToCartOnId(productId);
+        if (addToCartId != null) {
+          
+          print("addToCartId: $addToCartId");
+          final existingProductQuantity = _getExistingProductQuantity(productId, addToCartId);
+          print("existingProductQuantity: $existingProductQuantity");
+
+        //TODO:- Add Quantity
+      cartBloc.add(
+        CartAddItemRequested(
+          storeId: storeId,
+          cartType: 1,
+          // Default cart type
+          action: 2,
+          // Add action
+          storeCategoryId: storeCategoryId,
+          newQuantity: existingProductQuantity + 1,
+          storeTypeId: storeTypeId,
+          productId: productId,
+          centralProductId: parentProductId,
+          unitId: unitId,
+          addToCartOnId: addToCartId,
+        ),
+      );
+
+        }else {
+            //TODO:- Add Quantity
       cartBloc.add(
         CartAddItemRequested(
           storeId: storeId,
@@ -476,6 +503,8 @@ class _GroceriesMenuScreenState extends State<GroceriesMenuScreen> {
           addToCartOnId: addToCartOnId,
         ),
       );
+        }
+      
 
       print("Added product to cart: ${productId}");
     } catch (e) {
@@ -595,11 +624,12 @@ class _GroceriesMenuScreenState extends State<GroceriesMenuScreen> {
     bool isIncrease,
     String productName,
     String productImage,
+    bool isCustomizable,
   ) {
     if (isIncrease == false && newQuantity == 1) {
       //TODO:- 0 Quantity
       int? addToCartOnId;
-      if (variantsCount > 1) {
+      if (isCustomizable) {
         addToCartOnId = _getAddToCartOnId(productId);
         print("addCartOnID: $addToCartOnId");
       }
@@ -620,7 +650,7 @@ class _GroceriesMenuScreenState extends State<GroceriesMenuScreen> {
         ),
       );
     } else if (newQuantity > 0 && isIncrease == true) {
-      if (variantsCount > 1) {
+      if (isCustomizable) {
         showModalBottomSheet(
           context: context,
           isScrollControlled: true,
@@ -694,7 +724,7 @@ class _GroceriesMenuScreenState extends State<GroceriesMenuScreen> {
     } else {
       //TODO:- Remove Quantity
       int? addToCartOnId;
-      if (variantsCount > 1) {
+      if (isCustomizable) {
         addToCartOnId = _getAddToCartOnId(productId);
         print("addCartOnID: $addToCartOnId");
       }
@@ -758,43 +788,43 @@ class _GroceriesMenuScreenState extends State<GroceriesMenuScreen> {
     );
   }
 
-  /// Handle adding products with addons to cart
-  void _onAddToCartWithAddOns(
-    String productId,
-    String centralProductId,
-    String storeId,
-    String storeCategoryId,
-    int storeTypeId,
-    BuildContext context,
-    dynamic variant,
-    List<Map<String, dynamic>> addOns,
-  ) {
-    try {
-      //TODO:- Add Quantity
-      cartBloc.add(
-        CartAddItemRequested(
-          storeId: storeId,
-          cartType: 1,
-          // Default cart type
-          action: 1,
-          // Add action
-          storeCategoryId: storeCategoryId,
-          newQuantity: 1,
-          storeTypeId: storeTypeId,
-          productId: productId,
-          centralProductId: centralProductId,
-          unitId: variant.unitId,
-          newAddOns: addOns,
-        ),
-      );
+  // /// Handle adding products with addons to cart
+  // void _onAddToCartWithAddOns(
+  //   String productId,
+  //   String centralProductId,
+  //   String storeId,
+  //   String storeCategoryId,
+  //   int storeTypeId,
+  //   BuildContext context,
+  //   dynamic variant,
+  //   List<Map<String, dynamic>> addOns,
+  // ) {
+  //   try {
+  //     //TODO:- Add Quantity
+  //     cartBloc.add(
+  //       CartAddItemRequested(
+  //         storeId: storeId,
+  //         cartType: 1,
+  //         // Default cart type
+  //         action: 1,
+  //         // Add action
+  //         storeCategoryId: storeCategoryId,
+  //         newQuantity: 1,
+  //         storeTypeId: storeTypeId,
+  //         productId: productId,
+  //         centralProductId: centralProductId,
+  //         unitId: variant.unitId,
+  //         newAddOns: addOns,
+  //       ),
+  //     );
 
-      // print("Added product with addons to cart: ${product.productName}");
-    } catch (e) {
-      print(
-        'RestaurantScreen: Error dispatching CartAddItemRequeste with addons: $e',
-      );
-    }
-  }
+  //     // print("Added product with addons to cart: ${product.productName}");
+  //   } catch (e) {
+  //     print(
+  //       'RestaurantScreen: Error dispatching CartAddItemRequeste with addons: $e',
+  //     );
+  //   }
+  // }
 }
 
 // Replaced inline card with shared MenuItemCard

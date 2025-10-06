@@ -664,7 +664,36 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
                               addOns,
                               selectedProductId,
                             ) {
-                              //TODO:- Add Quantity
+
+                              num? addToCartId = _getAddToCartOnId(selectedProductId);
+                              if (addToCartId != null) {
+                                 print("addToCartId: $addToCartId");
+                                  final existingProductQuantity = _getExistingProductQuantity(selectedProductId, addToCartId);
+                                  print("existingProductQuantity: $existingProductQuantity");
+
+                                 //TODO:- Add Quantity
+                              cartBloc.add(
+                                CartAddItemRequested(
+                                  storeId: widget.actionData?.storeId ?? '',
+                                  cartType: 1,
+                                  // Default cart type
+                                  action: 2,
+                                  // Add action
+                                  storeCategoryId:
+                                      widget.actionData?.storeCategoryId ?? '',
+                                  newQuantity: existingProductQuantity + 1,
+                                  // Add 1 item
+                                  storeTypeId:
+                                      widget.actionData?.storeTypeId ?? -111,
+                                  productId: selectedProductId,
+                                  centralProductId: centralProductId,
+                                  unitId: variant?.unitId ?? '',
+                                  // newAddOns: addOns,
+                                  addToCartOnId: addToCartId,
+                                ),
+                              );
+                              }else {
+                                 //TODO:- Add Quantity
                               cartBloc.add(
                                 CartAddItemRequested(
                                   storeId: widget.actionData?.storeId ?? '',
@@ -684,6 +713,7 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
                                   newAddOns: addOns,
                                 ),
                               );
+                              }
                             },
                           ),
                     );
@@ -1089,7 +1119,33 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
     String selectedProductId,
   ) {
     try {
-      //TODO:- Add Quantity
+
+        num? addToCartId = _getAddToCartOnId(selectedProductId);
+        if (addToCartId != null) {
+          
+          print("addToCartId: $addToCartId");
+          final existingProductQuantity = _getExistingProductQuantity(selectedProductId, addToCartId);
+          print("existingProductQuantity: $existingProductQuantity");
+
+           cartBloc.add(
+        CartAddItemRequested(
+          storeId: storeId,
+          cartType: 1,
+          // Default cart type
+          action: 2,
+          // Add action
+          storeCategoryId: storeCategoryId,
+          newQuantity: existingProductQuantity + 1,
+          storeTypeId: storeTypeId,
+          productId: selectedProductId,
+          centralProductId: centralProductId,
+          unitId: variant.unitId,
+          addToCartOnId: addToCartId,
+        ),
+      );
+          
+        }else {
+            //TODO:- Add Quantity
       cartBloc.add(
         CartAddItemRequested(
           storeId: storeId,
@@ -1106,6 +1162,7 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
           newAddOns: addOns,
         ),
       );
+        }
 
       // print("Added product with addons to cart: ${product.productName}");
     } catch (e) {
