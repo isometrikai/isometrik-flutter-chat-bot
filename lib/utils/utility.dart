@@ -1,3 +1,4 @@
+import 'package:chat_bot/widgets/black_toast_view.dart';
 import 'package:flutter/material.dart';
 
 final GlobalKey<NavigatorState> kNavigatorKey = GlobalKey<NavigatorState>();
@@ -64,6 +65,16 @@ class Utility {
     if (isLoading && context != null && Navigator.of(context).canPop()) {
       isLoading = false;
       Navigator.of(context).pop();
+    }
+  }
+
+  static void showErrorBlackToast(String message) {
+    final context = kNavigatorKey.currentContext ?? _currentContext;
+    if (context != null) {
+      BlackToastView.show(
+                  context,
+                  message,
+                );
     }
   }
 

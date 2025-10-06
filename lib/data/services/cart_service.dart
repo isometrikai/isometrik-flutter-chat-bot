@@ -162,7 +162,6 @@ class CartService {
         "centralProductId": centralProductId,
         if (newAddOns != null) "newAddOns": newAddOns,
         if (addToCartOnId != null) "addToCartOnId": addToCartOnId.toString(),
-        // "isMultiCart": 2
       };
 
       final result = await _client.post('/v1/cart', body);
@@ -175,6 +174,8 @@ class CartService {
           return ApiResult.error('Failed to parse response: ${e.toString()}');
         }
       } else {
+        print(result.data?['message']);
+        // Utility.showErrorBlackToast(result.data?['message'] ?? 'Failed to add item to cart');
         return ApiResult.error(result.message ?? 'Failed to add item to cart');
       }
     } catch (e) {

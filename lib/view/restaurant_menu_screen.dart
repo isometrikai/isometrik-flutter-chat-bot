@@ -459,31 +459,116 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
           ? _categories[_selectedMainCategoryIndex - 1]
           : null; // null means ALL
 
+  /// Check if a category has any products that match the current filters
+  bool _hasMatchingProducts(ProductCategory category) {
+    final List<_MenuItem> items = <_MenuItem>[];
+    if (category.isSubCategories && category.subCategories.isNotEmpty) {
+      // Check all subcategories for matching products
+      for (final subCategory in category.subCategories) {
+        items.addAll(subCategory.products.map(_mapProduct));
+      }
+    } else {
+      items.addAll(category.products.map(_mapProduct));
+    }
+
+    // Apply the same filtering logic as in _buildOneCategorySection
+    final List<_MenuItem> filtered = items.where((menuItem) {
+      // If both filters are off, show all items
+      if (!_filterVeg && !_filterNonVeg) {
+        // Only apply search filter
+        if (_searchController.text.trim().isNotEmpty &&
+            !menuItem.title.toLowerCase().contains(
+              _searchController.text.trim().toLowerCase(),
+            )) {
+          return false;
+        }
+        return true;
+      }
+
+      // If only veg filter is on, show only veg items
+      if (_filterVeg && !_filterNonVeg && !menuItem.isVeg) return false;
+
+      // If only non-veg filter is on, show only non-veg items
+      if (_filterNonVeg && !_filterVeg && menuItem.isVeg) return false;
+
+      // If both filters are on, show all items (both veg and non-veg)
+      // Apply search filter
+      if (_searchController.text.trim().isNotEmpty &&
+          !menuItem.title.toLowerCase().contains(
+            _searchController.text.trim().toLowerCase(),
+          )) {
+        return false;
+      }
+      return true;
+    }).toList();
+
+    return filtered.isNotEmpty;
+  }
+
   Widget _buildCurrentCategorySection() {
     final ProductCategory? category = _currentCategory;
     if (category == null) {
       // ALL view: display each category as its own section
+      final List<Widget> sections = <Widget>[];
+      for (final ProductCategory c in _categories) {
+        // Check if this category has any products that match the current filters
+        if (_hasMatchingProducts(c)) {
+          final Widget section = _buildOneCategorySection(
+            category: c,
+            selectedSubIndex: _subIndexByCategory[c.catName] ?? 0,
+            onSubSelected: (int idx) => _subIndexByCategory[c.catName] = idx,
+          );
+          sections.add(section);
+          sections.add(const SizedBox(height: 24));
+        }
+      }
+      
+      // If no sections have matching products, show "No Products found" message
+      if (sections.isEmpty) {
+        return Center(
+          child: Padding(
+            padding: const EdgeInsets.only(top: 50),
+            child: Text(
+              'No Products found',
+              style: AppTextStyles.bodyText.copyWith(
+                color: const Color(0xFF6E4185),
+                fontSize: 16,
+              ),
+            ),
+          ),
+        );
+      }
+      
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          for (final ProductCategory c in _categories) ...<Widget>[
-            _buildOneCategorySection(
-              category: c,
-              selectedSubIndex: _subIndexByCategory[c.catName] ?? 0,
-              onSubSelected: (int idx) => _subIndexByCategory[c.catName] = idx,
-            ),
-            const SizedBox(height: 24),
-          ],
-        ],
+        children: sections,
       );
     }
 
     // Single category view
-    return _buildOneCategorySection(
+    final Widget section = _buildOneCategorySection(
       category: category,
       selectedSubIndex: _selectedBiriyaniSubIndex,
       onSubSelected: (int idx) => _selectedBiriyaniSubIndex = idx,
     );
+    
+    // Check if the section has no matching products
+    if (!_hasMatchingProducts(category)) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.only(top: 50),
+          child: Text(
+            'No Products found',
+            style: AppTextStyles.bodyText.copyWith(
+              color: const Color(0xFF6E4185),
+              fontSize: 16,
+            ),
+          ),
+        ),
+      );
+    }
+    
+    return section;
   }
 
   Widget _buildOneCategorySection({
@@ -535,6 +620,11 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
           }
           return true;
         }).toList();
+
+    // Hide section if no products match the filter
+    if (filtered.isEmpty) {
+      return const SizedBox.shrink();
+    }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -664,7 +754,36 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
                               addOns,
                               selectedProductId,
                             ) {
-                              //TODO:- Add Quantity
+
+                              num? addToCartId = _getAddToCartOnId(selectedProductId);
+                              if (addToCartId != null) {
+                                 print("addToCartId: $addToCartId");
+                                  final existingProductQuantity = _getExistingProductQuantity(selectedProductId, addToCartId);
+                                  print("existingProductQuantity: $existingProductQuantity");
+
+                                 //TODO:- Add Quantity
+                              cartBloc.add(
+                                CartAddItemRequested(
+                                  storeId: widget.actionData?.storeId ?? '',
+                                  cartType: 1,
+                                  // Default cart type
+                                  action: 2,
+                                  // Add action
+                                  storeCategoryId:
+                                      widget.actionData?.storeCategoryId ?? '',
+                                  newQuantity: existingProductQuantity + 1,
+                                  // Add 1 item
+                                  storeTypeId:
+                                      widget.actionData?.storeTypeId ?? -111,
+                                  productId: selectedProductId,
+                                  centralProductId: centralProductId,
+                                  unitId: variant?.unitId ?? '',
+                                  // newAddOns: addOns,
+                                  addToCartOnId: addToCartId,
+                                ),
+                              );
+                              }else {
+                                 //TODO:- Add Quantity
                               cartBloc.add(
                                 CartAddItemRequested(
                                   storeId: widget.actionData?.storeId ?? '',
@@ -684,6 +803,7 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
                                   newAddOns: addOns,
                                 ),
                               );
+                              }
                             },
                           ),
                     );
@@ -1089,7 +1209,33 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
     String selectedProductId,
   ) {
     try {
-      //TODO:- Add Quantity
+
+        num? addToCartId = _getAddToCartOnId(selectedProductId);
+        if (addToCartId != null) {
+          
+          print("addToCartId: $addToCartId");
+          final existingProductQuantity = _getExistingProductQuantity(selectedProductId, addToCartId);
+          print("existingProductQuantity: $existingProductQuantity");
+
+           cartBloc.add(
+        CartAddItemRequested(
+          storeId: storeId,
+          cartType: 1,
+          // Default cart type
+          action: 2,
+          // Add action
+          storeCategoryId: storeCategoryId,
+          newQuantity: existingProductQuantity + 1,
+          storeTypeId: storeTypeId,
+          productId: selectedProductId,
+          centralProductId: centralProductId,
+          unitId: variant.unitId,
+          addToCartOnId: addToCartId,
+        ),
+      );
+          
+        }else {
+            //TODO:- Add Quantity
       cartBloc.add(
         CartAddItemRequested(
           storeId: storeId,
@@ -1106,6 +1252,7 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
           newAddOns: addOns,
         ),
       );
+        }
 
       // print("Added product with addons to cart: ${product.productName}");
     } catch (e) {

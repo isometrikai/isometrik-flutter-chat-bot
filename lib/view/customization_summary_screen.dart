@@ -399,7 +399,7 @@ class _CustomizationSummaryScreenState extends State<CustomizationSummaryScreen>
                   height: 62,
                   alignment: Alignment.center,
                   child: Text(
-                    "Repeat last",
+                    "Repeat",
                     style: AppTextStyles.button.copyWith(
                       fontSize: 16,
                       color: Colors.white,

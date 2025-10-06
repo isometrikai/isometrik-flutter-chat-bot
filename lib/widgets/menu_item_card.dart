@@ -100,7 +100,7 @@ class MenuItemCard extends StatelessWidget {
             ),
             const SizedBox(height: 9),
             SizedBox(
-              height: 34,
+              height: 38,
               child: Text(
                 title,
                 maxLines: 2,
