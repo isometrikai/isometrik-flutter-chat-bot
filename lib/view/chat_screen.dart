@@ -1527,6 +1527,7 @@ class _ChatScreenBody extends StatelessWidget {
                                           (context) => BlocProvider(
                                             create: (context) => CartBloc(),
                                             child: CartScreen(
+                                              needToEndThisChat: needToEndThisChat,
                                               onCheckout: (message) {
                                                 onSendMessage(message);
                                               },

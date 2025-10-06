@@ -28,10 +28,12 @@ class CategoryData {
 
 class CartScreen extends StatefulWidget {
   final Function(String)? onCheckout;
+  final bool needToEndThisChat;
 
   const CartScreen({
     super.key,
     this.onCheckout,
+    this.needToEndThisChat = false,
   });
 
   @override
@@ -66,9 +68,10 @@ class _CartScreenState extends State<CartScreen> {
             Expanded(
               child: _buildCartContent(),
             ),
-            
-            // Bottom action buttons
-            _buildBottomActions(),
+            if (widget.needToEndThisChat == false) ...[
+              // Bottom action buttons
+              _buildBottomActions(),
+            ],
           ],
         ),
       ),
