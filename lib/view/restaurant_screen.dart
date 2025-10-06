@@ -867,22 +867,12 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
           return _buildEmptyCart();
         }
 
-        return RefreshIndicator(
-          onRefresh: () async {
-            _refreshCart();
-            _bloc.add(
-              RestaurantFetchRequested(
-                keyword: _currentKeyword,
-                storeCategoryName: widget.actionData?.storeCategoryName ?? '',
-              ),
-            );
-          },
-          child: ListView.separated(
-            padding: EdgeInsets.zero,
-            itemCount: restaurants.length,
-            separatorBuilder: (context, index) => const SizedBox(height: 16),
-            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-            itemBuilder: (context, index) {
+        return ListView.separated(
+          padding: EdgeInsets.zero,
+          itemCount: restaurants.length,
+          separatorBuilder: (context, index) => const SizedBox(height: 16),
+          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+          itemBuilder: (context, index) {
               try {
                 return StoreCard(
                   store: restaurants[index],
@@ -1013,7 +1003,6 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
                 );
               }
             },
-          ),
         );
       },
     );
