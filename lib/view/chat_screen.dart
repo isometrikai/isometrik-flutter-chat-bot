@@ -554,6 +554,7 @@ class _ChatScreenState extends State<ChatScreen> {
       });
       _cartBloc = context.read<CartBloc>();
       _launchBloc = LaunchBloc();
+      _cartBloc.add(CartFetchRequested(needToShowLoader: false));
       
     }else {
 
@@ -1390,13 +1391,26 @@ class _ChatScreenBody extends StatelessWidget {
           height: 40,
           fit: BoxFit.cover,
         ),
-        onPressed: () {
-          Navigator.push(
+        onPressed: () async {
+          // Navigator.push(
+          //   context,
+          //   MaterialPageRoute(
+          //     builder: (context) => const ChatHistoryScreen(),
+          //   ),
+          // );
+          print('ChatScreen: $totalCartCount');
+          final result = await Navigator.push(
             context,
-            MaterialPageRoute(
-              builder: (context) => const ChatHistoryScreen(),
-            ),
+            MaterialPageRoute(builder: (context) => ChatHistoryScreen()),
           );
+
+          if (result != null && result is Map) {
+            final action = result['action'];
+            
+            if (action == 'new_chat_selected') {
+              onRestartChatAPI();
+            }
+          }
         },
       ),
       title: Row(
@@ -1520,7 +1534,24 @@ class _ChatScreenBody extends StatelessWidget {
                             isApiLoading
                                 ? null
                                 : () {
-                                  Navigator.push(
+                                  if (isFromHistory == true) {
+                                    Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder:
+                                          (context) => BlocProvider(
+                                            create: (context) => CartBloc(),
+                                            child: CartScreen(
+                                              needToEndThisChat: isFromHistory,
+                                              onCheckout: (message) {
+                                                onSendMessage(message);
+                                              },
+                                            ),
+                                          ),
+                                    ),
+                                  );
+                                  }else {
+                                    Navigator.push(
                                     context,
                                     MaterialPageRoute(
                                       builder:
@@ -1535,6 +1566,7 @@ class _ChatScreenBody extends StatelessWidget {
                                           ),
                                     ),
                                   );
+                                  }
                                 },
                       ),
                     IconButton(
@@ -1582,6 +1614,67 @@ class _ChatScreenBody extends StatelessWidget {
       centerTitle: false, // Align title to the left
       titleSpacing: 16, // Add left padding for proper alignment
       actions: [
+        IconButton(
+                        icon: Opacity(
+                          opacity: 1.0,
+                          child: Stack(
+                            children: [
+                              SvgPicture.asset(
+                                AssetPath.get('images/ic_cart.svg'),
+                                width: 40,
+                                height: 40,
+                              ),
+                              if ( _getTotalCartCount() > 0)
+                                Positioned(
+                                  right: 0,
+                                  top: 0,
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 4,
+                                      vertical: 2,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFF6B46C1),
+                                      // Purple color
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                    constraints: const BoxConstraints(
+                                      minWidth: 20,
+                                      minHeight: 20,
+                                    ),
+                                    child: Text(
+                                          (_getTotalCartCount())
+                                          .toString(),
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ),
+                        onPressed:() {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder:
+                                          (context) => BlocProvider(
+                                            create: (context) => CartBloc(),
+                                            child: CartScreen(
+                                              needToEndThisChat: needToEndThisChat,
+                                              onCheckout: (message) {
+                                                onSendMessage(message);
+                                              },
+                                            ),
+                                          ),
+                                    ),
+                                  );
+                                },
+                      ),
         IconButton(
           icon: SvgPicture.asset(
             AssetPath.get('images/ic_close.svg'),

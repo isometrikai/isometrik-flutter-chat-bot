@@ -19,5 +19,14 @@ class ChatHistoryLoadMoreRequested extends ChatHistoryEvent {
   const ChatHistoryLoadMoreRequested();
 }
 
+class ChatHistoryDeleteRequested extends ChatHistoryEvent {
+  final String sessionId;
+  
+  const ChatHistoryDeleteRequested({required this.sessionId});
+  
+  @override
+  List<Object?> get props => [sessionId];
+}
+
 
 

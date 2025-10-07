@@ -5,6 +5,7 @@ import 'package:chat_bot/bloc/cart/cart_bloc.dart';
 import 'package:chat_bot/bloc/chat_bloc.dart';
 import 'package:chat_bot/data/model/chat_history_response.dart';
 import 'package:chat_bot/view/chat_screen.dart';
+import 'package:chat_bot/widgets/black_toast_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -73,29 +74,38 @@ class _ChatHistoryContentState extends State<_ChatHistoryContent> {
       backgroundColor: Colors.white,
       appBar: _buildAppBar(context),
       body: SafeArea(     
-        child: Column(
-          children: [
-            // Chat History List
-            Expanded(
-              child: BlocBuilder<ChatHistoryBloc, ChatHistoryState>(
-                builder: (context, state) {
-                  if (state is ChatHistoryLoadInProgress) {
-                    return const Center(
-                      child: CircularProgressIndicator(),
-                    );
-                  } else if (state is ChatHistoryLoadSuccess) {
-                    if (state.sessions.isEmpty) {
+        child: BlocListener<ChatHistoryBloc, ChatHistoryState>(
+          listener: (context, state) {
+            if (state is ChatHistoryDeleteSuccess) {
+              BlackToastView.show(context, 'Chat deleted successfully');
+            } else if (state is ChatHistoryDeleteFailure) {
+              BlackToastView.show(context, 'Failed to delete chat: ${state.message}');
+            }
+          },
+          child: Column(
+            children: [
+              // Chat History List
+              Expanded(
+                child: BlocBuilder<ChatHistoryBloc, ChatHistoryState>(
+                  builder: (context, state) {
+                    if (state is ChatHistoryLoadInProgress) {
+                      return const Center(
+                        child: CircularProgressIndicator(),
+                      );
+                    } else if (state is ChatHistoryLoadSuccess) {
+                      if (state.sessions.isEmpty) {
+                        return _buildEmptyCart();
+                      }
+                      return _buildChatHistoryList(context, state.sessions, state);
+                    } else if (state is ChatHistoryLoadFailure) {
                       return _buildEmptyCart();
                     }
-                    return _buildChatHistoryList(context, state.sessions, state);
-                  } else if (state is ChatHistoryLoadFailure) {
-                    return _buildEmptyCart();
-                  }
-                  return const SizedBox.shrink();
-                },
+                    return const SizedBox.shrink();
+                  },
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -111,7 +121,7 @@ class _ChatHistoryContentState extends State<_ChatHistoryContent> {
       leadingWidth: 0,
       leading: const SizedBox.shrink(), // Remove leading widget
       title: const Text(
-        'Chat History',
+        'Chats',
         style: const TextStyle(
                     fontWeight: FontWeight.w700,
                     fontSize: 24,
@@ -122,6 +132,15 @@ class _ChatHistoryContentState extends State<_ChatHistoryContent> {
       centerTitle: false, // Align title to the left
       titleSpacing: 16, // Add left padding for proper alignment
       actions: [
+         IconButton(
+          icon: SvgPicture.asset(
+            AssetPath.get('images/ic_chat_new.svg'),
+            width: 40,
+            height: 40,
+            fit: BoxFit.cover,
+          ),
+          onPressed: () => _showNewChatConfirmation(context),
+        ),
         IconButton(
           icon: SvgPicture.asset(
             AssetPath.get('images/ic_close.svg'),
@@ -317,48 +336,342 @@ class _ChatHistoryContentState extends State<_ChatHistoryContent> {
         ? session.title 
         : 'Session ${session.sessionId}';
         
-    return GestureDetector(
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => MultiBlocProvider(
-              providers: [
-                BlocProvider(create: (context) => ChatBloc()),
-                BlocProvider(create: (context) => CartBloc()),
-              ],
-              child: ChatScreen(
-                isFromHistory: true,
-                historySessionId: session.sessionId.toString(),
-                chatHistoryTitle: displayText,
+    return Dismissible(
+      key: Key(session.sessionId.toString()),
+      direction: DismissDirection.endToStart,
+      background: Container(
+        margin: const EdgeInsets.only(bottom: 10),
+        decoration: BoxDecoration(
+          color: Colors.red,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        alignment: Alignment.centerRight,
+        padding: const EdgeInsets.only(right: 20),
+        child: const Icon(
+          Icons.delete,
+          color: Colors.white,
+          size: 24,
+        ),
+      ),
+      confirmDismiss: (direction) async {
+        // Show confirmation dialog
+        _showDeleteChatConfirmation(context, session.sessionId.toString(), displayText);
+        return false; // Don't dismiss automatically, let the confirmation dialog handle it
+      },
+      child: GestureDetector(
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => MultiBlocProvider(
+                providers: [
+                  BlocProvider(create: (context) => ChatBloc()),
+                  BlocProvider(create: (context) => CartBloc()),
+                ],
+                child: ChatScreen(
+                  isFromHistory: true,
+                  historySessionId: session.sessionId.toString(),
+                  chatHistoryTitle: displayText,
+                ),
               ),
             ),
+          );
+        },
+        child: Container(
+          margin: const EdgeInsets.only(bottom: 10),
+          padding: const EdgeInsets.all(10),
+          decoration: BoxDecoration(
+            color: const Color(0xFFF5F7FF),
+            border: Border.all(color: const Color(0xFFEEF4FF)),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: Text(
+                  displayText,
+                  style: AppTextStyles.chatMessage.copyWith(
+                    color: const Color(0xFF242424),
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+   void _showNewChatConfirmation(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(8)),
+      ),
+      builder: (BuildContext context) {
+        return Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            // Add this for left alignment
+            children: [
+              // Handle bar
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: Colors.grey[300],
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
+              const Text(
+                'Are you sure want to start new chat? if you start new chat, you will lose your current chat history.',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.black,
+                ),
+                textAlign: TextAlign.left,
+              ),
+              const SizedBox(height: 24),
+              Row(
+                children: [
+                  Expanded(
+                    child: SizedBox(
+                      height: 62,
+                      child: OutlinedButton(
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                        style: OutlinedButton.styleFrom(
+                          side: const BorderSide(
+                            color: Color(0xFF8E2FFD),
+                            width: 2,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          backgroundColor: Colors.white,
+                        ),
+                        child: const Text(
+                          "CANCEL",
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                            color: Color(0xFF8E2FFD),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  // Spacing between buttons
+                  const SizedBox(width: 16),
+
+                  // Right button - "Repeat last" (Gradient)
+                  Expanded(
+                    child: SizedBox(
+                      height: 62,
+                      child: ElevatedButton(
+                         onPressed: () {
+                           Navigator.of(context).pop();
+                           Navigator.pop(context, {
+                             'action': 'new_chat_selected',
+                            //  'cartCount': widget.cartCount ?? 0,
+                           });
+                         },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.transparent,
+                          elevation: 0,
+                          shadowColor: Colors.transparent,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          padding: EdgeInsets.zero,
+                        ),
+                        child: Ink(
+                          decoration: BoxDecoration(
+                            gradient: const LinearGradient(
+                              colors: [
+                                Color(0xFF5186E0),
+                                Color(0xFF5E3DFE),
+                                Color(0xFF8E2FFD),
+                                Color(0xFFB02EFB),
+                                Color(0xFFD445EC),
+                              ],
+                              stops: [0.0, 0.24, 0.52, 0.73, 1.0],
+                              begin: Alignment.centerLeft,
+                              end: Alignment.centerRight,
+                            ),
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: Container(
+                            height: 62,
+                            alignment: Alignment.center,
+                            child: const Text(
+                              "YES",
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w700,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 8),
+            ],
           ),
         );
       },
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 10),
-        padding: const EdgeInsets.all(10),
-        decoration: BoxDecoration(
-          color: const Color(0xFFF5F7FF),
-          border: Border.all(color: const Color(0xFFEEF4FF)),
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Row(
-          children: [
-            Expanded(
-              child: Text(
-                displayText,
-                style: AppTextStyles.chatMessage.copyWith(
-                  color: const Color(0xFF242424),
-                ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-          ],
-        ),
+    );
+  }
+
+  void _showDeleteChatConfirmation(BuildContext context, String chatId, String chatTitle) {
+    final chatHistoryBloc = context.read<ChatHistoryBloc>();
+    
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(8)),
       ),
+      builder: (BuildContext bottomSheetContext) {
+        return Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            // Add this for left alignment
+            children: [
+              // Handle bar
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: Colors.grey[300],
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
+               Text(
+                'Are you sure you want to delete “$chatTitle”?',
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.w700,
+                  color: Colors.black,
+                ),
+                textAlign: TextAlign.left,
+              ),
+              const SizedBox(height: 24),
+              Row(
+                children: [
+                  Expanded(
+                    child: SizedBox(
+                      height: 62,
+                      child: OutlinedButton(
+                        onPressed: () {
+                          Navigator.of(bottomSheetContext).pop();
+                        },
+                        style: OutlinedButton.styleFrom(
+                          side: const BorderSide(
+                            color: Color(0xFF8E2FFD),
+                            width: 2,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          backgroundColor: Colors.white,
+                        ),
+                        child: const Text(
+                          "No, Cancel",
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                            color: Color(0xFF8E2FFD),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  // Spacing between buttons
+                  const SizedBox(width: 16),
+
+                  Expanded(
+                    child: SizedBox(
+                      height: 62,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          Navigator.of(bottomSheetContext).pop();
+                          // Trigger delete action
+                          chatHistoryBloc.add(
+                            ChatHistoryDeleteRequested(sessionId: chatId),
+                          );
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.transparent,
+                          elevation: 0,
+                          shadowColor: Colors.transparent,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          padding: EdgeInsets.zero,
+                        ),
+                        child: Ink(
+                          decoration: BoxDecoration(
+                            gradient: const LinearGradient(
+                              colors: [
+                                Color(0xFF5186E0),
+                                Color(0xFF5E3DFE),
+                                Color(0xFF8E2FFD),
+                                Color(0xFFB02EFB),
+                                Color(0xFFD445EC),
+                              ],
+                              stops: [0.0, 0.24, 0.52, 0.73, 1.0],
+                              begin: Alignment.centerLeft,
+                              end: Alignment.centerRight,
+                            ),
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: Container(
+                            height: 62,
+                            alignment: Alignment.center,
+                            child: const Text(
+                              "Yes, Delete",
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w700,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 8),
+            ],
+          ),
+        );
+      },
     );
   }
 }

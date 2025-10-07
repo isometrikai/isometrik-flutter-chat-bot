@@ -17,6 +17,7 @@ class ChatHistoryBloc extends Bloc<ChatHistoryEvent, ChatHistoryState> {
     on<ChatHistoryFetchRequested>(_onFetchRequested);
     on<ChatHistoryRefreshed>(_onRefreshed);
     on<ChatHistoryLoadMoreRequested>(_onLoadMoreRequested);
+    on<ChatHistoryDeleteRequested>(_onDeleteRequested);
   }
 
   Future<void> _onFetchRequested(
@@ -102,6 +103,44 @@ class ChatHistoryBloc extends Bloc<ChatHistoryEvent, ChatHistoryState> {
     } catch (e) {
       emit(currentState.copyWith(isLoadingMore: false));
       // Optionally show error message for load more failure
+    }
+  }
+
+  Future<void> _onDeleteRequested(
+    ChatHistoryDeleteRequested event,
+    Emitter<ChatHistoryState> emit,
+  ) async {
+    final currentState = state;
+    if (currentState is! ChatHistoryLoadSuccess) {
+      return;
+    }
+    Utility.showLoader();
+    // emit(ChatHistoryDeleteInProgress(sessionId: event.sessionId));
+    
+    try {
+      await repository.deleteChat(sessionId: event.sessionId);
+      Utility.closeProgressDialog();
+      
+      // Remove the deleted session from the current list
+      // final updatedSessions = currentState.sessions
+      //     .where((session) => session.sessionId.toString() != event.sessionId)
+      //     .toList();
+      
+      add(ChatHistoryFetchRequested());
+      emit(ChatHistoryDeleteSuccess(sessionId: event.sessionId));
+      // emit(ChatHistoryLoadSuccess(
+      //   sessions: updatedSessions,
+      //   hasMore: currentState.hasMore,
+      //   isLoadingMore: currentState.isLoadingMore,
+      // ));
+    } catch (e) {
+      Utility.closeProgressDialog();
+      emit(ChatHistoryDeleteFailure(
+        message: e.toString(),
+        sessionId: event.sessionId,
+      ));
+      // Revert to the previous state after showing error
+      emit(currentState);
     }
   }
 }

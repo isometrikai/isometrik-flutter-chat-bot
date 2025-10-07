@@ -48,5 +48,33 @@ class ChatHistoryLoadFailure extends ChatHistoryState {
   List<Object?> get props => [message];
 }
 
+class ChatHistoryDeleteInProgress extends ChatHistoryState {
+  final String sessionId;
+  
+  const ChatHistoryDeleteInProgress({required this.sessionId});
+  
+  @override
+  List<Object?> get props => [sessionId];
+}
+
+class ChatHistoryDeleteSuccess extends ChatHistoryState {
+  final String sessionId;
+  
+  const ChatHistoryDeleteSuccess({required this.sessionId});
+  
+  @override
+  List<Object?> get props => [sessionId];
+}
+
+class ChatHistoryDeleteFailure extends ChatHistoryState {
+  final String message;
+  final String sessionId;
+  
+  const ChatHistoryDeleteFailure({required this.message, required this.sessionId});
+  
+  @override
+  List<Object?> get props => [message, sessionId];
+}
+
 
 

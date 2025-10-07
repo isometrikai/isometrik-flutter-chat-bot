@@ -1,5 +1,4 @@
 import 'package:chat_bot/data/model/chat_history_response.dart';
-import 'package:chat_bot/utils/user_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
@@ -38,6 +37,22 @@ class ChatHistoryRepository {
       }
     } catch (e) {
       throw Exception('Error fetching chat history: $e');
+    }
+  }
+
+  Future<void> deleteChat({
+    required String sessionId,
+  }) async {
+    final url = Uri.parse('$baseUrl/v2/delete_chat/$userIds/$sessionId');
+    
+    try {
+      final response = await http.delete(url);
+      
+      if (response.statusCode != 200) {
+        throw Exception('Failed to delete chat: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Error deleting chat: $e');
     }
   }
 }
