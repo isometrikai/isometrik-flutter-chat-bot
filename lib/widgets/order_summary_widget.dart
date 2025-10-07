@@ -150,7 +150,7 @@ class OrderSummaryWidget extends StatelessWidget {
                                   fontWeight: FontWeight.w400,
                                   color: Color(0xFF242424),
                                 ),
-                                maxLines: 2,
+                                maxLines: 3,//2
                                 overflow: TextOverflow.ellipsis,
                               ),
                             ),
