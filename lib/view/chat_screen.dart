@@ -271,11 +271,11 @@ class _ChatScreenState extends State<ChatScreen> {
         }
 
         // Check if stores, products, cart, etc. are present
-        bool hasStores = false;//storesWidget != null;
-        bool hasProducts = false;//productsWidget != null;
+        bool hasStores = storesWidget != null;
+        bool hasProducts = productsWidget != null;
         bool hasCart = cartWidget != null;
-        bool hasChooseAddress = false;//chooseAddressWidget != null;
-        bool hasChooseCard = false;//chooseCardWidget != null;
+        bool hasChooseAddress = chooseAddressWidget != null;
+        bool hasChooseCard = chooseCardWidget != null;
         bool hasOrderSummary = orderSummaryWidget != null;
         bool hasOrderConfirmed = orderConfirmedWidget != null;
 
@@ -1629,85 +1629,85 @@ class _ChatScreenBody extends StatelessWidget {
       centerTitle: false, // Align title to the left
       titleSpacing: 16, // Add left padding for proper alignment
       actions: [
-        IconButton(
-                        icon: Opacity(
-                          opacity: 1.0,
-                          child: Stack(
-                            children: [
-                              SvgPicture.asset(
-                                AssetPath.get('images/ic_cart.svg'),
-                                width: 40,
-                                height: 40,
-                              ),
-                              if ( _getTotalCartCount() > 0)
-                                Positioned(
-                                  right: 0,
-                                  top: 0,
-                                  child: Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 4,
-                                      vertical: 2,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: const Color(0xFF6B46C1),
-                                      // Purple color
-                                      borderRadius: BorderRadius.circular(10),
-                                    ),
-                                    constraints: const BoxConstraints(
-                                      minWidth: 20,
-                                      minHeight: 20,
-                                    ),
-                                    child: Text(
-                                          (_getTotalCartCount())
-                                          .toString(),
-                                      style: const TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                      textAlign: TextAlign.center,
-                                    ),
-                                  ),
-                                ),
-                            ],
-                          ),
-                        ),
-                        onPressed:() {
-                                  if (isFromHistory == true) {
-                                    Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder:
-                                          (context) => BlocProvider(
-                                            create: (context) => CartBloc(),
-                                            child: CartScreen(
-                                              needToEndThisChat: isFromHistory,
-                                              onCheckout: (message) {
-                                                onSendMessage(message);
-                                              },
-                                            ),
-                                          ),
-                                    ),
-                                  );
-                                  }else {
-                                    Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder:
-                                          (context) => BlocProvider(
-                                            create: (context) => CartBloc(),
-                                            child: CartScreen(
-                                              needToEndThisChat: needToEndThisChat,
-                                              onCheckout: (message) {
-                                                onSendMessage(message);
-                                              },
-                                            ),
-                                          ),
-                                    ),
-                                  );
-                                  }
-                                },
-                      ),
+        // IconButton(
+        //                 icon: Opacity(
+        //                   opacity: 1.0,
+        //                   child: Stack(
+        //                     children: [
+        //                       SvgPicture.asset(
+        //                         AssetPath.get('images/ic_cart.svg'),
+        //                         width: 40,
+        //                         height: 40,
+        //                       ),
+        //                       if ( _getTotalCartCount() > 0)
+        //                         Positioned(
+        //                           right: 0,
+        //                           top: 0,
+        //                           child: Container(
+        //                             padding: const EdgeInsets.symmetric(
+        //                               horizontal: 4,
+        //                               vertical: 2,
+        //                             ),
+        //                             decoration: BoxDecoration(
+        //                               color: const Color(0xFF6B46C1),
+        //                               // Purple color
+        //                               borderRadius: BorderRadius.circular(10),
+        //                             ),
+        //                             constraints: const BoxConstraints(
+        //                               minWidth: 20,
+        //                               minHeight: 20,
+        //                             ),
+        //                             child: Text(
+        //                                   (_getTotalCartCount())
+        //                                   .toString(),
+        //                               style: const TextStyle(
+        //                                 color: Colors.white,
+        //                                 fontSize: 12,
+        //                                 fontWeight: FontWeight.bold,
+        //                               ),
+        //                               textAlign: TextAlign.center,
+        //                             ),
+        //                           ),
+        //                         ),
+        //                     ],
+        //                   ),
+        //                 ),
+        //                 onPressed:() {
+        //                           if (isFromHistory == true) {
+        //                             Navigator.push(
+        //                             context,
+        //                             MaterialPageRoute(
+        //                               builder:
+        //                                   (context) => BlocProvider(
+        //                                     create: (context) => CartBloc(),
+        //                                     child: CartScreen(
+        //                                       needToEndThisChat: isFromHistory,
+        //                                       onCheckout: (message) {
+        //                                         onSendMessage(message);
+        //                                       },
+        //                                     ),
+        //                                   ),
+        //                             ),
+        //                           );
+        //                           }else {
+        //                             Navigator.push(
+        //                             context,
+        //                             MaterialPageRoute(
+        //                               builder:
+        //                                   (context) => BlocProvider(
+        //                                     create: (context) => CartBloc(),
+        //                                     child: CartScreen(
+        //                                       needToEndThisChat: needToEndThisChat,
+        //                                       onCheckout: (message) {
+        //                                         onSendMessage(message);
+        //                                       },
+        //                                     ),
+        //                                   ),
+        //                             ),
+        //                           );
+        //                           }
+        //                         },
+        //               ),
         IconButton(
           icon: SvgPicture.asset(
             AssetPath.get('images/ic_close.svg'),
@@ -3151,6 +3151,7 @@ class _ChatScreenBody extends StatelessWidget {
           storesWidget: storesWidget,
           index: index,
           cartData: cartBloc.cartData,
+          isFromChatHistory: isFromHistory,
           onAddToCart: (message, product, store, quantity) {
             onSendMessage(message);
           },
@@ -3765,7 +3766,7 @@ class _ChatScreenBody extends StatelessWidget {
     ChatWidget? productsWidget,
   ) {
     return Container(
-      height: 222,
+      height: isFromHistory ? 185 : 222,
       // color: Colors.red,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
@@ -3802,7 +3803,11 @@ class _ChatScreenBody extends StatelessWidget {
             instock: product.instock ?? true,
             storeIsOpen: product.storeIsOpen ?? true,
             storeType: product.storeTypeId ?? -111,
+            isFromChatHistory: isFromHistory,
             onClick: () {
+              if (isFromHistory) {
+                return;
+              }
               if (productsWidget != null) {
                 final Map<String, dynamic>? productJson = productsWidget
                     .getRawProduct(index);
@@ -4294,6 +4299,7 @@ class _ChatScreenBody extends StatelessWidget {
   Widget _buildChooseAddressWidget(List<AddressOption> addressOptions) {
     return ChooseAddressWidget(
       addressOptions: addressOptions,
+      isFromChatHistory: isFromHistory,
       onAddressSelected: (selectedAddress) {
         // Handle address selection
         print(
@@ -4310,6 +4316,7 @@ class _ChatScreenBody extends StatelessWidget {
   Widget _buildChooseCardWidget(List<CardOption> cardOptions) {
     return ChooseCardWidget(
       cardOptions: cardOptions,
+      isFromChatHistory: isFromHistory,
       onCardSelected: (selectedCard) {
         // Handle card selection
         print('Selected card: ${selectedCard.title}');

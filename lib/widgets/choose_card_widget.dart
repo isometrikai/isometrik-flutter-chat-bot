@@ -18,12 +18,14 @@ class ChooseCardWidget extends StatefulWidget {
   final List<CardOption> cardOptions;
   final Function(CardOption)? onCardSelected;
   final Function(String)? onSendMessage;
+  final bool isFromChatHistory;
 
   const ChooseCardWidget({
     super.key,
     required this.cardOptions,
     this.onCardSelected,
     this.onSendMessage,
+    this.isFromChatHistory = false,
   });
 
   @override
@@ -80,14 +82,16 @@ class _ChooseCardWidgetState extends State<ChooseCardWidget> {
     
     return GestureDetector(
       onTap: () {
-        setState(() {
-          selectedIndex = index;
-        });
-        widget.onCardSelected?.call(cardOption);
-        
-        // Automatically send the selected card as a message
-        final message = "Use this card:-\n${cardOption.title}";
-        widget.onSendMessage?.call(message);
+        if (widget.isFromChatHistory == false) {
+          setState(() {
+            selectedIndex = index;
+          });
+          widget.onCardSelected?.call(cardOption);
+          
+          // Automatically send the selected card as a message
+          final message = "Use this card:-\n${cardOption.title}";
+          widget.onSendMessage?.call(message);
+        }
       },
       child: Container(
         width: double.infinity,

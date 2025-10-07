@@ -27,6 +27,7 @@ class MenuItemCard extends StatelessWidget {
   final bool instock;
   final bool storeIsOpen;
   final int storeType;
+  final bool isFromChatHistory;
 
   MenuItemCard({
     super.key,
@@ -51,6 +52,7 @@ class MenuItemCard extends StatelessWidget {
     required this.instock,
     required this.storeIsOpen,
     required this.storeType,
+    this.isFromChatHistory = false,
   });
 
   @override
@@ -135,12 +137,14 @@ class MenuItemCard extends StatelessWidget {
                 ]
               ],
             ),
+            if (isFromChatHistory == false) ...[
             const SizedBox(height: 8),
             SizedBox(
               width: double.infinity,
               height: 37,
               child: _buildQuantityControls(),
             ),
+            ],
           ],
         ),
       ),

@@ -21,12 +21,14 @@ class ChooseAddressWidget extends StatefulWidget {
   final List<AddressOption> addressOptions;
   final Function(AddressOption)? onAddressSelected;
   final Function(String)? onSendMessage;
+  final bool isFromChatHistory;
 
   const ChooseAddressWidget({
     super.key,
     required this.addressOptions,
     this.onAddressSelected,
     this.onSendMessage,
+    this.isFromChatHistory = false,
   });
 
   @override
@@ -84,14 +86,16 @@ class _ChooseAddressWidgetState extends State<ChooseAddressWidget> {
     
     return GestureDetector(
       onTap: () {
-        setState(() {
-          selectedIndex = index;
-        });
-        widget.onAddressSelected?.call(addressOption);
-        
-        // Automatically send the selected address as a message
-        final message = "Use this address:-\n${addressOption.name}: ${addressOption.address}";
-        widget.onSendMessage?.call(message);
+        if (widget.isFromChatHistory == false) {
+          setState(() {
+            selectedIndex = index;
+          });
+          widget.onAddressSelected?.call(addressOption);
+          
+          // Automatically send the selected address as a message
+          final message = "Use this address:-\n${addressOption.name}: ${addressOption.address}";
+          widget.onSendMessage?.call(message);
+        }
       },
       child: Container(
         width: double.infinity,
