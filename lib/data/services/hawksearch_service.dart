@@ -103,7 +103,7 @@ class HawkSearchService {
       storeIdToDoc.putIfAbsent(storeId, () => doc);
     }
 
-    // Build Store list
+    // Build Store list - show all stores with all their products
     final List<Store> stores = [];
     storeIdToProducts.forEach((storeId, products) {
       final doc = storeIdToDoc[storeId] ?? {};
@@ -192,11 +192,12 @@ class HawkSearchService {
     // Prefer values from `storedata` when available
     final String storeDataRaw = _firstString(doc['storedata']);
     final Map<String, dynamic> storeData = _tryParseLooseJson(storeDataRaw);
-
+    
     final String storename = _firstString(doc['storename']).isNotEmpty
         ? _firstString(doc['storename'])
         : (storeData['storeName']?.toString() ?? '');
-
+    
+    
     // final double avgRating = (() {
     //   final String r = _firstString(doc['avgrating']);
     //   if (r.isNotEmpty) return double.tryParse(r) ?? 0.0;
@@ -344,9 +345,8 @@ class HawkSearchService {
       // Handle None values
       fixed = fixed.replaceAll('None', 'null');
       
-      // Replace single quotes with double quotes, but be careful with nested quotes
-      // First, let's handle the outer structure
-      fixed = fixed.replaceAll("'", '"');
+      // More careful quote replacement to handle nested structures
+      fixed = _replaceQuotesSafely(fixed);
       
       // Handle any remaining Python-specific formatting
       // Remove any trailing commas before closing braces/brackets
@@ -354,16 +354,75 @@ class HawkSearchService {
       fixed = fixed.replaceAll(RegExp(r',\s*]'), ']');
       
       final decoded = jsonDecode(fixed);
-      if (decoded is Map<String, dynamic>) return decoded;
+      if (decoded is Map<String, dynamic>) {
+        return decoded;
+      }
       return {};
     } catch (e) {
       // If JSON parsing fails, try a more robust approach
       try {
-        return _parsePythonDict(raw);
-      } catch (_) {
+        final result = _parsePythonDict(raw);
+        return result;
+      } catch (e2) {
         return {};
       }
     }
+  }
+
+  /// Safely replace single quotes with double quotes while preserving nested structures
+  String _replaceQuotesSafely(String input) {
+    final StringBuffer result = StringBuffer();
+    bool inString = false;
+    bool inDoubleQuotes = false;
+    
+    for (int i = 0; i < input.length; i++) {
+      final char = input[i];
+      
+      // Handle escaped characters
+      if (i > 0 && input[i - 1] == '\\') {
+        result.write(char);
+        continue;
+      }
+      
+      if (char == '"' && !inString) {
+        inDoubleQuotes = !inDoubleQuotes;
+        result.write(char);
+      } else if (char == "'" && !inString && !inDoubleQuotes) {
+        // Start of a string
+        inString = true;
+        result.write('"');
+      } else if (char == "'" && inString && !inDoubleQuotes) {
+        // Check if this is the end of the string
+        bool isEndOfString = false;
+        
+        // Skip whitespace after the quote
+        int j = i + 1;
+        while (j < input.length && input[j].trim().isEmpty) {
+          j++;
+        }
+        
+        if (j < input.length) {
+          final nextChar = input[j];
+          if (nextChar == ':' || nextChar == ',' || nextChar == '}' || nextChar == ']') {
+            isEndOfString = true;
+          }
+        } else {
+          isEndOfString = true;
+        }
+        
+        if (isEndOfString) {
+          inString = false;
+          result.write('"');
+        } else {
+          // This is an apostrophe within a string, keep it as is
+          result.write("'");
+        }
+      } else {
+        result.write(char);
+      }
+    }
+    
+    return result.toString();
   }
 
   /// Fallback method to parse Python dictionary strings more robustly
@@ -380,23 +439,32 @@ class HawkSearchService {
     final List<String> pairs = [];
     int braceCount = 0;
     int bracketCount = 0;
-    int quoteCount = 0;
+    int singleQuoteCount = 0;
+    int doubleQuoteCount = 0;
     String currentPair = '';
     
     for (int i = 0; i < content.length; i++) {
       final char = content[i];
       
-      if (char == "'" && (i == 0 || content[i - 1] != '\\')) {
-        quoteCount++;
-      } else if (char == '{' && quoteCount % 2 == 0) {
+      // Handle escaped characters
+      if (i > 0 && content[i - 1] == '\\') {
+        currentPair += char;
+        continue;
+      }
+      
+      if (char == "'" && doubleQuoteCount % 2 == 0) {
+        singleQuoteCount++;
+      } else if (char == '"' && singleQuoteCount % 2 == 0) {
+        doubleQuoteCount++;
+      } else if (char == '{' && singleQuoteCount % 2 == 0 && doubleQuoteCount % 2 == 0) {
         braceCount++;
-      } else if (char == '}' && quoteCount % 2 == 0) {
+      } else if (char == '}' && singleQuoteCount % 2 == 0 && doubleQuoteCount % 2 == 0) {
         braceCount--;
-      } else if (char == '[' && quoteCount % 2 == 0) {
+      } else if (char == '[' && singleQuoteCount % 2 == 0 && doubleQuoteCount % 2 == 0) {
         bracketCount++;
-      } else if (char == ']' && quoteCount % 2 == 0) {
+      } else if (char == ']' && singleQuoteCount % 2 == 0 && doubleQuoteCount % 2 == 0) {
         bracketCount--;
-      } else if (char == ',' && braceCount == 0 && bracketCount == 0 && quoteCount % 2 == 0) {
+      } else if (char == ',' && braceCount == 0 && bracketCount == 0 && singleQuoteCount % 2 == 0 && doubleQuoteCount % 2 == 0) {
         pairs.add(currentPair.trim());
         currentPair = '';
         continue;
@@ -409,6 +477,7 @@ class HawkSearchService {
       pairs.add(currentPair.trim());
     }
     
+    
     // Parse each key-value pair
     for (final pair in pairs) {
       final colonIndex = pair.indexOf(':');
@@ -418,7 +487,7 @@ class HawkSearchService {
       String value = pair.substring(colonIndex + 1).trim();
       
       // Remove quotes from key
-      if (key.startsWith("'") && key.endsWith("'")) {
+      if ((key.startsWith("'") && key.endsWith("'")) || (key.startsWith('"') && key.endsWith('"'))) {
         key = key.substring(1, key.length - 1);
       }
       
@@ -434,8 +503,8 @@ class HawkSearchService {
   dynamic _parseValue(String value) {
     value = value.trim();
     
-    // Handle strings
-    if (value.startsWith("'") && value.endsWith("'")) {
+    // Handle strings (both single and double quotes)
+    if ((value.startsWith("'") && value.endsWith("'")) || (value.startsWith('"') && value.endsWith('"'))) {
       return value.substring(1, value.length - 1);
     }
     
@@ -490,6 +559,7 @@ class HawkSearchService {
   }
 
   bool _toBool(dynamic value) {
+    if (value == null) return false;
     if (value is bool) return value;
     if (value is num) return value != 0;
     if (value is String) {
@@ -499,6 +569,7 @@ class HawkSearchService {
     }
     return false;
   }
+
 }
 
 
