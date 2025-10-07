@@ -48,6 +48,13 @@ class _ChatHistoryContent extends StatefulWidget {
 }
 
 class _ChatHistoryContentState extends State<_ChatHistoryContent> {
+  final TextEditingController _searchController = TextEditingController();
+  String _selectedCategory = 'All';
+  String _currentKeyword = '';
+  DateTime? _lastQueryAt;
+
+  final List<String> _categories = ['All', 'Food', 'Grocery', 'Pharmacy'];
+
   @override
   void initState() {
     super.initState();
@@ -56,11 +63,37 @@ class _ChatHistoryContentState extends State<_ChatHistoryContent> {
 
   @override
   void dispose() {
+    _searchController.dispose();
     widget.scrollController.removeListener(_onScroll);
     super.dispose();
   }
 
+  void _onSearchChanged(String value) {
+    _currentKeyword = value.trim();
+    final now = DateTime.now();
+    _lastQueryAt = now;
+
+    // Skip API call for empty queries - show all results
+    if (_currentKeyword.isEmpty) {
+      context.read<ChatHistoryBloc>().add(
+        ChatHistorySearchRequested(query: ''),
+      );
+      return;
+    }
+
+    // Debounce: only proceed if this is the latest input
+    Future.delayed(const Duration(milliseconds: 300), () async {
+      if (!mounted) return;
+      if (_lastQueryAt != now) return;
+      
+      context.read<ChatHistoryBloc>().add(
+        ChatHistorySearchRequested(query: _currentKeyword),
+      );
+    });
+  }
+
   void _onScroll() {
+    
     if (widget.scrollController.position.pixels >=
         widget.scrollController.position.maxScrollExtent - 200) {
       // Load more when user is 200 pixels from the bottom
@@ -84,6 +117,15 @@ class _ChatHistoryContentState extends State<_ChatHistoryContent> {
           },
           child: Column(
             children: [
+              // Search Bar
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: _buildSearchBar(),
+              ),
+              const SizedBox(height: 16),
+              // Category Filter Buttons
+              _buildCategoryButtons(),
+              const SizedBox(height: 24),
               // Chat History List
               Expanded(
                 child: BlocBuilder<ChatHistoryBloc, ChatHistoryState>(
@@ -96,6 +138,7 @@ class _ChatHistoryContentState extends State<_ChatHistoryContent> {
                       if (state.sessions.isEmpty) {
                         return _buildEmptyCart();
                       }
+                      // No local filtering needed - search and category filtering are now done via API
                       return _buildChatHistoryList(context, state.sessions, state);
                     } else if (state is ChatHistoryLoadFailure) {
                       return _buildEmptyCart();
@@ -172,6 +215,7 @@ class _ChatHistoryContentState extends State<_ChatHistoryContent> {
       child: 
       ListView.builder(
         controller: widget.scrollController,
+        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
         padding: const EdgeInsets.symmetric(horizontal: 16),
         itemCount: groupedSessions.length + (state.hasMore ? 1 : 0),
         itemBuilder: (context, index) {
@@ -226,6 +270,120 @@ class _ChatHistoryContentState extends State<_ChatHistoryContent> {
       return const SizedBox.shrink();
     }
   }
+
+   Widget _buildSearchBar() {
+    return Container(
+      height: 54,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border.all(color: const Color(0xFFD8DEF3)),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: TextField(
+              controller: _searchController,
+              decoration: InputDecoration(
+                hintText: 'Search',
+                hintStyle: AppTextStyles.bodyText.copyWith(
+                  color: const Color(0xFF979797),
+                ),
+                border: InputBorder.none,
+                enabledBorder: InputBorder.none,
+                focusedBorder: InputBorder.none,
+                errorBorder: InputBorder.none,
+                focusedErrorBorder: InputBorder.none,
+                disabledBorder: InputBorder.none,
+                contentPadding: const EdgeInsets.symmetric(horizontal: 17),
+              ),
+              onChanged: (value) {
+                _onSearchChanged(value);
+              },
+            ),
+          ),
+          Container(
+            width: 34,
+            height: 34,
+            margin: const EdgeInsets.only(right: 10),
+            decoration: BoxDecoration(
+              color: const Color(0xFFF6F6F6),
+              borderRadius: BorderRadius.circular(54),
+            ),
+            child: const Icon(Icons.search, size: 17, color: Color(0xFF585C77)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCategoryButtons() {
+  return Container(
+    height: 34,
+    child: SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      physics: const BouncingScrollPhysics(),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ..._categories.map((category) {
+              final isSelected = _selectedCategory == category;
+              return Container(
+                margin: const EdgeInsets.only(right: 8),
+                child: GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      _selectedCategory = category;
+                    });
+                    // Trigger API call with new category filter
+                    context.read<ChatHistoryBloc>().add(
+                      ChatHistoryCategoryFilterRequested(category: category),
+                    );
+                  },
+                  child: Container(
+                    constraints: const BoxConstraints(
+                      minWidth: 60,
+                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: isSelected ? const Color(0xFFF0DAFE) : Colors.white,
+                      border: Border.all(
+                        color: const Color(0xFFE9DFFB),
+                        width: 1,
+                      ),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Center(
+                      child: Text(
+                        category,
+                        style: AppTextStyles.caption.copyWith(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w400,
+                          color: const Color(0xFF242424),
+                          height: 1.0, // Add this to control line height
+                        ),
+                        overflow: TextOverflow.visible,
+                        softWrap: false,
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            }),
+            // Add extra padding at the end to ensure last button is fully visible
+            const SizedBox(width: 24),
+          ],
+        ),
+      ),
+    ),
+  );
+}
+
+
+
 
   Widget _buildEmptyCart() {
     return Center(

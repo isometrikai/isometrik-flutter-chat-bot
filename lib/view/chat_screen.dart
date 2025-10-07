@@ -1673,7 +1673,24 @@ class _ChatScreenBody extends StatelessWidget {
                           ),
                         ),
                         onPressed:() {
-                                  Navigator.push(
+                                  if (isFromHistory == true) {
+                                    Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder:
+                                          (context) => BlocProvider(
+                                            create: (context) => CartBloc(),
+                                            child: CartScreen(
+                                              needToEndThisChat: isFromHistory,
+                                              onCheckout: (message) {
+                                                onSendMessage(message);
+                                              },
+                                            ),
+                                          ),
+                                    ),
+                                  );
+                                  }else {
+                                    Navigator.push(
                                     context,
                                     MaterialPageRoute(
                                       builder:
@@ -1688,6 +1705,7 @@ class _ChatScreenBody extends StatelessWidget {
                                           ),
                                     ),
                                   );
+                                  }
                                 },
                       ),
         IconButton(

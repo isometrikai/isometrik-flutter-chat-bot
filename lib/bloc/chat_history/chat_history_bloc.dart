@@ -10,6 +10,14 @@ class ChatHistoryBloc extends Bloc<ChatHistoryEvent, ChatHistoryState> {
   final ChatHistoryRepository repository;
   int _currentSkip = 0;
   static const int _pageSize = 20;
+  
+  // Current category filter state
+  bool? _isFoodChat;
+  bool? _isGroceryChat;
+  bool? _isPharmacyChat;
+  
+  // Current search query
+  String _currentQuery = '';
 
   ChatHistoryBloc({ChatHistoryRepository? repository})
       : repository = repository ?? ChatHistoryRepository.instance,
@@ -18,6 +26,8 @@ class ChatHistoryBloc extends Bloc<ChatHistoryEvent, ChatHistoryState> {
     on<ChatHistoryRefreshed>(_onRefreshed);
     on<ChatHistoryLoadMoreRequested>(_onLoadMoreRequested);
     on<ChatHistoryDeleteRequested>(_onDeleteRequested);
+    on<ChatHistoryCategoryFilterRequested>(_onCategoryFilterRequested);
+    on<ChatHistorySearchRequested>(_onSearchRequested);
   }
 
   Future<void> _onFetchRequested(
@@ -31,6 +41,10 @@ class ChatHistoryBloc extends Bloc<ChatHistoryEvent, ChatHistoryState> {
       final sessions = await repository.fetchChatHistory(
         limit: _pageSize,
         skip: _currentSkip,
+        isFoodChat: _isFoodChat,
+        isGroceryChat: _isGroceryChat,
+        isPharmacyChat: _isPharmacyChat,
+        query: _currentQuery.isNotEmpty ? _currentQuery : null,
       );
       Utility.closeProgressDialog();
       
@@ -57,6 +71,10 @@ class ChatHistoryBloc extends Bloc<ChatHistoryEvent, ChatHistoryState> {
       final sessions = await repository.fetchChatHistory(
         limit: _pageSize,
         skip: _currentSkip,
+        isFoodChat: _isFoodChat,
+        isGroceryChat: _isGroceryChat,
+        isPharmacyChat: _isPharmacyChat,
+        query: _currentQuery.isNotEmpty ? _currentQuery : null,
       );
       
       final hasMore = sessions.length == _pageSize;
@@ -88,6 +106,10 @@ class ChatHistoryBloc extends Bloc<ChatHistoryEvent, ChatHistoryState> {
       final newSessions = await repository.fetchChatHistory(
         limit: _pageSize,
         skip: _currentSkip,
+        isFoodChat: _isFoodChat,
+        isGroceryChat: _isGroceryChat,
+        isPharmacyChat: _isPharmacyChat,
+        query: _currentQuery.isNotEmpty ? _currentQuery : null,
       );
       
       final hasMore = newSessions.length == _pageSize;
@@ -141,6 +163,95 @@ class ChatHistoryBloc extends Bloc<ChatHistoryEvent, ChatHistoryState> {
       ));
       // Revert to the previous state after showing error
       emit(currentState);
+    }
+  }
+
+  Future<void> _onCategoryFilterRequested(
+    ChatHistoryCategoryFilterRequested event,
+    Emitter<ChatHistoryState> emit,
+  ) async {
+    // Update category filter state
+    _isFoodChat = null;
+    _isGroceryChat = null;
+    _isPharmacyChat = null;
+    
+    // Set the appropriate filter based on category
+    switch (event.category) {
+      case 'Food':
+        _isFoodChat = true;
+        break;
+      case 'Grocery':
+        _isGroceryChat = true;
+        break;
+      case 'Pharmacy':
+        _isPharmacyChat = true;
+        break;
+      case 'All':
+      default:
+        // No filters applied
+        break;
+    }
+    
+    // Reset pagination and fetch new data
+    _currentSkip = 0;
+    Utility.showLoader();
+    
+    try {
+      final sessions = await repository.fetchChatHistory(
+        limit: _pageSize,
+        skip: _currentSkip,
+        isFoodChat: _isFoodChat,
+        isGroceryChat: _isGroceryChat,
+        isPharmacyChat: _isPharmacyChat,
+        query: _currentQuery.isNotEmpty ? _currentQuery : null,
+      );
+      Utility.closeProgressDialog();
+      
+      final hasMore = sessions.length == _pageSize;
+      _currentSkip += sessions.length;
+      
+      emit(ChatHistoryLoadSuccess(
+        sessions: sessions,
+        hasMore: hasMore,
+      ));
+    } catch (e) {
+      Utility.closeProgressDialog();
+      emit(ChatHistoryLoadFailure(e.toString()));
+    }
+  }
+
+  Future<void> _onSearchRequested(
+    ChatHistorySearchRequested event,
+    Emitter<ChatHistoryState> emit,
+  ) async {
+    // Update search query
+    _currentQuery = event.query;
+    
+    // Reset pagination and fetch new data
+    _currentSkip = 0;
+    Utility.showLoader();
+    
+    try {
+      final sessions = await repository.fetchChatHistory(
+        limit: _pageSize,
+        skip: _currentSkip,
+        isFoodChat: _isFoodChat,
+        isGroceryChat: _isGroceryChat,
+        isPharmacyChat: _isPharmacyChat,
+        query: _currentQuery.isNotEmpty ? _currentQuery : null,
+      );
+      Utility.closeProgressDialog();
+      
+      final hasMore = sessions.length == _pageSize;
+      _currentSkip += sessions.length;
+      
+      emit(ChatHistoryLoadSuccess(
+        sessions: sessions,
+        hasMore: hasMore,
+      ));
+    } catch (e) {
+      Utility.closeProgressDialog();
+      emit(ChatHistoryLoadFailure(e.toString()));
     }
   }
 }

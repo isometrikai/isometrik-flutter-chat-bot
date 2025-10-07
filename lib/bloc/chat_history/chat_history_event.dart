@@ -28,5 +28,23 @@ class ChatHistoryDeleteRequested extends ChatHistoryEvent {
   List<Object?> get props => [sessionId];
 }
 
+class ChatHistoryCategoryFilterRequested extends ChatHistoryEvent {
+  final String category;
+  
+  const ChatHistoryCategoryFilterRequested({required this.category});
+  
+  @override
+  List<Object?> get props => [category];
+}
+
+class ChatHistorySearchRequested extends ChatHistoryEvent {
+  final String query;
+  
+  const ChatHistorySearchRequested({required this.query});
+  
+  @override
+  List<Object?> get props => [query];
+}
+
 
 
