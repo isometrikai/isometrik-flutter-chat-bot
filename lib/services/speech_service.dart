@@ -15,6 +15,9 @@ class SpeechService {
   bool _isPreWarmed = false;
   bool _initializationStarted = false;
 
+  /// Callback function for real-time text updates
+  Function(String)? _onTextUpdate;
+
   /// Get the current recognized text
   String get currentRecognizedText => _currentRecognizedText;
 
@@ -28,6 +31,16 @@ class SpeechService {
   bool get isPreWarmed => _isPreWarmed;
 
   String _currentRecognizedText = '';
+
+  /// Set callback for real-time text updates
+  void setOnTextUpdateCallback(Function(String) callback) {
+    _onTextUpdate = callback;
+  }
+
+  /// Clear the text update callback
+  void clearOnTextUpdateCallback() {
+    _onTextUpdate = null;
+  }
 
   /// Initialize speech to text service
   Future<bool> initialize() async {
@@ -105,6 +118,11 @@ class SpeechService {
           onResult: (result) {
             _currentRecognizedText = result.recognizedWords;
             debugPrint('Recognized text: $_currentRecognizedText');
+            
+            // Trigger real-time text update callback
+            if (_onTextUpdate != null) {
+              _onTextUpdate!(_currentRecognizedText);
+            }
           },
           listenFor: const Duration(seconds: 60),
           pauseFor: const Duration(seconds: 5),

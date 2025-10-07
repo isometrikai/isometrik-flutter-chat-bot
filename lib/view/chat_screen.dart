@@ -637,11 +637,47 @@ class _ChatScreenState extends State<ChatScreen> {
     // Start initialization in background - don't block UI
     try {
       _isSpeechAvailable = await _speechService.initialize();
-      if (!_isSpeechAvailable) {
-        debugPrint('Speech recognition not available');
-      } else {
+      // if (!_isSpeechAvailable) {
+      //   debugPrint('Speech recognition not available');
+      // } else {
         debugPrint('Speech service initialized successfully');
-      }
+        
+        // Set up real-time text update callback
+        _speechService.setOnTextUpdateCallback((String recognizedText) {
+          if (mounted) {
+            setState(() {
+              print("recognizedText: $_isRecording");
+              _messageController.text = recognizedText;
+              if (_isRecording == false && recognizedText.isNotEmpty) {
+                _messageController.clear();
+              }
+              
+              // Update text field height for the new text
+              final textSpan = TextSpan(
+                text: recognizedText.isEmpty
+                    ? 'How can zAIn help you today?'
+                    : recognizedText,
+                style: const TextStyle(
+                  fontSize: 16,
+                  height: 1.4,
+                  color: Color(0xFF242424),
+                ),
+              );
+              final textPainter = TextPainter(
+                text: textSpan,
+                textDirection: TextDirection.ltr,
+                maxLines: null,
+              );
+              textPainter.layout(
+                maxWidth: MediaQuery.of(context).size.width - 160,
+              );
+              
+              final newHeight = (textPainter.height + 20).clamp(50.0, 550.0);
+              _updateTextFieldHeight(newHeight);
+            });
+          }
+        });
+      // }
     } catch (e) {
       debugPrint('Failed to initialize speech service: $e');
       _isSpeechAvailable = false;
@@ -659,6 +695,8 @@ class _ChatScreenState extends State<ChatScreen> {
     // IMMEDIATE response - no async operations blocking UI
     setState(() {
       _isRecording = true;
+      _messageController.clear(); // Clear text field when starting recording
+      _textFieldHeight = 50.0; // Reset to default height
     });
 
     // Ultra-fast start - fire and forget approach
@@ -696,38 +734,10 @@ class _ChatScreenState extends State<ChatScreen> {
 
       final String recognizedText = _speechService.currentRecognizedText;
 
-      if (recognizedText.trim().isNotEmpty) {
-        // Set the recognized text to the text field
-        _messageController.text = recognizedText.trim();
-        // ADDED For Text Field Height
-         final textSpan = TextSpan(
-                                      text:
-                                          _messageController.text.isEmpty
-                                              ? 'How can zAIn help you today?'
-                                              : _messageController.text,
-                                      style: const TextStyle(
-                                        fontSize: 16,
-                                        height: 1.4,
-                                        color: Color(0xFF242424),
-                                      ),
-                                    );
-                                    final textPainter = TextPainter(
-                                      text: textSpan,
-                                      textDirection: TextDirection.ltr,
-                                      maxLines: null,
-                                    );
-                                    textPainter.layout(
-                                      maxWidth:
-                                          MediaQuery.of(context).size.width -
-                                          160,
-                                    );
-
-                                    final newHeight = (textPainter.height + 20)
-                                        .clamp(50.0, 550.0);
-                                    _updateTextFieldHeight(newHeight);
-      } else {
+      if (recognizedText.trim().isEmpty) {
         BlackToastView.show(context, 'No speech detected. Please try again.');
       }
+      // Text is already set in real-time via callback, no need to set it again here
     } catch (e) {
       debugPrint('Failed to stop speech recording: $e');
       setState(() {
@@ -750,6 +760,8 @@ class _ChatScreenState extends State<ChatScreen> {
 
       setState(() {
         _isRecording = false;
+         _messageController.clear(); // Clear text field when starting recording
+      _textFieldHeight = 50.0; // Reset to default height
       });
     } catch (e) {
       debugPrint('Failed to cancel speech recording: $e');
@@ -780,6 +792,9 @@ class _ChatScreenState extends State<ChatScreen> {
       _scrollController.dispose();
       _messageFocusNode.dispose();
       _launchBloc.close();
+      
+      // Clear speech service callback
+      _speechService.clearOnTextUpdateCallback();
     }
 
     // OrderService().clearCallback();
@@ -1356,7 +1371,7 @@ class _ChatScreenBody extends StatelessWidget {
                          
                       else ...[
                         _buildInputArea(context),
-                        if (isRecording) _buildInputRecordingArea(context),
+                        // if (isRecording) _buildInputRecordingArea(context),
                       ]
                     ],
                   ),
@@ -2773,10 +2788,7 @@ class _ChatScreenBody extends StatelessWidget {
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(16),
                         border: Border.all(
-                          color:
-                              isRecording
-                                  ? Colors.transparent
-                                  : Color(0xFFE9DFFB),
+                          color:Color(0xFFE9DFFB),
                           width: 1,
                         ),
                       ),
@@ -2803,7 +2815,7 @@ class _ChatScreenBody extends StatelessWidget {
                                     color: const Color(0xFF242424),
                                   ),
                                   decoration: InputDecoration(
-                                    hintText: 'How can zAIn help you today?',
+                                    hintText: isRecording ? 'Listening...' : 'How can zAIn help you today?',
                                     border: InputBorder.none,
                                     enabledBorder: InputBorder.none,
                                     focusedBorder: InputBorder.none,
@@ -2861,7 +2873,61 @@ class _ChatScreenBody extends StatelessWidget {
                             ),
                             const SizedBox(width: 10),
                             // Speech button - Single tap to start/stop recording
+                            if (isRecording) ...[
+                               Opacity(
+                              opacity: isApiLoading ? 0.4 : 1.0,
+                              child: GestureDetector(
+                                onTap:
+                                    isApiLoading
+                                        ? null
+                                        : () async {
+                                          await onCancelSpeechRecording();
+                                        },
+                                child: Container(
+                                  width: 34,
+                                  height: 34,
+                                  child: SvgPicture.asset(
+                                    AssetPath.get('images/ic_RecClose.svg'),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            // Send button
                             Opacity(
+                              opacity: isApiLoading ? 0.4 : 1.0,
+                              child: GestureDetector(
+                                onTap:
+                                    isApiLoading
+                                        ? null
+                                        : () async {
+                                          await onStopSpeechRecording();
+                                          onSendMessage(messageController.text);
+                                          if (messageController.text
+                                              .trim()
+                                              .isNotEmpty) {
+                                            FocusScope.of(
+                                              context,
+                                            ).requestFocus(messageFocusNode);
+                                          }
+                                          Future.delayed(
+                                            const Duration(milliseconds: 100),
+                                            () {
+                                              onScrollToBottom();
+                                            },
+                                          );
+                                        },
+                                child: SizedBox(
+                                  width: 34,
+                                  height: 34,
+                                  child: SvgPicture.asset(
+                                    AssetPath.get('images/ic_sendImg.svg'),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            ]else...[
+                               Opacity(
                               opacity: isApiLoading ? 0.4 : 1.0,
                               child: GestureDetector(
                                 onTap:
@@ -2918,6 +2984,7 @@ class _ChatScreenBody extends StatelessWidget {
                                 ),
                               ),
                             ),
+                            ]
                           ],
                         ),
                       ),
