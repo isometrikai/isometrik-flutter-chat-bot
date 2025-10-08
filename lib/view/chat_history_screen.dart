@@ -53,7 +53,8 @@ class _ChatHistoryContentState extends State<_ChatHistoryContent> {
   String _currentKeyword = '';
   DateTime? _lastQueryAt;
 
-  final List<String> _categories = ['All', 'Food', 'Grocery', 'Pharmacy'];
+  // final List<String> _categories = ['All', 'Food', 'Grocery', 'Pharmacy'];
+  final List<String> _categories = ['All', '🍕 Restaurant', '🥑 Grocery', '💊 Pharmacy'];
 
   @override
   void initState() {
@@ -381,7 +382,7 @@ class _ChatHistoryContentState extends State<_ChatHistoryContent> {
               );
             }),
             // Add extra padding at the end to ensure last button is fully visible
-            const SizedBox(width: 24),
+            // const SizedBox(width: 24),
           ],
         ),
       ),

@@ -177,16 +177,16 @@ class ChatHistoryBloc extends Bloc<ChatHistoryEvent, ChatHistoryState> {
     
     // Set the appropriate filter based on category
     switch (event.category) {
-      case 'Food':
+      case '🍕 Restaurant':
         _isFoodChat = true;
         break;
-      case 'Grocery':
+      case '🥑 Grocery':
         _isGroceryChat = true;
         break;
-      case 'Pharmacy':
+      case '💊 Pharmacy':
         _isPharmacyChat = true;
         break;
-      case 'All':
+      case 'ALL':
       default:
         // No filters applied
         break;
