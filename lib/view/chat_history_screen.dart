@@ -124,9 +124,25 @@ class _ChatHistoryContentState extends State<_ChatHistoryContent> {
                 child: _buildSearchBar(),
               ),
               const SizedBox(height: 16),
-              // Category Filter Buttons
-              _buildCategoryButtons(),
-              const SizedBox(height: 24),
+              // Category Filter Buttons - conditionally shown
+              BlocBuilder<ChatHistoryBloc, ChatHistoryState>(
+                builder: (context, state) {
+                  // Hide category buttons if "All" is selected and no data from API
+                  final shouldShowButtons = !(_selectedCategory == 'All' && 
+                    state is ChatHistoryLoadSuccess && 
+                    state.sessions.isEmpty);
+                  
+                  if (shouldShowButtons && state is ChatHistoryLoadSuccess) {
+                    return Column(
+                      children: [
+                        _buildCategoryButtons(),
+                        const SizedBox(height: 24),
+                      ],
+                    );
+                  }
+                  return const SizedBox(height: 1);
+                },
+              ),
               // Chat History List
               Expanded(
                 child: BlocBuilder<ChatHistoryBloc, ChatHistoryState>(
