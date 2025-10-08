@@ -302,7 +302,13 @@ class _ChatHistoryContentState extends State<_ChatHistoryContent> {
               },
             ),
           ),
-          Container(
+          GestureDetector(
+            onTap: () {
+              FocusScope.of(context).unfocus();
+              _searchController.clear();
+              _onSearchChanged('');
+            },
+            child: Container(
             width: 34,
             height: 34,
             margin: const EdgeInsets.only(right: 10),
@@ -310,7 +316,8 @@ class _ChatHistoryContentState extends State<_ChatHistoryContent> {
               color: const Color(0xFFF6F6F6),
               borderRadius: BorderRadius.circular(54),
             ),
-            child: const Icon(Icons.search, size: 17, color: Color(0xFF585C77)),
+            child: const Icon(Icons.close, size: 17, color: Color(0xFF585C77)),
+          ),
           ),
         ],
       ),
