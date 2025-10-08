@@ -37,9 +37,8 @@ class PopupOverlayScreen extends StatelessWidget {
   Widget _buildInfoPopup(BuildContext context) {
     return Container(
       width: double.infinity,
-      constraints: BoxConstraints(
+      constraints: const BoxConstraints(
         maxHeight: 580,
-        minHeight: 200,
       ),
       // margin: const EdgeInsets.only(bottom: 34),
       decoration: const BoxDecoration(
@@ -64,6 +63,7 @@ class PopupOverlayScreen extends StatelessWidget {
     final personaDesc = greetingData?.personaDesc ?? '';//'Abram is a meticulous weekly shopper who plans hisFridays around food, groceries, and pharmacydeliveries. He maintains a consistent routine, makingre lunch is ordered on time while also handlingssential groceries for his family. Abram values quickdelivery for health-related items like paracetamoland Dabber Bronco syrup, usually expecting themwithin an hour.Recently, he updated his payment details with anew card to ensure smooth and seamless checkouts.He manages multiple addresses efficiently, keepinghis mother’s grocery needs separate from his own,while reserving his home at 12, Al Ohood Street 6 forrestaurant deliveries. Abram’s behavior shows ablend of reliability, structure, and care, making hima detail- oriented user who values speed andconvenience.';//greetingData?.personaDesc ?? '';
 
     return Column(
+      mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SizedBox(height: 5),
@@ -152,7 +152,7 @@ class PopupOverlayScreen extends StatelessWidget {
         ),
         const SizedBox(height: 16),
         // Description section with scroll
-        Expanded(
+        Flexible(
           child: SingleChildScrollView(
             child: Text(
               personaDesc,
