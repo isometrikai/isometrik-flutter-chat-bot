@@ -730,8 +730,8 @@ class _ChatHistoryContentState extends State<_ChatHistoryContent> {
                Text(
                 'Are you sure you want to delete “$chatTitle”?',
                 style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.w700,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
                   color: Colors.black,
                 ),
                 textAlign: TextAlign.left,

@@ -134,15 +134,15 @@ class PopupOverlayScreen extends StatelessWidget {
                   Navigator.of(context).pop();
                 },
                 child: Container(
-                  width: 40,
-                  height: 40,
+                  width: 50,
+                  height: 50,
                   decoration: BoxDecoration(
                     color: Colors.white.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(63.6364),
                   ),
                   child: const Icon(
                     Icons.close,
-                    size: 16,
+                    size: 25,
                     color: Color(0xFF585C77),
                   ),
                 ),
