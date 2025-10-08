@@ -229,7 +229,7 @@ class ChatHistoryBloc extends Bloc<ChatHistoryEvent, ChatHistoryState> {
     
     // Reset pagination and fetch new data
     _currentSkip = 0;
-    Utility.showLoader();
+    // Utility.showLoader();
     
     try {
       final sessions = await repository.fetchChatHistory(
@@ -240,7 +240,7 @@ class ChatHistoryBloc extends Bloc<ChatHistoryEvent, ChatHistoryState> {
         isPharmacyChat: _isPharmacyChat,
         query: _currentQuery.isNotEmpty ? _currentQuery : null,
       );
-      Utility.closeProgressDialog();
+      // Utility.closeProgressDialog();
       
       final hasMore = sessions.length == _pageSize;
       _currentSkip += sessions.length;
@@ -250,7 +250,7 @@ class ChatHistoryBloc extends Bloc<ChatHistoryEvent, ChatHistoryState> {
         hasMore: hasMore,
       ));
     } catch (e) {
-      Utility.closeProgressDialog();
+      // Utility.closeProgressDialog();
       emit(ChatHistoryLoadFailure(e.toString()));
     }
   }

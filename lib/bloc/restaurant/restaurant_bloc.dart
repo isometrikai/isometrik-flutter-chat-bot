@@ -39,7 +39,7 @@ class RestaurantBloc extends Bloc<RestaurantEvent, RestaurantState> {
     
     // Only show global loader for initial load, not for search
     if (keyword.isEmpty) {
-      Utility.showLoader();
+      // Utility.showLoader();
     }else if (needToShowLoader == true) {
       Utility.showLoader();
     }else{
