@@ -125,24 +125,24 @@ class _ChatHistoryContentState extends State<_ChatHistoryContent> {
               ),
               const SizedBox(height: 16),
               // Category Filter Buttons - conditionally shown
-              BlocBuilder<ChatHistoryBloc, ChatHistoryState>(
-                builder: (context, state) {
-                  // Hide category buttons if "All" is selected and no data from API
-                  final shouldShowButtons = !(_selectedCategory == 'All' && 
-                    state is ChatHistoryLoadSuccess && 
-                    state.sessions.isEmpty);
+              // BlocBuilder<ChatHistoryBloc, ChatHistoryState>(
+              //   builder: (context, state) {
+              //     // Hide category buttons if "All" is selected and no data from API
+              //     final shouldShowButtons = !(_selectedCategory == 'All' && 
+              //       state is ChatHistoryLoadSuccess && 
+              //       state.sessions.isEmpty);
                   
-                  if (shouldShowButtons && state is ChatHistoryLoadSuccess) {
-                    return Column(
-                      children: [
+              //     if (shouldShowButtons && state is ChatHistoryLoadSuccess) {
+              //       return Column(
+              //         children: [
                         _buildCategoryButtons(),
                         const SizedBox(height: 24),
-                      ],
-                    );
-                  }
-                  return const SizedBox(height: 1);
-                },
-              ),
+              //         ],
+              //       );
+              //     }
+              //     return const SizedBox(height: 1);
+              //   },
+              // ),
               // Chat History List
               Expanded(
                 child: BlocBuilder<ChatHistoryBloc, ChatHistoryState>(
@@ -182,7 +182,7 @@ class _ChatHistoryContentState extends State<_ChatHistoryContent> {
       leading: const SizedBox.shrink(), // Remove leading widget
       title: const Text(
         'Chats',
-        style: const TextStyle(
+        style: TextStyle(
                     fontWeight: FontWeight.w700,
                     fontSize: 24,
                     height: 1.2,
@@ -321,19 +321,20 @@ class _ChatHistoryContentState extends State<_ChatHistoryContent> {
           ),
           GestureDetector(
             onTap: () {
-              FocusScope.of(context).unfocus();
+              // FocusScope.of(context).unfocus();
+              FocusManager.instance.primaryFocus?.unfocus();
               _searchController.clear();
               _onSearchChanged('');
             },
             child: Container(
-            width: 34,
-            height: 34,
+            width: 25,
+            height: 25,
             margin: const EdgeInsets.only(right: 10),
             decoration: BoxDecoration(
               color: const Color(0xFFF6F6F6),
               borderRadius: BorderRadius.circular(54),
             ),
-            child: const Icon(Icons.close, size: 17, color: Color(0xFF585C77)),
+            child: const Icon(Icons.close, size: 15, color: Color(0xFF585C77)),
           ),
           ),
         ],
@@ -358,6 +359,10 @@ class _ChatHistoryContentState extends State<_ChatHistoryContent> {
                 margin: const EdgeInsets.only(right: 8),
                 child: GestureDetector(
                   onTap: () {
+                    // Dismiss keyboard when tapping category filter
+                    // FocusScope.of(context).unfocus();
+                    FocusManager.instance.primaryFocus?.unfocus();
+                    _searchController.clear();
                     setState(() {
                       _selectedCategory = category;
                     });

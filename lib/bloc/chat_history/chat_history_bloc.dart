@@ -174,6 +174,7 @@ class ChatHistoryBloc extends Bloc<ChatHistoryEvent, ChatHistoryState> {
     _isFoodChat = null;
     _isGroceryChat = null;
     _isPharmacyChat = null;
+    _currentQuery = '';
     
     // Set the appropriate filter based on category
     switch (event.category) {
