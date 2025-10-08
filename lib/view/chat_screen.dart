@@ -62,7 +62,6 @@ class _ChatScreenState extends State<ChatScreen> {
   Set<String> _selectedOptionMessages = {};
   String? _pendingMessage;
   
-  double _textFieldHeight = 50.0; // Add height state variable
   List<ChatWidget> _latestActionWidgets = []; // Track latest action widgets
   int _totalCartCount = 0; // Track total cart count
   List<ChatMessage> messages = [];
@@ -148,7 +147,6 @@ class _ChatScreenState extends State<ChatScreen> {
         ),
       );
       _pendingMessage = text;
-      _textFieldHeight = 50.0; // Reset to default height when sending message
     });
 
     _messageController.clear();
@@ -160,12 +158,6 @@ class _ChatScreenState extends State<ChatScreen> {
   void _clearPendingMessage() {
     setState(() {
       _pendingMessage = null;
-    });
-  }
-
-  void _updateTextFieldHeight(double newHeight) {
-    setState(() {
-      _textFieldHeight = newHeight;
     });
   }
 
@@ -651,29 +643,6 @@ class _ChatScreenState extends State<ChatScreen> {
               if (_isRecording == false && recognizedText.isNotEmpty) {
                 _messageController.clear();
               }
-              
-              // Update text field height for the new text
-              final textSpan = TextSpan(
-                text: recognizedText.isEmpty
-                    ? 'How can zAIn help you today?'
-                    : recognizedText,
-                style: const TextStyle(
-                  fontSize: 16,
-                  height: 1.4,
-                  color: Color(0xFF242424),
-                ),
-              );
-              final textPainter = TextPainter(
-                text: textSpan,
-                textDirection: TextDirection.ltr,
-                maxLines: null,
-              );
-              textPainter.layout(
-                maxWidth: MediaQuery.of(context).size.width - 160,
-              );
-              
-              final newHeight = (textPainter.height + 20).clamp(50.0, 550.0);
-              _updateTextFieldHeight(newHeight);
             });
           }
         });
@@ -696,7 +665,6 @@ class _ChatScreenState extends State<ChatScreen> {
     setState(() {
       _isRecording = true;
       _messageController.clear(); // Clear text field when starting recording
-      _textFieldHeight = 50.0; // Reset to default height
     });
 
     // Ultra-fast start - fire and forget approach
@@ -761,7 +729,6 @@ class _ChatScreenState extends State<ChatScreen> {
       setState(() {
         _isRecording = false;
          _messageController.clear(); // Clear text field when starting recording
-      _textFieldHeight = 50.0; // Reset to default height
       });
     } catch (e) {
       debugPrint('Failed to cancel speech recording: $e');
@@ -887,8 +854,6 @@ class _ChatScreenState extends State<ChatScreen> {
       onClearPendingMessage: _clearPendingMessage,
       sessionId: sessionId,
       // Pass session ID
-      textFieldHeight: _textFieldHeight,
-      onUpdateTextFieldHeight: _updateTextFieldHeight,
       latestActionWidgets: _latestActionWidgets,
       onHideStoreCards: _hideStoreCards,
       // Add the callback
@@ -1122,8 +1087,6 @@ class _ChatScreenBody extends StatelessWidget {
   final String? pendingMessage;
   final VoidCallback onClearPendingMessage;
   final String sessionId;
-  final double textFieldHeight;
-  final Function(double) onUpdateTextFieldHeight;
   final List<ChatWidget> latestActionWidgets;
   final VoidCallback onHideStoreCards; // Add callback to hide store cards
   final Function(int) onUpdateCartCount; // Add callback to update cart count
@@ -1160,8 +1123,6 @@ class _ChatScreenBody extends StatelessWidget {
     required this.pendingMessage,
     required this.onClearPendingMessage,
     required this.sessionId,
-    required this.textFieldHeight,
-    required this.onUpdateTextFieldHeight,
     required this.latestActionWidgets,
     required this.onHideStoreCards, // Add the callback parameter
     required this.onUpdateCartCount, // Add the callback parameter
@@ -2794,39 +2755,37 @@ class _ChatScreenBody extends StatelessWidget {
                 // Stack(
                 //   children: [
                 Center(
-                  child: ConstrainedBox(
+                  child: Container(
                     constraints: BoxConstraints(
                       minHeight: 64,
-                      maxHeight: 570, // Allow up to 550 + 20 padding
+                      maxHeight: 200, // Maximum height for the input container
                     ),
-                    child: Container(
-                      height: textFieldHeight + 20,
-                      // Dynamic height based on text field
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(
-                          color:Color(0xFFE9DFFB),
-                          width: 1,
-                        ),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: Color(0xFFE9DFFB),
+                        width: 1,
                       ),
-                      child: Padding(
-                        // padding: const EdgeInsets.symmetric(horizontal: 12),
-                        padding: const EdgeInsets.symmetric(horizontal: 12,vertical: 20),// ADDED For Text Field Height
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Expanded(
-                              child: Container(
-                                height: textFieldHeight,
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Expanded(
+                            child: ConstrainedBox(
+                              constraints: BoxConstraints(
+                                maxHeight: 180, // Max height for scrollable text
+                              ),
+                              child: SingleChildScrollView(
                                 child: TextField(
                                   autofocus: false,
                                   controller: messageController,
                                   focusNode: messageFocusNode,
                                   enabled: !isApiLoading,
-                                  textCapitalization:
-                                      TextCapitalization.sentences,
+                                  textCapitalization: TextCapitalization.sentences,
                                   maxLines: null,
                                   minLines: 1,
                                   style: AppTextStyles.chatInput.copyWith(
@@ -2843,56 +2802,28 @@ class _ChatScreenBody extends StatelessWidget {
                                     hintStyle: AppTextStyles.chatInput.copyWith(
                                       color: Colors.grey,
                                     ),
-                                    isCollapsed: true,
-                                    contentPadding: EdgeInsets.zero,
+                                    isDense: true,
+                                    contentPadding: EdgeInsets.symmetric(vertical: 8),
                                   ),
-                                  onChanged: (text) {
-                                    // Calculate new height based on text content
-                                    final textSpan = TextSpan(
-                                      text:
-                                          text.isEmpty
-                                              ? 'How can zAIn help you today?'
-                                              : text,
-                                      style: const TextStyle(
-                                        fontSize: 16,
-                                        height: 1.4,
-                                        color: Color(0xFF242424),
-                                      ),
-                                    );
-                                    final textPainter = TextPainter(
-                                      text: textSpan,
-                                      textDirection: TextDirection.ltr,
-                                      maxLines: null,
-                                    );
-                                    textPainter.layout(
-                                      maxWidth:
-                                          MediaQuery.of(context).size.width -
-                                          160,
-                                    );
-
-                                    final newHeight = (textPainter.height + 20)
-                                        .clamp(50.0, 550.0);
-                                    onUpdateTextFieldHeight(newHeight);
-                                  },
-                                  onSubmitted:
-                                      isApiLoading
-                                          ? null
-                                          : (text) {
-                                            onSendMessage(text);
-                                            Future.delayed(
-                                              const Duration(milliseconds: 100),
-                                              () {
-                                                onScrollToBottom();
-                                              },
-                                            );
-                                          },
+                                  onSubmitted: isApiLoading
+                                      ? null
+                                      : (text) {
+                                          onSendMessage(text);
+                                          Future.delayed(
+                                            const Duration(milliseconds: 100),
+                                            () {
+                                              onScrollToBottom();
+                                            },
+                                          );
+                                        },
                                 ),
                               ),
                             ),
-                            const SizedBox(width: 10),
-                            // Speech button - Single tap to start/stop recording
-                            if (isRecording) ...[
-                               Opacity(
+                          ),
+                          const SizedBox(width: 10),
+                          // Speech button - Single tap to start/stop recording
+                          if (isRecording) ...[
+                            Opacity(
                               opacity: isApiLoading ? 0.4 : 1.0,
                               child: GestureDetector(
                                 onTap:
@@ -2944,8 +2875,8 @@ class _ChatScreenBody extends StatelessWidget {
                                 ),
                               ),
                             ),
-                            ]else...[
-                               Opacity(
+                          ] else ...[
+                            Opacity(
                               opacity: isApiLoading ? 0.4 : 1.0,
                               child: GestureDetector(
                                 onTap:
@@ -3002,9 +2933,8 @@ class _ChatScreenBody extends StatelessWidget {
                                 ),
                               ),
                             ),
-                            ]
                           ],
-                        ),
+                        ],
                       ),
                     ),
                   ),
@@ -3017,124 +2947,124 @@ class _ChatScreenBody extends StatelessWidget {
     );
   }
 
-  Widget _buildInputRecordingArea(BuildContext context) {
-    return BlocBuilder<ChatBloc, ChatState>(
-      builder: (context, state) {
-        bool isApiLoading = state is ChatLoading;
+  // Widget _buildInputRecordingArea(BuildContext context) {
+  //   return BlocBuilder<ChatBloc, ChatState>(
+  //     builder: (context, state) {
+  //       bool isApiLoading = state is ChatLoading;
 
-        return Container(
-          padding: EdgeInsets.only(
-            left: 16,
-            right: 16,
-            top: 10,
-            bottom: 16 + MediaQuery.of(context).viewInsets.bottom,
-          ),
-          color: Colors.white,
-          child: SafeArea(
-            top: false,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // Input field container
-                Stack(
-                  children: [
-                    Center(
-                      child: ConstrainedBox(
-                        constraints: BoxConstraints(
-                          minHeight: 64,
-                          maxHeight: 570, // Allow up to 550 + 20 padding
-                        ),
-                        child: Container(
-                          height: textFieldHeight + 20,
-                          // Dynamic height based on text field
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(16),
-                            border: Border.all(
-                              color: Color(0xFFE9DFFB),
-                              width: 1,
-                            ),
-                          ),
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 12),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                Opacity(
-                                  opacity: isApiLoading ? 0.4 : 1.0,
-                                  child: GestureDetector(
-                                    onTap:
-                                        isApiLoading
-                                            ? null
-                                            : () async {
-                                              await onCancelSpeechRecording();
-                                            },
-                                    child: SizedBox(
-                                      width: 34,
-                                      height: 34,
-                                      child: SvgPicture.asset(
-                                        AssetPath.get('images/ic_RecClose.svg'),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                                SvgPicture.asset(
-                                  AssetPath.get('images/ic_Listening.svg'),
-                                ),
-                                Opacity(
-                                  opacity: isApiLoading ? 0.4 : 1.0,
-                                  child: GestureDetector(
-                                    onTap:
-                                        isApiLoading
-                                            ? null
-                                            : () async {
-                                              await onStopSpeechRecording();
-                                              // onSendMessage(
-                                              //   messageController.text,
-                                              // );
-                                              // if (messageController.text
-                                              //     .trim()
-                                              //     .isNotEmpty) {
-                                              //   FocusScope.of(
-                                              //     context,
-                                              //   ).requestFocus(
-                                              //     messageFocusNode,
-                                              //   );
-                                              // }
-                                              // Future.delayed(
-                                              //   const Duration(
-                                              //     milliseconds: 100,
-                                              //   ),
-                                              //   () {
-                                              //     onScrollToBottom();
-                                              //   },
-                                              // );
-                                            },
-                                    child: SizedBox(
-                                      width: 34,
-                                      height: 34,
-                                      child: SvgPicture.asset(
-                                        AssetPath.get('images/ic_sendImg.svg'),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
+  //       return Container(
+  //         padding: EdgeInsets.only(
+  //           left: 16,
+  //           right: 16,
+  //           top: 10,
+  //           bottom: 16 + MediaQuery.of(context).viewInsets.bottom,
+  //         ),
+  //         color: Colors.white,
+  //         child: SafeArea(
+  //           top: false,
+  //           child: Column(
+  //             mainAxisSize: MainAxisSize.min,
+  //             children: [
+  //               // Input field container
+  //               Stack(
+  //                 children: [
+  //                   Center(
+  //                     child: ConstrainedBox(
+  //                       constraints: BoxConstraints(
+  //                         minHeight: 64,
+  //                         maxHeight: 570, // Allow up to 550 + 20 padding
+  //                       ),
+  //                       child: Container(
+  //                         height: textFieldHeight + 20,
+  //                         // Dynamic height based on text field
+  //                         decoration: BoxDecoration(
+  //                           color: Colors.white,
+  //                           borderRadius: BorderRadius.circular(16),
+  //                           border: Border.all(
+  //                             color: Color(0xFFE9DFFB),
+  //                             width: 1,
+  //                           ),
+  //                         ),
+  //                         child: Padding(
+  //                           padding: const EdgeInsets.symmetric(horizontal: 12),
+  //                           child: Row(
+  //                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  //                             crossAxisAlignment: CrossAxisAlignment.center,
+  //                             children: [
+  //                               Opacity(
+  //                                 opacity: isApiLoading ? 0.4 : 1.0,
+  //                                 child: GestureDetector(
+  //                                   onTap:
+  //                                       isApiLoading
+  //                                           ? null
+  //                                           : () async {
+  //                                             await onCancelSpeechRecording();
+  //                                           },
+  //                                   child: SizedBox(
+  //                                     width: 34,
+  //                                     height: 34,
+  //                                     child: SvgPicture.asset(
+  //                                       AssetPath.get('images/ic_RecClose.svg'),
+  //                                     ),
+  //                                   ),
+  //                                 ),
+  //                               ),
+  //                               SvgPicture.asset(
+  //                                 AssetPath.get('images/ic_Listening.svg'),
+  //                               ),
+  //                               Opacity(
+  //                                 opacity: isApiLoading ? 0.4 : 1.0,
+  //                                 child: GestureDetector(
+  //                                   onTap:
+  //                                       isApiLoading
+  //                                           ? null
+  //                                           : () async {
+  //                                             await onStopSpeechRecording();
+  //                                             // onSendMessage(
+  //                                             //   messageController.text,
+  //                                             // );
+  //                                             // if (messageController.text
+  //                                             //     .trim()
+  //                                             //     .isNotEmpty) {
+  //                                             //   FocusScope.of(
+  //                                             //     context,
+  //                                             //   ).requestFocus(
+  //                                             //     messageFocusNode,
+  //                                             //   );
+  //                                             // }
+  //                                             // Future.delayed(
+  //                                             //   const Duration(
+  //                                             //     milliseconds: 100,
+  //                                             //   ),
+  //                                             //   () {
+  //                                             //     onScrollToBottom();
+  //                                             //   },
+  //                                             // );
+  //                                           },
+  //                                   child: SizedBox(
+  //                                     width: 34,
+  //                                     height: 34,
+  //                                     child: SvgPicture.asset(
+  //                                       AssetPath.get('images/ic_sendImg.svg'),
+  //                                     ),
+  //                                   ),
+  //                                 ),
+  //                               ),
+  //                             ],
+  //                           ),
+  //                         ),
+  //                       ),
+  //                     ),
+  //                   ),
+  //                 ],
+  //               ),
+  //             ],
+  //           ),
+  //         ),
+  //       );
+  //     },
+  //   );
+  // }
 
   Widget _buildStoreCards(List<Store> stores, ChatWidget? storesWidget) {
     return ListView.separated(
