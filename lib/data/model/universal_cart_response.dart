@@ -157,7 +157,7 @@ class UniversalCartData {
   final String storeCategory;
   final String storeSubCategory;
   final bool hyperlocal;
-  // final int storeListing;
+  final int storeListing;//check
   final bool ecommerce;
   final int storeTypeId;
   final String storeType;
@@ -195,7 +195,7 @@ class UniversalCartData {
     required this.storeCategory,
     required this.storeSubCategory,
     required this.hyperlocal,
-    // required this.storeListing,
+    required this.storeListing,
     required this.ecommerce,
     required this.storeTypeId,
     required this.storeType,
@@ -235,7 +235,7 @@ class UniversalCartData {
       storeCategory: json['storeCategory'] ?? '',
       storeSubCategory: json['storeSubCategory'] ?? '',
       hyperlocal: json['hyperlocal'] ?? false,
-      // storeListing: json['storeListing'] ?? 0,
+      storeListing: json['storeListing'] ?? 0,
       ecommerce: json['ecommerce'] ?? false,
       storeTypeId: json['storeTypeId'] ?? 0,
       storeType: json['storeType'] ?? '',
@@ -280,7 +280,7 @@ class UniversalCartData {
       'storeCategory': storeCategory,
       'storeSubCategory': storeSubCategory,
       'hyperlocal': hyperlocal,
-      // 'storeListing': storeListing,
+      'storeListing': storeListing,
       'ecommerce': ecommerce,
       'storeTypeId': storeTypeId,
       'storeType': storeType,
@@ -343,6 +343,7 @@ class Seller {
   // final int totalProductWeightInKG;
   final bool storeIsOpen;
   final List<Product> products;
+  final int companyType;
 
   Seller({
     required this.fullfilledBy,
@@ -378,6 +379,7 @@ class Seller {
     // required this.totalProductWeightInKG,
     required this.storeIsOpen,
     required this.products,
+    required this.companyType,
   });
 
   factory Seller.fromJson(Map<String, dynamic> json) {
@@ -417,6 +419,7 @@ class Seller {
       products: (json['products'] as List<dynamic>?)
           ?.map((e) => Product.fromJson(e))
           .toList() ?? [],
+      companyType: json['companyType'] ?? 0,
     );
   }
 
@@ -455,6 +458,7 @@ class Seller {
       // 'totalProductWeightInKG': totalProductWeightInKG,
       'storeIsOpen': storeIsOpen,
       'products': products.map((e) => e.toJson()).toList(),
+      'companyType': companyType,
     };
   }
 }

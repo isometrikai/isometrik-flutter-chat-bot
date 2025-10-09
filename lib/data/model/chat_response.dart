@@ -751,6 +751,9 @@ class WidgetAction {
   final String? storeCategoryName;
   final String? orderId;
   final String? addOns;
+  final int? storeListing;
+  final int? hyperlocal;
+  final int? companyType;
 
   WidgetAction({
     required this.buttonText,
@@ -773,6 +776,9 @@ class WidgetAction {
     this.storeCategoryName,
     this.orderId,
     this.addOns,
+    this.storeListing,
+    this.hyperlocal,
+    this.companyType,
   });
 
   factory WidgetAction.fromJson(Map<String, dynamic> json) {
@@ -801,6 +807,9 @@ class WidgetAction {
         storeCategoryName: json['storeCategoryName']?.toString(),
         orderId: json['orderId']?.toString(),
         addOns: json['addOns']?.toString(),
+        storeListing: json['storeListing'] ?? 111,
+        hyperlocal: json['hyperlocal'] ?? 111,
+        companyType: json['companyType'] ?? 111,
     );
   }
 
@@ -826,6 +835,10 @@ class WidgetAction {
       'storeCategoryName': storeCategoryName,
       'orderId': orderId,
       'addOns': addOns,
+      'storeListing': storeListing,
+      'hyperlocal': hyperlocal,
+      'companyType': companyType,
+      'storeCategoryId': storeCategoryId,
     };
   }
 }

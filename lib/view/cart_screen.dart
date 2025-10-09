@@ -1,3 +1,4 @@
+import 'package:chat_bot/services/callback_manage.dart';
 import 'package:chat_bot/utils/asset_path.dart';
 import 'package:chat_bot/utils/enum.dart';
 import 'package:flutter/material.dart';
@@ -16,13 +17,25 @@ class CategoryData {
   final List<WidgetAction> cartItems;
   final String storeName;
   final String? storeType;
+  final String storeCategoryId;
+  final int storeListing;
+  final int hyperlocal;
   final String currencySymbol;
+  final String storeId;
+  final int companyType;
+  final int storeTypeId;
 
   CategoryData({
     required this.cartItems,
     required this.storeName,
     this.storeType,
+    required this.storeCategoryId,
+    required this.storeListing,
     required this.currencySymbol,
+    required this.hyperlocal,
+    required this.storeId,
+    required this.companyType,
+    required this.storeTypeId,
   });
 }
 
@@ -348,12 +361,18 @@ class _CartScreenState extends State<CartScreen> {
     
     // Convert to widget actions for this specific category
     final cartItems = _convertToWidgetActions(matchingCartData, matchingSeller);
-    
+
     return CategoryData(
       cartItems: cartItems,
       storeName: matchingSeller.name,
       storeType: matchingSeller.storeType,
+      storeCategoryId: matchingCartData.storeCategoryId,
+      storeListing: matchingCartData.storeListing,
+      hyperlocal: matchingCartData.hyperlocal ? 1 : 0,
+      storeId: matchingSeller.products.first.storeId ?? '',
+      companyType: matchingSeller.companyType,
       currencySymbol: matchingCartData.currencyCode,
+      storeTypeId: matchingSeller.storeTypeId,
     );
   }
 
@@ -553,62 +572,39 @@ class _CartScreenState extends State<CartScreen> {
                         color: const Color(0xFF242424),
                       ),
                     ),
-                    // const SizedBox(height: 10),
-                    // Row(
-                    //   children: [
-                    //     // Rating
-                    //     Row(
-                    //       children: [
-                    //         const Icon(
-                    //           Icons.star,
-                    //           size: 12,
-                    //           color: Color(0xFFA674BF),
-                    //         ),
-                    //         const SizedBox(width: 4),
-                    //         Text(
-                    //           '4.5 (1.2k reviews)',
-                    //           style: const TextStyle(
-                    //             fontSize: 12,
-                    //             fontWeight: FontWeight.w400,
-                    //             color: Color(0xFF242424),
-                    //           ),
-                    //         ),
-                    //       ],
-                    //     ),
-                    //     const SizedBox(width: 7),
-                    //     const Text(
-                    //       '|',
-                    //       style: TextStyle(
-                    //         fontSize: 12,
-                    //         fontWeight: FontWeight.w400,
-                    //         color: Color(0xFFD7CDE9),
-                    //       ),
-                    //     ),
-                    //     const SizedBox(width: 7),
-                    //     // Delivery time
-                    //     Row(
-                    //       children: [
-                    //         const Icon(
-                    //           Icons.access_time,
-                    //           size: 12,
-                    //           color: Color(0xFFA674BF),
-                    //         ),
-                    //         const SizedBox(width: 4),
-                    //         Text(
-                    //           '15-20 min',
-                    //           style: const TextStyle(
-                    //             fontSize: 12,
-                    //             fontWeight: FontWeight.w400,
-                    //             color: Color(0xFF242424),
-                    //           ),
-                    //         ),
-                    //       ],
-                    //     ),
-                    //   ],
-                    // ),
                   ],
                 ),
               ),
+              const SizedBox(width: 5),
+                  GestureDetector(
+                    onTap: () {
+                      print("storeCategoryId: ${categoryData.storeCategoryId}");
+                      print("storeTypeId: ${categoryData.storeTypeId}");
+                      print("storeListing: ${categoryData.storeListing}");
+                      print("hyperlocal: ${categoryData.hyperlocal}");
+                      print("storeId: ${categoryData.storeId}");
+                      print("companyType: ${categoryData.companyType}");
+                      OrderService().triggerStoreOrder({
+                        'storeCategoryId': categoryData.storeCategoryId,
+                        'storeTypeId': categoryData.storeTypeId,
+                        'storeListing': categoryData.storeListing,
+                        'hyperlocal': categoryData.hyperlocal,
+                        'storeId': categoryData.storeId,
+                        'companyType': categoryData.companyType,
+                      });
+                    },
+                    child: Container(
+                      width: 30,
+                      height: 30,
+                      alignment: Alignment.centerRight,
+                      child:  SvgPicture.asset(
+                        AssetPath.get('images/ic_info_cart.svg'),
+                        width: 20,
+                        height: 20,
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                  ),  
             ],
           ),
         ],

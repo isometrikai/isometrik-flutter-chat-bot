@@ -2,6 +2,7 @@ import 'package:chat_bot/utils/asset_path.dart';
 import 'package:flutter/material.dart';
 import 'package:chat_bot/data/model/greeting_response.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:flutter_html/flutter_html.dart';
 
 class PopupOverlayScreen extends StatelessWidget {
   final GreetingResponse? greetingData;
@@ -55,6 +56,47 @@ class PopupOverlayScreen extends StatelessWidget {
         child: _buildPopupContent(),
       ),
     );
+  }
+
+   // Helper method to check if text contains markdown syntax
+  bool _hasMarkdownSyntax(String text) {
+    // Check for common markdown patterns
+    return text.contains('**') || // Bold text
+        text.contains('*') || // Italic text
+        text.contains('`') || // Code
+        text.contains('#') || // Headers
+        text.contains('- ') || // Lists
+        text.contains('1. ') || // Numbered lists
+        text.contains('[') || // Links
+        text.contains(']('); // Links
+  }
+
+  // Helper method to convert markdown to HTML
+  String _markdownToHtml(String text) {
+    String html = text;
+
+    // Convert bold text **text** to <strong>text</strong>
+    html = html.replaceAllMapped(
+      RegExp(r'\*\*(.*?)\*\*'),
+      (match) => '<strong>${match.group(1)}</strong>',
+    );
+
+    // Convert italic text *text* to <em>text</em>
+    html = html.replaceAllMapped(
+      RegExp(r'\*(.*?)\*'),
+      (match) => '<em>${match.group(1)}</em>',
+    );
+
+    // Convert code `text` to <code>text</code>
+    html = html.replaceAllMapped(
+      RegExp(r'`(.*?)`'),
+      (match) => '<code>${match.group(1)}</code>',
+    );
+
+    // Convert line breaks \n to <br>
+    html = html.replaceAll('\n', '<br>');
+
+    return html;
   }
 
   Widget _buildPopupContent() {
@@ -154,7 +196,36 @@ class PopupOverlayScreen extends StatelessWidget {
         // Description section with scroll
         Flexible(
           child: SingleChildScrollView(
-            child: Text(
+            child: _hasMarkdownSyntax(personaDesc)
+            ? Html(
+              data: _markdownToHtml(personaDesc),
+             style: {
+                                  "body": Style(
+                                    margin: Margins.zero,
+                                    padding: HtmlPaddings.zero,
+                                    fontSize: FontSize(14),
+                                    fontFamily: "Plus Jakarta Sans",
+                                    color:Color(0xFF242424),
+                                  ),
+                                  "strong": Style(
+                                    fontWeight: FontWeight.bold,
+                                    color:Color(0xFF242424),
+                                  ),
+                                  "em": Style(
+                                    fontStyle: FontStyle.italic,
+                                    color:Color(0xFF242424),
+                                  ),
+                                  "code": Style(
+                                    backgroundColor: Colors.grey.shade200,
+                                    padding: HtmlPaddings.symmetric(
+                                      horizontal: 4,
+                                      vertical: 2,
+                                    ),
+                                    fontFamily: "Plus Jakarta Sans",
+                                  ),
+                                },
+            )
+            : Text(
               personaDesc,
               style: const TextStyle(
                 fontFamily: 'Plus Jakarta Sans',
