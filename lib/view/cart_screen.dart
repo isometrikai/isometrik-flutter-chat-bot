@@ -576,6 +576,7 @@ class _CartScreenState extends State<CartScreen> {
                 ),
               ),
               const SizedBox(width: 5),
+              if (widget.needToEndThisChat == false) ...[
                   GestureDetector(
                     onTap: () {
                       print("storeCategoryId: ${categoryData.storeCategoryId}");
@@ -605,6 +606,7 @@ class _CartScreenState extends State<CartScreen> {
                       ),
                     ),
                   ),  
+              ],
             ],
           ),
         ],

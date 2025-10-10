@@ -4223,7 +4223,7 @@ class _ChatScreenBody extends StatelessWidget {
   }
 
   Widget _buildCartWidget(List<WidgetAction> cartItems) {
-    return CartWidget(cartItems: cartItems);
+    return CartWidget(cartItems: cartItems, isFromChatHistory: isFromHistory);
   }
 
   Widget _buildChooseAddressWidget(List<AddressOption> addressOptions) {
