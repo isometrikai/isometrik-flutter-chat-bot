@@ -1,12 +1,17 @@
+import 'package:chat_bot/services/callback_manage.dart';
 import 'package:flutter/material.dart';
 import 'package:chat_bot/data/model/chat_response.dart';
+import 'package:flutter_svg/svg.dart' show SvgPicture;
+import 'package:chat_bot/utils/asset_path.dart';
 
 class OrderSummaryWidget extends StatelessWidget {
   final List<WidgetAction> orderItems;
+  final bool isFromChatHistory;
 
   const OrderSummaryWidget({
     super.key,
     required this.orderItems,
+    required this.isFromChatHistory,
   });
 
   @override
@@ -83,7 +88,7 @@ class OrderSummaryWidget extends StatelessWidget {
               // Store information section with light purple background
               Container(
                 width: double.infinity,
-                padding: const EdgeInsets.all(10),
+                padding: const EdgeInsets.fromLTRB(10, 10, 0, 10),
                 decoration: BoxDecoration(
                   color: const Color(0xFFFBF1FF),
                   borderRadius: BorderRadius.circular(8),
@@ -94,15 +99,38 @@ class OrderSummaryWidget extends StatelessWidget {
                     // Store name with icon
                     Row(
                       children: [
-                        Text(
-                          storeInfo.storeName ?? '',
-                          style: const TextStyle(
-                            fontFamily: 'Plus Jakarta Sans',
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                            color: Color(0xFF242424),
+                        Expanded(
+                          child: Text(
+                            storeInfo.storeName ?? '',
+                            style: const TextStyle(
+                              fontFamily: 'Plus Jakarta Sans',
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,  
+                              color: Color(0xFF242424),
+                            ),
                           ),
                         ),
+                        if(isFromChatHistory == false) ...[
+                            GestureDetector(
+                              onTap: () {
+                                print("storeInfo: ${storeInfo.toJson()}");
+                                OrderService().triggerStoreOrder(storeInfo.toJson());
+                              },
+                              child: Container(
+                                // margin: const EdgeInsets.only(right: 15),
+                                width: 45,
+                                height: 23,
+                                // color: Colors.red,
+                                alignment: Alignment.center,
+                                child:  SvgPicture.asset(
+                                  AssetPath.get('images/ic_info_cart.svg'),
+                                  width: 16,
+                                  height: 16,
+                                  fit: BoxFit.cover,
+                                ),
+                                ),
+                              ),   
+                        ],
                       ],
                     ),
                     const SizedBox(height: 10),

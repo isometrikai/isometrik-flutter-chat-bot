@@ -4259,7 +4259,7 @@ class _ChatScreenBody extends StatelessWidget {
   }
 
   Widget _buildOrderSummaryWidget(List<WidgetAction> orderSummaryItems) {
-    return OrderSummaryWidget(orderItems: orderSummaryItems);
+    return OrderSummaryWidget(orderItems: orderSummaryItems, isFromChatHistory: isFromHistory);
   }
 
   Widget _buildOrderConfirmedWidget(ChatWidget orderConfirmedWidget) {
