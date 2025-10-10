@@ -2,7 +2,6 @@ import 'package:chat_bot/utils/asset_path.dart';
 import 'package:flutter/material.dart';
 import 'package:chat_bot/data/model/greeting_response.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:flutter_html/flutter_html.dart';
 
 class PopupOverlayScreen extends StatelessWidget {
   final GreetingResponse? greetingData;
@@ -56,47 +55,6 @@ class PopupOverlayScreen extends StatelessWidget {
         child: _buildPopupContent(),
       ),
     );
-  }
-
-   // Helper method to check if text contains markdown syntax
-  bool _hasMarkdownSyntax(String text) {
-    // Check for common markdown patterns
-    return text.contains('**') || // Bold text
-        text.contains('*') || // Italic text
-        text.contains('`') || // Code
-        text.contains('#') || // Headers
-        text.contains('- ') || // Lists
-        text.contains('1. ') || // Numbered lists
-        text.contains('[') || // Links
-        text.contains(']('); // Links
-  }
-
-  // Helper method to convert markdown to HTML
-  String _markdownToHtml(String text) {
-    String html = text;
-
-    // Convert bold text **text** to <strong>text</strong>
-    html = html.replaceAllMapped(
-      RegExp(r'\*\*(.*?)\*\*'),
-      (match) => '<strong>${match.group(1)}</strong>',
-    );
-
-    // Convert italic text *text* to <em>text</em>
-    html = html.replaceAllMapped(
-      RegExp(r'\*(.*?)\*'),
-      (match) => '<em>${match.group(1)}</em>',
-    );
-
-    // Convert code `text` to <code>text</code>
-    html = html.replaceAllMapped(
-      RegExp(r'`(.*?)`'),
-      (match) => '<code>${match.group(1)}</code>',
-    );
-
-    // Convert line breaks \n to <br>
-    html = html.replaceAll('\n', '<br>');
-
-    return html;
   }
 
   Widget _buildPopupContent() {
@@ -196,45 +154,7 @@ class PopupOverlayScreen extends StatelessWidget {
         // Description section with scroll
         Flexible(
           child: SingleChildScrollView(
-            child: _hasMarkdownSyntax(personaDesc)
-            ? Html(
-              data: _markdownToHtml(personaDesc),
-             style: {
-                                  "body": Style(
-                                    margin: Margins.zero,
-                                    padding: HtmlPaddings.zero,
-                                    fontSize: FontSize(14),
-                                    fontFamily: "Plus Jakarta Sans",
-                                    color:Color(0xFF242424),
-                                  ),
-                                  "strong": Style(
-                                    fontWeight: FontWeight.bold,
-                                    color:Color(0xFF242424),
-                                  ),
-                                  "em": Style(
-                                    fontStyle: FontStyle.italic,
-                                    color:Color(0xFF242424),
-                                  ),
-                                  "code": Style(
-                                    backgroundColor: Colors.grey.shade200,
-                                    padding: HtmlPaddings.symmetric(
-                                      horizontal: 4,
-                                      vertical: 2,
-                                    ),
-                                    fontFamily: "Plus Jakarta Sans",
-                                  ),
-                                },
-            )
-            : Text(
-              personaDesc,
-              style: const TextStyle(
-                fontFamily: 'Plus Jakarta Sans',
-                fontSize: 14,
-                fontWeight: FontWeight.w400,
-                height: 1.4,
-                color: Color(0xFF242424),
-              ),
-            ),
+            child: _buildPersonaDescription(personaDesc),
           ),
         ),
         const SizedBox(height: 20),
@@ -258,6 +178,80 @@ class PopupOverlayScreen extends StatelessWidget {
         ),
         const SizedBox(height: 10),
       ],
+    );
+  }
+
+  Widget _buildPersonaDescription(String personaDesc) {
+    if (personaDesc.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    // Split the text by lines that start with "-"
+    final lines = personaDesc.split('\n');
+    
+    // Filter out empty lines
+    final nonEmptyLines = lines.where((line) => line.trim().isNotEmpty).toList();
+    
+    // If only one line or no lines, show as normal text
+    if (nonEmptyLines.length <= 1) {
+      return Text(
+        personaDesc.trim(),
+        style: const TextStyle(
+          fontFamily: 'Plus Jakarta Sans',
+          fontSize: 14,
+          fontWeight: FontWeight.w400,
+          height: 1.4,
+          color: Color(0xFF242424),
+        ),
+      );
+    }
+    
+    // Multiple lines - show as bullet points
+    final List<Widget> bulletPoints = [];
+    
+    for (String line in nonEmptyLines) {
+      // Remove the leading "- " if present
+      String cleanLine = line.trim();
+      if (cleanLine.startsWith('- ')) {
+        cleanLine = cleanLine.substring(2);
+      }
+      
+      bulletPoints.add(
+        Padding(
+          padding: const EdgeInsets.only(bottom: 8.0),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                margin: const EdgeInsets.only(top: 6, right: 8),
+                width: 6,
+                height: 6,
+                decoration: const BoxDecoration(
+                  color: Color(0xFF242424),
+                  shape: BoxShape.circle,
+                ),
+              ),
+              Expanded(
+                child: Text(
+                  cleanLine,
+                  style: const TextStyle(
+                    fontFamily: 'Plus Jakarta Sans',
+                    fontSize: 14,
+                    fontWeight: FontWeight.w400,
+                    height: 1.4,
+                    color: Color(0xFF242424),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: bulletPoints,
     );
   }
 }
