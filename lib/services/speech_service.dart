@@ -1,4 +1,4 @@
-import 'package:speech_to_text/speech_to_text.dart';
+// import 'package:speech_to_text/speech_to_text.dart';
 import 'package:flutter/material.dart';
 
 class SpeechService {
@@ -8,7 +8,7 @@ class SpeechService {
 
   SpeechService._internal();
 
-  final SpeechToText _speechToText = SpeechToText();
+  // final SpeechToText _speechToText = SpeechToText();
   bool _isListening = false;
   bool _isAvailable = false;
   bool _isInitialized = false;
@@ -62,17 +62,17 @@ class SpeechService {
     try {
       debugPrint('Starting speech recognition initialization in background...');
 
-      _isAvailable = await _speechToText.initialize(
-        onError: (error) {
-          debugPrint('Speech recognition error: ${error.errorMsg}');
-        },
-        onStatus: (status) {
-          debugPrint('Speech recognition status: $status');
-          if (status == 'done' || status == 'notListening') {
-            _isListening = false;
-          }
-        },
-      );
+      // _isAvailable = await _speechToText.initialize(
+      //   onError: (error) {
+      //     debugPrint('Speech recognition error: ${error.errorMsg}');
+      //   },
+      //   onStatus: (status) {
+      //     debugPrint('Speech recognition status: $status');
+      //     if (status == 'done' || status == 'notListening') {
+      //       _isListening = false;
+      //     }
+      //   },
+      // );
 
       _isInitialized = true;
       debugPrint('Speech recognition initialized: $_isAvailable');
@@ -105,7 +105,7 @@ class SpeechService {
     _isListening = true;
 
     // Fire-and-forget approach - don't wait for anything
-    _startListeningAsync();
+    // _startListeningAsync();
 
     return true;
   }
