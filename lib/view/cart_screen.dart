@@ -54,7 +54,7 @@ class CartScreen extends StatefulWidget {
 }
 
 class _CartScreenState extends State<CartScreen> {
-  int selectedCategoryIndex = 0; // 0 for Restaurant, 1 for Grocery, 2 for Pharmacy
+  int selectedCategoryIndex = 0; // 0 for Restaurant, 1 for Grocery, 2 for Pharmacy, 3 for Shopping
 
   @override
   void initState() {
@@ -135,6 +135,7 @@ class _CartScreenState extends State<CartScreen> {
           {'name': '🍕 Restaurant', 'count': categoryCounts['restaurant']},
           {'name': '🥑 Grocery', 'count': categoryCounts['grocery']},
           {'name': '💊 Pharmacy', 'count': categoryCounts['pharmacy']},
+          {'name': '🛒 Shopping', 'count': categoryCounts['shopping']},
         ];
 
         return Container(
@@ -221,6 +222,7 @@ class _CartScreenState extends State<CartScreen> {
     int foodCount = 0;
     int groceryCount = 0;
     int pharmacyCount = 0;
+    int shoppingCount = 0;
 
     if (state is CartLoaded && state.rawCartData != null) {
       for (final cartData in state.rawCartData!.data) {
@@ -229,7 +231,11 @@ class _CartScreenState extends State<CartScreen> {
           if (seller.storeTypeId == FoodCategory.food.value) {
             foodCount += seller.products.length;
           } else if (seller.storeTypeId == FoodCategory.grocery.value) {
-            groceryCount += seller.products.length;
+            if (cartData.storeCategoryId == FoodStoreCategoryId.shopping.value) {
+              shoppingCount += seller.products.length;
+            } else {
+              groceryCount += seller.products.length;
+            }
           } else if (seller.storeTypeId == FoodCategory.pharmacy.value) {
             pharmacyCount += seller.products.length;
           }
@@ -241,6 +247,7 @@ class _CartScreenState extends State<CartScreen> {
       'restaurant': foodCount,
       'grocery': groceryCount,
       'pharmacy': pharmacyCount,
+      'shopping': shoppingCount,
     };
   }
 
@@ -337,7 +344,7 @@ class _CartScreenState extends State<CartScreen> {
     }
 
     // Map category index to storeId: 0=Food(storeId=1), 1=Grocery(storeId=2)
-    int targetStoreId = categoryIndex == 0 ? FoodCategory.food.value : categoryIndex == 1 ? FoodCategory.grocery.value : FoodCategory.pharmacy.value;
+    int targetStoreId = categoryIndex == 0 ? FoodCategory.food.value : categoryIndex == 1 ? FoodCategory.grocery.value : categoryIndex == 2 ? FoodCategory.pharmacy.value : 4;
 
     // Find cart data with matching storeId
     UniversalCartData? matchingCartData;
@@ -347,6 +354,10 @@ class _CartScreenState extends State<CartScreen> {
       // Check if any seller in this cart has the target storeId
       for (final seller in cartData.sellers) {
         if (seller.storeTypeId == targetStoreId) {
+          matchingCartData = cartData;
+          matchingSeller = seller;
+          break;
+        }else if (targetStoreId == 4 && cartData.storeCategoryId == FoodStoreCategoryId.shopping.value) {
           matchingCartData = cartData;
           matchingSeller = seller;
           break;

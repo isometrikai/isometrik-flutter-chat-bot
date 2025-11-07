@@ -127,7 +127,7 @@ class CartBloc extends Bloc<CartEvent, CartState> {
     // Check all cart items for compatibility
     for (final existingCart in cartData) {
       // If store type ID is the same, check if store ID matches
-      if (existingCart.storeTypeId == event.storeTypeId) {
+      if (existingCart.storeTypeId == event.storeTypeId && existingCart.storeCategoryId == event.storeCategoryId) {
         if (existingCart.sellers.isNotEmpty) {
           // Check if any product in the cart has a different store ID
           for (final seller in existingCart.sellers) {

@@ -56,3 +56,24 @@ enum FoodCategory {
     );
   }
 }
+
+enum FoodStoreCategoryId {
+  food('634e50c3fd5d83948e00e745'),
+  grocery('634e537076e179f58008c0e5'),
+  pharmacy('634e525ae671ac4ee4016be7'),
+  healthCare('6507f939c2630000b000458d'),
+  shopping('636df238c8dcc5100f056ed8'),
+  services('63ac1c7322ec7895aa000935');
+
+  const FoodStoreCategoryId(this.value);
+  
+  final String value;
+  
+  // Create from integer value
+  static FoodStoreCategoryId fromValue(String value) {
+    return FoodStoreCategoryId.values.firstWhere(
+      (category) => category.value == value,
+      orElse: () => FoodStoreCategoryId.food, // default fallback
+    );
+  }
+}
