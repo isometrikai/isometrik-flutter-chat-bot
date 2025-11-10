@@ -15,7 +15,7 @@ class ChatHistoryBloc extends Bloc<ChatHistoryEvent, ChatHistoryState> {
   bool? _isFoodChat;
   bool? _isGroceryChat;
   bool? _isPharmacyChat;
-  
+  bool? _isShoppingChat;
   // Current search query
   String _currentQuery = '';
 
@@ -74,6 +74,7 @@ class ChatHistoryBloc extends Bloc<ChatHistoryEvent, ChatHistoryState> {
         isFoodChat: _isFoodChat,
         isGroceryChat: _isGroceryChat,
         isPharmacyChat: _isPharmacyChat,
+        isShoppingChat: _isShoppingChat,
         query: _currentQuery.isNotEmpty ? _currentQuery : null,
       );
       
@@ -109,6 +110,7 @@ class ChatHistoryBloc extends Bloc<ChatHistoryEvent, ChatHistoryState> {
         isFoodChat: _isFoodChat,
         isGroceryChat: _isGroceryChat,
         isPharmacyChat: _isPharmacyChat,
+        isShoppingChat: _isShoppingChat,
         query: _currentQuery.isNotEmpty ? _currentQuery : null,
       );
       
@@ -174,6 +176,7 @@ class ChatHistoryBloc extends Bloc<ChatHistoryEvent, ChatHistoryState> {
     _isFoodChat = null;
     _isGroceryChat = null;
     _isPharmacyChat = null;
+    _isShoppingChat = null;
     _currentQuery = '';
     
     // Set the appropriate filter based on category
@@ -186,6 +189,9 @@ class ChatHistoryBloc extends Bloc<ChatHistoryEvent, ChatHistoryState> {
         break;
       case '💊 Pharmacy':
         _isPharmacyChat = true;
+        break;
+      case '🛒 Shopping':
+        _isShoppingChat = true;
         break;
       case 'ALL':
       default:
@@ -204,6 +210,7 @@ class ChatHistoryBloc extends Bloc<ChatHistoryEvent, ChatHistoryState> {
         isFoodChat: _isFoodChat,
         isGroceryChat: _isGroceryChat,
         isPharmacyChat: _isPharmacyChat,
+        isShoppingChat: _isShoppingChat,
         query: _currentQuery.isNotEmpty ? _currentQuery : null,
       );
       Utility.closeProgressDialog();
@@ -239,6 +246,7 @@ class ChatHistoryBloc extends Bloc<ChatHistoryEvent, ChatHistoryState> {
         isFoodChat: _isFoodChat,
         isGroceryChat: _isGroceryChat,
         isPharmacyChat: _isPharmacyChat,
+        isShoppingChat: _isShoppingChat,
         query: _currentQuery.isNotEmpty ? _currentQuery : null,
       );
       // Utility.closeProgressDialog();

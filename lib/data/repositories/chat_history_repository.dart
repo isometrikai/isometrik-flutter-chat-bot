@@ -23,6 +23,7 @@ class ChatHistoryRepository {
     bool? isFoodChat,
     bool? isGroceryChat,
     bool? isPharmacyChat,
+    bool? isShoppingChat,
     String? query,
   }) async {
     
@@ -45,6 +46,9 @@ class ChatHistoryRepository {
     }
     if (isPharmacyChat == true) {
       queryParams['is_pharmacy_chat'] = 'true';
+    }
+    if (isShoppingChat == true) {
+      queryParams['is_shopping_chat'] = 'true';
     }
     
     final uri = Uri.parse('$baseUrl/v2/sessions/$userIds').replace(
