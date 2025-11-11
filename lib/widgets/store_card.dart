@@ -190,7 +190,7 @@ class StoreCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 12),
-            if (store.products.isNotEmpty)
+            if (store.products.isNotEmpty && (store.storeTypeId ?? store.type) != FoodCategory.services.value)
               SizedBox(
                 height: 113,
                 child: ListView.separated(

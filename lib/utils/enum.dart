@@ -42,7 +42,8 @@ enum WidgetEnum {
 enum FoodCategory {
   food(1),
   grocery(2),
-  pharmacy(6);
+  pharmacy(6),
+  services(25);
 
   const FoodCategory(this.value);
   
