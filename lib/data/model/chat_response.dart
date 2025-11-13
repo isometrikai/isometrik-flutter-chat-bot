@@ -340,8 +340,9 @@ class Product {
   final String? storeId;
   final bool? storeIsOpen;
   final bool? instock;
-  final bool? variantCount;// For Grocery Only
+  final bool? variantCount;// For Grocery, Services Only
   final bool? isPrimary;
+  final String? serviceRequireTime;
 
   const Product({
     // required this.id,
@@ -364,6 +365,7 @@ class Product {
      this.instock,
      this.variantCount,
      this.isPrimary,
+     this.serviceRequireTime,
   });
 
   double get finalPrice => finalPriceList.finalPrice;
@@ -406,6 +408,7 @@ class Product {
         instock: json['instock'] ?? true,
         variantCount: json['variantCount'] ?? false,
         isPrimary: json['isPrimary'] ?? true,
+        serviceRequireTime: json['serviceRequireTime']?.toString() ?? '',
     );
   }
 
@@ -431,6 +434,7 @@ class Product {
       'instock': instock,
       'variantCount': variantCount,
       'isPrimary': isPrimary,
+      'serviceRequireTime': serviceRequireTime,
     };
   }
 }

@@ -5,7 +5,6 @@ import 'package:chat_bot/data/model/chat_response.dart' as chat;
 import 'package:chat_bot/utils/enum.dart';
 import 'package:chat_bot/view/customization_summary_screen.dart';
 import 'package:chat_bot/view/grocery_customization_screen.dart';
-import 'package:chat_bot/view/product_customization_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:chat_bot/data/model/subcategory_products_response.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -15,11 +14,8 @@ import 'package:chat_bot/services/callback_manage.dart';
 import '../bloc/grocery_menu/grocery_menu_bloc.dart';
 import '../bloc/grocery_menu/grocery_menu_event.dart';
 import '../bloc/grocery_menu/grocery_menu_state.dart';
-import '../utils/asset_helper.dart';
 import 'package:chat_bot/data/model/universal_cart_response.dart';
 import '../utils/text_styles.dart';
-
-import '../widgets/black_toast_view.dart';
 
 class GroceriesMenuScreen extends StatefulWidget {
   final chat.WidgetAction? actionData;
@@ -71,6 +67,8 @@ class _GroceriesMenuScreenState extends State<GroceriesMenuScreen> {
       SubCategoryProductsRequested(
         storeId: widget.actionData?.storeId ?? '',
         subCategoryId: widget.actionData?.storeCategoryId ?? '',
+        storeTypeId: widget.actionData?.storeTypeId,
+        storeCategoryName: widget.actionData?.storeCategoryName ?? widget.actionData?.title,
       ),
     );
   }
@@ -184,9 +182,10 @@ class _GroceriesMenuScreenState extends State<GroceriesMenuScreen> {
           // const SizedBox(height: 16),
 
           // Category Filter Chips
-          _buildCategoryFilterChips(subCategoryProducts),
-          const SizedBox(height: 16),
-
+          if (widget.actionData?.storeTypeId != FoodCategory.services.value) ...[
+             _buildCategoryFilterChips(subCategoryProducts),
+            const SizedBox(height: 16),
+          ],
           // Products Grid
           _buildProductsGrid(subCategoryProducts),
         ],
@@ -263,7 +262,7 @@ class _GroceriesMenuScreenState extends State<GroceriesMenuScreen> {
       // Large devices (like iPhone Pro Max, tablets)
       itemWidth = (availableWidth - 20) / 2; // 20px spacing
       final imageHeight = itemWidth * 0.9;
-      itemHeight = imageHeight + 112; // Fixed content height
+      itemHeight = imageHeight + 112 + (widget.actionData?.storeTypeId == FoodCategory.services.value ? 38 : 0); // Fixed content height
       spacing = 12.0;
     }
 
@@ -360,6 +359,7 @@ class _GroceriesMenuScreenState extends State<GroceriesMenuScreen> {
                 instock: product.instock ?? true,
                 storeIsOpen: widget.actionData?.storeIsOpen ?? true,
                 storeType: product.storeTypeId ?? -111,
+                serviceRequireTime: menuItem.serviceRequireTime,
                 onQuantityChanged: (
                   productId,
                   centralProductId,
@@ -534,6 +534,7 @@ class _GroceriesMenuScreenState extends State<GroceriesMenuScreen> {
       productId: p.childProductId,
       centralProductId: p.parentProductId,
       isCustomizable: p.variantCount ?? false,
+      serviceRequireTime: p.serviceRequireTime,
     );
   }
 
@@ -573,11 +574,12 @@ class _GroceriesMenuScreenState extends State<GroceriesMenuScreen> {
   dynamic _getAddToCartOnId(String productId) {
     try {
       // Find all products with matching ID and get the last one's addToCartOnId
-      final matchingProducts = cartBloc.cartData
-          .expand((cart) => cart.sellers)
-          .expand((seller) => seller.products)
-          .where((product) => product.id == productId)
-          .toList();
+      final matchingProducts =
+          cartBloc.cartData
+              .expand((cart) => cart.sellers)
+              .expand((seller) => seller.products)
+              .where((product) => product.id == productId)
+              .toList();
 
       if (matchingProducts.isEmpty) {
         return null;
@@ -594,11 +596,16 @@ class _GroceriesMenuScreenState extends State<GroceriesMenuScreen> {
   dynamic _getExistingProductQuantity(String productId, num addToCartOnId) {
     try {
       // Find all products with matching ID and addToCartOnId
-      final matchingProducts = cartBloc.cartData
-          .expand((cart) => cart.sellers)
-          .expand((seller) => seller.products)
-          .where((product) => product.id == productId && product.addToCartOnId == addToCartOnId)
-          .toList();
+      final matchingProducts =
+          cartBloc.cartData
+              .expand((cart) => cart.sellers)
+              .expand((seller) => seller.products)
+              .where(
+                (product) =>
+                    product.id == productId &&
+                    product.addToCartOnId == addToCartOnId,
+              )
+              .toList();
 
       if (matchingProducts.isEmpty) {
         return null;
@@ -839,6 +846,7 @@ class _MenuItem {
   final String? productId;
   final String? centralProductId;
   final bool isCustomizable;
+  final String? serviceRequireTime;
 
   const _MenuItem({
     required this.title,
@@ -850,5 +858,6 @@ class _MenuItem {
     this.productId,
     this.centralProductId,
     this.isCustomizable = false,
+    this.serviceRequireTime,
   });
 }

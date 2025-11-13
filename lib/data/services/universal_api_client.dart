@@ -41,14 +41,14 @@ class UniversalApiClient {
   Future<Map<String, String>> _buildAppHeaders() async {
     final token = TokenManager.instance.userToken;
     return {
-    'currencycode':'AED',
-    // 'Content-Length':'391',
-    'Content-Type':'application/json',
-    'language':'en',
-    'lan':'en',
-    'currencysymbol': '2K8u2KU=',
-    'platform':'1',
-    'ipAddress':'192.168.1.3',
+      'currencycode': 'AED',
+      // 'Content-Length':'391',
+      'Content-Type': 'application/json',
+      'language': 'en',
+      'lan': 'en',
+      'currencysymbol': '2K8u2KU=',
+      'platform': '1',
+      'ipAddress': '192.168.1.3',
       'Authorization': token ?? '',
     };
   }
@@ -73,7 +73,10 @@ class UniversalApiClient {
   }
 
   /// Build grocery headers with dynamic storeId
-  Future<Map<String, String>> buildGroceryHeadersWithStoreId(String storeId, String storeCategoryId) async {
+  Future<Map<String, String>> buildGroceryHeadersWithStoreId(
+    String storeId,
+    String storeCategoryId,
+  ) async {
     final token = TokenManager.instance.userToken;
     return {
       'currencysymbol': '2K8u2KU=',
@@ -89,6 +92,31 @@ class UniversalApiClient {
       'size': '5',
       'storeCategoryId': storeCategoryId,
     };
+  }
+
+  Future<Map<String, String>> buildServiceGenieHeaders({
+    required String storeCategoryId,
+  }) async {
+    final token = TokenManager.instance.userToken;
+    final headers = <String, String>{
+      'User-Agent':
+          'Eazy Life/2.0.1 (com.eazy.customerapp; build:64; iOS 26.0.1)',
+      'Accept-Encoding': 'gzip',
+      'Accept-Language': 'en-IN;q=1.0',
+      'platform': '1',
+      'language': 'en',
+      'filterType': '1',
+      'logintype': '1',
+      'searchType': '1',
+      'storeCategoryId': storeCategoryId,
+      'Accept': 'application/json',
+    };
+
+    if (token != null && token.isNotEmpty) {
+      headers['Authorization'] = token;
+    }
+
+    return headers;
   }
 
   /// Handle token refresh when unauthorized

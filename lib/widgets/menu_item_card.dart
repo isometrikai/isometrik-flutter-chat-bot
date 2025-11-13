@@ -28,6 +28,7 @@ class MenuItemCard extends StatelessWidget {
   final bool storeIsOpen;
   final int storeType;
   final bool isFromChatHistory;
+  final String? serviceRequireTime;
 
   MenuItemCard({
     super.key,
@@ -53,6 +54,7 @@ class MenuItemCard extends StatelessWidget {
     required this.storeIsOpen,
     required this.storeType,
     this.isFromChatHistory = false,
+    this.serviceRequireTime,
   });
 
   @override
@@ -101,6 +103,20 @@ class MenuItemCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 9),
+             SizedBox(
+              // height: 38,
+              child: Text(
+                serviceRequireTime ?? '',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: AppTextStyles.productTitle.copyWith(
+                  color: const Color(0xFF979797),
+                  fontWeight: FontWeight.w400,
+                  fontSize: 11,
+                ),
+              ),
+            ),
+            const SizedBox(height: 4),
             SizedBox(
               height: 38,
               child: Text(

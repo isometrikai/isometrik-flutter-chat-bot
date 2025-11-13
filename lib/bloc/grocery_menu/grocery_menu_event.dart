@@ -18,12 +18,21 @@ class GroceryMenuRefreshed extends GroceryMenuEvent {
 class SubCategoryProductsRequested extends GroceryMenuEvent {
   final String storeId;
   final String subCategoryId;
+  final int? storeTypeId;
+  final String? storeCategoryName;
 
   const SubCategoryProductsRequested({
     required this.storeId,
     required this.subCategoryId,
+    this.storeTypeId,
+    this.storeCategoryName,
   });
 
   @override
-  List<Object?> get props => [storeId, subCategoryId];
+  List<Object?> get props => [
+    storeId,
+    subCategoryId,
+    storeTypeId,
+    storeCategoryName,
+  ];
 }

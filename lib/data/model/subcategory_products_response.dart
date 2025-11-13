@@ -34,9 +34,13 @@ class SubCategoryProductsResponse {
       bannerImageUrl: json['bannerImageUrl']?.toString() ?? '',
       websiteImageUrl: json['websiteImageUrl']?.toString() ?? '',
       websiteBannerImageUrl: json['websiteBannerImageUrl']?.toString() ?? '',
-      categoryData: (json['categoryData'] as List<dynamic>?)
-          ?.map((item) => CategoryData.fromJson(item as Map<String, dynamic>))
-          .toList() ?? [],
+      categoryData:
+          (json['categoryData'] as List<dynamic>?)
+              ?.map(
+                (item) => CategoryData.fromJson(item as Map<String, dynamic>),
+              )
+              .toList() ??
+          [],
       offers: (json['offers'] as List<dynamic>?) ?? [],
       type: json['type'] ?? 0,
       seqId: json['seqId'] ?? 0,
@@ -84,9 +88,14 @@ class CategoryData {
       thirdCategoryId: json['thirdCategoryId']?.toString() ?? '',
       subCategoryName: json['subCategoryName']?.toString() ?? '',
       catName: json['catName']?.toString() ?? '',
-      subCategory: (json['subCategory'] as List<dynamic>?)
-          ?.map((item) => SubCategoryProduct.fromJson(item as Map<String, dynamic>))
-          .toList() ?? [],
+      subCategory:
+          (json['subCategory'] as List<dynamic>?)
+              ?.map(
+                (item) =>
+                    SubCategoryProduct.fromJson(item as Map<String, dynamic>),
+              )
+              .toList() ??
+          [],
     );
   }
 
@@ -123,14 +132,17 @@ class SubCategoryProduct {
   final bool allowOrderOutOfStock;
   final String storeCategoryId;
   final FinalPriceList finalPriceList;
-  final MOQData moqData;
   final String currencySymbol;
   final String currency;
   final int adult;
   final String storeId;
+  final int storeTypeId;
+  final bool storeIsOpen;
   final String brandName;
   final bool isManufacturing;
   final int numberOfDaysManufacture;
+  final String serviceRequireTime;
+  final String supplierName;
 
   SubCategoryProduct({
     required this.outOfStock,
@@ -152,14 +164,17 @@ class SubCategoryProduct {
     required this.allowOrderOutOfStock,
     required this.storeCategoryId,
     required this.finalPriceList,
-    required this.moqData,
     required this.currencySymbol,
     required this.currency,
     required this.adult,
     required this.storeId,
+    required this.storeTypeId,
+    required this.storeIsOpen,
     required this.brandName,
     required this.isManufacturing,
     required this.numberOfDaysManufacture,
+    required this.serviceRequireTime,
+    required this.supplierName,
   });
 
   factory SubCategoryProduct.fromJson(Map<String, dynamic> json) {
@@ -172,9 +187,13 @@ class SubCategoryProduct {
       maxQuantityPerUser: json['maxQuantityPerUser'] ?? 1,
       b2cminimumOrderQty: json['b2cminimumOrderQty'] ?? 1,
       unitId: json['unitId']?.toString() ?? '',
-      variantData: (json['variantData'] as List<dynamic>?)
-          ?.map((item) => VariantData.fromJson(item as Map<String, dynamic>))
-          .toList() ?? [],
+      variantData:
+          (json['variantData'] as List<dynamic>?)
+              ?.map(
+                (item) => VariantData.fromJson(item as Map<String, dynamic>),
+              )
+              .toList() ??
+          [],
       availableQuantity: json['availableQuantity'] ?? 0,
       images: json['images']?.toString() ?? '',
       offers: (json['offers'] as Map<String, dynamic>?) ?? {},
@@ -184,15 +203,23 @@ class SubCategoryProduct {
       prescriptionRequired: json['prescriptionRequired'] ?? false,
       allowOrderOutOfStock: json['allowOrderOutOfStock'] ?? false,
       storeCategoryId: json['storeCategoryId']?.toString() ?? '',
-      finalPriceList: FinalPriceList.fromJson((json['finalPriceList'] ?? {}) as Map<String, dynamic>),
-      moqData: MOQData.fromJson((json['MOQData'] ?? {}) as Map<String, dynamic>),
+      finalPriceList: FinalPriceList.fromJson(
+        (json['finalPriceList'] ?? {}) as Map<String, dynamic>,
+      ),
       currencySymbol: json['currencySymbol']?.toString() ?? '',
       currency: json['currency']?.toString() ?? '',
       adult: json['adult'] ?? 0,
       storeId: json['storeId']?.toString() ?? '',
+      storeTypeId:
+          json['storeTypeId'] is int
+              ? json['storeTypeId'] as int
+              : int.tryParse(json['storeTypeId']?.toString() ?? '') ?? 8,
+      storeIsOpen: json['storeIsOpen'] ?? true,
       brandName: json['brandName']?.toString() ?? '',
       isManufacturing: json['isManufacturing'] ?? false,
       numberOfDaysManufacture: json['numberOfDaysManufacture'] ?? 0,
+      serviceRequireTime: json['serviceRequireTime']?.toString() ?? '',
+      supplierName: json['supplierName']?.toString() ?? '',
     );
   }
 
@@ -217,14 +244,17 @@ class SubCategoryProduct {
       'allowOrderOutOfStock': allowOrderOutOfStock,
       'storeCategoryId': storeCategoryId,
       'finalPriceList': finalPriceList.toJson(),
-      'MOQData': moqData.toJson(),
       'currencySymbol': currencySymbol,
       'currency': currency,
       'adult': adult,
       'storeId': storeId,
+      'storeTypeId': storeTypeId,
+      'storeIsOpen': storeIsOpen,
       'brandName': brandName,
       'isManufacturing': isManufacturing,
       'numberOfDaysManufacture': numberOfDaysManufacture,
+      'serviceRequireTime': serviceRequireTime,
+      'supplierName': supplierName,
     };
   }
 
@@ -243,11 +273,12 @@ class SubCategoryProduct {
       unitId: unitId,
       customizable: variantCount,
       storeCategoryId: storeCategoryId,
-      storeTypeId: 8, // Grocery store type
+      storeTypeId: storeTypeId,
       storeId: storeId,
-      storeIsOpen: true, // Default to true
+      storeIsOpen: storeIsOpen,
       instock: !outOfStock,
       variantCount: variantCount,
+      serviceRequireTime: serviceRequireTime.isNotEmpty ? serviceRequireTime : null,
     );
   }
 }
@@ -257,10 +288,7 @@ class VariantData {
   final String value;
   final String name;
 
-  VariantData({
-    required this.value,
-    required this.name,
-  });
+  VariantData({required this.value, required this.name});
 
   factory VariantData.fromJson(Map<String, dynamic> json) {
     return VariantData(
@@ -270,10 +298,7 @@ class VariantData {
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      'value': value,
-      'name': name,
-    };
+    return {'value': value, 'name': name};
   }
 }
 
