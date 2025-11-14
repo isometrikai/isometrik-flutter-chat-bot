@@ -27,11 +27,11 @@ class HawkSearchService {
     required double latitude,
     required double longitude,
   }) {
-    // _clientGuid = clientGuid;
-    // _indexName = indexName;
-    // _visitId = visitId;
-    // _visitorId = visitorId;
-    // _searchApiUrl = searchApiUrl;
+    _clientGuid = clientGuid;
+    _indexName = indexName;
+    _visitId = visitId;
+    _visitorId = visitorId;
+    _searchApiUrl = searchApiUrl;
     _latitude = latitude;
     _longitude = longitude;
   }
