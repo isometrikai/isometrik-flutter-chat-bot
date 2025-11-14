@@ -34,7 +34,7 @@ class ApiService {
     required String baseApiUrl,
   }) {
     _baseApiUrl = baseApiUrl.isNotEmpty 
-        ? baseApiUrl 
+        ? removeTrailingSlash(baseApiUrl) 
         : 'https://apisuperapp-staging.eazy-online.com';
     // Configure AuthService (legacy support)
     AuthService.instance.configure(
@@ -89,6 +89,16 @@ class ApiService {
       userId: userId,
     );
   }
+
+  static String removeTrailingSlash(String url) {
+  // Check if the URL ends with a slash
+  if (url.endsWith('/')) {
+    // Remove the last character (the slash)
+    return url.substring(0, url.length - 1);
+  }
+  // Return the URL unchanged if no trailing slash
+  return url;
+}
 
 }
 

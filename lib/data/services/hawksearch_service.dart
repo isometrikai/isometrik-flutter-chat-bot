@@ -72,7 +72,7 @@ class HawkSearchService {
     }
     };
 
-    final ApiResult res = await client.post('/api/v2/search', body);
+    final ApiResult res = await client.post('/search', body);
     if (!res.isSuccess || res.data == null) {
       return [];
     }

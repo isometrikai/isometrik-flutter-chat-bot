@@ -163,7 +163,7 @@ class PlatformService {
             indexName: 'hitechnology.20250821.105131',
             visitId: '3c6b9339-c602-4af9-b454-0ec0df067181',
             visitorId: '47daf829-b5df-4358-83ea-207aa4eaae15',
-            searchApiUrl: 'https://searchapi-dev.hawksearch.net',
+            searchApiUrl: 'https://searchapi-dev.hawksearch.net/api/v2',
             baseApiUrl: 'https://api-stage.eazylife-online.com',
           );
       }
