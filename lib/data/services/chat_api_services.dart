@@ -21,6 +21,11 @@ class ChatApiServices {
   String? _location;
   double? _longitude;
   double? _latitude;
+  String? _clientGuid;
+  String? _indexName;
+  String? _visitId;
+  String? _visitorId;
+  String? _searchApiUrl;
 
   late final ApiClient _chatClient = UniversalApiClient.instance.chatClient;
   late final ApiClient _appClient = UniversalApiClient.instance.appClient;
@@ -48,6 +53,11 @@ class ChatApiServices {
     _location = location;
     _longitude = longitude;
     _latitude = latitude;
+    _clientGuid = clientGuid;
+    _indexName = indexName;
+    _visitId = visitId;
+    _visitorId = visitorId;
+    _searchApiUrl = searchApiUrl;
   }
 
   /// Initialize the API service
@@ -72,6 +82,11 @@ class ChatApiServices {
       'device_id': fingerPrintId,
       'query': message,
       'session_id': sessionId,
+      'client_guid': _clientGuid ?? '',
+      'index_name': _indexName ?? '',
+      'visit_id': _visitId ?? '',
+      'visitor_id': _visitorId ?? '',
+      'search_api_url': _searchApiUrl ?? '',
       'location': {
         'latitude': (latitude == 0.0 ? (_latitude ?? 0.0) : latitude).toString(),
         'longitude': (longitude == 0.0 ? (_longitude ?? 0.0) : longitude).toString(),

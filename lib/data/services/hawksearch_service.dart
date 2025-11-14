@@ -9,13 +9,13 @@ class HawkSearchService {
   static final HawkSearchService instance = HawkSearchService._internal();
 
   // Configuration parameters
-  String _clientGuid = '528a7d439df44f2b9457342b7b865be2';
-  String _indexName = 'hitechnology.20250821.105131';
-  String _visitId = '3c6b9339-c602-4af9-b454-0ec0df067181';
-  String _visitorId = '47daf829-b5df-4358-83ea-207aa4eaae15';
-  String _searchApiUrl = 'https://searchapi-dev.hawksearch.net';
-  double _latitude = 25.276987;
-  double _longitude = 55.296249;
+  String _clientGuid = '';
+  String _indexName = '';
+  String _visitId = '';
+  String _visitorId = '';
+  String _searchApiUrl = '';
+  double _latitude = -1;
+  double _longitude = -1;
 
   /// Configure HawkSearch service with required parameters
   void configure({

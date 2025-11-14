@@ -4,6 +4,10 @@ import 'package:chat_bot/data/services/chat_api_services.dart';
 import 'package:chat_bot/data/services/hawksearch_service.dart';
 
 class ApiService {
+  static String _baseApiUrl = 'https://apisuperapp-staging.eazy-online.com';
+
+  static String get baseApiUrl => _baseApiUrl;
+
   static Future<void> initialize() async {
     await AuthService.instance.initialize();
     await ChatApiServices.instance.initialize();
@@ -27,7 +31,11 @@ class ApiService {
     required String visitId,
     required String visitorId,
     required String searchApiUrl,
+    required String baseApiUrl,
   }) {
+    _baseApiUrl = baseApiUrl.isNotEmpty 
+        ? baseApiUrl 
+        : 'https://apisuperapp-staging.eazy-online.com';
     // Configure AuthService (legacy support)
     AuthService.instance.configure(
       chatBotId: chatBotId,

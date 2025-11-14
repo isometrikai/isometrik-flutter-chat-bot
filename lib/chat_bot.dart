@@ -36,6 +36,7 @@ class ChatBot {
     required String visitId,
     required String visitorId,
     required String searchApiUrl,
+    required String baseApiUrl,
   }) {
     print('chatBotId: $chatBotId');
     print('appSecret: $appSecret');
@@ -54,6 +55,7 @@ class ChatBot {
     print('visitId: $visitId');
     print('visitorId: $visitorId');
     print('searchApiUrl: $searchApiUrl');
+    print('baseApiUrl: $baseApiUrl');
     isTutorialShown = needToShowTutorial;
     ApiService.configure(
       chatBotId: chatBotId,
@@ -73,6 +75,7 @@ class ChatBot {
       visitId: visitId,
       visitorId: visitorId,
       searchApiUrl: searchApiUrl,
+      baseApiUrl: baseApiUrl,
     );
   }
 

@@ -139,6 +139,7 @@ class PlatformService {
         visitId: config['visitId'] ?? '',
         visitorId: config['visitorId'] ?? '',
         searchApiUrl: config['searchApiUrl'] ?? '',
+        baseApiUrl: config['baseApiUrl'] ?? '',
       );
 
       print('✅ ApiService configured successfully');
@@ -150,10 +151,10 @@ class PlatformService {
             chatBotId: '1476',
             appSecret: "SFMyNTY.g3QAAAACZAAEZGF0YXQAAAADbQAAAAlhY2NvdW50SWRtAAAAGDY2YzQ2YWVhN2E2MDI5Yjk5MTNiMzIxOG0AAAAIa2V5c2V0SWRtAAAAJGFiZGFkNDQyLTA4YzktNDE4Ny1iYjk4LWUwMTAzYmY2YWYzOG0AAAAJcHJvamVjdElkbQAAACQ2Zjg4NzAwMi0yYzQ3LTQ4Y2EtYTQwNS0wZjk2NWVlNDAyNjFkAAZzaWduZWRuBgAUskFvkQE.esNFHT-JxzVtFpxylbJ8ik1lRZ-c75JjuCA0toa4C5M",
             licenseKey: "lic-IMKMqJdO3e2HO+6qDxctvESxA+HkoLIThG9",
-            userId: "68c129ebbdaeb6000f7ed53c",
+            userId: "68e8bd01f79a4c0013cab22d",
             name: 'Chintu',
             timestamp: '2025-07-28T12:30:00Z',
-            userToken: 'Bearer eyJhbGciOiJSU0EtT0FFUCIsImN0eSI6IkpXVCIsImVuYyI6IkExMjhHQ00iLCJ0eXAiOiJKV1QifQ.QJA2s5lyqVrBDWROAVE3i8lNY5ktoVhezWBgXhbBoH2MxQ8xaSBEerlsd169io0LM8VVXYjRa3bvA0n-GFVvopTK2UNOvrZ0zPaS0JcmduTgn3U1oAm-GCGL52p-ikyFWZ6exTbdKLYVQHmoAeeynFfVZ_XkJ-f5heMRL3qm5qE.1bbVFV3keuReUZcg.s6if4-aB356mRncR0PNM6DlZ1G-y-QgJraG76QD3XTxUVbUarYAewh47-LyWAY_mVMwk5blG9IqddnsbcayJPlO556rw387IEQs3QHGZ-ogEvuAJTri-VpM0a-EFBYg-q2_RFMiumN2ptxyJP6Ofa2lrNIhfdkks1wK6qqzxUq2kato8p-oi5zJ7dsWzhX6Nn9VMiDkks9UNzCGrDLASznxapqV_K3IJvX6U66LMbSRguscQvK03X8AquPHIJio5G8E8_RbZl3AmujfzqAbF17Lp1hZyJvYqaGxzC14dBm7O-GedzNZQzxZZwGR2vZU49x7xWuvpc6sou3mu8NlyP2ODOe3cYOuyLSggkLZ-xKOBvADvJBe1NM9clfj7kBRiGJZwLvUq5IIjbkBldYOrM2kebAVxGoXnwzlygiw_pL-Tv3NDHAqrcvq7JdSIGHKDjnamP01PS_8PsTZG5_u9Yn7jpyF3LXpLNZDMJqCp7wlK2_iB8SuvImm01nD1KbAfCVlZO-VLt5eOhPhrxfmd0EW3-6aev8vpGyJaFWjccunNxe2ZIbyItRWhhwshidWqu115O0bZMP55ch9v3kctc30GX7YoYNLNAU000O7BTb8mco1dfTpx6RHYBSSpLNHbrrLMbBLooHz23ziO41MEU3A16eSk632vla-JbD3dB0G_enhQ5SBqRXydiGt0NUyJn5ZFuJL7-qTvvV5S2_vQeioyHVBBrGRJRpzaoRPgbFJXrRVlS1-1lhknyTfWeoOuE9VSc1P0O3cPd-nVRtgXQ-kEkSDbbNR_3q98NGy0eU2siZOJ6xSe1uewdtODcWKjw2v9m7QdJOyuWrbGWpee9x9CzL_wItapW0mLK0tsWBH1ReAoL--nPRMbgDXN2IRgFNT2e7SByspEbX21Ch_fELIavZsGR2BTJs6zbhV1DaZL9mNTXO8ELVtoLdJ4SGMngTHonIYQMG8XSEiR4slVerEnTSrcSPYZZDzUCudYj3cusZhnSJX4McoqGQCR9q_fDeWYwXxAowGJP-2bM9PAZEp2fmJ1r45ozoTg2uOJTgBVDY1sME6eFcWfvIjSofalQFjJHEqjf6q3Q3-bZe0R_wMM0c2iHTP7I7jE5O8kdMveD6Nx1qFV9Gxllxkr_AcTul1v54LC47yzDaeAxsCxbRUwCOxYPrH18UpRVsCp2Ax-Mno54jYZKq9ym6hKYGNo7H1riVPlUr6GTdVgKtrPXsoPr2fbGfgv0H9ykGpT3Wkf_0j4xHdaOEmYFozbhJRQKD7W4fBpAzCYGII6-0yUadreZEkI3Lpk2hhR00rih7OngNNAv2hbwc-GzNd1X7XCzW8hMGv85eR1ZmHYPxT3hH_MKqXPVqE-k-X8pNYSfFE-eFRvKvAcRO9NhxmvNtgQD1z6TFscTWwBbYBj9bw0IbYOlfxnzn4s1VIOwZSUrMzvQB2qI92xYSU6y5pRWmvR2JW7KMfx9IyRyZ5bOqtSMcbBVPsUZQD7iNxOZUSeqv9jn05ibqfzukb9jqF0fR_qo1AabubMgBozfs4Agr1nV14Ug59LCv3RgA1cWlB07A0ATAobO9SUf1zHGZrltCk6qnw8ywF_pWl9g5iCsz17eI56EBKtf6cxkMpo4hPwJGXg56Vv15DgBvNQOZq_ns5nSYJ0Ka2KGrfHcleOMgolonOrcDPq1WCLvjO7X7tC4_kD1mELgq0eyNEXmHD9FaJqaT9YIx0qhM-W4OcCm85pmRx7VsRJrJ4xGEBLi8irI56z84_6kxABDm8iLYPgqvM-1_WAVK0OJ4zFTfs.ZgQl50MvmqDci7fK3d4XAw',
+            userToken: 'Bearer eyJhbGciOiJSU0EtT0FFUCIsImN0eSI6IkpXVCIsImVuYyI6IkExMjhHQ00iLCJ0eXAiOiJKV1QifQ.h4GiSjVO4_JzMV1_65jVxJcsv8uFSfdpIxKR_p2UQe3V4tLxQZOhGf1E48r_d1CehWSxa7usfvP2zOQ9VqEPvrv8Xlobb6JSh38ADXuVd93IZG-VeK7fAagacuKXS9O7wwCyw4rpz-kYEnQgK90nqWWq65bE_zlajuER3DeTdVk.78wh4UHvvTPKL2l5.5HIEF9eQO6Hvq4L31Kcrm8-DnrJPHdHxvTHPL6G67s5UNuc396-Rj5RSE6TTPF2M5hFJUpZdiFVaiFjy-VyQ1Iqsa8ITUF9WErT1vTU5UB3WjdjFvpySSBCJjNNbWAfZiputyAvlQakO6i-bjxd2Jhasj-a7ab0v5vDxwHkoJB_kNUhRR5suor_JXo7Os22_FJTEELg0zCNrmSRVNAoAv0e7KuTKCCohyiVt7hGOhws5FjUNY1LXLOmz3INz66KqdHS7t-g3oiGhmjAU2Bv65ZvXN3bo7KbiHeJ2IblKPkCapa-XZOgZ5vhRyHVVWjxvg4yP73sPGoOVta4mODU0qDktamvND13N1xwRm1DFSGZLyAP6PROfHum_GXJ0C4ne-_QYz1amNNTWNIPBNP5I65r4Y8U_gXGChdTA76Ls4ifUx9yZbXppYTATg3ug36fP9XjJLASosU_aSTeIpRImouhmLZc_jUq8ApJnZuNt1Zqa4kzjWy0BS5pscYVCK0QXhiawE1lm66ETLWQiV4VKN2fDgrQABRgMQ8TLdD2CZmGlSIWna9RyAAjRxWlg8fluVNJ6LJa54fXLdTBo0__SA9ZBNfZwrmtK30osAmwbMr6r9OPCYZB_0TI3ccbCBe-uPsDinjc0Lik2yu5HpMuycHbPCtvS0Xw4-01QWGwQdkM5l2go61lZPkKKsRnb2U4cb4V-Ex2RpCts8Ho3mL7VsXYLYNHUJtB8m6fuaHT2NWwTGY2oex57-Uyy-YqGvuSwoWMU2RtM6z1zT9wC4KCbZ7buEfj4uww6bf40E7TGbwkmMiIiOYqm-wCVR-_EY_ZrZsE28IDpGfezcjVvdwFPB55_EnXvg2i_V9JkBQzqolohTz8VcKO39KYYYaduUqEce8MpgsgS6c2rn_7dTxKK8co7sy25t5HgzBM_5YLzmh_8rGG3hQND468d8BFDK_JETCjB7QVX5lzjd_R83rPgHvBdjI26ldzugeseTQNwJyf1HLWW6qP7X52_OoLwKumuLi-Wca79ywHbL26bYnaYd7s_j43rrp6WUORi1BcF9iHzY_ueIH2Hr_WtGgNMcf7eGabAe7idDoTVuVxMnugBHzhfAZ7X82i2GRErp3CtDntKP_a2AYgF7ojfMDW0HJu7aUx1e7ocwLpvuFrROqAAAiX6yxW8WIgAqPmvzY6_Y0x2dO_ynbmWVtaUEyyGvqgpeIHYGNafUOJQkKDCpXSuL2ZnNDLkrUs2E9xHuM1FRMl8WQddURIP7iTWrTIn8cwvD7tmUxIAiLhKuxViwCF17gwqNCBhPP2kdoYxjsA21ErYsHspLiiKsvaiWoxNs8IXi1vpuWXhpp3vDNjR8puU4PPLg7XZQV_SBbfGqPRgDX5e6ZZ3xHZdrMk0DykOSc4p94Mrgh8IeuDG1al3Td21sZhZnX3a4dEw3-ttuppBWTRvzRuLRr_Lgjy7eVPoiKUNwn0HTa02Trox-IUKmJpCL4T5plJvxw4oyM-iNi1UthId9rYBoMkB-cR912gTmf_usosYbrCDLNpM4M15MfB0ZUqz5Y8wfziNpYoXoqAan58PSOFL2RQKS5SpucOxw0EvfcD4BHDZNYojN7Jn--2OY__n4EPY-h83xZlKmeyV6aPvLFL2flderKDJM26U6h0vLgobGEDeEtRrs625SDsYXyr1wPnhxo3_7t2OO4L8SKW6LmaCAUqzuGS6tZ9ShHhhZrymQP5YUmZezTa2CZFjyexwoj6VfD7RXgu3.D8qXSkDpEC1ewKzA0k2YNA',
             location: 'Dubai Marina',
             isProduction: false,
             latitude: 25.276987,
@@ -163,6 +164,7 @@ class PlatformService {
             visitId: '3c6b9339-c602-4af9-b454-0ec0df067181',
             visitorId: '47daf829-b5df-4358-83ea-207aa4eaae15',
             searchApiUrl: 'https://searchapi-dev.hawksearch.net',
+            baseApiUrl: 'https://api-stage.eazylife-online.com',
           );
       }
     }
