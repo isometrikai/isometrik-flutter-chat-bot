@@ -25,6 +25,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:chat_bot/utils/asset_path.dart';
+import 'package:flutter_native_timezone/flutter_native_timezone.dart';
 import 'package:lottie/lottie.dart';
 import 'package:shimmer/shimmer.dart';
 import '../services/callback_manage.dart';
@@ -499,7 +500,8 @@ class _ChatScreenState extends State<ChatScreen> {
                     widget.type == WidgetEnum.choose_card.value ||
                     widget.type == WidgetEnum.cash_on_delivery.value ||
                     widget.type == WidgetEnum.order_tracking.value ||
-                    widget.type == WidgetEnum.order_details.value,
+                    widget.type == WidgetEnum.order_details.value ||
+                    widget.type == WidgetEnum.scheduled_later.value,
               )
               .toList();
     });
@@ -2663,6 +2665,33 @@ class _ChatScreenBody extends StatelessWidget {
           }
         }
 
+        for (final widget in latestActionWidgets.where(
+          (w) => w.type == WidgetEnum.scheduled_later.value,
+        )) {
+          for (final action in widget.addPayment) {
+            actionButtons.add(
+              _buildActionButton(
+                text: action.buttonText,
+                onTap:
+                    isApiLoading
+                        ? () {}
+                        : () async {
+                          String timezone = await FlutterNativeTimezone.getLocalTimezone();
+
+                          Map<String, dynamic> obj = {
+                          's_id': action.storeId,
+                          'timezone': timezone,
+                          'lat': '13.02868',
+                          'long': '77.58952'
+                        };
+
+                        OrderService().triggerScheduledLaterScreenOpen(obj);
+                        },
+              ),
+            );
+          }
+        }
+
         for (final widgetType in [
           WidgetEnum.add_more.value,
           WidgetEnum.proceed_to_checkout.value,
@@ -3696,7 +3725,7 @@ class _ChatScreenBody extends StatelessWidget {
     ChatWidget? productsWidget,
   ) {
     return Container(
-      height: isFromHistory ? 185 : 222,
+      height: isFromHistory ? 187 : 232,
       // color: Colors.red,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,

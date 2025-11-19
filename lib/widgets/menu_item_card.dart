@@ -102,7 +102,7 @@ class MenuItemCard extends StatelessWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 9),
+            SizedBox(height: serviceRequireTime != null ? 4 : 0),
              SizedBox(
               // height: 38,
               child: Text(
@@ -116,7 +116,7 @@ class MenuItemCard extends StatelessWidget {
                 ),
               ),
             ),
-            const SizedBox(height: 4),
+             const SizedBox(height: 4),
             SizedBox(
               height: 38,
               child: Text(

@@ -125,4 +125,9 @@ class ChatBot {
     print('openAddressSummary: $addressSummary');
     OrderService().triggerAddressSummary(addressSummary);
   }
+
+  static void openScheduledLaterScreen(Map<String, dynamic> obj) {
+    print('openScheduledLaterScreen: $obj');
+    OrderService().triggerScheduledLaterScreenOpen(obj);
+  }
 }

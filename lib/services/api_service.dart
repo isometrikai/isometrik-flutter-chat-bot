@@ -54,7 +54,7 @@ class ApiService {
       indexName: indexName,
       visitId: visitId,
       visitorId: visitorId,
-      searchApiUrl: searchApiUrl,
+      searchApiUrl: removeTrailingSlash(searchApiUrl),
     );
 
     // Configure ComprehensiveApiService (new system)
@@ -71,7 +71,7 @@ class ApiService {
       indexName: indexName,
       visitId: visitId,
       visitorId: visitorId,
-      searchApiUrl: searchApiUrl,
+      searchApiUrl: removeTrailingSlash(searchApiUrl),
     );
 
     // Configure HawkSearchService
@@ -80,7 +80,7 @@ class ApiService {
       indexName: indexName,
       visitId: visitId,
       visitorId: visitorId,
-      searchApiUrl: searchApiUrl,
+      searchApiUrl: removeTrailingSlash(searchApiUrl),
       latitude: latitude ?? 0.0,
       longitude: longitude ?? 0.0,
     );

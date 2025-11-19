@@ -7,9 +7,11 @@ class OrderService {
   Function(Map<String, dynamic>)? onOrderNow;
   Function()? onAddCardOpen;
   Function()? onAddressScreenOpen;
+  Function()? onTriggerScheduledLaterScreenOpen;
   Function(Map<String, dynamic>)? onStoreNow;
   Function(Map<String, dynamic>)? onOrderDetails;
   Function(Map<String, dynamic>)? onOrderTracking;
+  Function(Map<String, dynamic>)? onScheduledLaterScreenOpen;
   Function()? onChatDismiss; // Add dismiss callback
   Function(bool)? onCartUpdate; // Add cart update callback
   Function(String)? onStripePayment; // Add stripe payment callback
@@ -38,6 +40,10 @@ class OrderService {
 
   void setOrderTrackingCallback(Function(Map<String, dynamic>) orderTracking) {
     onOrderTracking = orderTracking;
+  }
+
+  void setScheduledLaterScreenOpenCallback(Function(Map<String, dynamic>) scheduledLaterScreenOpen) {
+    onScheduledLaterScreenOpen = scheduledLaterScreenOpen;
   }
 
   // Add dismiss callback setter
@@ -76,6 +82,10 @@ class OrderService {
 
   void triggerAddressScreenOpen() {
     onAddressScreenOpen?.call();
+  }
+
+  void triggerScheduledLaterScreenOpen(Map<String, dynamic> obj) {
+    onTriggerScheduledLaterScreenOpen?.call();
   }
 
   void triggerOrderDetails(Map<String, dynamic> orderDetails) {
@@ -124,5 +134,7 @@ class OrderService {
     onAddressSummary = null; // Clear address summary callback
     onAddressScreenOpen = null; // Clear address screen open callback
     onSendMessage = null; // Clear send message callback // CHANGE CALLBACK
+    onScheduledLaterScreenOpen = null; 
+    onTriggerScheduledLaterScreenOpen = null; // Clear scheduled later screen open callback
   }
 }
