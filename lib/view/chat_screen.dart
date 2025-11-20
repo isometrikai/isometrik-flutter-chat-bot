@@ -1544,29 +1544,21 @@ class _ChatScreenBody extends StatelessWidget {
                                     ),
                                   );
                                   }else {
-                                     Map<String, dynamic> obj = {
-                          's_id': 'action.storeId',
-                          'timezone': 'timezone staff',
-                          'lat': '13.02868',
-                          'long': '77.58952'
-                        };
-
-                        OrderService().triggerSelectStaffScreenOpen(obj);
-                                  //   Navigator.push(
-                                  //   context,
-                                  //   MaterialPageRoute(
-                                  //     builder:
-                                  //         (context) => BlocProvider(
-                                  //           create: (context) => CartBloc(),
-                                  //           child: CartScreen(
-                                  //             needToEndThisChat: needToEndThisChat,
-                                  //             onCheckout: (message) {
-                                  //               onSendMessage(message);
-                                  //             },
-                                  //           ),
-                                  //         ),
-                                  //   ),
-                                  // );
+                                    Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder:
+                                          (context) => BlocProvider(
+                                            create: (context) => CartBloc(),
+                                            child: CartScreen(
+                                              needToEndThisChat: needToEndThisChat,
+                                              onCheckout: (message) {
+                                                onSendMessage(message);
+                                              },
+                                            ),
+                                          ),
+                                    ),
+                                  );
                                   }
                                 },
                       ),
