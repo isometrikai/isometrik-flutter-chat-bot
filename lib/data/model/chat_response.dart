@@ -78,6 +78,7 @@ class ChatResponse {
   List<ChatWidget> get orderTrackingWidgets => getWidgetsByType('order_tracking');
   List<ChatWidget> get orderDetailsWidgets => getWidgetsByType('order_details');
   List<ChatWidget> get scheduledLaterWidgets => getWidgetsByType('scheduled_later');
+  List<ChatWidget> get selectStaffWidgets => getWidgetsByType('select_staff');
   @override
   String toString() {
     return 'ChatResponse(text: $text, requestId: $requestId, widgets: ${widgets.length})';
@@ -129,6 +130,7 @@ class ChatWidget {
   bool get isAddAddressWidget => type == WidgetEnum.add_address.value;
   bool get isAddPaymentWidget => type == WidgetEnum.add_payment.value;
   bool get isScheduledLaterWidget => type == WidgetEnum.scheduled_later.value;
+  bool get isSelectStaffWidget => type == WidgetEnum.select_staff.value;
   bool get isOrderSummaryWidget => type == WidgetEnum.order_summary.value;
   bool get isOrderConfirmedWidget => type == WidgetEnum.order_confirmed.value;
   bool get isOrderTrackingWidget => type == WidgetEnum.order_tracking.value;
@@ -230,6 +232,11 @@ class ChatWidget {
 
   // Get scheduled_later actions (converted to models)
   List<WidgetAction> get scheduledLater => isScheduledLaterWidget
+      ? widget.map((e) => WidgetAction.fromJson(e as Map<String, dynamic>)).toList()
+      : [];
+
+  // Get select_staff actions (converted to models)
+  List<WidgetAction> get selectStaff => isSelectStaffWidget
       ? widget.map((e) => WidgetAction.fromJson(e as Map<String, dynamic>)).toList()
       : [];
 

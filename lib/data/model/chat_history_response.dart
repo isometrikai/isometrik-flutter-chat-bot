@@ -130,5 +130,6 @@ class ChatHistoryMessageResponse {
   List<ChatWidget> get orderDetailsWidgets => getWidgetsByType('order_details');
   List<ChatWidget> get proceedToCheckoutWidgets => getWidgetsByType('proceed_to_checkout');
   List<ChatWidget> get scheduledLaterWidgets => getWidgetsByType('scheduled_later');
+  List<ChatWidget> get selectStaffWidgets => getWidgetsByType('select_staff');
 }
 

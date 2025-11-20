@@ -130,4 +130,9 @@ class ChatBot {
     print('openScheduledLaterScreen: $obj');
     OrderService().triggerScheduledLaterScreenOpen(obj);
   }
+
+  static void openSelectStaffScreen(Map<String, dynamic> obj) {
+    print('openSelectStaffScreen: $obj');
+    OrderService().triggerSelectStaffScreenOpen(obj);
+  }
 }

@@ -7,16 +7,20 @@ class OrderService {
   Function(Map<String, dynamic>)? onOrderNow;
   Function()? onAddCardOpen;
   Function()? onAddressScreenOpen;
-  Function()? onTriggerScheduledLaterScreenOpen;
+  Function(Map<String, dynamic>)? onTriggerScheduledLaterScreenOpen;
+  Function(Map<String, dynamic>)? onTriggerSelectStaffScreenOpen;
   Function(Map<String, dynamic>)? onStoreNow;
   Function(Map<String, dynamic>)? onOrderDetails;
   Function(Map<String, dynamic>)? onOrderTracking;
-  Function(Map<String, dynamic>)? onScheduledLaterScreenOpen;
+  // Function(Map<String, dynamic>)? onScheduledLaterScreenOpen;
+  // Function(Map<String, dynamic>)? onSelectStaffScreenOpen;
   Function()? onChatDismiss; // Add dismiss callback
   Function(bool)? onCartUpdate; // Add cart update callback
   Function(String)? onStripePayment; // Add stripe payment callback
   Function(String)? onAddressSummary; // Add order summary callback
   Function(String)? onSendMessage; // Add send message callback // CHANGE CALLBACK
+  Function(String)? onSelectSchedule; // Add select schedule callback
+  Function(String)? onSelectStaff; // Add select staff callback
 
   void setProductCallback(Function(Map<String, dynamic>) callback) {
     onOrderNow = callback;
@@ -42,9 +46,13 @@ class OrderService {
     onOrderTracking = orderTracking;
   }
 
-  void setScheduledLaterScreenOpenCallback(Function(Map<String, dynamic>) scheduledLaterScreenOpen) {
-    onScheduledLaterScreenOpen = scheduledLaterScreenOpen;
-  }
+  // void setScheduledLaterScreenOpenCallback(Function(Map<String, dynamic>) scheduledLaterScreenOpen) {
+  //   onScheduledLaterScreenOpen = scheduledLaterScreenOpen;
+  // }
+
+  // void setSelectStaffScreenOpenCallback(Function(Map<String, dynamic>) selectStaffScreenOpen) {
+  //   onSelectStaffScreenOpen = selectStaffScreenOpen;
+  // }
 
   // Add dismiss callback setter
   void setDismissCallback(Function() callback) {
@@ -62,6 +70,14 @@ class OrderService {
 
   void setAddressSummaryCallback(Function(String) callback) {
     onAddressSummary = callback;
+  }
+
+  void setSelectScheduleCallback(Function(String) callback) {
+    onSelectSchedule = callback;
+  }
+
+  void setSelectStaffCallback(Function(String) callback) {
+    onSelectStaff = callback;
   }
 
    void setSendMessageCallback(Function(String) callback) { // CHANGE CALLBACK
@@ -85,7 +101,11 @@ class OrderService {
   }
 
   void triggerScheduledLaterScreenOpen(Map<String, dynamic> obj) {
-    onTriggerScheduledLaterScreenOpen?.call();
+    onTriggerScheduledLaterScreenOpen?.call(obj);
+  }
+
+  void triggerSelectStaffScreenOpen(Map<String, dynamic> obj) {
+    onTriggerSelectStaffScreenOpen?.call(obj);
   }
 
   void triggerOrderDetails(Map<String, dynamic> orderDetails) {
@@ -122,6 +142,13 @@ class OrderService {
     onSendMessage?.call(message);
   }
 
+  void triggerSelectSchedule(String schedule) {
+    onSelectSchedule?.call(schedule);
+  }
+
+  void triggerSelectStaff(String staff) {
+    onSelectStaff?.call(staff);
+  }
 
   void clearCallback() {
     onOrderNow = null;
@@ -134,7 +161,11 @@ class OrderService {
     onAddressSummary = null; // Clear address summary callback
     onAddressScreenOpen = null; // Clear address screen open callback
     onSendMessage = null; // Clear send message callback // CHANGE CALLBACK
-    onScheduledLaterScreenOpen = null; 
+    // onScheduledLaterScreenOpen = null; // Clear scheduled later screen open callback
     onTriggerScheduledLaterScreenOpen = null; // Clear scheduled later screen open callback
+    // onSelectStaffScreenOpen = null; // Clear select staff screen open callback
+    onTriggerSelectStaffScreenOpen = null; // Clear select staff screen open callback
+    onSelectSchedule = null; // Clear select schedule callback
+    onSelectStaff = null; // Clear select staff callback
   }
 }

@@ -501,7 +501,8 @@ class _ChatScreenState extends State<ChatScreen> {
                     widget.type == WidgetEnum.cash_on_delivery.value ||
                     widget.type == WidgetEnum.order_tracking.value ||
                     widget.type == WidgetEnum.order_details.value ||
-                    widget.type == WidgetEnum.scheduled_later.value,
+                    widget.type == WidgetEnum.scheduled_later.value ||
+                    widget.type == WidgetEnum.select_staff.value,
               )
               .toList();
     });
@@ -603,6 +604,20 @@ class _ChatScreenState extends State<ChatScreen> {
       if (mounted) {
         print('ChatScreen: Address summary received - $addressSummary');
         _sendMessage('I have added a new address.\n$addressSummary');
+      }
+    });
+
+    OrderService().setSelectScheduleCallback((String schedule) {
+      if (mounted) {
+        print('ChatScreen: Select schedule received - $schedule');
+        _sendMessage('I have selected a schedule.\n$schedule');
+      }
+    });
+
+    OrderService().setSelectStaffCallback((String staff) {
+      if (mounted) {
+        print('ChatScreen: Select staff received - $staff');
+        _sendMessage('I have selected a staff.\n$staff');
       }
     });
 
@@ -2686,6 +2701,32 @@ class _ChatScreenBody extends StatelessWidget {
                         };
 
                         OrderService().triggerScheduledLaterScreenOpen(obj);
+                        },
+              ),
+            );
+          }
+        }
+
+        for (final widget in latestActionWidgets.where(
+          (w) => w.type == WidgetEnum.select_staff.value,
+        )) {
+          for (final action in widget.selectStaff) {
+            actionButtons.add(
+              _buildActionButton(
+                text: action.buttonText,
+                onTap:
+                    isApiLoading
+                        ? () {}
+                        : () async {
+
+                          Map<String, dynamic> obj = {
+                          's_id': action.storeId,
+                          'timezone': 'timezone',
+                          'lat': '13.02868',
+                          'long': '77.58952'
+                        };
+
+                        OrderService().triggerSelectStaffScreenOpen(obj);
                         },
               ),
             );

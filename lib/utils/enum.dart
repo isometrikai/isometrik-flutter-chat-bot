@@ -10,6 +10,7 @@ enum WidgetEnum {
   add_address,
   add_payment,
   scheduled_later,
+  select_staff,
   payment,
   order_summary,
   order_confirmed,
