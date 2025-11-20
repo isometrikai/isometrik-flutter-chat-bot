@@ -1544,21 +1544,29 @@ class _ChatScreenBody extends StatelessWidget {
                                     ),
                                   );
                                   }else {
-                                    Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder:
-                                          (context) => BlocProvider(
-                                            create: (context) => CartBloc(),
-                                            child: CartScreen(
-                                              needToEndThisChat: needToEndThisChat,
-                                              onCheckout: (message) {
-                                                onSendMessage(message);
-                                              },
-                                            ),
-                                          ),
-                                    ),
-                                  );
+                                     Map<String, dynamic> obj = {
+                          's_id': 'action.storeId',
+                          'timezone': 'timezone',
+                          'lat': '13.02868',
+                          'long': '77.58952'
+                        };
+
+                        OrderService().triggerScheduledLaterScreenOpen(obj);
+                                  //   Navigator.push(
+                                  //   context,
+                                  //   MaterialPageRoute(
+                                  //     builder:
+                                  //         (context) => BlocProvider(
+                                  //           create: (context) => CartBloc(),
+                                  //           child: CartScreen(
+                                  //             needToEndThisChat: needToEndThisChat,
+                                  //             onCheckout: (message) {
+                                  //               onSendMessage(message);
+                                  //             },
+                                  //           ),
+                                  //         ),
+                                  //   ),
+                                  // );
                                   }
                                 },
                       ),
