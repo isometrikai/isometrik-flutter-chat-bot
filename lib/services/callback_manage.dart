@@ -7,12 +7,12 @@ class OrderService {
   Function(Map<String, dynamic>)? onOrderNow;
   Function()? onAddCardOpen;
   Function()? onAddressScreenOpen;
-  Function(Map<String, dynamic>)? onTriggerScheduledLaterScreenOpen;
+  // Function(Map<String, dynamic>)? onTriggerScheduledLaterScreenOpen;
   Function(Map<String, dynamic>)? onTriggerSelectStaffScreenOpen;
   Function(Map<String, dynamic>)? onStoreNow;
   Function(Map<String, dynamic>)? onOrderDetails;
   Function(Map<String, dynamic>)? onOrderTracking;
-  // Function(Map<String, dynamic>)? onScheduledLaterScreenOpen;
+  Function(Map<String, dynamic>)? onScheduledLaterScreenOpen;
   // Function(Map<String, dynamic>)? onSelectStaffScreenOpen;
   Function()? onChatDismiss; // Add dismiss callback
   Function(bool)? onCartUpdate; // Add cart update callback
@@ -46,9 +46,9 @@ class OrderService {
     onOrderTracking = orderTracking;
   }
 
-  // void setScheduledLaterScreenOpenCallback(Function(Map<String, dynamic>) scheduledLaterScreenOpen) {
-  //   onScheduledLaterScreenOpen = scheduledLaterScreenOpen;
-  // }
+  void setScheduledLaterScreenOpenCallback(Function(Map<String, dynamic>) scheduledLaterScreenOpen) {
+    onScheduledLaterScreenOpen = scheduledLaterScreenOpen;
+  }
 
   // void setSelectStaffScreenOpenCallback(Function(Map<String, dynamic>) selectStaffScreenOpen) {
   //   onSelectStaffScreenOpen = selectStaffScreenOpen;
@@ -101,7 +101,7 @@ class OrderService {
   }
 
   void triggerScheduledLaterScreenOpen(Map<String, dynamic> obj) {
-    onTriggerScheduledLaterScreenOpen?.call(obj);
+    onScheduledLaterScreenOpen?.call(obj);
   }
 
   void triggerSelectStaffScreenOpen(Map<String, dynamic> obj) {
@@ -161,8 +161,8 @@ class OrderService {
     onAddressSummary = null; // Clear address summary callback
     onAddressScreenOpen = null; // Clear address screen open callback
     onSendMessage = null; // Clear send message callback // CHANGE CALLBACK
-    // onScheduledLaterScreenOpen = null; // Clear scheduled later screen open callback
-    onTriggerScheduledLaterScreenOpen = null; // Clear scheduled later screen open callback
+    onScheduledLaterScreenOpen = null; // Clear scheduled later screen open callback
+    // onTriggerScheduledLaterScreenOpen = null; // Clear scheduled later screen open callback
     // onSelectStaffScreenOpen = null; // Clear select staff screen open callback
     onTriggerSelectStaffScreenOpen = null; // Clear select staff screen open callback
     onSelectSchedule = null; // Clear select schedule callback
