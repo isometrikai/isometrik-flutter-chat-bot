@@ -1546,12 +1546,12 @@ class _ChatScreenBody extends StatelessWidget {
                                   }else {
                                      Map<String, dynamic> obj = {
                           's_id': 'action.storeId',
-                          'timezone': 'timezone',
+                          'timezone': 'timezone staff',
                           'lat': '13.02868',
                           'long': '77.58952'
                         };
 
-                        OrderService().triggerScheduledLaterScreenOpen(obj);
+                        OrderService().triggerSelectStaffScreenOpen(obj);
                                   //   Navigator.push(
                                   //   context,
                                   //   MaterialPageRoute(
