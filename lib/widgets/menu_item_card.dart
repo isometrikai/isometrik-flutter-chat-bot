@@ -90,16 +90,18 @@ class MenuItemCard extends StatelessWidget {
                           child: const ColoredBox(color: Color(0xFFF5F5F5)),
                         ),
                 ),
-                Positioned(
-                  left: 8,
-                  top: 8,
-                  child: SvgPicture.asset(
-                    AssetPath.get(isVeg ? 'images/ic_Veg.svg' : 'images/ic_NonVeg.svg'),
-                    width: 14,
-                    height: 14,
-                    fit: BoxFit.contain,
+                if (storeType == FoodCategory.grocery.value) ...[
+                  Positioned(
+                    left: 8,
+                    top: 8,
+                    child: SvgPicture.asset(
+                      AssetPath.get(isVeg ? 'images/ic_Veg.svg' : 'images/ic_NonVeg.svg'),
+                      width: 14,
+                      height: 14,
+                      fit: BoxFit.contain,
+                    ),
                   ),
-                ),
+                ],
               ],
             ),
             SizedBox(height: serviceRequireTime != null ? 4 : 0),

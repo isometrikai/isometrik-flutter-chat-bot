@@ -2547,7 +2547,9 @@ class _ChatScreenBody extends StatelessWidget {
                           if (action.storeTypeId ==
                                   FoodCategory.grocery.value ||
                               action.storeTypeId ==
-                                  FoodCategory.pharmacy.value) {
+                                  FoodCategory.pharmacy.value ||
+                              action.storeTypeId ==
+                                  FoodCategory.services.value) {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
