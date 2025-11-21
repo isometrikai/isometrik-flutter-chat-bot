@@ -2720,10 +2720,10 @@ class _ChatScreenBody extends StatelessWidget {
                         : () async {
 
                           Map<String, dynamic> obj = {
-                          's_id': action.storeId,
-                          'timezone': 'timezone',
-                          'lat': '13.02868',
-                          'long': '77.58952'
+                          'startTime': '',
+                          'storeId': '',
+                          'categoryId': '',
+                          'bookingType': ''
                         };
 
                         OrderService().triggerSelectStaffScreenOpen(obj);
