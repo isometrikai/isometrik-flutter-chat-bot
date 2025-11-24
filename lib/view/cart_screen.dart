@@ -136,6 +136,7 @@ class _CartScreenState extends State<CartScreen> {
           {'name': '🥑 Grocery', 'count': categoryCounts['grocery']},
           {'name': '💊 Pharmacy', 'count': categoryCounts['pharmacy']},
           {'name': '🛒 Shopping', 'count': categoryCounts['shopping']},
+          {'name': '💄 Services', 'count': categoryCounts['services']},
         ];
 
         return Container(
@@ -223,6 +224,7 @@ class _CartScreenState extends State<CartScreen> {
     int groceryCount = 0;
     int pharmacyCount = 0;
     int shoppingCount = 0;
+    int servicesCount = 0;
 
     if (state is CartLoaded && state.rawCartData != null) {
       for (final cartData in state.rawCartData!.data) {
@@ -238,6 +240,8 @@ class _CartScreenState extends State<CartScreen> {
             }
           } else if (seller.storeTypeId == FoodCategory.pharmacy.value) {
             pharmacyCount += seller.products.length;
+          } else if (seller.storeTypeId == FoodCategory.services.value) {
+            servicesCount += seller.products.length;
           }
         }
       }
@@ -248,6 +252,7 @@ class _CartScreenState extends State<CartScreen> {
       'grocery': groceryCount,
       'pharmacy': pharmacyCount,
       'shopping': shoppingCount,
+      'services': servicesCount,
     };
   }
 
@@ -343,21 +348,41 @@ class _CartScreenState extends State<CartScreen> {
       return null;
     }
 
-    // Map category index to storeId: 0=Food(storeId=1), 1=Grocery(storeId=2)
-    int targetStoreId = categoryIndex == 0 ? FoodCategory.food.value : categoryIndex == 1 ? FoodCategory.grocery.value : categoryIndex == 2 ? FoodCategory.pharmacy.value : 4;
-
     // Find cart data with matching storeId
     UniversalCartData? matchingCartData;
     Seller? matchingSeller;
     
     for (final cartData in state.rawCartData!.data) {
-      // Check if any seller in this cart has the target storeId
+      // Check if any seller in this cart matches the selected category
       for (final seller in cartData.sellers) {
-        if (seller.storeTypeId == targetStoreId) {
-          matchingCartData = cartData;
-          matchingSeller = seller;
-          break;
-        }else if (targetStoreId == 4 && cartData.storeCategoryId == FoodStoreCategoryId.shopping.value) {
+        bool matches = false;
+        
+        // 0: Restaurant (Food) - storeTypeId = 1
+        if (categoryIndex == 0 && seller.storeTypeId == FoodCategory.food.value) {
+          matches = true;
+        }
+        // 1: Grocery - storeTypeId = 2, but NOT shopping
+        else if (categoryIndex == 1 && 
+                 seller.storeTypeId == FoodCategory.grocery.value &&
+                 cartData.storeCategoryId != FoodStoreCategoryId.shopping.value) {
+          matches = true;
+        }
+        // 2: Pharmacy - storeTypeId = 6
+        else if (categoryIndex == 2 && seller.storeTypeId == FoodCategory.pharmacy.value) {
+          matches = true;
+        }
+        // 3: Shopping - storeTypeId = 2 AND storeCategoryId = shopping
+        else if (categoryIndex == 3 && 
+                 seller.storeTypeId == FoodCategory.grocery.value &&
+                 cartData.storeCategoryId == FoodStoreCategoryId.shopping.value) {
+          matches = true;
+        }
+        // 4: Services - storeTypeId = 25
+        else if (categoryIndex == 4 && seller.storeTypeId == FoodCategory.services.value) {
+          matches = true;
+        }
+        
+        if (matches) {
           matchingCartData = cartData;
           matchingSeller = seller;
           break;

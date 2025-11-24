@@ -54,7 +54,7 @@ class _ChatHistoryContentState extends State<_ChatHistoryContent> {
   DateTime? _lastQueryAt;
 
   // final List<String> _categories = ['All', 'Food', 'Grocery', 'Pharmacy'];
-  final List<String> _categories = ['All', '🍕 Restaurant', '🥑 Grocery', '💊 Pharmacy', '🛒 Shopping'];
+  final List<String> _categories = ['All', '🍕 Restaurant', '🥑 Grocery', '💊 Pharmacy', '🛒 Shopping', '💄 Services'];
 
   @override
   void initState() {
