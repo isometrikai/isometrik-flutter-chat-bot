@@ -45,6 +45,7 @@ class OrderService {
   }
 
   void setScheduledLaterScreenOpenCallback(Function(Map<String, dynamic>) scheduledLaterScreenOpen) {
+    print('setScheduledLaterScreenOpenCallback: $scheduledLaterScreenOpen');
     onScheduledLaterScreenOpen = scheduledLaterScreenOpen;
   }
 
@@ -71,6 +72,7 @@ class OrderService {
   }
 
   void setSelectScheduleCallback(Function(String) callback) {
+    print('setSelectScheduleCallback: $callback');
     onSelectSchedule = callback;
   }
 
@@ -99,6 +101,7 @@ class OrderService {
   }
 
   void triggerScheduledLaterScreenOpen(Map<String, dynamic> obj) {
+    print('triggerScheduledLaterScreenOpen: $obj');
     onScheduledLaterScreenOpen?.call(obj);
   }
 
@@ -141,6 +144,7 @@ class OrderService {
   }
 
   void triggerSelectSchedule(String schedule) {
+    print('triggerSelectSchedule: $schedule');
     onSelectSchedule?.call(schedule);
   }
 
