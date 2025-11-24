@@ -501,7 +501,7 @@ class _ChatScreenState extends State<ChatScreen> {
                     widget.type == WidgetEnum.cash_on_delivery.value ||
                     widget.type == WidgetEnum.order_tracking.value ||
                     widget.type == WidgetEnum.order_details.value ||
-                    widget.type == WidgetEnum.scheduled_later.value ||
+                    widget.type == WidgetEnum.schedule_later.value ||
                     widget.type == WidgetEnum.select_staff.value,
               )
               .toList();
@@ -2683,9 +2683,9 @@ class _ChatScreenBody extends StatelessWidget {
         }
 
         for (final widget in latestActionWidgets.where(
-          (w) => w.type == WidgetEnum.scheduled_later.value,
+          (w) => w.type == WidgetEnum.schedule_later.value,
         )) {
-          for (final action in widget.addPayment) {
+          for (final action in widget.scheduledLater) {
             actionButtons.add(
               _buildActionButton(
                 text: action.buttonText,

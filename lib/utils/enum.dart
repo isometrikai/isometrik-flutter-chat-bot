@@ -9,7 +9,7 @@ enum WidgetEnum {
   proceed_to_checkout,
   add_address,
   add_payment,
-  scheduled_later,
+  schedule_later,
   select_staff,
   payment,
   order_summary,
