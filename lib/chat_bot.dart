@@ -128,11 +128,11 @@ class ChatBot {
 
   static void openScheduledLaterScreen(Map<String, dynamic> obj) {
     print('openScheduledLaterScreen: $obj');
-    OrderService().triggerSelectSchedule('obj');
+    OrderService().triggerSelectSchedule(obj);
   }
 
   static void openSelectStaffScreen(Map<String, dynamic> obj) {
     print('openSelectStaffScreen: $obj');
-    OrderService().triggerSelectStaff('obj');
+    OrderService().triggerSelectStaff(obj);
   }
 }

@@ -17,8 +17,8 @@ class OrderService {
   Function(String)? onStripePayment; // Add stripe payment callback
   Function(String)? onAddressSummary; // Add order summary callback
   Function(String)? onSendMessage; // Add send message callback // CHANGE CALLBACK
-  Function(String)? onSelectSchedule; // Add select schedule callback
-  Function(String)? onSelectStaff; // Add select staff callback
+  Function(Map<String, dynamic>)? onSelectSchedule; // Add select schedule callback
+  Function(Map<String, dynamic>)? onSelectStaff; // Add select staff callback
 
   void setProductCallback(Function(Map<String, dynamic>) callback) {
     onOrderNow = callback;
@@ -71,12 +71,12 @@ class OrderService {
     onAddressSummary = callback;
   }
 
-  void setSelectScheduleCallback(Function(String) callback) {
+  void setSelectScheduleCallback(Function(Map<String, dynamic>) callback) {
     print('setSelectScheduleCallback: $callback');
     onSelectSchedule = callback;
   }
 
-  void setSelectStaffCallback(Function(String) callback) {
+  void setSelectStaffCallback(Function(Map<String, dynamic>) callback) {
     onSelectStaff = callback;
   }
 
@@ -143,12 +143,12 @@ class OrderService {
     onSendMessage?.call(message);
   }
 
-  void triggerSelectSchedule(String schedule) {
+  void triggerSelectSchedule(Map<String, dynamic> schedule) {
     print('triggerSelectSchedule: $schedule');
     onSelectSchedule?.call(schedule);
   }
 
-  void triggerSelectStaff(String staff) {
+  void triggerSelectStaff(Map<String, dynamic> staff) {
     onSelectStaff?.call(staff);
   }
 
