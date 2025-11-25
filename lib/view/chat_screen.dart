@@ -2696,7 +2696,8 @@ class _ChatScreenBody extends StatelessWidget {
                           Map<String, dynamic> obj = {
                           's_id': action.storeId,
                           'lat': '13.02868',
-                          'long': '77.58952'
+                          'long': '77.58952',
+                          'storeIsOpen': action.storeIsOpen ?? true
                         };
 
                         OrderService().triggerScheduledLaterScreenOpen(obj);
