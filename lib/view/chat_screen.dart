@@ -25,7 +25,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:chat_bot/utils/asset_path.dart';
-import 'package:flutter_native_timezone/flutter_native_timezone.dart';
 import 'package:lottie/lottie.dart';
 import 'package:shimmer/shimmer.dart';
 import '../services/callback_manage.dart';
@@ -2693,11 +2692,9 @@ class _ChatScreenBody extends StatelessWidget {
                     isApiLoading
                         ? () {}
                         : () async {
-                          String timezone = await FlutterNativeTimezone.getLocalTimezone();
 
                           Map<String, dynamic> obj = {
                           's_id': action.storeId,
-                          'timezone': timezone,
                           'lat': '13.02868',
                           'long': '77.58952'
                         };
