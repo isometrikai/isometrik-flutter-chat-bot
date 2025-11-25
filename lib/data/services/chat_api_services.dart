@@ -76,6 +76,7 @@ class ChatApiServices {
     bool isLoggedIn = false,
     double longitude = 0.0,
     double latitude = 0.0,
+    String staffId = "",
   }) async {
     final body = {
       'user_id': _userId,
@@ -95,7 +96,8 @@ class ChatApiServices {
         'name': _name ?? '',
         'timestamp': _timestamp ?? '',
         'location': _location ?? '',
-      }
+      },
+      'staff_id': staffId,
     };
 
     // Match existing endpoint used elsewhere

@@ -15,6 +15,7 @@ class ChatService {
     bool isLoggedIn = false,
     double longitude = 0.0,
     double latitude = 0.0,
+    String staffId = "",
   }) {
     return ChatApiServices.instance.sendChatMessage(
       message: message,
@@ -24,6 +25,7 @@ class ChatService {
       isLoggedIn: isLoggedIn,
       longitude: longitude,
       latitude: latitude,
+      staffId: staffId,
     );
   }
 

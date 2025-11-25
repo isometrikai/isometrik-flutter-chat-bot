@@ -24,6 +24,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
         isLoggedIn: event.isLoggedIn,
         longitude: double.parse(event.longitude),
         latitude: double.parse(event.latitude),
+        staffId: event.staffId,
       );
       if (chat != null) {
         emit(ChatLoaded(chat));

@@ -61,7 +61,8 @@ class _ChatScreenState extends State<ChatScreen> {
   final FocusNode _messageFocusNode = FocusNode();
   Set<String> _selectedOptionMessages = {};
   String? _pendingMessage;
-  
+  String? _scheduleLaterStaffId;
+
   List<ChatWidget> _latestActionWidgets = []; // Track latest action widgets
   int _totalCartCount = 0; // Track total cart count
   List<ChatMessage> messages = [];
@@ -128,7 +129,7 @@ class _ChatScreenState extends State<ChatScreen> {
     }
   }
 
-  void _sendMessage(String text) {
+  void _sendMessage(String text, [String? scheduleLaterStaffId]) {
     if (text.trim().isEmpty) return;
 
     // Prepare: hide stores/products from the last bot message if present
@@ -147,6 +148,7 @@ class _ChatScreenState extends State<ChatScreen> {
         ),
       );
       _pendingMessage = text;
+      _scheduleLaterStaffId = scheduleLaterStaffId;
     });
 
     _messageController.clear();
@@ -158,6 +160,7 @@ class _ChatScreenState extends State<ChatScreen> {
   void _clearPendingMessage() {
     setState(() {
       _pendingMessage = null;
+      _scheduleLaterStaffId = null;
     });
   }
 
@@ -609,7 +612,8 @@ class _ChatScreenState extends State<ChatScreen> {
     OrderService().setSelectScheduleCallback((Map<String, dynamic> schedule) {
       if (mounted) {
         print('ChatScreen: Select schedule received - $schedule');
-        _sendMessage('I have selected a schedule.\n$schedule');
+        _scheduleLaterStaffId = schedule['serviceRequestedTime'];
+        _sendMessage('I have selected a schedule.\n', schedule['staff_id']);
       }
     });
 
@@ -762,6 +766,7 @@ class _ChatScreenState extends State<ChatScreen> {
       _selectedOptionMessages.clear();
       _initializeSession(true);
       _pendingMessage = null;
+      _scheduleLaterStaffId = null;
       _latestActionWidgets.clear(); // Clear action widgets when restarting
       _cartBloc.add(CartFetchRequested(needToShowLoader: false));
     });
@@ -867,6 +872,7 @@ class _ChatScreenState extends State<ChatScreen> {
         });
       },
       pendingMessage: _pendingMessage,
+      scheduleLaterStaffId: _scheduleLaterStaffId ?? "",
       onClearPendingMessage: _clearPendingMessage,
       sessionId: sessionId,
       // Pass session ID
@@ -1101,6 +1107,7 @@ class _ChatScreenBody extends StatelessWidget {
   final Function(Set<String>) onUpdateSelectedOptions;
   final Function(List<ChatMessage>) onUpdateMessages;
   final String? pendingMessage;
+  final String? scheduleLaterStaffId;
   final VoidCallback onClearPendingMessage;
   final String sessionId;
   final List<ChatWidget> latestActionWidgets;
@@ -1137,6 +1144,7 @@ class _ChatScreenBody extends StatelessWidget {
     required this.onUpdateSelectedOptions,
     required this.onUpdateMessages,
     required this.pendingMessage,
+    required this.scheduleLaterStaffId,
     required this.onClearPendingMessage,
     required this.sessionId,
     required this.latestActionWidgets,
@@ -1242,6 +1250,7 @@ class _ChatScreenBody extends StatelessWidget {
                   final event = await ChatLoadEvent.create(
                     message: msg.trim(),
                     sessionId: sid,
+                    staffId: scheduleLaterStaffId ?? "",
                   );
                   bloc.add(event);
                   onClearPendingMessage();
