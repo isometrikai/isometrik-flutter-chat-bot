@@ -2694,7 +2694,7 @@ class _ChatScreenBody extends StatelessWidget {
                         : () async {
 
                           Map<String, dynamic> obj = {
-                          's_id': action.storeId,
+                          'storeId': action.storeId,
                           'lat': '13.02868',
                           'long': '77.58952',
                           'storeIsOpen': action.storeIsOpen ?? true
