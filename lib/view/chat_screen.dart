@@ -106,7 +106,8 @@ class _ChatScreenState extends State<ChatScreen> {
         message.hasChooseAddressWidget ||
         message.hasChooseCardWidget ||
         message.hasOrderSummaryWidget ||
-        message.hasOrderConfirmedWidget))
+        message.hasOrderConfirmedWidget ||
+        message.hasServicesDeliveryOptionsWidget))
       return message;
     return message.copyWith(
       hasStoreCards: false,
@@ -117,6 +118,7 @@ class _ChatScreenState extends State<ChatScreen> {
       hasOrderConfirmedWidget: false,
       // Keep cart widget visible
       hasCartWidget: message.hasCartWidget,
+      hasServicesDeliveryOptionsWidget: false,
     );
   }
 
@@ -206,6 +208,7 @@ class _ChatScreenState extends State<ChatScreen> {
         ChatWidget? storesWidget;
         ChatWidget? productsWidget;
         ChatWidget? cartWidget;
+        ChatWidget? servicesDeliveryOptionsWidget;
         ChatWidget? chooseAddressWidget;
         ChatWidget? chooseCardWidget;
         ChatWidget? orderSummaryWidget;
@@ -231,6 +234,12 @@ class _ChatScreenState extends State<ChatScreen> {
           cartWidget = botResponse.widgets.firstWhere((widget) => widget.isCartWidget);
         } catch (e) {
           cartWidget = null;
+        }
+
+        try {
+          servicesDeliveryOptionsWidget = botResponse.widgets.firstWhere((widget) => widget.isServicesDeliveryOptionsWidget);
+        } catch (e) {
+          servicesDeliveryOptionsWidget = null;
         }
 
         try {
@@ -269,6 +278,7 @@ class _ChatScreenState extends State<ChatScreen> {
         bool hasStores = storesWidget != null;
         bool hasProducts = productsWidget != null;
         bool hasCart = cartWidget != null;
+        bool hasServicesDeliveryOptions = servicesDeliveryOptionsWidget != null;
         bool hasChooseAddress = chooseAddressWidget != null;
         bool hasChooseCard = chooseCardWidget != null;
         bool hasOrderSummary = orderSummaryWidget != null;
@@ -283,6 +293,7 @@ class _ChatScreenState extends State<ChatScreen> {
             hasStoreCards: hasStores,
             hasProductCards: hasProducts,
             hasCartWidget: hasCart,
+            hasServicesDeliveryOptionsWidget: hasServicesDeliveryOptions,
             hasChooseAddressWidget: hasChooseAddress,
             hasChooseCardWidget: hasChooseCard,
             hasOrderSummaryWidget: hasOrderSummary,
@@ -362,6 +373,7 @@ class _ChatScreenState extends State<ChatScreen> {
     ChatWidget? storesWidget;
     ChatWidget? productsWidget;
     ChatWidget? cartWidget;
+    ChatWidget? servicesDeliveryOptionsWidget;
     ChatWidget? chooseAddressWidget;
     ChatWidget? chooseCardWidget;
     ChatWidget? orderSummaryWidget;
@@ -389,6 +401,12 @@ class _ChatScreenState extends State<ChatScreen> {
       cartWidget = response.widgets.firstWhere((widget) => widget.isCartWidget);
     } catch (e) {
       cartWidget = null;
+    }
+
+     try {
+      servicesDeliveryOptionsWidget = response.widgets.firstWhere((widget) => widget.isServicesDeliveryOptionsWidget);
+    } catch (e) {
+      servicesDeliveryOptionsWidget = null;
     }
 
     try {
@@ -427,6 +445,7 @@ class _ChatScreenState extends State<ChatScreen> {
     bool hasStores = storesWidget != null;
     bool hasProducts = productsWidget != null;
     bool hasCart = cartWidget != null;
+    bool hasServicesDeliveryOptions = servicesDeliveryOptionsWidget != null;
     bool hasChooseAddress = chooseAddressWidget != null;
     bool hasChooseCard = chooseCardWidget != null;
     bool hasOrderSummary = orderSummaryWidget != null;
@@ -442,6 +461,7 @@ class _ChatScreenState extends State<ChatScreen> {
           hasStoreCards: hasStores,
           hasProductCards: hasProducts,
           hasCartWidget: hasCart,
+          hasServicesDeliveryOptionsWidget: hasServicesDeliveryOptions,
           hasChooseAddressWidget: hasChooseAddress,
           hasChooseCardWidget: hasChooseCard,
           hasOrderSummaryWidget: hasOrderSummary,
@@ -451,6 +471,7 @@ class _ChatScreenState extends State<ChatScreen> {
               !hasStores &&
               !hasProducts &&
               !hasCart &&
+              !hasServicesDeliveryOptions &&
               !hasChooseAddress &&
               !hasChooseCard &&
               !hasOrderSummary &&
@@ -461,6 +482,7 @@ class _ChatScreenState extends State<ChatScreen> {
               !hasStores &&
                       !hasProducts &&
                       !hasCart &&
+                      !hasServicesDeliveryOptions &&
                       !hasChooseAddress &&
                       !hasChooseCard &&
                       !hasOrderSummary &&
@@ -472,12 +494,14 @@ class _ChatScreenState extends State<ChatScreen> {
           stores: storesWidget?.stores ?? [],
           products: productsWidget?.products ?? [],
           cartItems: cartWidget?.getCartItems() ?? [],
+          servicesDeliveryOptions: servicesDeliveryOptionsWidget?.getServicesDeliveryOptions() ?? [],
           addressOptions: chooseAddressWidget?.getAddressOptions() ?? [],
           cardOptions: chooseCardWidget?.getCardOptions() ?? [],
           orderSummaryItems: orderSummaryWidget?.getOrderSummaryItems() ?? [],
           storesWidget: storesWidget,
           productsWidget: productsWidget,
           cartWidget: cartWidget,
+          servicesDeliveryOptionsWidget: servicesDeliveryOptionsWidget,
           chooseAddressWidget: chooseAddressWidget,
           chooseCardWidget: chooseCardWidget,
           orderSummaryWidget: orderSummaryWidget,
@@ -497,6 +521,7 @@ class _ChatScreenState extends State<ChatScreen> {
                     widget.type == WidgetEnum.add_address.value ||
                     widget.type == WidgetEnum.add_payment.value ||
                     widget.type == WidgetEnum.cart.value ||
+                    widget.type == WidgetEnum.services_delivery_options.value ||
                     widget.type == WidgetEnum.order_summary.value ||
                     widget.type == WidgetEnum.choose_address.value ||
                     widget.type == WidgetEnum.choose_card.value ||
@@ -2133,6 +2158,10 @@ class _ChatScreenBody extends StatelessWidget {
           if (message.hasCartWidget) ...[
             const SizedBox(height: 4), //12
             _buildCartWidget(message.cartItems),
+          ],
+          if (message.hasServicesDeliveryOptionsWidget) ...[
+            const SizedBox(height: 4), //12
+            _buildServicesDeliveryOptionsWidget(message.servicesDeliveryOptions),
           ],
           if (message.hasChooseAddressWidget) ...[
             const SizedBox(height: 4), //12
@@ -4349,6 +4378,16 @@ class _ChatScreenBody extends StatelessWidget {
     }
     return const SizedBox.shrink();
   }
+
+  Widget _buildServicesDeliveryOptionsWidget(List<WidgetAction> servicesDeliveryOptions) {
+    return ServicesDeliveryOptionsWidget(
+      servicesDeliveryOptions: servicesDeliveryOptions,
+      isFromChatHistory: isFromHistory,
+      onSendMessage: (message) {
+        onSendMessage(message);
+      },
+    );
+  }
 }
 
 class _GreetingOptionTile extends StatelessWidget {
@@ -4494,6 +4533,101 @@ class _GreetingOptionTile extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class ServicesDeliveryOptionsWidget extends StatefulWidget {
+  final List<WidgetAction> servicesDeliveryOptions;
+  final Function(String)? onSendMessage;
+  final bool isFromChatHistory;
+
+  const ServicesDeliveryOptionsWidget({
+    super.key,
+    required this.servicesDeliveryOptions,
+    this.onSendMessage,
+    this.isFromChatHistory = false,
+  });
+
+  @override
+  State<ServicesDeliveryOptionsWidget> createState() => _ServicesDeliveryOptionsWidgetState();
+}
+
+class _ServicesDeliveryOptionsWidgetState extends State<ServicesDeliveryOptionsWidget> {
+  int? selectedIndex;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(left: 0, right: 24, bottom: 8, top: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 20),
+      constraints: const BoxConstraints(
+        minWidth: 320,
+        maxWidth: 320,
+      ),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF5F7FF),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: const Color(0xFFE5F2FF),
+          width: 1,
+        ),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          ...widget.servicesDeliveryOptions.asMap().entries.map((entry) {
+            final index = entry.key;
+            final option = entry.value;
+            final isSelected = selectedIndex == index;
+            final displayText = option.name ?? option.title;
+            
+            return Padding(
+              padding: EdgeInsets.only(bottom: index < widget.servicesDeliveryOptions.length - 1 ? 10 : 0),
+              child: GestureDetector(
+                onTap: () {
+                  if (widget.isFromChatHistory == false) {
+                    setState(() {
+                      // Toggle selection: if already selected, deselect; otherwise select
+                      selectedIndex = isSelected ? null : index;
+                    });
+                    // Handle option selection - send message with the name text
+                    if (selectedIndex != null && displayText.isNotEmpty) {
+                      widget.onSendMessage?.call(displayText);
+                    }
+                  }
+                },
+                child: Row(
+                  children: [
+                    // Text
+                    Expanded(
+                      child: Text(
+                        displayText,
+                        style: const TextStyle(
+                          fontFamily: 'Plus Jakarta Sans',
+                          fontSize: 14,
+                          fontWeight: FontWeight.w400,
+                          color: Color(0xFF242424),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    // Radio button
+                    SvgPicture.asset(
+                      AssetPath.get(isSelected 
+                        ? 'images/ic_sel_radio.svg' 
+                        : 'images/ic_de_sel_radio.svg'),
+                      width: 20,
+                      height: 20,
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }),
+        ],
       ),
     );
   }

@@ -125,6 +125,7 @@ class ChatWidget {
   bool get isSeeMoreWidget => type == WidgetEnum.see_more.value;
   bool get isMenuWidget => type == WidgetEnum.menu.value;
   bool get isCartWidget => type == WidgetEnum.cart.value;
+  bool get isServicesDeliveryOptionsWidget => type == WidgetEnum.services_delivery_options.value;
   bool get isChooseAddressWidget => type == WidgetEnum.choose_address.value;
   bool get isChooseCardWidget => type == WidgetEnum.choose_card.value;
   bool get isAddAddressWidget => type == WidgetEnum.add_address.value;
@@ -269,6 +270,14 @@ class ChatWidget {
   // Helper method to get cart items
   List<WidgetAction> getCartItems() {
     if (isCartWidget) {
+      return widget.map((item) => WidgetAction.fromJson(item as Map<String, dynamic>)).toList();
+    }
+    return [];
+  }
+
+   // Helper method to get cart items
+  List<WidgetAction> getServicesDeliveryOptions() {
+    if (isServicesDeliveryOptionsWidget) {
       return widget.map((item) => WidgetAction.fromJson(item as Map<String, dynamic>)).toList();
     }
     return [];
