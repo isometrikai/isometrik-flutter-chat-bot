@@ -1419,7 +1419,7 @@ class _ChatScreenBody extends StatelessWidget {
           Container(
             child:
                     SvgPicture.asset(
-                      AssetPath.get('images/ic_header_logo.svg'),
+                      AssetPath.get('images/ic_header_logo_R.svg'),
                       width: 75,
                       height: 23,
                       fit: BoxFit.cover,

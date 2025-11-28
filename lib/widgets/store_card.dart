@@ -239,7 +239,7 @@ class StoreCard extends StatelessWidget {
                   ),
                   const SizedBox(width: 5),
                   Text(
-                    'Open in Eazy app',
+                    'Open in app',
                     style: AppTextStyles.restaurantDescription.copyWith(
                       color: const Color(0xFF8E2FFD),
                     ),
