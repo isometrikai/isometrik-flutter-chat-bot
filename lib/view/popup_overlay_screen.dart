@@ -166,7 +166,7 @@ class PopupOverlayScreen extends StatelessWidget {
             borderRadius: BorderRadius.circular(8),
           ),
           child: const Text(
-            'This profile is built from your interactions with zAIn and helps us provide personalized recommendations tailored to your preferences and habits.',
+            'This profile is built from your interactions with AI and helps us provide personalized recommendations tailored to your preferences and habits.',
             style: TextStyle(
               fontFamily: 'Plus Jakarta Sans',
               fontSize: 12,

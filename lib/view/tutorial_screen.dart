@@ -191,7 +191,7 @@ class _TutorialScreenState extends State<TutorialScreen> {
     return Column(
       children: [
         const Text(
-          'Welcome to your\nzAIn AI assistant!',
+          'Welcome to your\nAI assistant!',
           textAlign: TextAlign.center,
           style: TextStyle(
             fontFamily: 'Plus Jakarta Sans',
@@ -461,7 +461,7 @@ class _TutorialScreenState extends State<TutorialScreen> {
     return Column(
       children: [
         const Text(
-          'How to chat with zAIn',
+          'How to chat with AI',
           textAlign: TextAlign.center,
           style: TextStyle(
             fontFamily: 'Plus Jakarta Sans',
@@ -1013,7 +1013,7 @@ class _TutorialScreenState extends State<TutorialScreen> {
     return Column(
       children: [
         const Text(
-          'Why choose zAIn AI?',
+          'Why choose AI assistant?',
           textAlign: TextAlign.center,
           style: TextStyle(
             fontFamily: 'Plus Jakarta Sans',
@@ -1203,7 +1203,7 @@ class _TutorialScreenState extends State<TutorialScreen> {
         ),
         const SizedBox(height: 16),
         const Text(
-          'Start chatting with Zain AI to order food, shop for groceries, book services, and more. Just type what you need!',
+          'Start chatting with AI to order food, shop for groceries, book services, and more. Just type what you need!',
           textAlign: TextAlign.center,
           style: TextStyle(
             fontFamily: 'Plus Jakarta Sans',
@@ -1347,7 +1347,7 @@ class _TutorialScreenState extends State<TutorialScreen> {
     return Column(
       children: [
         const Text(
-          'Meet zAIn AI',
+          'Meet AI assistant',
           style: TextStyle(
             fontFamily: 'Plus Jakarta Sans',
             fontWeight: FontWeight.w700,

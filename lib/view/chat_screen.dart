@@ -1870,7 +1870,7 @@ class _ChatScreenBody extends StatelessWidget {
               ),
               const SizedBox(height: 16),
                Text(
-                'Exit zAIn?',
+                'Exit AI?',
                 style: AppTextStyles.bodyText.copyWith(
                   fontSize: 24,
                   fontWeight: FontWeight.w700,
@@ -2870,7 +2870,7 @@ class _ChatScreenBody extends StatelessWidget {
                                     color: const Color(0xFF242424),
                                   ),
                                   decoration: InputDecoration(
-                                    hintText: isRecording ? 'Listening...' : 'How can zAIn help you today?',
+                                    hintText: isRecording ? 'Listening...' : 'How can AI help you today?',
                                     border: InputBorder.none,
                                     enabledBorder: InputBorder.none,
                                     focusedBorder: InputBorder.none,
