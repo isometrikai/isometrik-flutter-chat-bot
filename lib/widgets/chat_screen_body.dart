@@ -889,22 +889,22 @@ class ChatScreenBody extends StatelessWidget {
                                     fontFamily: "Plus Jakarta Sans",
                                     color:
                                         message.isBot
-                                            ? Color(int.parse('0xFF000000'))
-                                            : Color(int.parse('0xFF242424')),
+                                            ? AppTheme.chatBotMessageColor
+                                            : AppTheme.chatUserMessageColor,
                                   ),
                                   "strong": Style(
                                     fontWeight: FontWeight.bold,
                                     color:
                                         message.isBot
-                                            ? Color(int.parse('0xFF000000'))
-                                            : Color(int.parse('0xFF242424')),
+                                            ? AppTheme.chatBotMessageColor
+                                            : AppTheme.chatUserMessageColor,
                                   ),
                                   "em": Style(
                                     fontStyle: FontStyle.italic,
                                     color:
                                         message.isBot
-                                            ? Color(int.parse('0xFF000000'))
-                                            : Color(int.parse('0xFF242424')),
+                                            ? AppTheme.chatBotMessageColor
+                                            : AppTheme.chatUserMessageColor,
                                   ),
                                   "code": Style(
                                     backgroundColor: Colors.grey.shade200,
@@ -921,8 +921,8 @@ class ChatScreenBody extends StatelessWidget {
                                 style: AppTextStyles.chatMessage.copyWith(
                                   color:
                                       message.isBot
-                                          ? Color(int.parse('0xFF000000'))
-                                          : Color(int.parse('0xFF242424')),
+                                          ? AppTheme.chatBotMessageColor
+                                          : AppTheme.chatUserMessageColor,
                                 ),
                               ),
                     ),

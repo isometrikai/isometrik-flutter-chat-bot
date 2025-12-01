@@ -1030,11 +1030,6 @@ class _ChatScreenState extends State<ChatScreen> {
                   horizontal: 20,
                   vertical: 16,
                 ),
-                // decoration: BoxDecoration(
-                //   color: Colors.grey[300]!,
-                //   borderRadius: BorderRadius.circular(12),
-                //   border: Border.all(color: Colors.grey[300]!, width: 1),
-                // ),
                 child: Shimmer.fromColors(
                   baseColor: Colors.grey[300]!,
                   highlightColor: Colors.grey[100]!,
