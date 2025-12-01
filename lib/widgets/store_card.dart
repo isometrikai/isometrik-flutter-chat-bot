@@ -1,11 +1,9 @@
-import 'package:chat_bot/utils/enum.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:chat_bot/data/data.dart' as chat;
 import 'package:chat_bot/data/model/universal_cart_response.dart' as cart_models;
-import 'package:chat_bot/services/callback_manage.dart';
-import 'package:flutter_svg/svg.dart';
-import '../utils/asset_path.dart';
-import '../utils/text_styles.dart';
+import 'package:chat_bot/utils/utils.dart';
+import 'package:chat_bot/services/services.dart';
 
 class StoreCard extends StatelessWidget {
   final chat.Store store;

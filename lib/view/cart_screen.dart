@@ -1,15 +1,11 @@
-import 'package:chat_bot/services/callback_manage.dart';
-import 'package:chat_bot/utils/asset_path.dart';
-import 'package:chat_bot/utils/enum.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
-import '../widgets/cart_details_price_widget.dart';
-import '../bloc/cart/cart_bloc.dart';
-import '../bloc/cart/cart_event.dart';
-import '../bloc/cart/cart_state.dart';
 import 'package:chat_bot/data/data.dart';
-import '../utils/text_styles.dart';
+import 'package:chat_bot/bloc/bloc.dart';
+import 'package:chat_bot/widgets/widgets.dart';
+import 'package:chat_bot/utils/utils.dart';
+import 'package:chat_bot/services/services.dart';
 
 /// Data class to hold category-specific cart information
 class CategoryData {

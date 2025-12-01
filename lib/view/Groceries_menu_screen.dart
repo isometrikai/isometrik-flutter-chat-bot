@@ -1,20 +1,12 @@
-import 'package:chat_bot/bloc/cart/cart_bloc.dart';
-import 'package:chat_bot/bloc/cart/cart_event.dart';
-import 'package:chat_bot/bloc/cart/cart_state.dart';
-import 'package:chat_bot/data/data.dart';
-import 'package:chat_bot/data/data.dart' as chat;
-import 'package:chat_bot/utils/enum.dart';
-import 'package:chat_bot/view/customization_summary_screen.dart';
-import 'package:chat_bot/view/grocery_customization_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:chat_bot/widgets/menu_item_card.dart';
-import 'package:chat_bot/widgets/screen_header.dart';
-import 'package:chat_bot/services/callback_manage.dart';
-import '../bloc/grocery_menu/grocery_menu_bloc.dart';
-import '../bloc/grocery_menu/grocery_menu_event.dart';
-import '../bloc/grocery_menu/grocery_menu_state.dart';
-import '../utils/text_styles.dart';
+import 'package:chat_bot/data/data.dart';
+import 'package:chat_bot/data/data.dart' as chat;
+import 'package:chat_bot/bloc/bloc.dart';
+import 'package:chat_bot/widgets/widgets.dart';
+import 'package:chat_bot/view/views.dart';
+import 'package:chat_bot/utils/utils.dart';
+import 'package:chat_bot/services/services.dart';
 
 class GroceriesMenuScreen extends StatefulWidget {
   final chat.WidgetAction? actionData;
