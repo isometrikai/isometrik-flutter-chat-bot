@@ -1,6 +1,5 @@
 import 'package:equatable/equatable.dart';
-import 'package:chat_bot/data/model/mygpts_model.dart';
-import 'package:chat_bot/data/model/greeting_response.dart';
+import 'package:chat_bot/data/data.dart';
 
 abstract class LaunchState extends Equatable {
   const LaunchState();

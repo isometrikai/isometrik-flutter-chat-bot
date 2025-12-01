@@ -2,8 +2,7 @@ import 'dart:async';
 
 import 'package:chat_bot/bloc/restaurant/restaurant_event.dart';
 import 'package:chat_bot/bloc/restaurant/restaurant_state.dart';
-import 'package:chat_bot/data/model/chat_response.dart';
-import 'package:chat_bot/data/repositories/restaurant_repository.dart';
+import 'package:chat_bot/data/data.dart';
 import 'package:chat_bot/utils/utility.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 

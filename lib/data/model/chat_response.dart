@@ -1,8 +1,8 @@
 import 'dart:convert';
 
+import 'package:chat_bot/widgets/widgets.dart';
+
 import '../../utils/enum.dart';
-import '../../widgets/choose_address_widget.dart';
-import '../../widgets/choose_card_widget.dart';
 
 // Main Chat Response Model
 class ChatResponse {

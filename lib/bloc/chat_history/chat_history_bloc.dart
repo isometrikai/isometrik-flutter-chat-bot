@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:chat_bot/bloc/chat_history/chat_history_event.dart';
 import 'package:chat_bot/bloc/chat_history/chat_history_state.dart';
-import 'package:chat_bot/data/repositories/chat_history_repository.dart';
+import 'package:chat_bot/data/data.dart';
 import 'package:chat_bot/utils/utility.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 

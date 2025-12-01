@@ -8,8 +8,7 @@ import '../widgets/cart_details_price_widget.dart';
 import '../bloc/cart/cart_bloc.dart';
 import '../bloc/cart/cart_event.dart';
 import '../bloc/cart/cart_state.dart';
-import '../data/model/universal_cart_response.dart';
-import '../data/model/chat_response.dart';
+import 'package:chat_bot/data/data.dart';
 import '../utils/text_styles.dart';
 
 /// Data class to hold category-specific cart information

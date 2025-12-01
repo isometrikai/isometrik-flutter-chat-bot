@@ -1,12 +1,12 @@
 import 'package:chat_bot/bloc/cart/cart_bloc.dart';
 import 'package:chat_bot/bloc/cart/cart_event.dart';
 import 'package:chat_bot/bloc/cart/cart_state.dart';
-import 'package:chat_bot/data/model/chat_response.dart' as chat;
+import 'package:chat_bot/data/data.dart';
+import 'package:chat_bot/data/data.dart' as chat;
 import 'package:chat_bot/utils/enum.dart';
 import 'package:chat_bot/view/customization_summary_screen.dart';
 import 'package:chat_bot/view/grocery_customization_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:chat_bot/data/model/subcategory_products_response.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:chat_bot/widgets/menu_item_card.dart';
 import 'package:chat_bot/widgets/screen_header.dart';
@@ -14,7 +14,6 @@ import 'package:chat_bot/services/callback_manage.dart';
 import '../bloc/grocery_menu/grocery_menu_bloc.dart';
 import '../bloc/grocery_menu/grocery_menu_event.dart';
 import '../bloc/grocery_menu/grocery_menu_state.dart';
-import 'package:chat_bot/data/model/universal_cart_response.dart';
 import '../utils/text_styles.dart';
 
 class GroceriesMenuScreen extends StatefulWidget {

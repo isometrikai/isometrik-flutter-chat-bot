@@ -1,6 +1,6 @@
 import 'package:chat_bot/utils/asset_path.dart';
 import 'package:flutter/material.dart';
-import 'package:chat_bot/data/model/greeting_response.dart';
+import 'package:chat_bot/data/data.dart';
 import 'package:flutter_svg/svg.dart';
 
 class PopupOverlayScreen extends StatelessWidget {

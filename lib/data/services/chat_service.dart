@@ -1,7 +1,4 @@
-import 'package:chat_bot/data/model/chat_response.dart';
-import 'package:chat_bot/data/model/chat_history_response.dart';
-import 'package:chat_bot/data/model/session_id_response.dart';
-import 'package:chat_bot/data/services/chat_api_services.dart';
+import 'package:chat_bot/data/data.dart';
 
 class ChatService {
   ChatService._internal();

@@ -1,7 +1,7 @@
 import 'package:chat_bot/services/callback_manage.dart';
 import 'package:chat_bot/utils/asset_path.dart';
 import 'package:flutter/material.dart';
-import 'package:chat_bot/data/model/chat_response.dart';
+import 'package:chat_bot/data/data.dart';
 import 'package:flutter_svg/svg.dart' show SvgPicture;
 
 class CartWidget extends StatelessWidget {

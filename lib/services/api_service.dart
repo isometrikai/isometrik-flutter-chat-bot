@@ -1,7 +1,4 @@
-import 'package:chat_bot/data/repositories/chat_history_repository.dart';
-import 'package:chat_bot/data/services/auth_service.dart';
-import 'package:chat_bot/data/services/chat_api_services.dart';
-import 'package:chat_bot/data/services/hawksearch_service.dart';
+import 'package:chat_bot/data/data.dart';
 
 class ApiService {
   static String _baseApiUrl = 'https://apisuperapp-staging.eazy-online.com';
