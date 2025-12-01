@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:chat_bot/data/data.dart';
 import 'package:chat_bot/utils/asset_path.dart';
+import '../utils/utils.dart';
 
 class GreetingOptionTile extends StatelessWidget {
   final GreetingOption option;
@@ -58,8 +59,7 @@ class GreetingOptionTile extends StatelessWidget {
                         Text(
                           option.title,
                           maxLines: 1,
-                          style: const TextStyle(
-                            fontFamily: 'Plus Jakarta Sans',
+                          style: AppTextStyles.restaurantTitle.copyWith(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
                             height: 1.4,
@@ -71,8 +71,7 @@ class GreetingOptionTile extends StatelessWidget {
                         Text(
                           option.subTitle,
                           maxLines: 1,
-                          style: const TextStyle(
-                            fontFamily: 'Plus Jakarta Sans',
+                          style: AppTextStyles.restaurantTitle.copyWith(
                             fontSize: 12,
                             fontWeight: FontWeight.w400,
                             height: 1.4,

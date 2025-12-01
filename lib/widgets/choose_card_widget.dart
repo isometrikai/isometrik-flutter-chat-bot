@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../utils/utils.dart';
 
 class CardOption {
   final String title;
@@ -52,10 +53,9 @@ class _ChooseCardWidgetState extends State<ChooseCardWidget> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Title
-          const Text(
+           Text(
             'Choose payment option',
-            style: TextStyle(
-              fontFamily: 'Plus Jakarta Sans',
+            style: AppTextStyles.restaurantTitle.copyWith(
               fontSize: 16,
               fontWeight: FontWeight.w700,
               height: 1.2,
@@ -118,8 +118,7 @@ class _ChooseCardWidgetState extends State<ChooseCardWidget> {
               child: Center(
                 child: Text(
                   _getIconForCardType(cardOption.title),
-                  style: const TextStyle(
-                    fontFamily: 'Plus Jakarta Sans',
+                  style: AppTextStyles.restaurantTitle.copyWith(
                     fontSize: 14,
                     fontWeight: FontWeight.w400,
                     height: 1.2,
@@ -133,8 +132,7 @@ class _ChooseCardWidgetState extends State<ChooseCardWidget> {
             Expanded(
               child: Text(
                 cardOption.title,
-                style: const TextStyle(
-                  fontFamily: 'Plus Jakarta Sans',
+                style: AppTextStyles.restaurantTitle.copyWith(
                   fontSize: 14,
                   fontWeight: FontWeight.w400,
                   height: 1.2,

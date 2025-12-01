@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../utils/utils.dart';
+
 class AddressOption {
   final String name;
   final String address;
@@ -56,10 +58,9 @@ class _ChooseAddressWidgetState extends State<ChooseAddressWidget> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Title
-          const Text(
+           Text(
             'Choose address',
-            style: TextStyle(
-              fontFamily: 'Plus Jakarta Sans',
+            style: AppTextStyles.restaurantTitle.copyWith(
               fontSize: 16,
               fontWeight: FontWeight.w700,
               height: 1.2,
@@ -122,8 +123,7 @@ class _ChooseAddressWidgetState extends State<ChooseAddressWidget> {
               child: Center(
                 child: Text(
                   _getIconForAddressType(addressOption.name),
-                  style: const TextStyle(
-                    fontFamily: 'Plus Jakarta Sans',
+                  style: AppTextStyles.restaurantTitle.copyWith(
                     fontSize: 14,
                     fontWeight: FontWeight.w400,
                     height: 1.2,
@@ -141,8 +141,7 @@ class _ChooseAddressWidgetState extends State<ChooseAddressWidget> {
                 children: [
                   Text(
                     addressOption.address,
-                    style: const TextStyle(
-                      fontFamily: 'Plus Jakarta Sans',
+                    style: AppTextStyles.restaurantTitle.copyWith(
                       fontSize: 13,
                       fontWeight: FontWeight.w400,
                       height: 1.2,

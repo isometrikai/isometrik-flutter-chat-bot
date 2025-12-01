@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:chat_bot/data/data.dart';
-import 'package:chat_bot/utils/asset_path.dart';
+import '../utils/utils.dart';
 
 class ServicesDeliveryOptionsWidget extends StatefulWidget {
   final List<WidgetAction> servicesDeliveryOptions;
@@ -70,8 +70,7 @@ class _ServicesDeliveryOptionsWidgetState extends State<ServicesDeliveryOptionsW
                     Expanded(
                       child: Text(
                         displayText,
-                        style: const TextStyle(
-                          fontFamily: 'Plus Jakarta Sans',
+                        style: AppTextStyles.restaurantDescription.copyWith(
                           fontSize: 14,
                           fontWeight: FontWeight.w400,
                           color: Color(0xFF242424),

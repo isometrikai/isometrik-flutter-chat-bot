@@ -3,6 +3,7 @@ import 'package:chat_bot/utils/asset_path.dart';
 import 'package:flutter/material.dart';
 import 'package:chat_bot/data/data.dart';
 import 'package:flutter_svg/svg.dart' show SvgPicture;
+import '../utils/utils.dart';
 
 class CartWidget extends StatelessWidget {
   final List<WidgetAction> cartItems;
@@ -79,8 +80,7 @@ class CartWidget extends StatelessWidget {
                       storeNameItem.storeName ?? '',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        fontFamily: 'Plus Jakarta Sans',
+                      style: AppTextStyles.restaurantTitle.copyWith(
                         fontWeight: FontWeight.w600,
                         fontSize: 14,
                         height: 1.4,

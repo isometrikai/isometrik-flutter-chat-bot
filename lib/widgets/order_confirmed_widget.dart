@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../utils/utils.dart';
 
 class OrderConfirmedWidget extends StatelessWidget {
   final String title;
@@ -29,17 +30,14 @@ class OrderConfirmedWidget extends StatelessWidget {
           Expanded(
             child: Text(
               title,
-              style: const TextStyle(
-                fontFamily: 'Plus Jakarta Sans',
-                fontStyle: FontStyle.normal,
-                fontWeight: FontWeight.w600,
+              style: AppTextStyles.restaurantTitle.copyWith (
                 fontSize: 16,
-                height: 1.2,
-                color: Color(0xFF242424),
-              ),
+              fontWeight: FontWeight.w600,
+              color: Color(0xFF242424),
+              height: 1.2,
             ),
           ),
-          
+        ),
         ],
       ),
     );

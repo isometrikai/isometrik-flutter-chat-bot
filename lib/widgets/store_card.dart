@@ -511,12 +511,11 @@ class _ProductPreviewTile extends StatelessWidget {
       child: Center(
         child: Text(
           'OUT OF STOCK',
-          style: TextStyle(
-            fontFamily: 'Plus Jakarta Sans',
+          style: AppTextStyles.restaurantDescription.copyWith(
             fontWeight: FontWeight.w700,
             fontSize: 8,
             height: 1.2,
-            color: const Color(0xFFF44336),
+            color: Color(0xFFF44336),
           ),
         ),
       ),

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:chat_bot/data/data.dart';
 import 'package:flutter_svg/svg.dart' show SvgPicture;
 import 'package:chat_bot/utils/asset_path.dart';
+import '../utils/utils.dart';
 
 class OrderSummaryWidget extends StatelessWidget {
   final List<WidgetAction> orderItems;
@@ -74,14 +75,14 @@ class OrderSummaryWidget extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Header - Order summary
-              const Text(
+               Text(
                 'Order Summary',
-                style: TextStyle(
-                  fontFamily: 'Plus Jakarta Sans',
+                style: 
+                AppTextStyles.restaurantTitle.copyWith(
                   fontSize: 14,
                   fontWeight: FontWeight.w700,
                   color: Color(0xFF242424),
-                ),
+                ),  
               ),
               const SizedBox(height: 10),
               
@@ -102,10 +103,10 @@ class OrderSummaryWidget extends StatelessWidget {
                         Expanded(
                           child: Text(
                             storeInfo.storeName ?? '',
-                            style: const TextStyle(
-                              fontFamily: 'Plus Jakarta Sans',
+                            style: 
+                            AppTextStyles.restaurantTitle.copyWith(
                               fontSize: 16,
-                              fontWeight: FontWeight.w600,  
+                              fontWeight: FontWeight.w600,
                               color: Color(0xFF242424),
                             ),
                           ),
@@ -141,8 +142,8 @@ class OrderSummaryWidget extends StatelessWidget {
                         Expanded(
                           child: Text(
                             storeInfo.address ?? 'Address not available',
-                            style: const TextStyle(
-                              fontFamily: 'Plus Jakarta Sans',
+                            style: 
+                            AppTextStyles.restaurantDescription.copyWith(
                               fontSize: 14,
                               fontWeight: FontWeight.w400,
                               color: Color(0xFF242424),
@@ -172,8 +173,8 @@ class OrderSummaryWidget extends StatelessWidget {
                               child: Text(
                                 item.quantity?.isNotEmpty ?? false ? '${item.quantity}x ${item.productName}' : item.productName ?? '',
                                 // '${item.quantity}x ${item.productName}',
-                                style: const TextStyle(
-                                  fontFamily: 'Plus Jakarta Sans',
+                                style: 
+                                AppTextStyles.restaurantDescription.copyWith(
                                   fontSize: 14,
                                   fontWeight: FontWeight.w400,
                                   color: Color(0xFF242424),
@@ -187,8 +188,8 @@ class OrderSummaryWidget extends StatelessWidget {
                               width: 80,
                               child: Text(
                                 _formatCurrency(item.currencySymbol ?? 'د.إ', item.productPrice ?? 0),
-                                style: const TextStyle(
-                                  fontFamily: 'Plus Jakarta Sans',
+                                style: 
+                                AppTextStyles.restaurantDescription.copyWith(
                                   fontSize: 14,
                                   fontWeight: FontWeight.w400,
                                   color: Color(0xFF242424),
@@ -206,8 +207,8 @@ class OrderSummaryWidget extends StatelessWidget {
                             child: Text(
                               '${item.addOns}',
                               maxLines: 5,
-                              style: const TextStyle(
-                                fontFamily: 'Plus Jakarta Sans',
+                              style: 
+                              AppTextStyles.restaurantDescription.copyWith(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w300,
                                 color: Color(0xFF242424),
@@ -246,11 +247,11 @@ class OrderSummaryWidget extends StatelessWidget {
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Expanded(
+                       Expanded(
                         child: Text(
                           'Total to pay',
-                          style: TextStyle(
-                            fontFamily: 'Plus Jakarta Sans',
+                          style: 
+                          AppTextStyles.restaurantTitle.copyWith(
                             fontSize: 14,
                             fontWeight: FontWeight.w700,
                             color: Color(0xFF242424),
@@ -262,12 +263,11 @@ class OrderSummaryWidget extends StatelessWidget {
                         width: 130,
                         child: Text(
                           _formatCurrency(totalItem.currencySymbol ?? '', totalItem.productPrice ?? 0),
-                          style: const TextStyle(
-                            fontFamily: 'Plus Jakarta Sans',
+                          style: AppTextStyles.restaurantTitle.copyWith(
                             fontSize: 14,
                             fontWeight: FontWeight.w700,
                             color: Color(0xFF242424),
-                          ),
+                          ),  
                           textAlign: TextAlign.right,
                         ),
                       ),
@@ -281,12 +281,11 @@ class OrderSummaryWidget extends StatelessWidget {
                       Expanded(
                         child: Text(
                           storeInfo.paymentTypeText ?? '',
-                          style: const TextStyle(
-                            fontFamily: 'Plus Jakarta Sans',
+                          style: AppTextStyles.restaurantDescription.copyWith(
                             fontSize: 14,
                             fontWeight: FontWeight.w400,
                             color: Color(0xFF242424),
-                          ),
+                          ),  
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                         ),
