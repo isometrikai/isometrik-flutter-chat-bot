@@ -558,135 +558,146 @@ class ChatScreenBody extends StatelessWidget {
   }
 
   void showNewChatConfirmation(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.white,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(8)),
-      ),
-      builder: (BuildContext context) {
-        return Container(
-          width: double.infinity,
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            // Add this for left alignment
-            children: [
-              // Handle bar
-              Center(
-                child: Container(
-                  width: 40,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: Colors.grey[300],
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 20),
-              const Text(
-                'Are you sure want to start new chat?',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
-                  color: Colors.black,
-                ),
-                textAlign: TextAlign.left,
-              ),
-              const SizedBox(height: 24),
-              Row(
-                children: [
-                  Expanded(
-                    child: SizedBox(
-                      height: 62,
-                      child: OutlinedButton(
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                        },
-                        style: OutlinedButton.styleFrom(
-                          side: const BorderSide(
-                            color: Color(0xFF8E2FFD),
-                            width: 2,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          backgroundColor: Colors.white,
-                        ),
-                        child: const Text(
-                          "CANCEL",
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w700,
-                            color: Color(0xFF8E2FFD),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
 
-                  // Spacing between buttons
-                  const SizedBox(width: 16),
+     Map<String, dynamic> obj = {
+                          'startTime': '123',
+                          'storeId': '1234',
+                          'categoryId': '1235',
+                          'bookingType': '1236'
+                        };
+                        // Map<String, dynamic> obj = Map<String, dynamic>.from(staffData);
+                        print("obj: $obj");
+                        OrderService().triggerSelectStaffScreenOpen(obj);
 
-                  // Right button - "Repeat last" (Gradient)
-                  Expanded(
-                    child: SizedBox(
-                      height: 62,
-                      child: ElevatedButton(
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                          onRestartChatAPI();
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.transparent,
-                          elevation: 0,
-                          shadowColor: Colors.transparent,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          padding: EdgeInsets.zero,
-                        ),
-                        child: Ink(
-                          decoration: BoxDecoration(
-                            gradient: const LinearGradient(
-                              colors: [
-                                Color(0xFF5186E0),
-                                Color(0xFF5E3DFE),
-                                Color(0xFF8E2FFD),
-                                Color(0xFFB02EFB),
-                                Color(0xFFD445EC),
-                              ],
-                              stops: [0.0, 0.24, 0.52, 0.73, 1.0],
-                              begin: Alignment.centerLeft,
-                              end: Alignment.centerRight,
-                            ),
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          child: Container(
-                            height: 62,
-                            alignment: Alignment.center,
-                            child: const Text(
-                              "YES",
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w700,
-                                color: Colors.white,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              SizedBox(height: 8),
-            ],
-          ),
-        );
-      },
-    );
+    // showModalBottomSheet(
+    //   context: context,
+    //   backgroundColor: Colors.white,
+    //   shape: const RoundedRectangleBorder(
+    //     borderRadius: BorderRadius.vertical(top: Radius.circular(8)),
+    //   ),
+    //   builder: (BuildContext context) {
+    //     return Container(
+    //       width: double.infinity,
+    //       padding: const EdgeInsets.all(24),
+    //       child: Column(
+    //         mainAxisSize: MainAxisSize.min,
+    //         crossAxisAlignment: CrossAxisAlignment.start,
+    //         // Add this for left alignment
+    //         children: [
+    //           // Handle bar
+    //           Center(
+    //             child: Container(
+    //               width: 40,
+    //               height: 4,
+    //               decoration: BoxDecoration(
+    //                 color: Colors.grey[300],
+    //                 borderRadius: BorderRadius.circular(2),
+    //               ),
+    //             ),
+    //           ),
+    //           const SizedBox(height: 20),
+    //           const Text(
+    //             'Are you sure want to start new chat?',
+    //             style: TextStyle(
+    //               fontSize: 16,
+    //               fontWeight: FontWeight.w500,
+    //               color: Colors.black,
+    //             ),
+    //             textAlign: TextAlign.left,
+    //           ),
+    //           const SizedBox(height: 24),
+    //           Row(
+    //             children: [
+    //               Expanded(
+    //                 child: SizedBox(
+    //                   height: 62,
+    //                   child: OutlinedButton(
+    //                     onPressed: () {
+    //                       Navigator.of(context).pop();
+    //                     },
+    //                     style: OutlinedButton.styleFrom(
+    //                       side: const BorderSide(
+    //                         color: Color(0xFF8E2FFD),
+    //                         width: 2,
+    //                       ),
+    //                       shape: RoundedRectangleBorder(
+    //                         borderRadius: BorderRadius.circular(16),
+    //                       ),
+    //                       backgroundColor: Colors.white,
+    //                     ),
+    //                     child: const Text(
+    //                       "CANCEL",
+    //                       style: TextStyle(
+    //                         fontSize: 16,
+    //                         fontWeight: FontWeight.w700,
+    //                         color: Color(0xFF8E2FFD),
+    //                       ),
+    //                     ),
+    //                   ),
+    //                 ),
+    //               ),
+
+    //               // Spacing between buttons
+    //               const SizedBox(width: 16),
+
+    //               // Right button - "Repeat last" (Gradient)
+    //               Expanded(
+    //                 child: SizedBox(
+    //                   height: 62,
+    //                   child: ElevatedButton(
+    //                     onPressed: () {
+    //                       Navigator.of(context).pop();
+    //                       onRestartChatAPI();
+    //                     },
+    //                     style: ElevatedButton.styleFrom(
+    //                       backgroundColor: Colors.transparent,
+    //                       elevation: 0,
+    //                       shadowColor: Colors.transparent,
+    //                       shape: RoundedRectangleBorder(
+    //                         borderRadius: BorderRadius.circular(16),
+    //                       ),
+    //                       padding: EdgeInsets.zero,
+    //                     ),
+    //                     child: Ink(
+    //                       decoration: BoxDecoration(
+    //                         gradient: const LinearGradient(
+    //                           colors: [
+    //                             Color(0xFF5186E0),
+    //                             Color(0xFF5E3DFE),
+    //                             Color(0xFF8E2FFD),
+    //                             Color(0xFFB02EFB),
+    //                             Color(0xFFD445EC),
+    //                           ],
+    //                           stops: [0.0, 0.24, 0.52, 0.73, 1.0],
+    //                           begin: Alignment.centerLeft,
+    //                           end: Alignment.centerRight,
+    //                         ),
+    //                         borderRadius: BorderRadius.circular(16),
+    //                       ),
+    //                       child: Container(
+    //                         height: 62,
+    //                         alignment: Alignment.center,
+    //                         child: const Text(
+    //                           "YES",
+    //                           style: TextStyle(
+    //                             fontSize: 16,
+    //                             fontWeight: FontWeight.w700,
+    //                             color: Colors.white,
+    //                           ),
+    //                         ),
+    //                       ),
+    //                     ),
+    //                   ),
+    //                 ),
+    //               ),
+    //             ],
+    //           ),
+    //           SizedBox(height: 8),
+    //         ],
+    //       ),
+    //     );
+    //   },
+    // );
   }
 
   void showExitChatConfirmation(BuildContext context) {
