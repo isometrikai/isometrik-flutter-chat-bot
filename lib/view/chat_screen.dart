@@ -28,8 +28,7 @@ class _ChatScreenState extends State<ChatScreen> {
   final FocusNode _messageFocusNode = FocusNode();
   Set<String> _selectedOptionMessages = {};
   String? _pendingMessage;
-  String? _scheduleLaterStaffId;
-  String? _serviceRequestedTime;
+  Map<String, dynamic> _apiData = {};
   List<ChatWidget> _latestActionWidgets = []; // Track latest action widgets
   int _totalCartCount = 0; // Track total cart count
   List<ChatMessage> messages = [];
@@ -224,8 +223,12 @@ class _ChatScreenState extends State<ChatScreen> {
         ),
       );
       _pendingMessage = text;
-      _scheduleLaterStaffId = scheduleLaterStaffId;
-      _serviceRequestedTime = serviceRequestedTime;
+      _apiData = {
+            'scheduleLaterStaffId': scheduleLaterStaffId,
+            'serviceRequestedTime': serviceRequestedTime,
+          };
+
+      print('CHINTU: _apiData: $_apiData');
     });
 
     _messageController.clear();
@@ -237,8 +240,7 @@ class _ChatScreenState extends State<ChatScreen> {
   void _clearPendingMessage() {
     setState(() {
       _pendingMessage = null;
-      _scheduleLaterStaffId = null;
-      _serviceRequestedTime = null;
+      _apiData = {};
     });
   }
 
@@ -758,8 +760,7 @@ class _ChatScreenState extends State<ChatScreen> {
       _selectedOptionMessages.clear();
       _initializeSession(true);
       _pendingMessage = null;
-      _scheduleLaterStaffId = null;
-      _serviceRequestedTime = null;
+      _apiData = {};
       _latestActionWidgets.clear(); // Clear action widgets when restarting
       _cartBloc.add(CartFetchRequested(needToShowLoader: false));
     });
@@ -865,8 +866,7 @@ class _ChatScreenState extends State<ChatScreen> {
         });
       },
       pendingMessage: _pendingMessage,
-      scheduleLaterStaffId: _scheduleLaterStaffId ?? "",
-      serviceRequestedTime: _serviceRequestedTime ?? "",
+      apiData: _apiData,
       onClearPendingMessage: _clearPendingMessage,
       sessionId: sessionId,
       // Pass session ID

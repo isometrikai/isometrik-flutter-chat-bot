@@ -29,8 +29,7 @@ class ChatScreenBody extends StatelessWidget {
   final Function(Set<String>) onUpdateSelectedOptions;
   final Function(List<ChatMessage>) onUpdateMessages;
   final String? pendingMessage;
-  final String? scheduleLaterStaffId;
-  final String? serviceRequestedTime;
+  final Map<String, dynamic> apiData;
   final VoidCallback onClearPendingMessage;
   final String sessionId;
   final List<ChatWidget> latestActionWidgets;
@@ -67,8 +66,7 @@ class ChatScreenBody extends StatelessWidget {
     required this.onUpdateSelectedOptions,
     required this.onUpdateMessages,
     required this.pendingMessage,
-    required this.scheduleLaterStaffId,
-    required this.serviceRequestedTime,
+    required this.apiData,
     required this.onClearPendingMessage,
     required this.sessionId,
     required this.latestActionWidgets,
@@ -174,8 +172,8 @@ class ChatScreenBody extends StatelessWidget {
                   final event = await ChatLoadEvent.create(
                     message: msg.trim(),
                     sessionId: sid,
-                    staffId: scheduleLaterStaffId ?? "",
-                    serviceRequestedTime: serviceRequestedTime ?? "",
+                    staffId: apiData['scheduleLaterStaffId'] ?? "",
+                    serviceRequestedTime: apiData['serviceRequestedTime'] ?? "",
                   );
                   bloc.add(event);
                   onClearPendingMessage();
