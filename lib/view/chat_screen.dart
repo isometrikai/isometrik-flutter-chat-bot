@@ -29,7 +29,7 @@ class _ChatScreenState extends State<ChatScreen> {
   Set<String> _selectedOptionMessages = {};
   String? _pendingMessage;
   String? _scheduleLaterStaffId;
-
+  String? _serviceRequestedTime;
   List<ChatWidget> _latestActionWidgets = []; // Track latest action widgets
   int _totalCartCount = 0; // Track total cart count
   List<ChatMessage> messages = [];
@@ -205,7 +205,7 @@ class _ChatScreenState extends State<ChatScreen> {
     }
   }
 
-  void _sendMessage(String text, [String? scheduleLaterStaffId]) {
+  void _sendMessage(String text, [String? scheduleLaterStaffId, String? serviceRequestedTime]) {
     if (text.trim().isEmpty) return;
 
     // Prepare: hide stores/products from the last bot message if present
@@ -225,6 +225,7 @@ class _ChatScreenState extends State<ChatScreen> {
       );
       _pendingMessage = text;
       _scheduleLaterStaffId = scheduleLaterStaffId;
+      _serviceRequestedTime = serviceRequestedTime;
     });
 
     _messageController.clear();
@@ -237,6 +238,7 @@ class _ChatScreenState extends State<ChatScreen> {
     setState(() {
       _pendingMessage = null;
       _scheduleLaterStaffId = null;
+      _serviceRequestedTime = null;
     });
   }
 
@@ -757,6 +759,7 @@ class _ChatScreenState extends State<ChatScreen> {
       _initializeSession(true);
       _pendingMessage = null;
       _scheduleLaterStaffId = null;
+      _serviceRequestedTime = null;
       _latestActionWidgets.clear(); // Clear action widgets when restarting
       _cartBloc.add(CartFetchRequested(needToShowLoader: false));
     });
@@ -863,6 +866,7 @@ class _ChatScreenState extends State<ChatScreen> {
       },
       pendingMessage: _pendingMessage,
       scheduleLaterStaffId: _scheduleLaterStaffId ?? "",
+      serviceRequestedTime: _serviceRequestedTime ?? "",
       onClearPendingMessage: _clearPendingMessage,
       sessionId: sessionId,
       // Pass session ID
