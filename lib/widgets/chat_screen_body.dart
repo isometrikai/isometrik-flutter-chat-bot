@@ -556,17 +556,6 @@ class ChatScreenBody extends StatelessWidget {
   }
 
   void showNewChatConfirmation(BuildContext context) {
-
-    //  Map<String, dynamic> obj = {
-    //                       'startTime': '123',
-    //                       'storeId': '1234',
-    //                       'categoryId': '1235',
-    //                       'bookingType': '1236'
-    //                     };
-    //                     // Map<String, dynamic> obj = Map<String, dynamic>.from(staffData);
-    //                     print("obj: $obj");
-    //                     OrderService().triggerSelectStaffScreenOpen(obj);
-
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.white,
