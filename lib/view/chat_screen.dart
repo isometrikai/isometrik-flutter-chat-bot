@@ -128,7 +128,8 @@ class _ChatScreenState extends State<ChatScreen> {
     OrderService().setSelectStaffCallback((Map<String, dynamic> staff) {
       if (mounted) {
         print('ChatScreen: Select staff received - $staff');
-        _sendMessage('I have selected a staff.\n$staff');
+        // _sendMessage('I have selected a staff.\n$staff');
+        _sendMessage('I have selected a staff.\n${staff['dateTimeStr']}', staff['serviceRequestedTime']);
       }
     });
   }
