@@ -599,7 +599,7 @@ class _ChatScreenState extends State<ChatScreen> {
                     widget.type == WidgetEnum.add_address.value ||
                     widget.type == WidgetEnum.add_payment.value ||
                     widget.type == WidgetEnum.cart.value ||
-                    widget.type == WidgetEnum.services_delivery_options.value ||
+                    widget.type == WidgetEnum.service_types.value ||
                     widget.type == WidgetEnum.order_summary.value ||
                     widget.type == WidgetEnum.choose_address.value ||
                     widget.type == WidgetEnum.choose_card.value ||
