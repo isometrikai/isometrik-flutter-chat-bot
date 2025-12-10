@@ -5,10 +5,10 @@ class ApiService {
 
   static String get baseApiUrl => _baseApiUrl;
 
-  static Future<void> initialize() async {
-    await AuthService.instance.initialize();
-    await ChatApiServices.instance.initialize();
-  }
+  // static Future<void> initialize() async {
+  //   await AuthService.instance.initialize();
+  //   await ChatApiServices.instance.initialize();
+  // }
 
   static void configure({
     required String chatBotId,

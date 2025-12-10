@@ -5,7 +5,7 @@ import 'package:chat_bot/data/services/auth_service.dart';
 class LaunchRepository {
   const LaunchRepository();
 
-  Future<void> initialize() => AuthService.instance.initialize();
+  // Future<void> initialize() => AuthService.instance.initialize();
 
   Future<MyGPTsResponse?> getChatbotData() => AuthService.instance.getChatbotData();
 

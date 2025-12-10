@@ -60,10 +60,10 @@ class ChatApiServices {
     _searchApiUrl = searchApiUrl;
   }
 
-  /// Initialize the API service
-  Future<void> initialize() async {
-    await TokenManager.instance.initialize();
-  }
+  // /// Initialize the API service
+  // Future<void> initialize() async {
+  //   await TokenManager.instance.initialize();
+  // }
 
   /// Get the configured userId
   String? get userId => _userId;
@@ -102,8 +102,7 @@ class ChatApiServices {
 
     // Match existing endpoint used elsewhere
     final res = await _chatClient.post('/v2/chatbot', body);
-    // final res = await _appClient.post('/v2/chatbot', body);
-    // final res = await _chatClient.post('/v2/test-response', body);
+    
     if (res.isSuccess && res.data != null) {
       try {
         return ChatResponse.fromJson(res.data as Map<String, dynamic>);

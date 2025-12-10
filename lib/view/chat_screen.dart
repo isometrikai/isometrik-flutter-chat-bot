@@ -603,7 +603,7 @@ class _ChatScreenState extends State<ChatScreen> {
                     widget.type == WidgetEnum.order_tracking.value ||
                     widget.type == WidgetEnum.order_details.value ||
                     widget.type == WidgetEnum.schedule_later.value ||
-                    widget.type == WidgetEnum.select_staff.value,
+                    widget.type == WidgetEnum.staff_selection.value,
               )
               .toList();
     });

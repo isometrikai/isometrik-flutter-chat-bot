@@ -131,7 +131,7 @@ class ChatWidget {
   bool get isAddAddressWidget => type == WidgetEnum.add_address.value;
   bool get isAddPaymentWidget => type == WidgetEnum.add_payment.value;
   bool get isScheduledLaterWidget => type == WidgetEnum.schedule_later.value;
-  bool get isSelectStaffWidget => type == WidgetEnum.select_staff.value;
+  bool get isSelectStaffWidget => type == WidgetEnum.staff_selection.value;
   bool get isOrderSummaryWidget => type == WidgetEnum.order_summary.value;
   bool get isOrderConfirmedWidget => type == WidgetEnum.order_confirmed.value;
   bool get isOrderTrackingWidget => type == WidgetEnum.order_tracking.value;

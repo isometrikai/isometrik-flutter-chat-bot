@@ -1501,7 +1501,7 @@ class ChatScreenBody extends StatelessWidget {
         }
 
         for (final widget in latestActionWidgets.where(
-          (w) => w.type == WidgetEnum.select_staff.value,
+          (w) => w.type == WidgetEnum.staff_selection.value,
         )) {
           for (final action in widget.selectStaff) {
             actionButtons.add(
@@ -1512,13 +1512,21 @@ class ChatScreenBody extends StatelessWidget {
                         ? () {}
                         : () async {
 
-                          Map<String, dynamic> obj = {
-                          'startTime': '',
-                          'storeId': '',
-                          'categoryId': '',
-                          'bookingType': ''
-                        };
+                            final staffData = widget.rawItems.isNotEmpty 
+                              ? widget.rawItems.first 
+                              : <String, dynamic>{};
+                          
+                          // Print the JSON from 'widget' key when type == 'staff_selection'
+                          print('JSON: $staffData');
 
+                          Map<String, dynamic> obj = {
+                          'startTime': staffData['startTime'],
+                          'storeId': staffData['storeId'],
+                          'categoryId': staffData['categoryId'],
+                          'bookingType': staffData['bookingType']
+                        };
+                        // Map<String, dynamic> obj = Map<String, dynamic>.from(staffData);
+                        print("obj: $obj");
                         OrderService().triggerSelectStaffScreenOpen(obj);
                         },
               ),

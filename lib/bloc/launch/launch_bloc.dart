@@ -23,7 +23,7 @@ class LaunchBloc extends Bloc<LaunchEvent, LaunchState> {
     // emit(LaunchInProgress());
     // Utility.showLoader();
     try {
-      await repository.initialize();
+      // await repository.initialize();
       final chatbotData = await repository.getChatbotData();
       final greetingData = await repository.getInitialOptionData();
       // if (chatbotData == null) {
