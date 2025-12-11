@@ -136,7 +136,7 @@ class _ChatScreenState extends State<ChatScreen> {
             ..._apiData,
             'scheduleLaterStaffId': staff['scheduleLaterStaffId'],
           };
-        _sendMessage('I have selected a staff member: ${staff['staffName']}.', staff['scheduleLaterStaffId'], staff['serviceRequestedTime']);
+        _sendMessage('I have selected a staff member: ${staff['staffName']}', staff['scheduleLaterStaffId'], staff['serviceRequestedTime']);
       }
     });
   }
