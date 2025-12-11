@@ -134,8 +134,9 @@ class OrderSummaryWidget extends StatelessWidget {
                         ],
                       ],
                     ),
-                    const SizedBox(height: 10),
-                    // Address with icon
+                    if (storeInfo.address != null && storeInfo.address!.isNotEmpty) ...[    
+                      const SizedBox(height: 10),
+                      // Address with icon
                     Row(
                       children: [
                         const Text('🏠 ', style: TextStyle(fontSize: 14)),
@@ -152,6 +153,7 @@ class OrderSummaryWidget extends StatelessWidget {
                         ),
                       ],
                     ),
+                    ],  
                   ],
                 ),
               ),
