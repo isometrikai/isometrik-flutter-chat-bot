@@ -84,10 +84,12 @@ class PlatformService {
 
       if (config['longitude'] != null) {
         longitude = double.tryParse(config['longitude'].toString());
+        long = config['longitude'].toString();
       }
 
       if (config['latitude'] != null) {
         latitude = double.tryParse(config['latitude'].toString());
+        lat = config['latitude'].toString();
       }
 
       ApiService.configure(

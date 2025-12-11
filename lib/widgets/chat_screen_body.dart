@@ -1489,8 +1489,8 @@ class ChatScreenBody extends StatelessWidget {
 
                           Map<String, dynamic> obj = {
                           'storeId': action.storeId,
-                          'lat': '13.02868',
-                          'long': '77.58952',
+                          'lat': lat,
+                          'long': long,
                           'storeIsOpen': action.storeIsOpen ?? true
                         };
 
