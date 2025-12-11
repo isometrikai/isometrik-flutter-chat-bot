@@ -122,6 +122,7 @@ class _ChatScreenState extends State<ChatScreen> {
       if (mounted) {
         print('ChatScreen: Select schedule received - $schedule');
          _apiData = {
+            ..._apiData,
             'serviceRequestedTime': schedule['serviceRequestedTime'],
           };
         _sendMessage('I have selected a schedule: \n${schedule['dateTimeStr']}', schedule['scheduleLaterStaffId'], schedule['serviceRequestedTime']);
@@ -132,6 +133,7 @@ class _ChatScreenState extends State<ChatScreen> {
       if (mounted) {
         print('ChatScreen: Select staff received - $staff');
          _apiData = {
+            ..._apiData,
             'scheduleLaterStaffId': staff['scheduleLaterStaffId'],
           };
         _sendMessage('I have selected a staff member: ${staff['staffName']}.', staff['scheduleLaterStaffId'], staff['serviceRequestedTime']);
