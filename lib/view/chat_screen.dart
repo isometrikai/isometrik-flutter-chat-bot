@@ -247,7 +247,7 @@ class _ChatScreenState extends State<ChatScreen> {
   void _clearPendingMessage() {
     setState(() {
       _pendingMessage = null;
-      _apiData = {};
+      // _apiData = {};
     });
   }
 
