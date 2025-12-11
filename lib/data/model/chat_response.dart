@@ -780,6 +780,7 @@ class WidgetAction {
   final int? storeListing;
   final int? hyperlocal;
   final int? companyType;
+  final String? emoji;
 
   WidgetAction({
     required this.buttonText,
@@ -805,6 +806,7 @@ class WidgetAction {
     this.storeListing,
     this.hyperlocal,
     this.companyType,
+    this.emoji,
   });
 
   factory WidgetAction.fromJson(Map<String, dynamic> json) {
@@ -836,6 +838,7 @@ class WidgetAction {
         storeListing: json['storeListing'] ?? 111,
         hyperlocal: json['hyperlocal'] ?? 111,
         companyType: json['companyType'] ?? 111,
+        emoji: json['emoji']?.toString(),
     );
   }
 
@@ -865,6 +868,7 @@ class WidgetAction {
       'hyperlocal': hyperlocal,
       'companyType': companyType,
       'storeCategoryId': storeCategoryId,
+      'emoji': emoji,
     };
   }
 }

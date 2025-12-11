@@ -164,7 +164,8 @@ class _ChatScreenState extends State<ChatScreen> {
               message.hasChooseAddressWidget ||
               message.hasChooseCardWidget ||
               message.hasOrderSummaryWidget ||
-              message.hasOrderConfirmedWidget)) {
+              message.hasOrderConfirmedWidget ||
+              message.hasServicesDeliveryOptionsWidget)) {
         return i;
       }
     }
@@ -291,7 +292,7 @@ class _ChatScreenState extends State<ChatScreen> {
         ChatWidget? chooseCardWidget;
         ChatWidget? orderSummaryWidget;
         ChatWidget? orderConfirmedWidget;
-        
+
         try {
           storesWidget = botResponse.widgets.firstWhere(
             (widget) => widget.isStoresWidget,
@@ -402,6 +403,7 @@ class _ChatScreenState extends State<ChatScreen> {
             stores: storesWidget?.stores ?? [],
             products: productsWidget?.products ?? [],
             cartItems: cartWidget?.getCartItems() ?? [],
+            servicesDeliveryOptions: servicesDeliveryOptionsWidget?.getServicesDeliveryOptions() ?? [],
             addressOptions: chooseAddressWidget?.getAddressOptions() ?? [],
             cardOptions: chooseCardWidget?.getCardOptions() ?? [],
             orderSummaryItems: orderSummaryWidget?.getOrderSummaryItems() ?? [],

@@ -66,6 +66,14 @@ class _ServicesDeliveryOptionsWidgetState extends State<ServicesDeliveryOptionsW
                 },
                 child: Row(
                   children: [
+                    Text(
+                      option.emoji ?? '',
+                      style: AppTextStyles.restaurantDescription.copyWith(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w400
+                      ),
+                    ),
+                    const SizedBox(width: 10),
                     // Text
                     Expanded(
                       child: Text(
@@ -78,6 +86,7 @@ class _ServicesDeliveryOptionsWidgetState extends State<ServicesDeliveryOptionsW
                       ),
                     ),
                     const SizedBox(width: 10),
+                    if (widget.isFromChatHistory == false)
                     // Radio button
                     SvgPicture.asset(
                       AssetPath.get(isSelected 
