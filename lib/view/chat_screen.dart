@@ -121,6 +121,9 @@ class _ChatScreenState extends State<ChatScreen> {
     OrderService().setSelectScheduleCallback((Map<String, dynamic> schedule) {
       if (mounted) {
         print('ChatScreen: Select schedule received - $schedule');
+         _apiData = {
+            'serviceRequestedTime': schedule['serviceRequestedTime'],
+          };
         _sendMessage('I have selected a schedule: \n${schedule['dateTimeStr']}', schedule['scheduleLaterStaffId'], schedule['serviceRequestedTime']);
       }
     });
@@ -128,6 +131,9 @@ class _ChatScreenState extends State<ChatScreen> {
     OrderService().setSelectStaffCallback((Map<String, dynamic> staff) {
       if (mounted) {
         print('ChatScreen: Select staff received - $staff');
+         _apiData = {
+            'scheduleLaterStaffId': staff['scheduleLaterStaffId'],
+          };
         _sendMessage('I have selected a staff member: ${staff['staffName']}.', staff['scheduleLaterStaffId'], staff['serviceRequestedTime']);
       }
     });
@@ -224,10 +230,10 @@ class _ChatScreenState extends State<ChatScreen> {
         ),
       );
       _pendingMessage = text;
-      _apiData = {
-            'scheduleLaterStaffId': scheduleLaterStaffId,
-            'serviceRequestedTime': serviceRequestedTime,
-          };
+      // _apiData = {
+      //       'scheduleLaterStaffId': scheduleLaterStaffId,
+      //       'serviceRequestedTime': serviceRequestedTime,
+      //     };
 
       print('CHINTU: _apiData: $_apiData');
     });
