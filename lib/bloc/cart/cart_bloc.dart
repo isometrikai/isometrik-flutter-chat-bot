@@ -242,8 +242,6 @@ var isCartAPICalled = false;
 int totalProductCount = 0;
 var needToCallChatScreenSendMessageAPI = true;
 String sessionId = "";
-String lat = '13.02868';
-String long = '77.58952';
 
 /// Result class for cart validation
 class CartValidationResult {
