@@ -57,12 +57,14 @@ class _ProductCustomizationScreenState extends State<ProductCustomizationScreen>
         centralProductId: widget.centralProductId ?? '',
         childProductId: widget.productId ?? '',
         storeId: widget.storeId ?? '',
+        storeTypeId: widget.store?.storeTypeId ?? 0,
       ));
     }else {
       _bloc.add(LoadProductPortions(
         centralProductId: widget.product?.parentProductId ?? '',
         childProductId: widget.product?.childProductId ?? '',
         storeId: widget.store?.storeId ?? '',
+        storeTypeId: widget.store?.storeTypeId ?? 0,
       ));
     }
   }
@@ -144,12 +146,14 @@ class _ProductCustomizationScreenState extends State<ProductCustomizationScreen>
                                           centralProductId: widget.centralProductId ?? '',
                                           childProductId: widget.productId ?? '',
                                           storeId: widget.storeId ?? '',
+                                          storeTypeId: widget.store?.storeTypeId ?? 0,
                                         ));
                                         }else {
                                         _bloc.add(LoadProductPortions(
                                           centralProductId: widget.product?.parentProductId ?? '',
                                           childProductId: widget.product?.childProductId ?? '',
                                           storeId: widget.store?.storeId ?? '',
+                                          storeTypeId: widget.store?.storeTypeId ?? 0,
                                         ));
                                         }
                                       },

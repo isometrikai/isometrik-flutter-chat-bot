@@ -566,10 +566,37 @@ class Store {
         .map((e) => Product.fromJson(e as Map<String, dynamic>))
         .toList();
 
+    // Process categorylist - remove duplicates before displaying
+    String cuisineDetailsStr = '';
+    if (json['cuisineDetails'] != null) {
+      // If cuisineDetails is already a string, deduplicate it if it's comma-separated
+      final cuisineDetailsValue = json['cuisineDetails'].toString();
+      if (cuisineDetailsValue.contains(',')) {
+        // Split by comma, trim whitespace, remove duplicates, and rejoin
+        final categories = cuisineDetailsValue
+            .split(',')
+            .map((e) => e.trim())
+            .where((e) => e.isNotEmpty)
+            .toSet()
+            .toList();
+        cuisineDetailsStr = categories.join(', ');
+      } else {
+        cuisineDetailsStr = cuisineDetailsValue;
+      }
+    } else if (json['categorylist'] != null) {
+      final categoryList = (json['categorylist'] as List<dynamic>?)
+          ?.map((e) => e.toString().trim())
+          .where((e) => e.isNotEmpty)
+          .toList() ?? [];
+      // Remove duplicates by converting to Set and back to List
+      final uniqueCategories = categoryList.toSet().toList();
+      cuisineDetailsStr = uniqueCategories.join(', ');
+    }
+
     return Store(
       storename: name,
       avgRating: rating,
-      cuisineDetails: (json['cuisineDetails'] ?? (json['categorylist']?.join(', ') ?? '')).toString(),
+      cuisineDetails: cuisineDetailsStr,
       storeImage: image,
       distance: distance,
       storeId: storeId,

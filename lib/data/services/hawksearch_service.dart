@@ -208,7 +208,15 @@ class HawkSearchService {
 
     final String cuisineDetails = (() {
       final List<dynamic> cl = (doc['categorylist'] as List<dynamic>? ?? []);
-      if (cl.isNotEmpty) return cl.map((e) => e.toString()).join(', ');
+      if (cl.isNotEmpty) {
+        // Remove duplicates by converting to Set and back to List
+        final categoryList = cl
+            .map((e) => e.toString().trim())
+            .where((e) => e.isNotEmpty)
+            .toSet()
+            .toList();
+        return categoryList.join(', ');
+      }
       return '';
     })();
 

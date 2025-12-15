@@ -1869,7 +1869,8 @@ class ChatScreenBody extends StatelessWidget {
                     store.storeTypeId == FoodCategory.food.value) ||
                 (product.variantsCount > 0 &&
                     (store.storeTypeId == FoodCategory.grocery.value ||
-                        store.storeTypeId == FoodCategory.pharmacy.value))) {
+                        store.storeTypeId == FoodCategory.pharmacy.value ||
+                        store.storeTypeId == FoodCategory.services.value))) {
               if (store.storeTypeId == FoodCategory.grocery.value ||
                   store.storeTypeId == FoodCategory.pharmacy.value) {
                 showModalBottomSheet(

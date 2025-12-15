@@ -187,7 +187,6 @@ class StoreCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 12),
-            if (store.products.isNotEmpty && (store.storeTypeId ?? store.type) != FoodCategory.services.value)
               SizedBox(
                 height: 113,
                 child: ListView.separated(
@@ -409,7 +408,7 @@ class _ProductPreviewTile extends StatelessWidget {
                               : _placeholderProductImage(),
                     ),
                   ),
-                  if ((store.storeTypeId ?? store.type) != FoodCategory.food.value) ...[
+                  if (((store.storeTypeId ?? store.type) != FoodCategory.food.value) && ((store.storeTypeId ?? store.type) != FoodCategory.services.value)) ...[
                     if (product.instock == false) ...[
                       Positioned(
                         right: 4,
@@ -435,8 +434,10 @@ class _ProductPreviewTile extends StatelessWidget {
             ] else
               ...[
               ]
-          ] else
-            ...[
+          ] else if (((store.storeTypeId ?? store.type) == FoodCategory.services.value)) ...[
+              Positioned(
+                  right: 0, bottom: -4, child: _buildAddButton(context)),
+          ] else ...[
               if (product.instock == true) ...[
                 Positioned(
                     right: 0, bottom: -4, child: _buildAddButton(context)),

@@ -28,6 +28,7 @@ class ProductCustomizationBloc extends Bloc<ProductCustomizationEvent, ProductCu
         centralProductId: event.centralProductId,
         childProductId: event.childProductId,
         storeId: event.storeId,
+        storeTypeId: event.storeTypeId,
       );
 
       if (result.isSuccess) {
