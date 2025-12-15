@@ -191,66 +191,73 @@ class ChatScreenBody extends StatelessWidget {
               return Column(
                 children: [
                   Expanded(
-                    child: Stack(
-                      children: [
-                        NotificationListener<ScrollNotification>(
-                          onNotification: (ScrollNotification scrollInfo) {
-                            return false;
-                          },
-                          child: ListView.builder(
-                            controller: scrollController,
-                            padding: const EdgeInsets.all(16),
-                            keyboardDismissBehavior:
-                                ScrollViewKeyboardDismissBehavior.onDrag,
-                            itemCount:
-                                messages.length +
-                                (state is ChatLoading ? 1 : 0),
-                            itemBuilder: (context, index) {
-                              if (index < messages.length) {
-                                return buildMessageBubble(
-                                  messages[index],
-                                  context,
-                                );
-                              }
+                    child: GestureDetector(
+                      onTap: () {
+                        // Dismiss keyboard when tapping outside input area
+                        FocusScope.of(context).unfocus();
+                      },
+                      behavior: HitTestBehavior.translucent,
+                      child: Stack(
+                        children: [
+                          NotificationListener<ScrollNotification>(
+                            onNotification: (ScrollNotification scrollInfo) {
+                              return false;
+                            },
+                            child: ListView.builder(
+                              controller: scrollController,
+                              padding: const EdgeInsets.all(16),
+                              keyboardDismissBehavior:
+                                  ScrollViewKeyboardDismissBehavior.onDrag,
+                              itemCount:
+                                  messages.length +
+                                  (state is ChatLoading ? 1 : 0),
+                              itemBuilder: (context, index) {
+                                if (index < messages.length) {
+                                  return buildMessageBubble(
+                                    messages[index],
+                                    context,
+                                  );
+                                }
 
-                              if (state is ChatLoading) {
-                                return Padding(
-                                  padding: const EdgeInsets.only(bottom: 16),
-                                  child: Row(
-                                    crossAxisAlignment: CrossAxisAlignment.end,
-                                    children: [
-                                      Container(
-                                        child: SizedBox(
-                                          width: 80,
-                                          height: 40,
-                                          child: Transform.scale(
-                                            scale: 3.5,
-                                            child: Lottie.asset(
-                                              AssetPath.get(
-                                                'lottie/bubble-wave-black.json',
+                                if (state is ChatLoading) {
+                                  return Padding(
+                                    padding: const EdgeInsets.only(bottom: 16),
+                                    child: Row(
+                                      crossAxisAlignment: CrossAxisAlignment.end,
+                                      children: [
+                                        Container(
+                                          child: SizedBox(
+                                            width: 80,
+                                            height: 40,
+                                            child: Transform.scale(
+                                              scale: 3.5,
+                                              child: Lottie.asset(
+                                                AssetPath.get(
+                                                  'lottie/bubble-wave-black.json',
+                                                ),
+                                                fit: BoxFit.contain,
                                               ),
-                                              fit: BoxFit.contain,
                                             ),
                                           ),
                                         ),
-                                      ),
-                                    ],
-                                  ),
-                                );
-                              }
+                                      ],
+                                    ),
+                                  );
+                                }
 
-                              return const SizedBox.shrink();
-                            },
-                          ),
-                        ),
-                        if (showGreetingOverlay)
-                          Positioned.fill(
-                            child: IgnorePointer(
-                              ignoring: false,
-                              child: buildGreetingOverlay(context),
+                                return const SizedBox.shrink();
+                              },
                             ),
                           ),
-                      ],
+                          if (showGreetingOverlay)
+                            Positioned.fill(
+                              child: IgnorePointer(
+                                ignoring: false,
+                                child: buildGreetingOverlay(context),
+                              ),
+                            ),
+                        ],
+                      ),
                     ),
                   ),
                   buildActionButtons(context),
