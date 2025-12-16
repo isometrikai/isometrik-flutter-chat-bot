@@ -963,7 +963,7 @@ class _ChatScreenState extends State<ChatScreen> {
                         child: Padding(
                           padding: const EdgeInsets.all(12),
                           child: SvgPicture.asset(
-                            AssetPath.get('images/ic_mainImg.svg'),
+                            AssetPath.get('images/ic_mainImg_R.svg'),
                             fit: BoxFit.contain,
                           ),
                         ),

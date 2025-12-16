@@ -190,8 +190,8 @@ class _TutorialScreenState extends State<TutorialScreen> {
   Widget _buildWelcomeSection() {
     return Column(
       children: [
-         Text(
-          'Welcome to your\nzAIn AI assistant!',
+        const Text(
+          'Welcome to your\nAI assistant!',
           textAlign: TextAlign.center,
           style: AppTextStyles.restaurantTitle.copyWith(
             fontSize: 24,
@@ -458,7 +458,7 @@ class _TutorialScreenState extends State<TutorialScreen> {
     return Column(
       children: [
          Text(
-          'How to chat with zAIn',
+          'How to chat with AI',
           textAlign: TextAlign.center,
           style: AppTextStyles.restaurantTitle.copyWith(
             fontSize: 20,
@@ -997,8 +997,8 @@ class _TutorialScreenState extends State<TutorialScreen> {
   Widget _buildFeaturesTitleSection() {
     return Column(
       children: [
-         Text(
-          'Why choose zAIn AI?',
+        const Text(
+          'Why choose AI assistant?',
           textAlign: TextAlign.center,
           style: AppTextStyles.restaurantTitle.copyWith(
             fontSize: 20,
@@ -1181,8 +1181,8 @@ class _TutorialScreenState extends State<TutorialScreen> {
           ),
         ),
         const SizedBox(height: 16),
-         Text(
-          'Start chatting with Zain AI to order food, shop for groceries, book services, and more. Just type what you need!',
+        const Text(
+          'Start chatting with AI to order food, shop for groceries, book services, and more. Just type what you need!',
           textAlign: TextAlign.center,
           style: TextStyle(
             fontWeight: FontWeight.w400,
@@ -1321,7 +1321,7 @@ class _TutorialScreenState extends State<TutorialScreen> {
     return Column(
       children: [
          Text(
-          'Meet zAIn AI',
+          'Meet AI assistant',
           style: AppTextStyles.restaurantTitle.copyWith(
             fontWeight: FontWeight.w700,
             fontSize: 20,
