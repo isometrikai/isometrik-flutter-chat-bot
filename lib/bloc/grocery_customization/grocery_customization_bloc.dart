@@ -3,8 +3,7 @@ import 'package:chat_bot/utils/utility.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:chat_bot/bloc/grocery_customization/grocery_customization_event.dart';
 import 'package:chat_bot/bloc/grocery_customization/grocery_customization_state.dart';
-import 'package:chat_bot/data/repositories/grocery_product_repository.dart';
-import 'package:chat_bot/data/model/grocery_product_details_response.dart';
+import 'package:chat_bot/data/data.dart';
 
 class GroceryCustomizationBloc extends Bloc<GroceryCustomizationEvent, GroceryCustomizationState> {
   final GroceryProductRepository _repository;

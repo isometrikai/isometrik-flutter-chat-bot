@@ -11,6 +11,7 @@ class ChatMessage {
   final bool hasStoreCards;
   final bool hasProductCards;
   final bool hasCartWidget;
+  final bool hasServicesDeliveryOptionsWidget;
   final bool hasChooseAddressWidget;
   final bool hasChooseCardWidget;
   final bool hasOrderSummaryWidget;
@@ -21,12 +22,14 @@ class ChatMessage {
   final List<Store> stores;
   final List<Product> products;
   final List<WidgetAction> cartItems;
+  final List<WidgetAction> servicesDeliveryOptions;
   final List<AddressOption> addressOptions;
   final List<CardOption> cardOptions;
   final List<WidgetAction> orderSummaryItems;
   final ChatWidget? storesWidget;
   final ChatWidget? productsWidget;
   final ChatWidget? cartWidget;
+  final ChatWidget? servicesDeliveryOptionsWidget;
       final ChatWidget? chooseAddressWidget;
     final ChatWidget? chooseCardWidget;
     final ChatWidget? orderSummaryWidget;
@@ -41,6 +44,7 @@ class ChatMessage {
     this.hasStoreCards = false,
     this.hasProductCards = false,
     this.hasCartWidget = false,
+    this.hasServicesDeliveryOptionsWidget = false,
     this.hasChooseAddressWidget = false,
     this.hasChooseCardWidget = false,
     this.hasOrderSummaryWidget = false,
@@ -51,12 +55,14 @@ class ChatMessage {
     this.stores = const [],
     this.products = const [],
     this.cartItems = const [],
+    this.servicesDeliveryOptions = const [],
     this.addressOptions = const [],
     this.cardOptions = const [],
     this.orderSummaryItems = const [],
     this.storesWidget,
     this.productsWidget,
     this.cartWidget,
+    this.servicesDeliveryOptionsWidget,
     this.chooseAddressWidget,
     this.chooseCardWidget,
     this.orderSummaryWidget,
@@ -72,6 +78,7 @@ class ChatMessage {
     bool? hasStoreCards,
     bool? hasProductCards,
     bool? hasCartWidget,
+    bool? hasServicesDeliveryOptionsWidget,
     bool? hasChooseAddressWidget,
     bool? hasChooseCardWidget,
     bool? hasOrderSummaryWidget,
@@ -82,12 +89,14 @@ class ChatMessage {
     List<Store>? stores,
     List<Product>? products,
     List<WidgetAction>? cartItems,
+    List<WidgetAction>? servicesDeliveryOptions,
     List<AddressOption>? addressOptions,
     List<CardOption>? cardOptions,
     List<WidgetAction>? orderSummaryItems,
     ChatWidget? storesWidget,
     ChatWidget? productsWidget,
     ChatWidget? cartWidget,
+    ChatWidget? servicesDeliveryOptionsWidget,
     ChatWidget? chooseAddressWidget,
     ChatWidget? chooseCardWidget,
     ChatWidget? orderSummaryWidget,
@@ -102,6 +111,7 @@ class ChatMessage {
       hasStoreCards: hasStoreCards ?? this.hasStoreCards,
       hasProductCards: hasProductCards ?? this.hasProductCards,
       hasCartWidget: hasCartWidget ?? this.hasCartWidget,
+      hasServicesDeliveryOptionsWidget: hasServicesDeliveryOptionsWidget ?? this.hasServicesDeliveryOptionsWidget,
       hasChooseAddressWidget: hasChooseAddressWidget ?? this.hasChooseAddressWidget,
       hasChooseCardWidget: hasChooseCardWidget ?? this.hasChooseCardWidget,
               hasOrderSummaryWidget: hasOrderSummaryWidget ?? this.hasOrderSummaryWidget,
@@ -112,13 +122,15 @@ class ChatMessage {
       stores: stores ?? this.stores,
       products: products ?? this.products,
       cartItems: cartItems ?? this.cartItems,
+      servicesDeliveryOptions: servicesDeliveryOptions ?? this.servicesDeliveryOptions,
       addressOptions: addressOptions ?? this.addressOptions,
       cardOptions: cardOptions ?? this.cardOptions,
       orderSummaryItems: orderSummaryItems ?? this.orderSummaryItems,
       storesWidget: storesWidget ?? this.storesWidget,
       productsWidget: productsWidget ?? this.productsWidget,
       cartWidget: cartWidget ?? this.cartWidget,
-              chooseAddressWidget: chooseAddressWidget ?? this.chooseAddressWidget,
+      servicesDeliveryOptionsWidget: servicesDeliveryOptionsWidget ?? this.servicesDeliveryOptionsWidget,
+      chooseAddressWidget: chooseAddressWidget ?? this.chooseAddressWidget,
         chooseCardWidget: chooseCardWidget ?? this.chooseCardWidget,
         orderSummaryWidget: orderSummaryWidget ?? this.orderSummaryWidget,
         orderConfirmedWidget: orderConfirmedWidget ?? this.orderConfirmedWidget,

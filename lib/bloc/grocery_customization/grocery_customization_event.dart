@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-import 'package:chat_bot/data/model/grocery_product_details_response.dart';
+import 'package:chat_bot/data/data.dart';
 
 abstract class GroceryCustomizationEvent extends Equatable {
   const GroceryCustomizationEvent();

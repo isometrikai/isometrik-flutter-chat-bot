@@ -2,8 +2,7 @@ import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:chat_bot/bloc/product_customization/product_customization_event.dart';
 import 'package:chat_bot/bloc/product_customization/product_customization_state.dart';
-import 'package:chat_bot/data/repositories/product_portion_repository.dart';
-import 'package:chat_bot/data/model/product_portion_response.dart';
+import 'package:chat_bot/data/data.dart';
 
 class ProductCustomizationBloc extends Bloc<ProductCustomizationEvent, ProductCustomizationState> {
   final ProductPortionRepository _repository;
@@ -29,6 +28,7 @@ class ProductCustomizationBloc extends Bloc<ProductCustomizationEvent, ProductCu
         centralProductId: event.centralProductId,
         childProductId: event.childProductId,
         storeId: event.storeId,
+        storeTypeId: event.storeTypeId,
       );
 
       if (result.isSuccess) {

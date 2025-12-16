@@ -1,8 +1,8 @@
 import 'dart:convert';
 
+import 'package:chat_bot/widgets/widgets.dart';
+
 import '../../utils/enum.dart';
-import '../../widgets/choose_address_widget.dart';
-import '../../widgets/choose_card_widget.dart';
 
 // Main Chat Response Model
 class ChatResponse {
@@ -125,12 +125,13 @@ class ChatWidget {
   bool get isSeeMoreWidget => type == WidgetEnum.see_more.value;
   bool get isMenuWidget => type == WidgetEnum.menu.value;
   bool get isCartWidget => type == WidgetEnum.cart.value;
+  bool get isServicesDeliveryOptionsWidget => type == WidgetEnum.service_types.value;
   bool get isChooseAddressWidget => type == WidgetEnum.choose_address.value;
   bool get isChooseCardWidget => type == WidgetEnum.choose_card.value;
   bool get isAddAddressWidget => type == WidgetEnum.add_address.value;
   bool get isAddPaymentWidget => type == WidgetEnum.add_payment.value;
   bool get isScheduledLaterWidget => type == WidgetEnum.schedule_later.value;
-  bool get isSelectStaffWidget => type == WidgetEnum.select_staff.value;
+  bool get isSelectStaffWidget => type == WidgetEnum.staff_selection.value;
   bool get isOrderSummaryWidget => type == WidgetEnum.order_summary.value;
   bool get isOrderConfirmedWidget => type == WidgetEnum.order_confirmed.value;
   bool get isOrderTrackingWidget => type == WidgetEnum.order_tracking.value;
@@ -269,6 +270,14 @@ class ChatWidget {
   // Helper method to get cart items
   List<WidgetAction> getCartItems() {
     if (isCartWidget) {
+      return widget.map((item) => WidgetAction.fromJson(item as Map<String, dynamic>)).toList();
+    }
+    return [];
+  }
+
+   // Helper method to get cart items
+  List<WidgetAction> getServicesDeliveryOptions() {
+    if (isServicesDeliveryOptionsWidget) {
       return widget.map((item) => WidgetAction.fromJson(item as Map<String, dynamic>)).toList();
     }
     return [];
@@ -557,10 +566,37 @@ class Store {
         .map((e) => Product.fromJson(e as Map<String, dynamic>))
         .toList();
 
+    // Process categorylist - remove duplicates before displaying
+    String cuisineDetailsStr = '';
+    if (json['cuisineDetails'] != null) {
+      // If cuisineDetails is already a string, deduplicate it if it's comma-separated
+      final cuisineDetailsValue = json['cuisineDetails'].toString();
+      if (cuisineDetailsValue.contains(',')) {
+        // Split by comma, trim whitespace, remove duplicates, and rejoin
+        final categories = cuisineDetailsValue
+            .split(',')
+            .map((e) => e.trim())
+            .where((e) => e.isNotEmpty)
+            .toSet()
+            .toList();
+        cuisineDetailsStr = categories.join(', ');
+      } else {
+        cuisineDetailsStr = cuisineDetailsValue;
+      }
+    } else if (json['categorylist'] != null) {
+      final categoryList = (json['categorylist'] as List<dynamic>?)
+          ?.map((e) => e.toString().trim())
+          .where((e) => e.isNotEmpty)
+          .toList() ?? [];
+      // Remove duplicates by converting to Set and back to List
+      final uniqueCategories = categoryList.toSet().toList();
+      cuisineDetailsStr = uniqueCategories.join(', ');
+    }
+
     return Store(
       storename: name,
       avgRating: rating,
-      cuisineDetails: (json['cuisineDetails'] ?? (json['categorylist']?.join(', ') ?? '')).toString(),
+      cuisineDetails: cuisineDetailsStr,
       storeImage: image,
       distance: distance,
       storeId: storeId,
@@ -771,6 +807,7 @@ class WidgetAction {
   final int? storeListing;
   final int? hyperlocal;
   final int? companyType;
+  final String? emoji;
 
   WidgetAction({
     required this.buttonText,
@@ -796,6 +833,7 @@ class WidgetAction {
     this.storeListing,
     this.hyperlocal,
     this.companyType,
+    this.emoji,
   });
 
   factory WidgetAction.fromJson(Map<String, dynamic> json) {
@@ -827,6 +865,7 @@ class WidgetAction {
         storeListing: json['storeListing'] ?? 111,
         hyperlocal: json['hyperlocal'] ?? 111,
         companyType: json['companyType'] ?? 111,
+        emoji: json['emoji']?.toString(),
     );
   }
 
@@ -856,6 +895,7 @@ class WidgetAction {
       'hyperlocal': hyperlocal,
       'companyType': companyType,
       'storeCategoryId': storeCategoryId,
+      'emoji': emoji,
     };
   }
 }

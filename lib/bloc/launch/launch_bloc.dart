@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:chat_bot/bloc/launch/launch_event.dart';
 import 'package:chat_bot/bloc/launch/launch_state.dart';
-import 'package:chat_bot/data/repositories/launch_repository.dart';
+import 'package:chat_bot/data/data.dart';
 import 'package:chat_bot/utils/utility.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -23,7 +23,7 @@ class LaunchBloc extends Bloc<LaunchEvent, LaunchState> {
     // emit(LaunchInProgress());
     // Utility.showLoader();
     try {
-      await repository.initialize();
+      // await repository.initialize();
       final chatbotData = await repository.getChatbotData();
       final greetingData = await repository.getInitialOptionData();
       // if (chatbotData == null) {

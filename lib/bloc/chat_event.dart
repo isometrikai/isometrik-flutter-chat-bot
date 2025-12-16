@@ -17,6 +17,7 @@ class ChatLoadEvent extends ChatEvent {
   final String longitude;
   final String latitude;
   final String staffId;
+  final String serviceRequestedTime;
 
   const ChatLoadEvent({
     required this.message,
@@ -27,6 +28,7 @@ class ChatLoadEvent extends ChatEvent {
     this.longitude = "0.0",
     this.latitude = "0.0",
     this.staffId = "",
+    this.serviceRequestedTime = "",
   }) : sessionId = sessionId ?? "default-session";
 
   static Future<ChatLoadEvent> create({
@@ -38,6 +40,7 @@ class ChatLoadEvent extends ChatEvent {
     String longitude = "0.0",
     String latitude = "0.0",
     String staffId = "",
+    String serviceRequestedTime = "",
   }) async {
     String deviceId = fingerPrintId ?? await _getDeviceId();
     
@@ -50,6 +53,7 @@ class ChatLoadEvent extends ChatEvent {
       longitude: longitude,
       latitude: latitude,
       staffId: staffId,
+      serviceRequestedTime: serviceRequestedTime,
     );
   }
 

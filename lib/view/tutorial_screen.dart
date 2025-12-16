@@ -5,6 +5,7 @@ import 'package:chat_bot/bloc/chat_bloc.dart';
 import 'package:chat_bot/bloc/cart/cart_bloc.dart';
 import 'package:flutter_svg/svg.dart';
 import '../utils/asset_path.dart';
+import '../utils/utils.dart';
 
 class TutorialScreen extends StatefulWidget {
   final int currentStep;
@@ -121,23 +122,23 @@ class _TutorialScreenState extends State<TutorialScreen> {
                 children: [
                   Text(
                     (_currentPage + 1).toString().padLeft(2, '0'),
-                    style: const TextStyle(
-                      fontFamily: 'Plus Jakarta Sans',
-                      fontWeight: FontWeight.w700,
+                    style: 
+                    AppTextStyles.restaurantTitle.copyWith(
                       fontSize: 16,
+                      fontWeight: FontWeight.w700,
                       color: Color(0xFF8E2FFD),
                       height: 1.2,
-                    ),
+                    ),  
                   ),
                   const SizedBox(width: 2),
                   Container(
                     padding: const EdgeInsets.only(bottom: 1),
                     child: Text(
                       '.${widget.totalSteps.toString().padLeft(2, '0')}',
-                      style: const TextStyle(
-                        fontFamily: 'Plus Jakarta Sans',
-                        fontWeight: FontWeight.w500,
+                      style:  
+                      AppTextStyles.restaurantDescription.copyWith(
                         fontSize: 12,
+                        fontWeight: FontWeight.w500,
                         color: Color(0xFF171212),
                         height: 1.2,
                       ),
@@ -169,16 +170,15 @@ class _TutorialScreenState extends State<TutorialScreen> {
                 color: const Color(0xFFF5F7FF),
                 borderRadius: BorderRadius.circular(80),
               ),
-              child: const Text(
+              child:  Text(
                 'Skip',
-                style: TextStyle(
-                  fontFamily: 'Plus Jakarta Sans',
-                  fontWeight: FontWeight.w400,
+                style: 
+                AppTextStyles.restaurantDescription.copyWith(
                   fontSize: 12,
+                  fontWeight: FontWeight.w400,
                   color: Color(0xFF6E4185),
                   height: 1.4,
-                ),
-              ),
+                ),),
             ),
           ),
           ]
@@ -190,27 +190,26 @@ class _TutorialScreenState extends State<TutorialScreen> {
   Widget _buildWelcomeSection() {
     return Column(
       children: [
-        const Text(
+         Text(
           'Welcome to your\nzAIn AI assistant!',
           textAlign: TextAlign.center,
-          style: TextStyle(
-            fontFamily: 'Plus Jakarta Sans',
-            fontWeight: FontWeight.w700,
+          style: AppTextStyles.restaurantTitle.copyWith(
             fontSize: 24,
-            height: 1.2,
+            fontWeight: FontWeight.w700,
             color: Color(0xFF171212),
+            height: 1.2,
           ),
         ),
         const SizedBox(height: 6),
-        const Text(
+         Text(
           'Your Personal Assistant for Everything',
           textAlign: TextAlign.center,
-          style: TextStyle(
-            fontFamily: 'Plus Jakarta Sans',
-            fontWeight: FontWeight.w400,
+          style: 
+          AppTextStyles.restaurantDescription.copyWith(
             fontSize: 14,
-            height: 1.4,
+            fontWeight: FontWeight.w400,
             color: Color(0xFF6E4185),
+            height: 1.4,
           ),
         ),
       ],
@@ -299,27 +298,27 @@ class _TutorialScreenState extends State<TutorialScreen> {
   Widget _buildServiceTitleSection() {
     return Column(
       children: [
-        const Text(
+         Text(
           'What can I help you with today?',
           textAlign: TextAlign.center,
-          style: TextStyle(
-            fontFamily: 'Plus Jakarta Sans',
-            fontWeight: FontWeight.w700,
+          style: 
+          AppTextStyles.restaurantTitle.copyWith(
             fontSize: 20,
-            height: 1.2,
+            fontWeight: FontWeight.w700,
             color: Color(0xFF171212),
+            height: 1.2,
           ),
         ),
         const SizedBox(height: 12),
-        const Text(
+         Text(
           'Explore all available services',
           textAlign: TextAlign.center,
-          style: TextStyle(
-            fontFamily: 'Plus Jakarta Sans',
-            fontWeight: FontWeight.w400,
+          style: 
+          AppTextStyles.restaurantDescription.copyWith(
             fontSize: 14,
-            height: 1.4,
+            fontWeight: FontWeight.w400,
             color: Color(0xFF6E4185),
+            height: 1.4,
           ),
         ),
       ],
@@ -371,23 +370,22 @@ class _TutorialScreenState extends State<TutorialScreen> {
               children: [
                 Text(
                   title,
-                  style: const TextStyle(
-                    fontFamily: 'Plus Jakarta Sans',
-                    fontWeight: FontWeight.w600,
+                  style: AppTextStyles.restaurantTitle.copyWith(
                     fontSize: 16,
-                    height: 1.4,
+                    fontWeight: FontWeight.w600,
                     color: Color(0xFF242424),
+                    height: 1.4,
                   ),
                 ),
                 const SizedBox(height: 3),
                 Text(
                   description,
-                  style: const TextStyle(
-                    fontFamily: 'Plus Jakarta Sans',
-                    fontWeight: FontWeight.w400,
+                  style: 
+                  AppTextStyles.restaurantDescription.copyWith(
                     fontSize: 12,
-                    height: 1.4,
+                    fontWeight: FontWeight.w400,
                     color: Color(0xFF585C77),
+                    height: 1.4,
                   ),
                 ),
               ],
@@ -420,15 +418,14 @@ class _TutorialScreenState extends State<TutorialScreen> {
         color: const Color(0xFFE0FFEC),
         borderRadius: BorderRadius.circular(12),
       ),
-      child: const Text(
+      child:  Text(
         'Available 24/7 • Fast delivery • Secure payments',
         textAlign: TextAlign.center,
-        style: TextStyle(
-          fontFamily: 'Plus Jakarta Sans',
-          fontWeight: FontWeight.w500,
+        style: AppTextStyles.restaurantDescription.copyWith(
           fontSize: 12,
-          height: 1.4,
+          fontWeight: FontWeight.w500,
           color: Color(0xFF37A03C),
+          height: 1.4,
         ),
       ),
     );
@@ -460,27 +457,25 @@ class _TutorialScreenState extends State<TutorialScreen> {
   Widget _buildChatTitleSection() {
     return Column(
       children: [
-        const Text(
+         Text(
           'How to chat with zAIn',
           textAlign: TextAlign.center,
-          style: TextStyle(
-            fontFamily: 'Plus Jakarta Sans',
-            fontWeight: FontWeight.w700,
+          style: AppTextStyles.restaurantTitle.copyWith(
             fontSize: 20,
-            height: 1.2,
+            fontWeight: FontWeight.w700,
             color: Color(0xFF171212),
+            height: 1.2,
           ),
         ),
         const SizedBox(height: 12),
-        const Text(
+           Text(
           'Simple ways to get what you need',
           textAlign: TextAlign.center,
-          style: TextStyle(
-            fontFamily: 'Plus Jakarta Sans',
-            fontWeight: FontWeight.w400,
+          style: AppTextStyles.restaurantDescription.copyWith(
             fontSize: 14,
-            height: 1.4,
+            fontWeight: FontWeight.w400,
             color: Color(0xFF6E4185),
+            height: 1.4,
           ),
         ),
       ],
@@ -500,7 +495,7 @@ class _TutorialScreenState extends State<TutorialScreen> {
               top: 70,
               child: Transform.rotate(
                 angle: 0.32, // 18.09 degrees in radians
-                child: const Text(
+                child:  Text(
                   '💬',
                   style: TextStyle(fontSize: 36),
                 ),
@@ -545,14 +540,14 @@ class _TutorialScreenState extends State<TutorialScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Text(
+           Text(
             'Just speak naturally',
-            style: TextStyle(
-              fontFamily: 'Plus Jakarta Sans',
-              fontWeight: FontWeight.w600,
+            style: 
+            AppTextStyles.restaurantTitle.copyWith(
               fontSize: 16,
-              height: 1.4,
+              fontWeight: FontWeight.w600,
               color: Color(0xFF242424),
+              height: 1.4,
             ),
           ),
           const SizedBox(height: 12),
@@ -603,26 +598,26 @@ class _TutorialScreenState extends State<TutorialScreen> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Text(
+           Text(
             'Get personalized help',
-            style: TextStyle(
-              fontFamily: 'Plus Jakarta Sans',
-              fontWeight: FontWeight.w600,
+            style: 
+            AppTextStyles.restaurantTitle.copyWith(
               fontSize: 16,
-              height: 1.4,
+              fontWeight: FontWeight.w600,
               color: Color(0xFF242424),
+              height: 1.4,
             ),
           ),
           const SizedBox(height: 8),
-          const Text(
+           Text(
             "I'll ask follow-up questions to understand exactly what you need",
             textAlign: TextAlign.center,
-            style: TextStyle(
-              fontFamily: 'Plus Jakarta Sans',
-              fontWeight: FontWeight.w400,
+            style: 
+            AppTextStyles.restaurantDescription.copyWith(
               fontSize: 14,
-              height: 1.4,
+              fontWeight: FontWeight.w400,
               color: Color(0xFF6E4185),
+              height: 1.4,
             ),
           ),
         ],
@@ -640,13 +635,11 @@ class _TutorialScreenState extends State<TutorialScreen> {
       ),
       child: Text(
         text,
-        style: const TextStyle(
-          fontFamily: 'Plus Jakarta Sans',
-          fontStyle: FontStyle.italic,
-          fontWeight: FontWeight.w400,
+        style: AppTextStyles.restaurantDescription.copyWith(
           fontSize: 12,
-          height: 1.3,
+          fontWeight: FontWeight.w400,
           color: Color(0xFF242424),
+          height: 1.3,
         ),
       ),
     );
@@ -678,27 +671,25 @@ class _TutorialScreenState extends State<TutorialScreen> {
   Widget _buildConversationTitleSection() {
     return Column(
       children: [
-        const Text(
+         Text(
           'Example conversations',
           textAlign: TextAlign.center,
-          style: TextStyle(
-            fontFamily: 'Plus Jakarta Sans',
-            fontWeight: FontWeight.w700,
+          style: AppTextStyles.restaurantTitle.copyWith(
             fontSize: 20,
+            fontWeight: FontWeight.w700,
             height: 1.2,
             color: Color(0xFF171212),
           ),
         ),
         const SizedBox(height: 12),
-        const Text(
+         Text(
           'See how easy it is to get things done',
           textAlign: TextAlign.center,
-          style: TextStyle(
-            fontFamily: 'Plus Jakarta Sans',
-            fontWeight: FontWeight.w400,
+          style: AppTextStyles.restaurantDescription.copyWith(
             fontSize: 14,
-            height: 1.4,
+            fontWeight: FontWeight.w400,
             color: Color(0xFF6E4185),
+            height: 1.4,
           ),
         ),
       ],
@@ -734,14 +725,13 @@ class _TutorialScreenState extends State<TutorialScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Text(
+               Text(
                 'Food order',
-                style: TextStyle(
-                  fontFamily: 'Plus Jakarta Sans',
-                  fontWeight: FontWeight.w600,
+                style: AppTextStyles.restaurantTitle.copyWith(
                   fontSize: 16,
-                  height: 1.4,
+                  fontWeight: FontWeight.w600,
                   color: Color(0xFF242424),
+                  height: 1.4,
                 ),
               ),
               const SizedBox(height: 12),
@@ -842,14 +832,13 @@ class _TutorialScreenState extends State<TutorialScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Text(
+                 Text(
                 'Grocery Shopping',
-                style: TextStyle(
-                  fontFamily: 'Plus Jakarta Sans',
-                  fontWeight: FontWeight.w600,
+                style: AppTextStyles.restaurantTitle.copyWith(
                   fontSize: 16,
-                  height: 1.4,
+                  fontWeight: FontWeight.w600,
                   color: Color(0xFF242424),
+                  height: 1.4,
                 ),
               ),
               const SizedBox(height: 12),
@@ -946,13 +935,11 @@ class _TutorialScreenState extends State<TutorialScreen> {
       ),
       child: Text(
         text,
-        style: const TextStyle(
-          fontFamily: 'Plus Jakarta Sans',
-          fontStyle: FontStyle.italic,
-          fontWeight: FontWeight.w400,
+        style: AppTextStyles.restaurantDescription.copyWith(
           fontSize: 12,
-          height: 1.3,
+          fontWeight: FontWeight.w400,
           color: Color(0xFF242424),
+          height: 1.3,
         ),
         textAlign: TextAlign.right,
         softWrap: true,
@@ -971,13 +958,11 @@ class _TutorialScreenState extends State<TutorialScreen> {
       ),
       child: Text(
         text,
-        style: const TextStyle(
-          fontFamily: 'Plus Jakarta Sans',
-          fontStyle: FontStyle.italic,
-          fontWeight: FontWeight.w400,
+          style: AppTextStyles.restaurantDescription.copyWith(
           fontSize: 12,
+          fontWeight: FontWeight.w400,
           height: 1.3,
-          color: Color(0xFF242424),
+          color: Color(0xFF242424)
         ),
         textAlign: TextAlign.left,
         softWrap: true,
@@ -1012,25 +997,23 @@ class _TutorialScreenState extends State<TutorialScreen> {
   Widget _buildFeaturesTitleSection() {
     return Column(
       children: [
-        const Text(
+         Text(
           'Why choose zAIn AI?',
           textAlign: TextAlign.center,
-          style: TextStyle(
-            fontFamily: 'Plus Jakarta Sans',
-            fontWeight: FontWeight.w700,
+          style: AppTextStyles.restaurantTitle.copyWith(
             fontSize: 20,
+            fontWeight: FontWeight.w700,
             height: 1.2,
             color: Color(0xFF171212),
           ),
         ),
         const SizedBox(height: 12),
-        const Text(
+         Text(
           'Smart features that make life easier',
           textAlign: TextAlign.center,
-          style: TextStyle(
-            fontFamily: 'Plus Jakarta Sans',
-            fontWeight: FontWeight.w400,
+          style: AppTextStyles.restaurantDescription.copyWith(
             fontSize: 14,
+            fontWeight: FontWeight.w400,
             height: 1.4,
             color: Color(0xFF6E4185),
           ),
@@ -1123,10 +1106,9 @@ class _TutorialScreenState extends State<TutorialScreen> {
               children: [
                 Text(
                   title,
-                  style: const TextStyle(
-                    fontFamily: 'Plus Jakarta Sans',
-                    fontWeight: FontWeight.w500,
+                  style: AppTextStyles.restaurantTitle.copyWith(
                     fontSize: 16,
+                    fontWeight: FontWeight.w600,
                     height: 1.4,
                     color: Color(0xFF242424),
                   ),
@@ -1134,10 +1116,9 @@ class _TutorialScreenState extends State<TutorialScreen> {
                 const SizedBox(height: 3),
                 Text(
                   description,
-                  style: const TextStyle(
-                    fontFamily: 'Plus Jakarta Sans',
-                    fontWeight: FontWeight.w400,
+                  style: AppTextStyles.restaurantDescription.copyWith(
                     fontSize: 12,
+                    fontWeight: FontWeight.w400,
                     height: 1.4,
                     color: Color(0xFF585C77),
                   ),
@@ -1178,11 +1159,10 @@ class _TutorialScreenState extends State<TutorialScreen> {
   Widget _buildReadyToStartTitleSection() {
     return Column(
       children: [
-        const Text(
+         Text(
           'Ready to Get Started?',
           textAlign: TextAlign.center,
-          style: TextStyle(
-            fontFamily: 'Plus Jakarta Sans',
+          style: AppTextStyles.restaurantTitle.copyWith(
             fontWeight: FontWeight.w700,
             fontSize: 20,
             height: 1.2,
@@ -1190,11 +1170,10 @@ class _TutorialScreenState extends State<TutorialScreen> {
           ),
         ),
         const SizedBox(height: 8),
-        const Text(
+         Text(
           'Your AI assistant is ready to help!',
           textAlign: TextAlign.center,
-          style: TextStyle(
-            fontFamily: 'Plus Jakarta Sans',
+          style: AppTextStyles.restaurantDescription.copyWith(
             fontWeight: FontWeight.w400,
             fontSize: 14,
             height: 1.4,
@@ -1202,11 +1181,10 @@ class _TutorialScreenState extends State<TutorialScreen> {
           ),
         ),
         const SizedBox(height: 16),
-        const Text(
+         Text(
           'Start chatting with Zain AI to order food, shop for groceries, book services, and more. Just type what you need!',
           textAlign: TextAlign.center,
           style: TextStyle(
-            fontFamily: 'Plus Jakarta Sans',
             fontWeight: FontWeight.w400,
             fontSize: 14,
             height: 1.4,
@@ -1233,10 +1211,9 @@ class _TutorialScreenState extends State<TutorialScreen> {
               // Try saying header
               Row(
                 children: [
-                  const Text(
+                   Text(
                     'Try saying:',
-                    style: TextStyle(
-                      fontFamily: 'Plus Jakarta Sans',
+                    style: AppTextStyles.restaurantTitle.copyWith(
                       fontWeight: FontWeight.w600,
                       fontSize: 16,
                       height: 1.4,
@@ -1284,8 +1261,7 @@ class _TutorialScreenState extends State<TutorialScreen> {
               Expanded(
                 child: Text(
                   'Pro tip: The more specific you are, the better I can help you!',
-                  style: const TextStyle(
-                    fontFamily: 'Plus Jakarta Sans',
+                  style: AppTextStyles.restaurantTitle.copyWith(
                     fontWeight: FontWeight.w600,
                     fontSize: 14,
                     height: 1.4,
@@ -1324,13 +1300,11 @@ class _TutorialScreenState extends State<TutorialScreen> {
       child: Text(
         text,
         textAlign: TextAlign.right,
-        style: const TextStyle(
-          fontFamily: 'Plus Jakarta Sans',
-          fontStyle: FontStyle.italic,
-          fontWeight: FontWeight.w400,
+        style: AppTextStyles.restaurantDescription.copyWith(
           fontSize: 12,
-          height: 1.4,
+          fontWeight: FontWeight.w400,
           color: Color(0xFF242424),
+          height: 1.4,
         ),
       ),
     );
@@ -1346,10 +1320,9 @@ class _TutorialScreenState extends State<TutorialScreen> {
   Widget _buildMeetZainSection() {
     return Column(
       children: [
-        const Text(
+         Text(
           'Meet zAIn AI',
-          style: TextStyle(
-            fontFamily: 'Plus Jakarta Sans',
+          style: AppTextStyles.restaurantTitle.copyWith(
             fontWeight: FontWeight.w700,
             fontSize: 20,
             height: 1.2,
@@ -1357,11 +1330,10 @@ class _TutorialScreenState extends State<TutorialScreen> {
           ),
         ),
         const SizedBox(height: 8),
-        const Text(
+         Text(
           'Your intelligent chatbot that can help you order food, shop for groceries, buy medicines, book services and much more - all through simple conversations!',
           textAlign: TextAlign.center,
-          style: TextStyle(
-            fontFamily: 'Plus Jakarta Sans',
+          style: AppTextStyles.restaurantDescription.copyWith(
             fontWeight: FontWeight.w400,
             fontSize: 14,
             height: 1.4,
@@ -1397,11 +1369,10 @@ class _TutorialScreenState extends State<TutorialScreen> {
             ),
           ),
           const SizedBox(width: 11),
-          const Expanded(
+           Expanded(
             child: Text(
               'Just chat naturally -\nI\'ll understand what you need!',
-              style: TextStyle(
-                fontFamily: 'Plus Jakarta Sans',
+              style: AppTextStyles.restaurantDescription.copyWith(
                 fontWeight: FontWeight.w400,
                 fontSize: 14,
                 height: 1.4,
@@ -1447,11 +1418,10 @@ class _TutorialScreenState extends State<TutorialScreen> {
                 ),
                 borderRadius: BorderRadius.circular(16),
               ),
-              child: const Center(
+              child:  Center(
                 child: Text(
                   "Let's get started",
-                  style: TextStyle(
-                    fontFamily: 'Plus Jakarta Sans',
+                  style: AppTextStyles.restaurantTitle.copyWith(
                     fontWeight: FontWeight.w700,
                     fontSize: 16,
                     height: 1.2,

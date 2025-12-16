@@ -1,25 +1,13 @@
-import 'package:chat_bot/utils/asset_path.dart';
-import 'package:chat_bot/utils/enum.dart';
-import 'package:chat_bot/utils/utility.dart';
-import 'package:chat_bot/view/customization_summary_screen.dart';
-import 'package:chat_bot/view/product_customization_screen.dart';
-import 'package:chat_bot/view/grocery_customization_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import '../data/model/chat_response.dart' as chat;
-import '../data/model/universal_cart_response.dart';
-import '../widgets/black_toast_view.dart';
-import '../widgets/store_card.dart';
-import '../widgets/screen_header.dart';
-import 'package:chat_bot/bloc/restaurant/restaurant_bloc.dart';
-import 'package:chat_bot/bloc/restaurant/restaurant_event.dart';
-import 'package:chat_bot/bloc/restaurant/restaurant_state.dart';
-import 'package:chat_bot/services/callback_manage.dart';
-import 'package:chat_bot/bloc/cart/cart_bloc.dart';
-import 'package:chat_bot/bloc/cart/cart_event.dart';
-import 'package:chat_bot/bloc/cart/cart_state.dart';
-import 'package:chat_bot/utils/text_styles.dart';
+import 'package:chat_bot/data/data.dart';
+import 'package:chat_bot/data/data.dart' as chat;
+import 'package:chat_bot/bloc/bloc.dart';
+import 'package:chat_bot/widgets/widgets.dart';
+import 'package:chat_bot/view/views.dart';
+import 'package:chat_bot/utils/utils.dart';
+import 'package:chat_bot/services/services.dart';
 
 class RestaurantScreen extends StatefulWidget {
   final chat.WidgetAction? actionData;

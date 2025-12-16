@@ -28,6 +28,7 @@ class ProductPortion {
   final String currency;
   final String unitId;
   final String parentProductId;
+  final num maxQuantityPerUser;
 
   ProductPortion({
     required this.id,
@@ -40,15 +41,16 @@ class ProductPortion {
     required this.currency,
     required this.unitId,
     required this.parentProductId,
+    required this.maxQuantityPerUser,
   });
 
   factory ProductPortion.fromJson(Map<String, dynamic> json) {
     return ProductPortion(
-      id: json['id'] ?? '',
+      id: json['id'] ?? json['childProductId'] ?? '',
       isPrimary: json['isPrimary'] ?? false,
       childProductId: json['childProductId'] ?? '',
-      name: json['name'] ?? '',
-      price: (json['price'] ?? 0.0).toDouble(),
+      name: json['name'] ?? json['productName'] ?? '',
+      price: (json['price'] ?? (json['finalPriceList']?['finalPrice'] ?? 0.0)).toDouble(),
       addOns: (json['addOns'] as List<dynamic>?)
           ?.map((item) => AddOnCategory.fromJson(item as Map<String, dynamic>))
           .toList() ?? [],
@@ -56,6 +58,7 @@ class ProductPortion {
       currency: json['currency'] ?? '',
       unitId: json['unitId'] ?? '',
       parentProductId: json['parentProductId'] ?? '',
+      maxQuantityPerUser: json['maxQuantityPerUser'] ?? 0,
     );
   }
 }

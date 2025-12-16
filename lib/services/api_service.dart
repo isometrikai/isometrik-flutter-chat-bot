@@ -1,17 +1,14 @@
-import 'package:chat_bot/data/repositories/chat_history_repository.dart';
-import 'package:chat_bot/data/services/auth_service.dart';
-import 'package:chat_bot/data/services/chat_api_services.dart';
-import 'package:chat_bot/data/services/hawksearch_service.dart';
+import 'package:chat_bot/data/data.dart';
 
 class ApiService {
   static String _baseApiUrl = 'https://apisuperapp-staging.eazy-online.com';
 
   static String get baseApiUrl => _baseApiUrl;
 
-  static Future<void> initialize() async {
-    await AuthService.instance.initialize();
-    await ChatApiServices.instance.initialize();
-  }
+  // static Future<void> initialize() async {
+  //   await AuthService.instance.initialize();
+  //   await ChatApiServices.instance.initialize();
+  // }
 
   static void configure({
     required String chatBotId,
