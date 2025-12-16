@@ -190,7 +190,7 @@ class _TutorialScreenState extends State<TutorialScreen> {
   Widget _buildWelcomeSection() {
     return Column(
       children: [
-        const Text(
+         Text(
           'Welcome to your\nAI assistant!',
           textAlign: TextAlign.center,
           style: AppTextStyles.restaurantTitle.copyWith(
@@ -997,7 +997,7 @@ class _TutorialScreenState extends State<TutorialScreen> {
   Widget _buildFeaturesTitleSection() {
     return Column(
       children: [
-        const Text(
+         Text(
           'Why choose AI assistant?',
           textAlign: TextAlign.center,
           style: AppTextStyles.restaurantTitle.copyWith(
