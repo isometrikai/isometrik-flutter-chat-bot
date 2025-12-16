@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-import 'package:chat_bot/data/model/restaurant_menu_response.dart';
+import 'package:chat_bot/data/data.dart';
 
 abstract class RestaurantMenuState extends Equatable {
   const RestaurantMenuState();

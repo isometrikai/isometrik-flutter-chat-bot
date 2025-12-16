@@ -1,6 +1,7 @@
 import 'package:chat_bot/data/api_client.dart';
 import 'package:chat_bot/data/model/product_portion_response.dart';
 import 'package:chat_bot/utils/api_result.dart';
+import 'package:chat_bot/utils/enum.dart';
 
 class ProductPortionRepository {
   final ApiClient _apiClient;
@@ -11,16 +12,23 @@ class ProductPortionRepository {
     required String centralProductId,
     required String childProductId,
     required String storeId,
+    required int storeTypeId,
   }) async {
     try {
-      final endpoint = '/python/product/portion';
+      final endpoint = storeTypeId == FoodCategory.services.value ? '/python/variant/list' : '/python/product/portion';
       final queryParams = {
         'centralProductId': centralProductId,
         'childProductId': childProductId,
         'storeId': storeId,
       };
+      
+       final serviceQueryParams = {
+        'parentProoductId': centralProductId,
+        'childProoductId': childProductId,
+        'storeId': storeId,
+      };
 
-      final result = await _apiClient.get(endpoint, queryParameters: queryParams);
+      final result = await _apiClient.get(endpoint, queryParameters: storeTypeId == FoodCategory.services.value ? serviceQueryParams : queryParams);
       
       if (result.isSuccess) {
         final response = ProductPortionResponse.fromJson(result.data!);

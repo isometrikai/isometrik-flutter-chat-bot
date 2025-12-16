@@ -1,7 +1,6 @@
 import 'package:chat_bot/bloc/grocery_menu/grocery_menu_event.dart';
 import 'package:chat_bot/bloc/grocery_menu/grocery_menu_state.dart';
-import 'package:chat_bot/data/model/chat_response.dart';
-import 'package:chat_bot/data/repositories/restaurant_menu_repository.dart';
+import 'package:chat_bot/data/data.dart';
 import 'package:chat_bot/utils/enum.dart';
 import 'package:chat_bot/utils/utility.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';

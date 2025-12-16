@@ -3,10 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:chat_bot/bloc/product_customization/product_customization_bloc.dart';
 import 'package:chat_bot/bloc/product_customization/product_customization_event.dart';
 import 'package:chat_bot/bloc/product_customization/product_customization_state.dart';
-import 'package:chat_bot/data/model/product_portion_response.dart';
-import 'package:chat_bot/data/model/chat_response.dart';
-import 'package:chat_bot/data/repositories/product_portion_repository.dart';
-import 'package:chat_bot/data/services/universal_api_client.dart';
+import 'package:chat_bot/data/data.dart';
 import 'package:chat_bot/widgets/black_toast_view.dart';
 import 'package:chat_bot/utils/text_styles.dart';
 
@@ -60,12 +57,14 @@ class _ProductCustomizationScreenState extends State<ProductCustomizationScreen>
         centralProductId: widget.centralProductId ?? '',
         childProductId: widget.productId ?? '',
         storeId: widget.storeId ?? '',
+        storeTypeId: widget.store?.storeTypeId ?? 0,
       ));
     }else {
       _bloc.add(LoadProductPortions(
         centralProductId: widget.product?.parentProductId ?? '',
         childProductId: widget.product?.childProductId ?? '',
         storeId: widget.store?.storeId ?? '',
+        storeTypeId: widget.store?.storeTypeId ?? 0,
       ));
     }
   }
@@ -147,12 +146,14 @@ class _ProductCustomizationScreenState extends State<ProductCustomizationScreen>
                                           centralProductId: widget.centralProductId ?? '',
                                           childProductId: widget.productId ?? '',
                                           storeId: widget.storeId ?? '',
+                                          storeTypeId: widget.store?.storeTypeId ?? 0,
                                         ));
                                         }else {
                                         _bloc.add(LoadProductPortions(
                                           centralProductId: widget.product?.parentProductId ?? '',
                                           childProductId: widget.product?.childProductId ?? '',
                                           storeId: widget.store?.storeId ?? '',
+                                          storeTypeId: widget.store?.storeTypeId ?? 0,
                                         ));
                                         }
                                       },

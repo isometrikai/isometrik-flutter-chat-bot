@@ -1,9 +1,7 @@
-import 'package:chat_bot/utils/enum.dart';
 import 'package:flutter/material.dart';
-import 'package:chat_bot/data/model/universal_cart_response.dart';
 import 'package:flutter_svg/svg.dart';
-import '../utils/asset_path.dart';
-import '../utils/text_styles.dart';
+import 'package:chat_bot/data/data.dart';
+import 'package:chat_bot/utils/utils.dart';
 
 class MenuItemCard extends StatelessWidget {
   final String title;

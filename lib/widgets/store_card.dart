@@ -1,12 +1,9 @@
-import 'package:chat_bot/utils/enum.dart';
 import 'package:flutter/material.dart';
-import 'package:chat_bot/data/model/chat_response.dart' as chat;
-import 'package:chat_bot/data/model/universal_cart_response.dart';
-import 'package:chat_bot/services/callback_manage.dart';
 import 'package:flutter_svg/svg.dart';
-import '../utils/asset_path.dart';
-import 'black_toast_view.dart';
-import '../utils/text_styles.dart';
+import 'package:chat_bot/data/data.dart' as chat;
+import 'package:chat_bot/data/model/universal_cart_response.dart' as cart_models;
+import 'package:chat_bot/utils/utils.dart';
+import 'package:chat_bot/services/services.dart';
 
 class StoreCard extends StatelessWidget {
   final chat.Store store;
@@ -18,7 +15,7 @@ class StoreCard extends StatelessWidget {
   final VoidCallback? onHide; // New callback to hide the widget
   final Function(chat.Product, chat.Store)?
   onAddToCartRequested; // New callback for cart requests
-  final List<UniversalCartData>? cartData; // Cart data from getCart API
+  final List<cart_models.UniversalCartData>? cartData; // Cart data from getCart API
   final Function(chat.Product, chat.Store, int, bool)?
   onQuantityChanged; // Callback for quantity changes
   final bool isFromChatHistory;
@@ -190,7 +187,6 @@ class StoreCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 12),
-            if (store.products.isNotEmpty && (store.storeTypeId ?? store.type) != FoodCategory.services.value)
               SizedBox(
                 height: 113,
                 child: ListView.separated(
@@ -296,7 +292,7 @@ class _ProductPreviewTile extends StatelessWidget {
   final VoidCallback? onHide; // New parameter for hiding the widget
   final Function(chat.Product, chat.Store)?
   onAddToCartRequested; // New parameter for cart requests
-  final List<UniversalCartData>? cartData; // Cart data from getCart API
+  final List<cart_models.UniversalCartData>? cartData; // Cart data from getCart API
   final Function(chat.Product, chat.Store, int, bool)?
   onQuantityChanged; // Callback for quantity changes
   final bool isFromChatHistory;
@@ -412,7 +408,7 @@ class _ProductPreviewTile extends StatelessWidget {
                               : _placeholderProductImage(),
                     ),
                   ),
-                  if ((store.storeTypeId ?? store.type) != FoodCategory.food.value) ...[
+                  if (((store.storeTypeId ?? store.type) != FoodCategory.food.value) && ((store.storeTypeId ?? store.type) != FoodCategory.services.value)) ...[
                     if (product.instock == false) ...[
                       Positioned(
                         right: 4,
@@ -438,8 +434,10 @@ class _ProductPreviewTile extends StatelessWidget {
             ] else
               ...[
               ]
-          ] else
-            ...[
+          ] else if (((store.storeTypeId ?? store.type) == FoodCategory.services.value)) ...[
+              Positioned(
+                  right: 0, bottom: -4, child: _buildAddButton(context)),
+          ] else ...[
               if (product.instock == true) ...[
                 Positioned(
                     right: 0, bottom: -4, child: _buildAddButton(context)),
@@ -452,14 +450,14 @@ class _ProductPreviewTile extends StatelessWidget {
   }
 
    int? _getProductCartQuantity() {
-    if (cartData == null || product.childProductId == null) return null;
+    if (cartData == null) return null;
     
     try {
       // Find all products with matching ID and sum their quantities
       final matchingProducts = cartData!
           .expand((cartItem) => cartItem.sellers)
-          .expand((seller) => seller.products)
-          .where((cartProduct) => cartProduct.id == product.childProductId);
+          .expand((seller) => seller.products.where((p) => p.id == product.childProductId))
+          .toList();
       
       if (matchingProducts.isEmpty) {
         return null;
@@ -467,8 +465,9 @@ class _ProductPreviewTile extends StatelessWidget {
       
       // Sum up all quantities for products with the same ID
       int totalQuantity = 0;
-      for (final product in matchingProducts) {
-        totalQuantity += product.quantity?.value ?? 0;
+      for (final cartProduct in matchingProducts) {
+        final qty = cartProduct.quantity?.value ?? 0;
+        totalQuantity += qty.toInt();
       }
       
       return totalQuantity;
@@ -513,12 +512,11 @@ class _ProductPreviewTile extends StatelessWidget {
       child: Center(
         child: Text(
           'OUT OF STOCK',
-          style: TextStyle(
-            fontFamily: 'Plus Jakarta Sans',
+          style: AppTextStyles.restaurantDescription.copyWith(
             fontWeight: FontWeight.w700,
             fontSize: 8,
             height: 1.2,
-            color: const Color(0xFFF44336),
+            color: Color(0xFFF44336),
           ),
         ),
       ),

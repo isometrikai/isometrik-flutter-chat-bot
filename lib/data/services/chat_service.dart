@@ -1,7 +1,4 @@
-import 'package:chat_bot/data/model/chat_response.dart';
-import 'package:chat_bot/data/model/chat_history_response.dart';
-import 'package:chat_bot/data/model/session_id_response.dart';
-import 'package:chat_bot/data/services/chat_api_services.dart';
+import 'package:chat_bot/data/data.dart';
 
 class ChatService {
   ChatService._internal();
@@ -16,6 +13,7 @@ class ChatService {
     double longitude = 0.0,
     double latitude = 0.0,
     String staffId = "",
+    String serviceRequestedTime = "",
   }) {
     return ChatApiServices.instance.sendChatMessage(
       message: message,
@@ -26,6 +24,7 @@ class ChatService {
       longitude: longitude,
       latitude: latitude,
       staffId: staffId,
+      serviceRequestedTime: serviceRequestedTime,
     );
   }
 

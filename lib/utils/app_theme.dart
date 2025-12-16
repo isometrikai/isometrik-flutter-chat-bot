@@ -5,6 +5,12 @@ import 'package:flutter/material.dart';
 class AppTheme {
   // Font family constant
   static const String _fontFamily = 'Plus Jakarta Sans';
+  
+  /// Color for bot messages in chat
+  static const Color chatBotMessageColor = Color(0xFF000000);
+  
+  /// Color for user messages in chat
+  static const Color chatUserMessageColor = Color(0xFF242424);
 
   /// Light theme configuration
   static ThemeData get lightTheme {

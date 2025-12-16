@@ -2,9 +2,7 @@ import 'dart:async';
 
 import 'package:chat_bot/bloc/cart/cart_event.dart';
 import 'package:chat_bot/bloc/cart/cart_state.dart';
-import 'package:chat_bot/data/model/universal_cart_response.dart';
-
-import 'package:chat_bot/data/repositories/cart_repository.dart';
+import 'package:chat_bot/data/data.dart';
 import 'package:chat_bot/utils/enum.dart';
 import 'package:chat_bot/utils/utility.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
