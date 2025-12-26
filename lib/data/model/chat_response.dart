@@ -808,6 +808,10 @@ class WidgetAction {
   final int? hyperlocal;
   final int? companyType;
   final String? emoji;
+  final String? serviceType;
+  final num? bookingType;
+  final bool? isScheduled;
+  final String? serviceRequestedTime;
 
   WidgetAction({
     required this.buttonText,
@@ -834,6 +838,10 @@ class WidgetAction {
     this.hyperlocal,
     this.companyType,
     this.emoji,
+    this.serviceType,
+    this.bookingType,
+    this.isScheduled,
+    this.serviceRequestedTime,
   });
 
   factory WidgetAction.fromJson(Map<String, dynamic> json) {
@@ -866,6 +874,10 @@ class WidgetAction {
         hyperlocal: json['hyperlocal'] ?? 111,
         companyType: json['companyType'] ?? 111,
         emoji: json['emoji']?.toString(),
+        serviceType: json['serviceType']?.toString(),
+        bookingType: json['bookingType'] ?? 111,
+        isScheduled: json['isScheduled'] ?? false,
+        serviceRequestedTime: json['serviceRequestedTime']?.toString(),
     );
   }
 
@@ -896,6 +908,10 @@ class WidgetAction {
       'companyType': companyType,
       'storeCategoryId': storeCategoryId,
       'emoji': emoji,
+      'serviceType': serviceType,
+      'bookingType': bookingType,
+      'isScheduled': isScheduled,
+      'serviceRequestedTime': serviceRequestedTime,
     };
   }
 }
