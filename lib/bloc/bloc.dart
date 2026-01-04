@@ -16,3 +16,6 @@ export 'restaurant_menu/restaurant_menu_state.dart';
 export 'grocery_menu/grocery_menu_bloc.dart';
 export 'grocery_menu/grocery_menu_event.dart';
 export 'grocery_menu/grocery_menu_state.dart';
+export 'store_details/store_details_bloc.dart';
+export 'store_details/store_details_event.dart';
+export 'store_details/store_details_state.dart';

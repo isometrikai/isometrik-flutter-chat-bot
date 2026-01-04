@@ -1087,3 +1087,14 @@ class _ChatScreenState extends State<ChatScreen> {
     );
   }
 }
+// // TODO: Get userId from ChatApiServices.instance.userId or UserPreferences.getUserId()
+//   // TODO: Get storeCategoryId from the store or action data
+//   SelectTimeScreen.show(
+//     context,
+//     userId: '66a26937fc6559000d18a6a2', // TODO: Replace with actual userId
+//     storeCategoryId: '6507f939c2630000b000458d', // TODO: Replace with actual storeCategoryId
+//     onConfirm: (selectedDate, selectedTimeSlot) {
+//       // Handle confirmation
+//       print('Selected date: $selectedDate, time: $selectedTimeSlot');
+//     },
+//   );

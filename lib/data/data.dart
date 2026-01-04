@@ -8,6 +8,8 @@ export 'model/mygpts_model.dart' hide JsonParsingExtension;
 export 'model/product_portion_response.dart';
 export 'model/restaurant_menu_response.dart';
 export 'model/session_id_response.dart';
+export 'model/store_details_response.dart';
+export 'model/availability_slots_response.dart';
 export 'model/subcategory_products_response.dart';
 export 'model/universal_cart_response.dart' hide Product;
 export 'services/services.dart';
