@@ -232,10 +232,12 @@ class _ChatScreenState extends State<ChatScreen> {
         ),
       );
       _pendingMessage = text;
-      // _apiData = {
-      //       'scheduleLaterStaffId': scheduleLaterStaffId,
-      //       'serviceRequestedTime': serviceRequestedTime,
-      //     };
+      if (serviceRequestedTime != null) {
+      _apiData = {
+            ..._apiData,
+            'serviceRequestedTime': serviceRequestedTime,
+          };
+      }
 
       print('CHINTU: _apiData: $_apiData');
     });

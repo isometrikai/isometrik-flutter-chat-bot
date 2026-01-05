@@ -201,7 +201,7 @@ class _SelectTimeScreenState extends State<SelectTimeScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Select a Time',
+                          'Select Date & Time',
                           style: AppTextStyles.heading(
                             fontSize: 24,
                             fontWeight: FontWeight.w700,
@@ -212,7 +212,7 @@ class _SelectTimeScreenState extends State<SelectTimeScreen> {
                         ),
                         const SizedBox(height: 12),
                         Text(
-                          'Select a Time as per your convenience',
+                          'Select a date and time as per your convenience',
                           style: AppTextStyles.body(
                             fontSize: 14,
                             fontWeight: FontWeight.w400,

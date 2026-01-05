@@ -2,7 +2,6 @@ import 'package:chat_bot/data/api_client.dart';
 import 'package:chat_bot/data/model/chat_response.dart';
 import 'package:chat_bot/data/model/chat_history_response.dart';
 import 'package:chat_bot/data/model/session_id_response.dart';
-import 'package:chat_bot/data/services/token_manager.dart';
 import 'package:chat_bot/data/services/universal_api_client.dart';
 import 'package:chat_bot/utils/log.dart';
 import 'package:chat_bot/utils/utility.dart';
@@ -67,6 +66,12 @@ class ChatApiServices {
 
   /// Get the configured userId
   String? get userId => _userId;
+  
+  /// Get the configured latitude
+  double? get latitude => _latitude;
+  
+  /// Get the configured longitude
+  double? get longitude => _longitude;
 
   Future<ChatResponse?> sendChatMessage({
     required String message,

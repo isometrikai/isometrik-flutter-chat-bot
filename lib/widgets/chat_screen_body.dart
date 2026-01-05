@@ -20,7 +20,7 @@ class ChatScreenBody extends StatelessWidget {
   final GreetingResponse? greetingData;
   final Set<String> selectedOptionMessages;
   final List<ChatMessage> messages;
-  final Function(String) onSendMessage;
+  final Function(String, [String?, String?]) onSendMessage;
   final Function(ChatResponse) onHandleChatResponse;
   final Function(List<ChatHistoryDetail>) onHandleChatHistoryResponse;
   final VoidCallback onScrollToBottom;
@@ -1494,12 +1494,26 @@ class ChatScreenBody extends StatelessWidget {
                         ? () {}
                         : () async {
 
-                          Map<String, dynamic> obj = {
-                          'storeId': action.storeId,
-                          'storeIsOpen': action.storeIsOpen ?? true
-                        };
+                        //   Map<String, dynamic> obj = {
+                        //   'storeId': action.storeId,
+                        //   'storeIsOpen': action.storeIsOpen ?? true
+                        // };
+                         final timezone = await Utility.getCurrentTimezone();
+                         SelectDateTimeScreen.show(
+                                    context,
+                                    initialDate: DateTime.now(),
+                                    storeId: action.storeId ?? '',
+                                    latitude: ChatApiServices.instance.latitude,
+                                    longitude: ChatApiServices.instance.longitude,
+                                    timezone: timezone,
+                                    onConfirm: (String formattedDateTime, int timestamp) {
+                                      // Handle the selected date and time
+                                      print('Selected: $formattedDateTime (timestamp: $timestamp)');
+                                      onSendMessage('I have selected a schedule: \n$formattedDateTime', '', timestamp.toString());
+                                    },
+                                   );
 
-                        OrderService().triggerScheduledLaterScreenOpen(obj);
+                        // OrderService().triggerScheduledLaterScreenOpen(obj);
                         },
               ),
             );
