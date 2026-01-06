@@ -1493,11 +1493,11 @@ class ChatScreenBody extends StatelessWidget {
                     isApiLoading
                         ? () {}
                         : () async {
-
-                        //   Map<String, dynamic> obj = {
-                        //   'storeId': action.storeId,
-                        //   'storeIsOpen': action.storeIsOpen ?? true
-                        // };
+                          if (action.storeCategoryId == FoodStoreCategoryId.services.value) {
+                             //   Map<String, dynamic> obj = {
+                              //   'storeId': action.storeId,
+                              //   'storeIsOpen': action.storeIsOpen ?? true
+                              // };
                          final timezone = await Utility.getCurrentTimezone();
                          SelectDateTimeScreen.show(
                                     context,
@@ -1512,8 +1512,20 @@ class ChatScreenBody extends StatelessWidget {
                                       onSendMessage('I have selected a schedule: \n$formattedDateTime', '', timestamp.toString());
                                     },
                                    );
-
                         // OrderService().triggerScheduledLaterScreenOpen(obj);
+                          }else if (action.storeCategoryId == FoodStoreCategoryId.healthCare.value) {
+                            final timezone = await Utility.getCurrentTimezone();
+                              SelectTimeScreen.show(
+                                context,
+                                userId: ChatApiServices.instance.userId ?? '', // TODO: Replace with actual userId
+                                storeCategoryId: action.storeCategoryId, // TODO: Replace with actual storeCategoryId
+                                timezone: timezone,
+                                onConfirm: (selectedDate, selectedTimeSlot) {
+                                  // Handle confirmation
+                                  print('Selected date: $selectedDate, time: $selectedTimeSlot');
+                                },
+                              );
+                          }
                         },
               ),
             );

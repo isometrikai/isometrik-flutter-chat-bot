@@ -9,12 +9,14 @@ import '../utils/utils.dart';
 class SelectTimeScreen extends StatefulWidget {
   final String userId;
   final String storeCategoryId;
+  final String timezone;
   final Function(DateTime selectedDate, String selectedTime)? onConfirm;
   
   const SelectTimeScreen({
     super.key,
     required this.userId,
     required this.storeCategoryId,
+    required this.timezone,
     this.onConfirm,
   });
 
@@ -23,6 +25,7 @@ class SelectTimeScreen extends StatefulWidget {
     BuildContext context, {
     required String userId,
     required String storeCategoryId,
+    required String timezone,
     Function(DateTime selectedDate, String selectedTime)? onConfirm,
   }) async {
     return showModalBottomSheet(
@@ -36,6 +39,7 @@ class SelectTimeScreen extends StatefulWidget {
         child: SelectTimeScreen(
           userId: userId,
           storeCategoryId: storeCategoryId,
+          timezone: timezone,
           onConfirm: onConfirm,
         ),
       ),
