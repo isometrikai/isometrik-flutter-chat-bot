@@ -83,6 +83,7 @@ class ChatApiServices {
     double latitude = 0.0,
     String staffId = "",
     String serviceRequestedTime = "",
+    String storeCategoryId = "",
   }) async {
     final body = {
       'user_id': _userId,
@@ -105,6 +106,7 @@ class ChatApiServices {
       },
       'staff_id': staffId,
       'service_requested_time': serviceRequestedTime,
+      'store_category_id': storeCategoryId,
     };
 
     // Match existing endpoint used elsewhere

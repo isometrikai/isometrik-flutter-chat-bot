@@ -213,7 +213,7 @@ class _ChatScreenState extends State<ChatScreen> {
     }
   }
 
-  void _sendMessage(String text, [String? scheduleLaterStaffId, String? serviceRequestedTime]) {
+  void _sendMessage(String text, [String? scheduleLaterStaffId, String? serviceRequestedTime, String? storeCategoryId]) {
     if (text.trim().isEmpty) return;
 
     // Prepare: hide stores/products from the last bot message if present
@@ -233,10 +233,15 @@ class _ChatScreenState extends State<ChatScreen> {
       );
       _pendingMessage = text;
       if (serviceRequestedTime != null) {
-      _apiData = {
+        _apiData = {
             ..._apiData,
             'serviceRequestedTime': serviceRequestedTime,
           };
+      }else {
+        _apiData = {
+          ..._apiData,
+          'storeCategoryId': storeCategoryId,
+        };
       }
 
       print('CHINTU: _apiData: $_apiData');

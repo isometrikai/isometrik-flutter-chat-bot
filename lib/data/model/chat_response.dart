@@ -853,7 +853,7 @@ class WidgetAction {
       keyword: (json['keyword'] ?? '').toString(),
       quantity: json['quantity']?.toString(),
       productName: json['productName']?.toString(),
-      currencySymbol: json['currencySymbol']?.toString(),
+      currencySymbol: '${json['currencySymbol']?.toString() ?? ''} ',
       productPrice: json['productPrice'] is num 
           ? json['productPrice'] 
           : json['productPrice'] is String 

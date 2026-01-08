@@ -20,7 +20,7 @@ class ChatScreenBody extends StatelessWidget {
   final GreetingResponse? greetingData;
   final Set<String> selectedOptionMessages;
   final List<ChatMessage> messages;
-  final Function(String, [String?, String?]) onSendMessage;
+  final Function(String, [String?, String?, String?]) onSendMessage;
   final Function(ChatResponse) onHandleChatResponse;
   final Function(List<ChatHistoryDetail>) onHandleChatHistoryResponse;
   final VoidCallback onScrollToBottom;
@@ -146,7 +146,7 @@ class ChatScreenBody extends StatelessWidget {
                 if (state is CartProductAdded) {
                   // onHideStoreCards();
                   // Product added to cart successfully
-                  onSendMessage("I have updated the cart");
+                  onSendMessage("I have updated the cart", null, null, state.storeCategoryId);
                 } else if (state is CartLoaded) {
                   int cartCount = cartBloc.getTotalProductCount;
                   onUpdateCartCount(cartCount);
@@ -174,6 +174,7 @@ class ChatScreenBody extends StatelessWidget {
                     sessionId: sid,
                     staffId: apiData['scheduleLaterStaffId'] ?? "",
                     serviceRequestedTime: apiData['serviceRequestedTime'] ?? "",
+                    storeCategoryId: apiData['storeCategoryId'] ?? "",
                   );
                   bloc.add(event);
                   onClearPendingMessage();
@@ -474,8 +475,8 @@ class ChatScreenBody extends StatelessWidget {
                                             create: (context) => CartBloc(),
                                             child: CartScreen(
                                               needToEndThisChat: isFromHistory,
-                                              onCheckout: (message) {
-                                                onSendMessage(message);
+                                              onCheckout: (message, storeCategoryId) {
+                                                onSendMessage(message, null, null, storeCategoryId);
                                               },
                                             ),
                                           ),
@@ -490,8 +491,8 @@ class ChatScreenBody extends StatelessWidget {
                                             create: (context) => CartBloc(),
                                             child: CartScreen(
                                               needToEndThisChat: needToEndThisChat,
-                                              onCheckout: (message) {
-                                                onSendMessage(message);
+                                              onCheckout: (message, storeCategoryId) {
+                                                onSendMessage(message, null, null, storeCategoryId);
                                               },
                                             ),
                                           ),
@@ -1303,7 +1304,7 @@ class ChatScreenBody extends StatelessWidget {
                                       onUpdateCartCount(
                                         cartBloc.getTotalProductCount,
                                       );
-                                      onSendMessage("I have updated the cart");
+                                      onSendMessage("I have updated the cart", null, null, action.storeCategoryId);
                                       isCartAPICalled = false;
                                       needToCallChatScreenSendMessageAPI = true;
                                     }
@@ -1409,6 +1410,9 @@ class ChatScreenBody extends StatelessWidget {
                                           );
                                           onSendMessage(
                                             "I have updated the cart",
+                                            null,
+                                            null,
+                                            action.storeCategoryId,
                                           );
                                           isCartAPICalled = false;
                                           needToCallChatScreenSendMessageAPI = true;
@@ -1431,6 +1435,9 @@ class ChatScreenBody extends StatelessWidget {
                                           );
                                           onSendMessage(
                                             "I have updated the cart",
+                                            null,
+                                            null,
+                                            action.storeCategoryId,
                                           );
                                           isCartAPICalled = false;
                                           needToCallChatScreenSendMessageAPI = true;

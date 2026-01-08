@@ -35,7 +35,7 @@ class CategoryData {
 }
 
 class CartScreen extends StatefulWidget {
-  final Function(String)? onCheckout;
+  final Function(String, String?)? onCheckout;
   final bool needToEndThisChat;
 
   const CartScreen({
@@ -661,7 +661,7 @@ class _CartScreenState extends State<CartScreen> {
                   flex: 2,
                   child: GestureDetector(
                     onTap: () {
-                      widget.onCheckout?.call("Proceed to checkout");
+                      widget.onCheckout?.call("Proceed to checkout", categoryData.storeCategoryId);
                       Navigator.of(context).pop();
                     },
                     child: Container(

@@ -26,6 +26,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
         latitude: double.parse(event.latitude),
         staffId: event.staffId,
         serviceRequestedTime: event.serviceRequestedTime,
+        storeCategoryId: event.storeCategoryId,
       );
       print('CHINTU: $chat');
       if (chat != null) {
