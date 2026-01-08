@@ -109,6 +109,8 @@ class PlatformService {
         visitorId: config['visitorId'] ?? '',
         searchApiUrl: config['searchApiUrl'] ?? '',
         baseApiUrl: config['baseApiUrl'] ?? '',
+        currencycode: config['currencycode'] ?? '',
+        currencysymbol: config['currencysymbol'] ?? '',
       );
 
       print('✅ ApiService configured successfully');
@@ -134,6 +136,8 @@ class PlatformService {
             visitorId: '47daf829-b5df-4358-83ea-207aa4eaae15',
             searchApiUrl: 'https://searchapi-dev.hawksearch.net/api/v2',
             baseApiUrl: 'https://api-stage.eazylife-online.com',
+            currencycode: 'INR',//'AED',
+            currencysymbol: '4oK5',//"2K8u2KU=",//"د.إ",
           );
       }
     }

@@ -1,4 +1,5 @@
 import 'package:chat_bot/data/data.dart';
+import 'package:chat_bot/utils/utility.dart';
 
 class ApiService {
   static String _baseApiUrl = 'https://apisuperapp-staging.eazy-online.com';
@@ -29,6 +30,8 @@ class ApiService {
     required String visitorId,
     required String searchApiUrl,
     required String baseApiUrl,
+    required String currencycode,
+    required String currencysymbol,
   }) {
     _baseApiUrl = baseApiUrl.isNotEmpty 
         ? removeTrailingSlash(baseApiUrl) 
@@ -52,6 +55,8 @@ class ApiService {
       visitId: visitId,
       visitorId: visitorId,
       searchApiUrl: removeTrailingSlash(searchApiUrl),
+      currencycode: currencycode,
+      currencysymbol: currencysymbol,
     );
 
     // Configure ComprehensiveApiService (new system)
@@ -85,6 +90,9 @@ class ApiService {
     ChatHistoryRepository.instance.configure(
       userId: userId,
     );
+
+    Utility.setCurrencySymbol(currencysymbol);
+    Utility.setCurrencyCode(currencycode);
   }
 
   static String removeTrailingSlash(String url) {

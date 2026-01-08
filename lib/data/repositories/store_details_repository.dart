@@ -4,6 +4,7 @@ import 'package:chat_bot/data/services/token_manager.dart';
 import 'package:chat_bot/data/api_client.dart';
 import 'package:chat_bot/services/api_service.dart';
 import 'package:chat_bot/utils/log.dart';
+import 'package:chat_bot/utils/utility.dart';
 
 class StoreDetailsRepository {
   const StoreDetailsRepository();
@@ -30,6 +31,8 @@ class StoreDetailsRepository {
       'language': 'en',
       'User-Agent': 'Eazy Life/2.0.1 (com.eazy.customerapp; build:77; iOS 26.1.0) Alamofire/5.6.1',
       'Accept-Encoding': 'br;q=1.0, gzip;q=0.9, deflate;q=0.8',
+      'currencycode': Utility.getCurrencyCode(),
+      'currencysymbol': Utility.getCurrencySymbol(),
       if (authHeader.isNotEmpty) 'Authorization': authHeader,
     };
 

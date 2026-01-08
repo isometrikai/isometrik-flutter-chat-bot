@@ -54,6 +54,8 @@ class AuthService {
     required String visitId,
     required String visitorId,
     required String searchApiUrl,
+    required String currencycode,
+    required String currencysymbol,
   }) {
     _chatBotId = chatBotId;
     _isProduction = isProduction;
