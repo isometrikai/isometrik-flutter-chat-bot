@@ -25,6 +25,7 @@ class ChatApiServices {
   String? _visitId;
   String? _visitorId;
   String? _searchApiUrl;
+  String? _zoneId;
 
   late final ApiClient _chatClient = UniversalApiClient.instance.chatClient;
   late final ApiClient _appClient = UniversalApiClient.instance.appClient;
@@ -44,6 +45,7 @@ class ChatApiServices {
     required String visitId,
     required String visitorId,
     required String searchApiUrl,
+    required String zoneId,
   }) {
     _chatBotId = chatBotId;
     _userId = userId;
@@ -57,6 +59,7 @@ class ChatApiServices {
     _visitId = visitId;
     _visitorId = visitorId;
     _searchApiUrl = searchApiUrl;
+    _zoneId = zoneId;
   }
 
   // /// Initialize the API service
@@ -95,6 +98,7 @@ class ChatApiServices {
       'visit_id': _visitId ?? '',
       'visitor_id': _visitorId ?? '',
       'search_api_url': _searchApiUrl ?? '',
+      'zone_id': _zoneId ?? '',
       'location': {
         'latitude': (latitude == 0.0 ? (_latitude ?? 0.0) : latitude).toString(),
         'longitude': (longitude == 0.0 ? (_longitude ?? 0.0) : longitude).toString(),

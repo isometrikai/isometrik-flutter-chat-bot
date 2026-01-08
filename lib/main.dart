@@ -111,6 +111,7 @@ class PlatformService {
         baseApiUrl: config['baseApiUrl'] ?? '',
         currencycode: config['currencycode'] ?? '',
         currencysymbol: config['currencysymbol'] ?? '',
+        zoneId: config['zoneId'] ?? '',
       );
 
       print('✅ ApiService configured successfully');
@@ -138,6 +139,7 @@ class PlatformService {
             baseApiUrl: 'https://api-stage.eazylife-online.com',
             currencycode: 'INR',//'AED',
             currencysymbol: '4oK5',//"2K8u2KU=",//"د.إ",
+            zoneId: '634e5da256ad3fd02bd3feb5',
           );
       }
     }
