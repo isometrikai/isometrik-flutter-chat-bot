@@ -85,11 +85,11 @@ class OrderService {
 
   void setPrescriptionCallback(Function(List<String>) callback) {
     print('setPrescriptionScreenOpenCallback: $callback');
-    onSelectPrescription = callback;
+    onSelectPrescription = callback;//11
   }
 
   void setSelectStaffCallback(Function(Map<String, dynamic>) callback) {
-    onSelectStaff = callback;
+    onSelectStaff = callback;//11
   }
 
    void setSendMessageCallback(Function(String) callback) { // CHANGE CALLBACK
