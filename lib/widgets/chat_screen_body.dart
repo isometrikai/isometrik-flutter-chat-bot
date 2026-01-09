@@ -401,7 +401,7 @@ class ChatScreenBody extends StatelessWidget {
                         height: 40,
                       ),
                         onPressed: () {
-                          OrderService().triggerPrescriptionScreenOpen([]);
+                          OrderService().triggerPrescriptionScreenOpen({});
                           // OrderService().triggerSelectStaffScreenOpen({});
                           // Navigator.push(
                           //   context,
@@ -1587,7 +1587,7 @@ class ChatScreenBody extends StatelessWidget {
                         ? () {}
                         : () async {
 
-                        OrderService().triggerPrescriptionScreenOpen([]);
+                        OrderService().triggerPrescriptionScreenOpen({});
                         },
               ),
             );

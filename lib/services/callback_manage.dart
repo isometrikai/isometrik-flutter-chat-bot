@@ -12,7 +12,7 @@ class OrderService {
   Function(Map<String, dynamic>)? onOrderTracking;
   Function(Map<String, dynamic>)? onScheduledLaterScreenOpen;
   Function(Map<String, dynamic>)? onSelectStaffScreenOpen;
-  Function(List<String>)? onPrescriptionScreenOpen;
+  Function(Map<String, dynamic>)? onPrescriptionScreenOpen;
   Function()? onChatDismiss; // Add dismiss callback
   Function(bool)? onCartUpdate; // Add cart update callback
   Function(String)? onStripePayment; // Add stripe payment callback
@@ -51,7 +51,7 @@ class OrderService {
     onScheduledLaterScreenOpen = scheduledLaterScreenOpen;
   }
 
-  void setPrescriptionScreenOpenCallback(Function(List<String>) prescriptionScreenOpen) {
+  void setPrescriptionScreenOpenCallback(Function(Map<String, dynamic>) prescriptionScreenOpen) {
     print('setPrescriptionScreenOpenCallback: $prescriptionScreenOpen');
     onPrescriptionScreenOpen = prescriptionScreenOpen;//1
   }
@@ -117,7 +117,7 @@ class OrderService {
     onScheduledLaterScreenOpen?.call(obj);
   }
 
-  void triggerPrescriptionScreenOpen(List<String> prescription) {
+  void triggerPrescriptionScreenOpen(Map<String, dynamic> prescription) {
     print('triggerPrescriptionScreenOpen: $prescription');
     onPrescriptionScreenOpen?.call(prescription);//2
   }
