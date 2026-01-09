@@ -53,11 +53,11 @@ class OrderService {
 
   void setPrescriptionScreenOpenCallback(Function(List<String>) prescriptionScreenOpen) {
     print('setPrescriptionScreenOpenCallback: $prescriptionScreenOpen');
-    onPrescriptionScreenOpen = prescriptionScreenOpen;
+    onPrescriptionScreenOpen = prescriptionScreenOpen;//1
   }
 
   void setSelectStaffScreenOpenCallback(Function(Map<String, dynamic>) selectStaffScreenOpen) {
-    onSelectStaffScreenOpen = selectStaffScreenOpen;
+    onSelectStaffScreenOpen = selectStaffScreenOpen;//1
   }
 
   // Add dismiss callback setter
@@ -85,7 +85,7 @@ class OrderService {
 
   void setPrescriptionCallback(Function(List<String>) callback) {
     print('setPrescriptionScreenOpenCallback: $callback');
-    onPrescriptionScreenOpen = callback;
+    onSelectPrescription = callback;
   }
 
   void setSelectStaffCallback(Function(Map<String, dynamic>) callback) {
@@ -119,11 +119,11 @@ class OrderService {
 
   void triggerPrescriptionScreenOpen(List<String> prescription) {
     print('triggerPrescriptionScreenOpen: $prescription');
-    onPrescriptionScreenOpen?.call(prescription);
+    onPrescriptionScreenOpen?.call(prescription);//2
   }
 
   void triggerSelectStaffScreenOpen(Map<String, dynamic> obj) {
-    onSelectStaffScreenOpen?.call(obj);
+    onSelectStaffScreenOpen?.call(obj);//2
   }
 
   void triggerOrderDetails(Map<String, dynamic> orderDetails) {

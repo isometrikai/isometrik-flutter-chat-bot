@@ -401,8 +401,8 @@ class ChatScreenBody extends StatelessWidget {
                         height: 40,
                       ),
                         onPressed: () {
-                          // OrderService().triggerPrescriptionScreenOpen([]);
-                          OrderService().triggerSelectStaffScreenOpen({});
+                          OrderService().triggerPrescriptionScreenOpen([]);
+                          // OrderService().triggerSelectStaffScreenOpen({});
                           // Navigator.push(
                           //   context,
                           //   PageRouteBuilder(
