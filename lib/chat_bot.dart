@@ -147,6 +147,6 @@ class ChatBot {
 
   static void openPrescriptionScreen(List<String> prescription) {
     print('openPrescriptionScreen');
-    OrderService().triggerPrescriptionScreenOpen(prescription);
+    OrderService().triggerPrescriptionScreen(prescription);
   }
 }

@@ -118,6 +118,7 @@ class OrderService {
   }
 
   void triggerPrescriptionScreenOpen(List<String> prescription) {
+    print('triggerPrescriptionScreenOpen: $prescription');
     onPrescriptionScreenOpen?.call(prescription);
   }
 
@@ -165,6 +166,7 @@ class OrderService {
   }
 
   void triggerPrescriptionScreen(List<String> prescription) {
+    print('triggerPrescriptionScreen: $prescription');
     onSelectPrescription?.call(prescription);
   }
 
