@@ -139,6 +139,13 @@ class _ChatScreenState extends State<ChatScreen> {
         _sendMessage('I have selected a staff member: ${staff['staffName']}', staff['scheduleLaterStaffId'], staff['serviceRequestedTime']);
       }
     });
+
+    OrderService().setPrescriptionScreenOpenCallback((List<String> prescription) {
+      if (mounted) {
+        print('ChatScreen: Prescription screen received');
+        _sendMessage('I have opened the prescription screen', null, null, prescription.first);
+      }
+    });
   }
 
   /// Sets up post-initialization tasks (keyboard listener, cart fetch, speech service)

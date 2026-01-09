@@ -144,4 +144,9 @@ class ChatBot {
     print('openSelectStaffScreen: $obj');
     OrderService().triggerSelectStaff(obj);
   }
+
+  static void openPrescriptionScreen(List<String> prescription) {
+    print('openPrescriptionScreen');
+    OrderService().triggerPrescriptionScreenOpen(prescription);
+  }
 }
