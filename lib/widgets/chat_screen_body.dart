@@ -1574,6 +1574,25 @@ class ChatScreenBody extends StatelessWidget {
           }
         }
 
+        for (final widget in latestActionWidgets.where(
+          (w) => w.type == WidgetEnum.prescription_screen.value,
+        )) {
+          for (final action in widget.prescriptionScreen) {
+            actionButtons.add(
+              buildActionButton(
+                text: action.buttonText,
+                onTap:
+                    isApiLoading
+                        ? () {}
+                        : () async {
+
+                        OrderService().triggerPrescriptionScreenOpen([]);
+                        },
+              ),
+            );
+          }
+        }
+
         for (final widgetType in [
           WidgetEnum.add_more.value,
           WidgetEnum.proceed_to_checkout.value,

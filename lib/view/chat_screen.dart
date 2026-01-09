@@ -631,7 +631,8 @@ class _ChatScreenState extends State<ChatScreen> {
                     widget.type == WidgetEnum.order_tracking.value ||
                     widget.type == WidgetEnum.order_details.value ||
                     widget.type == WidgetEnum.schedule_later.value ||
-                    widget.type == WidgetEnum.staff_selection.value,
+                    widget.type == WidgetEnum.staff_selection.value ||
+                    widget.type == WidgetEnum.prescription_screen.value,
               )
               .toList();
     });

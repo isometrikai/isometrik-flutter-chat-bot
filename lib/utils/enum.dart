@@ -11,6 +11,7 @@ enum WidgetEnum {
   add_payment,
   schedule_later,
   staff_selection,
+  prescription_screen,
   payment,
   order_summary,
   order_confirmed,
