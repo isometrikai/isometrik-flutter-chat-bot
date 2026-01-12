@@ -92,7 +92,7 @@ class ChatApiServices {
     String staffId = "",
     String serviceRequestedTime = "",
     String storeCategoryId = "",
-    String prescriptionImageUrls = "",
+    List<String> prescriptionImageUrls = const [],
   }) async {
     final body = {
       'user_id': _userId,

@@ -15,7 +15,7 @@ class ChatService {
     String staffId = "",
     String serviceRequestedTime = "",
     String storeCategoryId = "",
-    String prescriptionImageUrls = "",
+    List<String> prescriptionImageUrls = const [],
   }) {
     return ChatApiServices.instance.sendChatMessage(
       message: message,
