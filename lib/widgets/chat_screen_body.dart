@@ -401,20 +401,20 @@ class ChatScreenBody extends StatelessWidget {
                         height: 40,
                       ),
                         onPressed: () {
-                          // OrderService().triggerPrescriptionScreenOpen({});
-                          Navigator.push(
-                            context,
-                            PageRouteBuilder(
-                              opaque: false,
-                              pageBuilder: (context, animation, secondaryAnimation) => PopupOverlayScreen(greetingData: greetingData),
-                              transitionsBuilder: (context, animation, secondaryAnimation, child) {
-                                return FadeTransition(
-                                  opacity: animation,
-                                  child: child,
-                                );
-                              },
-                            ),
-                          );
+                          OrderService().triggerPrescriptionScreenOpen({});
+                          // Navigator.push(
+                          //   context,
+                          //   PageRouteBuilder(
+                          //     opaque: false,
+                          //     pageBuilder: (context, animation, secondaryAnimation) => PopupOverlayScreen(greetingData: greetingData),
+                          //     transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                          //       return FadeTransition(
+                          //         opacity: animation,
+                          //         child: child,
+                          //       );
+                          //     },
+                          //   ),
+                          // );
                         },
                       ),
                     ],
