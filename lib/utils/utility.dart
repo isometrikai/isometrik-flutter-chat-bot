@@ -1,6 +1,5 @@
 import 'package:chat_bot/widgets/black_toast_view.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_native_timezone/flutter_native_timezone.dart';
 
 final GlobalKey<NavigatorState> kNavigatorKey = GlobalKey<NavigatorState>();
 

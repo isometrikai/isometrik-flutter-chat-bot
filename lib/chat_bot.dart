@@ -152,4 +152,9 @@ class ChatBot {
     print('openPrescriptionScreen');
     OrderService().triggerPrescriptionScreen(prescription);
   }
+
+  static void openStripePlaceOrderScreen(Map<String, dynamic> stripePlaceOrder) {
+    print('openStripePlaceOrderScreen: $stripePlaceOrder');
+    OrderService().triggerStripePlaceOrder(stripePlaceOrder);
+  }
 }

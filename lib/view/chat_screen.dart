@@ -152,6 +152,13 @@ class _ChatScreenState extends State<ChatScreen> {
         _sendMessage('I have uploaded the prescription. Please proceed with the order', null, null, null);
       }
     });
+
+    OrderService().setStripePlaceOrderCallback((Map<String, dynamic> stripePlaceOrder) {
+      if (mounted) {
+        print('ChatScreen: Stripe place order received - $stripePlaceOrder');
+        _sendMessage('Order placed successfully', null, null, null);
+      }
+    });
   }
 
   /// Sets up post-initialization tasks (keyboard listener, cart fetch, speech service)
