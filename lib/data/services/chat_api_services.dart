@@ -26,6 +26,7 @@ class ChatApiServices {
   String? _visitorId;
   String? _searchApiUrl;
   String? _zoneId;
+  String? _timezone;
 
   late final ApiClient _chatClient = UniversalApiClient.instance.chatClient;
   late final ApiClient _appClient = UniversalApiClient.instance.appClient;
@@ -46,6 +47,7 @@ class ChatApiServices {
     required String visitorId,
     required String searchApiUrl,
     required String zoneId,
+    required String timezone,
   }) {
     _chatBotId = chatBotId;
     _userId = userId;
@@ -60,6 +62,7 @@ class ChatApiServices {
     _visitorId = visitorId;
     _searchApiUrl = searchApiUrl;
     _zoneId = zoneId;
+    _timezone = timezone;
   }
 
   // /// Initialize the API service
@@ -75,6 +78,8 @@ class ChatApiServices {
   
   /// Get the configured longitude
   double? get longitude => _longitude;
+
+  String? get timezone => _timezone;
 
   Future<ChatResponse?> sendChatMessage({
     required String message,

@@ -113,18 +113,6 @@ class Utility {
       },
     );
   }
-  
-  /// Get the current timezone in IANA format
-  /// Returns the timezone name based on the device's native timezone
-  static Future<String> getCurrentTimezone() async {
-    try {
-      final timezone = await FlutterNativeTimezone.getLocalTimezone();
-      return timezone;
-    } catch (e) {
-      // Fallback to default timezone if package fails
-      return 'Asia/Kolkata';
-    }
-  }
 
   static void setCurrencySymbol(String currencySymbol) {
     Utility.currencySymbol = currencySymbol;

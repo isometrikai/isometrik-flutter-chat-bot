@@ -40,6 +40,7 @@ class ChatBot {
     required String currencycode,
     required String currencysymbol,
     required String zoneId,
+    required String timezone,
   }) {
     print('chatBotId: $chatBotId');
     print('appSecret: $appSecret');
@@ -62,6 +63,7 @@ class ChatBot {
     print('currencycode: $currencycode');
     print('currencysymbol: $currencysymbol');
     print('zoneId: $zoneId');
+    print('timezone: $timezone');
     isTutorialShown = needToShowTutorial;
     ApiService.configure(
       chatBotId: chatBotId,
@@ -85,6 +87,7 @@ class ChatBot {
       currencycode: currencycode,
       currencysymbol: currencysymbol,
       zoneId: zoneId,
+      timezone: timezone,
     );
   }
 

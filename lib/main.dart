@@ -112,6 +112,7 @@ class PlatformService {
         currencycode: config['currencycode'] ?? '',
         currencysymbol: config['currencysymbol'] ?? '',
         zoneId: config['zoneId'] ?? '',
+        timezone: config['timezone'] ?? '',
       );
 
       print('✅ ApiService configured successfully');
@@ -140,6 +141,7 @@ class PlatformService {
             currencycode: 'INR',//'AED',
             currencysymbol: '4oK5',//"2K8u2KU=",//"د.إ",
             zoneId: '634e5da256ad3fd02bd3feb5',
+            timezone: 'Asia/Kolkata',
           );
       }
     }

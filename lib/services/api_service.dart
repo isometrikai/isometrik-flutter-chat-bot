@@ -33,6 +33,7 @@ class ApiService {
     required String currencycode,
     required String currencysymbol,
     required String zoneId,
+    required String timezone,
   }) {
     _baseApiUrl = baseApiUrl.isNotEmpty 
         ? removeTrailingSlash(baseApiUrl) 
@@ -76,6 +77,7 @@ class ApiService {
       visitorId: visitorId,
       searchApiUrl: removeTrailingSlash(searchApiUrl),
       zoneId: zoneId,
+      timezone: timezone,
     );
 
     // Configure HawkSearchService

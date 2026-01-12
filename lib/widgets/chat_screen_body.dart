@@ -1507,14 +1507,13 @@ class ChatScreenBody extends StatelessWidget {
                               //   'storeId': action.storeId,
                               //   'storeIsOpen': action.storeIsOpen ?? true
                               // };
-                         final timezone = await Utility.getCurrentTimezone();
                          SelectDateTimeScreen.show(
                                     context,
                                     initialDate: DateTime.now(),
                                     storeId: action.storeId ?? '',
                                     latitude: ChatApiServices.instance.latitude,
                                     longitude: ChatApiServices.instance.longitude,
-                                    timezone: timezone,
+                                    timezone: ChatApiServices.instance.timezone ?? '',
                                     onConfirm: (String formattedDateTime, int timestamp) {
                                       // Handle the selected date and time
                                       print('Selected: $formattedDateTime (timestamp: $timestamp)');
@@ -1523,12 +1522,11 @@ class ChatScreenBody extends StatelessWidget {
                                    );
                         // OrderService().triggerScheduledLaterScreenOpen(obj);
                           }else if (action.storeCategoryId == FoodStoreCategoryId.healthCare.value) {
-                            final timezone = await Utility.getCurrentTimezone();
                               SelectTimeScreen.show(
                                 context,
                                 userId: ChatApiServices.instance.userId ?? '', // TODO: Replace with actual userId
                                 storeCategoryId: action.storeCategoryId, // TODO: Replace with actual storeCategoryId
-                                timezone: timezone,
+                                timezone: ChatApiServices.instance.timezone ?? '',
                                 onConfirm: (selectedDate, selectedTimeSlot) {
                                   // Handle confirmation
                                   print('Selected date: $selectedDate, time: $selectedTimeSlot');
