@@ -149,7 +149,7 @@ class _ChatScreenState extends State<ChatScreen> {
             // 'prescription_image_urls': (prescription['imagesurls'] as List?)?.join(',') ?? '',
             'prescription_image_urls': prescription['imagesurls'] ?? '',
           };
-        _sendMessage('I have opened the prescription screen', null, null, null);
+        _sendMessage('I have uploaded the prescription. Please proceed with the order', null, null, null);
       }
     });
   }

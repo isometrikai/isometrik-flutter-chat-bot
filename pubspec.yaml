@@ -48,7 +48,7 @@ dependencies:
   speech_to_text: ^7.3.0
   shimmer: ^3.0.0
   cupertino_calendar_picker: ^2.2.6
-  flutter_native_timezone: ^2.0.0
+  # flutter_native_timezone: ^2.0.0
 
 dev_dependencies:
   flutter_test:
