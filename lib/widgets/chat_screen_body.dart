@@ -175,7 +175,11 @@ class ChatScreenBody extends StatelessWidget {
                     staffId: apiData['scheduleLaterStaffId'] ?? "",
                     serviceRequestedTime: apiData['serviceRequestedTime'] ?? "",
                     storeCategoryId: apiData['storeCategoryId'] ?? "",
-                    prescriptionImageUrls: apiData['prescription_image_urls'] ?? "",
+                    prescriptionImageUrls: apiData['prescription_image_urls'] != null
+                        ? (apiData['prescription_image_urls'] as List)
+                            .map((e) => e.toString())
+                            .toList()
+                        : null,
                   );
                   bloc.add(event);
                   onClearPendingMessage();
