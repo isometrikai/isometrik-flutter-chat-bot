@@ -27,6 +27,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
         staffId: event.staffId,
         serviceRequestedTime: event.serviceRequestedTime,
         storeCategoryId: event.storeCategoryId,
+        prescriptionImageUrls: event.prescriptionImageUrls,
       );
       print('CHINTU: $chat');
       if (chat != null) {

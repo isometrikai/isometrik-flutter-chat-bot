@@ -19,7 +19,7 @@ class ChatLoadEvent extends ChatEvent {
   final String staffId;
   final String serviceRequestedTime;
   final String storeCategoryId;
-
+  final String prescriptionImageUrls;
   const ChatLoadEvent({
     required this.message,
     this.agentId = "67a9df239dbfc422720f19b5",
@@ -31,6 +31,7 @@ class ChatLoadEvent extends ChatEvent {
     this.staffId = "",
     this.serviceRequestedTime = "",
     this.storeCategoryId = "",
+    this.prescriptionImageUrls = "",
   }) : sessionId = sessionId ?? "default-session";
 
   static Future<ChatLoadEvent> create({
@@ -44,6 +45,7 @@ class ChatLoadEvent extends ChatEvent {
     String staffId = "",
     String serviceRequestedTime = "",
     String storeCategoryId = "",
+    String prescriptionImageUrls = "",
   }) async {
     String deviceId = fingerPrintId ?? await _getDeviceId();
     
@@ -58,6 +60,7 @@ class ChatLoadEvent extends ChatEvent {
       staffId: staffId,
       serviceRequestedTime: serviceRequestedTime,
       storeCategoryId: storeCategoryId,
+      prescriptionImageUrls: prescriptionImageUrls,
     );
   }
 

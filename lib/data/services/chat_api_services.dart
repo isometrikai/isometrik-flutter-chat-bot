@@ -87,6 +87,7 @@ class ChatApiServices {
     String staffId = "",
     String serviceRequestedTime = "",
     String storeCategoryId = "",
+    String prescriptionImageUrls = "",
   }) async {
     final body = {
       'user_id': _userId,
@@ -111,6 +112,7 @@ class ChatApiServices {
       'staff_id': staffId,
       'service_requested_time': serviceRequestedTime,
       'store_category_id': storeCategoryId,
+      'prescription_image_urls': prescriptionImageUrls,
     };
 
     // Match existing endpoint used elsewhere

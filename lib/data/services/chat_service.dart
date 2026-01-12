@@ -15,6 +15,7 @@ class ChatService {
     String staffId = "",
     String serviceRequestedTime = "",
     String storeCategoryId = "",
+    String prescriptionImageUrls = "",
   }) {
     return ChatApiServices.instance.sendChatMessage(
       message: message,
@@ -27,6 +28,7 @@ class ChatService {
       staffId: staffId,
       serviceRequestedTime: serviceRequestedTime,
       storeCategoryId: storeCategoryId,
+      prescriptionImageUrls: prescriptionImageUrls,
     );
   }
 

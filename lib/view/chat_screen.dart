@@ -144,6 +144,10 @@ class _ChatScreenState extends State<ChatScreen> {
       if (mounted) {
         print('ChatScreen: Prescription screen received');
         print('ChatScreen: Prescription screen received - $prescription');
+        _apiData = {
+            ..._apiData,
+            'prescription_image_urls': (prescription['imagesurls'] as List?)?.join(',') ?? '',
+          };
         _sendMessage('I have opened the prescription screen', null, null, null);
       }
     });
