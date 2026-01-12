@@ -19,7 +19,7 @@ class OrderService {
   Function(String)? onAddressSummary; // Add order summary callback
   Function(String)? onSendMessage; // Add send message callback // CHANGE CALLBACK
   Function(Map<String, dynamic>)? onSelectSchedule; // Add select schedule callback
-  Function(List<String>)? onSelectPrescription; // Add prescription screen callback
+  Function(Map<String, dynamic>)? onSelectPrescription; // Add prescription screen callback
   Function(Map<String, dynamic>)? onSelectStaff; // Add select staff callback
 
   void setProductCallback(Function(Map<String, dynamic>) callback) {
@@ -83,7 +83,7 @@ class OrderService {
     onSelectSchedule = callback;
   }
 
-  void setPrescriptionCallback(Function(List<String>) callback) {
+  void setPrescriptionCallback(Function(Map<String, dynamic>) callback) {
     print('setPrescriptionScreenOpenCallback: $callback');
     onSelectPrescription = callback;//11
   }
@@ -165,7 +165,7 @@ class OrderService {
     onSelectSchedule?.call(schedule);
   }
 
-  void triggerPrescriptionScreen(List<String> prescription) {
+  void triggerPrescriptionScreen(Map<String, dynamic> prescription) {
     print('triggerPrescriptionScreen: $prescription');
     onSelectPrescription?.call(prescription);
   }

@@ -145,7 +145,7 @@ class ChatBot {
     OrderService().triggerSelectStaff(obj);
   }
 
-  static void openPrescriptionScreen(List<String> prescription) {
+  static void openPrescriptionScreen(Map<String, dynamic> prescription) {
     print('openPrescriptionScreen');
     OrderService().triggerPrescriptionScreen(prescription);
   }

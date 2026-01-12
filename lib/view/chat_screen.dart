@@ -140,9 +140,10 @@ class _ChatScreenState extends State<ChatScreen> {
       }
     });
 
-    OrderService().setPrescriptionCallback((List<String> prescription) {
+    OrderService().setPrescriptionCallback((Map<String, dynamic> prescription) {
       if (mounted) {
         print('ChatScreen: Prescription screen received');
+        print('ChatScreen: Prescription screen received - $prescription');
         _sendMessage('I have opened the prescription screen', null, null, null);
       }
     });
