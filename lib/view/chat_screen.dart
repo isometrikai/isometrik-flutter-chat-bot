@@ -944,9 +944,9 @@ class _ChatScreenState extends State<ChatScreen> {
       onUpdateGotStripePaymentCallback: (bool value) {
         if (_gotStripePaymentCallback == true) {
           Timer(Duration(seconds: 1), () {
-             setState(() {
+            //  setState(() {
             _gotStripePaymentCallback = value;
-          });
+          // });
           });
         }
       }, // Add callback to update gotStripePaymentCallback
