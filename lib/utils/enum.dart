@@ -25,6 +25,7 @@ enum WidgetEnum {
   choose_address,
   choose_card,
   order_tracking,
+  online_payment_confirm_order,
   service_types;
 
   // Add string values for API communication

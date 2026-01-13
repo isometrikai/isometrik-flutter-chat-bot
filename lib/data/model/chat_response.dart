@@ -11,6 +11,7 @@ class ChatResponse {
   final List<ChatWidget> widgets;
   final int? cartCount;
   final bool needToEndThisChat;
+  final bool isOnlinePayment;
 
   ChatResponse({
     required this.text,
@@ -18,6 +19,7 @@ class ChatResponse {
     required this.widgets,
     this.cartCount,
     this.needToEndThisChat = false,
+    this.isOnlinePayment = false,
   });
 
   factory ChatResponse.fromJson(Map<String, dynamic> json) {
@@ -45,6 +47,7 @@ class ChatResponse {
       widgets: widgetsList,
       cartCount: json['cartCount'] ?? -1,
       needToEndThisChat: json['needToEndThisChat'] ?? false,
+      isOnlinePayment: json['isOnlinePayment'] ?? false,
     );
   }
 
@@ -55,6 +58,7 @@ class ChatResponse {
       'widgets': widgets.map((widget) => widget.toJson()).toList(),
       'cartCount': cartCount,
       'needToEndThisChat': needToEndThisChat,
+      'isOnlinePayment': isOnlinePayment,
     };
   }
 
@@ -133,6 +137,7 @@ class ChatWidget {
   bool get isScheduledLaterWidget => type == WidgetEnum.schedule_later.value;
   bool get isSelectStaffWidget => type == WidgetEnum.staff_selection.value;
   bool get isPrescriptionScreenWidget => type == WidgetEnum.prescription_screen.value;
+  bool get isOnlinePaymentConfirmOrderWidget => type == WidgetEnum.online_payment_confirm_order.value;
   bool get isOrderSummaryWidget => type == WidgetEnum.order_summary.value;
   bool get isOrderConfirmedWidget => type == WidgetEnum.order_confirmed.value;
   bool get isOrderTrackingWidget => type == WidgetEnum.order_tracking.value;
@@ -244,6 +249,11 @@ class ChatWidget {
 
   // Get prescription_screen actions (converted to models)
   List<WidgetAction> get prescriptionScreen => isPrescriptionScreenWidget
+      ? widget.map((e) => WidgetAction.fromJson(e as Map<String, dynamic>)).toList()
+      : [];
+
+  // Get online_payment_confirm_order actions (converted to models)
+  List<WidgetAction> get onlinePaymentConfirmOrder => isOnlinePaymentConfirmOrderWidget
       ? widget.map((e) => WidgetAction.fromJson(e as Map<String, dynamic>)).toList()
       : [];
 
@@ -818,6 +828,8 @@ class WidgetAction {
   final num? bookingType;
   final bool? isScheduled;
   final String? serviceRequestedTime;
+  final String? orderAmount;
+  final String? currency;
 
   WidgetAction({
     required this.buttonText,
@@ -848,6 +860,8 @@ class WidgetAction {
     this.bookingType,
     this.isScheduled,
     this.serviceRequestedTime,
+    this.orderAmount,
+    this.currency,
   });
 
   factory WidgetAction.fromJson(Map<String, dynamic> json) {
@@ -884,6 +898,8 @@ class WidgetAction {
         bookingType: json['bookingType'] ?? 111,
         isScheduled: json['isScheduled'] ?? false,
         serviceRequestedTime: json['serviceRequestedTime']?.toString(),
+        orderAmount: json['orderAmount']?.toString(),
+        currency: json['currency']?.toString(),
     );
   }
 
@@ -918,6 +934,8 @@ class WidgetAction {
       'bookingType': bookingType,
       'isScheduled': isScheduled,
       'serviceRequestedTime': serviceRequestedTime,
+      'orderAmount': orderAmount,
+      'currency': currency,
     };
   }
 }

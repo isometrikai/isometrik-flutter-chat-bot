@@ -156,7 +156,16 @@ class _ChatScreenState extends State<ChatScreen> {
     OrderService().setStripePlaceOrderCallback((Map<String, dynamic> stripePlaceOrder) {
       if (mounted) {
         print('ChatScreen: Stripe place order received - $stripePlaceOrder');
-        _sendMessage('Order placed successfully', null, null, null);
+        if (stripePlaceOrder['isPaymentSuccess'] == true) {
+          _needToEndThisChat = true;
+          BlackToastView.show(context, 'Payment successful');
+           context.read<CartBloc>().add(
+              CartFetchRequested(needToShowLoader: false),
+            );
+        }else if (stripePlaceOrder['isPaymentFailed'] == true) {
+          BlackToastView.show(context, stripePlaceOrder['message']);
+        }
+        // _sendMessage('Order placed successfully', null, null, null);
       }
     });
   }
@@ -645,7 +654,8 @@ class _ChatScreenState extends State<ChatScreen> {
                     widget.type == WidgetEnum.order_details.value ||
                     widget.type == WidgetEnum.schedule_later.value ||
                     widget.type == WidgetEnum.staff_selection.value ||
-                    widget.type == WidgetEnum.prescription_screen.value,
+                    widget.type == WidgetEnum.prescription_screen.value ||
+                    widget.type == WidgetEnum.online_payment_confirm_order.value,
               )
               .toList();
     });

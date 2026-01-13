@@ -100,9 +100,11 @@ class ChatScreenBody extends StatelessWidget {
                   onUpdateCartCount(cartCount);
                   onHandleChatResponse(state.messages);
                   if (state.messages.orderConfirmedWidgets.isNotEmpty) {
-                    context.read<CartBloc>().add(
-                      CartFetchRequested(needToShowLoader: false),
-                    );
+                    if (state.messages.isOnlinePayment == false) {
+                      context.read<CartBloc>().add(
+                        CartFetchRequested(needToShowLoader: false),
+                      );
+                    }
                   }
                   if (state.messages.cartCount != null &&
                       state.messages.cartCount == 0) {
@@ -1593,6 +1595,41 @@ class ChatScreenBody extends StatelessWidget {
                         },
               ),
             );
+          }
+        }
+
+        for (final widget in latestActionWidgets.where(
+          (w) => w.type == WidgetEnum.online_payment_confirm_order.value,
+        )) {
+          for (final action in widget.onlinePaymentConfirmOrder) {
+            // actionButtons.add(
+              // buildActionButton(
+                // text: action.buttonText,
+                // onTap:
+                    // isApiLoading
+                    //     ? () {}
+                    //     : () async {
+                          var data = {
+                                "metadata": {
+                                    "trigger": "order",
+                                    "orderId": action.orderId ?? '',
+                                    "userType": "user",
+                                    "paymentAction": 2,
+                                    "userId": ChatApiServices.instance.userId ?? ''
+                                },
+                                "userId": ChatApiServices.instance.userId ?? '',
+                                "amount": action.orderAmount ?? '',
+                                "currency": action.currency ?? '',
+                                "userType": "user",
+                                "capture": false,
+                                "paymentAction": 2,
+                                "orderId": action.orderId ?? ''
+                            };
+      
+                        OrderService().triggerStripePlaceOrderScreenOpen(data);
+                        // },
+              // ),
+            // );
           }
         }
 
