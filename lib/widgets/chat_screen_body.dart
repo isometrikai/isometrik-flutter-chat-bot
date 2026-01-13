@@ -1627,10 +1627,12 @@ class ChatScreenBody extends StatelessWidget {
                                 "paymentAction": 2,
                                 "orderId": action.orderId ?? ''
                             };
-                            Timer(Duration(seconds: 2), () {
-                              print("Timer completed");
-                              OrderService().triggerStripePlaceOrderScreenOpen(data);
-                            });
+                            if (needToEndThisChat == false) {
+                               Timer(Duration(seconds: 1), () {
+                                print("Timer completed");
+                                OrderService().triggerStripePlaceOrderScreenOpen(data);
+                              });
+                            }
                         // },
               // ),
             // );
