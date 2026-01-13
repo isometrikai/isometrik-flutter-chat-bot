@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -940,9 +942,13 @@ class _ChatScreenState extends State<ChatScreen> {
       needToEndThisChat: _needToEndThisChat, // Pass needToEndThisChat state
       gotStripePaymentCallback: _gotStripePaymentCallback, // Pass gotStripePaymentCallback parameter
       onUpdateGotStripePaymentCallback: (bool value) {
-        setState(() {
-          _gotStripePaymentCallback = value;
-        });
+        if (_gotStripePaymentCallback == true) {
+          Timer(Duration(seconds: 1), () {
+             setState(() {
+            _gotStripePaymentCallback = value;
+          });
+          });
+        }
       }, // Add callback to update gotStripePaymentCallback
       isFromHistory: widget.isFromHistory, // Pass isFromHistory parameter
       chatHistoryTitle: widget.chatHistoryTitle,
