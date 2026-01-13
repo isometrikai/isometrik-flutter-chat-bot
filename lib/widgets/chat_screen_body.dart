@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -1625,8 +1627,10 @@ class ChatScreenBody extends StatelessWidget {
                                 "paymentAction": 2,
                                 "orderId": action.orderId ?? ''
                             };
-      
-                        OrderService().triggerStripePlaceOrderScreenOpen(data);
+                            Timer(Duration(seconds: 2), () {
+                              print("Timer completed");
+                              OrderService().triggerStripePlaceOrderScreenOpen(data);
+                            });
                         // },
               // ),
             // );
