@@ -33,7 +33,7 @@ class _ChatScreenState extends State<ChatScreen> {
   int _totalCartCount = 0; // Track total cart count
   List<ChatMessage> messages = [];
   bool _needToEndThisChat = false; // Track if chat should be ended
-
+  bool _gotStripePaymentCallback = false;
   late final CartBloc _cartBloc;
   final SpeechService _speechService = SpeechService();
   bool _isSpeechAvailable = false;
@@ -158,11 +158,13 @@ class _ChatScreenState extends State<ChatScreen> {
         print('ChatScreen: Stripe place order received - $stripePlaceOrder');
         if (stripePlaceOrder['isPaymentSuccess'] == true) {
           _needToEndThisChat = true;
+          _gotStripePaymentCallback = true;
           BlackToastView.show(context, 'Payment successful');
            context.read<CartBloc>().add(
               CartFetchRequested(needToShowLoader: false),
             );
         }else if (stripePlaceOrder['isPaymentFailed'] == true) {
+          _gotStripePaymentCallback = true;
           // BlackToastView.show(context, stripePlaceOrder['message']);
           _sendMessage(stripePlaceOrder['message'], null, null, null);
         }
@@ -936,6 +938,12 @@ class _ChatScreenState extends State<ChatScreen> {
       // Add cancel speech handler
       isRecording: _isRecording, // Pass recording state
       needToEndThisChat: _needToEndThisChat, // Pass needToEndThisChat state
+      gotStripePaymentCallback: _gotStripePaymentCallback, // Pass gotStripePaymentCallback parameter
+      onUpdateGotStripePaymentCallback: (bool value) {
+        setState(() {
+          _gotStripePaymentCallback = value;
+        });
+      }, // Add callback to update gotStripePaymentCallback
       isFromHistory: widget.isFromHistory, // Pass isFromHistory parameter
       chatHistoryTitle: widget.chatHistoryTitle,
     );

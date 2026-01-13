@@ -47,6 +47,8 @@ class ChatScreenBody extends StatelessWidget {
   onCancelSpeechRecording; // Add cancel speech handler
   final bool isRecording; // Add recording state
   final bool needToEndThisChat; // Add needToEndThisChat parameter
+  final bool gotStripePaymentCallback; // Add gotStripePaymentCallback parameter
+  final Function(bool) onUpdateGotStripePaymentCallback; // Add callback to update gotStripePaymentCallback
   final bool isFromHistory; // Add isFromHistory parameter
   final String? chatHistoryTitle; // Add chatHistoryTitle parameter
 
@@ -81,6 +83,8 @@ class ChatScreenBody extends StatelessWidget {
     required this.onCancelSpeechRecording, // Add the cancel speech handler parameter
     required this.isRecording, // Add the recording state parameter
     required this.needToEndThisChat, // Add the needToEndThisChat parameter
+    required this.gotStripePaymentCallback, // Add gotStripePaymentCallback parameter
+    required this.onUpdateGotStripePaymentCallback, // Add callback to update gotStripePaymentCallback
     required this.isFromHistory, // Add the isFromHistory parameter
     required this.chatHistoryTitle, // Add the chatHistoryTitle parameter
   });
@@ -154,10 +158,12 @@ class ChatScreenBody extends StatelessWidget {
                 } else if (state is CartLoaded) {
                   int cartCount = cartBloc.getTotalProductCount;
                   onUpdateCartCount(cartCount);
+                  onUpdateGotStripePaymentCallback(false);
                 } else if (state is CartEmpty) {
                   // Cart is empty, set count to 0
                   print('CartBloc CartEmpty: Setting cart count to 0');
                   onUpdateCartCount(0);
+                  onUpdateGotStripePaymentCallback(false);
                 }
               },
             ),
@@ -1627,7 +1633,7 @@ class ChatScreenBody extends StatelessWidget {
                                 "paymentAction": 2,
                                 "orderId": action.orderId ?? ''
                             };
-                            if (needToEndThisChat == false) {
+                            if (gotStripePaymentCallback == false) {
                                Timer(Duration(seconds: 1), () {
                                 print("Timer completed");
                                 OrderService().triggerStripePlaceOrderScreenOpen(data);
