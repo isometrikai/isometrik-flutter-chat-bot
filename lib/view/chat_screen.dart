@@ -163,7 +163,8 @@ class _ChatScreenState extends State<ChatScreen> {
               CartFetchRequested(needToShowLoader: false),
             );
         }else if (stripePlaceOrder['isPaymentFailed'] == true) {
-          BlackToastView.show(context, stripePlaceOrder['message']);
+          // BlackToastView.show(context, stripePlaceOrder['message']);
+          _sendMessage(stripePlaceOrder['message'], null, null, null);
         }
         // _sendMessage('Order placed successfully', null, null, null);
       }
