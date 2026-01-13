@@ -943,11 +943,11 @@ class _ChatScreenState extends State<ChatScreen> {
       gotStripePaymentCallback: _gotStripePaymentCallback, // Pass gotStripePaymentCallback parameter
       onUpdateGotStripePaymentCallback: (bool value) {
         if (_gotStripePaymentCallback == true) {
-          Timer(Duration(seconds: 1), () {
+          // Timer(Duration(seconds: 1), () {
             //  setState(() {
             _gotStripePaymentCallback = value;
           // });
-          });
+          // });
         }
       }, // Add callback to update gotStripePaymentCallback
       isFromHistory: widget.isFromHistory, // Pass isFromHistory parameter
