@@ -161,7 +161,7 @@ class _ChatScreenState extends State<ChatScreen> {
         if (stripePlaceOrder['isPaymentSuccess'] == true) {
           _needToEndThisChat = true;
           _gotStripePaymentCallback = true;
-          BlackToastView.show(context, 'Payment successful');
+          BlackToastView.show(context, 'Payment completed successfully');
            context.read<CartBloc>().add(
               CartFetchRequested(needToShowLoader: false),
             );
