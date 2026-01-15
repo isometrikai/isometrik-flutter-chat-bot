@@ -1617,21 +1617,23 @@ class ChatScreenBody extends StatelessWidget {
                     // isApiLoading
                     //     ? () {}
                     //     : () async {
-                          var data = {
+                          final userId = ChatApiServices.instance.userId ?? '';
+                          final orderId = action.orderId ?? '';
+                          final data = <String, dynamic>{
                                 "metadata": {
                                     "trigger": "order",
-                                    "orderId": action.orderId ?? '',
+                                    "orderId": orderId,
                                     "userType": "user",
                                     "paymentAction": 2,
-                                    "userId": ChatApiServices.instance.userId ?? ''
+                                    "userId": userId
                                 },
-                                "userId": ChatApiServices.instance.userId ?? '',
+                                "userId": userId,
                                 "amount": action.orderAmount ?? '',
                                 "currency": action.currency ?? '',
                                 "userType": "user",
                                 "capture": false,
                                 "paymentAction": 2,
-                                "orderId": action.orderId ?? ''
+                                "orderId": orderId
                             };
                             if (gotStripePaymentCallback == false) {
                                Timer(Duration(seconds: 1), () {
