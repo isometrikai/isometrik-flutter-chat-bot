@@ -132,6 +132,8 @@ class PlatformService {
             isProduction: false,
             latitude: 13.02868,
             longitude: 77.58952,
+            // latitude: 25.204849243164062,//dubai
+            // longitude: 55.2704849243164062,//dubai
             clientGuid: '528a7d439df44f2b9457342b7b865be2',
             indexName: 'hitechnology.20250821.105131',
             visitId: '3c6b9339-c602-4af9-b454-0ec0df067181',
@@ -142,6 +144,9 @@ class PlatformService {
             currencysymbol: '4oK5',//"2K8u2KU=",//"د.إ",
             zoneId: '634e5da256ad3fd02bd3feb5',
             timezone: 'Asia/Kolkata',
+            // zoneId: '636dfc8c89b6a857b500ccd1',//dubai
+            //  currencycode: 'AED',//dubai
+            // currencysymbol: "2K8u2KU=",//"د.إ",//dubai
           );
       }
     }
