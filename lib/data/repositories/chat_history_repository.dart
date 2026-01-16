@@ -8,7 +8,6 @@ class ChatHistoryRepository {
   
   ChatHistoryRepository._internal();
 
-  static const String baseUrl = 'https://easyagentapi.isometrik.ai';
   String userIds = '';
 
   // Use the same chat client that handles token management automatically

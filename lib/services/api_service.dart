@@ -3,8 +3,10 @@ import 'package:chat_bot/utils/utility.dart';
 
 class ApiService {
   static String _baseApiUrl = 'https://apisuperapp-staging.eazy-online.com';
+  static bool _isProduction = false;
 
   static String get baseApiUrl => _baseApiUrl;
+  static bool get isProduction => _isProduction;
 
   // static Future<void> initialize() async {
   //   await AuthService.instance.initialize();
@@ -35,6 +37,7 @@ class ApiService {
     required String zoneId,
     required String timezone,
   }) {
+    _isProduction = isProduction;
     _baseApiUrl = baseApiUrl.isNotEmpty 
         ? removeTrailingSlash(baseApiUrl) 
         : 'https://apisuperapp-staging.eazy-online.com';

@@ -53,8 +53,8 @@ class _ChatHistoryContentState extends State<_ChatHistoryContent> {
   String _currentKeyword = '';
   DateTime? _lastQueryAt;
 
-  // final List<String> _categories = ['All', 'Food', 'Grocery', 'Pharmacy'];
-  final List<String> _categories = ['All', '🍕 Restaurant', '🥑 Grocery', '💊 Pharmacy', '🛒 Shopping', '💄 Services'];
+  final List<String> _categories = ['All', '🍕 Restaurant', '🥑 Grocery', '💊 Pharmacy'];
+  // final List<String> _categories = ['All', '🍕 Restaurant', '🥑 Grocery', '💊 Pharmacy', '🛒 Shopping', '💄 Services'];
 
   @override
   void initState() {

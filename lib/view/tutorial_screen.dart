@@ -345,18 +345,18 @@ class _TutorialScreenState extends State<TutorialScreen> {
           description: 'Medicines & health products',
           emoji: '💊',
         ),
-        const SizedBox(height: 16),
-        _buildServiceCard(
-          title: 'Shopping',
-          description: 'Browse products & deals',
-          emoji: '🛍️',
-        ),
-        const SizedBox(height: 16),
-        _buildServiceCard(
-          title: 'Services',
-          description: 'Book appointments & more',
-          emoji: '🔧',
-        ),
+        // const SizedBox(height: 16),
+        // _buildServiceCard(
+        //   title: 'Shopping',
+        //   description: 'Browse products & deals',
+        //   emoji: '🛍️',
+        // ),
+        // const SizedBox(height: 16),
+        // _buildServiceCard(
+        //   title: 'Services',
+        //   description: 'Book appointments & more',
+        //   emoji: '🔧',
+        // ),
       ],
     );
   }

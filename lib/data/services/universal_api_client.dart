@@ -2,6 +2,7 @@ import 'package:chat_bot/data/api_client.dart';
 import 'package:chat_bot/data/services/token_manager.dart';
 import 'package:chat_bot/utils/api_result.dart';
 import 'package:chat_bot/services/api_service.dart';
+import 'package:chat_bot/utils/app_constants.dart';
 import 'package:chat_bot/utils/utility.dart';
 
 /// Universal API client that automatically handles token refresh for all APIs
@@ -15,8 +16,9 @@ class UniversalApiClient {
     onUnauthorizedRefresh: _handleTokenRefresh,
   );
 
-  late final ApiClient _chatClient = ApiClient(
-    baseUrl: 'https://easyagentapi.isometrik.ai',
+  /// Chat client - uses dynamic base URL based on isProduction flag
+  ApiClient get _chatClient => ApiClient(
+    baseUrl: AppConstants.chatBaseUrl,
     buildHeaders: _buildAppHeaders,//_buildHeaders,
     // onUnauthorizedRefresh: _handleTokenRefresh,
   );
