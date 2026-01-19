@@ -148,6 +148,35 @@ class PlatformService {
             //  currencycode: 'AED',//dubai
             // currencysymbol: "2K8u2KU=",//"د.إ",//dubai
           );
+
+          // ApiService.configure(
+          //   chatBotId: '1476',
+          //   appSecret: "SFMyNTY.g3QAAAACZAAEZGF0YXQAAAADbQAAAAlhY2NvdW50SWRtAAAAGDY2YzQ2YWVhN2E2MDI5Yjk5MTNiMzIxOG0AAAAIa2V5c2V0SWRtAAAAJGFiZGFkNDQyLTA4YzktNDE4Ny1iYjk4LWUwMTAzYmY2YWYzOG0AAAAJcHJvamVjdElkbQAAACQ2Zjg4NzAwMi0yYzQ3LTQ4Y2EtYTQwNS0wZjk2NWVlNDAyNjFkAAZzaWduZWRuBgAUskFvkQE.esNFHT-JxzVtFpxylbJ8ik1lRZ-c75JjuCA0toa4C5M",
+          //   licenseKey: "lic-IMKMqJdO3e2HO+6qDxctvESxA+HkoLIThG9",
+          //   userId: "63ff047c83f1c452a11b8d63",
+          //   name: 'Vishvesh dg',
+          //   timestamp: '2025-07-28T12:30:00Z',
+          //   userToken: 'Bearer eyJhbGciOiJSU0EtT0FFUCIsImN0eSI6IkpXVCIsImVuYyI6IkExMjhHQ00iLCJ0eXAiOiJKV1QifQ.dyMQ2fJbubR8rwZZ6jlzeLdwqTafN8eJeZwVu4N7ZNPT8GfNg2lREhoxDOvW2jA2agROulCUQohjZPRCfK7W8NPCOdRuQzdT6tKb214Iq7zALmTEEyr0GyVkiqGKqn-hAvjg0n71BKxWZWaoirN9J1Lilt4Dkw9NzzJffAVtZKE.2-BqXlr_vdIBeRpe.L-B2IOGLYtlWj5xS1umo9l997Bloah7u0n3wQfAMcDhWYLnWd67kwsi88x5UHk5XxAlQuIFeW3k4CiDUhBhThrPmafsb31I0cHgOZtvvdaHPLv8vYIChn5FK0kCkOWaQy4wyqY-FsQE3ouQOJmU1TYe04oqsClO88hoIcVPnMfFbW9JZJ3zORpzNwJfAJyYVKponkgVJls_LbX8kLkFS652F-RPUafLh6WfLlXhJfacc9-b-0GIeoISZl3bn5hVwT76LyHalkoKG-Fp4ej47RTlfgELraHs8vml3Y69kQBrXzocrJadu4uOHTdXmJ9434Y5Iq1cFH58obbK4jTl29lsZd3k11hvwNfmasw2G32_NPNgazTTG4mGA3C1Pt-nbyx6Qel8Z3watNqlk92AK-yd5AdU-zQJwsyzDttfPeUnl6ur_5f3SPi7WGb_HeA5IQCkrkDyjz-7mKdrFi_cF7fcI7Mr728Onl6ujsOpkLiiGT9cuJTnjtmXW9WB5gjyvobodz7dqwVWECAupAJkdNvhyhT6Mtk2Dg4LxxU8MiA6ACCIPzWzl2jBnkV78P7sqY2AyLJ9b9V1Y_jpxTwW0sZKRmJHwCc0mCqVU-bqTVEx7HUM5Z7kYHJsZ8v3CwhVUE3mJC5eqPvGsGE3To_r_41MIHmanpsuwSMoS2ldxacI9Bas2YrRIuJuWHN8mM7TVn1mh7kzscNUJsYwS2xQd4eZi1fm0PGiqbFCjsutD7DKgz-blqc9d00PZtbJjqaGJRuygIN6rYAumSNcOhT8K5NFLTpge0WF22hgu5Wh192dehsQ0eimncJqGFWSEWLL2godekuLb76_gSOt454abkAsllEpAAxWvrD79MwAuWFVpv1NXj2f_6nOuGQee9ORT7_mDTlI660k9x4IvbGguyY3ytvDt9XXejcv2LyRadIC8XS3RyJnJARInv5Zc0_kZ6lLlWTVS2ETphcdGVHi4Hf8R9PAMnUJ4X6UYiXEe2eoy-A2sRHHCRXftq9vQJF7Nee20zc-bFh5jY_i_tztr9s7P0ggRVWRgPZ2kS0pPBR-mtIbgZfFQiOvo2LpuNUB0jrRa_elIzacdqrbm6CsqL2ZfOM0s6wQSdJZDHUw57PLCfdWIA4my9M9LhsCncsCBX5ZVLribUb7mG74g9vcUpv163bbp9OGkItS_Le2eSarjg1rEPqRAE3avUxvomR3IbUiJ7pSIGvEkX3VZZPnMyULXrNjeyoZVemuHC45LdPs0pEv0dJ8E9MoUNuAyGf_xVHvCSgiCunLPNUfIMyeSdJlcV4bD18zQsG2lYMkswRen6fQAXGmf6UlDCnQRgQnLvVFo4NGYzbkeugAAkVTkFihu9HyWrOz03i9FukZe0MTaTuqbu1H31kaetS_0hN48t6jYcDTEuGJqyjybE__58Ab8M_9av85Ix8JDybPd3itXN2mEpKsvS6h2JNW3nHpQYsxOd9CpSW9aVW29V56gInExRLkVjEoxBWTDYqOZ5SkA8zpeqJTDchMQr8AjnFY0t2PzVH6E1jSte4PBoIHIbHfsAM9ewL478mOV0C3ZGmmVGLoiNWuT5ni7AB5JhLTI1xQTd2XNg06H7y2gNY10KuEKB1XG5udpRvJQiOMF0B2KzeRrfJ8pYsrYEgt9YlzxhliF64FAuQgf_c1RUmkqA7inYAdWdUymmzbqiB_M4RJ_1GJqnHLY6Nm7VewdaSJ_MyygQdkdey40nxOWcXxRtIGJVg-ugeTnk0Hp4m4ekO6chuBFFt7EYgYkzPaRxelmzF-h6Gr71Q.OHlrpNAwn5GKGZZWid4P7A',
+          //   location: 'Dubai, Dubai, United Arab Emirates',
+          //   isProduction: true,
+          //   latitude: 25.204849243164062,
+          //   longitude: 55.270782470703125,
+          //   // latitude: 25.204849243164062,//dubai
+          //   // longitude: 55.2704849243164062,//dubai
+          //   clientGuid: '528a7d439df44f2b9457342b7b865be2',
+          //   indexName: 'hitechnology.20250821.105326',
+          //   visitId: '01e283c9-841b-4349-9d2d-39863fb3daed',
+          //   visitorId: '2b0a8996-a55e-4bdd-b4a7-3f85cae22bd6',
+          //   searchApiUrl: 'https://searchapi-dev.hawksearch.net/api/v2',
+          //   baseApiUrl: 'https://api-live.eazylife-online.com',
+          //   currencycode: 'AED',
+          //   currencysymbol: "2K8u2KU=",//"د.إ",
+          //   zoneId: '63e4cfa10a79635797059f24',
+          //   timezone: 'Asia/Kolkata',
+          //   // zoneId: '636dfc8c89b6a857b500ccd1',//dubai
+          //   //  currencycode: 'AED',//dubai
+          //   // currencysymbol: "2K8u2KU=",//"د.إ",//dubai
+          // );
       }
     }
   }
