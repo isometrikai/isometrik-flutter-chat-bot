@@ -1,3 +1,4 @@
+import 'package:chat_bot/utils/app_constants.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:chat_bot/bloc/product_customization/product_customization_bloc.dart';
@@ -114,7 +115,7 @@ class _ProductCustomizationScreenState extends State<ProductCustomizationScreen>
                             if (state is ProductCustomizationLoading) {
                               return const Center(
                                 child: CircularProgressIndicator(
-                                  color: Color(0xFF8E2FFD),
+                                  color: AppConstants.appThemeColor,
                                 ),
                               );
                             }
@@ -158,7 +159,7 @@ class _ProductCustomizationScreenState extends State<ProductCustomizationScreen>
                                         }
                                       },
                                       style: ElevatedButton.styleFrom(
-                                        backgroundColor: const Color(0xFF8E2FFD),
+                                        backgroundColor: AppConstants.appThemeColor,
                                         foregroundColor: Colors.white,
                                         shape: RoundedRectangleBorder(
                                           borderRadius: BorderRadius.circular(12),
@@ -232,13 +233,13 @@ class _ProductCustomizationScreenState extends State<ProductCustomizationScreen>
                           fit: BoxFit.cover,
                           errorBuilder: (context, error, stackTrace) => const Icon(
                             Icons.restaurant,
-                            color: Color(0xFF8E2FFD),
+                            color: AppConstants.appThemeColor,
                             size: 20,
                           ),
                         )
                       : const Icon(
                           Icons.restaurant,
-                          color: Color(0xFF8E2FFD),
+                          color: AppConstants.appThemeColor,
                           size: 20,
                         ),
                 ),
@@ -374,10 +375,10 @@ class _ProductCustomizationScreenState extends State<ProductCustomizationScreen>
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: isSelected ? const Color(0xFF8E2FFD) : const Color(0xFFE9DFFB),
+                  color: isSelected ? AppConstants.appThemeColor : const Color(0xFFE9DFFB),
                   width: 0.83,
                 ),
-                color: isSelected ? const Color(0xFF8E2FFD) : Colors.white,
+                color: isSelected ? AppConstants.appThemeColor : Colors.white,
               ),
               child: isSelected
                   ? Container(
@@ -492,10 +493,10 @@ class _ProductCustomizationScreenState extends State<ProductCustomizationScreen>
                     ? BorderRadius.circular(3.33) 
                     : null,
                 border: Border.all(
-                  color: isSelected ? const Color(0xFF8E2FFD) : const Color(0xFFB0C4FF),
+                  color: isSelected ? AppConstants.appThemeColor : const Color(0xFFB0C4FF),
                   width: 0.83,
                 ),
-                color: isSelected ? const Color(0xFF8E2FFD) : Colors.white,
+                color: isSelected ? AppConstants.appThemeColor : Colors.white,
               ),
               child: isSelected
                   ? addOnCategory.multiple
@@ -594,17 +595,7 @@ class _ProductCustomizationScreenState extends State<ProductCustomizationScreen>
                 width: 343,
                 height: 62,
                 decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [
-                      Color(0xFFD445EC),
-                      Color(0xFFB02EFB),
-                      Color(0xFF8E2FFD),
-                      Color(0xFF5E3DFE),
-                      Color(0xFF5186E0),
-                    ],
-                    begin: Alignment.centerLeft,
-                    end: Alignment.centerRight,
-                  ),
+                  color: AppConstants.appThemeColor,
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: ElevatedButton(

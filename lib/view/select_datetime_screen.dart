@@ -355,7 +355,7 @@ class _SelectDateTimeScreenState extends State<SelectDateTimeScreen> {
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                             decoration: BoxDecoration(
-                              color: const Color(0xFF8E2FFD),
+                              color: AppConstants.appThemeColor,
                               borderRadius: BorderRadius.circular(4),
                             ),
                             child: Text(
@@ -372,7 +372,7 @@ class _SelectDateTimeScreenState extends State<SelectDateTimeScreen> {
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                             decoration: BoxDecoration(
-                              color: const Color(0xFF8E2FFD),
+                              color: AppConstants.appThemeColor,
                               borderRadius: BorderRadius.circular(4),
                             ),
                             child: Text(
@@ -440,17 +440,7 @@ class _SelectDateTimeScreenState extends State<SelectDateTimeScreen> {
               child: Container(
                 height: 62,
                 decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [
-                      Color(0xFFD445EC),
-                      Color(0xFFB02EFB),
-                      Color(0xFF8E2FFD),
-                      Color(0xFF5E3DFE),
-                      Color(0xFF5186E0),
-                    ],
-                    begin: Alignment.centerLeft,
-                    end: Alignment.centerRight,
-                  ),
+                  color: AppConstants.appThemeColor,
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Material(

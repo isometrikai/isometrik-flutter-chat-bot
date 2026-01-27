@@ -110,7 +110,7 @@ class OrderSummaryWidget extends StatelessWidget {
                           style: AppTextStyles.restaurantTitle.copyWith(
                             fontSize: 13,
                             fontWeight: FontWeight.w400,
-                            color: const Color(0xFF8E2FFD),
+                            color: AppConstants.appThemeColor,
                           ),
                         ),
                       ),

@@ -7,10 +7,10 @@ class AppTheme {
   static const String _fontFamily = 'Plus Jakarta Sans';
   
   /// Color for bot messages in chat
-  static const Color chatBotMessageColor = Color(0xFF000000);
+  static const Color chatBotMessageColor = Color(0xFF2F3C70);
   
   /// Color for user messages in chat
-  static const Color chatUserMessageColor = Color(0xFF242424);
+  static const Color chatUserMessageColor = Color(0xFF2F3C70);
 
   /// Light theme configuration
   static ThemeData get lightTheme {

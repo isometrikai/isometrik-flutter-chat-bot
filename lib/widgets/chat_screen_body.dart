@@ -302,7 +302,14 @@ class ChatScreenBody extends StatelessWidget {
                         )
                          
                       else ...[
-                        buildInputArea(context),
+                        Column(
+                          children: [
+                            if (showGreetingOverlay == true) ...[
+                              _buildGreetingOptions(),
+                            ],
+                             buildInputArea(context),
+                          ],
+                        ),
                         // if (isRecording) _buildInputRecordingArea(context),
                       ]
                     ],
@@ -362,17 +369,15 @@ class ChatScreenBody extends StatelessWidget {
       ),
       title: Row(
         children: [
-          if (messages.isNotEmpty) ...[
           Container(
             child:
                     SvgPicture.asset(
                       AssetPath.get('images/ic_header_logo.svg'),
-                      width: 75,
-                      height: 23,
+                      // width: 75,
+                      // height: 23,
                       fit: BoxFit.cover,
                     )
           ),
-          ]
         ],
       ),
       actions: [
@@ -453,7 +458,7 @@ class ChatScreenBody extends StatelessWidget {
                                       vertical: 2,
                                     ),
                                     decoration: BoxDecoration(
-                                      color: const Color(0xFF6B46C1),
+                                      color: AppConstants.appThemeColor,
                                       // Purple color
                                       borderRadius: BorderRadius.circular(10),
                                     ),
@@ -628,7 +633,7 @@ class ChatScreenBody extends StatelessWidget {
                         },
                         style: OutlinedButton.styleFrom(
                           side: const BorderSide(
-                            color: Color(0xFF8E2FFD),
+                            color: AppConstants.appThemeColor,
                             width: 2,
                           ),
                           shape: RoundedRectangleBorder(
@@ -641,7 +646,7 @@ class ChatScreenBody extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w700,
-                            color: Color(0xFF8E2FFD),
+                            color: AppConstants.appThemeColor,
                           ),
                         ),
                       ),
@@ -671,18 +676,7 @@ class ChatScreenBody extends StatelessWidget {
                         ),
                         child: Ink(
                           decoration: BoxDecoration(
-                            gradient: const LinearGradient(
-                              colors: [
-                                Color(0xFF5186E0),
-                                Color(0xFF5E3DFE),
-                                Color(0xFF8E2FFD),
-                                Color(0xFFB02EFB),
-                                Color(0xFFD445EC),
-                              ],
-                              stops: [0.0, 0.24, 0.52, 0.73, 1.0],
-                              begin: Alignment.centerLeft,
-                              end: Alignment.centerRight,
-                            ),
+                            color: AppConstants.appThemeColor,
                             borderRadius: BorderRadius.circular(16),
                           ),
                           child: Container(
@@ -767,12 +761,12 @@ class ChatScreenBody extends StatelessWidget {
                         onPressed: () => Navigator.of(context).pop(),
                         style: TextButton.styleFrom(
                           backgroundColor: Colors.white,
-                          foregroundColor: Color(0xFF8E2FFD),
+                          foregroundColor: AppConstants.appThemeColor,
                           padding: EdgeInsets.zero,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(16),
                             side: BorderSide(
-                              color: Color(0xFF8E2FFD),
+                              color: AppConstants.appThemeColor,
                               width: 1,
                             ),
                           ),
@@ -782,7 +776,7 @@ class ChatScreenBody extends StatelessWidget {
                           style: AppTextStyles.button.copyWith(
                             fontSize: 16,
                             fontWeight: FontWeight.w700,
-                            color: Color(0xFF8E2FFD),
+                            color: AppConstants.appThemeColor,
                           ),
                           overflow: TextOverflow.ellipsis,
                           maxLines: 1,
@@ -816,18 +810,7 @@ class ChatScreenBody extends StatelessWidget {
                         ),
                         child: Container(
                           decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              colors: [
-                                Color(0xFF5186E0),
-                                Color(0xFF5E3DFE),
-                                Color(0xFF8E2FFD),
-                                Color(0xFFB02EFB),
-                                Color(0xFFD445EC),
-                              ],
-                              stops: [0.0, 0.24, 0.52, 0.73, 1.0],
-                              begin: Alignment.centerLeft,
-                              end: Alignment.centerRight,
-                            ),
+                            color: AppConstants.appThemeColor,
                             borderRadius: BorderRadius.circular(16),
                           ),
                           child: Center(
@@ -884,7 +867,13 @@ class ChatScreenBody extends StatelessWidget {
                         color:
                             message.isBot
                                 ? Color(int.parse('0xFFFFFFFF'))
-                                : Color(int.parse('0xFFF0DAFE')),
+                                : Color(int.parse('0xFFEDF3FF')),
+                        border: message.isBot == false
+                            ? Border.all(
+                                color: const Color(0xFFE9DFFB),
+                                width: 1,
+                              )
+                            : null,
                         // borderRadius: BorderRadius.circular(16),
                         borderRadius:
                             (message.isBot == false)
@@ -1066,7 +1055,11 @@ class ChatScreenBody extends StatelessWidget {
             ? greetingData!.weatherText
             : 'dsada';
 
-    final List<GreetingOption> opts = (greetingData?.options ?? []).toList();
+    // final List<GreetingOption> opts = (greetingData?.options ?? []).toList();
+    
+    // Get device width and calculate dynamic width with 20 spacing on each side
+    final double deviceWidth = MediaQuery.of(context).size.width;
+    final double contentWidth = deviceWidth - 40; // 20 on left + 20 on right
 
     return GestureDetector(
       onTap: () {
@@ -1074,159 +1067,453 @@ class ChatScreenBody extends StatelessWidget {
       },
       child: SingleChildScrollView(
         // keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 360),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              // Top graphic group
-              SizedBox(
-                width: 90,
-                height: 90,
-                child: Stack(
-                  clipBehavior: Clip.none,
+        child: Padding(
+          padding: const EdgeInsets.only(left: 20, right: 20, top: 50),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(maxWidth: contentWidth),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                SizedBox(
+                  width: contentWidth,
+                  child: _buildTitleWithHighlightedName(titleText),
+                ),
+                const SizedBox(height: 20),
+                SizedBox(
+                  width: contentWidth,
+                  child: Text(
+                    weatherText,
+                    textAlign: TextAlign.center,
+                    style: AppTextStyles.launchSubtitle.copyWith(
+                      color: const Color(0xFF7085AE),
+                    ),
+                  ),
+                ),
+                // const SizedBox(height: 16),
+                // // Weather information view
+                // Container(
+                //   width: contentWidth,
+                //   padding: const EdgeInsets.symmetric(
+                //     horizontal: 20,
+                //     vertical: 16,
+                //   ),
+                //   decoration: BoxDecoration(
+                //     color: const Color(0xFFF5F7FF),// Light purple background
+                //     borderRadius: BorderRadius.circular(8),
+                //   ),
+                //   child: Text(
+                //     weatherText,
+                //     textAlign: TextAlign.center,
+                //     style: AppTextStyles.launchWeather.copyWith(
+                //       color: const Color(0xFF2F3C70), // Darker purple text
+                //     ),
+                //   ),
+                // ),
+                const SizedBox(height: 40),
+                //Explore Our Services
+                Row(
                   children: [
-                    // Outer glow circle
-                    Container(
-                      width: 90,
-                      height: 90,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(110),
-                        gradient: const LinearGradient(
-                          begin: Alignment.centerLeft,
-                          end: Alignment.centerRight,
-                          colors: [
-                            Color(0x1AD445EC),
-                            Color(0x1AB02EFB),
-                            Color(0x1A8E2FFD),
-                            Color(0x1A5E3DFE),
-                            Color(0x1A5186E0),
-                          ],
-                        ),
-                      ),
-                    ),
-                    // Center asset
-                    Align(
-                      alignment: Alignment.center,
+                    Expanded(
                       child: Container(
-                        width: 70,
-                        height: 70,
-                        decoration: const BoxDecoration(
-                          shape: BoxShape.circle,
-                          gradient: LinearGradient(
-                            begin: Alignment.centerLeft,
-                            end: Alignment.centerRight,
-                            colors: [
-                              Color(0xFFD445EC),
-                              Color(0xFFB02EFB),
-                              Color(0xFF8E2FFD),
-                              Color(0xFF5E3DFE),
-                              Color(0xFF5186E0),
-                            ],
-                          ),
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(12),
-                          child: SvgPicture.asset(
-                            AssetPath.get('images/ic_mainImg.svg'),
-                            fit: BoxFit.contain,
-                          ),
+                        height: 1,
+                        color: const Color(0xFFE0EBFF),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                      child: Text(
+                        'EXPLORE OUR SERVICES',
+                        style: AppTextStyles.body(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w400,
+                          color: const Color(0xFF7085AE),
                         ),
                       ),
                     ),
-                    Positioned(
-                      right: -6,
-                      top: -6,
-                      child: Opacity(
-                        opacity: 0.4,
-                        child: SvgPicture.asset(
-                          AssetPath.get('images/ic_topStar.svg'),
-                          width: 34,
-                          height: 34,
-                        ),
-                      ),
-                    ),
-                    Positioned(
-                      left: -10,
-                      bottom: -8,
-                      child: Opacity(
-                        opacity: 0.4,
-                        child: SvgPicture.asset(
-                          AssetPath.get('images/ic_topStar.svg'),
-                          width: 51,
-                          height: 51,
-                        ),
+                    Expanded(
+                      child: Container(
+                        height: 1,
+                        color: const Color(0xFFE0EBFF),
                       ),
                     ),
                   ],
                 ),
-              ),
-              const SizedBox(height: 12),
-              SizedBox(
-                width: 304,
-                child: Text(
-                  titleText,
-                  textAlign: TextAlign.center,
-                  style: AppTextStyles.launchTitle.copyWith(
-                    color: const Color(0xFF171212),
+                const SizedBox(height: 40),
+
+                //SET EXPLORE OPTIONS
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: [
+                      _buildCategoryItem(
+                        icon: Icons.restaurant_outlined,
+                        label: 'Food',
+                        iconBgColor: const Color(0xFFE6FCEF),
+                        iconColor: const Color(0xFF01E064),
+                      ),
+                      const SizedBox(width: 15),
+                      _buildCategoryItem(
+                        icon: Icons.build_outlined,
+                        label: 'Services',
+                        iconBgColor: const Color.fromRGBO(211, 184, 164, 0.2),
+                        iconColor: const Color(0xFFD3B8A4),
+                      ),
+                      const SizedBox(width: 15),
+                      _buildCategoryItem(
+                        icon: Icons.shopping_cart_outlined,
+                        label: 'Groceries',
+                        iconBgColor: const Color(0xFFECF8FF),
+                        iconColor: const Color(0xFF9EDBFD),
+                      ),
+                      const SizedBox(width: 15),
+                      _buildCategoryItem(
+                        icon: Icons.school_outlined,
+                        label: 'Education',
+                        iconBgColor: const Color(0xFFE6EDF7),
+                        iconColor: const Color(0xFF064BB3),
+                      ),
+                      const SizedBox(width: 15),
+                      _buildCategoryItem(
+                        icon: Icons.flight_takeoff,
+                        label: 'Travel',
+                        iconBgColor: const Color(0xFFF8E9F1),
+                        iconColor: const Color(0xFFB82278),
+                      ),
+                      const SizedBox(width: 15),
+                      _buildCategoryItem(
+                        icon: Icons.local_pharmacy_outlined,
+                        label: 'Pharmacy',
+                        iconBgColor: const Color(0xFFE5EFF2),
+                        iconColor: const Color(0xFF00637B),
+                      ),
+                    ],
                   ),
                 ),
-              ),
-              const SizedBox(height: 12),
-              SizedBox(
-                width: 323,
-                child: Text(
-                  subtitleText,
-                  textAlign: TextAlign.center,
-                  style: AppTextStyles.launchSubtitle.copyWith(
-                    color: const Color(0xFF6E4185),
+
+                const SizedBox(height: 40),
+                //Switch to Classic View
+                Container(
+                  width: contentWidth,
+                  height: 138,
+                  padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF5F7FF),
+                    border: Border.all(color: const Color(0xFFEEF4FF), width: 1),
+                    borderRadius: BorderRadius.circular(26),
                   ),
-                ),
-              ),
-              const SizedBox(height: 16),
-              // Weather information view
-              Container(
-                width: 340,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                  vertical: 16,
-                ),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFF5F0FF), // Light purple background
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: const Color(0xFFE8D5FF), width: 1),
-                ),
-                child: Text(
-                  weatherText,
-                  textAlign: TextAlign.center,
-                  style: AppTextStyles.launchWeather.copyWith(
-                    color: const Color(0xFF6E4185), // Darker purple text
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
-              // Options grid 1x1
-              ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 340),
-                child: Column(
-                  children:
-                      opts.map((opt) {
-                        return Padding(
-                          padding: const EdgeInsets.only(bottom: 10),
-                          child: GreetingOptionTile(
-                            option: opt,
-                            onTap: () {
-                              onSendMessage(opt.title);
-                            },
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // Text Block
+                      Flexible(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Text(
+                              'Switch to Classic View',
+                              style: AppTextStyles.body(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w700,
+                                color: const Color(0xFF2F3C70),
+                              ).copyWith(height: 1.2),
+                            ),
+                            const SizedBox(height: 2),
+                            SizedBox(
+                              width: 313,
+                              child: Text(
+                                "Prefer browsing? You're always in control",
+                                textAlign: TextAlign.center,
+                                style: AppTextStyles.body(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w400,
+                                  color: const Color(0xFF8294B8),
+                                ).copyWith(height: 1.4),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      // Button
+                      SizedBox(
+                        width: 313,
+                        height: 56,
+                        child: ElevatedButton(
+                          onPressed: () {
+                            // TODO: Handle button tap
+                            OrderService().triggerChatDismiss();
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppConstants.appThemeColor,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            padding: EdgeInsets.zero,
+                            minimumSize: const Size(313, 56),
+                            maximumSize: const Size(313, 56),
+                            fixedSize: const Size(313, 56),
+                            elevation: 0,
+                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                           ),
-                        );
-                      }).toList(),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 40),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  'Goto Eazy app',
+                                  style: AppTextStyles.body(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w700,
+                                    color: Colors.white,
+                                  ).copyWith(height: 1.2),
+                                ),
+                                const SizedBox(width: 8),
+                                Transform.rotate(
+                                  angle: 3.14159, // 180 degrees in radians
+                                  child: const Icon(
+                                    Icons.arrow_back,
+                                    color: Colors.white,
+                                    size: 14,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            ],
+                
+                // Options grid 1x1
+                // ConstrainedBox(
+                //   constraints: BoxConstraints(maxWidth: contentWidth),
+                //   child: Column(
+                //     children:
+                //         opts.map((opt) {
+                //           return Padding(
+                //             padding: const EdgeInsets.only(bottom: 10),
+                //             child: GreetingOptionTile(
+                //               option: opt,
+                //               onTap: () {
+                //                 onSendMessage(opt.title);
+                //               },
+                //             ),
+                //           );
+                //         }).toList(),
+                //   ),
+                // ),
+              ],
+            ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildPowerByZain() {
+    return Center(
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            'Powered by',
+            style: AppTextStyles.body(
+              fontSize: 12,
+              fontWeight: FontWeight.w400,
+              color: const Color(0xFF7085AE),
+            ).copyWith(
+              height: 1.2,
+            ),
+          ),
+          const SizedBox(width: 5),
+          ShaderMask(
+            shaderCallback: (bounds) => const LinearGradient(
+              colors: [
+                Color(0xFF5186E0),
+                Color(0xFF5E3DFE),
+                Color(0xFF8E2FFD),
+                Color(0xFFB02EFB),
+                Color(0xFFD445EC),
+              ],
+              stops: [0.0, 0.24, 0.52, 0.73, 1.0],
+              begin: Alignment.centerLeft,
+              end: Alignment.centerRight,
+            ).createShader(bounds),
+            child: Text(
+              'zAIn',
+              style: AppTextStyles.body(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: Colors.white,
+              ).copyWith(
+                height: 1.2,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildGreetingOptions() {
+    final List<GreetingOption> opts = (greetingData?.options ?? []).toList();
+    print('Options count: ${opts.length}');
+    if (opts.isEmpty) {
+      print('Options list is empty');
+      return const SizedBox.shrink();
+    }
+    print('Rendering ${opts.length} options');
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: SizedBox(
+        height: 38,
+        child: ListView.builder(
+          scrollDirection: Axis.horizontal,
+          itemCount: opts.length,
+          itemBuilder: (context, index) {
+            final option = opts[index];
+            print('Rendering option $index: ${option.title}');
+            final displayText = option.emoji.isNotEmpty
+                ? '${option.emoji} ${option.title}'
+                : option.title;
+            return GestureDetector(
+              onTap: () {
+                print('Selected option title: ${option.title}');
+                onSendMessage(option.title);
+              },
+              child: Container(
+                margin: EdgeInsets.only(right: index < opts.length - 1 ? 12 : 0),
+                padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(
+                    color: const Color(0xFFE0EBFF),
+                    width: 1,
+                  ),
+                ),
+                child: Center(
+                  child: Text(
+                    displayText,
+                    style: AppTextStyles.restaurantDescription.copyWith(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w400,
+                      color: const Color(0xFF2F3C70),
+                      height: 1.4,
+                    ),
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTitleWithHighlightedName(String text) {
+    // Parse text to find name between quotes (handles both \"name\" and "name")
+    final baseStyle = AppTextStyles.launchTitle.copyWith(
+      color: const Color(0xFF171212),
+    );
+    final highlightedStyle = AppTextStyles.launchTitle.copyWith(
+      color: AppConstants.appThemeColor,
+    );
+
+    final List<TextSpan> spans = [];
+    // Pattern matches both escaped quotes (\") and regular quotes (")
+    final RegExp quotePattern = RegExp(r'(?:\\"|")([^"]+)(?:\\"|")');
+    
+    int lastEnd = 0;
+    final matches = quotePattern.allMatches(text);
+    
+    if (matches.isEmpty) {
+      // No matches found, return regular text
+      return Text(
+        text,
+        textAlign: TextAlign.center,
+        style: baseStyle,
+      );
+    }
+    
+    for (final match in matches) {
+      // Add text before the match
+      if (match.start > lastEnd) {
+        spans.add(TextSpan(
+          text: text.substring(lastEnd, match.start),
+          style: baseStyle,
+        ));
+      }
+      
+      // Add the highlighted name (without quotes)
+      spans.add(TextSpan(
+        text: match.group(1) ?? '',
+        style: highlightedStyle,
+      ));
+      
+      lastEnd = match.end;
+    }
+    
+    // Add remaining text after the last match
+    if (lastEnd < text.length) {
+      spans.add(TextSpan(
+        text: text.substring(lastEnd),
+        style: baseStyle,
+      ));
+    }
+    
+    return Text.rich(
+      TextSpan(children: spans),
+      textAlign: TextAlign.center,
+    );
+  }
+
+  Widget _buildCategoryItem({
+    required IconData icon,
+    required String label,
+    required Color iconBgColor,
+    required Color iconColor,
+  }) {
+    return GestureDetector(
+      onTap: () {
+        // Handle category tap
+        // onSendMessage(label);
+      },
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              color: iconBgColor,
+              borderRadius: BorderRadius.circular(9.16667),
+            ),
+            child: Icon(
+              icon,
+              size: 24,
+              color: iconColor,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            label,
+            textAlign: TextAlign.center,
+            style: AppTextStyles.body(
+              fontSize: 12,
+              fontWeight: FontWeight.w400,
+              color: const Color(0xFF2F3C70),
+            ).copyWith(height: 1.4),
+          ),
+        ],
       ),
     );
   }
@@ -1703,14 +1990,14 @@ class ChatScreenBody extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
         decoration: BoxDecoration(
           color: Colors.white,
-          border: Border.all(color: const Color(0xFF8E2FFD), width: 1),
+          border: Border.all(color: AppConstants.appThemeColor, width: 1),
           borderRadius: BorderRadius.circular(8),
         ),
         child: Text(
           text,
           style: AppTextStyles.button.copyWith(
             fontWeight: FontWeight.w400,
-            color: const Color(0xFF8E2FFD),
+            color: AppConstants.appThemeColor,
           ),
         ),
       ),
@@ -1776,7 +2063,7 @@ class ChatScreenBody extends StatelessWidget {
                                     color: const Color(0xFF242424),
                                   ),
                                   decoration: InputDecoration(
-                                    hintText: isRecording ? 'Listening...' : 'How can zAIn help you today?',
+                                    hintText: isRecording ? 'Listening...' : 'Ask me anything...',
                                     border: InputBorder.none,
                                     enabledBorder: InputBorder.none,
                                     focusedBorder: InputBorder.none,
@@ -1923,6 +2210,8 @@ class ChatScreenBody extends StatelessWidget {
                     ),
                   ),
                 ),
+                const SizedBox(height: 5),
+                _buildPowerByZain(),
               ],
             ),
           ),

@@ -277,7 +277,7 @@ class _SelectTimeScreenState extends State<SelectTimeScreen> {
                           padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 9),
                           decoration: BoxDecoration(
                             color: isSelected 
-                              ? const Color(0xFF8E2FFD)
+                              ? AppConstants.appThemeColor
                               : const Color(0xFFF5F7FF),
                             border: isSelected
                               ? null
@@ -347,7 +347,7 @@ class _SelectTimeScreenState extends State<SelectTimeScreen> {
                   child: isLoading
                       ? const Center(
                           child: CircularProgressIndicator(
-                            color: Color(0xFF8E2FFD),
+                            color: AppConstants.appThemeColor,
                           ),
                         )
                       : timeSlots.isEmpty
@@ -412,17 +412,7 @@ class _SelectTimeScreenState extends State<SelectTimeScreen> {
               child: Container(
                 height: 62,
                 decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [
-                      Color(0xFFD445EC),
-                      Color(0xFFB02EFB),
-                      Color(0xFF8E2FFD),
-                      Color(0xFF5E3DFE),
-                      Color(0xFF5186E0),
-                    ],
-                    begin: Alignment.centerLeft,
-                    end: Alignment.centerRight,
-                  ),
+                  color: AppConstants.appThemeColor,
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Material(
@@ -467,7 +457,7 @@ class _SelectTimeScreenState extends State<SelectTimeScreen> {
       decoration: BoxDecoration(
         border: Border.all(
           color: isSelected 
-            ? const Color(0xFF8E2FFD)
+            ? AppConstants.appThemeColor
             : const Color(0xFFEEF4FF),
           width: 0.833333,
         ),
@@ -477,7 +467,7 @@ class _SelectTimeScreenState extends State<SelectTimeScreen> {
         ? Container(
             margin: const EdgeInsets.all(3),
             decoration: const BoxDecoration(
-              color: Color(0xFF8E2FFD),
+              color: AppConstants.appThemeColor,
               shape: BoxShape.circle,
             ),
           )

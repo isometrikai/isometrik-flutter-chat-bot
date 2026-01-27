@@ -85,7 +85,7 @@ class StoreCard extends StatelessWidget {
                           const Icon(
                             Icons.star,
                             size: 14,
-                            color: Color(0xFFA674BF),
+                            color: AppConstants.appThemeColor,
                           ),
                           const SizedBox(width: 4),
                           Text(
@@ -237,7 +237,7 @@ class StoreCard extends StatelessWidget {
                   Text(
                     'Open in app',
                     style: AppTextStyles.restaurantDescription.copyWith(
-                      color: const Color(0xFF8E2FFD),
+                      color: AppConstants.appThemeColor,
                     ),
                   ),
                 ],
@@ -557,7 +557,7 @@ class _ProductPreviewTile extends StatelessWidget {
                 width: 27,
                 height: 27,
                 decoration: const BoxDecoration(
-                  color: Color(0xFF8E2FFD),
+                  color: AppConstants.appThemeColor,
                   borderRadius: BorderRadius.only(
                     topLeft: Radius.circular(8),
                     bottomLeft: Radius.circular(8),
@@ -572,7 +572,7 @@ class _ProductPreviewTile extends StatelessWidget {
               child: Text(
                 '$cartQuantity',
                 style: AppTextStyles.button.copyWith(
-                  color: const Color(0xFF8E2FFD),
+                  color: AppConstants.appThemeColor,
                 ),
               ),
             ),
@@ -587,7 +587,7 @@ class _ProductPreviewTile extends StatelessWidget {
                 width: 27,
                 height: 27,
                 decoration: const BoxDecoration(
-                  color: Color(0xFF8E2FFD),
+                  color: AppConstants.appThemeColor,
                   borderRadius: BorderRadius.only(
                     topRight: Radius.circular(8),
                     bottomRight: Radius.circular(8),
@@ -631,7 +631,7 @@ class _ProductPreviewTile extends StatelessWidget {
           child: Text(
             'Add',
             style: AppTextStyles.button.copyWith(
-              color: const Color(0xFF8E2FFD),
+              color: AppConstants.appThemeColor,
             ),
           ),
         ),

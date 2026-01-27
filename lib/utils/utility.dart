@@ -1,3 +1,4 @@
+import 'package:chat_bot/utils/app_constants.dart';
 import 'package:chat_bot/widgets/black_toast_view.dart';
 import 'package:flutter/material.dart';
 
@@ -146,7 +147,7 @@ class AppLoader extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           CircularProgressIndicator(
-            color: Color(0xFF8E2FFD),
+            color: AppConstants.appThemeColor,
             strokeWidth: 4,
           ),
           if (message != null) ...[
