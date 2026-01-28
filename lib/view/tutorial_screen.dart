@@ -1,3 +1,4 @@
+import 'package:chat_bot/services/callback_manage.dart';
 import 'package:chat_bot/view/chat_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -45,18 +46,19 @@ class _TutorialScreenState extends State<TutorialScreen> {
         curve: Curves.easeInOut,
       );
     } else {
-       Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (context) => MultiBlocProvider(
-          providers: [
-            BlocProvider(create: (context) => ChatBloc()),
-            BlocProvider(create: (context) => CartBloc()),
-          ],
-          child: const ChatScreen(),
-        ),
-      ),
-    );
+      OrderService().triggerTutorialDismiss();
+    //    Navigator.pushReplacement(
+    //   context,
+    //   MaterialPageRoute(
+    //     builder: (context) => MultiBlocProvider(
+    //       providers: [
+    //         BlocProvider(create: (context) => ChatBloc()),
+    //         BlocProvider(create: (context) => CartBloc()),
+    //       ],
+    //       child: const ChatScreen(),
+    //     ),
+    //   ),
+    // );
     }
   }
 
@@ -170,19 +172,20 @@ class _TutorialScreenState extends State<TutorialScreen> {
               alignment: Alignment.centerRight,
               child: GestureDetector(
             onTap: () {
+              OrderService().triggerTutorialDismiss();
               // Navigate to chat screen or main app
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => MultiBlocProvider(
-                    providers: [
-                      BlocProvider(create: (context) => ChatBloc()),
-                      BlocProvider(create: (context) => CartBloc()),
-                    ],
-                    child: const ChatScreen(),
-                  ),
-                ),
-              );
+              // Navigator.pushReplacement(
+              //   context,
+              //   MaterialPageRoute(
+              //     builder: (context) => MultiBlocProvider(
+              //       providers: [
+              //         BlocProvider(create: (context) => ChatBloc()),
+              //         BlocProvider(create: (context) => CartBloc()),
+              //       ],
+              //       child: const ChatScreen(),
+              //     ),
+              //   ),
+              // );
             },
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 6),
