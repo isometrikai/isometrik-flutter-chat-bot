@@ -1,5 +1,4 @@
-import 'package:chat_bot/data/model/chat_response.dart';
-import 'package:chat_bot/data/model/universal_cart_response.dart';
+import 'package:chat_bot/data/data.dart';
 
 abstract class CartState {}
 
@@ -23,7 +22,12 @@ class CartLoaded extends CartState {
 
 class CartEmpty extends CartState {}
 
-class CartProductAdded extends CartState {}
+class CartProductAdded extends CartState {
+  final String storeCategoryId;
+
+  CartProductAdded({required this.storeCategoryId});
+
+}
 
 class CartError extends CartState {
   final String message;

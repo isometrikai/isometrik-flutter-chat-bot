@@ -1,8 +1,9 @@
 import 'package:chat_bot/services/callback_manage.dart';
 import 'package:flutter/material.dart';
-import 'package:chat_bot/data/model/chat_response.dart';
+import 'package:chat_bot/data/data.dart';
 import 'package:flutter_svg/svg.dart' show SvgPicture;
 import 'package:chat_bot/utils/asset_path.dart';
+import '../utils/utils.dart';
 
 class OrderSummaryWidget extends StatelessWidget {
   final List<WidgetAction> orderItems;
@@ -74,17 +75,115 @@ class OrderSummaryWidget extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Header - Order summary
-              const Text(
+               Text(
                 'Order Summary',
-                style: TextStyle(
-                  fontFamily: 'Plus Jakarta Sans',
+                style: 
+                AppTextStyles.restaurantTitle.copyWith(
                   fontSize: 14,
                   fontWeight: FontWeight.w700,
                   color: Color(0xFF242424),
-                ),
+                ),  
               ),
               const SizedBox(height: 10),
               
+              if (storeInfo.storeCategoryId == FoodStoreCategoryId.services.value) ...[
+                // Service card with light purple background
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFBF1FF),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 5),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFE9DFFB),
+                          borderRadius: const BorderRadius.all(Radius.circular(8)),
+                        ),
+                        child: Text(
+                          storeInfo.serviceType ?? '',
+                          style: AppTextStyles.restaurantTitle.copyWith(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w400,
+                            color: const Color(0xFF8E2FFD),
+                          ),
+                        ),
+                      ),
+                      // Content section
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(10, 12, 10, 12),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // Store name with hammer emoji
+                            Row(
+                              children: [
+                                const Text('🔨 ', style: TextStyle(fontSize: 16)),
+                                Expanded(
+                                  child: Text(
+                                    storeInfo.storeName ?? '',
+                                    style: AppTextStyles.restaurantTitle.copyWith(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w400,
+                                      color: const Color(0xFF242424),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 10),
+                            // Address with house emoji
+                            if (storeInfo.address != null && storeInfo.address!.isNotEmpty) ...[
+                              Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text('🏠 ', style: TextStyle(fontSize: 16)),
+                                  Expanded(
+                                    child: Text(
+                                      storeInfo.address ?? '',
+                                      style: AppTextStyles.restaurantDescription.copyWith(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w400,
+                                        color: const Color(0xFF242424),
+                                      ),
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 10),
+                            ],
+                            // Service time with alarm clock emoji
+                            Row(
+                              children: [
+                                const Text('⏰ ', style: TextStyle(fontSize: 16)),
+                                Expanded(
+                                  child: Text(
+                                    storeInfo.isScheduled == true 
+                                        ? 'Scheduled for ${_formatServiceTime(storeInfo.serviceRequestedTime)}' 
+                                        : 'Book Now',
+                                    style: AppTextStyles.restaurantDescription.copyWith(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w400,
+                                      color: const Color(0xFF242424),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ] else ...[
               // Store information section with light purple background
               Container(
                 width: double.infinity,
@@ -102,10 +201,10 @@ class OrderSummaryWidget extends StatelessWidget {
                         Expanded(
                           child: Text(
                             storeInfo.storeName ?? '',
-                            style: const TextStyle(
-                              fontFamily: 'Plus Jakarta Sans',
+                            style: 
+                            AppTextStyles.restaurantTitle.copyWith(
                               fontSize: 16,
-                              fontWeight: FontWeight.w600,  
+                              fontWeight: FontWeight.w600,
                               color: Color(0xFF242424),
                             ),
                           ),
@@ -133,16 +232,17 @@ class OrderSummaryWidget extends StatelessWidget {
                         ],
                       ],
                     ),
-                    const SizedBox(height: 10),
-                    // Address with icon
+                    if (storeInfo.address != null && storeInfo.address!.isNotEmpty) ...[    
+                      const SizedBox(height: 10),
+                      // Address with icon
                     Row(
                       children: [
                         const Text('🏠 ', style: TextStyle(fontSize: 14)),
                         Expanded(
                           child: Text(
                             storeInfo.address ?? 'Address not available',
-                            style: const TextStyle(
-                              fontFamily: 'Plus Jakarta Sans',
+                            style: 
+                            AppTextStyles.restaurantDescription.copyWith(
                               fontSize: 14,
                               fontWeight: FontWeight.w400,
                               color: Color(0xFF242424),
@@ -151,9 +251,11 @@ class OrderSummaryWidget extends StatelessWidget {
                         ),
                       ],
                     ),
-                  ],
+                    ],  
+                    ],
+                  ),
                 ),
-              ),
+              ],
               const SizedBox(height: 12),
               
               // Itemized list
@@ -172,8 +274,8 @@ class OrderSummaryWidget extends StatelessWidget {
                               child: Text(
                                 item.quantity?.isNotEmpty ?? false ? '${item.quantity}x ${item.productName}' : item.productName ?? '',
                                 // '${item.quantity}x ${item.productName}',
-                                style: const TextStyle(
-                                  fontFamily: 'Plus Jakarta Sans',
+                                style: 
+                                AppTextStyles.restaurantDescription.copyWith(
                                   fontSize: 14,
                                   fontWeight: FontWeight.w400,
                                   color: Color(0xFF242424),
@@ -184,11 +286,11 @@ class OrderSummaryWidget extends StatelessWidget {
                             ),
                             const SizedBox(width: 8),
                             SizedBox(
-                              width: 80,
+                              width: 90,
                               child: Text(
                                 _formatCurrency(item.currencySymbol ?? 'د.إ', item.productPrice ?? 0),
-                                style: const TextStyle(
-                                  fontFamily: 'Plus Jakarta Sans',
+                                style: 
+                                AppTextStyles.restaurantDescription.copyWith(
                                   fontSize: 14,
                                   fontWeight: FontWeight.w400,
                                   color: Color(0xFF242424),
@@ -206,8 +308,8 @@ class OrderSummaryWidget extends StatelessWidget {
                             child: Text(
                               '${item.addOns}',
                               maxLines: 5,
-                              style: const TextStyle(
-                                fontFamily: 'Plus Jakarta Sans',
+                              style: 
+                              AppTextStyles.restaurantDescription.copyWith(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w300,
                                 color: Color(0xFF242424),
@@ -246,11 +348,11 @@ class OrderSummaryWidget extends StatelessWidget {
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Expanded(
+                       Expanded(
                         child: Text(
                           'Total to pay',
-                          style: TextStyle(
-                            fontFamily: 'Plus Jakarta Sans',
+                          style: 
+                          AppTextStyles.restaurantTitle.copyWith(
                             fontSize: 14,
                             fontWeight: FontWeight.w700,
                             color: Color(0xFF242424),
@@ -262,12 +364,11 @@ class OrderSummaryWidget extends StatelessWidget {
                         width: 130,
                         child: Text(
                           _formatCurrency(totalItem.currencySymbol ?? '', totalItem.productPrice ?? 0),
-                          style: const TextStyle(
-                            fontFamily: 'Plus Jakarta Sans',
+                          style: AppTextStyles.restaurantTitle.copyWith(
                             fontSize: 14,
                             fontWeight: FontWeight.w700,
                             color: Color(0xFF242424),
-                          ),
+                          ),  
                           textAlign: TextAlign.right,
                         ),
                       ),
@@ -281,12 +382,11 @@ class OrderSummaryWidget extends StatelessWidget {
                       Expanded(
                         child: Text(
                           storeInfo.paymentTypeText ?? '',
-                          style: const TextStyle(
-                            fontFamily: 'Plus Jakarta Sans',
+                          style: AppTextStyles.restaurantDescription.copyWith(
                             fontSize: 14,
                             fontWeight: FontWeight.w400,
                             color: Color(0xFF242424),
-                          ),
+                          ),  
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -309,5 +409,36 @@ class OrderSummaryWidget extends StatelessWidget {
       return '$symbol${value.toString()}';
     }
     return 'د.إ${value.toStringAsFixed(value.truncateToDouble() == value ? 0 : 2)}';
+  }
+
+  String _formatServiceTime(String? isoDateString) {
+    if (isoDateString == null || isoDateString.isEmpty) {
+      return '';
+    }
+
+    try {
+      final dateTime = DateTime.parse(isoDateString);
+      
+      // Format: "Dec 25, 2023 at 10:20 AM"
+      final months = [
+        'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+        'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+      ];
+      
+      final month = months[dateTime.month - 1];
+      final day = dateTime.day;
+      final year = dateTime.year;
+      
+      final hour = dateTime.hour;
+      final minute = dateTime.minute;
+      final period = hour >= 12 ? 'PM' : 'AM';
+      final displayHour = hour > 12 ? hour - 12 : (hour == 0 ? 12 : hour);
+      final displayMinute = minute.toString().padLeft(2, '0');
+      
+      return '$month $day, $year at $displayHour:$displayMinute $period';
+    } catch (e) {
+      // If parsing fails, return the original string
+      return isoDateString;
+    }
   }
 }

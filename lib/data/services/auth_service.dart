@@ -54,6 +54,8 @@ class AuthService {
     required String visitId,
     required String visitorId,
     required String searchApiUrl,
+    required String currencycode,
+    required String currencysymbol,
   }) {
     _chatBotId = chatBotId;
     _isProduction = isProduction;
@@ -75,9 +77,9 @@ class AuthService {
     AppLog.info('Environment: ' + (_isProduction ? 'production' : 'staging'));
   }
 
-  Future<void> initialize() async {
-    await TokenManager.instance.initialize();
-  }
+  // Future<void> initialize() async {
+  //   await TokenManager.instance.initialize();
+  // }
 
   Future<MyGPTsResponse?> getChatbotData() async {
     // Temporary: Direct data loading (remove this when API is ready)

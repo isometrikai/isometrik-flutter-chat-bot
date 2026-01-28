@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-import 'package:chat_bot/data/model/chat_history_response.dart';
+import 'package:chat_bot/data/data.dart';
 
 abstract class ChatHistoryState extends Equatable {
   const ChatHistoryState();

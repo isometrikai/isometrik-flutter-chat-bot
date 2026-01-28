@@ -1,13 +1,17 @@
-import 'package:chat_bot/data/repositories/chat_history_repository.dart';
-import 'package:chat_bot/data/services/auth_service.dart';
-import 'package:chat_bot/data/services/chat_api_services.dart';
-import 'package:chat_bot/data/services/hawksearch_service.dart';
+import 'package:chat_bot/data/data.dart';
+import 'package:chat_bot/utils/utility.dart';
 
 class ApiService {
-  static Future<void> initialize() async {
-    await AuthService.instance.initialize();
-    await ChatApiServices.instance.initialize();
-  }
+  static String _baseApiUrl = 'https://apisuperapp-staging.eazy-online.com';
+  static bool _isProduction = false;
+
+  static String get baseApiUrl => _baseApiUrl;
+  static bool get isProduction => _isProduction;
+
+  // static Future<void> initialize() async {
+  //   await AuthService.instance.initialize();
+  //   await ChatApiServices.instance.initialize();
+  // }
 
   static void configure({
     required String chatBotId,
@@ -27,7 +31,16 @@ class ApiService {
     required String visitId,
     required String visitorId,
     required String searchApiUrl,
+    required String baseApiUrl,
+    required String currencycode,
+    required String currencysymbol,
+    required String zoneId,
+    required String timezone,
   }) {
+    _isProduction = isProduction;
+    _baseApiUrl = baseApiUrl.isNotEmpty 
+        ? removeTrailingSlash(baseApiUrl) 
+        : 'https://apisuperapp-staging.eazy-online.com';
     // Configure AuthService (legacy support)
     AuthService.instance.configure(
       chatBotId: chatBotId,
@@ -46,7 +59,9 @@ class ApiService {
       indexName: indexName,
       visitId: visitId,
       visitorId: visitorId,
-      searchApiUrl: searchApiUrl,
+      searchApiUrl: removeTrailingSlash(searchApiUrl),
+      currencycode: currencycode,
+      currencysymbol: currencysymbol,
     );
 
     // Configure ComprehensiveApiService (new system)
@@ -63,7 +78,9 @@ class ApiService {
       indexName: indexName,
       visitId: visitId,
       visitorId: visitorId,
-      searchApiUrl: searchApiUrl,
+      searchApiUrl: removeTrailingSlash(searchApiUrl),
+      zoneId: zoneId,
+      timezone: timezone,
     );
 
     // Configure HawkSearchService
@@ -72,7 +89,7 @@ class ApiService {
       indexName: indexName,
       visitId: visitId,
       visitorId: visitorId,
-      searchApiUrl: searchApiUrl,
+      searchApiUrl: removeTrailingSlash(searchApiUrl),
       latitude: latitude ?? 0.0,
       longitude: longitude ?? 0.0,
     );
@@ -80,7 +97,20 @@ class ApiService {
     ChatHistoryRepository.instance.configure(
       userId: userId,
     );
+
+    Utility.setCurrencySymbol(currencysymbol);
+    Utility.setCurrencyCode(currencycode);
   }
+
+  static String removeTrailingSlash(String url) {
+  // Check if the URL ends with a slash
+  if (url.endsWith('/')) {
+    // Remove the last character (the slash)
+    return url.substring(0, url.length - 1);
+  }
+  // Return the URL unchanged if no trailing slash
+  return url;
+}
 
 }
 

@@ -235,7 +235,9 @@ class UniversalCartData {
       storeCategory: json['storeCategory'] ?? '',
       storeSubCategory: json['storeSubCategory'] ?? '',
       hyperlocal: json['hyperlocal'] ?? false,
-      storeListing: json['storeListing'] ?? 0,
+      storeListing: json['storeListing'] is bool 
+          ? (json['storeListing'] as bool ? 1 : 0)
+          : (json['storeListing'] ?? 0),
       ecommerce: json['ecommerce'] ?? false,
       storeTypeId: json['storeTypeId'] ?? 0,
       storeType: json['storeType'] ?? '',

@@ -1,9 +1,7 @@
-import 'package:chat_bot/utils/enum.dart';
 import 'package:flutter/material.dart';
-import 'package:chat_bot/data/model/universal_cart_response.dart';
 import 'package:flutter_svg/svg.dart';
-import '../utils/asset_path.dart';
-import '../utils/text_styles.dart';
+import 'package:chat_bot/data/data.dart';
+import 'package:chat_bot/utils/utils.dart';
 
 class MenuItemCard extends StatelessWidget {
   final String title;
@@ -28,6 +26,7 @@ class MenuItemCard extends StatelessWidget {
   final bool storeIsOpen;
   final int storeType;
   final bool isFromChatHistory;
+  final String? serviceRequireTime;
 
   MenuItemCard({
     super.key,
@@ -53,6 +52,7 @@ class MenuItemCard extends StatelessWidget {
     required this.storeIsOpen,
     required this.storeType,
     this.isFromChatHistory = false,
+    this.serviceRequireTime,
   });
 
   @override
@@ -88,19 +88,35 @@ class MenuItemCard extends StatelessWidget {
                           child: const ColoredBox(color: Color(0xFFF5F5F5)),
                         ),
                 ),
-                Positioned(
-                  left: 8,
-                  top: 8,
-                  child: SvgPicture.asset(
-                    AssetPath.get(isVeg ? 'images/ic_Veg.svg' : 'images/ic_NonVeg.svg'),
-                    width: 14,
-                    height: 14,
-                    fit: BoxFit.contain,
+                if (storeType == FoodCategory.grocery.value) ...[
+                  Positioned(
+                    left: 8,
+                    top: 8,
+                    child: SvgPicture.asset(
+                      AssetPath.get(isVeg ? 'images/ic_Veg.svg' : 'images/ic_NonVeg.svg'),
+                      width: 14,
+                      height: 14,
+                      fit: BoxFit.contain,
+                    ),
                   ),
-                ),
+                ],
               ],
             ),
-            const SizedBox(height: 9),
+            SizedBox(height: serviceRequireTime != null ? 4 : 0),
+             SizedBox(
+              // height: 38,
+              child: Text(
+                serviceRequireTime ?? '',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: AppTextStyles.productTitle.copyWith(
+                  color: const Color(0xFF979797),
+                  fontWeight: FontWeight.w400,
+                  fontSize: 11,
+                ),
+              ),
+            ),
+             const SizedBox(height: 4),
             SizedBox(
               height: 38,
               child: Text(

@@ -1,8 +1,8 @@
 import 'dart:convert';
 
+import 'package:chat_bot/widgets/widgets.dart';
+
 import '../../utils/enum.dart';
-import '../../widgets/choose_address_widget.dart';
-import '../../widgets/choose_card_widget.dart';
 
 // Main Chat Response Model
 class ChatResponse {
@@ -11,6 +11,7 @@ class ChatResponse {
   final List<ChatWidget> widgets;
   final int? cartCount;
   final bool needToEndThisChat;
+  final bool isOnlinePayment;
 
   ChatResponse({
     required this.text,
@@ -18,6 +19,7 @@ class ChatResponse {
     required this.widgets,
     this.cartCount,
     this.needToEndThisChat = false,
+    this.isOnlinePayment = false,
   });
 
   factory ChatResponse.fromJson(Map<String, dynamic> json) {
@@ -45,6 +47,7 @@ class ChatResponse {
       widgets: widgetsList,
       cartCount: json['cartCount'] ?? -1,
       needToEndThisChat: json['needToEndThisChat'] ?? false,
+      isOnlinePayment: json['isOnlinePayment'] ?? false,
     );
   }
 
@@ -55,6 +58,7 @@ class ChatResponse {
       'widgets': widgets.map((widget) => widget.toJson()).toList(),
       'cartCount': cartCount,
       'needToEndThisChat': needToEndThisChat,
+      'isOnlinePayment': isOnlinePayment,
     };
   }
 
@@ -77,7 +81,8 @@ class ChatResponse {
   List<ChatWidget> get orderConfirmedWidgets => getWidgetsByType('order_confirmed');
   List<ChatWidget> get orderTrackingWidgets => getWidgetsByType('order_tracking');
   List<ChatWidget> get orderDetailsWidgets => getWidgetsByType('order_details');
-
+  List<ChatWidget> get scheduledLaterWidgets => getWidgetsByType('schedule_later');
+  List<ChatWidget> get selectStaffWidgets => getWidgetsByType('select_staff');
   @override
   String toString() {
     return 'ChatResponse(text: $text, requestId: $requestId, widgets: ${widgets.length})';
@@ -124,10 +129,15 @@ class ChatWidget {
   bool get isSeeMoreWidget => type == WidgetEnum.see_more.value;
   bool get isMenuWidget => type == WidgetEnum.menu.value;
   bool get isCartWidget => type == WidgetEnum.cart.value;
+  bool get isServicesDeliveryOptionsWidget => type == WidgetEnum.service_types.value;
   bool get isChooseAddressWidget => type == WidgetEnum.choose_address.value;
   bool get isChooseCardWidget => type == WidgetEnum.choose_card.value;
   bool get isAddAddressWidget => type == WidgetEnum.add_address.value;
   bool get isAddPaymentWidget => type == WidgetEnum.add_payment.value;
+  bool get isScheduledLaterWidget => type == WidgetEnum.schedule_later.value;
+  bool get isSelectStaffWidget => type == WidgetEnum.staff_selection.value;
+  bool get isPrescriptionScreenWidget => type == WidgetEnum.prescription_screen.value;
+  bool get isOnlinePaymentConfirmOrderWidget => type == WidgetEnum.online_payment_confirm_order.value;
   bool get isOrderSummaryWidget => type == WidgetEnum.order_summary.value;
   bool get isOrderConfirmedWidget => type == WidgetEnum.order_confirmed.value;
   bool get isOrderTrackingWidget => type == WidgetEnum.order_tracking.value;
@@ -227,6 +237,26 @@ class ChatWidget {
       ? widget.map((e) => WidgetAction.fromJson(e as Map<String, dynamic>)).toList()
       : [];
 
+  // Get scheduled_later actions (converted to models)
+  List<WidgetAction> get scheduledLater => isScheduledLaterWidget
+      ? widget.map((e) => WidgetAction.fromJson(e as Map<String, dynamic>)).toList()
+      : [];
+
+  // Get select_staff actions (converted to models)
+  List<WidgetAction> get selectStaff => isSelectStaffWidget
+      ? widget.map((e) => WidgetAction.fromJson(e as Map<String, dynamic>)).toList()
+      : [];
+
+  // Get prescription_screen actions (converted to models)
+  List<WidgetAction> get prescriptionScreen => isPrescriptionScreenWidget
+      ? widget.map((e) => WidgetAction.fromJson(e as Map<String, dynamic>)).toList()
+      : [];
+
+  // Get online_payment_confirm_order actions (converted to models)
+  List<WidgetAction> get onlinePaymentConfirmOrder => isOnlinePaymentConfirmOrderWidget
+      ? widget.map((e) => WidgetAction.fromJson(e as Map<String, dynamic>)).toList()
+      : [];
+
   // Get raw stores data (without converting to models)
   List<Map<String, dynamic>> get rawStores => isStoresWidget
       ? widget.map((e) => e as Map<String, dynamic>).toList()
@@ -256,6 +286,14 @@ class ChatWidget {
   // Helper method to get cart items
   List<WidgetAction> getCartItems() {
     if (isCartWidget) {
+      return widget.map((item) => WidgetAction.fromJson(item as Map<String, dynamic>)).toList();
+    }
+    return [];
+  }
+
+   // Helper method to get cart items
+  List<WidgetAction> getServicesDeliveryOptions() {
+    if (isServicesDeliveryOptionsWidget) {
       return widget.map((item) => WidgetAction.fromJson(item as Map<String, dynamic>)).toList();
     }
     return [];
@@ -340,8 +378,9 @@ class Product {
   final String? storeId;
   final bool? storeIsOpen;
   final bool? instock;
-  final bool? variantCount;// For Grocery Only
+  final bool? variantCount;// For Grocery, Services Only
   final bool? isPrimary;
+  final String? serviceRequireTime;
 
   const Product({
     // required this.id,
@@ -364,6 +403,7 @@ class Product {
      this.instock,
      this.variantCount,
      this.isPrimary,
+     this.serviceRequireTime,
   });
 
   double get finalPrice => finalPriceList.finalPrice;
@@ -406,6 +446,7 @@ class Product {
         instock: json['instock'] ?? true,
         variantCount: json['variantCount'] ?? false,
         isPrimary: json['isPrimary'] ?? true,
+        serviceRequireTime: json['serviceRequireTime']?.toString() ?? '',
     );
   }
 
@@ -431,6 +472,7 @@ class Product {
       'instock': instock,
       'variantCount': variantCount,
       'isPrimary': isPrimary,
+      'serviceRequireTime': serviceRequireTime,
     };
   }
 }
@@ -540,10 +582,37 @@ class Store {
         .map((e) => Product.fromJson(e as Map<String, dynamic>))
         .toList();
 
+    // Process categorylist - remove duplicates before displaying
+    String cuisineDetailsStr = '';
+    if (json['cuisineDetails'] != null) {
+      // If cuisineDetails is already a string, deduplicate it if it's comma-separated
+      final cuisineDetailsValue = json['cuisineDetails'].toString();
+      if (cuisineDetailsValue.contains(',')) {
+        // Split by comma, trim whitespace, remove duplicates, and rejoin
+        final categories = cuisineDetailsValue
+            .split(',')
+            .map((e) => e.trim())
+            .where((e) => e.isNotEmpty)
+            .toSet()
+            .toList();
+        cuisineDetailsStr = categories.join(', ');
+      } else {
+        cuisineDetailsStr = cuisineDetailsValue;
+      }
+    } else if (json['categorylist'] != null) {
+      final categoryList = (json['categorylist'] as List<dynamic>?)
+          ?.map((e) => e.toString().trim())
+          .where((e) => e.isNotEmpty)
+          .toList() ?? [];
+      // Remove duplicates by converting to Set and back to List
+      final uniqueCategories = categoryList.toSet().toList();
+      cuisineDetailsStr = uniqueCategories.join(', ');
+    }
+
     return Store(
       storename: name,
       avgRating: rating,
-      cuisineDetails: (json['cuisineDetails'] ?? (json['categorylist']?.join(', ') ?? '')).toString(),
+      cuisineDetails: cuisineDetailsStr,
       storeImage: image,
       distance: distance,
       storeId: storeId,
@@ -754,6 +823,13 @@ class WidgetAction {
   final int? storeListing;
   final int? hyperlocal;
   final int? companyType;
+  final String? emoji;
+  final String? serviceType;
+  final num? bookingType;
+  final bool? isScheduled;
+  final String? serviceRequestedTime;
+  final String? orderAmount;
+  final String? currency;
 
   WidgetAction({
     required this.buttonText,
@@ -779,6 +855,13 @@ class WidgetAction {
     this.storeListing,
     this.hyperlocal,
     this.companyType,
+    this.emoji,
+    this.serviceType,
+    this.bookingType,
+    this.isScheduled,
+    this.serviceRequestedTime,
+    this.orderAmount,
+    this.currency,
   });
 
   factory WidgetAction.fromJson(Map<String, dynamic> json) {
@@ -790,7 +873,7 @@ class WidgetAction {
       keyword: (json['keyword'] ?? '').toString(),
       quantity: json['quantity']?.toString(),
       productName: json['productName']?.toString(),
-      currencySymbol: json['currencySymbol']?.toString(),
+      currencySymbol: '${json['currencySymbol']?.toString() ?? ''} ',
       productPrice: json['productPrice'] is num 
           ? json['productPrice'] 
           : json['productPrice'] is String 
@@ -810,6 +893,13 @@ class WidgetAction {
         storeListing: json['storeListing'] ?? 111,
         hyperlocal: json['hyperlocal'] ?? 111,
         companyType: json['companyType'] ?? 111,
+        emoji: json['emoji']?.toString(),
+        serviceType: json['serviceType']?.toString(),
+        bookingType: json['bookingType'] ?? 111,
+        isScheduled: json['isScheduled'] ?? false,
+        serviceRequestedTime: json['serviceRequestedTime']?.toString(),
+        orderAmount: json['orderAmount']?.toString(),
+        currency: json['currency']?.toString(),
     );
   }
 
@@ -839,6 +929,13 @@ class WidgetAction {
       'hyperlocal': hyperlocal,
       'companyType': companyType,
       'storeCategoryId': storeCategoryId,
+      'emoji': emoji,
+      'serviceType': serviceType,
+      'bookingType': bookingType,
+      'isScheduled': isScheduled,
+      'serviceRequestedTime': serviceRequestedTime,
+      'orderAmount': orderAmount,
+      'currency': currency,
     };
   }
 }

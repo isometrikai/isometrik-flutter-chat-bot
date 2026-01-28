@@ -1,6 +1,9 @@
 import 'package:chat_bot/data/api_client.dart';
 import 'package:chat_bot/data/services/token_manager.dart';
 import 'package:chat_bot/utils/api_result.dart';
+import 'package:chat_bot/services/api_service.dart';
+import 'package:chat_bot/utils/app_constants.dart';
+import 'package:chat_bot/utils/utility.dart';
 
 /// Universal API client that automatically handles token refresh for all APIs
 class UniversalApiClient {
@@ -13,19 +16,20 @@ class UniversalApiClient {
     onUnauthorizedRefresh: _handleTokenRefresh,
   );
 
-  late final ApiClient _chatClient = ApiClient(
-    baseUrl: 'https://easyagentapi.isometrik.ai',
+  /// Chat client - uses dynamic base URL based on isProduction flag
+  ApiClient get _chatClient => ApiClient(
+    baseUrl: AppConstants.chatBaseUrl,
     buildHeaders: _buildAppHeaders,//_buildHeaders,
     // onUnauthorizedRefresh: _handleTokenRefresh,
   );
 
-  late final ApiClient _appClient = ApiClient(
-    baseUrl: 'https://apisuperapp-staging.eazy-online.com',
+  ApiClient get _appClient => ApiClient(
+    baseUrl: ApiService.baseApiUrl,
     buildHeaders: _buildAppHeaders,
   );
 
-  late final ApiClient _groceryClient = ApiClient(
-    baseUrl: 'https://apisuperapp-staging.eazy-online.com',
+  ApiClient get _groceryClient => ApiClient(
+    baseUrl: ApiService.baseApiUrl,
     buildHeaders: _buildGroceryHeaders,
   );
 
@@ -41,14 +45,14 @@ class UniversalApiClient {
   Future<Map<String, String>> _buildAppHeaders() async {
     final token = TokenManager.instance.userToken;
     return {
-    'currencycode':'AED',
-    // 'Content-Length':'391',
-    'Content-Type':'application/json',
-    'language':'en',
-    'lan':'en',
-    'currencysymbol': '2K8u2KU=',
-    'platform':'1',
-    'ipAddress':'192.168.1.3',
+      // 'Content-Length':'391',
+      'Content-Type': 'application/json',
+      'language': 'en',
+      'lan': 'en',
+      'currencysymbol': Utility.getCurrencySymbol(),//2K8u2KU=
+      'currencycode': Utility.getCurrencyCode(),
+      'platform': '1',
+      'ipAddress': '192.168.1.3',
       'Authorization': token ?? '',
     };
   }
@@ -57,14 +61,14 @@ class UniversalApiClient {
   Future<Map<String, String>> _buildGroceryHeaders() async {
     final token = TokenManager.instance.userToken;
     return {
-      'currencysymbol': '2K8u2KU=',
+      'currencysymbol': Utility.getCurrencySymbol(),//2K8u2KU=
       'storeId': '', // Default storeId, will be overridden
       'Authorization': token ?? '',
       'storeType': '8',
       'ipAddress': '192.168.5.105',
       'platform': '1',
       'language': 'en',
-      'currencycode': 'AED',
+      'currencycode': Utility.getCurrencyCode(),//AED
       'skip': '0',
       'cityId': '5df7b7218798dc2c1114e6bf',
       'size': '5',
@@ -73,22 +77,52 @@ class UniversalApiClient {
   }
 
   /// Build grocery headers with dynamic storeId
-  Future<Map<String, String>> buildGroceryHeadersWithStoreId(String storeId, String storeCategoryId) async {
+  Future<Map<String, String>> buildGroceryHeadersWithStoreId(
+    String storeId,
+    String storeCategoryId,
+  ) async {
     final token = TokenManager.instance.userToken;
     return {
-      'currencysymbol': '2K8u2KU=',
+      'currencysymbol': Utility.getCurrencySymbol(),//2K8u2KU=
       'storeId': storeId,
       'Authorization': '$token',
       'storeType': '8',
       'ipAddress': '192.168.5.105',
       'platform': '1',
       'language': 'en',
-      'currencycode': 'AED',
+      'currencycode': Utility.getCurrencyCode(),//AED
       'skip': '0',
       'cityId': '5df7b7218798dc2c1114e6bf',
       'size': '5',
       'storeCategoryId': storeCategoryId,
     };
+  }
+
+  Future<Map<String, String>> buildServiceGenieHeaders({
+    required String storeCategoryId,
+  }) async {
+    final token = TokenManager.instance.userToken;
+    final headers = <String, String>{
+      'User-Agent':
+          'Eazy Life/2.0.1 (com.eazy.customerapp; build:64; iOS 26.0.1)',
+      'Accept-Encoding': 'gzip',
+      'Accept-Language': 'en-IN;q=1.0',
+      'platform': '1',
+      'language': 'en',
+      'filterType': '1',
+      'logintype': '1',
+      'searchType': '1',
+      'storeCategoryId': storeCategoryId,
+      'Accept': 'application/json',
+      'currencycode': Utility.getCurrencyCode(),//AED
+      'currencysymbol': Utility.getCurrencySymbol(),//2K8u2KU=
+    };
+
+    if (token != null && token.isNotEmpty) {
+      headers['Authorization'] = token;
+    }
+
+    return headers;
   }
 
   /// Handle token refresh when unauthorized
@@ -124,7 +158,7 @@ class UniversalApiClient {
   }) async {
     // Create a custom client with the specific headers
     final client = ApiClient(
-      baseUrl: 'https://apisuperapp-staging.eazy-online.com',
+      baseUrl: ApiService.baseApiUrl,
       buildHeaders: () async => customHeaders ?? {},
     );
     

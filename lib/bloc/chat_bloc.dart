@@ -1,7 +1,7 @@
 import 'package:chat_bot/bloc/cart/cart_bloc.dart';
 import 'package:chat_bot/bloc/chat_event.dart';
 import 'package:chat_bot/bloc/chat_state.dart';
-import 'package:chat_bot/data/services/chat_service.dart';
+import 'package:chat_bot/data/data.dart';
 import 'package:chat_bot/utils/utility.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -24,7 +24,12 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
         isLoggedIn: event.isLoggedIn,
         longitude: double.parse(event.longitude),
         latitude: double.parse(event.latitude),
+        staffId: event.staffId,
+        serviceRequestedTime: event.serviceRequestedTime,
+        storeCategoryId: event.storeCategoryId,
+        prescriptionImageUrls: event.prescriptionImageUrls,
       );
+      print('CHINTU: $chat');
       if (chat != null) {
         emit(ChatLoaded(chat));
       } else {

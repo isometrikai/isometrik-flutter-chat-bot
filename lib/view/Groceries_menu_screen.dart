@@ -1,25 +1,12 @@
-import 'package:chat_bot/bloc/cart/cart_bloc.dart';
-import 'package:chat_bot/bloc/cart/cart_event.dart';
-import 'package:chat_bot/bloc/cart/cart_state.dart';
-import 'package:chat_bot/data/model/chat_response.dart' as chat;
-import 'package:chat_bot/utils/enum.dart';
-import 'package:chat_bot/view/customization_summary_screen.dart';
-import 'package:chat_bot/view/grocery_customization_screen.dart';
-import 'package:chat_bot/view/product_customization_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:chat_bot/data/model/subcategory_products_response.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:chat_bot/widgets/menu_item_card.dart';
-import 'package:chat_bot/widgets/screen_header.dart';
-import 'package:chat_bot/services/callback_manage.dart';
-import '../bloc/grocery_menu/grocery_menu_bloc.dart';
-import '../bloc/grocery_menu/grocery_menu_event.dart';
-import '../bloc/grocery_menu/grocery_menu_state.dart';
-import '../utils/asset_helper.dart';
-import 'package:chat_bot/data/model/universal_cart_response.dart';
-import '../utils/text_styles.dart';
-
-import '../widgets/black_toast_view.dart';
+import 'package:chat_bot/data/data.dart';
+import 'package:chat_bot/data/data.dart' as chat;
+import 'package:chat_bot/bloc/bloc.dart';
+import 'package:chat_bot/widgets/widgets.dart';
+import 'package:chat_bot/view/views.dart';
+import 'package:chat_bot/utils/utils.dart';
+import 'package:chat_bot/services/services.dart';
 
 class GroceriesMenuScreen extends StatefulWidget {
   final chat.WidgetAction? actionData;
@@ -71,6 +58,8 @@ class _GroceriesMenuScreenState extends State<GroceriesMenuScreen> {
       SubCategoryProductsRequested(
         storeId: widget.actionData?.storeId ?? '',
         subCategoryId: widget.actionData?.storeCategoryId ?? '',
+        storeTypeId: widget.actionData?.storeTypeId,
+        storeCategoryName: widget.actionData?.storeCategoryName ?? widget.actionData?.title,
       ),
     );
   }
@@ -184,9 +173,10 @@ class _GroceriesMenuScreenState extends State<GroceriesMenuScreen> {
           // const SizedBox(height: 16),
 
           // Category Filter Chips
-          _buildCategoryFilterChips(subCategoryProducts),
-          const SizedBox(height: 16),
-
+          if (widget.actionData?.storeTypeId != FoodCategory.services.value) ...[
+             _buildCategoryFilterChips(subCategoryProducts),
+            const SizedBox(height: 16),
+          ],
           // Products Grid
           _buildProductsGrid(subCategoryProducts),
         ],
@@ -246,24 +236,37 @@ class _GroceriesMenuScreenState extends State<GroceriesMenuScreen> {
     double itemHeight;
     double spacing;
 
+    // Calculate fixed content height:
+    // - Spacing after image: 4px
+    // - Service time text (if present): ~14px + 4px spacing = 18px
+    // - Title: 38px
+    // - Spacing after title: 4px
+    // - Price row: ~18px
+    // - Spacing before controls: 8px
+    // - Quantity controls: 37px
+    // Total: 4 + 18 + 38 + 4 + 18 + 8 + 37 = 127px (with service time)
+    // Total: 4 + 38 + 4 + 18 + 8 + 37 = 109px (without service time)
+    // Use 130px to account for service time and add buffer for overflow
+    const double fixedContentHeight = 130.0;
+
     if (screenWidth < 360) {
       // Small devices (like iPhone SE)
       itemWidth = (availableWidth - 12) / 2; // 12px spacing between items
-      // Calculate height based on content: image (90% of width) + fixed content (112px)
       final imageHeight = itemWidth * 0.9;
-      itemHeight = imageHeight + 112; // Fixed content height
+      itemHeight = imageHeight + fixedContentHeight;
       spacing = 8.0;
     } else if (screenWidth < 400) {
       // Medium devices
       itemWidth = (availableWidth - 16) / 2; // 16px spacing
       final imageHeight = itemWidth * 0.9;
-      itemHeight = imageHeight + 112; // Fixed content height
+      itemHeight = imageHeight + fixedContentHeight;
       spacing = 10.0;
     } else {
       // Large devices (like iPhone Pro Max, tablets)
       itemWidth = (availableWidth - 20) / 2; // 20px spacing
       final imageHeight = itemWidth * 0.9;
-      itemHeight = imageHeight + 112; // Fixed content height
+      // Add extra height for services if needed
+      itemHeight = imageHeight + fixedContentHeight + (widget.actionData?.storeTypeId == FoodCategory.services.value ? 38 : 0);
       spacing = 12.0;
     }
 
@@ -360,6 +363,7 @@ class _GroceriesMenuScreenState extends State<GroceriesMenuScreen> {
                 instock: product.instock ?? true,
                 storeIsOpen: widget.actionData?.storeIsOpen ?? true,
                 storeType: product.storeTypeId ?? -111,
+                serviceRequireTime: menuItem.serviceRequireTime,
                 onQuantityChanged: (
                   productId,
                   centralProductId,
@@ -534,6 +538,7 @@ class _GroceriesMenuScreenState extends State<GroceriesMenuScreen> {
       productId: p.childProductId,
       centralProductId: p.parentProductId,
       isCustomizable: p.variantCount ?? false,
+      serviceRequireTime: p.serviceRequireTime,
     );
   }
 
@@ -573,11 +578,12 @@ class _GroceriesMenuScreenState extends State<GroceriesMenuScreen> {
   dynamic _getAddToCartOnId(String productId) {
     try {
       // Find all products with matching ID and get the last one's addToCartOnId
-      final matchingProducts = cartBloc.cartData
-          .expand((cart) => cart.sellers)
-          .expand((seller) => seller.products)
-          .where((product) => product.id == productId)
-          .toList();
+      final matchingProducts =
+          cartBloc.cartData
+              .expand((cart) => cart.sellers)
+              .expand((seller) => seller.products)
+              .where((product) => product.id == productId)
+              .toList();
 
       if (matchingProducts.isEmpty) {
         return null;
@@ -594,11 +600,16 @@ class _GroceriesMenuScreenState extends State<GroceriesMenuScreen> {
   dynamic _getExistingProductQuantity(String productId, num addToCartOnId) {
     try {
       // Find all products with matching ID and addToCartOnId
-      final matchingProducts = cartBloc.cartData
-          .expand((cart) => cart.sellers)
-          .expand((seller) => seller.products)
-          .where((product) => product.id == productId && product.addToCartOnId == addToCartOnId)
-          .toList();
+      final matchingProducts =
+          cartBloc.cartData
+              .expand((cart) => cart.sellers)
+              .expand((seller) => seller.products)
+              .where(
+                (product) =>
+                    product.id == productId &&
+                    product.addToCartOnId == addToCartOnId,
+              )
+              .toList();
 
       if (matchingProducts.isEmpty) {
         return null;
@@ -839,6 +850,7 @@ class _MenuItem {
   final String? productId;
   final String? centralProductId;
   final bool isCustomizable;
+  final String? serviceRequireTime;
 
   const _MenuItem({
     required this.title,
@@ -850,5 +862,6 @@ class _MenuItem {
     this.productId,
     this.centralProductId,
     this.isCustomizable = false,
+    this.serviceRequireTime,
   });
 }

@@ -36,6 +36,11 @@ class ChatBot {
     required String visitId,
     required String visitorId,
     required String searchApiUrl,
+    required String baseApiUrl,
+    required String currencycode,
+    required String currencysymbol,
+    required String zoneId,
+    required String timezone,
   }) {
     print('chatBotId: $chatBotId');
     print('appSecret: $appSecret');
@@ -54,6 +59,11 @@ class ChatBot {
     print('visitId: $visitId');
     print('visitorId: $visitorId');
     print('searchApiUrl: $searchApiUrl');
+    print('baseApiUrl: $baseApiUrl');
+    print('currencycode: $currencycode');
+    print('currencysymbol: $currencysymbol');
+    print('zoneId: $zoneId');
+    print('timezone: $timezone');
     isTutorialShown = needToShowTutorial;
     ApiService.configure(
       chatBotId: chatBotId,
@@ -73,6 +83,11 @@ class ChatBot {
       visitId: visitId,
       visitorId: visitorId,
       searchApiUrl: searchApiUrl,
+      baseApiUrl: baseApiUrl,
+      currencycode: currencycode,
+      currencysymbol: currencysymbol,
+      zoneId: zoneId,
+      timezone: timezone,
     );
   }
 
@@ -121,5 +136,25 @@ class ChatBot {
   static void openAddressSummary(String addressSummary) {
     print('openAddressSummary: $addressSummary');
     OrderService().triggerAddressSummary(addressSummary);
+  }
+
+  static void openScheduledLaterScreen(Map<String, dynamic> obj) {
+    print('openScheduledLaterScreen: $obj');
+    OrderService().triggerSelectSchedule(obj);
+  }
+
+  static void openSelectStaffScreen(Map<String, dynamic> obj) {
+    print('openSelectStaffScreen: $obj');
+    OrderService().triggerSelectStaff(obj);
+  }
+
+  static void openPrescriptionScreen(Map<String, dynamic> prescription) {
+    print('openPrescriptionScreen');
+    OrderService().triggerPrescriptionScreen(prescription);
+  }
+
+  static void openStripePlaceOrderScreen(Map<String, dynamic> stripePlaceOrder) {
+    print('openStripePlaceOrderScreen: $stripePlaceOrder');
+    OrderService().triggerStripePlaceOrder(stripePlaceOrder);
   }
 }

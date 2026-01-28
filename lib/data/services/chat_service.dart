@@ -1,7 +1,4 @@
-import 'package:chat_bot/data/model/chat_response.dart';
-import 'package:chat_bot/data/model/chat_history_response.dart';
-import 'package:chat_bot/data/model/session_id_response.dart';
-import 'package:chat_bot/data/services/chat_api_services.dart';
+import 'package:chat_bot/data/data.dart';
 
 class ChatService {
   ChatService._internal();
@@ -15,6 +12,10 @@ class ChatService {
     bool isLoggedIn = false,
     double longitude = 0.0,
     double latitude = 0.0,
+    String staffId = "",
+    String serviceRequestedTime = "",
+    String storeCategoryId = "",
+    List<String> prescriptionImageUrls = const [],
   }) {
     return ChatApiServices.instance.sendChatMessage(
       message: message,
@@ -24,6 +25,10 @@ class ChatService {
       isLoggedIn: isLoggedIn,
       longitude: longitude,
       latitude: latitude,
+      staffId: staffId,
+      serviceRequestedTime: serviceRequestedTime,
+      storeCategoryId: storeCategoryId,
+      prescriptionImageUrls: prescriptionImageUrls,
     );
   }
 
@@ -35,29 +40,6 @@ class ChatService {
     return ChatApiServices.instance.fetchChatHistory(sessionId);
   }
 
-  // Future<ChatResponse?> addToCart({
-  //   required String storeId,
-  //   required int cartType,
-  //   required int action,
-  //   required String storeCategoryId,
-  //   required int newQuantity,
-  //   required int storeTypeId,
-  //   required String productId,
-  //   required String centralProductId,
-  //   required String unitId,
-  // }) {
-  //   return ChatApiServices.instance.addToCart(
-  //     storeId: storeId,
-  //     cartType: cartType,
-  //     action: action,
-  //     storeCategoryId: storeCategoryId,
-  //     newQuantity: newQuantity,
-  //     storeTypeId: storeTypeId,
-  //     productId: productId,
-  //     centralProductId: centralProductId,
-  //     unitId: unitId,
-  //   );
-  // }
 }
 
 

@@ -3,7 +3,7 @@ import 'package:chat_bot/bloc/chat_history/chat_history_event.dart';
 import 'package:chat_bot/bloc/chat_history/chat_history_state.dart';
 import 'package:chat_bot/bloc/cart/cart_bloc.dart';
 import 'package:chat_bot/bloc/chat_bloc.dart';
-import 'package:chat_bot/data/model/chat_history_response.dart';
+import 'package:chat_bot/data/data.dart';
 import 'package:chat_bot/view/chat_screen.dart';
 import 'package:chat_bot/widgets/black_toast_view.dart';
 import 'package:flutter/material.dart';
@@ -53,8 +53,8 @@ class _ChatHistoryContentState extends State<_ChatHistoryContent> {
   String _currentKeyword = '';
   DateTime? _lastQueryAt;
 
-  // final List<String> _categories = ['All', 'Food', 'Grocery', 'Pharmacy'];
   final List<String> _categories = ['All', '🍕 Restaurant', '🥑 Grocery', '💊 Pharmacy'];
+  // final List<String> _categories = ['All', '🍕 Restaurant', '🥑 Grocery', '💊 Pharmacy', '🛒 Shopping', '💄 Services'];
 
   @override
   void initState() {

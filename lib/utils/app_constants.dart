@@ -1,5 +1,18 @@
+import 'package:chat_bot/services/api_service.dart';
 
-const String baseUrl = 'https://service-apis.isometrik.io';
-const String chatBaseUrl = 'https://easyagentapi.isometrik.ai';
-const String authEndpoint = '/v2/guestAuth';
-const String chatEndpoint = '/v1/chatbot';
+/// Centralized constants for the application
+class AppConstants {
+  AppConstants._(); // Private constructor to prevent instantiation
+
+  // Base URLs
+  static const String baseUrl = 'https://service-apis.isometrik.io';
+  
+  /// Chat base URL - dynamically returns staging or production URL based on isProduction flag
+  /// Staging: https://easyagentapi.eazylife-online.com
+  /// Production: https://easyagentapi-live.eazylife-online.com
+  static String get chatBaseUrl {
+    return ApiService.isProduction
+        ? 'https://easyagentapi-live.eazylife-online.com'
+        : 'https://easyagentapi.eazylife-online.com';
+  }
+}

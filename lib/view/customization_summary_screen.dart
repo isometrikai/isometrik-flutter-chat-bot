@@ -1,7 +1,7 @@
 import 'package:chat_bot/data/model/universal_cart_response.dart' as cart_models;
 import 'package:chat_bot/utils/enum.dart';
 import 'package:flutter/material.dart';
-import 'package:chat_bot/data/model/chat_response.dart';
+import 'package:chat_bot/data/data.dart';
 import '../utils/text_styles.dart';
 
 

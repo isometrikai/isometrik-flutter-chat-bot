@@ -1,7 +1,8 @@
 import 'package:chat_bot/utils/asset_path.dart';
 import 'package:flutter/material.dart';
-import 'package:chat_bot/data/model/greeting_response.dart';
+import 'package:chat_bot/data/data.dart';
 import 'package:flutter_svg/svg.dart';
+import '../utils/utils.dart';
 
 class PopupOverlayScreen extends StatelessWidget {
   final GreetingResponse? greetingData;
@@ -96,11 +97,10 @@ class PopupOverlayScreen extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(width: 6),
-                        const Flexible(
+                        Flexible(
                           child: Text(
                             'Your shopping persona',
-                            style: TextStyle(
-                              fontFamily: 'Plus Jakarta Sans',
+                            style: AppTextStyles.chatMessage.copyWith(
                               fontSize: 14,
                               fontWeight: FontWeight.w600,
                               height: 1.4,
@@ -115,8 +115,7 @@ class PopupOverlayScreen extends StatelessWidget {
                   // Title text
                    Text(
                     personaTitle,
-                    style: TextStyle(
-                      fontFamily: 'Plus Jakarta Sans',
+                    style: AppTextStyles.restaurantTitle.copyWith(
                       fontSize: 24,
                       fontWeight: FontWeight.w700,
                       height: 1.2,
@@ -165,10 +164,9 @@ class PopupOverlayScreen extends StatelessWidget {
             color: const Color(0xFFF5F7FF),
             borderRadius: BorderRadius.circular(8),
           ),
-          child: const Text(
-            'This profile is built from your interactions with zAIn and helps us provide personalized recommendations tailored to your preferences and habits.',
-            style: TextStyle(
-              fontFamily: 'Plus Jakarta Sans',
+          child:  Text(
+            'This profile is built from your interactions with AI and helps us provide personalized recommendations tailored to your preferences and habits.',
+            style: AppTextStyles.restaurantDescription.copyWith(
               fontSize: 12,
               fontWeight: FontWeight.w400,
               height: 1.4,
@@ -196,8 +194,7 @@ class PopupOverlayScreen extends StatelessWidget {
     if (nonEmptyLines.length <= 1) {
       return Text(
         personaDesc.trim(),
-        style: const TextStyle(
-          fontFamily: 'Plus Jakarta Sans',
+        style: AppTextStyles.restaurantDescription.copyWith(
           fontSize: 14,
           fontWeight: FontWeight.w400,
           height: 1.4,
@@ -234,8 +231,7 @@ class PopupOverlayScreen extends StatelessWidget {
               Expanded(
                 child: Text(
                   cleanLine,
-                  style: const TextStyle(
-                    fontFamily: 'Plus Jakarta Sans',
+                  style: AppTextStyles.restaurantDescription.copyWith(
                     fontSize: 14,
                     fontWeight: FontWeight.w400,
                     height: 1.4,

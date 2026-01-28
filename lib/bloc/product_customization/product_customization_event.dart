@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-import 'package:chat_bot/data/model/product_portion_response.dart';
+import 'package:chat_bot/data/data.dart';
 
 abstract class ProductCustomizationEvent extends Equatable {
   const ProductCustomizationEvent();
@@ -12,15 +12,17 @@ class LoadProductPortions extends ProductCustomizationEvent {
   final String centralProductId;
   final String childProductId;
   final String storeId;
+  final int storeTypeId;
 
   const LoadProductPortions({
     required this.centralProductId,
     required this.childProductId,
     required this.storeId,
+    required this.storeTypeId,
   });
 
   @override
-  List<Object?> get props => [centralProductId, childProductId, storeId];
+  List<Object?> get props => [centralProductId, childProductId, storeId, storeTypeId];
 }
 
 class SelectProductVariant extends ProductCustomizationEvent {

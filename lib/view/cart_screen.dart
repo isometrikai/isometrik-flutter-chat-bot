@@ -1,16 +1,11 @@
-import 'package:chat_bot/services/callback_manage.dart';
-import 'package:chat_bot/utils/asset_path.dart';
-import 'package:chat_bot/utils/enum.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
-import '../widgets/cart_details_price_widget.dart';
-import '../bloc/cart/cart_bloc.dart';
-import '../bloc/cart/cart_event.dart';
-import '../bloc/cart/cart_state.dart';
-import '../data/model/universal_cart_response.dart';
-import '../data/model/chat_response.dart';
-import '../utils/text_styles.dart';
+import 'package:chat_bot/data/data.dart';
+import 'package:chat_bot/bloc/bloc.dart';
+import 'package:chat_bot/widgets/widgets.dart';
+import 'package:chat_bot/utils/utils.dart';
+import 'package:chat_bot/services/services.dart';
 
 /// Data class to hold category-specific cart information
 class CategoryData {
@@ -40,7 +35,7 @@ class CategoryData {
 }
 
 class CartScreen extends StatefulWidget {
-  final Function(String)? onCheckout;
+  final Function(String, String?)? onCheckout;
   final bool needToEndThisChat;
 
   const CartScreen({
@@ -54,7 +49,7 @@ class CartScreen extends StatefulWidget {
 }
 
 class _CartScreenState extends State<CartScreen> {
-  int selectedCategoryIndex = 0; // 0 for Restaurant, 1 for Grocery, 2 for Pharmacy
+  int selectedCategoryIndex = 0; // 0 for Restaurant, 1 for Grocery, 2 for Pharmacy, 3 for Shopping
 
   @override
   void initState() {
@@ -135,6 +130,8 @@ class _CartScreenState extends State<CartScreen> {
           {'name': '🍕 Restaurant', 'count': categoryCounts['restaurant']},
           {'name': '🥑 Grocery', 'count': categoryCounts['grocery']},
           {'name': '💊 Pharmacy', 'count': categoryCounts['pharmacy']},
+          // {'name': '🛒 Shopping', 'count': categoryCounts['shopping']},
+          // {'name': '💄 Services', 'count': categoryCounts['services']},
         ];
 
         return Container(
@@ -221,6 +218,8 @@ class _CartScreenState extends State<CartScreen> {
     int foodCount = 0;
     int groceryCount = 0;
     int pharmacyCount = 0;
+    int shoppingCount = 0;
+    int servicesCount = 0;
 
     if (state is CartLoaded && state.rawCartData != null) {
       for (final cartData in state.rawCartData!.data) {
@@ -229,9 +228,15 @@ class _CartScreenState extends State<CartScreen> {
           if (seller.storeTypeId == FoodCategory.food.value) {
             foodCount += seller.products.length;
           } else if (seller.storeTypeId == FoodCategory.grocery.value) {
-            groceryCount += seller.products.length;
+            if (cartData.storeCategoryId == FoodStoreCategoryId.shopping.value) {
+              shoppingCount += seller.products.length;
+            } else {
+              groceryCount += seller.products.length;
+            }
           } else if (seller.storeTypeId == FoodCategory.pharmacy.value) {
             pharmacyCount += seller.products.length;
+          } else if (seller.storeTypeId == FoodCategory.services.value) {
+            servicesCount += seller.products.length;
           }
         }
       }
@@ -241,6 +246,8 @@ class _CartScreenState extends State<CartScreen> {
       'restaurant': foodCount,
       'grocery': groceryCount,
       'pharmacy': pharmacyCount,
+      'shopping': shoppingCount,
+      'services': servicesCount,
     };
   }
 
@@ -336,17 +343,41 @@ class _CartScreenState extends State<CartScreen> {
       return null;
     }
 
-    // Map category index to storeId: 0=Food(storeId=1), 1=Grocery(storeId=2)
-    int targetStoreId = categoryIndex == 0 ? FoodCategory.food.value : categoryIndex == 1 ? FoodCategory.grocery.value : FoodCategory.pharmacy.value;
-
     // Find cart data with matching storeId
     UniversalCartData? matchingCartData;
     Seller? matchingSeller;
     
     for (final cartData in state.rawCartData!.data) {
-      // Check if any seller in this cart has the target storeId
+      // Check if any seller in this cart matches the selected category
       for (final seller in cartData.sellers) {
-        if (seller.storeTypeId == targetStoreId) {
+        bool matches = false;
+        
+        // 0: Restaurant (Food) - storeTypeId = 1
+        if (categoryIndex == 0 && seller.storeTypeId == FoodCategory.food.value) {
+          matches = true;
+        }
+        // 1: Grocery - storeTypeId = 2, but NOT shopping
+        else if (categoryIndex == 1 && 
+                 seller.storeTypeId == FoodCategory.grocery.value &&
+                 cartData.storeCategoryId != FoodStoreCategoryId.shopping.value) {
+          matches = true;
+        }
+        // 2: Pharmacy - storeTypeId = 6
+        else if (categoryIndex == 2 && seller.storeTypeId == FoodCategory.pharmacy.value) {
+          matches = true;
+        }
+        // 3: Shopping - storeTypeId = 2 AND storeCategoryId = shopping
+        else if (categoryIndex == 3 && 
+                 seller.storeTypeId == FoodCategory.grocery.value &&
+                 cartData.storeCategoryId == FoodStoreCategoryId.shopping.value) {
+          matches = true;
+        }
+        // 4: Services - storeTypeId = 25
+        else if (categoryIndex == 4 && seller.storeTypeId == FoodCategory.services.value) {
+          matches = true;
+        }
+        
+        if (matches) {
           matchingCartData = cartData;
           matchingSeller = seller;
           break;
@@ -630,7 +661,7 @@ class _CartScreenState extends State<CartScreen> {
                   flex: 2,
                   child: GestureDetector(
                     onTap: () {
-                      widget.onCheckout?.call("Proceed to checkout");
+                      widget.onCheckout?.call("Proceed to checkout", categoryData.storeCategoryId);
                       Navigator.of(context).pop();
                     },
                     child: Container(

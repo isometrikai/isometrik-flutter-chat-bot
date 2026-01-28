@@ -10,11 +10,19 @@ class OrderService {
   Function(Map<String, dynamic>)? onStoreNow;
   Function(Map<String, dynamic>)? onOrderDetails;
   Function(Map<String, dynamic>)? onOrderTracking;
+  Function(Map<String, dynamic>)? onScheduledLaterScreenOpen;
+  Function(Map<String, dynamic>)? onSelectStaffScreenOpen;
+  Function(Map<String, dynamic>)? onPrescriptionScreenOpen;
+  Function(Map<String, dynamic>)? onStripePlaceOrderScreenOpen;
   Function()? onChatDismiss; // Add dismiss callback
   Function(bool)? onCartUpdate; // Add cart update callback
   Function(String)? onStripePayment; // Add stripe payment callback
   Function(String)? onAddressSummary; // Add order summary callback
   Function(String)? onSendMessage; // Add send message callback // CHANGE CALLBACK
+  Function(Map<String, dynamic>)? onSelectSchedule; // Add select schedule callback
+  Function(Map<String, dynamic>)? onSelectPrescription; // Add prescription screen callback
+  Function(Map<String, dynamic>)? onSelectStaff; // Add select staff callback
+  Function(Map<String, dynamic>)? onStripePlaceOrder; // Add stripe place order callback
 
   void setProductCallback(Function(Map<String, dynamic>) callback) {
     onOrderNow = callback;
@@ -40,6 +48,26 @@ class OrderService {
     onOrderTracking = orderTracking;
   }
 
+  void setScheduledLaterScreenOpenCallback(Function(Map<String, dynamic>) scheduledLaterScreenOpen) {
+    print('setScheduledLaterScreenOpenCallback: $scheduledLaterScreenOpen');
+    onScheduledLaterScreenOpen = scheduledLaterScreenOpen;
+  }
+
+  void setPrescriptionScreenOpenCallback(Function(Map<String, dynamic>) prescriptionScreenOpen) {
+    print('setPrescriptionScreenOpenCallback: $prescriptionScreenOpen');
+    onPrescriptionScreenOpen = prescriptionScreenOpen;//1
+  }
+
+  void setStripePlaceOrderScreenOpenCallback(Function(Map<String, dynamic>) stripePlaceOrderScreenOpen) {
+    print('setStripePlaceOrderScreenOpenCallback: $stripePlaceOrderScreenOpen');
+    onStripePlaceOrderScreenOpen = stripePlaceOrderScreenOpen;
+  }
+
+
+  void setSelectStaffScreenOpenCallback(Function(Map<String, dynamic>) selectStaffScreenOpen) {
+    onSelectStaffScreenOpen = selectStaffScreenOpen;//1
+  }
+
   // Add dismiss callback setter
   void setDismissCallback(Function() callback) {
     onChatDismiss = callback;
@@ -56,6 +84,25 @@ class OrderService {
 
   void setAddressSummaryCallback(Function(String) callback) {
     onAddressSummary = callback;
+  }
+
+  void setSelectScheduleCallback(Function(Map<String, dynamic>) callback) {
+    print('setSelectScheduleCallback: $callback');
+    onSelectSchedule = callback;
+  }
+
+  void setPrescriptionCallback(Function(Map<String, dynamic>) callback) {
+    print('setPrescriptionScreenOpenCallback: $callback');
+    onSelectPrescription = callback;//11
+  }
+
+  void setStripePlaceOrderCallback(Function(Map<String, dynamic>) callback) {
+    print('setStripePlaceOrderCallback: $callback');
+    onStripePlaceOrder = callback;
+  }
+
+  void setSelectStaffCallback(Function(Map<String, dynamic>) callback) {
+    onSelectStaff = callback;//11
   }
 
    void setSendMessageCallback(Function(String) callback) { // CHANGE CALLBACK
@@ -76,6 +123,25 @@ class OrderService {
 
   void triggerAddressScreenOpen() {
     onAddressScreenOpen?.call();
+  }
+
+  void triggerScheduledLaterScreenOpen(Map<String, dynamic> obj) {
+    print('triggerScheduledLaterScreenOpen: $obj');
+    onScheduledLaterScreenOpen?.call(obj);
+  }
+
+  void triggerPrescriptionScreenOpen(Map<String, dynamic> prescription) {
+    print('triggerPrescriptionScreenOpen: $prescription');
+    onPrescriptionScreenOpen?.call(prescription);//2
+  }
+
+  void triggerStripePlaceOrderScreenOpen(Map<String, dynamic> stripePlaceOrderScreenOpen) {
+    print('triggerStripePlaceOrderScreenOpen: $stripePlaceOrderScreenOpen');
+    onStripePlaceOrderScreenOpen?.call(stripePlaceOrderScreenOpen);
+  }
+
+  void triggerSelectStaffScreenOpen(Map<String, dynamic> obj) {
+    onSelectStaffScreenOpen?.call(obj);//2
   }
 
   void triggerOrderDetails(Map<String, dynamic> orderDetails) {
@@ -112,6 +178,24 @@ class OrderService {
     onSendMessage?.call(message);
   }
 
+  void triggerSelectSchedule(Map<String, dynamic> schedule) {
+    print('triggerSelectSchedule: $schedule');
+    onSelectSchedule?.call(schedule);
+  }
+
+  void triggerPrescriptionScreen(Map<String, dynamic> prescription) {
+    print('triggerPrescriptionScreen: $prescription');
+    onSelectPrescription?.call(prescription);
+  }
+
+  void triggerStripePlaceOrder(Map<String, dynamic> stripePlaceOrder) {
+    print('triggerStripePlaceOrder: $stripePlaceOrder');
+    onStripePlaceOrder?.call(stripePlaceOrder);
+  }
+
+  void triggerSelectStaff(Map<String, dynamic> staff) {
+    onSelectStaff?.call(staff);
+  }
 
   void clearCallback() {
     onOrderNow = null;
@@ -124,5 +208,13 @@ class OrderService {
     onAddressSummary = null; // Clear address summary callback
     onAddressScreenOpen = null; // Clear address screen open callback
     onSendMessage = null; // Clear send message callback // CHANGE CALLBACK
+    onScheduledLaterScreenOpen = null; // Clear scheduled later screen open callback
+    onSelectStaffScreenOpen = null; // Clear select staff screen open callback
+    onPrescriptionScreenOpen = null; // Clear prescription screen open callback
+    onStripePlaceOrderScreenOpen = null; // Clear stripe place order screen open callback
+    onStripePlaceOrder = null; // Clear stripe place order callback
+    onSelectPrescription = null; // Clear prescription screen callback
+    onSelectSchedule = null; // Clear select schedule callback
+    onSelectStaff = null; // Clear select staff callback
   }
 }

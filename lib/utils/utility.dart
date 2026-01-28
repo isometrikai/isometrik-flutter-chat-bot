@@ -5,6 +5,8 @@ final GlobalKey<NavigatorState> kNavigatorKey = GlobalKey<NavigatorState>();
 
 class Utility {
   static bool isLoading = false;
+  static String currencySymbol = '';
+  static String currencyCode = '';
 
   static void showLoader({
     String? message,
@@ -109,6 +111,22 @@ class Utility {
         );
       },
     );
+  }
+
+  static void setCurrencySymbol(String currencySymbol) {
+    Utility.currencySymbol = currencySymbol;
+  }
+
+  static void setCurrencyCode(String currencyCode) {
+    Utility.currencyCode = currencyCode;
+  }
+
+  static String getCurrencySymbol() {
+    return currencySymbol;
+  }
+
+  static String getCurrencyCode() {
+    return currencyCode;
   }
 }
 

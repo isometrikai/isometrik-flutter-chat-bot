@@ -2,7 +2,6 @@ import 'package:chat_bot/data/api_client.dart';
 import 'package:chat_bot/data/model/chat_response.dart';
 import 'package:chat_bot/data/model/chat_history_response.dart';
 import 'package:chat_bot/data/model/session_id_response.dart';
-import 'package:chat_bot/data/services/token_manager.dart';
 import 'package:chat_bot/data/services/universal_api_client.dart';
 import 'package:chat_bot/utils/log.dart';
 import 'package:chat_bot/utils/utility.dart';
@@ -21,6 +20,13 @@ class ChatApiServices {
   String? _location;
   double? _longitude;
   double? _latitude;
+  String? _clientGuid;
+  String? _indexName;
+  String? _visitId;
+  String? _visitorId;
+  String? _searchApiUrl;
+  String? _zoneId;
+  String? _timezone;
 
   late final ApiClient _chatClient = UniversalApiClient.instance.chatClient;
   late final ApiClient _appClient = UniversalApiClient.instance.appClient;
@@ -40,6 +46,8 @@ class ChatApiServices {
     required String visitId,
     required String visitorId,
     required String searchApiUrl,
+    required String zoneId,
+    required String timezone,
   }) {
     _chatBotId = chatBotId;
     _userId = userId;
@@ -48,15 +56,30 @@ class ChatApiServices {
     _location = location;
     _longitude = longitude;
     _latitude = latitude;
+    _clientGuid = clientGuid;
+    _indexName = indexName;
+    _visitId = visitId;
+    _visitorId = visitorId;
+    _searchApiUrl = searchApiUrl;
+    _zoneId = zoneId;
+    _timezone = timezone;
   }
 
-  /// Initialize the API service
-  Future<void> initialize() async {
-    await TokenManager.instance.initialize();
-  }
+  // /// Initialize the API service
+  // Future<void> initialize() async {
+  //   await TokenManager.instance.initialize();
+  // }
 
   /// Get the configured userId
   String? get userId => _userId;
+  
+  /// Get the configured latitude
+  double? get latitude => _latitude;
+  
+  /// Get the configured longitude
+  double? get longitude => _longitude;
+
+  String? get timezone => _timezone;
 
   Future<ChatResponse?> sendChatMessage({
     required String message,
@@ -66,12 +89,22 @@ class ChatApiServices {
     bool isLoggedIn = false,
     double longitude = 0.0,
     double latitude = 0.0,
+    String staffId = "",
+    String serviceRequestedTime = "",
+    String storeCategoryId = "",
+    List<String> prescriptionImageUrls = const [],
   }) async {
     final body = {
       'user_id': _userId,
       'device_id': fingerPrintId,
       'query': message,
       'session_id': sessionId,
+      'client_guid': _clientGuid ?? '',
+      'index_name': _indexName ?? '',
+      'visit_id': _visitId ?? '',
+      'visitor_id': _visitorId ?? '',
+      'search_api_url': _searchApiUrl ?? '',
+      'zone_id': _zoneId ?? '',
       'location': {
         'latitude': (latitude == 0.0 ? (_latitude ?? 0.0) : latitude).toString(),
         'longitude': (longitude == 0.0 ? (_longitude ?? 0.0) : longitude).toString(),
@@ -80,13 +113,16 @@ class ChatApiServices {
         'name': _name ?? '',
         'timestamp': _timestamp ?? '',
         'location': _location ?? '',
-      }
+      },
+      'staff_id': staffId,
+      'service_requested_time': serviceRequestedTime,
+      'store_category_id': storeCategoryId,
+      'prescription_image_urls': prescriptionImageUrls,
     };
 
     // Match existing endpoint used elsewhere
     final res = await _chatClient.post('/v2/chatbot', body);
-    // final res = await _appClient.post('/v2/chatbot', body);
-    // final res = await _chatClient.post('/v2/test-response', body);
+    
     if (res.isSuccess && res.data != null) {
       try {
         return ChatResponse.fromJson(res.data as Map<String, dynamic>);

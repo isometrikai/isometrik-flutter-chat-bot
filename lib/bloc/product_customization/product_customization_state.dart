@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-import 'package:chat_bot/data/model/product_portion_response.dart';
+import 'package:chat_bot/data/data.dart';
 
 abstract class ProductCustomizationState extends Equatable {
   const ProductCustomizationState();

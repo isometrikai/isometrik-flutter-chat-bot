@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:chat_bot/data/model/chat_response.dart';
+import 'package:chat_bot/data/data.dart';
 
 class CartDetailsPriceWidget extends StatelessWidget {
   final List<WidgetAction> cartItems;

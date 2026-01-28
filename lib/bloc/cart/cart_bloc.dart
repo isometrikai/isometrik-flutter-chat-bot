@@ -2,9 +2,7 @@ import 'dart:async';
 
 import 'package:chat_bot/bloc/cart/cart_event.dart';
 import 'package:chat_bot/bloc/cart/cart_state.dart';
-import 'package:chat_bot/data/model/universal_cart_response.dart';
-
-import 'package:chat_bot/data/repositories/cart_repository.dart';
+import 'package:chat_bot/data/data.dart';
 import 'package:chat_bot/utils/enum.dart';
 import 'package:chat_bot/utils/utility.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -127,7 +125,7 @@ class CartBloc extends Bloc<CartEvent, CartState> {
     // Check all cart items for compatibility
     for (final existingCart in cartData) {
       // If store type ID is the same, check if store ID matches
-      if (existingCart.storeTypeId == event.storeTypeId) {
+      if (existingCart.storeTypeId == event.storeTypeId && existingCart.storeCategoryId == event.storeCategoryId) {
         if (existingCart.sellers.isNotEmpty) {
           // Check if any product in the cart has a different store ID
           for (final seller in existingCart.sellers) {
@@ -225,7 +223,7 @@ class CartBloc extends Bloc<CartEvent, CartState> {
 
       if (result.isSuccess) {
         isCartAPICalled = true;
-        emit(CartProductAdded());
+        emit(CartProductAdded(storeCategoryId: event.storeCategoryId));
         add(CartFetchRequested(needToShowLoader: event.needToShowLoaderForCartFetch));
       } else {
         add(CartFetchRequested(needToShowLoader: event.needToShowLoaderForCartFetch));
