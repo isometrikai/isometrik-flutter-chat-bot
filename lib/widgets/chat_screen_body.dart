@@ -1147,45 +1147,33 @@ class ChatScreenBody extends StatelessWidget {
                   child: Row(
                     children: [
                       _buildCategoryItem(
-                        icon: Icons.restaurant_outlined,
+                        iconPath: 'ic_H_food.svg',
                         label: 'Food',
-                        iconBgColor: const Color(0xFFE6FCEF),
-                        iconColor: const Color(0xFF01E064),
                       ),
                       const SizedBox(width: 15),
                       _buildCategoryItem(
-                        icon: Icons.build_outlined,
+                        iconPath: 'ic_H_services.svg',
                         label: 'Services',
-                        iconBgColor: const Color.fromRGBO(211, 184, 164, 0.2),
-                        iconColor: const Color(0xFFD3B8A4),
                       ),
                       const SizedBox(width: 15),
                       _buildCategoryItem(
-                        icon: Icons.shopping_cart_outlined,
+                        iconPath: 'ic_H_groceries.svg',
                         label: 'Groceries',
-                        iconBgColor: const Color(0xFFECF8FF),
-                        iconColor: const Color(0xFF9EDBFD),
                       ),
                       const SizedBox(width: 15),
                       _buildCategoryItem(
-                        icon: Icons.school_outlined,
+                        iconPath: 'ic_H_education.svg',
                         label: 'Education',
-                        iconBgColor: const Color(0xFFE6EDF7),
-                        iconColor: const Color(0xFF064BB3),
                       ),
                       const SizedBox(width: 15),
                       _buildCategoryItem(
-                        icon: Icons.flight_takeoff,
+                        iconPath: 'ic_H_travel.svg',
                         label: 'Travel',
-                        iconBgColor: const Color(0xFFF8E9F1),
-                        iconColor: const Color(0xFFB82278),
                       ),
                       const SizedBox(width: 15),
                       _buildCategoryItem(
-                        icon: Icons.local_pharmacy_outlined,
+                        iconPath: 'ic_H_pharmacy.svg',
                         label: 'Pharmacy',
-                        iconBgColor: const Color(0xFFE5EFF2),
-                        iconColor: const Color(0xFF00637B),
                       ),
                     ],
                   ),
@@ -1266,7 +1254,7 @@ class ChatScreenBody extends StatelessWidget {
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 Text(
-                                  'Goto Eazy app',
+                                  'Go To Eazy app',
                                   style: AppTextStyles.body(
                                     fontSize: 16,
                                     fontWeight: FontWeight.w700,
@@ -1313,52 +1301,6 @@ class ChatScreenBody extends StatelessWidget {
             ),
           ),
         ),
-      ),
-    );
-  }
-
-  Widget _buildPowerByZain() {
-    return Center(
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            'Powered by',
-            style: AppTextStyles.body(
-              fontSize: 12,
-              fontWeight: FontWeight.w400,
-              color: const Color(0xFF7085AE),
-            ).copyWith(
-              height: 1.2,
-            ),
-          ),
-          const SizedBox(width: 5),
-          ShaderMask(
-            shaderCallback: (bounds) => const LinearGradient(
-              colors: [
-                Color(0xFF5186E0),
-                Color(0xFF5E3DFE),
-                Color(0xFF8E2FFD),
-                Color(0xFFB02EFB),
-                Color(0xFFD445EC),
-              ],
-              stops: [0.0, 0.24, 0.52, 0.73, 1.0],
-              begin: Alignment.centerLeft,
-              end: Alignment.centerRight,
-            ).createShader(bounds),
-            child: Text(
-              'zAIn',
-              style: AppTextStyles.body(
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-                color: Colors.white,
-              ).copyWith(
-                height: 1.2,
-              ),
-            ),
-          ),
-        ],
       ),
     );
   }
@@ -1477,11 +1419,11 @@ class ChatScreenBody extends StatelessWidget {
   }
 
   Widget _buildCategoryItem({
-    required IconData icon,
+    String? iconPath,
     required String label,
-    required Color iconBgColor,
-    required Color iconColor,
   }) {
+    assert(iconPath != null,
+        'Either icon or iconPath must be provided');
     return GestureDetector(
       onTap: () {
         // Handle category tap
@@ -1493,15 +1435,13 @@ class ChatScreenBody extends StatelessWidget {
           Container(
             width: 44,
             height: 44,
-            decoration: BoxDecoration(
-              color: iconBgColor,
-              borderRadius: BorderRadius.circular(9.16667),
-            ),
-            child: Icon(
-              icon,
-              size: 24,
-              color: iconColor,
-            ),
+            alignment: Alignment.center,
+            child: SvgPicture.asset(
+                    AssetPath.get('images/$iconPath'),
+                    // width: 24,
+                    // height: 24,
+                    fit: BoxFit.contain,
+                  )
           ),
           const SizedBox(height: 4),
           Text(
@@ -2211,7 +2151,6 @@ class ChatScreenBody extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 5),
-                _buildPowerByZain(),
               ],
             ),
           ),
