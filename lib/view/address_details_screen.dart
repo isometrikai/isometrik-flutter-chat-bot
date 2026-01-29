@@ -1,3 +1,4 @@
+import 'package:chat_bot/utils/app_constants.dart';
 import 'package:chat_bot/utils/text_styles.dart';
 import 'package:flutter/material.dart';
 import '../widgets/screen_header.dart';
@@ -221,7 +222,7 @@ class _InputField extends StatelessWidget {
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(16),
-            borderSide: const BorderSide(color: Color(0xFF8E2FFD)),
+            borderSide: BorderSide(color: AppConstants.appThemeColor),
           ),
         ),
         style: const TextStyle(
@@ -259,13 +260,13 @@ class _TagRadio extends StatelessWidget {
             height: 20,
             padding: const EdgeInsets.all(3),
             decoration: BoxDecoration(
-              border: Border.all(color: selected ? const Color(0xFF8E2FFD) : const Color(0xFFE9DFFB), width: 0.8),
+              border: Border.all(color: selected ? AppConstants.appThemeColor : const Color(0xFFE9DFFB), width: 0.8),
               shape: BoxShape.circle,
             ),
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 200),
               decoration: BoxDecoration(
-                color: selected ? const Color(0xFF8E2FFD) : Colors.white,
+                color: selected ? AppConstants.appThemeColor : Colors.white,
                 shape: BoxShape.circle,
               ),
             ),

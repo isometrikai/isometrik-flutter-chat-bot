@@ -15,6 +15,7 @@ class OrderService {
   Function(Map<String, dynamic>)? onPrescriptionScreenOpen;
   Function(Map<String, dynamic>)? onStripePlaceOrderScreenOpen;
   Function()? onChatDismiss; // Add dismiss callback
+  Function()? onTutorialDismiss; // Add tutorial dismiss callback
   Function(bool)? onCartUpdate; // Add cart update callback
   Function(String)? onStripePayment; // Add stripe payment callback
   Function(String)? onAddressSummary; // Add order summary callback
@@ -71,6 +72,10 @@ class OrderService {
   // Add dismiss callback setter
   void setDismissCallback(Function() callback) {
     onChatDismiss = callback;
+  }
+
+  void setTutorialDismissCallback(Function() callback) {
+    onTutorialDismiss = callback;
   }
 
   // Add cart update callback setter
@@ -161,6 +166,10 @@ class OrderService {
     onChatDismiss?.call();
   }
 
+  void triggerTutorialDismiss() {
+    onTutorialDismiss?.call();
+  }
+
   // Add cart update trigger
   void triggerCartUpdate(bool isCartUpdate) {
     onCartUpdate?.call(isCartUpdate);
@@ -203,6 +212,7 @@ class OrderService {
     onStoreNow = null;
     onOrderDetails = null;
     onChatDismiss = null; // Clear dismiss callback
+    onTutorialDismiss = null; // Clear tutorial dismiss callback
     onCartUpdate = null; // Clear cart update callback
     onStripePayment = null; // Clear stripe payment callback
     onAddressSummary = null; // Clear address summary callback

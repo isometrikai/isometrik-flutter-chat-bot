@@ -176,7 +176,7 @@ class _CartScreenState extends State<CartScreen> {
       decoration: BoxDecoration(
         color: isSelected ? const Color(0xFFFDFAFF) : Colors.white,
         border: Border.all(
-          color: isSelected ? const Color(0xFF8E2FFD) : const Color(0xFFD8DEF3),
+          color: isSelected ? AppConstants.appThemeColor : const Color(0xFFD8DEF3),
         ),
         borderRadius: BorderRadius.circular(80),
       ),
@@ -196,7 +196,7 @@ class _CartScreenState extends State<CartScreen> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
               decoration: BoxDecoration(
-                color: const Color(0xFF8E2FFD),
+                color: AppConstants.appThemeColor,
                 borderRadius: BorderRadius.circular(39.59),
               ),
               child: Text(
@@ -257,7 +257,7 @@ class _CartScreenState extends State<CartScreen> {
         if (state is CartLoading) {
           return const Center(
             child: CircularProgressIndicator(
-              color: Color(0xFF8E2FFD),
+              color: AppConstants.appThemeColor,
             ),
           );
         }
@@ -667,16 +667,7 @@ class _CartScreenState extends State<CartScreen> {
                     child: Container(
                       height: 62,
                       decoration: BoxDecoration(
-                        gradient: const LinearGradient(
-                          colors: [
-                            Color(0xFF5186E0),
-                            Color(0xFF5E3DFE),
-                            Color(0xFF8E2FFD),
-                            Color(0xFFB02EFB),
-                            Color(0xFFD445EC),
-                          ],
-                          stops: [0.0, 0.24, 0.52, 0.73, 1.0],
-                        ),
+                        color: AppConstants.appThemeColor,
                         borderRadius: BorderRadius.circular(16),
                       ),
                       child: Center(

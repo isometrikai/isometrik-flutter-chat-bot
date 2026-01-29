@@ -20,7 +20,7 @@ class RestaurantMenuScreen extends StatefulWidget {
 }
 
 class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
-  static const Color _purple = Color(0xFF8E2FFD);
+  static const Color _purple = AppConstants.appThemeColor;
   static const Color _border = Color(0xFFD8DEF3);
   static const Color _labelGrey = Color(0xFF979797);
   static const Color _veg = Color(0xFF66BB6A);

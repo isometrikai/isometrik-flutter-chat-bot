@@ -974,78 +974,61 @@ class _ChatScreenState extends State<ChatScreen> {
                 child: Stack(
                   clipBehavior: Clip.none,
                   children: [
-                    // Outer glow circle
-                    Container(
-                      width: 110,
-                      height: 110,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(110),
-                        gradient: const LinearGradient(
-                          begin: Alignment.centerLeft,
-                          end: Alignment.centerRight,
-                          colors: [
-                            Color(0x1AD445EC),
-                            Color(0x1AB02EFB),
-                            Color(0x1A8E2FFD),
-                            Color(0x1A5E3DFE),
-                            Color(0x1A5186E0),
-                          ],
-                        ),
-                      ),
-                    ),
-                    // Center asset
                     Align(
                       alignment: Alignment.center,
-                      child: Container(
-                        width: 90,
-                        height: 90,
-                        decoration: const BoxDecoration(
-                          shape: BoxShape.circle,
-                          gradient: LinearGradient(
-                            begin: Alignment.centerLeft,
-                            end: Alignment.centerRight,
-                            colors: [
-                              Color(0xFFD445EC),
-                              Color(0xFFB02EFB),
-                              Color(0xFF8E2FFD),
-                              Color(0xFF5E3DFE),
-                              Color(0xFF5186E0),
-                            ],
-                          ),
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(12),
-                          child: SvgPicture.asset(
-                            AssetPath.get('images/ic_mainImg_R.svg'),
-                            fit: BoxFit.contain,
-                          ),
-                        ),
+                      child: SvgPicture.asset(
+                        AssetPath.get('images/ic_LogoTutorial.svg'),
+                        fit: BoxFit.contain,
                       ),
-                    ),
-                    Positioned(
-                      right: -6,
-                      top: -6,
-                      child: Opacity(
-                        opacity: 0.4,
-                        child: SvgPicture.asset(
-                          AssetPath.get('images/ic_topStar.svg'),
-                          width: 44,
-                          height: 44,
-                        ),
-                      ),
-                    ),
-                    Positioned(
-                      left: -10,
-                      bottom: -8,
-                      child: Opacity(
-                        opacity: 0.4,
-                        child: SvgPicture.asset(
-                          AssetPath.get('images/ic_topStar.svg'),
-                          width: 61,
-                          height: 61,
-                        ),
-                      ),
-                    ),
+                    )
+                    // Outer glow circle
+                    // Container(
+                    //   width: 110,
+                    //   height: 110,
+                    //   decoration: BoxDecoration(
+                    //     borderRadius: BorderRadius.circular(110),
+                    //     gradient: const LinearGradient(
+                    //       begin: Alignment.centerLeft,
+                    //       end: Alignment.centerRight,
+                    //       colors: [
+                    //         Color(0x1AD445EC),
+                    //         Color(0x1AB02EFB),
+                    //         Color(0x1A8E2FFD),
+                    //         Color(0x1A5E3DFE),
+                    //         Color(0x1A5186E0),
+                    //       ],
+                    //     ),
+                    //   ),
+                    // ),
+                    // // Center asset
+                    // Align(
+                    //   alignment: Alignment.center,
+                    //   child: Container(
+                    //     width: 90,
+                    //     height: 90,
+                    //     decoration: const BoxDecoration(
+                    //       shape: BoxShape.circle,
+                    //       gradient: LinearGradient(
+                    //         begin: Alignment.centerLeft,
+                    //         end: Alignment.centerRight,
+                    //         colors: [
+                    //           Color(0xFFD445EC),
+                    //           Color(0xFFB02EFB),
+                    //           Color(0xFF8E2FFD),
+                    //           Color(0xFF5E3DFE),
+                    //           Color(0xFF5186E0),
+                    //         ],
+                    //       ),
+                    //     ),
+                    //     child: Padding(
+                    //       padding: const EdgeInsets.all(12),
+                    //       child: SvgPicture.asset(
+                    //         AssetPath.get('images/ic_mainImg_R.svg'),
+                    //         fit: BoxFit.contain,
+                    //       ),
+                    //     ),
+                    //   ),
+                    // ),
                   ],
                 ),
               ),
