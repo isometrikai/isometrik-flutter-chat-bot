@@ -153,14 +153,14 @@ class PlatformService {
           //   chatBotId: '1476',
           //   appSecret: "SFMyNTY.g3QAAAACZAAEZGF0YXQAAAADbQAAAAlhY2NvdW50SWRtAAAAGDY2YzQ2YWVhN2E2MDI5Yjk5MTNiMzIxOG0AAAAIa2V5c2V0SWRtAAAAJGFiZGFkNDQyLTA4YzktNDE4Ny1iYjk4LWUwMTAzYmY2YWYzOG0AAAAJcHJvamVjdElkbQAAACQ2Zjg4NzAwMi0yYzQ3LTQ4Y2EtYTQwNS0wZjk2NWVlNDAyNjFkAAZzaWduZWRuBgAUskFvkQE.esNFHT-JxzVtFpxylbJ8ik1lRZ-c75JjuCA0toa4C5M",
           //   licenseKey: "lic-IMKMqJdO3e2HO+6qDxctvESxA+HkoLIThG9",
-          //   userId: "63ff047c83f1c452a11b8d63",
-          //   name: 'Vishvesh dg',
-          //   timestamp: '2025-07-28T12:30:00Z',
-          //   userToken: 'Bearer eyJhbGciOiJSU0EtT0FFUCIsImN0eSI6IkpXVCIsImVuYyI6IkExMjhHQ00iLCJ0eXAiOiJKV1QifQ.dyMQ2fJbubR8rwZZ6jlzeLdwqTafN8eJeZwVu4N7ZNPT8GfNg2lREhoxDOvW2jA2agROulCUQohjZPRCfK7W8NPCOdRuQzdT6tKb214Iq7zALmTEEyr0GyVkiqGKqn-hAvjg0n71BKxWZWaoirN9J1Lilt4Dkw9NzzJffAVtZKE.2-BqXlr_vdIBeRpe.L-B2IOGLYtlWj5xS1umo9l997Bloah7u0n3wQfAMcDhWYLnWd67kwsi88x5UHk5XxAlQuIFeW3k4CiDUhBhThrPmafsb31I0cHgOZtvvdaHPLv8vYIChn5FK0kCkOWaQy4wyqY-FsQE3ouQOJmU1TYe04oqsClO88hoIcVPnMfFbW9JZJ3zORpzNwJfAJyYVKponkgVJls_LbX8kLkFS652F-RPUafLh6WfLlXhJfacc9-b-0GIeoISZl3bn5hVwT76LyHalkoKG-Fp4ej47RTlfgELraHs8vml3Y69kQBrXzocrJadu4uOHTdXmJ9434Y5Iq1cFH58obbK4jTl29lsZd3k11hvwNfmasw2G32_NPNgazTTG4mGA3C1Pt-nbyx6Qel8Z3watNqlk92AK-yd5AdU-zQJwsyzDttfPeUnl6ur_5f3SPi7WGb_HeA5IQCkrkDyjz-7mKdrFi_cF7fcI7Mr728Onl6ujsOpkLiiGT9cuJTnjtmXW9WB5gjyvobodz7dqwVWECAupAJkdNvhyhT6Mtk2Dg4LxxU8MiA6ACCIPzWzl2jBnkV78P7sqY2AyLJ9b9V1Y_jpxTwW0sZKRmJHwCc0mCqVU-bqTVEx7HUM5Z7kYHJsZ8v3CwhVUE3mJC5eqPvGsGE3To_r_41MIHmanpsuwSMoS2ldxacI9Bas2YrRIuJuWHN8mM7TVn1mh7kzscNUJsYwS2xQd4eZi1fm0PGiqbFCjsutD7DKgz-blqc9d00PZtbJjqaGJRuygIN6rYAumSNcOhT8K5NFLTpge0WF22hgu5Wh192dehsQ0eimncJqGFWSEWLL2godekuLb76_gSOt454abkAsllEpAAxWvrD79MwAuWFVpv1NXj2f_6nOuGQee9ORT7_mDTlI660k9x4IvbGguyY3ytvDt9XXejcv2LyRadIC8XS3RyJnJARInv5Zc0_kZ6lLlWTVS2ETphcdGVHi4Hf8R9PAMnUJ4X6UYiXEe2eoy-A2sRHHCRXftq9vQJF7Nee20zc-bFh5jY_i_tztr9s7P0ggRVWRgPZ2kS0pPBR-mtIbgZfFQiOvo2LpuNUB0jrRa_elIzacdqrbm6CsqL2ZfOM0s6wQSdJZDHUw57PLCfdWIA4my9M9LhsCncsCBX5ZVLribUb7mG74g9vcUpv163bbp9OGkItS_Le2eSarjg1rEPqRAE3avUxvomR3IbUiJ7pSIGvEkX3VZZPnMyULXrNjeyoZVemuHC45LdPs0pEv0dJ8E9MoUNuAyGf_xVHvCSgiCunLPNUfIMyeSdJlcV4bD18zQsG2lYMkswRen6fQAXGmf6UlDCnQRgQnLvVFo4NGYzbkeugAAkVTkFihu9HyWrOz03i9FukZe0MTaTuqbu1H31kaetS_0hN48t6jYcDTEuGJqyjybE__58Ab8M_9av85Ix8JDybPd3itXN2mEpKsvS6h2JNW3nHpQYsxOd9CpSW9aVW29V56gInExRLkVjEoxBWTDYqOZ5SkA8zpeqJTDchMQr8AjnFY0t2PzVH6E1jSte4PBoIHIbHfsAM9ewL478mOV0C3ZGmmVGLoiNWuT5ni7AB5JhLTI1xQTd2XNg06H7y2gNY10KuEKB1XG5udpRvJQiOMF0B2KzeRrfJ8pYsrYEgt9YlzxhliF64FAuQgf_c1RUmkqA7inYAdWdUymmzbqiB_M4RJ_1GJqnHLY6Nm7VewdaSJ_MyygQdkdey40nxOWcXxRtIGJVg-ugeTnk0Hp4m4ekO6chuBFFt7EYgYkzPaRxelmzF-h6Gr71Q.OHlrpNAwn5GKGZZWid4P7A',
-          //   location: 'Dubai, Dubai, United Arab Emirates',
+          //   userId: "697c887549ce2251cb66c9e2",
+          //   name: 'Chetan',
+          //   timestamp: '2026-01-30T11:54:41Z',
+          //   userToken: 'Bearer eyJhbGciOiJSU0EtT0FFUCIsImN0eSI6IkpXVCIsImVuYyI6IkExMjhHQ00iLCJ0eXAiOiJKV1QifQ.NrN5ZjSn5hbFgvan8BbGB7fuJB3BccYl4nm9EzDTKEI-FO0Oq4tuehS5lIO7HGwFc_LnP6VEGlnQhczaoW2aZoo-ElvqnfjpXVDP5HukZm5IUMrcI0v2GxwXCmj_HJFAENOgPsSizkon7igzy-yAPq5OvycdIftBnU9DIaKd7Cw.MjLn8kE307RqfiLu.WXksH3TpeqMRYefj-U1stv4pOLrg8wXWGlwo6zUYreK-94mcj9fKQ8HyWIujWrzBD_ttGo1Rk0t_434huvtpDsNZ38kbvjFD0lg5qdsFACcODRiTwhtS6ke6ej9E_iZIzafp17UGbC8C8ulcBdL1iGakmz3JNfhh6Kcuiqt476EWi7UsDlytwIa1gGE2yrObnd2gSznFZMFX4Qz3metof4bRMuf35xb0_DFV9jsEE3EguZ1r9R6FwHjAS-YBZzQXhnZYRT_9rjaxhDZXgBxA_VAFPMosRjK4dThlYMH7MntjuuoX8UkOfxW3WfYLmh7EdxMU23CZTkPib6fj42-iZpJhlsPK6e0ZcewVBqo-lyFGqG04NSBRMFdsbqgLD-HWXhElWqui78AIKy7BJC17hjjUvhYR8ZE_zf2cEM4CUZjjNvE5Mi1I-tAFf_y79Hch0n8yuzN0KR7c-uzqC9GenNIET83Mi8CzegzMzibwnhD14XRloTilCckcmimn_tTcXVEdRMMNG_Xhsmkn4B4v7odCsjPDgg1q8pqZKZWsnBU1tsJqm3t2Qr97Ix35BgLmZQ6kcvoIk0bs6_eUF0CcSsupo-0OPXr4Jpo04a05R_yCMrYo3cmGZ14zJeXbUF5ss7EpvH9UDKxHkW0ib653HhS4nNhkamFeWeDWWYw5pheCQpqNf2RrQTYpiAz7XmlUBFRS1Ex6GhiD8mRBGIQ0A9Y6DQ-zmW1I9vLnhCAvuC53F60krR5T910_JB_-6U_fFD4Lvz44wC-vTh_S0uJLtgzlooKpS12nLUA7x7Qi8edqXHGUqo_cG7K2ghLaSoe-c8SENDZtMEoyujzUrfUEqpyEM5W5gpaWFi5oAVp-BCY0jsTbPf4mdzkWcbIGkZQpKPRctcNyMvTdWVV_R1NW2WvXeAUXt6m98_Gm3_yV0jV625E0mV14sLuF817OJfaUe1bZFcaa2Y5F15vxH7oh-w6UItmTkdKWJwozXkB2M2s6WmqyM4AL0aPMXqDeGoRbaWLdCownPMA5e0Uk8fObC3_QPRYT3RWRZYs8mR5_FviNOqPJiZ6l8WuLEMxJ2522Imb15qxD2mw_7kYSZG1tJerFT74HG5I8iSozr1cBOnDQ9MvUhUkT95lLL_zrJP7yMzQeNaPZa-6aCL6pmp65tebHBg2vFutiKg75j06RIriuf-9jcpvfMXGTv9AbHroFG1otwXnSCSYa_6gAIh2t3K5HoR0IHQms3yr8meYoGh6ty7jbRoMe6MG39mOEQdMM7RiOD02kEiA2w8zOF9Rcwml7Cj8UiTCsGeXWc4-BBIDWTM6HCCpv3oNnlhikVnjr9Blvs_knavoXlfj3fC6LGw008dN39Pd9tqThtLFkJGzEkkKVq3rRqu2ZTL0NvAiLvuEfERGIMasocBjmzFvzdrQHIejB6m_1XImRhDFwyYiywY335vyDUL9bbA5NyioDeKBqvUulen3NE_arpKbdAUDR4_7niQb4daZZMHxxrYKzw8yulqQdcDDptU75iFjSDR0FZEJx_YYHWVV6r59HaskXWNiMTinvLi-I1P2RKzUeElFcJNP4PCU5gMtO4unhs9MEIazqv2tU0tsuxM9PrN9SGjQhQYw-0AzJ_vs6DNVU__VynhJBJRPM3FKtiX46EpoD7h0jtZCFoSZwwUW8vgWuHiO5BYjhT4qEVeoc7PcH5utL_r6m1WEXtb4YxmD2lKJRarlKwe7ltYIB1RTFTu2NQpHsqyIeiw._YeCh8jOnezWOvj7iwfmdw',
+          //   location: 'Bengaluru, Karnataka, India',
           //   isProduction: true,
-          //   latitude: 25.204849243164062,
-          //   longitude: 55.270782470703125,
+          //   latitude: 13.028684616088867,//india
+          //   longitude: 77.58952331542969,//india
           //   // latitude: 25.204849243164062,//dubai
           //   // longitude: 55.2704849243164062,//dubai
           //   clientGuid: '528a7d439df44f2b9457342b7b865be2',
@@ -169,9 +169,9 @@ class PlatformService {
           //   visitorId: '2b0a8996-a55e-4bdd-b4a7-3f85cae22bd6',
           //   searchApiUrl: 'https://searchapi-dev.hawksearch.net/api/v2',
           //   baseApiUrl: 'https://api-live.eazylife-online.com',
-          //   currencycode: 'AED',
-          //   currencysymbol: "2K8u2KU=",//"د.إ",
-          //   zoneId: '63e4cfa10a79635797059f24',
+          //   currencycode: 'INR',
+          //   currencysymbol: "4oK5",//"د.إ",
+          //   zoneId: '634e5da256ad3fd02bd3feb5',
           //   timezone: 'Asia/Kolkata',
           //   // zoneId: '636dfc8c89b6a857b500ccd1',//dubai
           //   //  currencycode: 'AED',//dubai
