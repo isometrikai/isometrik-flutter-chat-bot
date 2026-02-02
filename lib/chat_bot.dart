@@ -91,29 +91,54 @@ class ChatBot {
     );
   }
 
-  static void openChatBot(BuildContext context) async {
+   static void openChatBot(BuildContext context) async {
     // Set current context for fallback when navigator key is not available
     Utility.setCurrentContext(context);
     if (isTutorialShown == true) {
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => const TutorialScreen()),
+        PageRouteBuilder(
+          pageBuilder: (context, animation, secondaryAnimation) =>
+              const TutorialScreen(),
+          transitionDuration: Duration.zero,
+          reverseTransitionDuration: Duration.zero,
+        ),
       );
     } else {
-      Navigator.push(
+     Navigator.push(
         context,
-        MaterialPageRoute(
-          builder: (context) => MultiBlocProvider(
+        PageRouteBuilder(
+          pageBuilder: (context, animation, secondaryAnimation) =>
+              MultiBlocProvider(
             providers: [
               BlocProvider(create: (context) => ChatBloc()),
               BlocProvider(create: (context) => CartBloc()),
             ],
             child: const ChatScreen(),
           ),
+          transitionDuration: Duration.zero,
+          reverseTransitionDuration: Duration.zero,
         ),
       );
     }
   }
+    // Navigator.push(
+    //     context,
+    //     MaterialPageRoute(builder: (context) => const TutorialScreen()),
+    //   );
+
+//  Navigator.push(
+//         context,
+//         MaterialPageRoute(
+//           builder: (context) => MultiBlocProvider(
+//             providers: [
+//               BlocProvider(create: (context) => ChatBloc()),
+//               BlocProvider(create: (context) => CartBloc()),
+//             ],
+//             child: const ChatScreen(),
+//           ),
+//         ),
+//       );
 
   static void isCartUpdate(dynamic cartData) {// CHANGE CALLBACK
     print('ChatBot.isCartUpdate called with cartData: $cartData');
