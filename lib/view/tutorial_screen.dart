@@ -91,6 +91,7 @@ class _TutorialScreenState extends State<TutorialScreen> {
               Expanded(
                 child: PageView.builder(
                   controller: _pageController,
+                  physics: const NeverScrollableScrollPhysics(),// Disable Swipe Horizontal Scroll to change page
                   onPageChanged: (index) {
                     setState(() {
                       _currentPage = index;
