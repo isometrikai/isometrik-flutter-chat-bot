@@ -14,4 +14,5 @@ export 'restaurant_screen.dart';
 export 'select_time_screen.dart';
 export 'select_datetime_screen.dart';
 export 'tutorial_screen.dart';
+export 'complete_setup/complete_setup.dart';
 

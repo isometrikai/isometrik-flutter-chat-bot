@@ -1,0 +1,11 @@
+export 'complete_setup_screen.dart';
+export 'personal_details_setup_screen.dart';
+export 'important_people_setup_screen.dart';
+export 'food_preferences_setup_screen.dart';
+export 'shopping_habits_setup_screen.dart';
+export 'health_preferences_setup_screen.dart';
+export 'travel_preferences_setup_screen.dart';
+export 'home_services_setup_screen.dart';
+export 'budget_deals_setup_screen.dart';
+export 'notification_settings_setup_screen.dart';
+export 'setup_complete_screen.dart';
