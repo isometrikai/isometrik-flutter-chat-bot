@@ -19,17 +19,21 @@ class _CompleteSetupFlowScreenState extends State<CompleteSetupFlowScreen> {
   static const int _totalSteps = 10;
 
   late final PageController _pageController;
+  late final UserPreferenceBloc userPreferenceBloc;
   int _currentPage = 0;
 
   @override
   void initState() {
     super.initState();
     _pageController = PageController(initialPage: 0);
+    userPreferenceBloc = UserPreferenceBloc()
+      ..add(const UserPreferenceLoadRequested());
   }
 
   @override
   void dispose() {
     _pageController.dispose();
+    userPreferenceBloc.close();
     super.dispose();
   }
 
@@ -40,7 +44,7 @@ class _CompleteSetupFlowScreenState extends State<CompleteSetupFlowScreen> {
         curve: Curves.easeInOut,
       );
     } else {
-      context.read<UserPreferenceBloc>().add(const UserPreferenceSubmitRequested());
+      userPreferenceBloc.add(const UserPreferenceSubmitRequested());
     }
   }
 
@@ -61,54 +65,57 @@ class _CompleteSetupFlowScreenState extends State<CompleteSetupFlowScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<UserPreferenceBloc, UserPreferenceState>(
-      listenWhen: (prev, curr) => curr.submitStatus != prev.submitStatus,
-      listener: (context, state) {
-        if (state.isSubmitSuccess) {
-          Navigator.of(context).pushReplacement(
-            MaterialPageRoute(
-              builder: (context) => const SetupCompleteScreen(),
-            ),
-          );
-        }
-        if (state.isSubmitFailure && state.submitMessage != null) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(state.submitMessage!)),
-          );
-        }
-      },
-      child: Scaffold(
-        backgroundColor: Colors.white,
-        body: SafeArea(
-          child: BlocBuilder<UserPreferenceBloc, UserPreferenceState>(
-            buildWhen: (prev, curr) => prev.loadStatus != curr.loadStatus,
-            builder: (context, state) {
-              if (state.isLoading) {
-                return const Center(child: CircularProgressIndicator());
-              }
-              return Column(
-                children: [
-                  _buildHeader(),
-                  Expanded(
-                    child: PageView.builder(
-                      controller: _pageController,
-                      physics: const NeverScrollableScrollPhysics(),
-                      onPageChanged: (index) {
-                        setState(() => _currentPage = index);
-                      },
-                      itemCount: _totalSteps,
-                      itemBuilder: (context, index) {
-                        return SizedBox.expand(
-                          key: ValueKey<int>(index),
-                          child: CompleteSetupStepPages.buildStep(context, index),
-                        );
-                      },
+    return BlocProvider.value(
+      value: userPreferenceBloc,
+      child: BlocListener<UserPreferenceBloc, UserPreferenceState>(
+        listenWhen: (prev, curr) => curr.submitStatus != prev.submitStatus,
+        listener: (context, state) {
+          if (state.isSubmitSuccess) {
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(
+                builder: (context) => const SetupCompleteScreen(),
+              ),
+            );
+          }
+          if (state.isSubmitFailure && state.submitMessage != null) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(state.submitMessage!)),
+            );
+          }
+        },
+        child: Scaffold(
+          backgroundColor: Colors.white,
+          body: SafeArea(
+            child: BlocBuilder<UserPreferenceBloc, UserPreferenceState>(
+              buildWhen: (prev, curr) => prev.loadStatus != curr.loadStatus,
+              builder: (context, state) {
+                if (state.isLoading) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                return Column(
+                  children: [
+                    _buildHeader(),
+                    Expanded(
+                      child: PageView.builder(
+                        controller: _pageController,
+                        physics: const NeverScrollableScrollPhysics(),
+                        onPageChanged: (index) {
+                          setState(() => _currentPage = index);
+                        },
+                        itemCount: _totalSteps,
+                        itemBuilder: (context, index) {
+                          return SizedBox.expand(
+                            key: ValueKey<int>(index),
+                            child: CompleteSetupStepPages.buildStep(context, index),
+                          );
+                        },
+                      ),
                     ),
-                  ),
-                  _buildBottomNavigation(),
-                ],
-              );
-            },
+                    _buildBottomNavigation(),
+                  ],
+                );
+              },
+            ),
           ),
         ),
       ),

@@ -1106,11 +1106,7 @@ class ChatScreenBody extends StatelessWidget {
                       onTap: () {
                         Navigator.of(context).push(
                           MaterialPageRoute(
-                            builder: (context) => BlocProvider(
-                              create: (_) => UserPreferenceBloc()
-                                ..add(const UserPreferenceLoadRequested()),
-                              child: const CompleteSetupFlowScreen(),
-                            ),
+                            builder: (context) => const CompleteSetupFlowScreen(),
                           ),
                         );
                       },
