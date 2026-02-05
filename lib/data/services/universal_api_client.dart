@@ -33,6 +33,24 @@ class UniversalApiClient {
     buildHeaders: _buildGroceryHeaders,
   );
 
+  /// User preference API (eazylife): accept, authorization Bearer, language, platform 3
+  ApiClient get _userPreferenceClient => ApiClient(
+    baseUrl: ApiService.baseApiUrl,
+    buildHeaders: _buildUserPreferenceHeaders,
+  );
+
+  Future<Map<String, String>> _buildUserPreferenceHeaders() async {
+    final raw = TokenManager.instance.userToken ?? '';
+    final token = raw.isEmpty ? '' : (raw.startsWith('Bearer ') ? raw : 'Bearer $raw');
+    return {
+      'accept': 'application/json',
+      'Content-Type': 'application/json',
+      'language': 'en',
+      'platform': '3',
+      if (token.isNotEmpty) 'authorization': token,
+    };
+  }
+
   /// Build headers with current token
   Future<Map<String, String>> _buildHeaders() async {
     final token = TokenManager.instance.authorizationHeader;
@@ -140,6 +158,9 @@ class UniversalApiClient {
 
   /// Get grocery API client (for grocery-specific APIs)
   ApiClient get groceryClient => _groceryClient;
+
+  /// Get user preference API client (POST/GET/PATCH userPreference)
+  ApiClient get userPreferenceClient => _userPreferenceClient;
 
   /// Create a custom API client for any base URL
   ApiClient createClient(String baseUrl) {

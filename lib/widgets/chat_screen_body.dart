@@ -1068,13 +1068,21 @@ class ChatScreenBody extends StatelessWidget {
       child: SingleChildScrollView(
         // keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
         child: Padding(
-          padding: const EdgeInsets.only(left: 20, right: 20, top: 50),
+          padding: const EdgeInsets.only(left: 20, right: 20, top: 10),
           child: ConstrainedBox(
             constraints: BoxConstraints(maxWidth: contentWidth),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
+                SizedBox(
+                  height: 75,
+                  width: 75,
+                  child: SvgPicture.asset(
+                        AssetPath.get('images/ic_LogoTutorial.svg'),
+                        fit: BoxFit.contain,
+                      ),
+                ),
                 SizedBox(
                   width: contentWidth,
                   child: _buildTitleWithHighlightedName(titleText),
@@ -1098,7 +1106,11 @@ class ChatScreenBody extends StatelessWidget {
                       onTap: () {
                         Navigator.of(context).push(
                           MaterialPageRoute(
-                            builder: (context) => const CompleteSetupScreen(),
+                            builder: (context) => BlocProvider(
+                              create: (_) => UserPreferenceBloc()
+                                ..add(const UserPreferenceLoadRequested()),
+                              child: const CompleteSetupFlowScreen(),
+                            ),
                           ),
                         );
                       },
@@ -1130,6 +1142,17 @@ class ChatScreenBody extends StatelessWidget {
                       ),
                     ),
                   ),
+                ),
+                const SizedBox(height: 16),
+                _BirthdayReminderCard(
+                  onBookRestaurant: () {
+                    onSendMessage(
+                      'Book restaurant for Sarah\'s birthday',
+                    );
+                  },
+                  onBrowseGifts: () {
+                    onSendMessage('Browse gifts for Sarah\'s birthday');
+                  },
                 ),
                 // const SizedBox(height: 16),
                 // // Weather information view
@@ -3414,6 +3437,216 @@ class ChatScreenBody extends StatelessWidget {
       onSendMessage: (message) {
         onSendMessage(message);
       },
+    );
+  }
+}
+
+/// Birthday reminder card shown after the Complete setup button.
+class _BirthdayReminderCard extends StatefulWidget {
+  final VoidCallback? onBookRestaurant;
+  final VoidCallback? onBrowseGifts;
+
+  const _BirthdayReminderCard({
+    this.onBookRestaurant,
+    this.onBrowseGifts,
+  });
+
+  @override
+  State<_BirthdayReminderCard> createState() => _BirthdayReminderCardState();
+}
+
+class _BirthdayReminderCardState extends State<_BirthdayReminderCard> {
+  bool _visible = true;
+
+  @override
+  Widget build(BuildContext context) {
+    if (!_visible) return const SizedBox.shrink();
+
+    return Center(
+      child: SizedBox(
+        width: 343,
+        child: Stack(
+          clipBehavior: Clip.none,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(15),
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    Color(0xFFF5E0FF),
+                    Color(0xFFD59DFF),
+                  ],
+                  stops: [0.1555, 0.9554],
+                ),
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const SizedBox(height: 4),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        width: 39,
+                        height: 39,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(8.125),
+                        ),
+                        alignment: Alignment.center,
+                        child: const Text(
+                          '🎂',
+                          style: TextStyle(fontSize: 22),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 6,
+                                vertical: 3,
+                              ),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFECC6FE),
+                                borderRadius: BorderRadius.circular(80),
+                              ),
+                              child: const Text(
+                                'TOMORROW',
+                                style: TextStyle(
+                                  fontFamily: 'Inter',
+                                  fontSize: 10,
+                                  height: 1.4,
+                                  color: Color(0xFF414F85),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            const Text(
+                              "Sarah's Birthday Tomorrow!",
+                              style: TextStyle(
+                                fontFamily: 'Plus Jakarta Sans',
+                                fontWeight: FontWeight.w700,
+                                fontSize: 14,
+                                height: 1.2,
+                                color: Color(0xFF2F3C70),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  const Text(
+                    "Don't forget! Your wife's birthday is tomorrow. Need help with dinner reservations or gifts?",
+                    style: TextStyle(
+                      fontFamily: 'Plus Jakarta Sans',
+                      fontWeight: FontWeight.w400,
+                      fontSize: 12,
+                      height: 1.4,
+                      color: Color(0xFF2F3C70),
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Row(
+                    children: [
+                      Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          onTap: widget.onBookRestaurant,
+                          borderRadius: BorderRadius.circular(8),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 12,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: const Text(
+                              'Book Restaurant',
+                              style: TextStyle(
+                                fontFamily: 'Inter',
+                                fontWeight: FontWeight.w600,
+                                fontSize: 14,
+                                height: 1.2,
+                                color: Color(0xFF007AFF),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          onTap: widget.onBrowseGifts,
+                          borderRadius: BorderRadius.circular(8),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 12,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: const Text(
+                              'Browse Gifts',
+                              style: TextStyle(
+                                fontFamily: 'Inter',
+                                fontWeight: FontWeight.w600,
+                                fontSize: 14,
+                                height: 1.2,
+                                color: Color(0xFF007AFF),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            Positioned(
+              top: 15,
+              right: 15,
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  onTap: () => setState(() => _visible = false),
+                  borderRadius: BorderRadius.circular(32),
+                  child: Container(
+                    width: 20,
+                    height: 20,
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.66),
+                      borderRadius: BorderRadius.circular(32),
+                    ),
+                    alignment: Alignment.center,
+                    child: Icon(
+                      Icons.close,
+                      size: 14,
+                      color: const Color(0xFF242424),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

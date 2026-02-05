@@ -12,6 +12,7 @@ export 'model/store_details_response.dart';
 export 'model/availability_slots_response.dart';
 export 'model/subcategory_products_response.dart';
 export 'model/universal_cart_response.dart' hide Product;
+export 'model/user_preference_request.dart';
 export 'services/services.dart';
 export 'repositories/repositories.dart';
 export 'api_client.dart';

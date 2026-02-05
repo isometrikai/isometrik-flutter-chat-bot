@@ -19,3 +19,6 @@ export 'grocery_menu/grocery_menu_state.dart';
 export 'store_details/store_details_bloc.dart';
 export 'store_details/store_details_event.dart';
 export 'store_details/store_details_state.dart';
+export 'user_preference/user_preference_bloc.dart';
+export 'user_preference/user_preference_event.dart';
+export 'user_preference/user_preference_state.dart';
