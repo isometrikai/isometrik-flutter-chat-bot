@@ -1,5 +1,6 @@
 library chat_bot;
 
+import 'package:chat_bot/view/complete_setup/complete_setup_flow_screen.dart';
 import 'package:chat_bot/view/tutorial_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -17,6 +18,7 @@ export 'services/api_service.dart';
 
 class ChatBot {
   static bool isTutorialShown = false;
+  static bool isCompleteSetupShown = false;
 
   static void configure({
     required String chatBotId,
@@ -31,6 +33,7 @@ class ChatBot {
     required double longitude,
     required double latitude,
     required bool needToShowTutorial,
+    required bool needToShowCompleteSetup,
     required String clientGuid,
     required String indexName,
     required String visitId,
@@ -54,6 +57,7 @@ class ChatBot {
     print('longitude: $longitude');
     print('latitude: $latitude');
     print('needToShowTutorial: $needToShowTutorial');
+    print('needToShowCompleteSetup: $needToShowCompleteSetup');
     print('clientGuid: $clientGuid');
     print('indexName: $indexName');
     print('visitId: $visitId');
@@ -65,6 +69,7 @@ class ChatBot {
     print('zoneId: $zoneId');
     print('timezone: $timezone');
     isTutorialShown = needToShowTutorial;
+    isCompleteSetupShown = needToShowCompleteSetup;
     ApiService.configure(
       chatBotId: chatBotId,
       appSecret: appSecret,
@@ -78,6 +83,7 @@ class ChatBot {
       longitude: longitude,
       latitude: latitude,
         needToShowTutorial:needToShowTutorial,
+        needToShowCompleteSetup:needToShowCompleteSetup,
       clientGuid: clientGuid,
       indexName: indexName,
       visitId: visitId,
@@ -102,6 +108,14 @@ class ChatBot {
               const TutorialScreen(),
           transitionDuration: Duration.zero,
           reverseTransitionDuration: Duration.zero,
+        ),
+      );
+    }else if (isCompleteSetupShown == true) {
+      Navigator.push(
+        context,
+        PageRouteBuilder(
+          pageBuilder: (context, animation, secondaryAnimation) =>
+              const CompleteSetupFlowScreen(),
         ),
       );
     } else {

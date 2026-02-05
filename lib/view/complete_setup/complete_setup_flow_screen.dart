@@ -1,3 +1,5 @@
+import 'package:chat_bot/chat_bot.dart';
+import 'package:chat_bot/services/callback_manage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:chat_bot/bloc/bloc.dart';
@@ -60,7 +62,14 @@ class _CompleteSetupFlowScreenState extends State<CompleteSetupFlowScreen> {
   }
 
   void _onSkip() {
-    Navigator.of(context).pop();
+    if(mounted) {
+      if(ChatBot.isCompleteSetupShown == true) {
+         // TODO: Handle button tap
+        OrderService().triggerChatDismiss();
+      }else {
+        Navigator.of(context).pop();
+      }
+    }
   }
 
   @override

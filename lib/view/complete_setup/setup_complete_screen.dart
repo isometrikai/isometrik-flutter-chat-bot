@@ -1,3 +1,5 @@
+import 'package:chat_bot/chat_bot.dart';
+import 'package:chat_bot/services/callback_manage.dart';
 import 'package:flutter/material.dart';
 import 'package:chat_bot/utils/utils.dart';
 
@@ -22,8 +24,15 @@ class SetupCompleteScreen extends StatelessWidget {
   ];
 
   void _onLetsGetStarted(BuildContext context) {
-    // Pop entire setup stack (10 screens) to return to ChatScreen
-    Navigator.popUntil(context, (route) => route.isFirst);
+    // if(mounted) {
+      if(ChatBot.isCompleteSetupShown == true) {
+         // TODO: Handle button tap
+          OrderService().triggerChatDismiss();
+      }else {
+          // Pop entire setup stack (10 screens) to return to ChatScreen
+           Navigator.popUntil(context, (route) => route.isFirst);
+      }
+    // }
   }
 
   @override

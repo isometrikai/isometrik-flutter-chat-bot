@@ -49,6 +49,7 @@ class AuthService {
     double? longitude,
     double? latitude,
     bool? needToShowTutorial,
+    bool? needToShowCompleteSetup,
     required String clientGuid,
     required String indexName,
     required String visitId,
