@@ -37,6 +37,7 @@ class ApiService {
     required String currencysymbol,
     required String zoneId,
     required String timezone,
+    required int platform,
   }) {
     _isProduction = isProduction;
     _baseApiUrl = baseApiUrl.isNotEmpty 
@@ -102,6 +103,7 @@ class ApiService {
 
     Utility.setCurrencySymbol(currencysymbol);
     Utility.setCurrencyCode(currencycode);
+    Utility.setPlatform(platform);
   }
 
   static String removeTrailingSlash(String url) {
