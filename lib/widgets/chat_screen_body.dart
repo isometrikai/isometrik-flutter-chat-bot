@@ -1098,47 +1098,49 @@ class ChatScreenBody extends StatelessWidget {
                     ),
                   ),
                 ),
-                const SizedBox(height: 16),
-                Center(
-                  child: Material(
-                    color: Colors.transparent,
-                    child: InkWell(
-                      onTap: () {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (context) => const CompleteSetupFlowScreen(),
-                          ),
-                        );
-                      },
-                      borderRadius: BorderRadius.circular(12),
-                      child: Container(
-                        width: 313,
-                        height: 46,
-                        padding: const EdgeInsets.symmetric(horizontal: 40),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFF3F7FF),
-                          border: Border.all(color: AppConstants.appThemeColor, width: 1),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              'Complete setup ->',
-                              style: AppTextStyles.launchSubtitle.copyWith(
-                                fontWeight: FontWeight.w700,
-                                fontSize: 16,
-                                height: 1.2,
-                                color: AppConstants.appThemeColor,
-                              ),
+                if (greetingData?.setupUserPreference == true) ...[
+                  const SizedBox(height: 16),
+                  Center(
+                    child: Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        onTap: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context) => const CompleteSetupFlowScreen(),
                             ),
-                          ],
+                          );
+                        },
+                        borderRadius: BorderRadius.circular(12),
+                        child: Container(
+                          width: 313,
+                          height: 46,
+                          padding: const EdgeInsets.symmetric(horizontal: 40),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFF3F7FF),
+                            border: Border.all(color: AppConstants.appThemeColor, width: 1),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                'Complete setup ->',
+                                style: AppTextStyles.launchSubtitle.copyWith(
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 16,
+                                  height: 1.2,
+                                  color: AppConstants.appThemeColor,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ),
                   ),
-                ),
+                ],
                 const SizedBox(height: 16),
                 _BirthdayReminderCard(
                   onBookRestaurant: () {

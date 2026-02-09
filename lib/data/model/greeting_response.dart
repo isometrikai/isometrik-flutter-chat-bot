@@ -42,6 +42,7 @@ class GreetingResponse {
   final String weatherText;
   final String personaTitle;
   final String personaDesc;
+  final bool setupUserPreference;
 
   GreetingResponse({
     required this.greeting,
@@ -50,6 +51,7 @@ class GreetingResponse {
     required this.weatherText,
     required this.personaTitle,
     required this.personaDesc,
+    required this.setupUserPreference,
   });
 
   factory GreetingResponse.fromJson(Map<String, dynamic> json) {
@@ -63,6 +65,7 @@ class GreetingResponse {
           <GreetingOption>[],
       personaTitle: json['personaTitle']?.toString() ?? '',
       personaDesc: json['personaDesc']?.toString() ?? '',
+      setupUserPreference: json['setupUserPreference'] ?? false,
     );
   }
 
@@ -74,6 +77,7 @@ class GreetingResponse {
       'options': options.map((option) => option.toJson()).toList(),
       'personaTitle': personaTitle,
       'personaDesc': personaDesc,
+      'userPreference': setupUserPreference,
     };
   }
 
