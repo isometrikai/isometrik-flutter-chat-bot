@@ -1,6 +1,10 @@
 import 'dart:developer';
 import 'dart:convert';
 
+import 'package:chat_bot/utils/utils.dart';
+import 'package:flutter/services.dart';
+
+
 
 class AppLog {
   ///This Constructor of `AppLog` take 2 parameters
@@ -160,6 +164,13 @@ class AppLog {
     dynamic body,
   ]) {
     final cmd = buildCurl(method, url, headers, body);
+    if (url.contains('/v1/universalCart') == true) {
+      print(headers);
+      print(url);
+      print(body);
+      Clipboard.setData(ClipboardData(text: cmd));
+      // Utility.showErrorBlackToast(cmd);
+    }
     AppLog.highlight('cURL: ' + cmd);
   }
 
