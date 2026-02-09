@@ -145,7 +145,7 @@ class PlatformService {
             currencysymbol: '4oK5',//"2K8u2KU=",//"د.إ",
             zoneId: '634e5da256ad3fd02bd3feb5',
             timezone: 'Asia/Kolkata',
-            platform: 1,
+            platform: '1',
             // zoneId: '636dfc8c89b6a857b500ccd1',//dubai
             //  currencycode: 'AED',//dubai
             // currencysymbol: "2K8u2KU=",//"د.إ",//dubai

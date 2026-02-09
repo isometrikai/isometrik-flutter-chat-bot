@@ -44,7 +44,7 @@ class ChatBot {
     required String currencysymbol,
     required String zoneId,
     required String timezone,
-    required int platform,
+    required String platform,
   }) {
     print('chatBotId: $chatBotId');
     print('appSecret: $appSecret');

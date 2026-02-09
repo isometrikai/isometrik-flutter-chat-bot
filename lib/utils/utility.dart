@@ -8,7 +8,7 @@ class Utility {
   static bool isLoading = false;
   static String currencySymbol = '';
   static String currencyCode = '';
-  static int platform = 0;
+  static String platform = '';
 
   static void showLoader({
     String? message,
@@ -123,7 +123,7 @@ class Utility {
     Utility.currencyCode = currencyCode;
   }
 
-  static void setPlatform(int platform) {
+  static void setPlatform(String platform) {
     Utility.platform = platform;
   }
 
@@ -135,7 +135,7 @@ class Utility {
     return currencyCode;
   }
 
-  static int getPlatform() {
+  static String getPlatform() {
     return platform;
   }
 }

@@ -37,7 +37,7 @@ class ApiService {
     required String currencysymbol,
     required String zoneId,
     required String timezone,
-    required int platform,
+    required String platform,
   }) {
     _isProduction = isProduction;
     _baseApiUrl = baseApiUrl.isNotEmpty 

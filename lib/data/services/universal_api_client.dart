@@ -46,7 +46,7 @@ class UniversalApiClient {
       'accept': 'application/json',
       'Content-Type': 'application/json',
       'language': 'en',
-      'platform': Utility.getPlatform().toString(),
+      'platform': Utility.getPlatform(),
       if (token.isNotEmpty) 'authorization': token,
     };
   }
@@ -69,7 +69,7 @@ class UniversalApiClient {
       'lan': 'en',
       'currencysymbol': Utility.getCurrencySymbol(),//2K8u2KU=
       'currencycode': Utility.getCurrencyCode(),
-      'platform': Utility.getPlatform().toString(),
+      'platform': Utility.getPlatform(),
       'ipAddress': '192.168.1.3',
       'Authorization': token ?? '',
     };
@@ -84,7 +84,7 @@ class UniversalApiClient {
       'Authorization': token ?? '',
       'storeType': '8',
       'ipAddress': '192.168.5.105',
-      'platform': Utility.getPlatform().toString(),
+      'platform': Utility.getPlatform(),
       'language': 'en',
       'currencycode': Utility.getCurrencyCode(),//AED
       'skip': '0',
@@ -106,7 +106,7 @@ class UniversalApiClient {
       'Authorization': '$token',
       'storeType': '8',
       'ipAddress': '192.168.5.105',
-      'platform': Utility.getPlatform().toString(),
+      'platform': Utility.getPlatform(),
       'language': 'en',
       'currencycode': Utility.getCurrencyCode(),//AED
       'skip': '0',
@@ -125,7 +125,7 @@ class UniversalApiClient {
           'Eazy Life/2.0.1 (com.eazy.customerapp; build:64; iOS 26.0.1)',
       'Accept-Encoding': 'gzip',
       'Accept-Language': 'en-IN;q=1.0',
-      'platform': Utility.getPlatform().toString(),
+      'platform': Utility.getPlatform(),
       'language': 'en',
       'filterType': '1',
       'logintype': '1',
