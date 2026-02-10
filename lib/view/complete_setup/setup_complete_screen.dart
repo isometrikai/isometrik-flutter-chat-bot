@@ -6,7 +6,8 @@ import 'package:chat_bot/utils/utils.dart';
 /// Shown after completing the 10-step setup: "You're All Set!".
 /// User taps "Let's get started" to return to ChatScreen.
 class SetupCompleteScreen extends StatelessWidget {
-  const SetupCompleteScreen({super.key});
+  final Function(String) onCallback;
+  const SetupCompleteScreen({super.key, required this.onCallback});
 
   static const Color _green = Color(0xFF34C363);
   static const Color _blue = Color(0xFF007AFF);
@@ -24,15 +25,12 @@ class SetupCompleteScreen extends StatelessWidget {
   ];
 
   void _onLetsGetStarted(BuildContext context) {
-    // if(mounted) {
-      if(ChatBot.isCompleteSetupShown == true) {
-         // TODO: Handle button tap
-          OrderService().triggerChatDismiss();
-      }else {
-          // Pop entire setup stack (10 screens) to return to ChatScreen
-           Navigator.popUntil(context, (route) => route.isFirst);
-      }
-    // }
+    if (ChatBot.isCompleteSetupShown == true) {
+      OrderService().triggerChatDismiss();
+    } else {
+      onCallback("Data from Screen Complete Setup");
+      Navigator.popUntil(context, (route) => route.isFirst);
+    }
   }
 
   @override

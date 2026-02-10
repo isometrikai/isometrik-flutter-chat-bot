@@ -28,6 +28,7 @@ class ChatScreenBody extends StatelessWidget {
   final VoidCallback onScrollToBottom;
   final VoidCallback onLoadChatbotData;
   final VoidCallback onRestartChatAPI;
+  final VoidCallback onRestartGreetingAPI;
   final Function(Set<String>) onUpdateSelectedOptions;
   final Function(List<ChatMessage>) onUpdateMessages;
   final String? pendingMessage;
@@ -67,6 +68,7 @@ class ChatScreenBody extends StatelessWidget {
     required this.onScrollToBottom,
     required this.onLoadChatbotData,
     required this.onRestartChatAPI,
+    required this.onRestartGreetingAPI,
     required this.onUpdateSelectedOptions,
     required this.onUpdateMessages,
     required this.pendingMessage,
@@ -1107,7 +1109,9 @@ class ChatScreenBody extends StatelessWidget {
                         onTap: () {
                           Navigator.of(context).push(
                             MaterialPageRoute(
-                              builder: (context) => const CompleteSetupFlowScreen(),
+                              builder: (context) => CompleteSetupFlowScreen(onCallback: (data) {
+                                onRestartGreetingAPI();
+                              }),
                             ),
                           );
                         },

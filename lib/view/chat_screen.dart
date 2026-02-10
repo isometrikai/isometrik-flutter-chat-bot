@@ -819,6 +819,14 @@ class _ChatScreenState extends State<ChatScreen> {
     });
   }
 
+  Future<void> _restartGreetingAPI() async {
+    setState(() {
+      _greetingData = null;
+      _isDataLoaded = false;
+      _launchBloc.add(const LaunchRequested());
+    });
+  }
+
   @override
   void dispose() {
     if (widget.isFromHistory == false) {
@@ -908,6 +916,7 @@ class _ChatScreenState extends State<ChatScreen> {
       onScrollToBottom: _scrollToBottom,
       onLoadChatbotData: () {},
       onRestartChatAPI: _restartChatAPI,
+      onRestartGreetingAPI: _restartGreetingAPI,
       onUpdateSelectedOptions: (Set<String> newSet) {
         setState(() {
           _selectedOptionMessages = newSet;

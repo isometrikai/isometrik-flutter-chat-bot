@@ -118,7 +118,9 @@ class ChatBot {
         context,
         PageRouteBuilder(
           pageBuilder: (context, animation, secondaryAnimation) =>
-              const CompleteSetupFlowScreen(),
+              CompleteSetupFlowScreen(onCallback: (data) {
+                print('Data from Complete Setup Flow Screen: $data');
+              }),
         ),
       );
     } else {

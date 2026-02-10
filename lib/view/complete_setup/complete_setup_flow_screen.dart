@@ -10,7 +10,9 @@ import 'package:chat_bot/view/complete_setup/setup_complete_screen.dart';
 /// Single-screen Complete Setup flow (like TutorialScreen).
 /// Manages all 10 steps in one route via PageView; header and footer are shared.
 class CompleteSetupFlowScreen extends StatefulWidget {
-  const CompleteSetupFlowScreen({super.key});
+  final Function(String) onCallback;
+  const CompleteSetupFlowScreen({super.key, required this.onCallback});
+  
 
   @override
   State<CompleteSetupFlowScreen> createState() =>
@@ -82,7 +84,7 @@ class _CompleteSetupFlowScreenState extends State<CompleteSetupFlowScreen> {
           if (state.isSubmitSuccess) {
             Navigator.of(context).pushReplacement(
               MaterialPageRoute(
-                builder: (context) => const SetupCompleteScreen(),
+                builder: (context) =>  SetupCompleteScreen(onCallback: widget.onCallback),
               ),
             );
           }

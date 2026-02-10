@@ -626,6 +626,41 @@ class _Step02ImportantPeoplePageState extends State<_Step02ImportantPeoplePage> 
     );
   }
 
+  void _editMember(int index) {
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => _AddMemberSheet(
+        initialMember: _members[index],
+        onSave: (m) {
+          setState(() => _members[index] = m);
+          _syncToBloc();
+          Navigator.of(ctx).pop();
+        },
+        onCancel: () => Navigator.of(ctx).pop(),
+      ),
+    );
+  }
+
+  Future<void> _deleteMember(int index) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Delete member'),
+        content: Text('Remove ${_members[index].name} from important people?'),
+        actions: [
+          TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: const Text('Cancel')),
+          TextButton(onPressed: () => Navigator.of(ctx).pop(true), child: const Text('Delete', style: TextStyle(color: Colors.red))),
+        ],
+      ),
+    );
+    if (confirm == true && mounted) {
+      setState(() => _members.removeAt(index));
+      _syncToBloc();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
@@ -662,14 +697,37 @@ class _Step02ImportantPeoplePageState extends State<_Step02ImportantPeoplePage> 
                     ),
                     const SizedBox(height: 7),
                     Text(m.name, style: AppTextStyles.body(fontSize: 16, fontWeight: FontWeight.w400, height: 1.2, color: _kTextDark)),
-                    if (m.birthday != null) ...[
+                    if (m.birthday != null && m.anniversary != null) ...[
                       const SizedBox(height: 4),
-                      Text('${m.relationship == 'FATHER' ? 'DOB' : 'Birthday'} : ${_fmtDate(m.birthday!)}', style: AppTextStyles.body(fontSize: 12, fontWeight: FontWeight.w400, color: _kTextMuted)),
+                      Text('${'Birthday'} : ${_fmtDate(m.birthday!)}', style: AppTextStyles.body(fontSize: 12, fontWeight: FontWeight.w400, color: _kTextMuted)),
                     ],
-                    if (m.anniversary != null) ...[
-                      const SizedBox(height: 4),
-                      Text('Anniversary : ${_fmtDate(m.anniversary!)}', style: AppTextStyles.body(fontSize: 12, fontWeight: FontWeight.w400, color: _kTextMuted)),
-                    ],
+                    SizedBox(height: (m.birthday != null || m.anniversary != null) ? 4 : 0),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Expanded(
+                          child: 
+                          Text(
+                            m.anniversary != null
+                                ? 'Anniversary : ${_fmtDate(m.anniversary!)}'
+                                : m.birthday != null
+                                    ? '${m.relationship == 'FATHER' ? 'DOB' : 'Birthday'} : ${_fmtDate(m.birthday!)}'
+                                    : '',
+                            style: AppTextStyles.body(fontSize: 12, fontWeight: FontWeight.w400, color: _kTextMuted),
+                          ),
+                        ),
+                        IconButton(
+                          onPressed: () => _editMember(i),
+                          icon: const Icon(Icons.edit_outlined, size: 18, color: _kBlue),
+                          style: IconButton.styleFrom(padding: const EdgeInsets.all(6), minimumSize: Size.zero, tapTargetSize: MaterialTapTargetSize.shrinkWrap),
+                        ),
+                        IconButton(
+                          onPressed: () => _deleteMember(i),
+                          icon: const Icon(Icons.delete_outline, size: 18, color: Colors.red),
+                          style: IconButton.styleFrom(padding: const EdgeInsets.all(6), minimumSize: Size.zero, tapTargetSize: MaterialTapTargetSize.shrinkWrap),
+                        ),
+                      ],
+                    ),
                   ],
                 ),
               ),
@@ -729,8 +787,9 @@ class _Pill extends StatelessWidget {
 class _AddMemberSheet extends StatefulWidget {
   final void Function(_FamilyMemberData) onSave;
   final VoidCallback onCancel;
+  final _FamilyMemberData? initialMember;
 
-  const _AddMemberSheet({required this.onSave, required this.onCancel});
+  const _AddMemberSheet({required this.onSave, required this.onCancel, this.initialMember});
 
   @override
   State<_AddMemberSheet> createState() => _AddMemberSheetState();
@@ -742,6 +801,19 @@ class _AddMemberSheetState extends State<_AddMemberSheet> {
   String _gender = 'MALE';
   DateTime? _birthday, _anniversary;
   static const _relationships = ['SPOUSE', 'CHILD', 'FATHER', 'MOTHER', 'OTHER'];
+
+  @override
+  void initState() {
+    super.initState();
+    final e = widget.initialMember;
+    if (e != null) {
+      _nameController.text = e.name;
+      _relationship = e.relationship;
+      _gender = e.gender;
+      _birthday = e.birthday;
+      _anniversary = e.anniversary;
+    }
+  }
 
   @override
   void dispose() {
@@ -789,7 +861,7 @@ class _AddMemberSheetState extends State<_AddMemberSheet> {
             Row(
               children: [
                 Expanded(
-                  child: Text('Add member', style: AppTextStyles.heading(fontSize: 24, fontWeight: FontWeight.w700, height: 1.2, color: _kTextDark)),
+                  child: Text(widget.initialMember == null ? 'Add member' : 'Edit member', style: AppTextStyles.heading(fontSize: 24, fontWeight: FontWeight.w700, height: 1.2, color: _kTextDark)),
                 ),
                 GestureDetector(
                   onTap: widget.onCancel,
@@ -1335,24 +1407,28 @@ class _Step08BudgetDealsPage extends StatefulWidget {
 class _Step08BudgetDealsPageState extends State<_Step08BudgetDealsPage> {
   static const _deals = ['Very Important - Always looking for deals', 'Moderate - Nice to have', 'Low - Convenience first'];
   static const _dealsApi = ['very_important', 'moderate', 'low'];
-  static const _ranges = ['₹2,000 - ₹5,000', '₹5,000 - ₹10,000', '₹10,000 - ₹20,000', '₹20,000+'];
+  static List<String> _getRanges() {
+    final c = Utility.getCurrencyCode();
+    return ['$c 2,000 - $c 5,000', '$c 5,000 - $c 10,000', '$c 10,000 - $c 20,000', '$c 20,000+'];
+  }
   static const _rangeMin = [2000, 5000, 10000, 20000];
   static const _rangeMax = [5000, 10000, 20000, 50000];
   static const _causes = ['Education', 'Healthcare', 'Environment', 'Animals'];
   static const _causesApi = ['education', 'healthcare', 'environment', 'animals'];
   int _dealsIndex = 0;
-  String _range = _ranges[0];
+  late String _range;
   final Set<int> _selCauses = {0};
 
   void _restoreFromBloc() {
     final b = context.read<UserPreferenceBloc>().state.request.budgetAndDeals;
     if (b == null) return;
     final dealIdx = _dealsApi.indexOf(b.dealImportance);
-    String range = _ranges[0];
+    final ranges = _getRanges();
+    String range = ranges[0];
     if (b.monthlyBudgetRange != null) {
       for (int i = 0; i < _rangeMin.length; i++) {
         if (_rangeMin[i] == b.monthlyBudgetRange!.min && _rangeMax[i] == b.monthlyBudgetRange!.max) {
-          range = _ranges[i];
+          range = ranges[i];
           break;
         }
       }
@@ -1372,7 +1448,7 @@ class _Step08BudgetDealsPageState extends State<_Step08BudgetDealsPage> {
   }
 
   void _syncToBloc() {
-    final rangeIndex = _ranges.indexOf(_range).clamp(0, _rangeMin.length - 1);
+    final rangeIndex = _getRanges().indexOf(_range).clamp(0, _rangeMin.length - 1);
     context.read<UserPreferenceBloc>().add(UserPreferenceBudgetUpdated(
           UserPreferenceBudgetAndDeals(
             dealImportance: _dealsApi[_dealsIndex],
@@ -1385,6 +1461,7 @@ class _Step08BudgetDealsPageState extends State<_Step08BudgetDealsPage> {
   @override
   void initState() {
     super.initState();
+    _range = _getRanges()[0];
     WidgetsBinding.instance.addPostFrameCallback((_) => _restoreFromBloc());
   }
 
@@ -1421,7 +1498,7 @@ class _Step08BudgetDealsPageState extends State<_Step08BudgetDealsPage> {
                 value: _range,
                 isExpanded: true,
                 dropdownColor: Colors.white,
-                items: _ranges.map((s) => DropdownMenuItem(value: s, child: Text(s))).toList(),
+                items: _getRanges().map((s) => DropdownMenuItem(value: s, child: Text(s))).toList(),
                 onChanged: (v) { setState(() => _range = v ?? _range); _syncToBloc(); },
               ),
             ),
