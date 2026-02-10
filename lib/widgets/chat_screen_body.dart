@@ -1141,17 +1141,20 @@ class ChatScreenBody extends StatelessWidget {
                     ),
                   ),
                 ],
-                const SizedBox(height: 16),
-                _BirthdayReminderCard(
-                  onBookRestaurant: () {
-                    onSendMessage(
-                      'Book restaurant for Sarah\'s birthday',
-                    );
-                  },
-                  onBrowseGifts: () {
-                    onSendMessage('Browse gifts for Sarah\'s birthday');
-                  },
-                ),
+                if (greetingData?.reminders.isNotEmpty == true) ...[
+                  const SizedBox(height: 16),
+                  _BirthdayReminderCard(
+                    greetingReminder: greetingData?.reminders.first,
+                    onBookRestaurant: () {
+                      onSendMessage(
+                        greetingData?.reminders.first.buttons.first ?? '',
+                      );
+                    },
+                    onBrowseGifts: () {
+                      onSendMessage(greetingData?.reminders.first.buttons.last ?? '');
+                    },
+                  ),
+                ],
                 // const SizedBox(height: 16),
                 // // Weather information view
                 // Container(
@@ -3443,10 +3446,12 @@ class ChatScreenBody extends StatelessWidget {
 class _BirthdayReminderCard extends StatefulWidget {
   final VoidCallback? onBookRestaurant;
   final VoidCallback? onBrowseGifts;
+  final GreetingReminder? greetingReminder;
 
   const _BirthdayReminderCard({
     this.onBookRestaurant,
     this.onBrowseGifts,
+    this.greetingReminder,
   });
 
   @override
@@ -3497,8 +3502,8 @@ class _BirthdayReminderCardState extends State<_BirthdayReminderCard> {
                           borderRadius: BorderRadius.circular(8.125),
                         ),
                         alignment: Alignment.center,
-                        child: const Text(
-                          '🎂',
+                        child: Text(
+                          widget.greetingReminder?.emoji ?? '🎂',
                           style: TextStyle(fontSize: 22),
                         ),
                       ),
@@ -3517,25 +3522,20 @@ class _BirthdayReminderCardState extends State<_BirthdayReminderCard> {
                                 color: const Color(0xFFECC6FE),
                                 borderRadius: BorderRadius.circular(80),
                               ),
-                              child: const Text(
-                                'TOMORROW',
-                                style: TextStyle(
-                                  fontFamily: 'Inter',
+                              child: Text(
+                                '${widget.greetingReminder?.daysUntil}',
+                                style: AppTextStyles.bodyText.copyWith(
                                   fontSize: 10,
-                                  height: 1.4,
-                                  color: Color(0xFF414F85),
+                                  color: const Color(0xFF414F85),
                                 ),
                               ),
                             ),
                             const SizedBox(height: 2),
-                            const Text(
-                              "Sarah's Birthday Tomorrow!",
-                              style: TextStyle(
-                                fontFamily: 'Plus Jakarta Sans',
-                                fontWeight: FontWeight.w700,
+                             Text(
+                              "${widget.greetingReminder?.title}!",
+                              style: AppTextStyles.heading(
                                 fontSize: 14,
-                                height: 1.2,
-                                color: Color(0xFF2F3C70),
+                                color: const Color(0xFF2F3C70),
                               ),
                             ),
                           ],
@@ -3544,14 +3544,12 @@ class _BirthdayReminderCardState extends State<_BirthdayReminderCard> {
                     ],
                   ),
                   const SizedBox(height: 8),
-                  const Text(
-                    "Don't forget! Your wife's birthday is tomorrow. Need help with dinner reservations or gifts?",
-                    style: TextStyle(
-                      fontFamily: 'Plus Jakarta Sans',
-                      fontWeight: FontWeight.w400,
+                  Text(
+                    '${widget.greetingReminder?.subtitle}',
+                    style: AppTextStyles.bodyText.copyWith(
                       fontSize: 12,
-                      height: 1.4,
-                      color: Color(0xFF2F3C70),
+                      color: const Color(0xFF2F3C70),
+                      fontWeight: FontWeight.w400,
                     ),
                   ),
                   const SizedBox(height: 10),
@@ -3571,14 +3569,12 @@ class _BirthdayReminderCardState extends State<_BirthdayReminderCard> {
                               color: Colors.white,
                               borderRadius: BorderRadius.circular(8),
                             ),
-                            child: const Text(
-                              'Book Restaurant',
-                              style: TextStyle(
-                                fontFamily: 'Inter',
-                                fontWeight: FontWeight.w600,
+                            child: Text(
+                              widget.greetingReminder?.buttons.first ?? 'Book Restaurant',
+                              style: AppTextStyles.bodyText.copyWith(
                                 fontSize: 14,
-                                height: 1.2,
-                                color: Color(0xFF007AFF),
+                                fontWeight: FontWeight.w600,
+                                color: const Color(0xFF007AFF),
                               ),
                             ),
                           ),
@@ -3599,14 +3595,12 @@ class _BirthdayReminderCardState extends State<_BirthdayReminderCard> {
                               color: Colors.white,
                               borderRadius: BorderRadius.circular(8),
                             ),
-                            child: const Text(
-                              'Browse Gifts',
-                              style: TextStyle(
-                                fontFamily: 'Inter',
-                                fontWeight: FontWeight.w600,
+                            child: Text(
+                              widget.greetingReminder?.buttons.last ?? 'Browse Gifts',
+                              style: AppTextStyles.bodyText.copyWith(
                                 fontSize: 14,
-                                height: 1.2,
-                                color: Color(0xFF007AFF),
+                                fontWeight: FontWeight.w600,
+                                color: const Color(0xFF007AFF),
                               ),
                             ),
                           ),
@@ -3617,31 +3611,31 @@ class _BirthdayReminderCardState extends State<_BirthdayReminderCard> {
                 ],
               ),
             ),
-            Positioned(
-              top: 15,
-              right: 15,
-              child: Material(
-                color: Colors.transparent,
-                child: InkWell(
-                  onTap: () => setState(() => _visible = false),
-                  borderRadius: BorderRadius.circular(32),
-                  child: Container(
-                    width: 20,
-                    height: 20,
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.66),
-                      borderRadius: BorderRadius.circular(32),
-                    ),
-                    alignment: Alignment.center,
-                    child: Icon(
-                      Icons.close,
-                      size: 14,
-                      color: const Color(0xFF242424),
-                    ),
-                  ),
-                ),
-              ),
-            ),
+            // Positioned(
+            //   top: 15,
+            //   right: 15,
+            //   child: Material(
+            //     color: Colors.transparent,
+            //     child: InkWell(
+            //       onTap: () => setState(() => _visible = false),
+            //       borderRadius: BorderRadius.circular(32),
+            //       child: Container(
+            //         width: 20,
+            //         height: 20,
+            //         decoration: BoxDecoration(
+            //           color: Colors.white.withOpacity(0.66),
+            //           borderRadius: BorderRadius.circular(32),
+            //         ),
+            //         alignment: Alignment.center,
+            //         child: Icon(
+            //           Icons.close,
+            //           size: 14,
+            //           color: const Color(0xFF242424),
+            //         ),
+            //       ),
+            //     ),
+            //   ),
+            // ),
           ],
         ),
       ),

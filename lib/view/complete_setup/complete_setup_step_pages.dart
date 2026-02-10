@@ -1048,7 +1048,7 @@ class _Step04ShoppingHabitsPageState extends State<_Step04ShoppingHabitsPage> {
             child: _SetupRadio<int>(label: _freq[i], value: i, groupValue: _freqIndex, onChanged: (v) { setState(() => _freqIndex = v!); _syncToBloc(); }),
           )),
           const SizedBox(height: 24),
-          Text('Shopping categories', style: AppTextStyles.body(fontSize: 14, fontWeight: FontWeight.w500, height: 1.2, color: _kSectionLabel)),
+          Text('Shopping Interests', style: AppTextStyles.body(fontSize: 14, fontWeight: FontWeight.w500, height: 1.2, color: _kSectionLabel)),
           const SizedBox(height: 14),
           Wrap(spacing: 8, runSpacing: 8, children: List.generate(_cats.length, (i) => _SetupChip(label: _cats[i], selected: _sel.contains(i), onTap: () { setState(() { if (_sel.contains(i)) _sel.remove(i); else _sel.add(i); }); _syncToBloc(); }))),
         ],

@@ -174,7 +174,7 @@ class _CartScreenState extends State<CartScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
       decoration: BoxDecoration(
-        color: isSelected ? const Color(0xFFFDFAFF) : Colors.white,
+        // color: isSelected ? const Color(0xFFFDFAFF) : Colors.white,
         border: Border.all(
           color: isSelected ? AppConstants.appThemeColor : const Color(0xFFD8DEF3),
         ),
