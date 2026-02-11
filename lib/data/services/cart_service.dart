@@ -119,20 +119,15 @@ class CartService {
   /// Fetch raw universal cart data
   Future<ApiResult> fetchRawUniversalCart() async {
     try {
-      print("CART FETCH REQUESTED 10");
       final result = await _client.get('/v1/universalCart');
-      print("CART FETCH REQUESTED 11: $result");
 
       if (result.isSuccess) {
-        print("CART FETCH REQUESTED 12");
         final universalCartResponse = UniversalCartResponse.fromJson(result.data);
         return ApiResult.success(universalCartResponse);
       } else {
-        print("CART FETCH REQUESTED 13");
         return ApiResult.error(result.message ?? 'Failed to fetch cart');
       }
     } catch (e) {
-      print("CART FETCH REQUESTED 14: $e");
       return ApiResult.error(e.toString());
     }
   }

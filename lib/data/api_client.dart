@@ -25,15 +25,12 @@ class ApiClient {
     Map<String, String>? queryParameters,
   }) =>
       _requestWithRetry(() async {
-        print("CART FETCH REQUESTED 15");
         final uri = Uri.parse('$baseUrl$endpoint').replace(
           queryParameters: queryParameters,
         );
-        print("CART FETCH REQUESTED 16: $uri");
         final headers = await buildHeaders();
         _logRequest('GET', uri.toString(), headers);
         // Print curl for every request
-        print("CART FETCH REQUESTED 19 : $uri");
         AppLog.curl('GET', uri.toString(), headers);
         final response = await http.get(uri, headers: headers).timeout(timeout);
         _logResponse('GET', uri.toString(), response.statusCode, response.body);

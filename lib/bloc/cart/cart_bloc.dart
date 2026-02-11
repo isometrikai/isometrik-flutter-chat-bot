@@ -31,19 +31,16 @@ class CartBloc extends Bloc<CartEvent, CartState> {
     CartFetchRequested event,
     Emitter<CartState> emit,
   ) async {
-    print("CART FETCH REQUESTED 1");
     if (event.needToShowLoader) {
       Utility.showLoader();
     }
     try {
-      print("CART FETCH REQUESTED 3");
       // Fetch raw cart data once and use it for both purposes
       final rawResult = await repository.fetchRawUniversalCart();
        if (event.needToShowLoader) {
         Utility.closeProgressDialog();
       }
       if (rawResult.isSuccess) {
-        print("CART FETCH REQUESTED 4");
         final rawCartData = rawResult.data as UniversalCartResponse;
           cartId = rawCartData.data.first.id;
           print('cartId: $cartId');
@@ -55,7 +52,6 @@ class CartBloc extends Bloc<CartEvent, CartState> {
         String? storeType;
         
         if (rawCartData.data.isNotEmpty) {
-          print("CART FETCH REQUESTED 6");
           cartData = rawCartData.data;
           globalCartData = rawCartData.data;
           final cart = rawCartData.data.first;
@@ -75,17 +71,14 @@ class CartBloc extends Bloc<CartEvent, CartState> {
           }
           print('CartBloc: Calculated totalProductCount: $totalProductCount');
         }else {
-          print("CART FETCH REQUESTED 7");
           cartData.clear();
           globalCartData.clear();
           totalProductCount = 0;
         }
         
         if (widgetActions.isEmpty) {
-          print("CART FETCH REQUESTED 8");
           emit(CartEmpty());
         } else {
-          print("CART FETCH REQUESTED 9");
           emit(CartLoaded(
             cartItems: widgetActions,
             rawCartData: rawCartData,
@@ -94,7 +87,6 @@ class CartBloc extends Bloc<CartEvent, CartState> {
           ));
         }
       } else {
-        print("CART FETCH REQUESTED 5");
         cartData.clear();
         globalCartData.clear();
         totalProductCount = 0;
@@ -102,7 +94,6 @@ class CartBloc extends Bloc<CartEvent, CartState> {
         // emit(CartError(message: rawResult.message ?? 'Failed to fetch cart'));
       }
     } catch (e) {
-      print("CART FETCH REQUESTED 2: $e");
       cartData.clear();
       globalCartData.clear();
       totalProductCount = 0;
