@@ -632,7 +632,7 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
           const SizedBox(height: 16),
         ],
         SizedBox(
-          height: 222,
+          height: 222 + 18,
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
             itemCount: filtered.length,
