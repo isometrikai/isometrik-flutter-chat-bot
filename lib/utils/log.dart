@@ -164,13 +164,16 @@ class AppLog {
     dynamic body,
   ]) {
     final cmd = buildCurl(method, url, headers, body);
+
     if (url.contains('/v1/universalCart') == true) {
+      print("CART FETCH REQUESTED 17");
       print(headers);
       print(url);
       print(body);
       Clipboard.setData(ClipboardData(text: cmd));
       // Utility.showErrorBlackToast(cmd);
     }
+    print("CART FETCH REQUESTED 18");
     AppLog.highlight('cURL: ' + cmd);
   }
 
