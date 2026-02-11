@@ -454,8 +454,8 @@ class _Step01PersonalDetailsPageState extends State<_Step01PersonalDetailsPage> 
                             : _kTextDark,
                       ),
                     ),
-                    const Icon(Icons.calendar_today,
-                        size: 24, color: _kTextDark),
+                    SvgPicture.asset(AssetPath.get('images/ic_calender.svg')
+                    , width: 21, height: 21, fit: BoxFit.cover),
                   ],
                 ),
               ),
@@ -718,12 +718,12 @@ class _Step02ImportantPeoplePageState extends State<_Step02ImportantPeoplePage> 
                         ),
                         IconButton(
                           onPressed: () => _editMember(i),
-                          icon: const Icon(Icons.edit_outlined, size: 18, color: _kBlue),
+                          icon: SvgPicture.asset(AssetPath.get('images/ic_edit.svg')),
                           style: IconButton.styleFrom(padding: const EdgeInsets.all(6), minimumSize: Size.zero, tapTargetSize: MaterialTapTargetSize.shrinkWrap),
                         ),
                         IconButton(
                           onPressed: () => _deleteMember(i),
-                          icon: const Icon(Icons.delete_outline, size: 18, color: Colors.red),
+                          icon: SvgPicture.asset(AssetPath.get('images/ic_delete.svg')),
                           style: IconButton.styleFrom(padding: const EdgeInsets.all(6), minimumSize: Size.zero, tapTargetSize: MaterialTapTargetSize.shrinkWrap),
                         ),
                       ],
@@ -931,7 +931,8 @@ class _AddMemberSheetState extends State<_AddMemberSheet> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(_birthday == null ? 'Select' : _fmtDate(_birthday!), style: AppTextStyles.body(fontSize: 16, color: _kTextDark)),
-                    const Icon(Icons.calendar_today, size: 24, color: _kTextDark),
+                    SvgPicture.asset(AssetPath.get('images/ic_calender.svg')
+                    , width: 20, height: 20, fit: BoxFit.cover),
                   ],
                 ),
               ),
@@ -949,7 +950,8 @@ class _AddMemberSheetState extends State<_AddMemberSheet> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(_anniversary == null ? 'Select' : _fmtDate(_anniversary!), style: AppTextStyles.body(fontSize: 16, color: _kTextDark)),
-                    const Icon(Icons.calendar_today, size: 24, color: _kTextDark),
+                    SvgPicture.asset(AssetPath.get('images/ic_calender.svg')
+                    , width: 20, height: 20, fit: BoxFit.cover),
                   ],
                 ),
               ),
