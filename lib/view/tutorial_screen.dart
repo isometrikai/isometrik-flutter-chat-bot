@@ -382,18 +382,20 @@ class _TutorialScreenState extends State<TutorialScreen> {
           emoji: '💊',
           iconPath: 'ic_pharmacy.svg',
         ),
-        // const SizedBox(height: 16),
-        // _buildServiceCard(
-        //   title: 'Shopping',
-        //   description: 'Browse products & deals',
-        //   emoji: '🛍️',
-        // ),
-        // const SizedBox(height: 16),
-        // _buildServiceCard(
-        //   title: 'Services',
-        //   description: 'Book appointments & more',
-        //   emoji: '🔧',
-        // ),
+        const SizedBox(height: 16),
+        _buildServiceCard(
+          title: 'Shopping',
+          description: 'Browse products & deals',
+          emoji: '🛍️',
+          iconPath: 'ic_shopping_s.svg',
+        ),
+        const SizedBox(height: 16),
+        _buildServiceCard(
+          title: 'Services',
+          description: 'Book appointments & more',
+          emoji: '🔧',
+          iconPath: 'ic_services.svg',
+        ),
       ],
     );
   }
@@ -427,9 +429,9 @@ class _TutorialScreenState extends State<TutorialScreen> {
               child: iconPath != null
                   ? SvgPicture.asset(
                       AssetPath.get('images/$iconPath'),
-                      width: 24,
-                      height: 24,
-                      fit: BoxFit.contain,
+                      // width: 24,
+                      // height: 24,
+                      fit: BoxFit.scaleDown,
                     )
                   : Text(
                       emoji ?? '',
