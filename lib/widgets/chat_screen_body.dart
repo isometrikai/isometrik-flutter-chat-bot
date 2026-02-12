@@ -735,7 +735,7 @@ class ChatScreenBody extends StatelessWidget {
               ),
               const SizedBox(height: 16),
                Text(
-                'Exit zAIn?',
+                'Leave AI Chat?',
                 style: AppTextStyles.bodyText.copyWith(
                   fontSize: 24,
                   fontWeight: FontWeight.w700,
