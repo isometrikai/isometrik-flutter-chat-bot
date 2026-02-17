@@ -239,6 +239,17 @@ class ProfileSettingScreen extends StatelessWidget {
                             Icon(Icons.card_giftcard_outlined, size: 14, color: _pointsPurple),
                             const SizedBox(width: 4),
                             Text(
+                          'Xtra',
+                          style: AppTheme.getTextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                            color: _pointsPurple,
+                          ),
+                        ),
+                          ],
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
                               'Earn while you spend',
                               style: AppTheme.getTextStyle(
                                 fontSize: 12,
@@ -246,47 +257,34 @@ class ProfileSettingScreen extends StatelessWidget {
                                 color: _sectionLabel,
                               ),
                             ),
-                          ],
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          '3452 pts',
-                          style: AppTheme.getTextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                            color: _pointsPurple,
-                          ),
-                        ),
                       ],
                     ),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        Text(
-                          'Eazy Wallet',
-                          style: AppTheme.getTextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                            color: _walletBarBg,
+                    Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        onTap: () {
+                          OrderService().triggerSideMenuOption({'action': 'eazy_Xtra'});
+                        },
+                        borderRadius: BorderRadius.circular(8),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                'D45,123',
+                                style: AppTheme.getTextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w700,
+                                  color: _pointsPurple,
+                                ),
+                              ),
+                              const SizedBox(width: 4),
+                              Icon(Icons.chevron_right, size: 20, color: _pointsPurple),
+                            ],
                           ),
                         ),
-                        const SizedBox(height: 2),
-                        Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              'D45,123',
-                              style: AppTheme.getTextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w400,
-                                color: _walletBarBg,
-                              ),
-                            ),
-                            // const SizedBox(width: 4),
-                            // Icon(Icons.chevron_right, size: 12, color: _walletBarBg),
-                          ],
-                        ),
-                      ],
+                      ),
                     ),
                   ],
                 ),
