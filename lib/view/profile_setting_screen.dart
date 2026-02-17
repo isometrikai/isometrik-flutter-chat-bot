@@ -1,4 +1,5 @@
 import 'package:chat_bot/data/model/greeting_response.dart';
+import 'package:chat_bot/services/callback_manage.dart';
 import 'package:chat_bot/utils/app_constants.dart';
 import 'package:chat_bot/view/chat_history_screen.dart';
 import 'package:chat_bot/view/complete_setup/complete_setup_flow_screen.dart';
@@ -94,7 +95,9 @@ class ProfileSettingScreen extends StatelessWidget {
                               fit: BoxFit.cover,
                             ),
                             label: 'Manage Addresses',
-                            onTap: () {},
+                            onTap: () {
+                              OrderService().triggerSideMenuOption({'action': 'manage_addresses'});
+                            },
                             isLast: true,
                           ),
                         ],

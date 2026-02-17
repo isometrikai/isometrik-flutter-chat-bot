@@ -8,6 +8,7 @@ class OrderService {
   Function()? onAddCardOpen;
   Function()? onAddressScreenOpen;
   Function(Map<String, dynamic>)? onStoreNow;
+  Function(Map<String, dynamic>)? onSideMenuOption;
   Function(Map<String, dynamic>)? onOrderDetails;
   Function(Map<String, dynamic>)? onOrderTracking;
   Function(Map<String, dynamic>)? onScheduledLaterScreenOpen;
@@ -31,6 +32,10 @@ class OrderService {
 
   void setStoreCallback(Function(Map<String, dynamic>) callback) {
     onStoreNow = callback;
+  }
+
+  void setSideMenuOptionCallback(Function(Map<String, dynamic>) callback) {
+    onSideMenuOption = callback;
   }
 
   void setAddCardOpenCallback(Function() callback) {
@@ -118,6 +123,10 @@ class OrderService {
     onStoreNow = callback;
   }
 
+  void setonSideMenuOptionCallback(Function(Map<String, dynamic>) callback) {
+    onSideMenuOption = callback;
+  }
+
   void triggerProductOrder(Map<String, dynamic> product) {
     onOrderNow?.call(product);
   }
@@ -155,6 +164,10 @@ class OrderService {
 
   void triggerStoreOrder(Map<String, dynamic> store) {
     onStoreNow?.call(store);
+  }
+
+  void triggerSideMenuOption(Map<String, dynamic> sideMenuOption) {
+    onSideMenuOption?.call(sideMenuOption);
   }
 
   void triggerOrderTracking(Map<String, dynamic> orderTracking) {
@@ -210,6 +223,7 @@ class OrderService {
     onOrderNow = null;
     onAddCardOpen = null;
     onStoreNow = null;
+    onSideMenuOption = null;
     onOrderDetails = null;
     onChatDismiss = null; // Clear dismiss callback
     onTutorialDismiss = null; // Clear tutorial dismiss callback
