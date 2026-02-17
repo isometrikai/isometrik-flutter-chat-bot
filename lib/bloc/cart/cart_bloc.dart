@@ -227,6 +227,7 @@ class CartBloc extends Bloc<CartEvent, CartState> {
         add(CartFetchRequested(needToShowLoader: event.needToShowLoaderForCartFetch));
       } else {
         add(CartFetchRequested(needToShowLoader: event.needToShowLoaderForCartFetch));
+        // Utility.showErrorBlackToast(result.message ?? 'Failed to add item to cart');// ISSUE IS BLACK TOAST NOT SHOWING
         emit(CartError(message: result.message ?? 'Failed to add item to cart'));
       }
     } catch (e) {
