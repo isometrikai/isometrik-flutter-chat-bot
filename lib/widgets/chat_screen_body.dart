@@ -342,33 +342,49 @@ class ChatScreenBody extends StatelessWidget {
       elevation: 1,
       leading: IconButton(
         icon: SvgPicture.asset(
-          AssetPath.get('images/ic_history.svg'),
+          AssetPath.get('images/ic_sideMeu.svg'),
           width: 40,
           height: 40,
           fit: BoxFit.cover,
         ),
         onPressed: () async {
-          // Navigator.push(
-          //   context,
-          //   MaterialPageRoute(
-          //     builder: (context) => const ChatHistoryScreen(),
-          //   ),
-          // );
-          print('ChatScreen: $totalCartCount');
-          final result = await Navigator.push(
+          Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => ChatHistoryScreen()),
+            MaterialPageRoute(
+              builder: (context) => ProfileSettingScreen(greetingData: greetingData),
+            ),
           );
-
-          if (result != null && result is Map) {
-            final action = result['action'];
-            
-            if (action == 'new_chat_selected') {
-              onRestartChatAPI();
-            }
-          }
         },
       ),
+      //  IconButton(
+      //   icon: SvgPicture.asset(
+      //     AssetPath.get('images/ic_history.svg'),
+      //     width: 40,
+      //     height: 40,
+      //     fit: BoxFit.cover,
+      //   ),
+      //   onPressed: () async {
+      //     Navigator.push(
+      //       context,
+      //       MaterialPageRoute(
+      //         builder: (context) => const ProfileSettingScreen(),
+      //       ),
+      //     );
+      //     // print('ChatScreen: $totalCartCount');
+      //     // final result = await Navigator.push(
+      //     //   context,
+      //     //   MaterialPageRoute(builder: (context) => ChatHistoryScreen()),
+      //     // );
+
+      //     // if (result != null && result is Map) {
+      //     //   final action = result['action'];
+            
+      //     //   if (action == 'new_chat_selected') {
+      //     //     onRestartChatAPI();
+      //     //   }
+      //     // }
+      //   },
+      // ),
       title: Row(
         children: [
           Container(

@@ -193,15 +193,15 @@ class _ChatHistoryContentState extends State<_ChatHistoryContent> {
       centerTitle: false, // Align title to the left
       titleSpacing: 16, // Add left padding for proper alignment
       actions: [
-         IconButton(
-          icon: SvgPicture.asset(
-            AssetPath.get('images/ic_chat_new.svg'),
-            width: 40,
-            height: 40,
-            fit: BoxFit.cover,
-          ),
-          onPressed: () => _showNewChatConfirmation(context),
-        ),
+        //  IconButton(
+        //   icon: SvgPicture.asset(
+        //     AssetPath.get('images/ic_chat_new.svg'),
+        //     width: 40,
+        //     height: 40,
+        //     fit: BoxFit.cover,
+        //   ),
+        //   onPressed: () => _showNewChatConfirmation(context),
+        // ),
         IconButton(
           icon: SvgPicture.asset(
             AssetPath.get('images/ic_close.svg'),
