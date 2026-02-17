@@ -85,7 +85,9 @@ class ProfileSettingScreen extends StatelessWidget {
                               fit: BoxFit.cover,
                             ),
                             label: 'Debit/Credit Card',
-                            onTap: () {},
+                            onTap: () {
+                              OrderService().triggerSideMenuOption({'action': 'debit_credit_card'});
+                            },
                           ),
                           _SettingItem(
                             icon: SvgPicture.asset(
@@ -114,7 +116,9 @@ class ProfileSettingScreen extends StatelessWidget {
                               fit: BoxFit.cover,
                             ),
                             label: 'Help center',
-                            onTap: () {},
+                            onTap: () {
+                              OrderService().triggerSideMenuOption({'action': 'help_center'});
+                            },
                           ),
                           _SettingItem(
                             icon: SvgPicture.asset(
@@ -124,7 +128,9 @@ class ProfileSettingScreen extends StatelessWidget {
                               fit: BoxFit.cover,
                             ),
                             label: 'Language',
-                            onTap: () {},
+                            onTap: () {
+                              OrderService().triggerSideMenuOption({'action': 'language'});
+                            },
                           ),
                           _SettingItem(
                             icon: SvgPicture.asset(
@@ -134,7 +140,9 @@ class ProfileSettingScreen extends StatelessWidget {
                               fit: BoxFit.cover,
                             ),
                             label: 'FAQs',
-                            onTap: () {},
+                            onTap: () {
+                              OrderService().triggerSideMenuOption({'action': 'faqs'});
+                            },
                             isLast: true,
                           ),
                         ],
@@ -151,7 +159,9 @@ class ProfileSettingScreen extends StatelessWidget {
                               fit: BoxFit.cover,
                             ),
                             label: 'Terms & Conditions',
-                            onTap: () {},
+                            onTap: () {
+                              OrderService().triggerSideMenuOption({'action': 'terms_and_conditions'});
+                            },
                           ),
                           _SettingItem(
                             icon: SvgPicture.asset(
@@ -161,7 +171,9 @@ class ProfileSettingScreen extends StatelessWidget {
                               fit: BoxFit.cover,
                             ),
                             label: 'Privacy Policy',
-                            onTap: () {},
+                            onTap: () {
+                              OrderService().triggerSideMenuOption({'action': 'privacy_policy'});
+                            },
                           ),
                           _SettingItem(
                             icon: SvgPicture.asset(
@@ -171,7 +183,9 @@ class ProfileSettingScreen extends StatelessWidget {
                               fit: BoxFit.cover,
                             ),
                             label: 'About Us',
-                            onTap: () {},
+                            onTap: () {
+                              OrderService().triggerSideMenuOption({'action': 'about_us'});
+                            },
                             isLast: true,
                           ),
                         ],
@@ -494,7 +508,9 @@ class ProfileSettingScreen extends StatelessWidget {
                     height: 30,
                   ),
                   label: 'My Orders',
-                  onTap: () {},
+                  onTap: () {
+                    OrderService().triggerSideMenuOption({'action': 'my_orders'});
+                  },
                 ),
               ),
               const SizedBox(width: 13),
@@ -506,7 +522,9 @@ class ProfileSettingScreen extends StatelessWidget {
                     height: 30,
                   ),
                   label: 'My Profile',
-                  onTap: () {},
+                  onTap: () {
+                    OrderService().triggerSideMenuOption({'action': 'my_profile'});
+                  },
                 ),
               ),
             ],
@@ -579,7 +597,8 @@ class ProfileSettingScreen extends StatelessWidget {
     return InkWell(
       onTap: () {
         // TODO: trigger logout
-        Navigator.of(context).maybePop();
+        OrderService().triggerSideMenuOption({'action': 'logout'});
+        // Navigator.of(context).maybePop();
       },
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 10),
