@@ -282,8 +282,8 @@ class ProfileSettingScreen extends StatelessWidget {
                                 color: _walletBarBg,
                               ),
                             ),
-                            const SizedBox(width: 4),
-                            Icon(Icons.chevron_right, size: 12, color: _walletBarBg),
+                            // const SizedBox(width: 4),
+                            // Icon(Icons.chevron_right, size: 12, color: _walletBarBg),
                           ],
                         ),
                       ],
@@ -293,44 +293,50 @@ class ProfileSettingScreen extends StatelessWidget {
               ],
             ),
           ),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 12),
-            decoration: BoxDecoration(
-              color: _walletBarBg,
+          Material(
+            color: _walletBarBg,
+            borderRadius: const BorderRadius.vertical(bottom: Radius.circular(16)),
+            child: InkWell(
               borderRadius: const BorderRadius.vertical(bottom: Radius.circular(16)),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Row(
+              onTap: () {
+                OrderService().triggerSideMenuOption({'action': 'eazy_wallet'});
+              },
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 12),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Icon(Icons.account_balance_wallet_outlined, size: 20, color: Colors.white),
-                    const SizedBox(width: 8),
-                    Text(
-                      'Eazy Wallet',
-                      style: AppTheme.getTextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.white,
-                      ),
+                    Row(
+                      children: [
+                        Icon(Icons.account_balance_wallet_outlined, size: 20, color: Colors.white),
+                        const SizedBox(width: 8),
+                        Text(
+                          'Eazy Wallet',
+                          style: AppTheme.getTextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ],
+                    ),
+                    Row(
+                      children: [
+                        Text(
+                          'D45,123',
+                          style: AppTheme.getTextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w400,
+                            color: Colors.white,
+                          ),
+                        ),
+                        const SizedBox(width: 4),
+                        Icon(Icons.chevron_right, size: 12, color: Colors.white),
+                      ],
                     ),
                   ],
                 ),
-                Row(
-                  children: [
-                    Text(
-                      'D45,123',
-                      style: AppTheme.getTextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w400,
-                        color: Colors.white,
-                      ),
-                    ),
-                    const SizedBox(width: 4),
-                    Icon(Icons.chevron_right, size: 12, color: Colors.white),
-                  ],
-                ),
-              ],
+              ),
             ),
           ),
         ],
