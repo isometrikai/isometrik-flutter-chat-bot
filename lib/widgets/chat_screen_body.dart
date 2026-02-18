@@ -348,12 +348,20 @@ class ChatScreenBody extends StatelessWidget {
           fit: BoxFit.cover,
         ),
         onPressed: () async {
-          Navigator.push(
+         final result = await Navigator.push(
             context,
             MaterialPageRoute(
               builder: (context) => ProfileSettingScreen(greetingData: greetingData),
             ),
           );
+
+                if (result != null && result is Map) {
+            final action = result['action'];
+            
+            if (action == 'new_chat_selected') {
+              onRestartChatAPI();
+            }
+          }
         },
       ),
       //  IconButton(
@@ -431,31 +439,31 @@ class ChatScreenBody extends StatelessWidget {
                                 : () => showNewChatConfirmation(context),
                       ),
                     ],
-                    if (greetingData?.personaTitle.isNotEmpty ?? false) ...[
-                      IconButton(
-                        icon: SvgPicture.asset(
-                        AssetPath.get('images/ic_chat_profile.svg'),
-                        width: 40,
-                        height: 40,
-                      ),
-                        onPressed: () {
-                          // OrderService().triggerPrescriptionScreenOpen({});
-                          Navigator.push(
-                            context,
-                            PageRouteBuilder(
-                              opaque: false,
-                              pageBuilder: (context, animation, secondaryAnimation) => PopupOverlayScreen(greetingData: greetingData),
-                              transitionsBuilder: (context, animation, secondaryAnimation, child) {
-                                return FadeTransition(
-                                  opacity: animation,
-                                  child: child,
-                                );
-                              },
-                            ),
-                          );
-                        },
-                      ),
-                    ],
+                    // if (greetingData?.personaTitle.isNotEmpty ?? false) ...[
+                    //   IconButton(
+                    //     icon: SvgPicture.asset(
+                    //     AssetPath.get('images/ic_chat_profile.svg'),
+                    //     width: 40,
+                    //     height: 40,
+                    //   ),
+                    //     onPressed: () {
+                    //       // OrderService().triggerPrescriptionScreenOpen({});
+                    //       Navigator.push(
+                    //         context,
+                    //         PageRouteBuilder(
+                    //           opaque: false,
+                    //           pageBuilder: (context, animation, secondaryAnimation) => PopupOverlayScreen(greetingData: greetingData),
+                    //           transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                    //             return FadeTransition(
+                    //               opacity: animation,
+                    //               child: child,
+                    //             );
+                    //           },
+                    //         ),
+                    //       );
+                    //     },
+                    //   ),
+                    // ],
                     IconButton(
                         icon: Opacity(
                           opacity: 1.0,

@@ -393,67 +393,44 @@ class ProfileSettingScreen extends StatelessWidget {
         ],
       ),
       actions: [
-      // IconButton(
-      //                   icon: Opacity(
-      //                     opacity: 1.0,
-      //                     child: Stack(
-      //                       children: [
-      //                         SvgPicture.asset(
-      //                           AssetPath.get('images/ic_cart.svg'),
-      //                           width: 40,
-      //                           height: 40,
-      //                         ),
-      //                         if (cartCount > 0)
-      //                           Positioned(
-      //                             right: 0,
-      //                             top: 0,
-      //                             child: Container(
-      //                               padding: const EdgeInsets.symmetric(
-      //                                 horizontal: 4,
-      //                                 vertical: 2,
-      //                               ),
-      //                               decoration: BoxDecoration(
-      //                                 color: AppConstants.appThemeColor,
-      //                                 // Purple color
-      //                                 borderRadius: BorderRadius.circular(10),
-      //                               ),
-      //                               constraints: const BoxConstraints(
-      //                                 minWidth: 20,
-      //                                 minHeight: 20,
-      //                               ),
-      //                               child: Text(
-      //                                 (ccartCount)
-      //                                     .toString(),
-      //                                 style: const TextStyle(
-      //                                   color: Colors.white,
-      //                                   fontSize: 12,
-      //                                   fontWeight: FontWeight.bold,
-      //                                 ),
-      //                                 textAlign: TextAlign.center,
-      //                               ),
-      //                             ),
-      //                           ),
-      //                       ],
-      //                     ),
-      //                   ),
-      //                   onPressed:() {
-      //                     //  Navigator.push(
-      //                     //           context,
-      //                     //           MaterialPageRoute(
-      //                     //             builder:
-      //                     //                 (context) => BlocProvider(
-      //                     //                   create: (context) => CartBloc(),
-      //                     //                   child: CartScreen(
-      //                     //                     needToEndThisChat: needToEndThisChat,
-      //                     //                     onCheckout: (message, storeCategoryId) {
-      //                     //                       onSendMessage(message, null, null, storeCategoryId);
-      //                     //                     },
-      //                     //                   ),
-      //                     //                 ),
-      //                     //           ),
-      //                     //         );
-      //                   },
-      //                 )
+        Padding(
+          padding: const EdgeInsets.only(right: 16),
+          child: Center(
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: () {
+                  // TODO: Add action (e.g. save, done)
+                  // Navigator.pop(context);
+                  Navigator.pop(context, {
+                             'action': 'new_chat_selected',
+                            //  'cartCount': widget.cartCount ?? 0,
+                           });
+                },
+                borderRadius: BorderRadius.circular(8),
+                child: Container(
+                  width: 93,
+                  height: 34,
+                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF2E8AFF),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Center(
+                    child: Text(
+                      'New Chat',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
       ],
       
       bottom: PreferredSize(
