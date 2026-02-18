@@ -9,6 +9,7 @@ class Utility {
   static String currencySymbol = '';
   static String currencyCode = '';
   static String platform = '';
+  static String name = '';
 
   static void showLoader({
     String? message,
@@ -125,6 +126,14 @@ class Utility {
 
   static void setPlatform(String platform) {
     Utility.platform = platform;
+  }
+
+  static void setName(String name) {
+    Utility.name = name;
+  }
+
+  static String getName() {
+    return name;
   }
 
   static String getCurrencySymbol() {

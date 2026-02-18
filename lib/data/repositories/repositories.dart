@@ -9,4 +9,5 @@ export 'restaurant_repository.dart';
 export 'store_details_repository.dart';
 export 'availability_slots_repository.dart';
 export 'user_preference_repository.dart';
+export 'wallet_repository.dart';
 

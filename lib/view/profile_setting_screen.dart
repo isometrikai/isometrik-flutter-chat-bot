@@ -1,10 +1,14 @@
+import 'package:chat_bot/bloc/bloc.dart';
 import 'package:chat_bot/data/model/greeting_response.dart';
+import 'package:chat_bot/data/services/chat_api_services.dart';
 import 'package:chat_bot/services/callback_manage.dart';
 import 'package:chat_bot/utils/app_constants.dart';
+import 'package:chat_bot/utils/utility.dart';
 import 'package:chat_bot/view/chat_history_screen.dart';
 import 'package:chat_bot/view/complete_setup/complete_setup_flow_screen.dart';
 import 'package:chat_bot/view/popup_overlay_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '../utils/asset_path.dart';
 import '../utils/app_theme.dart';
@@ -29,10 +33,14 @@ class ProfileSettingScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: buildAppBar(context),
-      body: SafeArea(
+    final userId = ChatApiServices.instance.userId ?? '';
+    return BlocProvider(
+      create: (context) => WalletBloc()
+        ..add(WalletFetchRequested(userId: userId, userType: 'customer')),
+      child: Scaffold(
+        backgroundColor: Colors.white,
+        appBar: buildAppBar(context),
+        body: SafeArea(
         child: Container(
           width: double.infinity,
           // constraints: const BoxConstraints(maxWidth: 375),
@@ -120,18 +128,18 @@ class ProfileSettingScreen extends StatelessWidget {
                               OrderService().triggerSideMenuOption({'action': 'help_center'});
                             },
                           ),
-                          _SettingItem(
-                            icon: SvgPicture.asset(
-                              AssetPath.get('images/ic_S_language.svg'),
-                              width: 20,
-                              height: 20,
-                              fit: BoxFit.cover,
-                            ),
-                            label: 'Language',
-                            onTap: () {
-                              OrderService().triggerSideMenuOption({'action': 'language'});
-                            },
-                          ),
+                          // _SettingItem(
+                          //   icon: SvgPicture.asset(
+                          //     AssetPath.get('images/ic_S_language.svg'),
+                          //     width: 20,
+                          //     height: 20,
+                          //     fit: BoxFit.cover,
+                          //   ),
+                          //   label: 'Language',
+                          //   onTap: () {
+                          //     OrderService().triggerSideMenuOption({'action': 'language'});
+                          //   },
+                          // ),
                           _SettingItem(
                             icon: SvgPicture.asset(
                               AssetPath.get('images/ic_S_FAQ.svg'),
@@ -200,56 +208,68 @@ class ProfileSettingScreen extends StatelessWidget {
           ),
         ),
       ),
+    ),
     );
   }
 
   Widget _buildProfileCard() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 0),
-      child: Column(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(15),
-            decoration: BoxDecoration(
-              color: _cardBg,
-              border: Border.all(color: _topCardBorder),
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Abram Qureshi',
-                  style: AppTheme.getTextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w700,
-                    color: _primaryText,
-                  ),
+    return BlocBuilder<WalletBloc, WalletState>(
+      buildWhen: (prev, next) => prev != next,
+      builder: (context, state) {
+        final xtraBalance = state is WalletLoadSuccess
+            ? (state.availablePoints != null
+                ? state.availablePoints.toString()
+                : state.response.displayEarningBalance)
+            : (state is WalletLoadInProgress ? '---' : '---');
+        final walletBalance = state is WalletLoadSuccess
+            ? state.response.displayBalance
+            : (state is WalletLoadInProgress ? '---' : '—--');
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 0),
+          child: Column(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(15),
+                decoration: BoxDecoration(
+                  color: _cardBg,
+                  border: Border.all(color: _topCardBorder),
+                  borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
                 ),
-                const SizedBox(height: 10),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.end,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                    Text(
+                      Utility.getName(),
+                      style: AppTheme.getTextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w700,
+                        color: _primaryText,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
-                        Row(
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Icon(Icons.card_giftcard_outlined, size: 14, color: _pointsPurple),
-                            const SizedBox(width: 4),
+                            Row(
+                              children: [
+                                Icon(Icons.card_giftcard_outlined, size: 14, color: _pointsPurple),
+                                const SizedBox(width: 4),
+                                Text(
+                                  'Xtra',
+                                  style: AppTheme.getTextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w700,
+                                    color: _pointsPurple,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 4),
                             Text(
-                          'Xtra',
-                          style: AppTheme.getTextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w700,
-                            color: _pointsPurple,
-                          ),
-                        ),
-                          ],
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
                               'Earn while you spend',
                               style: AppTheme.getTextStyle(
                                 fontSize: 12,
@@ -257,88 +277,90 @@ class ProfileSettingScreen extends StatelessWidget {
                                 color: _sectionLabel,
                               ),
                             ),
-                      ],
-                    ),
-                    Material(
-                      color: Colors.transparent,
-                      child: InkWell(
-                        onTap: () {
-                          OrderService().triggerSideMenuOption({'action': 'eazy_Xtra'});
-                        },
-                        borderRadius: BorderRadius.circular(8),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(
-                                'D45,123',
-                                style: AppTheme.getTextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w700,
-                                  color: _pointsPurple,
-                                ),
+                          ],
+                        ),
+                        Material(
+                          color: Colors.transparent,
+                          child: InkWell(
+                            onTap: () {
+                              OrderService().triggerSideMenuOption({'action': 'eazy_Xtra'});
+                            },
+                            borderRadius: BorderRadius.circular(8),
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    xtraBalance == '0' ? '---' : xtraBalance,
+                                    style: AppTheme.getTextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w700,
+                                      color: _pointsPurple,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Icon(Icons.chevron_right, size: 20, color: _pointsPurple),
+                                ],
                               ),
-                              const SizedBox(width: 4),
-                              Icon(Icons.chevron_right, size: 20, color: _pointsPurple),
-                            ],
+                            ),
                           ),
                         ),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-          Material(
-            color: _walletBarBg,
-            borderRadius: const BorderRadius.vertical(bottom: Radius.circular(16)),
-            child: InkWell(
-              borderRadius: const BorderRadius.vertical(bottom: Radius.circular(16)),
-              onTap: () {
-                OrderService().triggerSideMenuOption({'action': 'eazy_wallet'});
-              },
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 12),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Row(
-                      children: [
-                        Icon(Icons.account_balance_wallet_outlined, size: 20, color: Colors.white),
-                        const SizedBox(width: 8),
-                        Text(
-                          'Eazy Wallet',
-                          style: AppTheme.getTextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ],
-                    ),
-                    Row(
-                      children: [
-                        Text(
-                          'D45,123',
-                          style: AppTheme.getTextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w400,
-                            color: Colors.white,
-                          ),
-                        ),
-                        const SizedBox(width: 4),
-                        Icon(Icons.chevron_right, size: 12, color: Colors.white),
                       ],
                     ),
                   ],
                 ),
               ),
-            ),
+              Material(
+                color: _walletBarBg,
+                borderRadius: const BorderRadius.vertical(bottom: Radius.circular(16)),
+                child: InkWell(
+                  borderRadius: const BorderRadius.vertical(bottom: Radius.circular(16)),
+                  onTap: () {
+                    OrderService().triggerSideMenuOption({'action': 'eazy_wallet'});
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 12),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(Icons.account_balance_wallet_outlined, size: 20, color: Colors.white),
+                            const SizedBox(width: 8),
+                            Text(
+                              'Eazy Wallet',
+                              style: AppTheme.getTextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ],
+                        ),
+                        Row(
+                          children: [
+                            Text(
+                              walletBalance,
+                              style: AppTheme.getTextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w400,
+                                color: Colors.white,
+                              ),
+                            ),
+                            const SizedBox(width: 4),
+                            Icon(Icons.chevron_right, size: 12, color: Colors.white),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 

@@ -104,6 +104,7 @@ class ApiService {
     Utility.setCurrencySymbol(currencysymbol);
     Utility.setCurrencyCode(currencycode);
     Utility.setPlatform(platform);
+    Utility.setName(name);
   }
 
   static String removeTrailingSlash(String url) {

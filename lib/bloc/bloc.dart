@@ -22,3 +22,6 @@ export 'store_details/store_details_state.dart';
 export 'user_preference/user_preference_bloc.dart';
 export 'user_preference/user_preference_event.dart';
 export 'user_preference/user_preference_state.dart';
+export 'wallet/wallet_bloc.dart';
+export 'wallet/wallet_event.dart';
+export 'wallet/wallet_state.dart';
