@@ -409,9 +409,9 @@ class ProfileSettingScreen extends StatelessWidget {
                 },
                 borderRadius: BorderRadius.circular(8),
                 child: Container(
-                  width: 93,
+                  width: 95,
                   height: 34,
-                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                  padding: const EdgeInsets.symmetric(horizontal: 3),
                   decoration: BoxDecoration(
                     color: const Color(0xFF2E8AFF),
                     borderRadius: BorderRadius.circular(8),
