@@ -127,11 +127,11 @@ class _CartScreenState extends State<CartScreen> {
         final categoryCounts = _calculateCategoryCounts(state);
         
         final categories = [
-          // {'name': '🍕 Restaurant', 'count': categoryCounts['restaurant']},
-          // {'name': '🥑 Grocery', 'count': categoryCounts['grocery']},
-          // {'name': '💊 Pharmacy', 'count': categoryCounts['pharmacy']},
-          // {'name': '🛒 Shopping', 'count': categoryCounts['shopping']},
-          // {'name': '💄 Services', 'count': categoryCounts['services']},
+          {'name': '🍕 Restaurant', 'count': categoryCounts['restaurant']},
+          {'name': '🥑 Grocery', 'count': categoryCounts['grocery']},
+          {'name': '💊 Pharmacy', 'count': categoryCounts['pharmacy']},
+          {'name': '🛒 Shopping', 'count': categoryCounts['shopping']},
+          {'name': '💄 Services', 'count': categoryCounts['services']},
         ];
 
         return Container(

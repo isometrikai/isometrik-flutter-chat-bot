@@ -338,20 +338,20 @@ class ProfileSettingScreen extends StatelessWidget {
                             ),
                           ],
                         ),
-                        // Row(
-                        //   children: [
-                        //     Text(
-                        //       walletBalance,
-                        //       style: AppTheme.getTextStyle(
-                        //         fontSize: 16,
-                        //         fontWeight: FontWeight.w400,
-                        //         color: Colors.white,
-                        //       ),
-                        //     ),
-                        //     const SizedBox(width: 4),
-                        //     Icon(Icons.chevron_right, size: 12, color: Colors.white),
-                        //   ],
-                        // ),
+                        Row(
+                          children: [
+                            Text(
+                              walletBalance,
+                              style: AppTheme.getTextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w400,
+                                color: Colors.white,
+                              ),
+                            ),
+                            const SizedBox(width: 4),
+                            Icon(Icons.chevron_right, size: 12, color: Colors.white),
+                          ],
+                        ),
                       ],
                     ),
                   ),
