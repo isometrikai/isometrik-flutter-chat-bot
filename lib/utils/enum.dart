@@ -47,7 +47,7 @@ enum FoodCategory {
   food(1),
   grocery(2),
   pharmacy(6),
-  services(25);
+  services(25);//healthCare and services are same
 
   const FoodCategory(this.value);
   
