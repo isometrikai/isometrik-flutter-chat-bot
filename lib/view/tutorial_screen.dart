@@ -215,7 +215,7 @@ class _TutorialScreenState extends State<TutorialScreen> {
     return Column(
       children: [
          Text(
-          'Welcome to your\nAI assistant!',
+          'Welcome to your\neazy assistant!',
           textAlign: TextAlign.center,
           style: AppTextStyles.restaurantTitle.copyWith(
             fontSize: 24,
@@ -1107,7 +1107,7 @@ class _TutorialScreenState extends State<TutorialScreen> {
     return Column(
       children: [
          Text(
-          'Why choose AI assistant?',
+          'Why choose eazy?',
           textAlign: TextAlign.center,
           style: AppTextStyles.restaurantTitle.copyWith(
             fontSize: 20,
