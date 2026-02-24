@@ -215,7 +215,7 @@ class _TutorialScreenState extends State<TutorialScreen> {
     return Column(
       children: [
          Text(
-          'Welcome to your\neazy assistant!',
+          'Welcome to your\nAI assistant!',
           textAlign: TextAlign.center,
           style: AppTextStyles.restaurantTitle.copyWith(
             fontSize: 24,
@@ -1242,7 +1242,7 @@ class _TutorialScreenState extends State<TutorialScreen> {
             
             // Logo
             SvgPicture.asset(
-              AssetPath.get('images/ic_LogoTutorial.svg'),
+              AssetPath.get('images/ic_mainImg_R.svg'),
               width: 120,
               height: 120,
             ),
@@ -1393,7 +1393,7 @@ class _TutorialScreenState extends State<TutorialScreen> {
 
   Widget _buildCentralImage() {
     return SvgPicture.asset(
-      AssetPath.get('images/ic_LogoTutorial.svg'),
+      AssetPath.get('images/ic_mainImg_R.svg'),
       fit: BoxFit.contain,
     );
   }

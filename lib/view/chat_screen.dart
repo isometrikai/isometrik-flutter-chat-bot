@@ -986,7 +986,7 @@ class _ChatScreenState extends State<ChatScreen> {
                     Align(
                       alignment: Alignment.center,
                       child: SvgPicture.asset(
-                        AssetPath.get('images/ic_LogoTutorial.svg'),
+                        AssetPath.get('images/ic_mainImg_R.svg'),
                         fit: BoxFit.contain,
                       ),
                     )
