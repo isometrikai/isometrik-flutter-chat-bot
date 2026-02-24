@@ -4,6 +4,7 @@ import 'package:chat_bot/bloc/chat_history/chat_history_state.dart';
 import 'package:chat_bot/bloc/cart/cart_bloc.dart';
 import 'package:chat_bot/bloc/chat_bloc.dart';
 import 'package:chat_bot/data/data.dart';
+import 'package:chat_bot/utils/app_constants.dart';
 import 'package:chat_bot/view/chat_screen.dart';
 import 'package:chat_bot/widgets/black_toast_view.dart';
 import 'package:flutter/material.dart';
@@ -53,7 +54,7 @@ class _ChatHistoryContentState extends State<_ChatHistoryContent> {
   String _currentKeyword = '';
   DateTime? _lastQueryAt;
 
-  // final List<String> _categories = ['All', 'Food', 'Grocery', 'Pharmacy'];
+  // final List<String> _categories = ['All', '🍕 Restaurant', '🥑 Grocery', '💊 Pharmacy'];
   final List<String> _categories = ['All', '🍕 Restaurant', '🥑 Grocery', '💊 Pharmacy', '🛒 Shopping', '💄 Services'];
 
   @override
@@ -192,15 +193,15 @@ class _ChatHistoryContentState extends State<_ChatHistoryContent> {
       centerTitle: false, // Align title to the left
       titleSpacing: 16, // Add left padding for proper alignment
       actions: [
-         IconButton(
-          icon: SvgPicture.asset(
-            AssetPath.get('images/ic_chat_new.svg'),
-            width: 40,
-            height: 40,
-            fit: BoxFit.cover,
-          ),
-          onPressed: () => _showNewChatConfirmation(context),
-        ),
+        //  IconButton(
+        //   icon: SvgPicture.asset(
+        //     AssetPath.get('images/ic_chat_new.svg'),
+        //     width: 40,
+        //     height: 40,
+        //     fit: BoxFit.cover,
+        //   ),
+        //   onPressed: () => _showNewChatConfirmation(context),
+        // ),
         IconButton(
           icon: SvgPicture.asset(
             AssetPath.get('images/ic_close.svg'),
@@ -265,7 +266,7 @@ class _ChatHistoryContentState extends State<_ChatHistoryContent> {
             width: 25,
             height: 25,
             child: CircularProgressIndicator(
-              color: Color(0xFF8E2FFD),
+              color: AppConstants.appThemeColor,
               // strokeWidth: 2.0,
             ),
           ),
@@ -377,9 +378,10 @@ class _ChatHistoryContentState extends State<_ChatHistoryContent> {
                     ),
                     padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 8),
                     decoration: BoxDecoration(
-                      color: isSelected ? const Color(0xFFF0DAFE) : Colors.white,
+                      // color: isSelected ? const Color(0xFFF0DAFE) : Colors.white,
+                      color: Colors.white,
                       border: Border.all(
-                        color: const Color(0xFFE9DFFB),
+                        color: isSelected ? AppConstants.appThemeColor : const Color(0xFFE9DFFB),
                         width: 1,
                       ),
                       borderRadius: BorderRadius.circular(10),
@@ -640,7 +642,7 @@ class _ChatHistoryContentState extends State<_ChatHistoryContent> {
                         },
                         style: OutlinedButton.styleFrom(
                           side: const BorderSide(
-                            color: Color(0xFF8E2FFD),
+                            color: AppConstants.appThemeColor,
                             width: 2,
                           ),
                           shape: RoundedRectangleBorder(
@@ -653,7 +655,7 @@ class _ChatHistoryContentState extends State<_ChatHistoryContent> {
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w700,
-                            color: Color(0xFF8E2FFD),
+                            color: AppConstants.appThemeColor,
                           ),
                         ),
                       ),
@@ -686,18 +688,7 @@ class _ChatHistoryContentState extends State<_ChatHistoryContent> {
                         ),
                         child: Ink(
                           decoration: BoxDecoration(
-                            gradient: const LinearGradient(
-                              colors: [
-                                Color(0xFF5186E0),
-                                Color(0xFF5E3DFE),
-                                Color(0xFF8E2FFD),
-                                Color(0xFFB02EFB),
-                                Color(0xFFD445EC),
-                              ],
-                              stops: [0.0, 0.24, 0.52, 0.73, 1.0],
-                              begin: Alignment.centerLeft,
-                              end: Alignment.centerRight,
-                            ),
+                            color: AppConstants.appThemeColor,
                             borderRadius: BorderRadius.circular(16),
                           ),
                           child: Container(
@@ -777,7 +768,7 @@ class _ChatHistoryContentState extends State<_ChatHistoryContent> {
                         },
                         style: OutlinedButton.styleFrom(
                           side: const BorderSide(
-                            color: Color(0xFF8E2FFD),
+                            color: AppConstants.appThemeColor,
                             width: 2,
                           ),
                           shape: RoundedRectangleBorder(
@@ -790,7 +781,7 @@ class _ChatHistoryContentState extends State<_ChatHistoryContent> {
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w700,
-                            color: Color(0xFF8E2FFD),
+                            color: AppConstants.appThemeColor,
                           ),
                         ),
                       ),
@@ -822,19 +813,7 @@ class _ChatHistoryContentState extends State<_ChatHistoryContent> {
                         ),
                         child: Ink(
                           decoration: BoxDecoration(
-                            gradient: const LinearGradient(
-                              colors: [
-                                Color(0xFF5186E0),
-                                Color(0xFF5E3DFE),
-                                Color(0xFF8E2FFD),
-                                Color(0xFFB02EFB),
-                                Color(0xFFD445EC),
-                              ],
-                              stops: [0.0, 0.24, 0.52, 0.73, 1.0],
-                              begin: Alignment.centerLeft,
-                              end: Alignment.centerRight,
-                            ),
-                            borderRadius: BorderRadius.circular(16),
+                            color: AppConstants.appThemeColor,
                           ),
                           child: Container(
                             height: 62,

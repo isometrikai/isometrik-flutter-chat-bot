@@ -2,7 +2,6 @@ import 'package:chat_bot/data/api_client.dart';
 import 'package:chat_bot/data/model/chat_response.dart';
 import 'package:chat_bot/data/model/chat_history_response.dart';
 import 'package:chat_bot/data/model/session_id_response.dart';
-import 'package:chat_bot/data/services/token_manager.dart';
 import 'package:chat_bot/data/services/universal_api_client.dart';
 import 'package:chat_bot/utils/log.dart';
 import 'package:chat_bot/utils/utility.dart';
@@ -26,6 +25,8 @@ class ChatApiServices {
   String? _visitId;
   String? _visitorId;
   String? _searchApiUrl;
+  String? _zoneId;
+  String? _timezone;
 
   late final ApiClient _chatClient = UniversalApiClient.instance.chatClient;
   late final ApiClient _appClient = UniversalApiClient.instance.appClient;
@@ -45,6 +46,8 @@ class ChatApiServices {
     required String visitId,
     required String visitorId,
     required String searchApiUrl,
+    required String zoneId,
+    required String timezone,
   }) {
     _chatBotId = chatBotId;
     _userId = userId;
@@ -58,6 +61,8 @@ class ChatApiServices {
     _visitId = visitId;
     _visitorId = visitorId;
     _searchApiUrl = searchApiUrl;
+    _zoneId = zoneId;
+    _timezone = timezone;
   }
 
   // /// Initialize the API service
@@ -67,6 +72,14 @@ class ChatApiServices {
 
   /// Get the configured userId
   String? get userId => _userId;
+  
+  /// Get the configured latitude
+  double? get latitude => _latitude;
+  
+  /// Get the configured longitude
+  double? get longitude => _longitude;
+
+  String? get timezone => _timezone;
 
   Future<ChatResponse?> sendChatMessage({
     required String message,
@@ -78,6 +91,8 @@ class ChatApiServices {
     double latitude = 0.0,
     String staffId = "",
     String serviceRequestedTime = "",
+    String storeCategoryId = "",
+    List<String> prescriptionImageUrls = const [],
   }) async {
     final body = {
       'user_id': _userId,
@@ -89,6 +104,7 @@ class ChatApiServices {
       'visit_id': _visitId ?? '',
       'visitor_id': _visitorId ?? '',
       'search_api_url': _searchApiUrl ?? '',
+      'zone_id': _zoneId ?? '',
       'location': {
         'latitude': (latitude == 0.0 ? (_latitude ?? 0.0) : latitude).toString(),
         'longitude': (longitude == 0.0 ? (_longitude ?? 0.0) : longitude).toString(),
@@ -100,6 +116,8 @@ class ChatApiServices {
       },
       'staff_id': staffId,
       'service_requested_time': serviceRequestedTime,
+      'store_category_id': storeCategoryId,
+      'prescription_image_urls': prescriptionImageUrls,
     };
 
     // Match existing endpoint used elsewhere

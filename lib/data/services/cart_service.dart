@@ -175,8 +175,7 @@ class CartService {
         }
       } else {
         print(result.data?['message']);
-        // Utility.showErrorBlackToast(result.data?['message'] ?? 'Failed to add item to cart');
-        return ApiResult.error(result.message ?? 'Failed to add item to cart');
+        return ApiResult.error(result.data?['message'] ?? 'Failed to add item to cart');
       }
     } catch (e) {
       return ApiResult.error(e.toString());

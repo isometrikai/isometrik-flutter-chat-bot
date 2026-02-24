@@ -86,6 +86,104 @@ class OrderSummaryWidget extends StatelessWidget {
               ),
               const SizedBox(height: 10),
               
+              if (storeInfo.storeCategoryId == FoodStoreCategoryId.services.value) ...[
+                // Service card with light purple background
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFBF1FF),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 5),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFE9DFFB),
+                          borderRadius: const BorderRadius.all(Radius.circular(8)),
+                        ),
+                        child: Text(
+                          storeInfo.serviceType ?? '',
+                          style: AppTextStyles.restaurantTitle.copyWith(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w400,
+                            color: AppConstants.appThemeColor,
+                          ),
+                        ),
+                      ),
+                      // Content section
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(10, 12, 10, 12),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // Store name with hammer emoji
+                            Row(
+                              children: [
+                                const Text('🔨 ', style: TextStyle(fontSize: 16)),
+                                Expanded(
+                                  child: Text(
+                                    storeInfo.storeName ?? '',
+                                    style: AppTextStyles.restaurantTitle.copyWith(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w400,
+                                      color: const Color(0xFF242424),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 10),
+                            // Address with house emoji
+                            if (storeInfo.address != null && storeInfo.address!.isNotEmpty) ...[
+                              Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text('🏠 ', style: TextStyle(fontSize: 16)),
+                                  Expanded(
+                                    child: Text(
+                                      storeInfo.address ?? '',
+                                      style: AppTextStyles.restaurantDescription.copyWith(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w400,
+                                        color: const Color(0xFF242424),
+                                      ),
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 10),
+                            ],
+                            // Service time with alarm clock emoji
+                            Row(
+                              children: [
+                                const Text('⏰ ', style: TextStyle(fontSize: 16)),
+                                Expanded(
+                                  child: Text(
+                                    storeInfo.isScheduled == true 
+                                        ? 'Scheduled for ${_formatServiceTime(storeInfo.serviceRequestedTime)}' 
+                                        : 'Book Now',
+                                    style: AppTextStyles.restaurantDescription.copyWith(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w400,
+                                      color: const Color(0xFF242424),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ] else ...[
               // Store information section with light purple background
               Container(
                 width: double.infinity,
@@ -154,9 +252,10 @@ class OrderSummaryWidget extends StatelessWidget {
                       ],
                     ),
                     ],  
-                  ],
+                    ],
+                  ),
                 ),
-              ),
+              ],
               const SizedBox(height: 12),
               
               // Itemized list
@@ -187,7 +286,7 @@ class OrderSummaryWidget extends StatelessWidget {
                             ),
                             const SizedBox(width: 8),
                             SizedBox(
-                              width: 80,
+                              width: 90,
                               child: Text(
                                 _formatCurrency(item.currencySymbol ?? 'د.إ', item.productPrice ?? 0),
                                 style: 
@@ -310,5 +409,36 @@ class OrderSummaryWidget extends StatelessWidget {
       return '$symbol${value.toString()}';
     }
     return 'د.إ${value.toStringAsFixed(value.truncateToDouble() == value ? 0 : 2)}';
+  }
+
+  String _formatServiceTime(String? isoDateString) {
+    if (isoDateString == null || isoDateString.isEmpty) {
+      return '';
+    }
+
+    try {
+      final dateTime = DateTime.parse(isoDateString);
+      
+      // Format: "Dec 25, 2023 at 10:20 AM"
+      final months = [
+        'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+        'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+      ];
+      
+      final month = months[dateTime.month - 1];
+      final day = dateTime.day;
+      final year = dateTime.year;
+      
+      final hour = dateTime.hour;
+      final minute = dateTime.minute;
+      final period = hour >= 12 ? 'PM' : 'AM';
+      final displayHour = hour > 12 ? hour - 12 : (hour == 0 ? 12 : hour);
+      final displayMinute = minute.toString().padLeft(2, '0');
+      
+      return '$month $day, $year at $displayHour:$displayMinute $period';
+    } catch (e) {
+      // If parsing fails, return the original string
+      return isoDateString;
+    }
   }
 }

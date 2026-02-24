@@ -22,7 +22,12 @@ class CartLoaded extends CartState {
 
 class CartEmpty extends CartState {}
 
-class CartProductAdded extends CartState {}
+class CartProductAdded extends CartState {
+  final String storeCategoryId;
+
+  CartProductAdded({required this.storeCategoryId});
+
+}
 
 class CartError extends CartState {
   final String message;

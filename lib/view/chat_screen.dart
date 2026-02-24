@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -33,7 +35,7 @@ class _ChatScreenState extends State<ChatScreen> {
   int _totalCartCount = 0; // Track total cart count
   List<ChatMessage> messages = [];
   bool _needToEndThisChat = false; // Track if chat should be ended
-
+  bool _gotStripePaymentCallback = false;
   late final CartBloc _cartBloc;
   final SpeechService _speechService = SpeechService();
   bool _isSpeechAvailable = false;
@@ -139,6 +141,38 @@ class _ChatScreenState extends State<ChatScreen> {
         _sendMessage('I have selected a staff member: ${staff['staffName']}', staff['scheduleLaterStaffId'], staff['serviceRequestedTime']);
       }
     });
+
+    OrderService().setPrescriptionCallback((Map<String, dynamic> prescription) {
+      if (mounted) {
+        print('ChatScreen: Prescription screen received');
+        print('ChatScreen: Prescription screen received - $prescription');
+        _apiData = {
+            ..._apiData,
+            // 'prescription_image_urls': (prescription['imagesurls'] as List?)?.join(',') ?? '',
+            'prescription_image_urls': prescription['imagesurls'] ?? '',
+          };
+        _sendMessage('I have uploaded the prescription. Please proceed with the order', null, null, null);
+      }
+    });
+
+    OrderService().setStripePlaceOrderCallback((Map<String, dynamic> stripePlaceOrder) {
+      if (mounted) {
+        print('ChatScreen: Stripe place order received - $stripePlaceOrder');
+        if (stripePlaceOrder['isPaymentSuccess'] == true) {
+          _needToEndThisChat = true;
+          _gotStripePaymentCallback = true;
+          BlackToastView.show(context, 'Payment completed successfully');
+           context.read<CartBloc>().add(
+              CartFetchRequested(needToShowLoader: false),
+            );
+        }else if (stripePlaceOrder['isPaymentFailed'] == true) {
+          _gotStripePaymentCallback = true;
+          // BlackToastView.show(context, stripePlaceOrder['message']);
+          _sendMessage(stripePlaceOrder['message'], null, null, null);
+        }
+        // _sendMessage('Order placed successfully', null, null, null);
+      }
+    });
   }
 
   /// Sets up post-initialization tasks (keyboard listener, cart fetch, speech service)
@@ -213,7 +247,7 @@ class _ChatScreenState extends State<ChatScreen> {
     }
   }
 
-  void _sendMessage(String text, [String? scheduleLaterStaffId, String? serviceRequestedTime]) {
+  void _sendMessage(String text, [String? scheduleLaterStaffId, String? serviceRequestedTime, String? storeCategoryId]) {
     if (text.trim().isEmpty) return;
 
     // Prepare: hide stores/products from the last bot message if present
@@ -232,10 +266,17 @@ class _ChatScreenState extends State<ChatScreen> {
         ),
       );
       _pendingMessage = text;
-      // _apiData = {
-      //       'scheduleLaterStaffId': scheduleLaterStaffId,
-      //       'serviceRequestedTime': serviceRequestedTime,
-      //     };
+      if (serviceRequestedTime != null) {
+        _apiData = {
+            ..._apiData,
+            'serviceRequestedTime': serviceRequestedTime,
+          };
+      }else {
+        _apiData = {
+          ..._apiData,
+          'storeCategoryId': storeCategoryId,
+        };
+      }
 
       print('CHINTU: _apiData: $_apiData');
     });
@@ -617,7 +658,9 @@ class _ChatScreenState extends State<ChatScreen> {
                     widget.type == WidgetEnum.order_tracking.value ||
                     widget.type == WidgetEnum.order_details.value ||
                     widget.type == WidgetEnum.schedule_later.value ||
-                    widget.type == WidgetEnum.staff_selection.value,
+                    widget.type == WidgetEnum.staff_selection.value ||
+                    widget.type == WidgetEnum.prescription_screen.value ||
+                    widget.type == WidgetEnum.online_payment_confirm_order.value,
               )
               .toList();
     });
@@ -776,6 +819,14 @@ class _ChatScreenState extends State<ChatScreen> {
     });
   }
 
+  Future<void> _restartGreetingAPI() async {
+    setState(() {
+      _greetingData = null;
+      _isDataLoaded = false;
+      _launchBloc.add(const LaunchRequested());
+    });
+  }
+
   @override
   void dispose() {
     if (widget.isFromHistory == false) {
@@ -865,6 +916,7 @@ class _ChatScreenState extends State<ChatScreen> {
       onScrollToBottom: _scrollToBottom,
       onLoadChatbotData: () {},
       onRestartChatAPI: _restartChatAPI,
+      onRestartGreetingAPI: _restartGreetingAPI,
       onUpdateSelectedOptions: (Set<String> newSet) {
         setState(() {
           _selectedOptionMessages = newSet;
@@ -897,6 +949,16 @@ class _ChatScreenState extends State<ChatScreen> {
       // Add cancel speech handler
       isRecording: _isRecording, // Pass recording state
       needToEndThisChat: _needToEndThisChat, // Pass needToEndThisChat state
+      gotStripePaymentCallback: _gotStripePaymentCallback, // Pass gotStripePaymentCallback parameter
+      onUpdateGotStripePaymentCallback: (bool value) {
+        if (_gotStripePaymentCallback == true) {
+          Timer(Duration(seconds: 2), () {
+            //  setState(() {
+            _gotStripePaymentCallback = value;
+          // });
+          });
+        }
+      }, // Add callback to update gotStripePaymentCallback
       isFromHistory: widget.isFromHistory, // Pass isFromHistory parameter
       chatHistoryTitle: widget.chatHistoryTitle,
     );
@@ -921,78 +983,61 @@ class _ChatScreenState extends State<ChatScreen> {
                 child: Stack(
                   clipBehavior: Clip.none,
                   children: [
-                    // Outer glow circle
-                    Container(
-                      width: 110,
-                      height: 110,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(110),
-                        gradient: const LinearGradient(
-                          begin: Alignment.centerLeft,
-                          end: Alignment.centerRight,
-                          colors: [
-                            Color(0x1AD445EC),
-                            Color(0x1AB02EFB),
-                            Color(0x1A8E2FFD),
-                            Color(0x1A5E3DFE),
-                            Color(0x1A5186E0),
-                          ],
-                        ),
-                      ),
-                    ),
-                    // Center asset
                     Align(
                       alignment: Alignment.center,
-                      child: Container(
-                        width: 90,
-                        height: 90,
-                        decoration: const BoxDecoration(
-                          shape: BoxShape.circle,
-                          gradient: LinearGradient(
-                            begin: Alignment.centerLeft,
-                            end: Alignment.centerRight,
-                            colors: [
-                              Color(0xFFD445EC),
-                              Color(0xFFB02EFB),
-                              Color(0xFF8E2FFD),
-                              Color(0xFF5E3DFE),
-                              Color(0xFF5186E0),
-                            ],
-                          ),
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(12),
-                          child: SvgPicture.asset(
-                            AssetPath.get('images/ic_mainImg_R.svg'),
-                            fit: BoxFit.contain,
-                          ),
-                        ),
+                      child: SvgPicture.asset(
+                        AssetPath.get('images/ic_LogoTutorial.svg'),
+                        fit: BoxFit.contain,
                       ),
-                    ),
-                    Positioned(
-                      right: -6,
-                      top: -6,
-                      child: Opacity(
-                        opacity: 0.4,
-                        child: SvgPicture.asset(
-                          AssetPath.get('images/ic_topStar.svg'),
-                          width: 44,
-                          height: 44,
-                        ),
-                      ),
-                    ),
-                    Positioned(
-                      left: -10,
-                      bottom: -8,
-                      child: Opacity(
-                        opacity: 0.4,
-                        child: SvgPicture.asset(
-                          AssetPath.get('images/ic_topStar.svg'),
-                          width: 61,
-                          height: 61,
-                        ),
-                      ),
-                    ),
+                    )
+                    // Outer glow circle
+                    // Container(
+                    //   width: 110,
+                    //   height: 110,
+                    //   decoration: BoxDecoration(
+                    //     borderRadius: BorderRadius.circular(110),
+                    //     gradient: const LinearGradient(
+                    //       begin: Alignment.centerLeft,
+                    //       end: Alignment.centerRight,
+                    //       colors: [
+                    //         Color(0x1AD445EC),
+                    //         Color(0x1AB02EFB),
+                    //         Color(0x1A8E2FFD),
+                    //         Color(0x1A5E3DFE),
+                    //         Color(0x1A5186E0),
+                    //       ],
+                    //     ),
+                    //   ),
+                    // ),
+                    // // Center asset
+                    // Align(
+                    //   alignment: Alignment.center,
+                    //   child: Container(
+                    //     width: 90,
+                    //     height: 90,
+                    //     decoration: const BoxDecoration(
+                    //       shape: BoxShape.circle,
+                    //       gradient: LinearGradient(
+                    //         begin: Alignment.centerLeft,
+                    //         end: Alignment.centerRight,
+                    //         colors: [
+                    //           Color(0xFFD445EC),
+                    //           Color(0xFFB02EFB),
+                    //           Color(0xFF8E2FFD),
+                    //           Color(0xFF5E3DFE),
+                    //           Color(0xFF5186E0),
+                    //         ],
+                    //       ),
+                    //     ),
+                    //     child: Padding(
+                    //       padding: const EdgeInsets.all(12),
+                    //       child: SvgPicture.asset(
+                    //         AssetPath.get('images/ic_mainImg_R.svg'),
+                    //         fit: BoxFit.contain,
+                    //       ),
+                    //     ),
+                    //   ),
+                    // ),
                   ],
                 ),
               ),
@@ -1087,3 +1132,14 @@ class _ChatScreenState extends State<ChatScreen> {
     );
   }
 }
+// // TODO: Get userId from ChatApiServices.instance.userId or UserPreferences.getUserId()
+//   // TODO: Get storeCategoryId from the store or action data
+//   SelectTimeScreen.show(
+//     context,
+//     userId: '66a26937fc6559000d18a6a2', // TODO: Replace with actual userId
+//     storeCategoryId: '6507f939c2630000b000458d', // TODO: Replace with actual storeCategoryId
+//     onConfirm: (selectedDate, selectedTimeSlot) {
+//       // Handle confirmation
+//       print('Selected date: $selectedDate, time: $selectedTimeSlot');
+//     },
+//   );

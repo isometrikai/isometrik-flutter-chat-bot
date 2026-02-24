@@ -11,6 +11,7 @@ enum WidgetEnum {
   add_payment,
   schedule_later,
   staff_selection,
+  prescription_screen,
   payment,
   order_summary,
   order_confirmed,
@@ -24,6 +25,7 @@ enum WidgetEnum {
   choose_address,
   choose_card,
   order_tracking,
+  online_payment_confirm_order,
   service_types;
 
   // Add string values for API communication

@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:chat_bot/utils/log.dart';
+import 'package:chat_bot/utils/app_constants.dart';
 
 /// Centralized token manager for handling authentication tokens across all APIs
 class TokenManager {

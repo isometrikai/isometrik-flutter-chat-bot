@@ -1,9 +1,12 @@
 import 'package:chat_bot/data/data.dart';
+import 'package:chat_bot/utils/utility.dart';
 
 class ApiService {
   static String _baseApiUrl = 'https://apisuperapp-staging.eazy-online.com';
+  static bool _isProduction = false;
 
   static String get baseApiUrl => _baseApiUrl;
+  static bool get isProduction => _isProduction;
 
   // static Future<void> initialize() async {
   //   await AuthService.instance.initialize();
@@ -23,13 +26,20 @@ class ApiService {
     double? longitude,
     double? latitude,
     bool? needToShowTutorial,
+    bool? needToShowCompleteSetup,
     required String clientGuid,
     required String indexName,
     required String visitId,
     required String visitorId,
     required String searchApiUrl,
     required String baseApiUrl,
+    required String currencycode,
+    required String currencysymbol,
+    required String zoneId,
+    required String timezone,
+    required String platform,
   }) {
+    _isProduction = isProduction;
     _baseApiUrl = baseApiUrl.isNotEmpty 
         ? removeTrailingSlash(baseApiUrl) 
         : 'https://apisuperapp-staging.eazy-online.com';
@@ -47,11 +57,14 @@ class ApiService {
       longitude: longitude,
       latitude: latitude,
         needToShowTutorial: needToShowTutorial,
+        needToShowCompleteSetup: needToShowCompleteSetup,
       clientGuid: clientGuid,
       indexName: indexName,
       visitId: visitId,
       visitorId: visitorId,
       searchApiUrl: removeTrailingSlash(searchApiUrl),
+      currencycode: currencycode,
+      currencysymbol: currencysymbol,
     );
 
     // Configure ComprehensiveApiService (new system)
@@ -69,6 +82,8 @@ class ApiService {
       visitId: visitId,
       visitorId: visitorId,
       searchApiUrl: removeTrailingSlash(searchApiUrl),
+      zoneId: zoneId,
+      timezone: timezone,
     );
 
     // Configure HawkSearchService
@@ -85,6 +100,11 @@ class ApiService {
     ChatHistoryRepository.instance.configure(
       userId: userId,
     );
+
+    Utility.setCurrencySymbol(currencysymbol);
+    Utility.setCurrencyCode(currencycode);
+    Utility.setPlatform(platform);
+    Utility.setName(name);
   }
 
   static String removeTrailingSlash(String url) {

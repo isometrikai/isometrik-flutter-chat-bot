@@ -20,7 +20,7 @@ class RestaurantMenuScreen extends StatefulWidget {
 }
 
 class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
-  static const Color _purple = Color(0xFF8E2FFD);
+  static const Color _purple = AppConstants.appThemeColor;
   static const Color _border = Color(0xFFD8DEF3);
   static const Color _labelGrey = Color(0xFF979797);
   static const Color _veg = Color(0xFF66BB6A);
@@ -632,7 +632,7 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
           const SizedBox(height: 16),
         ],
         SizedBox(
-          height: 222,
+          height: 222 + 18, // 18px is the height of the category title and spacing
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
             itemCount: filtered.length,

@@ -2,6 +2,8 @@ import 'package:chat_bot/data/api_client.dart';
 import 'package:chat_bot/data/services/token_manager.dart';
 import 'package:chat_bot/utils/api_result.dart';
 import 'package:chat_bot/services/api_service.dart';
+import 'package:chat_bot/utils/app_constants.dart';
+import 'package:chat_bot/utils/utility.dart';
 
 /// Universal API client that automatically handles token refresh for all APIs
 class UniversalApiClient {
@@ -14,8 +16,9 @@ class UniversalApiClient {
     onUnauthorizedRefresh: _handleTokenRefresh,
   );
 
-  late final ApiClient _chatClient = ApiClient(
-    baseUrl: 'https://easyagentapi.isometrik.ai',
+  /// Chat client - uses dynamic base URL based on isProduction flag
+  ApiClient get _chatClient => ApiClient(
+    baseUrl: AppConstants.chatBaseUrl,
     buildHeaders: _buildAppHeaders,//_buildHeaders,
     // onUnauthorizedRefresh: _handleTokenRefresh,
   );
@@ -30,6 +33,24 @@ class UniversalApiClient {
     buildHeaders: _buildGroceryHeaders,
   );
 
+  /// User preference API (eazylife): accept, authorization Bearer, language, platform 3
+  ApiClient get _userPreferenceClient => ApiClient(
+    baseUrl: ApiService.baseApiUrl,
+    buildHeaders: _buildUserPreferenceHeaders,
+  );
+
+  Future<Map<String, String>> _buildUserPreferenceHeaders() async {
+    final raw = TokenManager.instance.userToken ?? '';
+    final token = raw.isEmpty ? '' : (raw.startsWith('Bearer ') ? raw : 'Bearer $raw');
+    return {
+      'accept': 'application/json',
+      'Content-Type': 'application/json',
+      'language': 'en',
+      'platform': Utility.getPlatform(),
+      if (token.isNotEmpty) 'authorization': token,
+    };
+  }
+
   /// Build headers with current token
   Future<Map<String, String>> _buildHeaders() async {
     final token = TokenManager.instance.authorizationHeader;
@@ -42,13 +63,13 @@ class UniversalApiClient {
   Future<Map<String, String>> _buildAppHeaders() async {
     final token = TokenManager.instance.userToken;
     return {
-      'currencycode': 'AED',
       // 'Content-Length':'391',
       'Content-Type': 'application/json',
       'language': 'en',
       'lan': 'en',
-      'currencysymbol': '2K8u2KU=',
-      'platform': '1',
+      'currencysymbol': Utility.getCurrencySymbol(),//2K8u2KU=
+      'currencycode': Utility.getCurrencyCode(),
+      'platform': Utility.getPlatform(),
       'ipAddress': '192.168.1.3',
       'Authorization': token ?? '',
     };
@@ -58,14 +79,14 @@ class UniversalApiClient {
   Future<Map<String, String>> _buildGroceryHeaders() async {
     final token = TokenManager.instance.userToken;
     return {
-      'currencysymbol': '2K8u2KU=',
+      'currencysymbol': Utility.getCurrencySymbol(),//2K8u2KU=
       'storeId': '', // Default storeId, will be overridden
       'Authorization': token ?? '',
       'storeType': '8',
       'ipAddress': '192.168.5.105',
-      'platform': '1',
+      'platform': Utility.getPlatform(),
       'language': 'en',
-      'currencycode': 'AED',
+      'currencycode': Utility.getCurrencyCode(),//AED
       'skip': '0',
       'cityId': '5df7b7218798dc2c1114e6bf',
       'size': '5',
@@ -80,14 +101,14 @@ class UniversalApiClient {
   ) async {
     final token = TokenManager.instance.userToken;
     return {
-      'currencysymbol': '2K8u2KU=',
+      'currencysymbol': Utility.getCurrencySymbol(),//2K8u2KU=
       'storeId': storeId,
       'Authorization': '$token',
       'storeType': '8',
       'ipAddress': '192.168.5.105',
-      'platform': '1',
+      'platform': Utility.getPlatform(),
       'language': 'en',
-      'currencycode': 'AED',
+      'currencycode': Utility.getCurrencyCode(),//AED
       'skip': '0',
       'cityId': '5df7b7218798dc2c1114e6bf',
       'size': '5',
@@ -104,13 +125,15 @@ class UniversalApiClient {
           'Eazy Life/2.0.1 (com.eazy.customerapp; build:64; iOS 26.0.1)',
       'Accept-Encoding': 'gzip',
       'Accept-Language': 'en-IN;q=1.0',
-      'platform': '1',
+      'platform': Utility.getPlatform(),
       'language': 'en',
       'filterType': '1',
       'logintype': '1',
       'searchType': '1',
       'storeCategoryId': storeCategoryId,
       'Accept': 'application/json',
+      'currencycode': Utility.getCurrencyCode(),//AED
+      'currencysymbol': Utility.getCurrencySymbol(),//2K8u2KU=
     };
 
     if (token != null && token.isNotEmpty) {
@@ -135,6 +158,9 @@ class UniversalApiClient {
 
   /// Get grocery API client (for grocery-specific APIs)
   ApiClient get groceryClient => _groceryClient;
+
+  /// Get user preference API client (POST/GET/PATCH userPreference)
+  ApiClient get userPreferenceClient => _userPreferenceClient;
 
   /// Create a custom API client for any base URL
   ApiClient createClient(String baseUrl) {

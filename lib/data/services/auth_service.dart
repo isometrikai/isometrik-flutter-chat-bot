@@ -49,11 +49,14 @@ class AuthService {
     double? longitude,
     double? latitude,
     bool? needToShowTutorial,
+    bool? needToShowCompleteSetup,
     required String clientGuid,
     required String indexName,
     required String visitId,
     required String visitorId,
     required String searchApiUrl,
+    required String currencycode,
+    required String currencysymbol,
   }) {
     _chatBotId = chatBotId;
     _isProduction = isProduction;

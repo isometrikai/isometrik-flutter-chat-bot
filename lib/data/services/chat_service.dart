@@ -14,6 +14,8 @@ class ChatService {
     double latitude = 0.0,
     String staffId = "",
     String serviceRequestedTime = "",
+    String storeCategoryId = "",
+    List<String> prescriptionImageUrls = const [],
   }) {
     return ChatApiServices.instance.sendChatMessage(
       message: message,
@@ -25,6 +27,8 @@ class ChatService {
       latitude: latitude,
       staffId: staffId,
       serviceRequestedTime: serviceRequestedTime,
+      storeCategoryId: storeCategoryId,
+      prescriptionImageUrls: prescriptionImageUrls,
     );
   }
 

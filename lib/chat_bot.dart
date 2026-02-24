@@ -1,5 +1,6 @@
 library chat_bot;
 
+import 'package:chat_bot/view/complete_setup/complete_setup_flow_screen.dart';
 import 'package:chat_bot/view/tutorial_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -17,6 +18,7 @@ export 'services/api_service.dart';
 
 class ChatBot {
   static bool isTutorialShown = false;
+  static bool isCompleteSetupShown = false;
 
   static void configure({
     required String chatBotId,
@@ -31,12 +33,18 @@ class ChatBot {
     required double longitude,
     required double latitude,
     required bool needToShowTutorial,
+    required bool needToShowCompleteSetup,
     required String clientGuid,
     required String indexName,
     required String visitId,
     required String visitorId,
     required String searchApiUrl,
     required String baseApiUrl,
+    required String currencycode,
+    required String currencysymbol,
+    required String zoneId,
+    required String timezone,
+    required String platform,
   }) {
     print('chatBotId: $chatBotId');
     print('appSecret: $appSecret');
@@ -50,13 +58,20 @@ class ChatBot {
     print('longitude: $longitude');
     print('latitude: $latitude');
     print('needToShowTutorial: $needToShowTutorial');
+    print('needToShowCompleteSetup: $needToShowCompleteSetup');
     print('clientGuid: $clientGuid');
     print('indexName: $indexName');
     print('visitId: $visitId');
     print('visitorId: $visitorId');
     print('searchApiUrl: $searchApiUrl');
     print('baseApiUrl: $baseApiUrl');
+    print('currencycode: $currencycode');
+    print('currencysymbol: $currencysymbol');
+    print('zoneId: $zoneId');
+    print('timezone: $timezone');
+    print('platform: $platform');
     isTutorialShown = needToShowTutorial;
+    isCompleteSetupShown = needToShowCompleteSetup;
     ApiService.configure(
       chatBotId: chatBotId,
       appSecret: appSecret,
@@ -70,12 +85,18 @@ class ChatBot {
       longitude: longitude,
       latitude: latitude,
         needToShowTutorial:needToShowTutorial,
+        needToShowCompleteSetup:needToShowCompleteSetup,
       clientGuid: clientGuid,
       indexName: indexName,
       visitId: visitId,
       visitorId: visitorId,
       searchApiUrl: searchApiUrl,
       baseApiUrl: baseApiUrl,
+      currencycode: currencycode,
+      currencysymbol: currencysymbol,
+      zoneId: zoneId,
+      timezone: timezone,
+      platform: platform,
     );
   }
 
@@ -85,24 +106,58 @@ class ChatBot {
     if (isTutorialShown == true) {
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => const TutorialScreen()),
+        PageRouteBuilder(
+          pageBuilder: (context, animation, secondaryAnimation) =>
+              const TutorialScreen(),
+          transitionDuration: Duration.zero,
+          reverseTransitionDuration: Duration.zero,
+        ),
       );
-    } else {
+    }else if (isCompleteSetupShown == true) {
       Navigator.push(
         context,
-        MaterialPageRoute(
-          builder: (context) => MultiBlocProvider(
+        PageRouteBuilder(
+          pageBuilder: (context, animation, secondaryAnimation) =>
+              CompleteSetupFlowScreen(onCallback: (data) {
+                print('Data from Complete Setup Flow Screen: $data');
+              }),
+        ),
+      );
+    } else {
+     Navigator.push(
+        context,
+        PageRouteBuilder(
+          pageBuilder: (context, animation, secondaryAnimation) =>
+              MultiBlocProvider(
             providers: [
               BlocProvider(create: (context) => ChatBloc()),
               BlocProvider(create: (context) => CartBloc()),
             ],
             child: const ChatScreen(),
           ),
+          transitionDuration: Duration.zero,
+          reverseTransitionDuration: Duration.zero,
         ),
       );
     }
   }
+    // Navigator.push(
+    //     context,
+    //     MaterialPageRoute(builder: (context) => const TutorialScreen()),
+    //   );
 
+//  Navigator.push(
+//         context,
+//         MaterialPageRoute(
+//           builder: (context) => MultiBlocProvider(
+//             providers: [
+//               BlocProvider(create: (context) => ChatBloc()),
+//               BlocProvider(create: (context) => CartBloc()),
+//             ],
+//             child: const ChatScreen(),
+//           ),
+//         ),
+//       );
   static void isCartUpdate(dynamic cartData) {// CHANGE CALLBACK
     print('ChatBot.isCartUpdate called with cartData: $cartData');
     print('Checking callback status before triggering...');
@@ -134,5 +189,15 @@ class ChatBot {
   static void openSelectStaffScreen(Map<String, dynamic> obj) {
     print('openSelectStaffScreen: $obj');
     OrderService().triggerSelectStaff(obj);
+  }
+
+  static void openPrescriptionScreen(Map<String, dynamic> prescription) {
+    print('openPrescriptionScreen');
+    OrderService().triggerPrescriptionScreen(prescription);
+  }
+
+  static void openStripePlaceOrderScreen(Map<String, dynamic> stripePlaceOrder) {
+    print('openStripePlaceOrderScreen: $stripePlaceOrder');
+    OrderService().triggerStripePlaceOrder(stripePlaceOrder);
   }
 }
