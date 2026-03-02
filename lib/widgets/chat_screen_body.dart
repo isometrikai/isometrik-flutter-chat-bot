@@ -1858,12 +1858,13 @@ class ChatScreenBody extends StatelessWidget {
                           }else if (action.storeCategoryId == FoodStoreCategoryId.healthCare.value) {
                               SelectTimeScreen.show(
                                 context,
-                                userId: ChatApiServices.instance.userId ?? '', // TODO: Replace with actual userId
+                                userId: action.storeId ?? '', // TODO: Replace with actual userId
                                 storeCategoryId: action.storeCategoryId, // TODO: Replace with actual storeCategoryId
                                 timezone: ChatApiServices.instance.timezone ?? '',
-                                onConfirm: (selectedDate, selectedTimeSlot) {
+                                onConfirm: (String formattedDateTime, int timestamp) {
                                   // Handle confirmation
-                                  print('Selected date: $selectedDate, time: $selectedTimeSlot');
+                                  print('Selected: $formattedDateTime (timestamp: $timestamp)');
+                                  onSendMessage('I have selected a schedule: \n$formattedDateTime', '', timestamp.toString());
                                 },
                               );
                           }
@@ -2277,17 +2278,17 @@ class ChatScreenBody extends StatelessWidget {
                 store.storeTypeId == FoodCategory.pharmacy.value) {
               onQuantityChangedForGrocery(
                 context,
-                product.parentProductId,
-                product.childProductId,
-                product.unitId,
+                product?.parentProductId ?? '',
+                product?.childProductId ?? '',
+                product?.unitId ?? '',
                 store.storeId,
                 store.storeCategoryId,
                 store.storeTypeId ?? -111,
-                product.variantsCount,
+                product?.variantsCount ?? 0,
                 newQuantity,
                 isIncrease,
-                product.productName,
-                product.productImage,
+                product?.productName ?? '',
+                product?.productImage ?? '',
               );
             } else {
               onQuantityChanged(
@@ -2299,10 +2300,82 @@ class ChatScreenBody extends StatelessWidget {
               );
             }
           },
-          onAddToCartRequested: (product, store) {
-            if ((product.variantsCount > 1 &&
+          onAddToCartRequested: (product, store, doctor) {
+            if (store.isDoctore == true && doctor != null) {
+              DoctorServiceTypeSheet.show(
+                context,
+                doctor: doctor,
+                onServiceTypeSelected: (selectedType) {
+                  // Selected: selectedType (DoctorServiceType.inCall | .outCall | .teleCall)
+                  final int serviceLocationAt;
+                  final String productName;
+                  int? estimatedProductPrice;
+                  switch (selectedType) {
+                    case DoctorServiceType.inCall:
+                      serviceLocationAt = 1;
+                      productName = "Visit at doctor's clinic";
+                      estimatedProductPrice = doctor.pricing?.inCallFee ?? 0;
+                      break;
+                    case DoctorServiceType.outCall:
+                      serviceLocationAt = 2;
+                      productName = "Doctor's at home";
+                      estimatedProductPrice = doctor.pricing?.outCallFee ?? 0;
+                      break;
+                    case DoctorServiceType.teleCall:
+                      serviceLocationAt = 3;
+                      productName = "Tele appointment";
+                      estimatedProductPrice = doctor.pricing?.teleCallFee ?? 0;
+                      break;
+                  }
+
+                  Map<String, dynamic> doctorParams = {
+                    "estimatedProductPrice": estimatedProductPrice,
+                    "productName": productName,
+                    "providerId": doctor.id,
+                    "cartType": 2,
+                    "storeId": store.storeId,
+                    "newQuantity": 0,
+                    "productId": "",
+                    "userType": 1,
+                    "unitId": "",
+                    "isDoctorFlow": true,
+                    "serviceLocationAt": serviceLocationAt,
+                    "longitude": ChatApiServices.instance.longitude ?? 0,
+                    "latitude": ChatApiServices.instance.latitude ?? 0,
+                    "centralProductId": "",
+                    "storeTypeId": store.storeTypeId ?? 25,
+                    "storeCategoryId": store.storeCategoryId,
+                    "offers": {
+                      "discountValue": 0,
+                      "offerFor": 0,
+                      "offerId": "",
+                      "offerName": {},
+                      "status": 0,
+                      "discountType": 0
+                    },
+                    "action": 1
+                  };
+
+                  cartBloc.add(
+                    CartAddItemRequested(
+                      storeId: store.storeId,
+                      cartType: 2,
+                      action: 1,
+                      storeCategoryId: store.storeCategoryId,
+                      newQuantity: 0,
+                      storeTypeId: store.storeTypeId ?? 25,
+                      productId: '',
+                      centralProductId: '',
+                      unitId: '',
+                      doctorParams: doctorParams,
+                    ),
+                  );
+                },
+              );
+            } else {
+               if ((product != null && product.variantsCount > 1 &&
                     store.storeTypeId == FoodCategory.food.value) ||
-                (product.variantsCount > 0 &&
+                (product != null && product.variantsCount > 0 &&
                     (store.storeTypeId == FoodCategory.grocery.value ||
                         store.storeTypeId == FoodCategory.pharmacy.value ||
                         store.storeTypeId == FoodCategory.services.value))) {
@@ -2359,12 +2432,13 @@ class ChatScreenBody extends StatelessWidget {
                   newQuantity: 1,
                   // Add 1 item
                   storeTypeId: store.storeTypeId ?? -111,
-                  productId: product.childProductId,
-                  centralProductId: product.parentProductId,
-                  unitId: product.unitId,
+                  productId: product?.childProductId ?? '',
+                  centralProductId: product?.parentProductId ?? '',
+                  unitId: product?.unitId ?? '',
                   needToShowLoaderForCartFetch: false,
                 ),
               );
+            }
             }
           },
         );
@@ -2688,7 +2762,7 @@ class ChatScreenBody extends StatelessWidget {
 
   void onQuantityChanged(
     BuildContext context,
-    Product product,
+    Product? product,
     Store store,
     int newQuantity,
     bool isIncrease,
@@ -2696,7 +2770,7 @@ class ChatScreenBody extends StatelessWidget {
     if (isIncrease == false && newQuantity == 1) {
       //TODO:- 0 Quantity
       int? addToCartOnId;
-      if (product.variantsCount > 1) {
+      if (product != null && product.variantsCount > 1) {
         addToCartOnId = getAddToCartOnId(product.childProductId);
         print("addCartOnID: $addToCartOnId");
       }
@@ -2709,15 +2783,15 @@ class ChatScreenBody extends StatelessWidget {
           storeCategoryId: store.storeCategoryId,
           newQuantity: 0,
           storeTypeId: store.storeTypeId ?? -111,
-          productId: product.childProductId,
-          centralProductId: product.parentProductId,
-          unitId: product.unitId,
+          productId: product?.childProductId ?? '',
+          centralProductId: product?.parentProductId ?? '',
+          unitId: product?.unitId ?? '',
           addToCartOnId: addToCartOnId,
           needToShowLoaderForCartFetch: false,
         ),
       );
     } else if (newQuantity > 0 && isIncrease == true) {
-      if (product.variantsCount > 1) {
+      if (product != null && product.variantsCount > 1) {
         showModalBottomSheet(
           context: context,
           isScrollControlled: true,
@@ -2774,9 +2848,9 @@ class ChatScreenBody extends StatelessWidget {
             storeCategoryId: store.storeCategoryId,
             newQuantity: newQuantity + 1,
             storeTypeId: store.storeTypeId ?? -111,
-            productId: product.childProductId,
-            centralProductId: product.parentProductId,
-            unitId: product.unitId,
+            productId: product?.childProductId ?? '',
+            centralProductId: product?.parentProductId ?? '',
+            unitId: product?.unitId ?? '',
             needToShowLoaderForCartFetch: false,
           ),
         );
@@ -2784,14 +2858,14 @@ class ChatScreenBody extends StatelessWidget {
     } else {
       //TODO:- Remove Quantity
       int? addToCartOnId;
-      if (product.variantsCount > 1) {
+      if (product != null && product.variantsCount > 1) {
         addToCartOnId = getAddToCartOnId(product.childProductId);
         print("addCartOnID: $addToCartOnId");
       }
       int? existingProductQuantity;
       existingProductQuantity = newQuantity;
       if (addToCartOnId != null) {
-        existingProductQuantity = getExistingProductQuantity(product.childProductId, addToCartOnId);
+        existingProductQuantity = getExistingProductQuantity(product?.childProductId ?? '', addToCartOnId);
         print("existingProductQuantity: $existingProductQuantity");
       }
       cartBloc.add(
@@ -2803,9 +2877,9 @@ class ChatScreenBody extends StatelessWidget {
           storeCategoryId: store.storeCategoryId,
           newQuantity: (existingProductQuantity == 1) ? 0 : (existingProductQuantity ?? 0) - 1,
           storeTypeId: store.storeTypeId ?? -111,
-          productId: product.childProductId,
-          centralProductId: product.parentProductId,
-          unitId: product.unitId,
+          productId: product?.childProductId ?? '',
+          centralProductId: product?.parentProductId ?? '',
+          unitId: product?.unitId ?? '',
           addToCartOnId: addToCartOnId,
           needToShowLoaderForCartFetch: false,
         ),

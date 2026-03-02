@@ -215,6 +215,7 @@ class CartBloc extends Bloc<CartEvent, CartState> {
         unitId: '', //event.unitId,
         newAddOns: event.newAddOns,
         addToCartOnId: event.addToCartOnId,
+        doctorParams: event.doctorParams,
       );
 
       if (event.needToShowLoader) {

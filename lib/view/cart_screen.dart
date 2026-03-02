@@ -132,6 +132,7 @@ class _CartScreenState extends State<CartScreen> {
           {'name': '💊 Pharmacy', 'count': categoryCounts['pharmacy']},
           {'name': '🛒 Shopping', 'count': categoryCounts['shopping']},
           {'name': '💄 Services', 'count': categoryCounts['services']},
+          {'name': '🏥 Health Care', 'count': categoryCounts['healthCare']},
         ];
 
         return Container(
@@ -220,11 +221,11 @@ class _CartScreenState extends State<CartScreen> {
     int pharmacyCount = 0;
     int shoppingCount = 0;
     int servicesCount = 0;
+    int healthCareCount = 0;
 
     if (state is CartLoaded && state.rawCartData != null) {
       for (final cartData in state.rawCartData!.data) {
         for (final seller in cartData.sellers) {
-          // storeTypeId 1 = Food, storeTypeId 2 = Grocery
           if (seller.storeTypeId == FoodCategory.food.value) {
             foodCount += seller.products.length;
           } else if (seller.storeTypeId == FoodCategory.grocery.value) {
@@ -236,7 +237,11 @@ class _CartScreenState extends State<CartScreen> {
           } else if (seller.storeTypeId == FoodCategory.pharmacy.value) {
             pharmacyCount += seller.products.length;
           } else if (seller.storeTypeId == FoodCategory.services.value) {
-            servicesCount += seller.products.length;
+            if (cartData.storeCategoryId == FoodStoreCategoryId.healthCare.value) {
+              healthCareCount += seller.products.length;
+            } else {
+              servicesCount += seller.products.length;
+            }
           }
         }
       }
@@ -248,6 +253,7 @@ class _CartScreenState extends State<CartScreen> {
       'pharmacy': pharmacyCount,
       'shopping': shoppingCount,
       'services': servicesCount,
+      'healthCare': healthCareCount,
     };
   }
 
@@ -373,7 +379,15 @@ class _CartScreenState extends State<CartScreen> {
           matches = true;
         }
         // 4: Services - storeTypeId = 25
-        else if (categoryIndex == 4 && seller.storeTypeId == FoodCategory.services.value) {
+        else if (categoryIndex == 4 && 
+                  seller.storeTypeId == FoodCategory.services.value && 
+                  cartData.storeCategoryId != FoodStoreCategoryId.healthCare.value) {
+          matches = true;
+        }
+        // 5: Health Care - storeTypeId = 25 AND storeCategoryId = healthCare
+        else if (categoryIndex == 5 && 
+                 seller.storeTypeId == FoodCategory.services.value && 
+                 cartData.storeCategoryId == FoodStoreCategoryId.healthCare.value) {
           matches = true;
         }
         
@@ -438,8 +452,8 @@ class _CartScreenState extends State<CartScreen> {
     
     return formattedAttributes.join('\n');
   }
+  // TODO:- Managed Cart OBJECT
 
-  /// Convert UniversalCartData to WidgetAction list for specific seller
   List<WidgetAction> _convertToWidgetActions(UniversalCartData cartData, Seller seller) {
     List<WidgetAction> widgetActions = [];
     
@@ -467,6 +481,8 @@ class _CartScreenState extends State<CartScreen> {
           formattedAddOns = _formatSelectedAddOns(product.selectedAddOns!);
         }else if (product.attributes != null && product.attributes!.isNotEmpty && cartData.storeTypeId != FoodCategory.food.value) {
           formattedAddOns = _formatProductAttributes(product.attributes!);
+        }else if (cartData.storeCategoryId == FoodStoreCategoryId.healthCare.value) {
+          formattedAddOns = "Service: ${productName}";
         }
         
         widgetActions.add(WidgetAction(
@@ -475,8 +491,8 @@ class _CartScreenState extends State<CartScreen> {
           subtitle: '',
           storeCategoryId: cartData.storeCategoryId,
           keyword: '',
-          quantity: '${totalQuantity}x',
-          productName: productName,
+          quantity: cartData.storeCategoryId == FoodStoreCategoryId.healthCare.value ? null : '${totalQuantity}x',
+          productName: cartData.storeCategoryId == FoodStoreCategoryId.healthCare.value ? cartData.providerName : productName,
           currencySymbol: cartData.currencyCode,
           productPrice: unitPrice,
           addOns: formattedAddOns,

@@ -298,9 +298,11 @@ class HawkSearchService {
 
     final String linkFromId = metaData['linkFromId']?.toString() ?? '';
     final int type = _toInt(metaData['type'], fallback: 0);
-    final bool isDoctored = _toBool(metaData['isDoctore'] ?? metaData['isDoctored']);
+    final bool isDoctore = _toBool(metaData['isDoctore'] ?? metaData['isDoctored']);
     final bool storeListing = _toBool(metaData['storeListing']);
     final bool hyperlocal = _toBool(metaData['hyperlocal']);
+
+    final List<Doctor> doctorsList = _parseDoctorsListFromStoreData(storeData);
 
     return Store(
       storename: storename,
@@ -314,13 +316,41 @@ class HawkSearchService {
       linkFromId: linkFromId,
       type: type,
       storeTypeId: type,
-      isDoctored: isDoctored,
+      isDoctore: isDoctore,
       storeListing: storeListing,
       hyperlocal: hyperlocal,
         storeIsOpen: storeIsOpen,
         supportedOrderTypes: supportedOrderTypes,
         tableReservations: tableReservations,
+        doctorsList: doctorsList,
     );
+  }
+
+  /// Parses serviceProvider from HawkSearch storedata into List<Doctor>.
+  List<Doctor> _parseDoctorsListFromStoreData(Map<String, dynamic> storeData) {
+    final dynamic raw = storeData['serviceProvider'];
+    if (raw is! List || raw.isEmpty) return [];
+    final List<Doctor> result = [];
+    for (final dynamic item in raw) {
+      if (item is! Map<String, dynamic>) continue;
+      try {
+        final Map<String, dynamic> map = Map<String, dynamic>.from(item);
+        // Normalize _id if it came as "ObjectId('hex')" string from fallback parser
+        final dynamic idRaw = map['_id'];
+        if (idRaw is String && idRaw.startsWith('ObjectId(')) {
+          // Extract hex id from ObjectId('hex') or ObjectId("hex")
+          final match = RegExp(r'ObjectId\s*\(\s*.(.+?).\s*\)').firstMatch(idRaw);
+          if (match != null) {
+            final hex = match.group(1)?.replaceAll('"', '').replaceAll("'", '') ?? '';
+            if (hex.isNotEmpty) map['_id'] = hex;
+          }
+        }
+        result.add(Doctor.fromJson(map));
+      } catch (_) {
+        // Skip malformed provider entries
+      }
+    }
+    return result;
   }
 
   String _firstString(dynamic value) {
@@ -345,14 +375,24 @@ class HawkSearchService {
     try {
       // Handle Python dictionary string format
       String fixed = raw;
-      
+
+      // Replace ObjectId('hex') or ObjectId("hex") with "hex" for valid JSON
+      const objectIdPattern = r'ObjectId\s*\(\s*.(.+?).\s*\)';
+      fixed = fixed.replaceAllMapped(
+        RegExp(objectIdPattern),
+        (Match m) {
+          final hex = (m.group(1) ?? '').replaceAll('"', '').replaceAll("'", '');
+          return '"$hex"';
+        },
+      );
+
       // Replace Python boolean values with JSON boolean values
       fixed = fixed.replaceAll('True', 'true');
       fixed = fixed.replaceAll('False', 'false');
-      
+
       // Handle None values
       fixed = fixed.replaceAll('None', 'null');
-      
+
       // More careful quote replacement to handle nested structures
       fixed = _replaceQuotesSafely(fixed);
       

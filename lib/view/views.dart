@@ -4,6 +4,7 @@ export 'cart_screen.dart';
 export 'chat_history_screen.dart';
 export 'chat_screen.dart';
 export 'customization_summary_screen.dart';
+export 'doctor_service_type_sheet.dart';
 export 'Groceries_menu_screen.dart';
 export 'grocery_customization_screen.dart';
 export 'launch_screen.dart';

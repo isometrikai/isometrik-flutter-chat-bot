@@ -145,9 +145,10 @@ class CartService {
     required String unitId,
     List<Map<String, dynamic>>? newAddOns,
     dynamic addToCartOnId,
+    Map<String, dynamic>? doctorParams,
   }) async {
     try {
-      final body = {
+      Map<String, dynamic> body = {
         "offers": {},
         "storeId": storeId,
         "cartType": cartType,
@@ -163,6 +164,10 @@ class CartService {
         if (newAddOns != null) "newAddOns": newAddOns,
         if (addToCartOnId != null) "addToCartOnId": addToCartOnId.toString(),
       };
+      if (doctorParams != null) {
+        body.clear();
+        body = doctorParams;
+      }
 
       final result = await _client.post('/v1/cart', body);
       
