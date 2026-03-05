@@ -759,7 +759,7 @@ class ChatScreenBody extends StatelessWidget {
               ),
               const SizedBox(height: 16),
                Text(
-                'Leave AI Chat?',
+                'Leave Chat?',
                 style: AppTextStyles.bodyText.copyWith(
                   fontSize: 24,
                   fontWeight: FontWeight.w700,
@@ -769,7 +769,7 @@ class ChatScreenBody extends StatelessWidget {
               ),
               const SizedBox(height: 20),
                Text(
-                'Are you sure you want to leave the chat? Your conversation history will be saved, but you will lose your current context.',
+                'Your current conversation will not be saved.However, you can view your conversation history anytime from the chat menu.',
                 style: AppTextStyles.subtitle.copyWith(
                   fontSize: 14, 
                   color: Color(0xFF242424), 
@@ -778,40 +778,11 @@ class ChatScreenBody extends StatelessWidget {
                 textAlign: TextAlign.left,
               ),
               const SizedBox(height: 40),
-              Row(
+              Column(
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  Expanded(
-                    child: SizedBox(
-                      height: 62,
-                      child: TextButton(
-                        onPressed: () => Navigator.of(context).pop(),
-                        style: TextButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          foregroundColor: AppConstants.appThemeColor,
-                          padding: EdgeInsets.zero,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
-                            side: BorderSide(
-                              color: AppConstants.appThemeColor,
-                              width: 1,
-                            ),
-                          ),
-                        ),
-                        child: Text(
-                          'Stay in chat',
-                          style: AppTextStyles.button.copyWith(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w700,
-                            color: AppConstants.appThemeColor,
-                          ),
-                          overflow: TextOverflow.ellipsis,
-                          maxLines: 1,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
+                  SizedBox(
+                    width: double.infinity,
                     child: SizedBox(
                       height: 62,
                       child: TextButton(
@@ -827,8 +798,8 @@ class ChatScreenBody extends StatelessWidget {
                           }
                         },
                         style: TextButton.styleFrom(
-                          backgroundColor: Colors.transparent,
-                          foregroundColor: Colors.white,
+                           backgroundColor: Colors.white,
+                          foregroundColor: AppConstants.appThemeColor,
                           padding: EdgeInsets.zero,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(16),
@@ -837,11 +808,11 @@ class ChatScreenBody extends StatelessWidget {
                         child: Container(
                           decoration: BoxDecoration(
                             color: AppConstants.appThemeColor,
-                            borderRadius: BorderRadius.circular(16),
+                            borderRadius: BorderRadius.circular(8),
                           ),
                           child: Center(
                             child: Text(
-                              'Continue to app',
+                              'Yes, Go to Eazy App',
                               style: TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w700,
@@ -851,6 +822,38 @@ class ChatScreenBody extends StatelessWidget {
                               maxLines: 1,
                             ),
                           ),
+                        ),
+                      ),
+                    ),
+                  ),
+                 const SizedBox(height: 16),
+                   SizedBox(
+                    width: double.infinity,
+                    child: SizedBox(
+                      height: 62,
+                      child: TextButton(
+                        onPressed: () => Navigator.of(context).pop(),
+                        style: TextButton.styleFrom(
+                          backgroundColor: Colors.transparent,
+                          foregroundColor: Colors.white,
+                          padding: EdgeInsets.zero,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            side: BorderSide(
+                              color: AppConstants.appThemeColor,
+                              width: 1,
+                            ),
+                          ),
+                        ),
+                        child: Text(
+                          'Stay in chat',
+                          style: AppTextStyles.button.copyWith(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                            color: AppConstants.appThemeColor,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
                         ),
                       ),
                     ),
