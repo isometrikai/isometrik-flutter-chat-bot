@@ -27,6 +27,7 @@ class ChatHistoryRepository {
     bool? isPharmacyChat,
     bool? isShoppingChat,
     bool? isServicesChat,
+    bool? isHealthCareChat,
     String? query,
   }) async {
     
@@ -55,6 +56,9 @@ class ChatHistoryRepository {
     }
     if (isServicesChat == true) {
       queryParams['is_services_chat'] = 'true';
+    }
+    if (isHealthCareChat == true) {
+      queryParams['is_health_care_chat'] = 'true';
     }
     
     try {
