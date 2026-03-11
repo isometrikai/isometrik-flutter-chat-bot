@@ -57,6 +57,14 @@ class _CartScreenState extends State<CartScreen> {
     
     // Fetch cart data using BLoC
     context.read<CartBloc>().add(CartFetchRequested());
+
+    OrderService().setCartUpdateCallback((bool isCartUpdate) {
+      print('CartScreen: Cart update callback received - $isCartUpdate');
+      if (mounted && isCartUpdate) {
+        print('CartScreen: Cart update received - $isCartUpdate');
+        context.read<CartBloc>().add(CartFetchRequested());
+      }
+    });
   }
 
   @override
