@@ -59,9 +59,10 @@ class _CartScreenState extends State<CartScreen> {
     context.read<CartBloc>().add(CartFetchRequested());
 
     OrderService().setCartUpdateCallback((bool isCartUpdate) {
-      print('CartScreen: Cart update callback received - $isCartUpdate');
       if (mounted && isCartUpdate) {
         print('CartScreen: Cart update received - $isCartUpdate');
+        // isCartAPICalled = true;
+        needToCallChatScreenSendMessageAPI = false;
         context.read<CartBloc>().add(CartFetchRequested());
       }
     });
