@@ -173,6 +173,13 @@ class _ChatScreenState extends State<ChatScreen> {
         // _sendMessage('Order placed successfully', null, null, null);
       }
     });
+
+    OrderService().setSelectClickManageCallback((Map<String, dynamic> clickManage) {
+      if (mounted) {
+        print('ChatScreen: Click manage received - $clickManage');
+        _sendMessage('I have selected a click manage: ${clickManage}', null, null, null);
+      }
+    });
   }
 
   /// Sets up post-initialization tasks (keyboard listener, cart fetch, speech service)

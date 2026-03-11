@@ -200,4 +200,9 @@ class ChatBot {
     print('openStripePlaceOrderScreen: $stripePlaceOrder');
     OrderService().triggerStripePlaceOrder(stripePlaceOrder);
   }
+
+  static void openClickManageScreen(Map<String, dynamic> clickManage) {// Data Received 
+    print('openClickManageScreen: $clickManage');
+    OrderService().triggerClickManageScreen(clickManage);
+  }
 }
