@@ -161,7 +161,7 @@ class OrderService {
     onPrescriptionScreenOpen?.call(prescription);//2
   }
 
-  void triggerClickManage(Map<String, dynamic> clickManage) {
+  void triggerClickManageScreenOpen(Map<String, dynamic> clickManage) {
     print('triggerClickManage: $clickManage');
     onClickManage?.call(clickManage);
   }

@@ -530,7 +530,7 @@ class ChatScreenBody extends StatelessWidget {
                                     ),
                                   );
                                   }else {
-                                    OrderService().triggerClickManageScreen({'action': 'add_dependent_healthcare'});
+                                    OrderService().triggerClickManageScreenOpen({'action': 'add_dependent_healthcare'});
                                   //   Navigator.push(
                                   //   context,
                                   //   MaterialPageRoute(
