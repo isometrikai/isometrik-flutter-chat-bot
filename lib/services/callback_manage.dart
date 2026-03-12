@@ -15,7 +15,7 @@ class OrderService {
   Function(Map<String, dynamic>)? onSelectStaffScreenOpen;
   Function(Map<String, dynamic>)? onPrescriptionScreenOpen;
   Function(Map<String, dynamic>)? onStripePlaceOrderScreenOpen;
-  Function(Map<String, dynamic>)? onClickManage;
+  Function(Map<String, dynamic>)? onClickManageScreenOpen;
   Function()? onChatDismiss; // Add dismiss callback
   Function()? onTutorialDismiss; // Add tutorial dismiss callback
   Function(bool)? onCartUpdate; // Add cart update callback
@@ -66,9 +66,9 @@ class OrderService {
     onPrescriptionScreenOpen = prescriptionScreenOpen;//1
   }
 
-  void setClickManageCallback(Function(Map<String, dynamic>) onClickManage) {
-    print('setClickManageCallback: $onClickManage');
-    onClickManage = onClickManage;
+  void setClickManageScreenOpenCallback(Function(Map<String, dynamic>) onClickManage) {
+    print('setClickManageScreenOpenCallback: $onClickManage');
+    onClickManageScreenOpen = onClickManage;
   }
 
   void setStripePlaceOrderScreenOpenCallback(Function(Map<String, dynamic>) stripePlaceOrderScreenOpen) {
@@ -163,7 +163,7 @@ class OrderService {
 
   void triggerClickManageScreenOpen(Map<String, dynamic> clickManage) {
     print('triggerClickManage: $clickManage');
-    onClickManage?.call(clickManage);
+    onClickManageScreenOpen?.call(clickManage);
   }
 
   void triggerStripePlaceOrderScreenOpen(Map<String, dynamic> stripePlaceOrderScreenOpen) {
@@ -263,6 +263,6 @@ class OrderService {
     onSelectSchedule = null; // Clear select schedule callback
     onSelectStaff = null; // Clear select staff callback
     onSelectClickManage = null; // Clear select click manage callback
-    onClickManage = null; // Clear click manage callback
+    onClickManageScreenOpen = null; // Clear click manage callback
   }
 }

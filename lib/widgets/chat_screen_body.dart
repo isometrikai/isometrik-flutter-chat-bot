@@ -530,22 +530,22 @@ class ChatScreenBody extends StatelessWidget {
                                     ),
                                   );
                                   }else {
-                                    // OrderService().triggerClickManageScreenOpen({'action': 'add_dependent_healthcare'});
-                                    Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder:
-                                          (context) => BlocProvider(
-                                            create: (context) => CartBloc(),
-                                            child: CartScreen(
-                                              needToEndThisChat: needToEndThisChat,
-                                              onCheckout: (message, storeCategoryId) {
-                                                onSendMessage(message, null, null, storeCategoryId);
-                                              },
-                                            ),
-                                          ),
-                                    ),
-                                  );
+                                    OrderService().triggerClickManageScreenOpen({'action': 'add_dependent_healthcare'});
+                                  //   Navigator.push(
+                                  //   context,
+                                  //   MaterialPageRoute(
+                                  //     builder:
+                                  //         (context) => BlocProvider(
+                                  //           create: (context) => CartBloc(),
+                                  //           child: CartScreen(
+                                  //             needToEndThisChat: needToEndThisChat,
+                                  //             onCheckout: (message, storeCategoryId) {
+                                  //               onSendMessage(message, null, null, storeCategoryId);
+                                  //             },
+                                  //           ),
+                                  //         ),
+                                  //   ),
+                                  // );
                                   }
                                 },
                       ),
