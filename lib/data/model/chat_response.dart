@@ -142,6 +142,7 @@ class ChatWidget {
   bool get isOrderConfirmedWidget => type == WidgetEnum.order_confirmed.value;
   bool get isOrderTrackingWidget => type == WidgetEnum.order_tracking.value;
   bool get isOrderDetailsWidget => type == WidgetEnum.order_details.value;
+  bool get isAddDependentWidget => type == WidgetEnum.add_dependent.value;
   bool get isButtonWidget => type == 'button';
   bool get isInputWidget => type == 'input';
   bool get isImageWidget => type == 'image';
@@ -254,6 +255,11 @@ class ChatWidget {
 
   // Get online_payment_confirm_order actions (converted to models)
   List<WidgetAction> get onlinePaymentConfirmOrder => isOnlinePaymentConfirmOrderWidget
+      ? widget.map((e) => WidgetAction.fromJson(e as Map<String, dynamic>)).toList()
+      : [];
+
+  // Get add_dependent actions (converted to models)
+  List<WidgetAction> get addDependent => isAddDependentWidget
       ? widget.map((e) => WidgetAction.fromJson(e as Map<String, dynamic>)).toList()
       : [];
 

@@ -530,22 +530,21 @@ class ChatScreenBody extends StatelessWidget {
                                     ),
                                   );
                                   }else {
-                                    OrderService().triggerClickManageScreenOpen({'action': 'add_dependent_healthcare'});
-                                  //   Navigator.push(
-                                  //   context,
-                                  //   MaterialPageRoute(
-                                  //     builder:
-                                  //         (context) => BlocProvider(
-                                  //           create: (context) => CartBloc(),
-                                  //           child: CartScreen(
-                                  //             needToEndThisChat: needToEndThisChat,
-                                  //             onCheckout: (message, storeCategoryId) {
-                                  //               onSendMessage(message, null, null, storeCategoryId);
-                                  //             },
-                                  //           ),
-                                  //         ),
-                                  //   ),
-                                  // );
+                                    Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder:
+                                          (context) => BlocProvider(
+                                            create: (context) => CartBloc(),
+                                            child: CartScreen(
+                                              needToEndThisChat: needToEndThisChat,
+                                              onCheckout: (message, storeCategoryId) {
+                                                onSendMessage(message, null, null, storeCategoryId);
+                                              },
+                                            ),
+                                          ),
+                                    ),
+                                  );
                                   }
                                 },
                       ),
@@ -1868,7 +1867,7 @@ class ChatScreenBody extends StatelessWidget {
                                 onConfirm: (String formattedDateTime, int timestamp) {
                                   // Handle confirmation
                                   print('Selected: $formattedDateTime (timestamp: $timestamp)');
-                                  onSendMessage('I have selected a schedule: \n$formattedDateTime', '', timestamp.toString());
+                                  onSendMessage('I want to book an appointment for: \n$formattedDateTime', '', timestamp.toString());
                                 },
                               );
                           }
@@ -1969,6 +1968,24 @@ class ChatScreenBody extends StatelessWidget {
                         // },
               // ),
             // );
+          }
+        }
+
+        for (final widget in latestActionWidgets.where(
+          (w) => w.type == WidgetEnum.add_dependent.value,
+        )) {
+          for (final action in widget.addDependent) {
+            actionButtons.add(
+              buildActionButton(
+                text: action.buttonText,
+                onTap:
+                    isApiLoading
+                        ? () {}
+                        : () {
+                        OrderService().triggerClickManageScreenOpen({'action': 'add_dependent_healthcare'});
+                        },
+              ),
+            );
           }
         }
 

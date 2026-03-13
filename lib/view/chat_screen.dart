@@ -177,7 +177,11 @@ class _ChatScreenState extends State<ChatScreen> {
     OrderService().setSelectClickManageCallback((Map<String, dynamic> clickManage) {
       if (mounted) {
         print('ChatScreen: Click manage received - $clickManage');
-        _sendMessage('I have selected a click manage: ${clickManage}', null, null, null);
+        _apiData = {
+            ..._apiData,
+            "dependent_id": clickManage['dependentId'] ?? '',
+          };
+        _sendMessage('I have selected a click manage: ${clickManage['firstName'] ?? ''} ${clickManage['lastName'] ?? ''}', null, null, null);
       }
     });
   }
@@ -667,7 +671,8 @@ class _ChatScreenState extends State<ChatScreen> {
                     widget.type == WidgetEnum.schedule_later.value ||
                     widget.type == WidgetEnum.staff_selection.value ||
                     widget.type == WidgetEnum.prescription_screen.value ||
-                    widget.type == WidgetEnum.online_payment_confirm_order.value,
+                    widget.type == WidgetEnum.online_payment_confirm_order.value ||
+                    widget.type == WidgetEnum.add_dependent.value,
               )
               .toList();
     });
