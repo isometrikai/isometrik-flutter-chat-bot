@@ -181,7 +181,7 @@ class _ChatScreenState extends State<ChatScreen> {
             ..._apiData,
             "dependent_id": clickManage['dependentId'] ?? '',
           };
-        _sendMessage('I have selected a click manage: ${clickManage['firstName'] ?? ''} ${clickManage['lastName'] ?? ''}', null, null, null);
+        _sendMessage('I have selected a dependent:\n${clickManage['firstName'] ?? ''} ${clickManage['lastName'] ?? ''}', null, null, null);
       }
     });
   }
