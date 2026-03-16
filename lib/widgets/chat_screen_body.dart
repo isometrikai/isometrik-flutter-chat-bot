@@ -1867,7 +1867,8 @@ class ChatScreenBody extends StatelessWidget {
                                 onConfirm: (String formattedDateTime, int timestamp) {
                                   // Handle confirmation
                                   print('Selected: $formattedDateTime (timestamp: $timestamp)');
-                                  onSendMessage('I want to book an appointment for: \n$formattedDateTime', '', timestamp.toString());
+                                  // onSendMessage('I want to book an appointment for: \n$formattedDateTime', '', timestamp.toString());
+                                  onSendMessage('I have selected a schedule: \n$formattedDateTime', '', timestamp.toString());
                                 },
                               );
                           }

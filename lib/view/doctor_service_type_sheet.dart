@@ -75,6 +75,19 @@ class _DoctorServiceTypeSheetState extends State<DoctorServiceTypeSheet> {
     return options;
   }
 
+  int _feeFor(DoctorServiceType type) {
+    final pricing = widget.doctor.pricing;
+    if (pricing == null) return 0;
+    switch (type) {
+      case DoctorServiceType.inCall:
+        return pricing.inCallFee;
+      case DoctorServiceType.outCall:
+        return pricing.outCallFee;
+      case DoctorServiceType.teleCall:
+        return pricing.teleCallFee;
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -125,6 +138,9 @@ class _DoctorServiceTypeSheetState extends State<DoctorServiceTypeSheet> {
             const SizedBox(height: 20),
             ...options.map((type) {
               final isSelected = _selectedType == type;
+              final fee = _feeFor(type);
+              final priceText =
+                  '${Utility.getCurrencyCode()} ${fee.toString()}';
               return GestureDetector(
                 onTap: () => setState(() => _selectedType = type),
                 behavior: HitTestBehavior.opaque,
@@ -144,6 +160,17 @@ class _DoctorServiceTypeSheetState extends State<DoctorServiceTypeSheet> {
                             height: 1.4,
                           ),
                           textAlign: TextAlign.left,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        priceText,
+                        style: AppTextStyles.body(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                        ).copyWith(
+                          color: const Color(0xFF242424),
+                          height: 1.4,
                         ),
                       ),
                       const SizedBox(width: 16),
