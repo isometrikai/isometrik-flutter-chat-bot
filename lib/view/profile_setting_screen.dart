@@ -329,7 +329,7 @@ class ProfileSettingScreen extends StatelessWidget {
                             Icon(Icons.account_balance_wallet_outlined, size: 20, color: Colors.white),
                             const SizedBox(width: 8),
                             Text(
-                              'Eazy Wallet',
+                              'App Wallet',
                               style: AppTheme.getTextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w600,

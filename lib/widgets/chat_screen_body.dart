@@ -814,7 +814,7 @@ class ChatScreenBody extends StatelessWidget {
                           ),
                           child: Center(
                             child: Text(
-                              'Yes, Go to Eazy App',
+                              'Yes, Go to App',
                               style: TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w700,
@@ -1352,7 +1352,7 @@ class ChatScreenBody extends StatelessWidget {
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 Text(
-                                  'Go To Eazy app',
+                                  'Go To App',
                                   style: AppTextStyles.body(
                                     fontSize: 16,
                                     fontWeight: FontWeight.w700,

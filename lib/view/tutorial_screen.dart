@@ -598,7 +598,7 @@ class _TutorialScreenState extends State<TutorialScreen> {
         ),
         const SizedBox(height: 12),
            Text(
-          'Just type naturally- ask questions, get recommendations, explore things, or have a friendly chat. Eazy understands context and provided helpful responses.',
+          'Just type naturally- ask questions, get recommendations, explore things, or have a friendly chat. App understands context and provided helpful responses.',
           textAlign: TextAlign.center,
           style: AppTextStyles.restaurantDescription.copyWith(
             fontSize: 14,
@@ -1107,7 +1107,7 @@ class _TutorialScreenState extends State<TutorialScreen> {
     return Column(
       children: [
          Text(
-          'Why choose eazy?',
+          'Why choose App?',
           textAlign: TextAlign.center,
           style: AppTextStyles.restaurantTitle.copyWith(
             fontSize: 20,
