@@ -26,7 +26,8 @@ enum WidgetEnum {
   choose_card,
   order_tracking,
   online_payment_confirm_order,
-  service_types;
+  service_types,
+  add_dependent;
 
   // Add string values for API communication
   String get value {
@@ -47,7 +48,7 @@ enum FoodCategory {
   food(1),
   grocery(2),
   pharmacy(6),
-  services(25);
+  services(25);//healthCare and services are same
 
   const FoodCategory(this.value);
   

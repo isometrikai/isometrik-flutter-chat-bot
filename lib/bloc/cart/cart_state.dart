@@ -24,8 +24,9 @@ class CartEmpty extends CartState {}
 
 class CartProductAdded extends CartState {
   final String storeCategoryId;
+  final bool needToSendMessage;
 
-  CartProductAdded({required this.storeCategoryId});
+  CartProductAdded({required this.storeCategoryId, this.needToSendMessage = true});
 
 }
 

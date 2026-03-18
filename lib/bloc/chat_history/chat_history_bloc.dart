@@ -17,6 +17,7 @@ class ChatHistoryBloc extends Bloc<ChatHistoryEvent, ChatHistoryState> {
   bool? _isPharmacyChat;
   bool? _isShoppingChat;
   bool? _isServicesChat;
+  bool? _isHealthCareChat;
   // Current search query
   String _currentQuery = '';
 
@@ -46,6 +47,7 @@ class ChatHistoryBloc extends Bloc<ChatHistoryEvent, ChatHistoryState> {
         isGroceryChat: _isGroceryChat,
         isPharmacyChat: _isPharmacyChat,
         isServicesChat: _isServicesChat,
+        isHealthCareChat: _isHealthCareChat,
         query: _currentQuery.isNotEmpty ? _currentQuery : null,
       );
       Utility.closeProgressDialog();
@@ -78,6 +80,7 @@ class ChatHistoryBloc extends Bloc<ChatHistoryEvent, ChatHistoryState> {
         isPharmacyChat: _isPharmacyChat,
         isShoppingChat: _isShoppingChat,
         isServicesChat: _isServicesChat,
+        isHealthCareChat: _isHealthCareChat,
         query: _currentQuery.isNotEmpty ? _currentQuery : null,
       );
       
@@ -115,6 +118,7 @@ class ChatHistoryBloc extends Bloc<ChatHistoryEvent, ChatHistoryState> {
         isPharmacyChat: _isPharmacyChat,
         isShoppingChat: _isShoppingChat,
         isServicesChat: _isServicesChat,
+        isHealthCareChat: _isHealthCareChat,
         query: _currentQuery.isNotEmpty ? _currentQuery : null,
       );
       
@@ -182,6 +186,7 @@ class ChatHistoryBloc extends Bloc<ChatHistoryEvent, ChatHistoryState> {
     _isPharmacyChat = null;
     _isShoppingChat = null;
     _isServicesChat = null;
+    _isHealthCareChat = null;
     _currentQuery = '';
     
     // Set the appropriate filter based on category
@@ -200,6 +205,9 @@ class ChatHistoryBloc extends Bloc<ChatHistoryEvent, ChatHistoryState> {
         break;
       case '💄 Services':
         _isServicesChat = true;
+        break;
+      case '🏥 Health Care':
+        _isHealthCareChat = true;
         break;
       case 'ALL':
       default:
@@ -220,6 +228,7 @@ class ChatHistoryBloc extends Bloc<ChatHistoryEvent, ChatHistoryState> {
         isPharmacyChat: _isPharmacyChat,
         isShoppingChat: _isShoppingChat,
         isServicesChat: _isServicesChat,
+        isHealthCareChat: _isHealthCareChat,
         query: _currentQuery.isNotEmpty ? _currentQuery : null,
       );
       Utility.closeProgressDialog();
@@ -257,6 +266,7 @@ class ChatHistoryBloc extends Bloc<ChatHistoryEvent, ChatHistoryState> {
         isPharmacyChat: _isPharmacyChat,
         isShoppingChat: _isShoppingChat,
         isServicesChat: _isServicesChat,
+        isHealthCareChat: _isHealthCareChat,
         query: _currentQuery.isNotEmpty ? _currentQuery : null,
       );
       // Utility.closeProgressDialog();

@@ -154,9 +154,11 @@ class ChatScreenBody extends StatelessWidget {
             BlocListener<CartBloc, CartState>(
               listener: (context, state) {
                 if (state is CartProductAdded) {
-                  // onHideStoreCards();
-                  // Product added to cart successfully
-                  onSendMessage("I have updated the cart", null, null, state.storeCategoryId);
+                  if (state.needToSendMessage) {
+                    // onHideStoreCards();
+                    // Product added to cart successfully
+                    onSendMessage("I have updated the cart", null, null, state.storeCategoryId);
+                  }
                 } else if (state is CartLoaded) {
                   int cartCount = cartBloc.getTotalProductCount;
                   onUpdateCartCount(cartCount);
@@ -759,7 +761,7 @@ class ChatScreenBody extends StatelessWidget {
               ),
               const SizedBox(height: 16),
                Text(
-                'Leave AI Chat?',
+                'Leave Chat?',
                 style: AppTextStyles.bodyText.copyWith(
                   fontSize: 24,
                   fontWeight: FontWeight.w700,
@@ -769,7 +771,7 @@ class ChatScreenBody extends StatelessWidget {
               ),
               const SizedBox(height: 20),
                Text(
-                'Are you sure you want to leave the chat? Your conversation history will be saved, but you will lose your current context.',
+                'Your current conversation will not be saved.However, you can view your conversation history anytime from the chat menu.',
                 style: AppTextStyles.subtitle.copyWith(
                   fontSize: 14, 
                   color: Color(0xFF242424), 
@@ -778,40 +780,11 @@ class ChatScreenBody extends StatelessWidget {
                 textAlign: TextAlign.left,
               ),
               const SizedBox(height: 40),
-              Row(
+              Column(
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  Expanded(
-                    child: SizedBox(
-                      height: 62,
-                      child: TextButton(
-                        onPressed: () => Navigator.of(context).pop(),
-                        style: TextButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          foregroundColor: AppConstants.appThemeColor,
-                          padding: EdgeInsets.zero,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
-                            side: BorderSide(
-                              color: AppConstants.appThemeColor,
-                              width: 1,
-                            ),
-                          ),
-                        ),
-                        child: Text(
-                          'Stay in chat',
-                          style: AppTextStyles.button.copyWith(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w700,
-                            color: AppConstants.appThemeColor,
-                          ),
-                          overflow: TextOverflow.ellipsis,
-                          maxLines: 1,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
+                  SizedBox(
+                    width: double.infinity,
                     child: SizedBox(
                       height: 62,
                       child: TextButton(
@@ -827,8 +800,8 @@ class ChatScreenBody extends StatelessWidget {
                           }
                         },
                         style: TextButton.styleFrom(
-                          backgroundColor: Colors.transparent,
-                          foregroundColor: Colors.white,
+                           backgroundColor: Colors.white,
+                          foregroundColor: AppConstants.appThemeColor,
                           padding: EdgeInsets.zero,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(16),
@@ -837,11 +810,11 @@ class ChatScreenBody extends StatelessWidget {
                         child: Container(
                           decoration: BoxDecoration(
                             color: AppConstants.appThemeColor,
-                            borderRadius: BorderRadius.circular(16),
+                            borderRadius: BorderRadius.circular(8),
                           ),
                           child: Center(
                             child: Text(
-                              'Continue to app',
+                              'Yes, Go to Eazy App',
                               style: TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w700,
@@ -851,6 +824,38 @@ class ChatScreenBody extends StatelessWidget {
                               maxLines: 1,
                             ),
                           ),
+                        ),
+                      ),
+                    ),
+                  ),
+                 const SizedBox(height: 16),
+                   SizedBox(
+                    width: double.infinity,
+                    child: SizedBox(
+                      height: 62,
+                      child: TextButton(
+                        onPressed: () => Navigator.of(context).pop(),
+                        style: TextButton.styleFrom(
+                          backgroundColor: Colors.transparent,
+                          foregroundColor: Colors.white,
+                          padding: EdgeInsets.zero,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            side: BorderSide(
+                              color: AppConstants.appThemeColor,
+                              width: 1,
+                            ),
+                          ),
+                        ),
+                        child: Text(
+                          'Stay in chat',
+                          style: AppTextStyles.button.copyWith(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                            color: AppConstants.appThemeColor,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
                         ),
                       ),
                     ),
@@ -1858,12 +1863,14 @@ class ChatScreenBody extends StatelessWidget {
                           }else if (action.storeCategoryId == FoodStoreCategoryId.healthCare.value) {
                               SelectTimeScreen.show(
                                 context,
-                                userId: ChatApiServices.instance.userId ?? '', // TODO: Replace with actual userId
+                                userId: action.storeId ?? '', // TODO: Replace with actual userId
                                 storeCategoryId: action.storeCategoryId, // TODO: Replace with actual storeCategoryId
                                 timezone: ChatApiServices.instance.timezone ?? '',
-                                onConfirm: (selectedDate, selectedTimeSlot) {
+                                onConfirm: (String formattedDateTime, int timestamp) {
                                   // Handle confirmation
-                                  print('Selected date: $selectedDate, time: $selectedTimeSlot');
+                                  print('Selected: $formattedDateTime (timestamp: $timestamp)');
+                                  // onSendMessage('I want to book an appointment for: \n$formattedDateTime', '', timestamp.toString());
+                                  onSendMessage('I have selected a schedule: \n$formattedDateTime', '', timestamp.toString());
                                 },
                               );
                           }
@@ -1964,6 +1971,24 @@ class ChatScreenBody extends StatelessWidget {
                         // },
               // ),
             // );
+          }
+        }
+
+        for (final widget in latestActionWidgets.where(
+          (w) => w.type == WidgetEnum.add_dependent.value,
+        )) {
+          for (final action in widget.addDependent) {
+            actionButtons.add(
+              buildActionButton(
+                text: action.buttonText,
+                onTap:
+                    isApiLoading
+                        ? () {}
+                        : () {
+                        OrderService().triggerClickManageScreenOpen({'action': 'add_dependent_healthcare'});
+                        },
+              ),
+            );
           }
         }
 
@@ -2277,17 +2302,17 @@ class ChatScreenBody extends StatelessWidget {
                 store.storeTypeId == FoodCategory.pharmacy.value) {
               onQuantityChangedForGrocery(
                 context,
-                product.parentProductId,
-                product.childProductId,
-                product.unitId,
+                product?.parentProductId ?? '',
+                product?.childProductId ?? '',
+                product?.unitId ?? '',
                 store.storeId,
                 store.storeCategoryId,
                 store.storeTypeId ?? -111,
-                product.variantsCount,
+                product?.variantsCount ?? 0,
                 newQuantity,
                 isIncrease,
-                product.productName,
-                product.productImage,
+                product?.productName ?? '',
+                product?.productImage ?? '',
               );
             } else {
               onQuantityChanged(
@@ -2299,10 +2324,113 @@ class ChatScreenBody extends StatelessWidget {
               );
             }
           },
-          onAddToCartRequested: (product, store) {
-            if ((product.variantsCount > 1 &&
+          onAddToCartRequested: (product, store, doctor) {
+            if (store.isDoctore == true && doctor != null) {
+              DoctorServiceTypeSheet.show(
+                context,
+                doctor: doctor,
+                store: store,
+                onServiceTypeSelected: (selectedType, selectedProduct) {
+                  // Selected: selectedType (DoctorServiceType), selectedProduct (Product? from store)
+                  final int serviceLocationAt;
+                  final String productName;
+                  int? estimatedProductPrice;
+                  switch (selectedType) {
+                    case DoctorServiceType.inCall:
+                      serviceLocationAt = 1;
+                      productName = "Visit at doctor's clinic";
+                      estimatedProductPrice = doctor.pricing?.inCallFee ?? 0;
+                      break;
+                    case DoctorServiceType.outCall:
+                      serviceLocationAt = 2;
+                      productName = "Doctor's at home";
+                      estimatedProductPrice = doctor.pricing?.outCallFee ?? 0;
+                      break;
+                    case DoctorServiceType.teleCall:
+                      serviceLocationAt = 3;
+                      productName = "Tele appointment";
+                      estimatedProductPrice = doctor.pricing?.teleCallFee ?? 0;
+                      break;
+                  }
+
+                  Map<String, dynamic> doctorParams = {
+                    "estimatedProductPrice": estimatedProductPrice,
+                    "productName": productName,
+                    "providerId": doctor.id,
+                    "cartType": 2,
+                    "storeId": store.storeId,
+                    "newQuantity": 0,
+                    "productId": "",
+                    "userType": 1,
+                    "unitId": "",
+                    "isDoctorFlow": true,
+                    "serviceLocationAt": serviceLocationAt,
+                    "longitude": ChatApiServices.instance.longitude ?? 0,
+                    "latitude": ChatApiServices.instance.latitude ?? 0,
+                    "centralProductId": "",
+                    "storeTypeId": store.storeTypeId ?? 25,
+                    "storeCategoryId": store.storeCategoryId,
+                    "offers": {
+                      "discountValue": 0,
+                      "offerFor": 0,
+                      "offerId": "",
+                      "offerName": {},
+                      "status": 0,
+                      "discountType": 0
+                    },
+                    "action": 1
+                  };
+
+                  // Add doctor first; then add product only after first API completes (one by one)
+                  cartBloc.add(
+                    CartAddItemRequested(
+                      storeId: store.storeId,
+                      cartType: 2,
+                      action: 1,
+                      storeCategoryId: store.storeCategoryId,
+                      newQuantity: 0,
+                      storeTypeId: store.storeTypeId ?? 25,
+                      productId: '',
+                      centralProductId: '',
+                      unitId: '',
+                      doctorParams: doctorParams,
+                      needToShowLoaderForCartFetch: selectedProduct == null,
+                      needToSendMessage: selectedProduct == null ? true : false,
+                    ),
+                  );
+
+                  if (selectedProduct != null) {
+                    cartBloc.stream
+                        .firstWhere(
+                          (state) =>
+                              state is CartProductAdded ,
+                        )
+                        .then((state) {
+                      if (state is CartProductAdded) {
+                        cartBloc.add(
+                          CartAddItemRequested(
+                            storeId: store.storeId,
+                            cartType: 2,
+                            action: 1,
+                            storeCategoryId: store.storeCategoryId,
+                            newQuantity: 1,
+                            storeTypeId: store.storeTypeId ?? -111,
+                            productId: selectedProduct.childProductId,
+                            centralProductId: selectedProduct.parentProductId,
+                            unitId: selectedProduct.unitId,
+                            needToShowLoaderForCartFetch: true,
+                            needToSendMessage: true,
+                          ),
+                        );
+                      }
+                    });
+                  }
+                },
+              );
+            } else {
+               if ((product != null && product.variantsCount > 1 &&
                     store.storeTypeId == FoodCategory.food.value) ||
-                (product.variantsCount > 0 &&
+                (product != null && product.variantsCount > 0 &&
                     (store.storeTypeId == FoodCategory.grocery.value ||
                         store.storeTypeId == FoodCategory.pharmacy.value ||
                         store.storeTypeId == FoodCategory.services.value))) {
@@ -2359,12 +2487,13 @@ class ChatScreenBody extends StatelessWidget {
                   newQuantity: 1,
                   // Add 1 item
                   storeTypeId: store.storeTypeId ?? -111,
-                  productId: product.childProductId,
-                  centralProductId: product.parentProductId,
-                  unitId: product.unitId,
+                  productId: product?.childProductId ?? '',
+                  centralProductId: product?.parentProductId ?? '',
+                  unitId: product?.unitId ?? '',
                   needToShowLoaderForCartFetch: false,
                 ),
               );
+            }
             }
           },
         );
@@ -2688,7 +2817,7 @@ class ChatScreenBody extends StatelessWidget {
 
   void onQuantityChanged(
     BuildContext context,
-    Product product,
+    Product? product,
     Store store,
     int newQuantity,
     bool isIncrease,
@@ -2696,7 +2825,7 @@ class ChatScreenBody extends StatelessWidget {
     if (isIncrease == false && newQuantity == 1) {
       //TODO:- 0 Quantity
       int? addToCartOnId;
-      if (product.variantsCount > 1) {
+      if (product != null && product.variantsCount > 1) {
         addToCartOnId = getAddToCartOnId(product.childProductId);
         print("addCartOnID: $addToCartOnId");
       }
@@ -2709,15 +2838,15 @@ class ChatScreenBody extends StatelessWidget {
           storeCategoryId: store.storeCategoryId,
           newQuantity: 0,
           storeTypeId: store.storeTypeId ?? -111,
-          productId: product.childProductId,
-          centralProductId: product.parentProductId,
-          unitId: product.unitId,
+          productId: product?.childProductId ?? '',
+          centralProductId: product?.parentProductId ?? '',
+          unitId: product?.unitId ?? '',
           addToCartOnId: addToCartOnId,
           needToShowLoaderForCartFetch: false,
         ),
       );
     } else if (newQuantity > 0 && isIncrease == true) {
-      if (product.variantsCount > 1) {
+      if (product != null && product.variantsCount > 1) {
         showModalBottomSheet(
           context: context,
           isScrollControlled: true,
@@ -2774,9 +2903,9 @@ class ChatScreenBody extends StatelessWidget {
             storeCategoryId: store.storeCategoryId,
             newQuantity: newQuantity + 1,
             storeTypeId: store.storeTypeId ?? -111,
-            productId: product.childProductId,
-            centralProductId: product.parentProductId,
-            unitId: product.unitId,
+            productId: product?.childProductId ?? '',
+            centralProductId: product?.parentProductId ?? '',
+            unitId: product?.unitId ?? '',
             needToShowLoaderForCartFetch: false,
           ),
         );
@@ -2784,14 +2913,14 @@ class ChatScreenBody extends StatelessWidget {
     } else {
       //TODO:- Remove Quantity
       int? addToCartOnId;
-      if (product.variantsCount > 1) {
+      if (product != null && product.variantsCount > 1) {
         addToCartOnId = getAddToCartOnId(product.childProductId);
         print("addCartOnID: $addToCartOnId");
       }
       int? existingProductQuantity;
       existingProductQuantity = newQuantity;
       if (addToCartOnId != null) {
-        existingProductQuantity = getExistingProductQuantity(product.childProductId, addToCartOnId);
+        existingProductQuantity = getExistingProductQuantity(product?.childProductId ?? '', addToCartOnId);
         print("existingProductQuantity: $existingProductQuantity");
       }
       cartBloc.add(
@@ -2803,9 +2932,9 @@ class ChatScreenBody extends StatelessWidget {
           storeCategoryId: store.storeCategoryId,
           newQuantity: (existingProductQuantity == 1) ? 0 : (existingProductQuantity ?? 0) - 1,
           storeTypeId: store.storeTypeId ?? -111,
-          productId: product.childProductId,
-          centralProductId: product.parentProductId,
-          unitId: product.unitId,
+          productId: product?.childProductId ?? '',
+          centralProductId: product?.parentProductId ?? '',
+          unitId: product?.unitId ?? '',
           addToCartOnId: addToCartOnId,
           needToShowLoaderForCartFetch: false,
         ),

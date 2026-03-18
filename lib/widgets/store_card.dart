@@ -8,16 +8,15 @@ import 'package:chat_bot/services/services.dart';
 class StoreCard extends StatelessWidget {
   final chat.Store store;
   final chat.ChatWidget? storesWidget;
+  final chat.Doctor? doctor;
   final int index;
   final EdgeInsets? margin;
   final VoidCallback? onTap;
   final Function(String, chat.Product, chat.Store, int)? onAddToCart;
   final VoidCallback? onHide; // New callback to hide the widget
-  final Function(chat.Product, chat.Store)?
-  onAddToCartRequested; // New callback for cart requests
+  final Function(chat.Product?, chat.Store, chat.Doctor?)? onAddToCartRequested; // New callback for cart requests
   final List<cart_models.UniversalCartData>? cartData; // Cart data from getCart API
-  final Function(chat.Product, chat.Store, int, bool)?
-  onQuantityChanged; // Callback for quantity changes
+  final Function(chat.Product?, chat.Store, int, bool)? onQuantityChanged; // Callback for quantity changes
   final bool isFromChatHistory;
 
   StoreCard({
@@ -33,6 +32,7 @@ class StoreCard extends StatelessWidget {
     this.cartData, // Add cart data parameter
     this.onQuantityChanged, // Add quantity change callback
     this.isFromChatHistory = false,
+    this.doctor,
   });
 
   @override
@@ -194,7 +194,8 @@ class StoreCard extends StatelessWidget {
                   padding: EdgeInsets.zero,
                   itemBuilder:
                       (context, i) => _ProductPreviewTile(
-                        product: store.products[i],
+                        product: store.isDoctore == false ? store.products[i] : null,
+                        doctor: store.isDoctore == false ? null : store.doctorsList[i],
                         store: store,
                         onAddToCart: onAddToCart,
                         onHide: onHide,
@@ -208,7 +209,7 @@ class StoreCard extends StatelessWidget {
                         isFromChatHistory: isFromChatHistory,
                       ),
                   separatorBuilder: (_, __) => const SizedBox(width: 10),
-                  itemCount: store.products.length,
+                  itemCount: store.isDoctore == false ? store.products.length : store.doctorsList.length,
                 ),
               ),
               if (isFromChatHistory == false) ...[
@@ -286,20 +287,20 @@ class StoreCard extends StatelessWidget {
 }
 
 class _ProductPreviewTile extends StatelessWidget {
-  final chat.Product product;
+  final chat.Product? product;
   final chat.Store store;
+  final chat.Doctor? doctor;
   final Function(String, chat.Product, chat.Store, int)? onAddToCart;
   final VoidCallback? onHide; // New parameter for hiding the widget
-  final Function(chat.Product, chat.Store)?
-  onAddToCartRequested; // New parameter for cart requests
+  final Function(chat.Product?, chat.Store, chat.Doctor?)? onAddToCartRequested; // New parameter for cart requests
   final List<cart_models.UniversalCartData>? cartData; // Cart data from getCart API
-  final Function(chat.Product, chat.Store, int, bool)?
-  onQuantityChanged; // Callback for quantity changes
+  final Function(chat.Product?, chat.Store, int, bool)? onQuantityChanged; // Callback for quantity changes
   final bool isFromChatHistory;
 
   const _ProductPreviewTile({
-    required this.product,
+    this.product,
     required this.store,
+    this.doctor,
     this.onAddToCart,
     this.onHide, // Add the new parameter
     this.onAddToCartRequested, // Add the new parameter
@@ -329,19 +330,21 @@ class _ProductPreviewTile extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    SvgPicture.asset(
-                      AssetPath.get(
-                        product.containsMeat
-                            ? 'images/ic_NonVeg.svg'
-                            : 'images/ic_Veg.svg',
+                    if (store.isDoctore == false && product != null) ...[
+                      SvgPicture.asset(
+                        AssetPath.get(
+                          product!.containsMeat
+                              ? 'images/ic_NonVeg.svg'
+                              : 'images/ic_Veg.svg',
+                        ),
+                        width: 14,
+                        height: 14,
+                        fit: BoxFit.contain,
                       ),
-                      width: 14,
-                      height: 14,
-                      fit: BoxFit.contain,
-                    ),
-                    const SizedBox(height: 5),
+                      const SizedBox(height: 5),
+                    ],
                     Text(
-                      product.productName,
+                      store.isDoctore == false && product != null ? product?.productName ?? '' : ('${doctor?.firstName} ${doctor?.lastName}'),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: AppTextStyles.productTitle.copyWith(
@@ -350,32 +353,34 @@ class _ProductPreviewTile extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 4),
-                    Row(
-                      children: [
-                        Text(
-                          '${product.currency} ${product.finalPrice.toStringAsFixed(0)}',
-                          style: AppTextStyles.productPrice.copyWith(
-                            color: const Color(0xFF242424),
-                            fontSize: 12,
-                          ),
-                        ),
-                        if (product.finalPriceList.basePrice !=
-                            product.finalPriceList.finalPrice) ...[
-                          const SizedBox(width: 5),
-                          Flexible(
-                            child: Text(
-                              '${product.currencySymbol}${product.finalPriceList.basePrice.toStringAsFixed(0)}',
-                              overflow: TextOverflow.ellipsis,
-                              style: AppTextStyles.productPrice.copyWith(
-                                decoration: TextDecoration.lineThrough,
-                                color: const Color(0xFF979797),
-                                fontSize: 12,
-                              ),
+                    if (store.isDoctore == false && product != null) ...[
+                      Row(
+                        children: [
+                          Text(
+                            '${product?.currency} ${product?.finalPrice.toStringAsFixed(0)}',
+                            style: AppTextStyles.productPrice.copyWith(
+                              color: const Color(0xFF242424),
+                              fontSize: 12,
                             ),
                           ),
+                          if (product?.finalPriceList.basePrice !=
+                              product?.finalPriceList.finalPrice) ...[
+                            const SizedBox(width: 5),
+                            Flexible(
+                              child: Text(
+                                '${product!.currencySymbol}${product!.finalPriceList.basePrice.toStringAsFixed(0)}',
+                                overflow: TextOverflow.ellipsis,
+                                style: AppTextStyles.productPrice.copyWith(
+                                  decoration: TextDecoration.lineThrough,
+                                  color: const Color(0xFF979797),
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ),
+                          ],
                         ],
-                      ],
-                    ),
+                      ),
+                    ]
                   ],
                 ),
               ),
@@ -388,28 +393,32 @@ class _ProductPreviewTile extends StatelessWidget {
                       width: 78,
                       height: 78,
                       // color: const Color(0xFFD9D9D9),
-                      child:
-                          product.productImage.isNotEmpty
+                      child: () {
+                          final String imageUrl = store.isDoctore == false && product != null
+                              ? product?.productImage ?? ''
+                              : doctor?.profilePic ?? '';
+                          return imageUrl.isNotEmpty
                               ? Image.network(
-                                product.productImage,
-                                fit: BoxFit.cover,
-                                loadingBuilder: (
-                                  context,
-                                  child,
-                                  loadingProgress,
-                                ) {
-                                  if (loadingProgress == null) return child;
-                                  return _placeholderProductImage();
-                                },
-                                errorBuilder:
-                                    (context, error, stackTrace) =>
-                                        _placeholderProductImage(),
-                              )
-                              : _placeholderProductImage(),
+                                  imageUrl,
+                                  fit: BoxFit.cover,
+                                  loadingBuilder: (
+                                    context,
+                                    child,
+                                    loadingProgress,
+                                  ) {
+                                    if (loadingProgress == null) return child;
+                                    return _placeholderProductImage();
+                                  },
+                                  errorBuilder:
+                                      (context, error, stackTrace) =>
+                                          _placeholderProductImage(),
+                                )
+                              : _placeholderProductImage();
+                        }(),
                     ),
                   ),
                   if (((store.storeTypeId ?? store.type) != FoodCategory.food.value) && ((store.storeTypeId ?? store.type) != FoodCategory.services.value)) ...[
-                    if (product.instock == false) ...[
+                    if (product?.instock == false) ...[
                       Positioned(
                         right: 4,
                         bottom: 4,
@@ -438,7 +447,7 @@ class _ProductPreviewTile extends StatelessWidget {
               Positioned(
                   right: 0, bottom: -4, child: _buildAddButton(context)),
           ] else ...[
-              if (product.instock == true) ...[
+              if (product != null && product?.instock == true) ...[
                 Positioned(
                     right: 0, bottom: -4, child: _buildAddButton(context)),
               ],
@@ -449,14 +458,14 @@ class _ProductPreviewTile extends StatelessWidget {
     );
   }
 
-   int? _getProductCartQuantity() {
-    if (cartData == null) return null;
+  int? _getProductCartQuantity() {
+    if (cartData == null || product == null) return null;
     
     try {
       // Find all products with matching ID and sum their quantities
       final matchingProducts = cartData!
           .expand((cartItem) => cartItem.sellers)
-          .expand((seller) => seller.products.where((p) => p.id == product.childProductId))
+          .expand((seller) => seller.products.where((p) => p.id == product?.childProductId))
           .toList();
       
       if (matchingProducts.isEmpty) {
@@ -549,7 +558,7 @@ class _ProductPreviewTile extends StatelessWidget {
             // Decrease button
             GestureDetector(
               onTap: () {
-                if (onQuantityChanged != null) {
+                if (onQuantityChanged != null && product != null) {
                   onQuantityChanged!(product, store, cartQuantity, false);
                 }
               },
@@ -579,7 +588,7 @@ class _ProductPreviewTile extends StatelessWidget {
             // Increase button
             GestureDetector(
               onTap: () {
-                if (onQuantityChanged != null) {
+                if (onQuantityChanged != null && product != null) {
                   onQuantityChanged!(product, store, cartQuantity, true);
                 }
               },
@@ -604,7 +613,11 @@ class _ProductPreviewTile extends StatelessWidget {
       return GestureDetector(
         onTap: () {
           if (onAddToCartRequested != null) {
-            onAddToCartRequested!(product, store);
+            if (doctor != null) {
+              onAddToCartRequested!(product, store, doctor);
+            } else {
+              onAddToCartRequested!(product, store, null);
+            }
           }
           // Call onHide callback if provided
           if (onHide != null) {
