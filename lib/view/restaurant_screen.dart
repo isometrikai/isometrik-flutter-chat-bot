@@ -880,8 +880,9 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
                           DoctorServiceTypeSheet.show(
                             context,
                             doctor: doctor,
-                            onServiceTypeSelected: (selectedType) {
-                              // Selected: selectedType (DoctorServiceType.inCall | .outCall | .teleCall)
+                            store: store,
+                            onServiceTypeSelected: (selectedType, selectedProduct) {
+                              // Selected: selectedType (DoctorServiceType), selectedProduct (Product? from store)
                               final int serviceLocationAt;
                               final String productName;
                               int? estimatedProductPrice;
@@ -945,6 +946,31 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
                                   doctorParams: doctorParams,
                                 ),
                               );
+                               if (selectedProduct != null) {
+                                  cartBloc.stream
+                                      .firstWhere(
+                                        (state) =>
+                                            state is CartProductAdded ,
+                                      )
+                                      .then((state) {
+                                    if (state is CartProductAdded) {
+                                      cartBloc.add(
+                                        CartAddItemRequested(
+                                          storeId: store.storeId,
+                                          cartType: 2,
+                                          action: 1,
+                                          storeCategoryId: store.storeCategoryId,
+                                          newQuantity: 1,
+                                          storeTypeId: store.storeTypeId ?? -111,
+                                          productId: selectedProduct.childProductId,
+                                          centralProductId: selectedProduct.parentProductId,
+                                          unitId: selectedProduct.unitId,
+                                          needToShowLoaderForCartFetch: true,
+                                        ),
+                                      );
+                                    }
+                                  });
+                                }
                             },
                           );
                         }else {

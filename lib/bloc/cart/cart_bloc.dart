@@ -224,7 +224,7 @@ class CartBloc extends Bloc<CartEvent, CartState> {
 
       if (result.isSuccess) {
         isCartAPICalled = true;
-        emit(CartProductAdded(storeCategoryId: event.storeCategoryId));
+        emit(CartProductAdded(storeCategoryId: event.storeCategoryId, needToSendMessage: event.needToSendMessage));
         add(CartFetchRequested(needToShowLoader: event.needToShowLoaderForCartFetch));
       } else {
         add(CartFetchRequested(needToShowLoader: event.needToShowLoaderForCartFetch));

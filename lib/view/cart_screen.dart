@@ -488,10 +488,10 @@ class _CartScreenState extends State<CartScreen> {
         String formattedAddOns = '';
         if (product.selectedAddOns != null && product.selectedAddOns!.isNotEmpty) {
           formattedAddOns = _formatSelectedAddOns(product.selectedAddOns!);
-        }else if (product.attributes != null && product.attributes!.isNotEmpty && cartData.storeTypeId != FoodCategory.food.value) {
-          formattedAddOns = _formatProductAttributes(product.attributes!);
         }else if (cartData.storeCategoryId == FoodStoreCategoryId.healthCare.value) {
           formattedAddOns = "Service: ${productName}";
+        }else if (product.attributes != null && product.attributes!.isNotEmpty && cartData.storeTypeId != FoodCategory.food.value) {
+          formattedAddOns = _formatProductAttributes(product.attributes!);
         }
         
         widgetActions.add(WidgetAction(

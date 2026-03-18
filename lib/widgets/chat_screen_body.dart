@@ -154,9 +154,11 @@ class ChatScreenBody extends StatelessWidget {
             BlocListener<CartBloc, CartState>(
               listener: (context, state) {
                 if (state is CartProductAdded) {
-                  // onHideStoreCards();
-                  // Product added to cart successfully
-                  onSendMessage("I have updated the cart", null, null, state.storeCategoryId);
+                  if (state.needToSendMessage) {
+                    // onHideStoreCards();
+                    // Product added to cart successfully
+                    onSendMessage("I have updated the cart", null, null, state.storeCategoryId);
+                  }
                 } else if (state is CartLoaded) {
                   int cartCount = cartBloc.getTotalProductCount;
                   onUpdateCartCount(cartCount);
@@ -2327,8 +2329,9 @@ class ChatScreenBody extends StatelessWidget {
               DoctorServiceTypeSheet.show(
                 context,
                 doctor: doctor,
-                onServiceTypeSelected: (selectedType) {
-                  // Selected: selectedType (DoctorServiceType.inCall | .outCall | .teleCall)
+                store: store,
+                onServiceTypeSelected: (selectedType, selectedProduct) {
+                  // Selected: selectedType (DoctorServiceType), selectedProduct (Product? from store)
                   final int serviceLocationAt;
                   final String productName;
                   int? estimatedProductPrice;
@@ -2378,6 +2381,7 @@ class ChatScreenBody extends StatelessWidget {
                     "action": 1
                   };
 
+                  // Add doctor first; then add product only after first API completes (one by one)
                   cartBloc.add(
                     CartAddItemRequested(
                       storeId: store.storeId,
@@ -2390,8 +2394,37 @@ class ChatScreenBody extends StatelessWidget {
                       centralProductId: '',
                       unitId: '',
                       doctorParams: doctorParams,
+                      needToShowLoaderForCartFetch: selectedProduct == null,
+                      needToSendMessage: selectedProduct == null ? true : false,
                     ),
                   );
+
+                  if (selectedProduct != null) {
+                    cartBloc.stream
+                        .firstWhere(
+                          (state) =>
+                              state is CartProductAdded ,
+                        )
+                        .then((state) {
+                      if (state is CartProductAdded) {
+                        cartBloc.add(
+                          CartAddItemRequested(
+                            storeId: store.storeId,
+                            cartType: 2,
+                            action: 1,
+                            storeCategoryId: store.storeCategoryId,
+                            newQuantity: 1,
+                            storeTypeId: store.storeTypeId ?? -111,
+                            productId: selectedProduct.childProductId,
+                            centralProductId: selectedProduct.parentProductId,
+                            unitId: selectedProduct.unitId,
+                            needToShowLoaderForCartFetch: true,
+                            needToSendMessage: true,
+                          ),
+                        );
+                      }
+                    });
+                  }
                 },
               );
             } else {
