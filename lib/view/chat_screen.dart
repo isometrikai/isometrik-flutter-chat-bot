@@ -693,15 +693,15 @@ class _ChatScreenState extends State<ChatScreen> {
 
   // Method to hide store cards when Add button is clicked
   void _hideStoreCards() {
-    setState(() {
-      // Find the last bot message with store cards and hide them
-      for (int i = messages.length - 1; i >= 0; i--) {
-        if (messages[i].isBot && messages[i].hasStoreCards) {
-          messages[i] = messages[i].copyWith(hasStoreCards: false);
-          break;
-        }
-      }
-    });
+    // setState(() {
+    //   // Find the last bot message with store cards and hide them
+    //   for (int i = messages.length - 1; i >= 0; i--) {
+    //     if (messages[i].isBot && messages[i].hasStoreCards) {
+    //       messages[i] = messages[i].copyWith(hasStoreCards: false);
+    //       break;
+    //     }
+    //   }
+    // });
   }
 
   Future<void> _initializeSpeechService() async {
@@ -795,9 +795,9 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   Future<void> _cancelSpeechRecording() async {
-    if (!_isRecording) {
-      return;
-    }
+    // if (!_isRecording) {
+    //   return;
+    // }
 
     // Haptic feedback for cancel
     HapticFeedback.lightImpact();

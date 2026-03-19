@@ -278,22 +278,22 @@ class _DoctorServiceTypeSheetState extends State<DoctorServiceTypeSheet> {
             ),
           ),
           const SizedBox(height: 16),
-          SizedBox(
-            height: 48,
-            child: ElevatedButton(
-              onPressed: _selectedType == null
-                  ? null
-                  : () => widget.onConfirm?.call(_selectedType!, _selectedProduct),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppConstants.appThemeColor,
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-              child: const Text('Confirm'),
-            ),
-          ),
+          // SizedBox(
+          //   height: 48,
+          //   child: ElevatedButton(
+          //     onPressed: _selectedType == null
+          //         ? null
+          //         : () => widget.onConfirm?.call(_selectedType!, _selectedProduct),
+          //     style: ElevatedButton.styleFrom(
+          //       backgroundColor: AppConstants.appThemeColor,
+          //       foregroundColor: Colors.white,
+          //       shape: RoundedRectangleBorder(
+          //         borderRadius: BorderRadius.circular(12),
+          //       ),
+          //     ),
+          //     child: const Text('Confirm'),
+          //   ),
+          // ),
         ],
       ),
     );
