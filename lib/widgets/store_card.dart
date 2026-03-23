@@ -233,6 +233,10 @@ class StoreCard extends StatelessWidget {
                   SvgPicture.asset(
                     AssetPath.get('images/ic_eazy_app.svg'),
                     fit: BoxFit.contain,
+                    colorFilter: ColorFilter.mode(
+                      AppConstants.appThemeColor, // Your desired color
+                      BlendMode.srcIn,
+                    ),
                   ),
                   const SizedBox(width: 5),
                   Text(

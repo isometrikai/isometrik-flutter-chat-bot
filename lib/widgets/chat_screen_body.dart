@@ -168,6 +168,11 @@ class ChatScreenBody extends StatelessWidget {
                   print('CartBloc CartEmpty: Setting cart count to 0');
                   onUpdateCartCount(0);
                   onUpdateGotStripePaymentCallback(false);
+                }else if (state is CartError) {
+                  BlackToastView.show(
+                    context,
+                    state.message,
+                  );
                 }
               },
             ),

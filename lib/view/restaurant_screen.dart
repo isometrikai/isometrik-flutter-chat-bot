@@ -101,6 +101,11 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
         _updateCartData(state.rawCartData!.data);
       } else if (state is CartEmpty) {
         _updateCartData([]);
+      } else if (state is CartError) {
+        BlackToastView.show(
+          context,
+          state.message,
+        );
       }
     });
   }
