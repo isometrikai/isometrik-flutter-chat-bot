@@ -1737,7 +1737,10 @@ class ChatScreenBody extends StatelessWidget {
                     isApiLoading
                         ? () {}
                         : () {
-                          if (action.storeTypeId ==
+                          if (action.storeCategoryId == FoodStoreCategoryId.healthCare.value) {
+                             print("action: ${action.toJson()}");
+                            OrderService().triggerStoreOrder(action.toJson());
+                          }else if (action.storeTypeId ==
                                   FoodCategory.grocery.value ||
                               action.storeTypeId ==
                                   FoodCategory.pharmacy.value ||
