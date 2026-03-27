@@ -95,12 +95,14 @@ class ChatWidget {
   final int widgetId;
   final int widgetsType;
   final String type;
+  final bool isTableBookingFlow;
   final List<dynamic> widget; // Raw JSON data
 
   ChatWidget({
     required this.widgetId,
     required this.widgetsType,
     required this.type,
+    required this.isTableBookingFlow,
     required this.widget,
   });
 
@@ -109,6 +111,7 @@ class ChatWidget {
       widgetId: json['widgetId'] ?? 0,
       widgetsType: json['widgets_type'] ?? 0,
       type: json['type'] ?? '',
+      isTableBookingFlow: json['is_table_booking_flow'] ?? false,
       widget: (json['widget'] as List<dynamic>?) ?? [],
     );
   }
@@ -118,6 +121,7 @@ class ChatWidget {
       'widgetId': widgetId,
       'widgets_type': widgetsType,
       'type': type,
+      'is_table_booking_flow': isTableBookingFlow,
       'widget': widget,
     };
   }

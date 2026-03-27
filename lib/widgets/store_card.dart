@@ -17,7 +17,9 @@ class StoreCard extends StatelessWidget {
   final Function(chat.Product?, chat.Store, chat.Doctor?)? onAddToCartRequested; // New callback for cart requests
   final List<cart_models.UniversalCartData>? cartData; // Cart data from getCart API
   final Function(chat.Product?, chat.Store, int, bool)? onQuantityChanged; // Callback for quantity changes
+  final Function(chat.Store)? onTableBookingTap;
   final bool isFromChatHistory;
+  final bool isTableBookingFlow;
 
   StoreCard({
     super.key,
@@ -33,6 +35,8 @@ class StoreCard extends StatelessWidget {
     this.onQuantityChanged, // Add quantity change callback
     this.isFromChatHistory = false,
     this.doctor,
+    this.isTableBookingFlow = false,
+    this.onTableBookingTap,
   });
 
   @override
@@ -186,7 +190,8 @@ class StoreCard extends StatelessWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 12),
+            if (isTableBookingFlow == false) ...[
+             const SizedBox(height: 12),
               SizedBox(
                 height: 113,
                 child: ListView.separated(
@@ -212,41 +217,75 @@ class StoreCard extends StatelessWidget {
                   itemCount: store.isDoctore == false ? store.products.length : store.doctorsList.length,
                 ),
               ),
+            ],
               if (isFromChatHistory == false) ...[
             const SizedBox(height: 15),
-            GestureDetector(
-              onTap: () {
-                if (onTap != null) {
-                  onTap!.call();
-                  return;
-                }
-                if (storesWidget != null) {
-                  print('StoreCard: onTap called - $index');
-                  final Map<String, dynamic>? storeJson = storesWidget!.getRawStore(index);
-                  print('StoreCard: storeJson - $storeJson');
-                  OrderService().triggerStoreOrder(storeJson ?? {});
-                }
-              },
-              child: Row(
-                children: [
-                  const SizedBox(width: 3),
-                  SvgPicture.asset(
-                    AssetPath.get('images/ic_eazy_app.svg'),
-                    fit: BoxFit.contain,
-                    colorFilter: ColorFilter.mode(
-                      AppConstants.appThemeColor, // Your desired color
-                      BlendMode.srcIn,
+            Row(
+              children: [
+                GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: () {
+                    if (onTap != null) {
+                      onTap!.call();
+                      return;
+                    }
+                    if (storesWidget != null) {
+                      print('StoreCard: onTap called - $index');
+                      final Map<String, dynamic>? storeJson =
+                          storesWidget!.getRawStore(index);
+                      print('StoreCard: storeJson - $storeJson');
+                      OrderService().triggerStoreOrder(storeJson ?? {});
+                    }
+                  },
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const SizedBox(width: 3),
+                      SvgPicture.asset(
+                        AssetPath.get('images/ic_eazy_app.svg'),
+                        fit: BoxFit.contain,
+                        colorFilter: ColorFilter.mode(
+                          AppConstants.appThemeColor, // Your desired color
+                          BlendMode.srcIn,
+                        ),
+                      ),
+                      const SizedBox(width: 5),
+                      Text(
+                        'Open in app',
+                        style: AppTextStyles.restaurantDescription.copyWith(
+                          color: AppConstants.appThemeColor,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const Spacer(),
+                if (isTableBookingFlow == true)
+                  GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onTap: () {
+                      if (onTap != null) {
+                        onTap!.call();
+                        return;
+                      }
+                      if (storesWidget != null) {
+                        onTableBookingTap?.call(store);
+                      }
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 3),
+                      child: Text(
+                        'Book a Table',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppTextStyles.restaurantDescription.copyWith(
+                          color: AppConstants.appThemeColor,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
                     ),
                   ),
-                  const SizedBox(width: 5),
-                  Text(
-                    'Open in app',
-                    style: AppTextStyles.restaurantDescription.copyWith(
-                      color: AppConstants.appThemeColor,
-                    ),
-                  ),
-                ],
-              ),
+              ],
             ),
             ],
           ],

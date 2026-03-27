@@ -1645,6 +1645,10 @@ class ChatScreenBody extends StatelessWidget {
                               builder: (context) {
                                 return RestaurantScreen(
                                   actionData: action,
+                                  isTableBookingFlow: widget.isTableBookingFlow,
+                                  onTableBookingTap: (store) {
+                                    onSendMessage('I want to book a table for ${store.storename}');
+                                  },
                                   onCheckout: (value) {
                                     if (isCartAPICalled == true) {
                                       onUpdateCartCount(
@@ -2301,8 +2305,12 @@ class ChatScreenBody extends StatelessWidget {
           index: index,
           cartData: cartBloc.cartData,
           isFromChatHistory: isFromHistory,
+          isTableBookingFlow: storesWidget?.isTableBookingFlow ?? false,
           onAddToCart: (message, product, store, quantity) {
             onSendMessage(message);
+          },
+          onTableBookingTap: (store) {
+            onSendMessage('I want to book a table for ${store.storename}');
           },
           // onHide: onHideStoreCards,
           onQuantityChanged: (product, store, newQuantity, isIncrease) {

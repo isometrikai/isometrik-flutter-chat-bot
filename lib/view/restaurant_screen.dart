@@ -11,15 +11,20 @@ import 'package:chat_bot/services/services.dart';
 
 class RestaurantScreen extends StatefulWidget {
   final chat.WidgetAction? actionData;
+  final bool isTableBookingFlow;
   final Function(bool)? onCheckout;
+  final Function(chat.Store)? onTableBookingTap;
+
 
   // final CartBloc? cartBloc; // Optional CartBloc parameter
 
   const RestaurantScreen({
     super.key,
     this.actionData,
+    this.isTableBookingFlow = false,
     this.onCheckout,
     // this.cartBloc, // Optional parameter
+    this.onTableBookingTap,
   });
 
   @override
@@ -868,6 +873,7 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
           itemBuilder: (context, index) {
               try {
                 return StoreCard(
+                  isTableBookingFlow: widget.isTableBookingFlow,
                   store: restaurants[index],
                   storesWidget: null,
                   index: index,
@@ -879,6 +885,10 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
                         restaurants[index].toJson();
                     OrderService().triggerStoreOrder(storeJson);
                     // Navigator.pop(context);
+                  },
+                  onTableBookingTap: (store) {
+                    widget.onTableBookingTap?.call(store);
+                    Navigator.pop(context);
                   },
                   onAddToCartRequested: (product, store, doctor) {
                     if (store.isDoctore == true && doctor != null) {
