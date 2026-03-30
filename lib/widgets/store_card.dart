@@ -92,8 +92,14 @@ class StoreCard extends StatelessWidget {
                             color: AppConstants.appThemeColor,
                           ),
                           const SizedBox(width: 4),
-                          Text(
-                            store.avgRating.toStringAsFixed(1),
+                          // Text(
+                          //   store.avgRating.toStringAsFixed(1),
+                          //   style: AppTextStyles.restaurantDescription.copyWith(
+                          //     color: const Color(0xFF242424),
+                          //   ),
+                          // ),
+                           Text(
+                            store.cuisineDetails.toStringAsFixed(1),
                             style: AppTextStyles.restaurantDescription.copyWith(
                               color: const Color(0xFF242424),
                             ),
@@ -230,25 +236,25 @@ class StoreCard extends StatelessWidget {
                       return;
                     }
                     if (storesWidget != null) {
-                      print('StoreCard: onTap called - $index');
-                      final Map<String, dynamic>? storeJson =
-                          storesWidget!.getRawStore(index);
-                      print('StoreCard: storeJson - $storeJson');
-                      OrderService().triggerStoreOrder(storeJson ?? {});
+                      // print('StoreCard: onTap called - $index');
+                      // final Map<String, dynamic>? storeJson =
+                      //     storesWidget!.getRawStore(index);
+                      // print('StoreCard: storeJson - $storeJson');
+                      // OrderService().triggerStoreOrder(storeJson ?? {});
                     }
                   },
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       const SizedBox(width: 3),
-                      SvgPicture.asset(
-                        AssetPath.get('images/ic_eazy_app.svg'),
-                        fit: BoxFit.contain,
-                        colorFilter: ColorFilter.mode(
-                          AppConstants.appThemeColor, // Your desired color
-                          BlendMode.srcIn,
-                        ),
-                      ),
+                      // SvgPicture.asset(
+                      //   AssetPath.get('images/ic_eazy_app.svg'),
+                      //   fit: BoxFit.contain,
+                      //   colorFilter: ColorFilter.mode(
+                      //     AppConstants.appThemeColor, // Your desired color
+                      //     BlendMode.srcIn,
+                      //   ),
+                      // ),
                       const SizedBox(width: 5),
                       Text(
                         'Open in app',
@@ -374,16 +380,16 @@ class _ProductPreviewTile extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     if (store.isDoctore == false && product != null) ...[
-                      SvgPicture.asset(
-                        AssetPath.get(
-                          product!.containsMeat
-                              ? 'images/ic_NonVeg.svg'
-                              : 'images/ic_Veg.svg',
-                        ),
-                        width: 14,
-                        height: 14,
-                        fit: BoxFit.contain,
-                      ),
+                      // SvgPicture.asset(
+                      //   AssetPath.get(
+                      //     product!.containsMeat
+                      //         ? 'images/ic_NonVeg.svg'
+                      //         : 'images/ic_Veg.svg',
+                      //   ),
+                      //   width: 14,
+                      //   height: 14,
+                      //   fit: BoxFit.contain,
+                      // ),
                       const SizedBox(height: 5),
                     ],
                     Text(

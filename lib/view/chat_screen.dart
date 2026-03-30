@@ -719,9 +719,9 @@ class _ChatScreenState extends State<ChatScreen> {
             setState(() {
               print("recognizedText: $_isRecording");
               _messageController.text = recognizedText;
-              if (_isRecording == false && recognizedText.isNotEmpty) {
-                _messageController.clear();
-              }
+              // if (_isRecording == false && recognizedText.isNotEmpty) {
+              //   _messageController.clear();
+              // }
             });
           }
         });
@@ -846,7 +846,7 @@ class _ChatScreenState extends State<ChatScreen> {
       _messageController.dispose();
       _scrollController.dispose();
       _messageFocusNode.dispose();
-      _launchBloc.close();
+      // _launchBloc.close();
       
       // Clear speech service callback
       _speechService.clearOnTextUpdateCallback();
@@ -991,7 +991,7 @@ class _ChatScreenState extends State<ChatScreen> {
               // Top graphic group with shimmer
               SizedBox(
                 width: 110,
-                height: 110,
+                // height: 110,
                 child: Stack(
                   clipBehavior: Clip.none,
                   children: [
