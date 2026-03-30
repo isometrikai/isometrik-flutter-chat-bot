@@ -881,9 +881,9 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
                   // Pass cart data to StoreCard
                   onTap: () {
                     // Pass the entire store object as JSON, just like in Chat screen
-                    final Map<String, dynamic> storeJson =
-                        restaurants[index].toJson();
-                    OrderService().triggerStoreOrder(storeJson);
+                    // final Map<String, dynamic> storeJson =
+                    //     restaurants[index].toJson();
+                    // OrderService().triggerStoreOrder(storeJson);
                     // Navigator.pop(context);
                   },
                   onTableBookingTap: (store) {
