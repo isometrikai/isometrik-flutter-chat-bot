@@ -258,7 +258,7 @@ class _ChatScreenState extends State<ChatScreen> {
     }
   }
 
-  void _sendMessage(String text, [String? scheduleLaterStaffId, String? serviceRequestedTime, String? storeCategoryId]) {
+  void _sendMessage(String text, [String? scheduleLaterStaffId, String? serviceRequestedTime, String? storeCategoryId, Map<String, dynamic>? dict]) {
     if (text.trim().isEmpty) return;
 
     // Prepare: hide stores/products from the last bot message if present
@@ -285,6 +285,7 @@ class _ChatScreenState extends State<ChatScreen> {
       }else {
         _apiData = {
           ..._apiData,
+          ...dict ?? {},
           'storeCategoryId': storeCategoryId,
         };
       }
@@ -672,7 +673,8 @@ class _ChatScreenState extends State<ChatScreen> {
                     widget.type == WidgetEnum.staff_selection.value ||
                     widget.type == WidgetEnum.prescription_screen.value ||
                     widget.type == WidgetEnum.online_payment_confirm_order.value ||
-                    widget.type == WidgetEnum.add_dependent.value,
+                    widget.type == WidgetEnum.add_dependent.value ||
+                    widget.type == WidgetEnum.choose_date.value,
               )
               .toList();
     });

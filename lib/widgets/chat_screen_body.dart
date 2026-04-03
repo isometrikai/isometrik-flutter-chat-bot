@@ -22,7 +22,7 @@ class ChatScreenBody extends StatelessWidget {
   final GreetingResponse? greetingData;
   final Set<String> selectedOptionMessages;
   final List<ChatMessage> messages;
-  final Function(String, [String?, String?, String?]) onSendMessage;
+  final Function(String, [String?, String?, String?, Map<String, dynamic>?]) onSendMessage;
   final Function(ChatResponse) onHandleChatResponse;
   final Function(List<ChatHistoryDetail>) onHandleChatHistoryResponse;
   final VoidCallback onScrollToBottom;
@@ -199,6 +199,7 @@ class ChatScreenBody extends StatelessWidget {
                             .map((e) => e.toString())
                             .toList()
                         : null,
+                    tableBookingData: apiData['table_booking'] ?? {},
                   );
                   bloc.add(event);
                   onClearPendingMessage();
@@ -1082,10 +1083,6 @@ class ChatScreenBody extends StatelessWidget {
         greetingData?.greeting.isNotEmpty == true
             ? greetingData!.greeting
             : 'Good evening';
-    final String subtitleText =
-        greetingData?.subtitle.isNotEmpty == true
-            ? greetingData!.subtitle
-            : 'Your intelligent life assistant is ready to help';
     final String weatherText =
         greetingData?.weatherText.isNotEmpty == true
             ? greetingData!.weatherText
@@ -1837,6 +1834,47 @@ class ChatScreenBody extends StatelessWidget {
                         : () async {
                           OrderService().triggerAddCardOpen();
                         },
+              ),
+            );
+          }
+        }
+
+        for (final widget in latestActionWidgets.where(
+          (w) => w.type == WidgetEnum.choose_date.value,
+        )) {
+          for (final action in widget.chooseDate) {
+            actionButtons.add(
+              buildActionButton(
+                text: action.buttonText,
+                onTap: () {
+                  // OrderService().triggerChooseDateScreenOpen();
+                   SelectTimeScreen.show(
+                    context,
+                    userId:
+                        action.storeId ??
+                        '', // TODO: Replace with actual userId
+                    storeCategoryId:
+                        action
+                            .storeCategoryId, // TODO: Replace with actual storeCategoryId
+                    timezone: ChatApiServices.instance.timezone ?? '',
+                    isForTableBooking: true,
+                    onTableBookingConfirm: (String selectedDateIso, String showDate) {
+                      final Map<String, dynamic>? dict = {
+                       "table_booking": {
+                            "booking_date": selectedDateIso,
+                            "booking_time": ""
+                        },
+                      };
+                      onSendMessage(
+                        'I want to book for $showDate',
+                        null,
+                        null,
+                        null,
+                        dict,
+                      );
+                    },
+                  );
+                },
               ),
             );
           }

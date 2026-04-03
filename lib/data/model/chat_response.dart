@@ -138,6 +138,7 @@ class ChatWidget {
   bool get isChooseCardWidget => type == WidgetEnum.choose_card.value;
   bool get isAddAddressWidget => type == WidgetEnum.add_address.value;
   bool get isAddPaymentWidget => type == WidgetEnum.add_payment.value;
+  bool get isChooseDateWidget => type == WidgetEnum.choose_date.value;
   bool get isScheduledLaterWidget => type == WidgetEnum.schedule_later.value;
   bool get isSelectStaffWidget => type == WidgetEnum.staff_selection.value;
   bool get isPrescriptionScreenWidget => type == WidgetEnum.prescription_screen.value;
@@ -239,6 +240,11 @@ class ChatWidget {
 
   // Get add_payment actions (converted to models)
   List<WidgetAction> get addPayment => isAddPaymentWidget
+      ? widget.map((e) => WidgetAction.fromJson(e as Map<String, dynamic>)).toList()
+      : [];
+
+  // Get choose_date actions (converted to models)
+  List<WidgetAction> get chooseDate => isChooseDateWidget
       ? widget.map((e) => WidgetAction.fromJson(e as Map<String, dynamic>)).toList()
       : [];
 

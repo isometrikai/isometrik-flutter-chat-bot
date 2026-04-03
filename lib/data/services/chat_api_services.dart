@@ -93,6 +93,7 @@ class ChatApiServices {
     String serviceRequestedTime = "",
     String storeCategoryId = "",
     List<String> prescriptionImageUrls = const [],
+    Map<String, dynamic> tableBookingData = const {},
   }) async {
     final body = {
       'user_id': _userId,
@@ -118,6 +119,7 @@ class ChatApiServices {
       'service_requested_time': serviceRequestedTime,
       'store_category_id': storeCategoryId,
       'prescription_image_urls': prescriptionImageUrls,
+      'table_booking': tableBookingData,
     };
 
     // Match existing endpoint used elsewhere

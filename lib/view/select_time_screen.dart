@@ -10,7 +10,9 @@ class SelectTimeScreen extends StatefulWidget {
   final String userId;
   final String storeCategoryId;
   final String timezone;
+  final bool isForTableBooking;
   final Function(String selectedTimeDate,int timestamp)? onConfirm;
+  final Function(String selectedDate, String showDate)? onTableBookingConfirm;
   
   const SelectTimeScreen({
     super.key,
@@ -18,6 +20,8 @@ class SelectTimeScreen extends StatefulWidget {
     required this.storeCategoryId,
     required this.timezone,
     this.onConfirm,
+    this.isForTableBooking = false,
+    this.onTableBookingConfirm,
   });
 
   /// Present the SelectTimeScreen as a modal bottom sheet
@@ -26,7 +30,9 @@ class SelectTimeScreen extends StatefulWidget {
     required String userId,
     required String storeCategoryId,
     required String timezone,
+    bool isForTableBooking = false,
     Function(String selectedTimeDate,int timestamp)? onConfirm,
+    Function(String selectedDate, String showDate)? onTableBookingConfirm,
   }) async {
     return showModalBottomSheet(
       context: context,
@@ -41,6 +47,8 @@ class SelectTimeScreen extends StatefulWidget {
           storeCategoryId: storeCategoryId,
           timezone: timezone,
           onConfirm: onConfirm,
+          isForTableBooking: isForTableBooking,
+          onTableBookingConfirm: onTableBookingConfirm,
         ),
       ),
     );
@@ -59,9 +67,15 @@ class _SelectTimeScreenState extends State<SelectTimeScreen> {
   @override
   void initState() {
     super.initState();
-    // Initialize with next 7 days
     final now = DateTime.now();
-    availableDates = List.generate(7, (index) => now.add(Duration(days: index)));
+
+    // When booking a table, allow selecting from today up to next 30 days.
+    // Otherwise, keep existing behavior (next 7 days).
+    final daysToShow = widget.isForTableBooking ? 31 : 7; // includes today
+    availableDates = List.generate(
+      daysToShow,
+      (index) => now.add(Duration(days: index)),
+    );
     if (availableDates.isNotEmpty) {
       selectedDate = availableDates[0];
       // Fetch slots for the first date
@@ -80,6 +94,9 @@ class _SelectTimeScreenState extends State<SelectTimeScreen> {
   }
   
   void _fetchSlotsForDate(DateTime date) {
+    if (widget.isForTableBooking) {
+      return;
+    }
     final dateStr = _formatDateForApi(date);
     
     // Check if we already have slots for this date
@@ -192,6 +209,49 @@ class _SelectTimeScreenState extends State<SelectTimeScreen> {
     return '$weekday, $month $day, $year at $hour12:$minuteStr $period';
   }
 
+  String _formatIsoDate(DateTime date) {
+    // YYYY-MM-DD
+    final y = date.year.toString().padLeft(4, '0');
+    final m = date.month.toString().padLeft(2, '0');
+    final d = date.day.toString().padLeft(2, '0');
+    return '$y-$m-$d';
+  }
+
+  String _dayOrdinalSuffix(int day) {
+    // Handles 11th/12th/13th correctly.
+    if (day % 100 >= 11 && day % 100 <= 13) return 'th';
+    switch (day % 10) {
+      case 1:
+        return 'st';
+      case 2:
+        return 'nd';
+      case 3:
+        return 'rd';
+      default:
+        return 'th';
+    }
+  }
+
+  String _formatMonthDayOrdinal(DateTime date) {
+    const months = [
+      'January',
+      'February',
+      'March',
+      'April',
+      'May',
+      'June',
+      'July',
+      'August',
+      'September',
+      'October',
+      'November',
+      'December',
+    ];
+    final month = months[date.month - 1];
+    final suffix = _dayOrdinalSuffix(date.day);
+    return '$month ${date.day}$suffix';
+  }
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -218,9 +278,9 @@ class _SelectTimeScreenState extends State<SelectTimeScreen> {
                         .toList();
                   });
                 } else if (state is StoreDetailsLoadFailure) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Failed to load time slots: ${state.message}')),
-                  );
+                  // ScaffoldMessenger.of(context).showSnackBar(
+                  //   SnackBar(content: Text('Failed to load time slots: ${state.message}')),
+                  // );
                 }
               },
               builder: (context, state) {
@@ -236,7 +296,7 @@ class _SelectTimeScreenState extends State<SelectTimeScreen> {
   Widget _buildModalContent(BuildContext context, StoreDetailsState state) {
     final screenHeight = MediaQuery.of(context).size.height;
     final safeAreaBottom = MediaQuery.of(context).padding.bottom;
-    final maxModalHeight = screenHeight * 0.7;
+    final maxModalHeight = widget.isForTableBooking ? screenHeight * 0.4 : screenHeight * 0.7;
     
     final isLoading = selectedDate != null && _isLoadingDate(state, selectedDate!);
     final timeSlots = currentTimeSlots;
@@ -398,7 +458,7 @@ class _SelectTimeScreenState extends State<SelectTimeScreen> {
             ),
             
             const SizedBox(height: 24),
-            
+            if (!widget.isForTableBooking) ...[
             // Time slots list
             Flexible(
               child: ConstrainedBox(
@@ -475,7 +535,7 @@ class _SelectTimeScreenState extends State<SelectTimeScreen> {
                 ),
               ),
             ),
-            
+            ],
             const SizedBox(height: 24),
             
             // Confirm button
@@ -504,6 +564,13 @@ class _SelectTimeScreenState extends State<SelectTimeScreen> {
                         );
                         print(formatted); // e.g. Friday, February 27, 2026 at 3:36 PM
                         Navigator.of(context).pop();
+                      }else if (widget.isForTableBooking) {
+                        if (selectedDate != null) {
+                          final isoDate = _formatIsoDate(selectedDate!);
+                          final showDate = _formatMonthDayOrdinal(selectedDate!);
+                          widget.onTableBookingConfirm?.call(isoDate, showDate);
+                          Navigator.of(context).pop();
+                        }
                       }
                     },
                     borderRadius: BorderRadius.circular(16),
