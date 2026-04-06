@@ -65,11 +65,6 @@ class ChatApiServices {
     _timezone = timezone;
   }
 
-  // /// Initialize the API service
-  // Future<void> initialize() async {
-  //   await TokenManager.instance.initialize();
-  // }
-
   /// Get the configured userId
   String? get userId => _userId;
   
@@ -143,6 +138,20 @@ class ChatApiServices {
     };
 
     final res = await _chatClient.post('/v2/create_session', body);
+    if (res.isSuccess && res.data != null) {
+      return SessionIdResponse.fromJson(res.data as Map<String, dynamic>);
+    }
+    return null;
+  }
+
+   Future<SessionIdResponse?> getSession() async {
+    final body = {
+      'userId': _userId,
+      'deviceId': await _getDeviceId(),
+      'userName': _name
+    };
+
+    final res = await _chatClient.post('/v2/get-session', body);
     if (res.isSuccess && res.data != null) {
       return SessionIdResponse.fromJson(res.data as Map<String, dynamic>);
     }

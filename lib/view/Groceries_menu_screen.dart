@@ -62,6 +62,8 @@ class _GroceriesMenuScreenState extends State<GroceriesMenuScreen> {
         storeCategoryName: widget.actionData?.storeCategoryName ?? widget.actionData?.title,
       ),
     );
+         cartBloc.add(CartFetchRequested(needToShowLoader: false));
+
   }
 
   @override
@@ -242,16 +244,6 @@ class _GroceriesMenuScreenState extends State<GroceriesMenuScreen> {
     double spacing;
 
     // Calculate fixed content height:
-    // - Spacing after image: 4px
-    // - Service time text (if present): ~14px + 4px spacing = 18px
-    // - Title: 38px
-    // - Spacing after title: 4px
-    // - Price row: ~18px
-    // - Spacing before controls: 8px
-    // - Quantity controls: 37px
-    // Total: 4 + 18 + 38 + 4 + 18 + 8 + 37 = 127px (with service time)
-    // Total: 4 + 38 + 4 + 18 + 8 + 37 = 109px (without service time)
-    // Use 130px to account for service time and add buffer for overflow
     const double fixedContentHeight = 130.0;
 
     if (screenWidth < 360) {
@@ -804,43 +796,6 @@ class _GroceriesMenuScreenState extends State<GroceriesMenuScreen> {
     );
   }
 
-  // /// Handle adding products with addons to cart
-  // void _onAddToCartWithAddOns(
-  //   String productId,
-  //   String centralProductId,
-  //   String storeId,
-  //   String storeCategoryId,
-  //   int storeTypeId,
-  //   BuildContext context,
-  //   dynamic variant,
-  //   List<Map<String, dynamic>> addOns,
-  // ) {
-  //   try {
-  //     //TODO:- Add Quantity
-  //     cartBloc.add(
-  //       CartAddItemRequested(
-  //         storeId: storeId,
-  //         cartType: 1,
-  //         // Default cart type
-  //         action: 1,
-  //         // Add action
-  //         storeCategoryId: storeCategoryId,
-  //         newQuantity: 1,
-  //         storeTypeId: storeTypeId,
-  //         productId: productId,
-  //         centralProductId: centralProductId,
-  //         unitId: variant.unitId,
-  //         newAddOns: addOns,
-  //       ),
-  //     );
-
-  //     // print("Added product with addons to cart: ${product.productName}");
-  //   } catch (e) {
-  //     print(
-  //       'RestaurantScreen: Error dispatching CartAddItemRequeste with addons: $e',
-  //     );
-  //   }
-  // }
 }
 
 // Replaced inline card with shared MenuItemCard

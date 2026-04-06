@@ -65,6 +65,19 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
           storeCategoryId: widget.actionData?.storeCategoryId ?? '',
         ),
       );
+       CartAddItemRequested(
+          storeId: '',
+          cartType: 2,
+          action: 1,
+          // Add/Update action
+          storeCategoryId: '',
+          newQuantity: 0,
+          storeTypeId: -111,
+          productId: '',
+          centralProductId: '',
+          unitId: '',
+          addToCartOnId: null,
+        );
       return;
     }
 
@@ -694,107 +707,20 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
               fontSize: 16,
               height: 1.2,
             ),
+            textAlign: TextAlign.center,
           ),
-          // const SizedBox(height: 8),
-          // // Description text
-          // Padding(
-          //   padding: const EdgeInsets.symmetric(horizontal: 40),
-          //   child: Text(
-          //     'Add items like food, groceries, medicines, services or other products to get started.',
-          //     textAlign: TextAlign.center,
-          //     style: AppTextStyles.restaurantDescription.copyWith(
-          //       color: const Color(0xFF6E4185),
-          //     ),
-          //   ),
-          // ),
+          const SizedBox(height: 8),
+          Text(
+            'Add items like food, groceries, medicines, services or other products to get started.',
+            style: AppTextStyles.restaurantDescription.copyWith(
+              color: const Color(0xFF6E4185),
+            ),
+            textAlign: TextAlign.center,
+          ),
         ],
       ),
     );
   }
-
-  // Widget _buildBottomCartBar() {
-  //   return GestureDetector(
-  //     onTap: _onAddToCart,
-  //     child: Container(
-  //       width: double.infinity,
-  //       height: 105.56,
-  //       padding: const EdgeInsets.only(top: 10),
-  //       decoration: const BoxDecoration(
-  //         color: Color(0xFFF5F7FF),
-  //       ),
-  //       child: Center(
-  //         child: Container(
-  //           width: 343,
-  //           height: 62,
-  //           decoration: BoxDecoration(
-  //             gradient: const LinearGradient(
-  //               begin: Alignment.centerLeft,
-  //               end: Alignment.centerRight,
-  //               colors: [
-  //                 Color(0xFFD445EC),
-  //                 Color(0xFFB02EFB),
-  //                 Color(0xFF8E2FFD),
-  //                 Color(0xFF5E3DFE),
-  //                 Color(0xFF5186E0),
-  //               ],
-  //               stops: [0.0, 0.27, 0.48, 0.76, 1.0],
-  //             ),
-  //             borderRadius: BorderRadius.circular(16),
-  //           ),
-  //           child: Row(
-  //             children: [
-  //               // Left side - Price and items
-  //               Padding(
-  //                 padding: const EdgeInsets.only(left: 25, top: 13),
-  //                 child: Column(
-  //                   crossAxisAlignment: CrossAxisAlignment.start,
-  //                   children: [
-  //                     Text(
-  //                       'د.إ${_cartTotal.toStringAsFixed(2)}',
-  //                       style: const TextStyle(
-  //                         fontFamily: 'aed',
-  //                         fontSize: 16,
-  //                         fontWeight: FontWeight.w400,
-  //                         height: 1.2,
-  //                         color: Colors.white,
-  //                       ),
-  //                     ),
-  //                     const SizedBox(height: 2),
-  //                     Text(
-  //                       '${_cartItems.toString().padLeft(2, '0')} items',
-  //                       style: const TextStyle(
-  //                         fontFamily: 'Plus Jakarta Sans',
-  //                         fontSize: 12,
-  //                         fontWeight: FontWeight.w400,
-  //                         height: 1.4,
-  //                         color: Colors.white,
-  //                       ),
-  //                     ),
-  //                   ],
-  //                 ),
-  //               ),
-  //               const Spacer(),
-  //               // Right side - Checkout button
-  //               Padding(
-  //                 padding: const EdgeInsets.only(right: 25),
-  //                 child: const Text(
-  //                   'Checkout',
-  //                   style: TextStyle(
-  //                     fontFamily: 'Plus Jakarta Sans',
-  //                     fontSize: 16,
-  //                     fontWeight: FontWeight.w700,
-  //                     height: 1.2,
-  //                     color: Colors.white,
-  //                   ),
-  //                 ),
-  //               ),
-  //             ],
-  //           ),
-  //         ),
-  //       ),
-  //     ),
-  //   );
-  // }
 
   Widget _buildSearchBar() {
     return Container(
