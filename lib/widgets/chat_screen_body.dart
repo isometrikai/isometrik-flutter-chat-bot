@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:chat_bot/view/choose_time_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -1848,7 +1849,7 @@ class ChatScreenBody extends StatelessWidget {
                 text: action.buttonText,
                 onTap: () {
                   // OrderService().triggerChooseDateScreenOpen();
-                   SelectTimeScreen.show(
+                   ChooseTimeScreen.show(
                     context,
                     userId:
                         action.storeId ??

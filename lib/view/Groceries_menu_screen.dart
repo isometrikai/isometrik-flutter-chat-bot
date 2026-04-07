@@ -218,10 +218,10 @@ class _GroceriesMenuScreenState extends State<GroceriesMenuScreen> {
               alignment: Alignment.center,
               child: Text(
                 categoryData.subCategoryName,
-                style: AppTextStyles.button.copyWith(
-                  color: const Color(0xFF242424),
-                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
-                ),
+                // style: AppTextStyles.button.copyWith(
+                //   color: const Color(0xFF242424),
+                //   fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+                // ),
               ),
             ),
           );
@@ -296,12 +296,12 @@ class _GroceriesMenuScreenState extends State<GroceriesMenuScreen> {
                 ),
               ),
               const SizedBox(height: 8),
-              Text(
-                'Try adjusting your search or check back later',
-                style: AppTextStyles.restaurantDescription.copyWith(
-                  color: const Color(0xFF979797),
-                ),
-              ),
+              // Text(
+              //   'Try adjusting your search or check back later',
+              //   style: AppTextStyles.restaurantDescription.copyWith(
+              //     color: const Color(0xFF979797),
+              //   ),
+              // ),
             ],
           ),
         ),

@@ -419,27 +419,27 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
                 },
                 onRepeatClicked: () {
                   //TODO:- Add Quantity
-                  final addToCartOnId = _getAddToCartOnId(productId);
-                  print("addCartOnID: $addToCartOnId");
+                  // final addToCartOnId = _getAddToCartOnId(productId);
+                  // print("addCartOnID: $addToCartOnId");
 
-                  final existingProductQuantity = _getExistingProductQuantity(productId, addToCartOnId);
-                  print("existingProductQuantity: $existingProductQuantity");
+                  // final existingProductQuantity = _getExistingProductQuantity(productId, addToCartOnId);
+                  // print("existingProductQuantity: $existingProductQuantity");
 
-                  cartBloc.add(
-                    CartAddItemRequested(
-                      storeId: storeId,
-                      cartType: 1,
-                      action: 2,
-                      // Add action
-                      storeCategoryId: storeCategoryId,
-                      newQuantity: existingProductQuantity + 1,
-                      storeTypeId: storeTypeId,
-                      productId: productId,
-                      centralProductId: parentProductId,
-                      unitId: unitId,
-                      addToCartOnId: addToCartOnId,
-                    ),
-                  );
+                  // cartBloc.add(
+                  //   CartAddItemRequested(
+                  //     storeId: storeId,
+                  //     cartType: 1,
+                  //     action: 2,
+                  //     // Add action
+                  //     storeCategoryId: storeCategoryId,
+                  //     newQuantity: existingProductQuantity + 1,
+                  //     storeTypeId: storeTypeId,
+                  //     productId: productId,
+                  //     centralProductId: parentProductId,
+                  //     unitId: unitId,
+                  //     addToCartOnId: addToCartOnId,
+                  //   ),
+                  // );
                 },
               ),
         );

@@ -120,10 +120,10 @@ class _SelectDateTimeScreenState extends State<SelectDateTimeScreen> {
       
       AppLog.info('📅 SelectDateTimeScreen: API call successful. Received ${storeDetails.timing.length} timing slots');
       
-      setState(() {
-        storeTimings = storeDetails.timing;
-        isLoadingTimings = false;
-      });
+      // setState(() {
+      //   storeTimings = storeDetails.timing;
+      //   isLoadingTimings = false;
+      // });
     } catch (e, stackTrace) {
       AppLog.error('📅 SelectDateTimeScreen: API call failed: $e');
       AppLog.error('📅 Stack trace: $stackTrace');
@@ -171,14 +171,14 @@ class _SelectDateTimeScreenState extends State<SelectDateTimeScreen> {
     }
     
     // Validate against store timings if available
-    if (storeTimings.isNotEmpty && !_isDateTimeValid(selectedDateTime!)) {
+    // if (storeTimings.isNotEmpty && !_isDateTimeValid(selectedDateTime!)) {
 
-      BlackToastView.show(
-                      context,
-                      'Selected date and time is not available. Please choose another time slot.',
-                    );
-      return;
-    }
+    //   BlackToastView.show(
+    //                   context,
+    //                   'Selected date and time is not available. Please choose another time slot.',
+    //                 );
+    //   return;
+    // }
     
     // Format the date time and get timestamp
     final formattedDateTime = _formatDateTime(selectedDateTime!);
