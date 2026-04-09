@@ -91,6 +91,38 @@ class ChatScreenBody extends StatelessWidget {
     required this.chatHistoryTitle, // Add the chatHistoryTitle parameter
   });
 
+  String _to24HourWithSeconds(String input) {
+    final raw = input.trim();
+    if (raw.isEmpty) return raw;
+
+    // Already 24-hour time? Normalize seconds to ":00" if missing.
+    final already24 = RegExp(r'^(\d{1,2}):(\d{2})(?::(\d{2}))?$').firstMatch(raw);
+    if (already24 != null) {
+      final h = int.tryParse(already24.group(1)!) ?? 0;
+      final m = int.tryParse(already24.group(2)!) ?? 0;
+      final s = already24.group(3);
+      final hh = h.clamp(0, 23).toString().padLeft(2, '0');
+      final mm = m.clamp(0, 59).toString().padLeft(2, '0');
+      final ss = (s == null || s.isEmpty) ? '00' : (int.tryParse(s) ?? 0).clamp(0, 59).toString().padLeft(2, '0');
+      return '$hh:$mm:$ss';
+    }
+
+    // 12-hour format like "06:05 pm" or "12:05 am".
+    final match12 = RegExp(r'^(\d{1,2}):(\d{2})\s*([ap]m)$', caseSensitive: false).firstMatch(raw);
+    if (match12 == null) return raw;
+
+    var hour = int.tryParse(match12.group(1)!) ?? 0;
+    final minute = int.tryParse(match12.group(2)!) ?? 0;
+    final suffix = match12.group(3)!.toLowerCase();
+
+    hour = hour % 12; // 12 -> 0 before applying pm rule
+    if (suffix == 'pm') hour += 12;
+
+    final hh = hour.clamp(0, 23).toString().padLeft(2, '0');
+    final mm = minute.clamp(0, 59).toString().padLeft(2, '0');
+    return '$hh:$mm:00';
+  }
+
   @override
   Widget build(BuildContext context) {
     return PopScope(
@@ -2052,13 +2084,29 @@ class ChatScreenBody extends StatelessWidget {
           );
           for (final widget in widgets) {
             for (final item in widget.rawItems) {
-              final buttonText =
-                  item['button_text'] ?? item['title'] ?? 'Action';
+              final String buttonText =
+                  (item['button_text'] ?? item['title'] ?? 'Action').toString();
               actionButtons.add(
                 buildActionButton(
                   text: buttonText,
                   onTap: () {
-                    onSendMessage(buttonText);
+                    if (widget.isTableBookingFlow && widget.isTableBookingTimeSlot) {
+                      final bookingTime24 = _to24HourWithSeconds(buttonText);
+                      final Map<String, dynamic>? dict = {
+                       "table_booking": {
+                            "booking_time": bookingTime24
+                        },
+                      };
+                      onSendMessage(
+                        buttonText,
+                        null,
+                        null,
+                        null,
+                        dict,
+                      );
+                    }else {
+                      onSendMessage(buttonText);
+                    }
                   },
                 ),
               );
@@ -2068,6 +2116,40 @@ class ChatScreenBody extends StatelessWidget {
 
         if (actionButtons.isEmpty) {
           return const SizedBox.shrink();
+        }
+        final proceedToCheckoutWidget = latestActionWidgets.cast<dynamic>().firstWhere(
+          (w) => w?.type == WidgetEnum.proceed_to_checkout.value,
+          orElse: () => null,
+        );
+
+        final isTableBookingTimeSlot = proceedToCheckoutWidget?.isTableBookingTimeSlot == true;
+        final isTableBookingFlow = proceedToCheckoutWidget?.isTableBookingFlow == true;
+
+        if (isTableBookingFlow && isTableBookingTimeSlot) {
+          return Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            width: double.infinity,
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: SizedBox(
+                // 2-row horizontal grid; tweak if your button style changes.
+                height: 93,
+                child: GridView.builder(
+                  scrollDirection: Axis.horizontal,
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    mainAxisSpacing: 10,
+                    crossAxisSpacing: 18,
+                    // For horizontal grids, this controls each tile's width.
+                    mainAxisExtent: 90,
+                  ),
+                  physics: const BouncingScrollPhysics(),
+                  itemCount: actionButtons.length,
+                  itemBuilder: (context, index) => actionButtons[index],
+                ),
+              ),
+            ),
+          );
         }
 
         return Container(
