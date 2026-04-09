@@ -661,6 +661,7 @@ class Store {
   final bool storeIsOpen;
   final num supportedOrderTypes;
   final bool tableReservations;
+  final List<String> cuisines;
 
   Store({
     required this.storename,
@@ -681,6 +682,7 @@ class Store {
     required this.storeIsOpen,
     required this.supportedOrderTypes,
     required this.tableReservations,
+    required this.cuisines,
   });
 
   factory Store.fromJson(Map<String, dynamic> json) {
@@ -704,6 +706,9 @@ class Store {
         .toList();
     final List<Product> parsedProducts = (json['products'] as List<dynamic>? ?? [])
         .map((e) => Product.fromJson(e as Map<String, dynamic>))
+        .toList();
+    final List<String> cuisines = (json['cuisines'] as List<dynamic>? ?? [])
+        .map((e) => e.toString())
         .toList();
 
     // Process categorylist - remove duplicates before displaying
@@ -752,6 +757,7 @@ class Store {
       storeIsOpen: storeIsOpen,
       supportedOrderTypes: supportedOrderTypes,
       tableReservations: tableReservations,
+      cuisines: cuisines,
     );
   }
 
@@ -771,6 +777,7 @@ class Store {
       'supportedOrderTypes': supportedOrderTypes,
       'tableReservations': tableReservations,
       'isDoctore': isDoctore,
+      'cuisines': cuisines,
     };
   }
 }

@@ -161,6 +161,26 @@ class StoreCard extends StatelessWidget {
                             ),
                           ),
                         ],
+                      ] else if (store.storeCategoryId == FoodStoreCategoryId.healthCare.value) ...[
+                        // if (store.storeIsOpen) ...[
+                          Text(
+                            '${store.cuisines.isNotEmpty ? store.cuisines.join(', ') : ''}',
+                            maxLines: 1,
+                            style: AppTextStyles.restaurantDescription.copyWith(
+                              color: const Color(0xFF6E4185),
+                            ),
+                          ),
+                        // ] else ...[
+                        //   Text(
+                        //     'Store is closed',
+                        //     maxLines: 1,
+                        //     style: AppTextStyles.restaurantDescription.copyWith(
+                        //       color: const Color(0xFFF44336),
+                        //       fontWeight: FontWeight.w600,
+                        //       fontSize: 12,
+                        //     ),
+                        //   ),
+                        // ],
                       ] else ...[
                         if (store.storeIsOpen) ...[
                           Text(
@@ -423,6 +443,25 @@ class _ProductPreviewTile extends StatelessWidget {
                           ],
                         ],
                       ),
+                    ]else ...[
+                      if (doctor?.rating != null && doctor?.rating != 0.0) ...[
+                       Row(
+                        children: [
+                          const Icon(
+                            Icons.star,
+                            size: 14,
+                            color: AppConstants.appThemeColor,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            '${doctor?.rating?.toStringAsFixed(1) ?? ''}',
+                            style: AppTextStyles.restaurantDescription.copyWith(
+                              color: const Color(0xFF242424),
+                            ),
+                          ),
+                        ],
+                      ),
+                      ]
                     ]
                   ],
                 ),
