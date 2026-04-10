@@ -968,6 +968,10 @@ class WidgetAction {
   final String? serviceRequestedTime;
   final String? orderAmount;
   final String? currency;
+  final String? bookingDate;
+  final String? bookingTime;
+  final num? partySize;
+  final bool? isTableBooking;
 
   WidgetAction({
     required this.buttonText,
@@ -1000,6 +1004,10 @@ class WidgetAction {
     this.serviceRequestedTime,
     this.orderAmount,
     this.currency,
+    this.bookingDate,
+    this.bookingTime,
+    this.partySize,
+    this.isTableBooking,
   });
 
   factory WidgetAction.fromJson(Map<String, dynamic> json) {
@@ -1038,6 +1046,10 @@ class WidgetAction {
         serviceRequestedTime: json['serviceRequestedTime']?.toString(),
         orderAmount: json['orderAmount']?.toString(),
         currency: json['currency']?.toString(),
+        bookingDate: json['bookingDate']?.toString(),
+        bookingTime: json['bookingTime']?.toString(),
+        partySize: json['partySize'] ?? 111,
+        isTableBooking: json['isTableBooking'] ?? false,
     );
   }
 
@@ -1074,6 +1086,10 @@ class WidgetAction {
       'serviceRequestedTime': serviceRequestedTime,
       'orderAmount': orderAmount,
       'currency': currency,
+      'bookingDate': bookingDate,
+      'bookingTime': bookingTime,
+      'partySize': partySize,
+      'isTableBooking': isTableBooking,
     };
   }
 }

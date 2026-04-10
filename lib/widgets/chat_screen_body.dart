@@ -1938,7 +1938,7 @@ class ChatScreenBody extends StatelessWidget {
                                     onConfirm: (String formattedDateTime, int timestamp) {
                                       // Handle the selected date and time
                                       print('Selected: $formattedDateTime (timestamp: $timestamp)');
-                                      onSendMessage('I have selected a schedule: \n$formattedDateTime', '', timestamp.toString());
+                                      onSendMessage('I want to book service for: \n$formattedDateTime', '', timestamp.toString());
                                     },
                                    );
                         // OrderService().triggerScheduledLaterScreenOpen(obj);
@@ -1951,8 +1951,7 @@ class ChatScreenBody extends StatelessWidget {
                                 onConfirm: (String formattedDateTime, int timestamp) {
                                   // Handle confirmation
                                   print('Selected: $formattedDateTime (timestamp: $timestamp)');
-                                  // onSendMessage('I want to book an appointment for: \n$formattedDateTime', '', timestamp.toString());
-                                  onSendMessage('I have selected a schedule: \n$formattedDateTime', '', timestamp.toString());
+                                  onSendMessage('I want to book an appointment for: \n$formattedDateTime', '', timestamp.toString());
                                 },
                               );
                           }
@@ -2092,10 +2091,16 @@ class ChatScreenBody extends StatelessWidget {
                   onTap: () {
                     if (widget.isTableBookingFlow && widget.isTableBookingTimeSlot) {
                       final bookingTime24 = _to24HourWithSeconds(buttonText);
+                      final existing = apiData['table_booking'];
+                      final Map<String, dynamic> tableBooking = {};
+                      if (existing is Map) {
+                        tableBooking.addAll(
+                          Map<String, dynamic>.from(existing),
+                        );
+                      }
+                      tableBooking['booking_time'] = bookingTime24;
                       final Map<String, dynamic>? dict = {
-                       "table_booking": {
-                            "booking_time": bookingTime24
-                        },
+                        'table_booking': tableBooking,
                       };
                       onSendMessage(
                         buttonText,

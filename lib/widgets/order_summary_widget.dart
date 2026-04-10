@@ -300,6 +300,26 @@ class OrderSummaryWidget extends StatelessWidget {
                             ),
                           ],
                         ),
+                        if(item.isTableBooking == true) ...[
+                          const SizedBox(height: 4),
+                          Text(
+                            'Booking Date: ${item.bookingDate} Booking Time: ${item.bookingTime}',
+                            style: AppTextStyles.restaurantDescription.copyWith(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w300,
+                              color: Color(0xFF242424),
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            'Party Size: ${item.partySize}',
+                            style: AppTextStyles.restaurantDescription.copyWith(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w300,
+                              color: Color(0xFF242424),
+                            ),
+                          ),
+                        ],
                         // Add-ons section
                         if(item.addOns != null && item.addOns!.isNotEmpty) ...[
                           const SizedBox(height: 4),
