@@ -1740,18 +1740,22 @@ class ChatScreenBody extends StatelessWidget {
                     isApiLoading
                         ? () {}
                         : () async {
-                          print("Order Details: ${action.orderId}");
-                          // Call the order details API
-                          final orderDetails = await ChatApiServices.instance
-                              .getOrderDetails(
-                                orderId: action.orderId ?? '',
-                                type: 'masterOrder',
-                              );
-
-                          if (orderDetails != null) {
-                            OrderService().triggerOrderDetails(orderDetails);
+                          if (action.isTableBooking == true) {
+                            OrderService().triggerOrderDetails(action.toJson());
                           } else {
-                            print("Failed to fetch order details");
+                            print("Order Details: ${action.orderId}");
+                            // Call the order details API
+                            final orderDetails = await ChatApiServices.instance
+                                .getOrderDetails(
+                                  orderId: action.orderId ?? '',
+                                  type: 'masterOrder',
+                                );
+
+                            if (orderDetails != null) {
+                              OrderService().triggerOrderDetails(orderDetails);
+                            } else {
+                              print("Failed to fetch order details");
+                            }
                           }
                         },
               ),

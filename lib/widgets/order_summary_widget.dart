@@ -300,10 +300,10 @@ class OrderSummaryWidget extends StatelessWidget {
                             ),
                           ],
                         ),
-                        if(item.isTableBooking == true) ...[
+                        if(storeInfo.isTableBooking == true) ...[
                           const SizedBox(height: 4),
                           Text(
-                            'Booking Date: ${item.bookingDate} Booking Time: ${item.bookingTime}',
+                            'Booking Date and Time: ${storeInfo.bookingDate} ${storeInfo.bookingTime}',
                             style: AppTextStyles.restaurantDescription.copyWith(
                               fontSize: 12,
                               fontWeight: FontWeight.w300,
@@ -312,7 +312,7 @@ class OrderSummaryWidget extends StatelessWidget {
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            'Party Size: ${item.partySize}',
+                            'Party Size: ${storeInfo.partySize}',
                             style: AppTextStyles.restaurantDescription.copyWith(
                               fontSize: 12,
                               fontWeight: FontWeight.w300,
