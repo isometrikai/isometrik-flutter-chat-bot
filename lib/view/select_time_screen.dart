@@ -76,13 +76,13 @@ class _SelectTimeScreenState extends State<SelectTimeScreen> {
       daysToShow,
       (index) => now.add(Duration(days: index)),
     );
-    if (availableDates.isNotEmpty) {
-      selectedDate = availableDates[0];
-      // Fetch slots for the first date
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        _fetchSlotsForDate(availableDates[0]);
-      });
-    }
+    // if (availableDates.isNotEmpty) {
+    //   selectedDate = availableDates[0];
+    //   // Fetch slots for the first date
+    //   WidgetsBinding.instance.addPostFrameCallback((_) {
+    //     _fetchSlotsForDate(availableDates[0]);
+    //   });
+    // }
   }
   
   String _formatDateForApi(DateTime date) {
@@ -339,16 +339,16 @@ class _SelectTimeScreenState extends State<SelectTimeScreen> {
                           ),
                         ),
                         const SizedBox(height: 12),
-                        Text(
-                          'Select a date and time as per your convenience',
-                          style: AppTextStyles.body(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w400,
-                          ).copyWith(
-                            color: const Color(0xFF6E4185),
-                            height: 1.4,
-                          ),
-                        ),
+                        // Text(
+                        //   'Select a date and time as per your convenience',
+                        //   style: AppTextStyles.body(
+                        //     fontSize: 14,
+                        //     fontWeight: FontWeight.w400,
+                        //   ).copyWith(
+                        //     color: const Color(0xFF6E4185),
+                        //     height: 1.4,
+                        //   ),
+                        // ),
                       ],
                     ),
                   ),
@@ -416,21 +416,21 @@ class _SelectTimeScreenState extends State<SelectTimeScreen> {
                             mainAxisAlignment: MainAxisAlignment.center,
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
-                              Text(
-                                _formatDayAbbreviation(date),
-                                style: AppTextStyles.body(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w700,
-                                ).copyWith(
-                                  color: isSelected 
-                                    ? Colors.white
-                                    : const Color(0xFF242424),
-                                  height: 1.2,
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                textAlign: TextAlign.center,
-                              ),
+                              // Text(
+                              //   _formatDayAbbreviation(date),
+                              //   style: AppTextStyles.body(
+                              //     fontSize: 14,
+                              //     fontWeight: FontWeight.w700,
+                              //   ).copyWith(
+                              //     color: isSelected 
+                              //       ? Colors.white
+                              //       : const Color(0xFF242424),
+                              //     height: 1.2,
+                              //   ),
+                              //   maxLines: 1,
+                              //   overflow: TextOverflow.ellipsis,
+                              //   textAlign: TextAlign.center,
+                              // ),
                               const SizedBox(height: 2),
                               Text(
                                 _formatMonthDay(date),

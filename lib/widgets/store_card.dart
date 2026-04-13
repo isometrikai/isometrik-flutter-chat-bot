@@ -461,6 +461,24 @@ class _ProductPreviewTile extends StatelessWidget {
                           ),
                         ],
                       ),
+                      ]else 
+                      ...[
+                       Row(
+                        children: [
+                          const Icon(
+                            Icons.star,
+                            size: 14,
+                            color: AppConstants.appThemeColor,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            '${doctor?.rating?.toStringAsFixed(1) ?? ''}',
+                            style: AppTextStyles.restaurantDescription.copyWith(
+                              color: const Color(0xFF242424),
+                            ),
+                          ),
+                        ],
+                      ),
                       ]
                     ]
                   ],

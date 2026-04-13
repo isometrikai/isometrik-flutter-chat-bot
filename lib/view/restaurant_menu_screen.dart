@@ -849,9 +849,9 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
 
   String _formatCurrency(String symbol, double value) {
     // Keep simple formatting matching the mock (e.g., AED25)
-    if (symbol.isNotEmpty && symbol != 'AED') {
-      return '$symbol ${value.toStringAsFixed(value.truncateToDouble() == value ? 0 : 2)}';
-    }
+    // if (symbol.isNotEmpty && symbol != 'AED') {
+    //   return '$symbol ${value.toStringAsFixed(value.truncateToDouble() == value ? 0 : 2)}';
+    // }
     return '$symbol ${value.toStringAsFixed(value.truncateToDouble() == value ? 0 : 2)}';
   }
 
@@ -1054,16 +1054,16 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
                   storeTypeId: widget.actionData?.storeTypeId ?? -111,
                   onChooseClicked: () {
                     // When "I'll choose" is clicked, open ProductCustomizationScreen
-                    _openProductCustomization(
-                      productId,
-                      centralProductId,
-                      widget.actionData?.storeId ?? '',
-                      widget.actionData?.storeCategoryId ?? '',
-                      widget.actionData?.storeTypeId ?? -111,
-                      context,
-                      productName,
-                      productImage,
-                    );
+                    // _openProductCustomization(
+                    //   productId,
+                    //   centralProductId,
+                    //   widget.actionData?.storeId ?? '',
+                    //   widget.actionData?.storeCategoryId ?? '',
+                    //   widget.actionData?.storeTypeId ?? -111,
+                    //   context,
+                    //   productName,
+                    //   productImage,
+                    // );
                   },
                   onRepeatClicked: () {
                     //TODO:- Add Quantity

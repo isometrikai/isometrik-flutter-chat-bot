@@ -155,24 +155,24 @@ class _ChatScreenState extends State<ChatScreen> {
       }
     });
 
-    OrderService().setStripePlaceOrderCallback((Map<String, dynamic> stripePlaceOrder) {
-      if (mounted) {
-        print('ChatScreen: Stripe place order received - $stripePlaceOrder');
-        if (stripePlaceOrder['isPaymentSuccess'] == true) {
-          _needToEndThisChat = true;
-          _gotStripePaymentCallback = true;
-          BlackToastView.show(context, 'Payment completed successfully');
-           context.read<CartBloc>().add(
-              CartFetchRequested(needToShowLoader: false),
-            );
-        }else if (stripePlaceOrder['isPaymentFailed'] == true) {
-          _gotStripePaymentCallback = true;
-          // BlackToastView.show(context, stripePlaceOrder['message']);
-          _sendMessage(stripePlaceOrder['message'], null, null, null);
-        }
-        // _sendMessage('Order placed successfully', null, null, null);
-      }
-    });
+    // OrderService().setStripePlaceOrderCallback((Map<String, dynamic> stripePlaceOrder) {
+    //   if (mounted) {
+    //     print('ChatScreen: Stripe place order received - $stripePlaceOrder');
+    //     if (stripePlaceOrder['isPaymentSuccess'] == true) {
+    //       _needToEndThisChat = true;
+    //       _gotStripePaymentCallback = true;
+    //       BlackToastView.show(context, 'Payment completed successfully');
+    //        context.read<CartBloc>().add(
+    //           CartFetchRequested(needToShowLoader: false),
+    //         );
+    //     }else if (stripePlaceOrder['isPaymentFailed'] == true) {
+    //       _gotStripePaymentCallback = true;
+    //       // BlackToastView.show(context, stripePlaceOrder['message']);
+    //       _sendMessage(stripePlaceOrder['message'], null, null, null);
+    //     }
+    //     // _sendMessage('Order placed successfully', null, null, null);
+    //   }
+    // });
 
     OrderService().setSelectClickManageCallback((Map<String, dynamic> clickManage) {
       if (mounted) {
@@ -181,7 +181,7 @@ class _ChatScreenState extends State<ChatScreen> {
             ..._apiData,
             "dependent_id": clickManage['dependentId'] ?? '',
           };
-        _sendMessage('I have selected a dependent:\n${clickManage['firstName'] ?? ''} ${clickManage['lastName'] ?? ''}', null, null, null);
+        _sendMessage('I have selected a dependent:\n${clickManage['firstName'] ?? ''}', null, null, null);
       }
     });
   }

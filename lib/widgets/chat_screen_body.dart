@@ -1729,39 +1729,39 @@ class ChatScreenBody extends StatelessWidget {
           }
         }
 
-        for (final widget in latestActionWidgets.where(
-          (w) => w.type == WidgetEnum.order_details.value,
-        )) {
-          for (final action in widget.orderDetails) {
-            actionButtons.add(
-              buildActionButton(
-                text: action.buttonText,
-                onTap:
-                    isApiLoading
-                        ? () {}
-                        : () async {
-                          if (action.isTableBooking == true) {
-                            OrderService().triggerOrderDetails(action.toJson());
-                          } else {
-                            print("Order Details: ${action.orderId}");
-                            // Call the order details API
-                            final orderDetails = await ChatApiServices.instance
-                                .getOrderDetails(
-                                  orderId: action.orderId ?? '',
-                                  type: 'masterOrder',
-                                );
+        // for (final widget in latestActionWidgets.where(
+        //   (w) => w.type == WidgetEnum.order_details.value,
+        // )) {
+        //   for (final action in widget.orderDetails) {
+        //     actionButtons.add(
+        //       buildActionButton(
+        //         text: action.buttonText,
+        //         onTap:
+        //             isApiLoading
+        //                 ? () {}
+        //                 : () async {
+        //                   if (action.isTableBooking == true) {
+        //                     OrderService().triggerOrderDetails(action.toJson());
+        //                   } else {
+        //                     print("Order Details: ${action.orderId}");
+        //                     // Call the order details API
+        //                     final orderDetails = await ChatApiServices.instance
+        //                         .getOrderDetails(
+        //                           orderId: action.orderId ?? '',
+        //                           type: 'masterOrder',
+        //                         );
 
-                            if (orderDetails != null) {
-                              OrderService().triggerOrderDetails(orderDetails);
-                            } else {
-                              print("Failed to fetch order details");
-                            }
-                          }
-                        },
-              ),
-            );
-          }
-        }
+        //                     if (orderDetails != null) {
+        //                       OrderService().triggerOrderDetails(orderDetails);
+        //                     } else {
+        //                       print("Failed to fetch order details");
+        //                     }
+        //                   }
+        //                 },
+        //       ),
+        //     );
+        //   }
+        // }
 
         for (final widget in latestActionWidgets.where(
           (w) => w.type == WidgetEnum.menu.value,
