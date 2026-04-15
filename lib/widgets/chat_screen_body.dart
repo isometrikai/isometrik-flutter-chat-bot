@@ -1044,6 +1044,10 @@ class ChatScreenBody extends StatelessWidget {
             const SizedBox(height: 4), //12
             buildCartWidget(message.cartItems),
           ],
+          if (message.hasRestaurantSectionsWidget) ...[
+            const SizedBox(height: 4), //12
+            buildRestaurantSectionsWidget(context, message.restaurantSectionsItems),
+          ],
           if (message.hasServicesDeliveryOptionsWidget) ...[
             const SizedBox(height: 4), //12
             buildServicesDeliveryOptionsWidget(message.servicesDeliveryOptions),
@@ -3740,6 +3744,19 @@ class ChatScreenBody extends StatelessWidget {
       onSendMessage: (message) {
         onSendMessage(message);
       },
+    );
+  }
+
+  Widget buildRestaurantSectionsWidget(
+    BuildContext context,
+    List<WidgetAction> restaurantSectionsItems,
+  ) {
+    if (restaurantSectionsItems.isEmpty) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.only(left: 0.0),
+      child: RestaurantSectionsWidget(
+        restaurantSectionsItems: restaurantSectionsItems,
+      ),
     );
   }
 }

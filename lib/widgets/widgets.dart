@@ -11,4 +11,5 @@ export 'menu_item_card.dart';
 export 'black_toast_view.dart';
 export 'cart_widget.dart';
 export 'cart_details_price_widget.dart';
+export 'restaurant_sections_widget.dart';
 export 'screen_header.dart';

@@ -28,7 +28,8 @@ enum WidgetEnum {
   online_payment_confirm_order,
   service_types,
   choose_date,
-  add_dependent;
+  add_dependent,
+  restaurant_sections;
 
   // Add string values for API communication
   String get value {

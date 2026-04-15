@@ -137,6 +137,7 @@ class ChatWidget {
   bool get isSeeMoreWidget => type == WidgetEnum.see_more.value;
   bool get isMenuWidget => type == WidgetEnum.menu.value;
   bool get isCartWidget => type == WidgetEnum.cart.value;
+  bool get isRestaurantSectionsWidget => type == WidgetEnum.restaurant_sections.value;
   bool get isServicesDeliveryOptionsWidget => type == WidgetEnum.service_types.value;
   bool get isChooseAddressWidget => type == WidgetEnum.choose_address.value;
   bool get isChooseCardWidget => type == WidgetEnum.choose_card.value;
@@ -306,6 +307,14 @@ class ChatWidget {
   // Helper method to get cart items
   List<WidgetAction> getCartItems() {
     if (isCartWidget) {
+      return widget.map((item) => WidgetAction.fromJson(item as Map<String, dynamic>)).toList();
+    }
+    return [];
+  }
+
+  // Helper method to get restaurant sections items
+  List<WidgetAction> getRestaurantSectionsItems() {
+    if (isRestaurantSectionsWidget) {
       return widget.map((item) => WidgetAction.fromJson(item as Map<String, dynamic>)).toList();
     }
     return [];
@@ -972,6 +981,8 @@ class WidgetAction {
   final String? bookingTime;
   final num? partySize;
   final bool? isTableBooking;
+  final String? sectionName;
+  final String? image;
 
   WidgetAction({
     required this.buttonText,
@@ -1008,6 +1019,8 @@ class WidgetAction {
     this.bookingTime,
     this.partySize,
     this.isTableBooking,
+    this.sectionName,
+    this.image,
   });
 
   factory WidgetAction.fromJson(Map<String, dynamic> json) {
@@ -1050,6 +1063,8 @@ class WidgetAction {
         bookingTime: json['bookingTime']?.toString(),
         partySize: json['partySize'] ?? 111,
         isTableBooking: json['isTableBooking'] ?? false,
+        sectionName: json['sectionName']?.toString(),
+        image: json['image']?.toString(),
     );
   }
 
@@ -1090,6 +1105,8 @@ class WidgetAction {
       'bookingTime': bookingTime,
       'partySize': partySize,
       'isTableBooking': isTableBooking,
+      'sectionName': sectionName,
+      'image': image,
     };
   }
 }

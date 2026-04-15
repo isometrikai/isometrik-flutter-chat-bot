@@ -348,6 +348,7 @@ class _ChatScreenState extends State<ChatScreen> {
         ChatWidget? storesWidget;
         ChatWidget? productsWidget;
         ChatWidget? cartWidget;
+        ChatWidget? restaurantSectionsWidget;
         ChatWidget? servicesDeliveryOptionsWidget;
         ChatWidget? chooseAddressWidget;
         ChatWidget? chooseCardWidget;
@@ -374,6 +375,12 @@ class _ChatScreenState extends State<ChatScreen> {
           cartWidget = botResponse.widgets.firstWhere((widget) => widget.isCartWidget);
         } catch (e) {
           cartWidget = null;
+        }
+
+        try {
+          restaurantSectionsWidget = botResponse.widgets.firstWhere((widget) => widget.isRestaurantSectionsWidget);
+        } catch (e) {
+          restaurantSectionsWidget = null;
         }
 
         try {
@@ -418,6 +425,7 @@ class _ChatScreenState extends State<ChatScreen> {
         bool hasStores = storesWidget != null;
         bool hasProducts = productsWidget != null;
         bool hasCart = cartWidget != null;
+        bool hasRestaurantSections = restaurantSectionsWidget != null;
         bool hasServicesDeliveryOptions = servicesDeliveryOptionsWidget != null;
         bool hasChooseAddress = chooseAddressWidget != null;
         bool hasChooseCard = chooseCardWidget != null;
@@ -433,6 +441,7 @@ class _ChatScreenState extends State<ChatScreen> {
             hasStoreCards: hasStores,
             hasProductCards: hasProducts,
             hasCartWidget: hasCart,
+            hasRestaurantSectionsWidget: hasRestaurantSections,
             hasServicesDeliveryOptionsWidget: hasServicesDeliveryOptions,
             hasChooseAddressWidget: hasChooseAddress,
             hasChooseCardWidget: hasChooseCard,
@@ -453,6 +462,7 @@ class _ChatScreenState extends State<ChatScreen> {
                 !hasStores &&
                         !hasProducts &&
                         !hasCart &&
+                        !hasRestaurantSections &&
                         !hasChooseAddress &&
                         !hasChooseCard &&
                         !hasOrderSummary &&
@@ -464,6 +474,7 @@ class _ChatScreenState extends State<ChatScreen> {
             stores: storesWidget?.stores ?? [],
             products: productsWidget?.products ?? [],
             cartItems: cartWidget?.getCartItems() ?? [],
+            restaurantSectionsItems: restaurantSectionsWidget?.getRestaurantSectionsItems() ?? [],
             servicesDeliveryOptions: servicesDeliveryOptionsWidget?.getServicesDeliveryOptions() ?? [],
             addressOptions: chooseAddressWidget?.getAddressOptions() ?? [],
             cardOptions: chooseCardWidget?.getCardOptions() ?? [],
@@ -491,6 +502,7 @@ class _ChatScreenState extends State<ChatScreen> {
                         // widget.type == WidgetEnum.add_address.value ||
                         // widget.type == WidgetEnum.add_payment.value ||
                         // widget.type == WidgetEnum.cart.value ||
+                        // widget.type == WidgetEnum.restaurant_sections.value ||
                         // widget.type == WidgetEnum.order_summary.value ||
                         // widget.type == WidgetEnum.choose_address.value ||
                         // widget.type == WidgetEnum.choose_card.value ||
@@ -514,6 +526,7 @@ class _ChatScreenState extends State<ChatScreen> {
     ChatWidget? storesWidget;
     ChatWidget? productsWidget;
     ChatWidget? cartWidget;
+    ChatWidget? restaurantSectionsWidget;
     ChatWidget? servicesDeliveryOptionsWidget;
     ChatWidget? chooseAddressWidget;
     ChatWidget? chooseCardWidget;
@@ -542,6 +555,12 @@ class _ChatScreenState extends State<ChatScreen> {
       cartWidget = response.widgets.firstWhere((widget) => widget.isCartWidget);
     } catch (e) {
       cartWidget = null;
+    }
+
+    try {
+      restaurantSectionsWidget = response.widgets.firstWhere((widget) => widget.isRestaurantSectionsWidget);
+    } catch (e) {
+      restaurantSectionsWidget = null;
     }
 
      try {
@@ -586,6 +605,7 @@ class _ChatScreenState extends State<ChatScreen> {
     bool hasStores = storesWidget != null;
     bool hasProducts = productsWidget != null;
     bool hasCart = cartWidget != null;
+    bool hasRestaurantSections = restaurantSectionsWidget != null;
     bool hasServicesDeliveryOptions = servicesDeliveryOptionsWidget != null;
     bool hasChooseAddress = chooseAddressWidget != null;
     bool hasChooseCard = chooseCardWidget != null;
@@ -602,6 +622,7 @@ class _ChatScreenState extends State<ChatScreen> {
           hasStoreCards: hasStores,
           hasProductCards: hasProducts,
           hasCartWidget: hasCart,
+          hasRestaurantSectionsWidget: hasRestaurantSections,
           hasServicesDeliveryOptionsWidget: hasServicesDeliveryOptions,
           hasChooseAddressWidget: hasChooseAddress,
           hasChooseCardWidget: hasChooseCard,
@@ -612,6 +633,7 @@ class _ChatScreenState extends State<ChatScreen> {
               !hasStores &&
               !hasProducts &&
               !hasCart &&
+              !hasRestaurantSections &&
               !hasServicesDeliveryOptions &&
               !hasChooseAddress &&
               !hasChooseCard &&
@@ -623,6 +645,7 @@ class _ChatScreenState extends State<ChatScreen> {
               !hasStores &&
                       !hasProducts &&
                       !hasCart &&
+                      !hasRestaurantSections &&
                       !hasServicesDeliveryOptions &&
                       !hasChooseAddress &&
                       !hasChooseCard &&
@@ -635,6 +658,7 @@ class _ChatScreenState extends State<ChatScreen> {
           stores: storesWidget?.stores ?? [],
           products: productsWidget?.products ?? [],
           cartItems: cartWidget?.getCartItems() ?? [],
+          restaurantSectionsItems: restaurantSectionsWidget?.getRestaurantSectionsItems() ?? [],
           servicesDeliveryOptions: servicesDeliveryOptionsWidget?.getServicesDeliveryOptions() ?? [],
           addressOptions: chooseAddressWidget?.getAddressOptions() ?? [],
           cardOptions: chooseCardWidget?.getCardOptions() ?? [],
@@ -642,6 +666,7 @@ class _ChatScreenState extends State<ChatScreen> {
           storesWidget: storesWidget,
           productsWidget: productsWidget,
           cartWidget: cartWidget,
+          restaurantSectionsWidget: restaurantSectionsWidget,
           servicesDeliveryOptionsWidget: servicesDeliveryOptionsWidget,
           chooseAddressWidget: chooseAddressWidget,
           chooseCardWidget: chooseCardWidget,
@@ -662,6 +687,7 @@ class _ChatScreenState extends State<ChatScreen> {
                     widget.type == WidgetEnum.add_address.value ||
                     widget.type == WidgetEnum.add_payment.value ||
                     widget.type == WidgetEnum.cart.value ||
+                    widget.type == WidgetEnum.restaurant_sections.value ||
                     widget.type == WidgetEnum.service_types.value ||
                     widget.type == WidgetEnum.order_summary.value ||
                     widget.type == WidgetEnum.choose_address.value ||
