@@ -13,11 +13,17 @@ class AddressDetailsScreen extends StatefulWidget {
 class _AddressDetailsScreenState extends State<AddressDetailsScreen> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   // final TextEditingController _fullAddressController = TextEditingController(text: '');
-  final TextEditingController _countryController = TextEditingController(text: '');
+  final TextEditingController _countryController = TextEditingController(
+    text: '',
+  );
   final TextEditingController _areaController = TextEditingController(text: '');
   final TextEditingController _cityController = TextEditingController(text: '');
-  final TextEditingController _buildingController = TextEditingController(text: '');
-  final TextEditingController _landmarkController = TextEditingController(text: '');
+  final TextEditingController _buildingController = TextEditingController(
+    text: '',
+  );
+  final TextEditingController _landmarkController = TextEditingController(
+    text: '',
+  );
 
   String _tag = 'Home';
   bool _allFilled = false;
@@ -59,71 +65,71 @@ class _AddressDetailsScreenState extends State<AddressDetailsScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                    // const SizedBox(height: 32),
-                    const ScreenHeader(
-                      title: 'Please provide your\ncomplete address',
-                      showCloseButton: false,
-                      padding: EdgeInsets.zero,
-                    ),
-                    const SizedBox(height: 24),
-                    // _InputField(controller: _fullAddressController),
-                    // const SizedBox(height: 16),
-                    _InputField(
-                      controller: _countryController,
-                      hint: 'Country*',
-                      validator: _requiredValidator,
-                    ),
-                    const SizedBox(height: 16),
-                    _InputField(
-                      controller: _areaController,
-                      hint: 'Area*',
-                      validator: _requiredValidator,
-                    ),
-                    const SizedBox(height: 16),
-                    _InputField(
-                      controller: _cityController,
-                      hint: 'City*',
-                      validator: _requiredValidator,
-                    ),
-                    const SizedBox(height: 16),
-                    _InputField(
-                      controller: _buildingController,
-                      hint: 'Building*',
-                      validator: _requiredValidator,
-                    ),
-                    const SizedBox(height: 16),
-                    _InputField(
-                      controller: _landmarkController,
-                      hint: 'Landmark*',
-                      validator: _requiredValidator,
-                    ),
-                    const SizedBox(height: 16),
-                    Row(
-                      children: [
-                        _TagRadio(
-                          label: 'Home',
-                          groupValue: _tag,
-                          onChanged: (v) => setState(() => _tag = v!),
-                        ),
-                        const SizedBox(width: 16),
-                        _TagRadio(
-                          label: 'Work',
-                          groupValue: _tag,
-                          onChanged: (v) => setState(() => _tag = v!),
-                        ),
-                        const SizedBox(width: 16),
-                        _TagRadio(
-                          label: 'Others',
-                          groupValue: _tag,
-                          onChanged: (v) => setState(() => _tag = v!),
-                        ),
-                      ],
-                    ),
-                  ],
+                      // const SizedBox(height: 32),
+                      const ScreenHeader(
+                        title: 'Please provide your\ncomplete address',
+                        showCloseButton: false,
+                        padding: EdgeInsets.zero,
+                      ),
+                      const SizedBox(height: 24),
+                      // _InputField(controller: _fullAddressController),
+                      // const SizedBox(height: 16),
+                      _InputField(
+                        controller: _countryController,
+                        hint: 'Country*',
+                        validator: _requiredValidator,
+                      ),
+                      const SizedBox(height: 16),
+                      _InputField(
+                        controller: _areaController,
+                        hint: 'Area*',
+                        validator: _requiredValidator,
+                      ),
+                      const SizedBox(height: 16),
+                      _InputField(
+                        controller: _cityController,
+                        hint: 'City*',
+                        validator: _requiredValidator,
+                      ),
+                      const SizedBox(height: 16),
+                      _InputField(
+                        controller: _buildingController,
+                        hint: 'Building*',
+                        validator: _requiredValidator,
+                      ),
+                      const SizedBox(height: 16),
+                      _InputField(
+                        controller: _landmarkController,
+                        hint: 'Landmark*',
+                        validator: _requiredValidator,
+                      ),
+                      const SizedBox(height: 16),
+                      Row(
+                        children: [
+                          _TagRadio(
+                            label: 'Home',
+                            groupValue: _tag,
+                            onChanged: (v) => setState(() => _tag = v!),
+                          ),
+                          const SizedBox(width: 16),
+                          _TagRadio(
+                            label: 'Work',
+                            groupValue: _tag,
+                            onChanged: (v) => setState(() => _tag = v!),
+                          ),
+                          const SizedBox(width: 16),
+                          _TagRadio(
+                            label: 'Others',
+                            groupValue: _tag,
+                            onChanged: (v) => setState(() => _tag = v!),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
-          ),
             Positioned(
               top: 8,
               right: 8,
@@ -139,14 +145,14 @@ class _AddressDetailsScreenState extends State<AddressDetailsScreen> {
               child: _GradientButton(
                 enabled: _allFilled,
                 onPressed: _onSubmit,
-                child:  Text(
+                child: Text(
                   'Deliver here',
-                   style: AppTextStyles.button.copyWith(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w700,
-                            fontSize: 16,
-                            height: 1.2,
-                          ),
+                  style: AppTextStyles.button.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w700,
+                    fontSize: 16,
+                    height: 1.2,
+                  ),
                 ),
               ),
             ),
@@ -176,11 +182,12 @@ class _AddressDetailsScreenState extends State<AddressDetailsScreen> {
       'tag': _tag,
     };
 
-    Navigator.of(context).pop(result);
+    // Navigator.of(context).pop(result);
   }
 
   void _updateFilledState() {
-    final bool next = _countryController.text.trim().isNotEmpty &&
+    final bool next =
+        _countryController.text.trim().isNotEmpty &&
         _areaController.text.trim().isNotEmpty &&
         _cityController.text.trim().isNotEmpty &&
         _buildingController.text.trim().isNotEmpty &&
@@ -209,7 +216,10 @@ class _InputField extends StatelessWidget {
         decoration: InputDecoration(
           filled: true,
           fillColor: Colors.white,
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 16,
+          ),
           hintText: hint,
           hintStyle: const TextStyle(
             fontSize: 16,
@@ -260,7 +270,13 @@ class _TagRadio extends StatelessWidget {
             height: 20,
             padding: const EdgeInsets.all(3),
             decoration: BoxDecoration(
-              border: Border.all(color: selected ? AppConstants.appThemeColor : const Color(0xFFE9DFFB), width: 0.8),
+              border: Border.all(
+                color:
+                    selected
+                        ? AppConstants.appThemeColor
+                        : const Color(0xFFE9DFFB),
+                width: 0.8,
+              ),
               shape: BoxShape.circle,
             ),
             child: AnimatedContainer(
@@ -291,7 +307,11 @@ class _GradientButton extends StatelessWidget {
   final VoidCallback onPressed;
   final Widget child;
   final bool enabled;
-  const _GradientButton({required this.onPressed, required this.child, this.enabled = true});
+  const _GradientButton({
+    required this.onPressed,
+    required this.child,
+    this.enabled = true,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -300,18 +320,16 @@ class _GradientButton extends StatelessWidget {
       child: DecoratedBox(
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: enabled
-                ? const [
-                    Color(0xFFD445EC),
-                    Color(0xFFB02EFB),
-                    Color(0xFF8E2FFD),
-                    Color(0xFF5E3DFE),
-                    Color(0xFF5186E0),
-                  ]
-                : const [
-                    Color(0xFFE5E7EB),
-                    Color(0xFFD1D5DB),
-                  ],
+            colors:
+                enabled
+                    ? const [
+                      Color(0xFFD445EC),
+                      Color(0xFFB02EFB),
+                      Color(0xFF8E2FFD),
+                      Color(0xFF5E3DFE),
+                      Color(0xFF5186E0),
+                    ]
+                    : const [Color(0xFFE5E7EB), Color(0xFFD1D5DB)],
             begin: Alignment.centerLeft,
             end: Alignment.centerRight,
           ),
@@ -322,7 +340,9 @@ class _GradientButton extends StatelessWidget {
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.transparent,
             shadowColor: Colors.transparent,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
           ),
           child: child,
         ),
@@ -330,5 +350,3 @@ class _GradientButton extends StatelessWidget {
     );
   }
 }
-
-

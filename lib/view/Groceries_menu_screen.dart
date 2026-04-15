@@ -43,14 +43,14 @@ class _GroceriesMenuScreenState extends State<GroceriesMenuScreen> {
     cartBloc = CartBloc();
     cartBloc.add(CartFetchRequested(needToShowLoader: false));
     _fetchSubCategoryProducts();
-    OrderService().setCartUpdateCallback((bool isCartUpdate) {
-      if (mounted && isCartUpdate) {
-        print('GroceriesMenuScreen: Cart update received - $isCartUpdate');
-        isCartAPICalled = true;
-        needToCallChatScreenSendMessageAPI = false;
-        cartBloc.add(CartFetchRequested(needToShowLoader: true));
-      }
-    });
+    // OrderService().setCartUpdateCallback((bool isCartUpdate) {
+    //   if (mounted && isCartUpdate) {
+    //     print('GroceriesMenuScreen: Cart update received - $isCartUpdate');
+    //     isCartAPICalled = true;
+    //     needToCallChatScreenSendMessageAPI = false;
+    //     cartBloc.add(CartFetchRequested(needToShowLoader: true));
+    //   }
+    // });
   }
 
   void _fetchSubCategoryProducts() {
@@ -59,7 +59,8 @@ class _GroceriesMenuScreenState extends State<GroceriesMenuScreen> {
         storeId: widget.actionData?.storeId ?? '',
         subCategoryId: widget.actionData?.storeCategoryId ?? '',
         storeTypeId: widget.actionData?.storeTypeId,
-        storeCategoryName: widget.actionData?.storeCategoryName ?? widget.actionData?.title,
+        storeCategoryName:
+            widget.actionData?.storeCategoryName ?? widget.actionData?.title,
       ),
     );
   }
@@ -113,10 +114,7 @@ class _GroceriesMenuScreenState extends State<GroceriesMenuScreen> {
                           } else if (state is CartEmpty) {
                             _updateCartData([]);
                           } else if (state is CartError) {
-                            BlackToastView.show(
-                              context,
-                              state.message,
-                            );
+                            BlackToastView.show(context, state.message);
                           }
                         },
                         child: BlocListener<GroceryMenuBloc, GroceryMenuState>(
@@ -178,8 +176,9 @@ class _GroceriesMenuScreenState extends State<GroceriesMenuScreen> {
           // const SizedBox(height: 16),
 
           // Category Filter Chips
-          if (widget.actionData?.storeTypeId != FoodCategory.services.value) ...[
-             _buildCategoryFilterChips(subCategoryProducts),
+          if (widget.actionData?.storeTypeId !=
+              FoodCategory.services.value) ...[
+            _buildCategoryFilterChips(subCategoryProducts),
             const SizedBox(height: 16),
           ],
           // Products Grid
@@ -241,17 +240,6 @@ class _GroceriesMenuScreenState extends State<GroceriesMenuScreen> {
     double itemHeight;
     double spacing;
 
-    // Calculate fixed content height:
-    // - Spacing after image: 4px
-    // - Service time text (if present): ~14px + 4px spacing = 18px
-    // - Title: 38px
-    // - Spacing after title: 4px
-    // - Price row: ~18px
-    // - Spacing before controls: 8px
-    // - Quantity controls: 37px
-    // Total: 4 + 18 + 38 + 4 + 18 + 8 + 37 = 127px (with service time)
-    // Total: 4 + 38 + 4 + 18 + 8 + 37 = 109px (without service time)
-    // Use 130px to account for service time and add buffer for overflow
     const double fixedContentHeight = 130.0;
 
     if (screenWidth < 360) {
@@ -271,7 +259,12 @@ class _GroceriesMenuScreenState extends State<GroceriesMenuScreen> {
       itemWidth = (availableWidth - 20) / 2; // 20px spacing
       final imageHeight = itemWidth * 0.9;
       // Add extra height for services if needed
-      itemHeight = imageHeight + fixedContentHeight + (widget.actionData?.storeTypeId == FoodCategory.services.value ? 38 : 0);
+      itemHeight =
+          imageHeight +
+          fixedContentHeight +
+          (widget.actionData?.storeTypeId == FoodCategory.services.value
+              ? 38
+              : 0);
       spacing = 12.0;
     }
 
@@ -470,50 +463,50 @@ class _GroceriesMenuScreenState extends State<GroceriesMenuScreen> {
   ) {
     try {
       num? addToCartId = _getAddToCartOnId(productId);
-        if (addToCartId != null) {
-          
-          print("addToCartId: $addToCartId");
-          final existingProductQuantity = _getExistingProductQuantity(productId, addToCartId);
-          print("existingProductQuantity: $existingProductQuantity");
+      if (addToCartId != null) {
+        print("addToCartId: $addToCartId");
+        final existingProductQuantity = _getExistingProductQuantity(
+          productId,
+          addToCartId,
+        );
+        print("existingProductQuantity: $existingProductQuantity");
 
         //TODO:- Add Quantity
-      cartBloc.add(
-        CartAddItemRequested(
-          storeId: storeId,
-          cartType: 1,
-          // Default cart type
-          action: 2,
-          // Add action
-          storeCategoryId: storeCategoryId,
-          newQuantity: existingProductQuantity + 1,
-          storeTypeId: storeTypeId,
-          productId: productId,
-          centralProductId: parentProductId,
-          unitId: unitId,
-          addToCartOnId: addToCartId,
-        ),
-      );
-
-        }else {
-            //TODO:- Add Quantity
-      cartBloc.add(
-        CartAddItemRequested(
-          storeId: storeId,
-          cartType: 1,
-          // Default cart type
-          action: 1,
-          // Add action
-          storeCategoryId: storeCategoryId,
-          newQuantity: 1,
-          storeTypeId: storeTypeId,
-          productId: productId,
-          centralProductId: parentProductId,
-          unitId: unitId,
-          addToCartOnId: addToCartOnId,
-        ),
-      );
-        }
-      
+        cartBloc.add(
+          CartAddItemRequested(
+            storeId: storeId,
+            cartType: 1,
+            // Default cart type
+            action: 2,
+            // Add action
+            storeCategoryId: storeCategoryId,
+            newQuantity: existingProductQuantity + 1,
+            storeTypeId: storeTypeId,
+            productId: productId,
+            centralProductId: parentProductId,
+            unitId: unitId,
+            addToCartOnId: addToCartId,
+          ),
+        );
+      } else {
+        //TODO:- Add Quantity
+        cartBloc.add(
+          CartAddItemRequested(
+            storeId: storeId,
+            cartType: 1,
+            // Default cart type
+            action: 1,
+            // Add action
+            storeCategoryId: storeCategoryId,
+            newQuantity: 1,
+            storeTypeId: storeTypeId,
+            productId: productId,
+            centralProductId: parentProductId,
+            unitId: unitId,
+            addToCartOnId: addToCartOnId,
+          ),
+        );
+      }
 
       print("Added product to cart: ${productId}");
     } catch (e) {
@@ -572,14 +565,14 @@ class _GroceriesMenuScreenState extends State<GroceriesMenuScreen> {
     // Use post-frame callback to avoid calling setState during build
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
-        setState(() {
+        // setState(() {
           _cartData = cartData;
-        });
+        // });
       }
     });
   }
 
-   /// Get addToCartOnId from cart data for a specific product
+  /// Get addToCartOnId from cart data for a specific product
   dynamic _getAddToCartOnId(String productId) {
     try {
       // Find all products with matching ID and get the last one's addToCartOnId
@@ -650,21 +643,21 @@ class _GroceriesMenuScreenState extends State<GroceriesMenuScreen> {
         print("addCartOnID: $addToCartOnId");
       }
 
-      cartBloc.add(
-        CartAddItemRequested(
-          storeId: storeId,
-          cartType: 2,
-          action: 3,
-          // Add/Update action
-          storeCategoryId: storeCategoryId,
-          newQuantity: 0,
-          storeTypeId: storeTypeId,
-          productId: productId,
-          centralProductId: parentProductId,
-          unitId: unitId,
-          addToCartOnId: addToCartOnId,
-        ),
-      );
+      // cartBloc.add(
+      //   CartAddItemRequested(
+      //     storeId: storeId,
+      //     cartType: 2,
+      //     action: 3,
+      //     // Add/Update action
+      //     storeCategoryId: storeCategoryId,
+      //     newQuantity: 0,
+      //     storeTypeId: storeTypeId,
+      //     productId: productId,
+      //     centralProductId: parentProductId,
+      //     unitId: unitId,
+      //     addToCartOnId: addToCartOnId,
+      //   ),
+      // );
     } else if (newQuantity > 0 && isIncrease == true) {
       if (isCustomizable) {
         showModalBottomSheet(
@@ -696,7 +689,10 @@ class _GroceriesMenuScreenState extends State<GroceriesMenuScreen> {
                   final addToCartOnId = _getAddToCartOnId(productId);
                   print("addCartOnID: $addToCartOnId");
 
-                  final existingProductQuantity = _getExistingProductQuantity(productId, addToCartOnId);
+                  final existingProductQuantity = _getExistingProductQuantity(
+                    productId,
+                    addToCartOnId,
+                  );
                   print("existingProductQuantity: $existingProductQuantity");
 
                   cartBloc.add(
@@ -747,7 +743,10 @@ class _GroceriesMenuScreenState extends State<GroceriesMenuScreen> {
       int? existingProductQuantity;
       existingProductQuantity = newQuantity;
       if (addToCartOnId != null) {
-        existingProductQuantity = _getExistingProductQuantity(productId, addToCartOnId);
+        existingProductQuantity = _getExistingProductQuantity(
+          productId,
+          addToCartOnId,
+        );
         print("existingProductQuantity: $existingProductQuantity");
       }
       cartBloc.add(
@@ -757,7 +756,10 @@ class _GroceriesMenuScreenState extends State<GroceriesMenuScreen> {
           action: (existingProductQuantity == 1) ? 3 : 2,
           // Add/Update action
           storeCategoryId: storeCategoryId,
-          newQuantity: (existingProductQuantity == 1) ? 0 : (existingProductQuantity ?? 0) - 1,
+          newQuantity:
+              (existingProductQuantity == 1)
+                  ? 0
+                  : (existingProductQuantity ?? 0) - 1,
           storeTypeId: storeTypeId,
           productId: productId,
           centralProductId: parentProductId,

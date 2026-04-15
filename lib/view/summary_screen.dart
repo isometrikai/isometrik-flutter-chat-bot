@@ -1,12 +1,11 @@
-import 'package:chat_bot/data/model/universal_cart_response.dart'
-    as cart_models;
+import 'package:chat_bot/data/model/universal_cart_response.dart' as cart_models;
 import 'package:chat_bot/utils/app_constants.dart';
 import 'package:chat_bot/utils/enum.dart';
 import 'package:flutter/material.dart';
 import 'package:chat_bot/data/data.dart';
 import '../utils/text_styles.dart';
 
-class CustomizationSummaryScreen extends StatefulWidget {
+class SummaryScreen extends StatefulWidget {
   final Store? store;
   final Product? product;
   final String? productId;
@@ -15,9 +14,9 @@ class CustomizationSummaryScreen extends StatefulWidget {
   final VoidCallback? onChooseClicked;
   final VoidCallback? onRepeatClicked;
   final List<cart_models.UniversalCartData>
-  cartData; // Callback when "I'll choose" is clicked
+      cartData; // Callback when "I'll choose" is clicked
 
-  const CustomizationSummaryScreen({
+  const SummaryScreen({
     super.key,
     this.store,
     this.product,
@@ -30,12 +29,10 @@ class CustomizationSummaryScreen extends StatefulWidget {
   });
 
   @override
-  State<CustomizationSummaryScreen> createState() =>
-      _CustomizationSummaryScreenState();
+  State<SummaryScreen> createState() => _SummaryScreenState();
 }
 
-class _CustomizationSummaryScreenState
-    extends State<CustomizationSummaryScreen> {
+class _SummaryScreenState extends State<SummaryScreen> {
   @override
   Widget build(BuildContext context) {
     return ClipRRect(
@@ -45,19 +42,22 @@ class _CustomizationSummaryScreenState
       ),
       child: Container(
         constraints: BoxConstraints(
-          maxHeight:
-              MediaQuery.of(context).size.height *
+          maxHeight: MediaQuery.of(context).size.height *
               0.6, // Max 60% of screen height
           minHeight: 250, // Minimum height
         ),
-        decoration: const BoxDecoration(color: Colors.white),
+        decoration: const BoxDecoration(
+          color: Colors.white,
+        ),
         child: SafeArea(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               _buildHeader(),
               const SizedBox(height: 16),
-              Flexible(child: _buildCustomizationsList()),
+              Flexible(
+                child: _buildCustomizationsList(),
+              ),
               _buildBottomButtons(),
             ],
           ),
@@ -68,21 +68,16 @@ class _CustomizationSummaryScreenState
 
   /// Get product object from cart data for a specific product ID
   cart_models.Product? _getCartProductObject(
-    String productId,
-    String centralProductId,
-  ) {
+      String productId, String centralProductId) {
     try {
       // Use filter to find the product with matching ID
-      final cartProduct =
-          widget.cartData
-              .expand((cart) => cart.sellers)
-              .expand((seller) => seller.products)
-              .where(
-                (product) =>
-                    product.id == productId &&
-                    product.centralProductId == centralProductId,
-              )
-              .toList();
+      final cartProduct = widget.cartData
+          .expand((cart) => cart.sellers)
+          .expand((seller) => seller.products)
+          .where((product) =>
+              product.id == productId &&
+              product.centralProductId == centralProductId)
+          .toList();
 
       if (cartProduct.isEmpty) {
         return null;
@@ -98,7 +93,9 @@ class _CustomizationSummaryScreenState
   Widget _buildHeader() {
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(color: Colors.transparent),
+      decoration: BoxDecoration(
+        color: Colors.transparent,
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -111,26 +108,16 @@ class _CustomizationSummaryScreenState
                     const SizedBox(height: 10),
                     Text(
                       // 'Your customisations',
-                      _getCartProductObject(
-                            widget.productId ?? '',
-                            widget.centralProductId ?? '',
-                          )?.name ??
+                      _getCartProductObject(widget.productId ?? '',
+                              widget.centralProductId ?? '')
+                              ?.name ??
                           '',
-                      // style: AppTextStyles.launchTitle.copyWith(
-                      //   color: const Color(0xFF242424),
-                      //   fontSize: 16,
-                      //   fontWeight: FontWeight.w700,
-                      // ),
+                      style: AppTextStyles.launchTitle.copyWith(
+                        color: const Color(0xFF242424),
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
-                    // const SizedBox(height: 4),
-                    // Text(
-                    //   _getCartProductObject(widget.productId ?? '', widget.centralProductId ?? '')?.name ?? '',
-                    //   style: const TextStyle(
-                    //     fontSize: 12,
-                    //     fontWeight: FontWeight.w400,
-                    //     color: Color(0xFF6E4185),
-                    //   ),
-                    // ),
                     const SizedBox(height: 4),
                     Text(
                       '${'AED'} ${_getCartProductObject(widget.productId ?? '', widget.centralProductId ?? '')?.singleUnitPrice?.unitPriceWithTax.toString() ?? ''}',
@@ -170,8 +157,7 @@ class _CustomizationSummaryScreenState
 
   /// Group add-ons by category and combine options
   List<Map<String, String>> _groupAddOnsByCategory(
-    List<cart_models.SelectedAddOn> addOns,
-  ) {
+      List<cart_models.SelectedAddOn> addOns) {
     Map<String, List<String>> groupedAddOns = {};
 
     for (final addOn in addOns) {
@@ -185,28 +171,27 @@ class _CustomizationSummaryScreenState
     }
 
     return groupedAddOns.entries
-        .map(
-          (entry) => {'category': entry.key, 'options': entry.value.join(', ')},
-        )
+        .map((entry) => {
+              'category': entry.key,
+              'options': entry.value.join(', '),
+            })
         .toList();
   }
 
   Widget _buildCustomizationsList() {
-    final cartProduct = _getCartProductObject(
-      widget.productId ?? '',
-      widget.centralProductId ?? '',
-    );
+    final cartProduct =
+        _getCartProductObject(widget.productId ?? '', widget.centralProductId ?? '');
 
     // Debug information
-    // print('CustomizationSummaryScreen Debug:');
-    // print('Product ID: ${widget.productId}');
-    // print('Central Product ID: ${widget.centralProductId}');
-    // print('Cart Product found: ${cartProduct != null}');
-    // if (cartProduct != null) {
-    //   print('Cart Product Name: ${cartProduct.name}');
-    //   print('Selected Add-ons: ${cartProduct.selectedAddOns?.length ?? 0}');
-    //   print('Attributes: ${cartProduct.attributes?.length ?? 0}');
-    // }
+    print('CustomizationSummaryScreen Debug:');
+    print('Product ID: ${widget.productId}');
+    print('Central Product ID: ${widget.centralProductId}');
+    print('Cart Product found: ${cartProduct != null}');
+    if (cartProduct != null) {
+      print('Cart Product Name: ${cartProduct.name}');
+      print('Selected Add-ons: ${cartProduct.selectedAddOns?.length ?? 0}');
+      print('Attributes: ${cartProduct.attributes?.length ?? 0}');
+    }
 
     if (cartProduct == null) {
       return const Padding(
@@ -214,7 +199,10 @@ class _CustomizationSummaryScreenState
         child: Center(
           child: Text(
             'No customizations found',
-            style: TextStyle(fontSize: 14, color: Color(0xFF666666)),
+            style: TextStyle(
+              fontSize: 14,
+              color: Color(0xFF666666),
+            ),
           ),
         ),
       );
@@ -230,7 +218,10 @@ class _CustomizationSummaryScreenState
         child: Center(
           child: Text(
             'No customizations available',
-            style: TextStyle(fontSize: 14, color: Color(0xFF666666)),
+            style: TextStyle(
+              fontSize: 14,
+              color: Color(0xFF666666),
+            ),
           ),
         ),
       );
@@ -244,87 +235,83 @@ class _CustomizationSummaryScreenState
           // Display selected add-ons grouped by category
           if (selectedAddOns.isNotEmpty) ...[
             ..._groupAddOnsByCategory(selectedAddOns)
-                .map(
-                  (entry) => Container(
-                    margin: const EdgeInsets.only(bottom: 8),
-                    padding: const EdgeInsets.all(15),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFF5F7FF),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                entry['category']!,
-                                style: const TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w600,
-                                  color: Color(0xFF242424),
+                .map((entry) => Container(
+                      margin: const EdgeInsets.only(bottom: 8),
+                      padding: const EdgeInsets.all(15),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF5F7FF),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  entry['category']!,
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w600,
+                                    color: Color(0xFF242424),
+                                  ),
                                 ),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                entry['options']!,
-                                style: const TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w400,
-                                  color: Color(0xFF6E4185),
+                                const SizedBox(height: 4),
+                                Text(
+                                  entry['options']!,
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w400,
+                                    color: Color(0xFF6E4185),
+                                  ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
-                        ),
-                      ],
-                    ),
-                  ),
-                )
+                        ],
+                      ),
+                    ))
                 .toList(),
           ] else if (attributes.isNotEmpty &&
               widget.storeTypeId != FoodCategory.food.value) ...[
             ...attributes
                 .where((attribute) => attribute.value.isNotEmpty)
-                .map(
-                  (attribute) => Container(
-                    margin: const EdgeInsets.only(bottom: 8),
-                    padding: const EdgeInsets.all(15),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFF5F7FF),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                attribute.attrname,
-                                style: const TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w600,
-                                  color: Color(0xFF242424),
+                .map((attribute) => Container(
+                      margin: const EdgeInsets.only(bottom: 8),
+                      padding: const EdgeInsets.all(15),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF5F7FF),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  attribute.attrname,
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w600,
+                                    color: Color(0xFF242424),
+                                  ),
                                 ),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                attribute.value,
-                                style: const TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w400,
-                                  color: Color(0xFF6E4185),
+                                const SizedBox(height: 4),
+                                Text(
+                                  attribute.value,
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w400,
+                                    color: Color(0xFF6E4185),
+                                  ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
-                        ),
-                      ],
-                    ),
-                  ),
-                )
+                        ],
+                      ),
+                    ))
                 .toList(),
           ],
         ],
@@ -337,7 +324,9 @@ class _CustomizationSummaryScreenState
       padding: const EdgeInsets.all(16),
       decoration: const BoxDecoration(
         color: Colors.white,
-        border: Border(top: BorderSide(color: Color(0xFFE0E0E0), width: 1)),
+        border: Border(
+          top: BorderSide(color: Color(0xFFE0E0E0), width: 1),
+        ),
       ),
       child: Row(
         children: [
@@ -348,8 +337,7 @@ class _CustomizationSummaryScreenState
               child: OutlinedButton(
                 onPressed: () {
                   print(
-                    "I'll choose button clicked for: ${widget.product?.productName}",
-                  );
+                      "I'll choose button clicked for: ${widget.product?.productName}");
                   Navigator.of(context).pop();
 
                   // Call the callback to let parent know "I'll choose" was clicked
@@ -359,9 +347,7 @@ class _CustomizationSummaryScreenState
                 },
                 style: OutlinedButton.styleFrom(
                   side: const BorderSide(
-                    color: AppConstants.appThemeColor,
-                    width: 2,
-                  ),
+                      color: AppConstants.appThemeColor, width: 2),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16),
                   ),
@@ -426,3 +412,4 @@ class _CustomizationSummaryScreenState
     );
   }
 }
+
