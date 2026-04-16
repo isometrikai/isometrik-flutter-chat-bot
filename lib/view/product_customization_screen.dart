@@ -7,6 +7,9 @@ import 'package:chat_bot/bloc/product_customization/product_customization_state.
 import 'package:chat_bot/data/data.dart';
 import 'package:chat_bot/widgets/black_toast_view.dart';
 import 'package:chat_bot/utils/text_styles.dart';
+import 'product_customization/product_customization_bottom_bar.dart';
+import 'product_customization/product_customization_content.dart';
+import 'product_customization/product_customization_header.dart';
 
 
 
@@ -143,12 +146,12 @@ class _ProductCustomizationScreenState extends State<ProductCustomizationScreen>
                                     ElevatedButton(
                                       onPressed: () {
                                         if (widget.isFromMenuScreen == true) {
-                                          _bloc.add(LoadProductPortions(
-                                          centralProductId: widget.centralProductId ?? '',
-                                          childProductId: widget.productId ?? '',
-                                          storeId: widget.storeId ?? '',
-                                          storeTypeId: widget.store?.storeTypeId ?? 0,
-                                        ));
+                                        //   _bloc.add(LoadProductPortions(
+                                        //   centralProductId: widget.centralProductId ?? '',
+                                        //   childProductId: widget.productId ?? '',
+                                        //   storeId: widget.storeId ?? '',
+                                        //   storeTypeId: widget.store?.storeTypeId ?? 0,
+                                        // ));
                                         }else {
                                         _bloc.add(LoadProductPortions(
                                           centralProductId: widget.product?.parentProductId ?? '',
@@ -194,118 +197,16 @@ class _ProductCustomizationScreenState extends State<ProductCustomizationScreen>
   }
 
   Widget _buildHeader() {
-    return Container(
-      padding: const EdgeInsets.only(top: 40, left: 16, right: 16, bottom: 10),
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(16),
-          topRight: Radius.circular(16),
-        ),
-      ),
-      child: Column(
-        children: [
-          // Drag handle
-          Container(
-            width: 28,
-            height: 5,
-            decoration: BoxDecoration(
-              color: const Color(0xFFD8DEF3),
-              borderRadius: BorderRadius.circular(20),
-            ),
-          ),
-          const SizedBox(height: 15),
-          // Header content
-          Row(
-            children: [
-              Container(
-                width: 35,
-                height: 35,
-                decoration: BoxDecoration(
-                  color: const Color(0xFFE9DFFB),
-                  borderRadius: BorderRadius.circular(6.22),
-                ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(6.22),
-                  child: widget.product?.productImage.isNotEmpty ?? false
-                      ? Image.network(
-                          widget.isFromMenuScreen == true ? widget.productImage ?? '' : widget.product?.productImage ?? '',
-                          fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) => const Icon(
-                            Icons.restaurant,
-                            color: AppConstants.appThemeColor,
-                            size: 20,
-                          ),
-                        )
-                      : const Icon(
-                          Icons.restaurant,
-                          color: AppConstants.appThemeColor,
-                          size: 20,
-                        ),
-                ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Text(
-                 widget.isFromMenuScreen == true ? widget.productName ?? '' : widget.product?.productName ?? '',
-                  style: const TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w700,
-                    color: Color(0xFF242424),
-                  ),
-                ),
-              ),
-              Container(
-                width: 24,
-                height: 24,
-                decoration: BoxDecoration(
-                  color: const Color(0xFFF6F6F6),
-                  borderRadius: BorderRadius.circular(38.18),
-                ),
-                child: IconButton(
-                  onPressed: () => Navigator.of(context).pop(),
-                  icon: const Icon(
-                    Icons.close,
-                    color: Color(0xFF585C77),
-                    size: 9.6,
-                  ),
-                  constraints: const BoxConstraints(minWidth: 24, minHeight: 24),
-                  padding: EdgeInsets.zero,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 0),
-          // Container(
-          //   height: 1,
-          //   color: const Color(0xFFE9DFFB),
-          // ),
-        ],
-      ),
+    return ProductCustomizationHeader(
+      product: widget.product,
+      productName: widget.productName,
+      productImage: widget.productImage,
+      isFromMenuScreen: widget.isFromMenuScreen == true,
     );
   }
 
   Widget _buildCustomizationContent(ProductCustomizationLoaded state) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildSizeSection(state),
-          const SizedBox(height: 16),
-          // Dynamically show add-on sections based on API data
-          ...state.selectedVariant!.addOns.map((addOnCategory) => 
-            Column(
-              children: [
-                _buildAddOnSection(addOnCategory, state),
-                const SizedBox(height: 16),
-              ],
-            ),
-          ),
-          const SizedBox(height: 20),
-        ],
-      ),
-    );
+    return ProductCustomizationContent(state: state);
   }
 
   Widget _buildSizeSection(ProductCustomizationLoaded state) {
@@ -578,6 +479,13 @@ class _ProductCustomizationScreenState extends State<ProductCustomizationScreen>
   }
 
   Widget _buildBottomBar() {
+    return ProductCustomizationBottomBar(
+      product: widget.product,
+      store: widget.store,
+      isFromMenuScreen: widget.isFromMenuScreen,
+      onAddToCartWithAddOns: widget.onAddToCartWithAddOns,
+    );
+    // Remaining legacy implementation moved to `product_customization_bottom_bar.dart`.
     return BlocBuilder<ProductCustomizationBloc, ProductCustomizationState>(
       builder: (context, state) {
         if (state is! ProductCustomizationLoaded) {
