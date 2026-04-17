@@ -7,6 +7,7 @@ import 'package:chat_bot/widgets/widgets.dart';
 import 'package:chat_bot/view/views.dart';
 import 'package:chat_bot/utils/utils.dart';
 import 'package:chat_bot/services/services.dart';
+import 'package:chat_bot/view/groceries_menu/groceries_menu_content.dart';
 
 class GroceriesMenuScreen extends StatefulWidget {
   final chat.WidgetAction? actionData;
@@ -168,24 +169,53 @@ class _GroceriesMenuScreenState extends State<GroceriesMenuScreen> {
   }
 
   Widget _buildNewGroceryUI(SubCategoryProductsResponse subCategoryProducts) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Search Bar
-          // _buildSearchBar(),
-          // const SizedBox(height: 16),
-
-          // Category Filter Chips
-          if (widget.actionData?.storeTypeId != FoodCategory.services.value) ...[
-             _buildCategoryFilterChips(subCategoryProducts),
-            const SizedBox(height: 16),
-          ],
-          // Products Grid
-          _buildProductsGrid(subCategoryProducts),
-        ],
-      ),
+    return GroceriesMenuContent(
+      actionData: widget.actionData,
+      subCategoryProducts: subCategoryProducts,
+      selectedMainCategoryIndex: _selectedMainCategoryIndex,
+      onSelectedMainCategoryIndexChanged: (index) {
+        setState(() {
+          _selectedMainCategoryIndex = index;
+        });
+      },
+      cartData: _cartData,
+      purple: _purple,
+      border: _border,
+      vegColor: _veg,
+      nonVegColor: _nonVeg,
+      onQuantityChanged: (
+        productId,
+        centralProductId,
+        quantity,
+        isIncrease,
+        isCustomizable,
+      ) {
+        _onQuantityChangedForGrocery(
+          centralProductId,
+          productId,
+          '',
+          widget.actionData?.storeId ?? '',
+          widget.actionData?.storeCategoryId ?? '',
+          widget.actionData?.storeTypeId ?? -111,
+          0,
+          quantity,
+          isIncrease,
+          '',
+          '',
+          isCustomizable,
+        );
+      },
+      onProductTap: () {
+        // Keep existing behavior: handled inside MenuItemCard callbacks in the original grid.
+      },
+      onAddToCart: (
+        productId,
+        centralProductId,
+        quantity,
+        isCustomizable,
+      ) {
+        // Keep existing behavior: handled inside MenuItemCard callbacks in the original grid.
+      },
     );
   }
 
