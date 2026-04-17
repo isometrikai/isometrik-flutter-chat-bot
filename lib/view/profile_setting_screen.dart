@@ -6,6 +6,7 @@ import 'package:chat_bot/utils/app_constants.dart';
 import 'package:chat_bot/utils/utility.dart';
 import 'package:chat_bot/view/chat_history_screen.dart';
 import 'package:chat_bot/view/complete_setup/complete_setup_flow_screen.dart';
+import 'package:chat_bot/view/personalization_screen.dart';
 import 'package:chat_bot/view/popup_overlay_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -116,6 +117,22 @@ class ProfileSettingScreen extends StatelessWidget {
                         context,
                         title: 'SETTINGS',
                         items: [
+                          _SettingItem(
+                            icon: SvgPicture.asset(
+                              AssetPath.get('images/ic_personalization.svg'),
+                              width: 20,
+                              height: 20,
+                              fit: BoxFit.cover,
+                            ),
+                            label: 'Personalization',
+                            onTap: () {
+                              Navigator.of(context).push(
+                                MaterialPageRoute<void>(
+                                  builder: (context) => const PersonalizationScreen(),
+                                ),
+                              );
+                            },
+                          ),
                           _SettingItem(
                             icon: SvgPicture.asset(
                               AssetPath.get('images/ic_S_HelpCenter.svg'),
