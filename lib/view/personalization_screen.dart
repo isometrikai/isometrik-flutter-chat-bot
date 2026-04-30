@@ -32,6 +32,13 @@ class _PersonalizationScreenState extends State<PersonalizationScreen> {
 
   bool _personalizedAi = true;
 
+  TextStyle get _rowLabelStyle => AppTheme.getTextStyle(
+        fontSize: 16,
+        fontWeight: FontWeight.w400,
+        height: 1.2,
+        color: _primaryText,
+      );
+
   @override
   Widget build(BuildContext context) {
     final screenW = MediaQuery.sizeOf(context).width;
@@ -48,23 +55,7 @@ class _PersonalizationScreenState extends State<PersonalizationScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(0, 8, 16, 10),
-                  child: Align(
-                    alignment: Alignment.centerLeft,
-                    child: IconButton(
-                      padding: EdgeInsets.zero,
-                      constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
-                      icon: SvgPicture.asset(
-                        AssetPath.get('images/ic_full_black.svg'),
-                        width: 20,
-                        height: 20,
-                        colorFilter: const ColorFilter.mode(Color(0xFF242424), BlendMode.srcIn),
-                      ),
-                      onPressed: () => Navigator.of(context).maybePop(),
-                    ),
-                  ),
-                ),
+                _backButton(),
                 _titleHeader(),
                 Expanded(
                   child: ListView(
@@ -114,6 +105,26 @@ class _PersonalizationScreenState extends State<PersonalizationScreen> {
     );
   }
 
+  Widget _backButton() {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(0, 8, 16, 10),
+      child: Align(
+        alignment: Alignment.centerLeft,
+        child: IconButton(
+          padding: EdgeInsets.zero,
+          constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
+          icon: SvgPicture.asset(
+            AssetPath.get('images/ic_full_black.svg'),
+            width: 20,
+            height: 20,
+            colorFilter: const ColorFilter.mode(Color(0xFF242424), BlendMode.srcIn),
+          ),
+          onPressed: () => Navigator.of(context).maybePop(),
+        ),
+      ),
+    );
+  }
+
   Widget _titleHeader() {
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
@@ -142,13 +153,6 @@ class _PersonalizationScreenState extends State<PersonalizationScreen> {
         color: _sheetBodyColor,
       );
 
-  TextStyle get _sheetTitleStyle => AppTheme.getTextStyle(
-        fontSize: 20,
-        fontWeight: FontWeight.w700,
-        height: 1.25,
-        color: Colors.black,
-      );
-
   /// Archive / export: primary blue confirm. Delete: red filled confirm.
   /// Cancel (outlined) first, confirm (filled) second — matches design.
   Future<bool?> _showPersonalizationBottomSheet({
@@ -169,75 +173,11 @@ class _PersonalizationScreenState extends State<PersonalizationScreen> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(_sheetCornerRadius)),
       ),
       builder: (sheetContext) {
-        return Padding(
-          padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(sheetContext).bottom),
-          child: SingleChildScrollView(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(24, 30, 24, 28),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(child: Text(title, style: _sheetTitleStyle)),
-                      // _SheetCloseButton(onPressed: () => Navigator.pop(sheetContext, false)),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  body(sheetContext),
-                  const SizedBox(height: 28),
-                  SizedBox(
-                    height: _sheetButtonHeight,
-                    width: double.infinity,
-                    child: OutlinedButton(
-                      onPressed: () => Navigator.pop(sheetContext, false),
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: AppConstants.appThemeColor,
-                        side: const BorderSide(color: AppConstants.appThemeColor, width: 1),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(_sheetButtonRadius),
-                        ),
-                        backgroundColor: Colors.white,
-                      ),
-                      child: Text(
-                        'Cancel',
-                        style: AppTheme.getTextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
-                          color: AppConstants.appThemeColor,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  SizedBox(
-                    height: _sheetButtonHeight,
-                    width: double.infinity,
-                    child: FilledButton(
-                      onPressed: () => Navigator.pop(sheetContext, true),
-                      style: FilledButton.styleFrom(
-                        backgroundColor: confirmColor,
-                        foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(_sheetButtonRadius),
-                        ),
-                      ),
-                      child: Text(
-                        confirmLabel,
-                        style: AppTheme.getTextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
+        return _PersonalizationConfirmSheet(
+          title: title,
+          body: body,
+          confirmLabel: confirmLabel,
+          confirmColor: confirmColor,
         );
       },
     );
@@ -258,12 +198,7 @@ class _PersonalizationScreenState extends State<PersonalizationScreen> {
           Expanded(
             child: Text(
               label,
-              style: AppTheme.getTextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w400,
-                height: 1.2,
-                color: _primaryText,
-              ),
+              style: _rowLabelStyle,
             ),
           ),
           Transform.scale(
@@ -300,41 +235,17 @@ class _PersonalizationScreenState extends State<PersonalizationScreen> {
           Expanded(
             child: Text(
               label,
-              style: AppTheme.getTextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w400,
-                height: 1.2,
-                color: _primaryText,
-              ),
+              style: _rowLabelStyle,
             ),
           ),
           SizedBox(
             width: _actionPillWidth,
             height: 40,
-            child: OutlinedButton(
+            child: _ActionPillButton(
+              label: buttonLabel,
               onPressed: onPressed,
-              style: OutlinedButton.styleFrom(
-                foregroundColor: textColor,
-                side: BorderSide(color: borderColor),
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-                minimumSize: const Size(_actionPillWidth, 40),
-                maximumSize: const Size(_actionPillWidth, 40),
-                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                shape: const StadiumBorder(),
-                backgroundColor: Colors.white,
-              ),
-              child: Text(
-                buttonLabel,
-                textAlign: TextAlign.center,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: AppTheme.getTextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w400,
-                  height: 1.4,
-                  color: textColor,
-                ),
-              ),
+              borderColor: borderColor,
+              textColor: textColor,
             ),
           ),
         ],
@@ -482,32 +393,6 @@ class _PersonalizationScreenState extends State<PersonalizationScreen> {
           onMessage: (msg) {
             if (mounted) _showSnack(msg);
           },
-        ),
-      ),
-    );
-  }
-}
-
-class _SheetCloseButton extends StatelessWidget {
-  const _SheetCloseButton({required this.onPressed});
-
-  static const Color _bg = Color(0xFFECECEC);
-
-  final VoidCallback onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: _bg,
-      shape: const CircleBorder(),
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: onPressed,
-        customBorder: const CircleBorder(),
-        child: const SizedBox(
-          width: 36,
-          height: 36,
-          child: Icon(Icons.close, size: 20, color: Color(0xFF585C77)),
         ),
       ),
     );
@@ -839,12 +724,13 @@ class _ArchivedChatRow extends StatelessWidget {
                     IconButton(
                       padding: EdgeInsets.zero,
                       constraints: const BoxConstraints(minWidth: 25, minHeight: 25),
-                       icon: SvgPicture.asset(
+                      icon: SvgPicture.asset(
                         AssetPath.get('images/ic_archive.svg'),
                         width: 22,
                         height: 22,
                         colorFilter: const ColorFilter.mode(Color(0xFF424242), BlendMode.srcIn),
-                      ),                      onPressed: onUnarchive,
+                      ),
+                      onPressed: onUnarchive,
                     ),
                     IconButton(
                       padding: EdgeInsets.zero,
@@ -858,6 +744,144 @@ class _ArchivedChatRow extends StatelessWidget {
                       onPressed: onDelete,
                     ),
                   ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ActionPillButton extends StatelessWidget {
+  const _ActionPillButton({
+    required this.label,
+    required this.onPressed,
+    required this.borderColor,
+    required this.textColor,
+  });
+
+  final String label;
+  final VoidCallback onPressed;
+  final Color borderColor;
+  final Color textColor;
+
+  @override
+  Widget build(BuildContext context) {
+    return OutlinedButton(
+      onPressed: onPressed,
+      style: OutlinedButton.styleFrom(
+        foregroundColor: textColor,
+        side: BorderSide(color: borderColor),
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+        minimumSize: const Size(_PersonalizationScreenState._actionPillWidth, 40),
+        maximumSize: const Size(_PersonalizationScreenState._actionPillWidth, 40),
+        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        shape: const StadiumBorder(),
+        backgroundColor: Colors.white,
+      ),
+      child: Text(
+        label,
+        textAlign: TextAlign.center,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        style: AppTheme.getTextStyle(
+          fontSize: 14,
+          fontWeight: FontWeight.w400,
+          height: 1.4,
+          color: textColor,
+        ),
+      ),
+    );
+  }
+}
+
+class _PersonalizationConfirmSheet extends StatelessWidget {
+  const _PersonalizationConfirmSheet({
+    required this.title,
+    required this.body,
+    required this.confirmLabel,
+    required this.confirmColor,
+  });
+
+  final String title;
+  final Widget Function(BuildContext sheetContext) body;
+  final String confirmLabel;
+  final Color confirmColor;
+
+  TextStyle get _sheetTitleStyle => AppTheme.getTextStyle(
+        fontSize: 20,
+        fontWeight: FontWeight.w700,
+        height: 1.25,
+        color: Colors.black,
+      );
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(context).bottom),
+      child: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(24, 30, 24, 28),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(child: Text(title, style: _sheetTitleStyle)),
+                  // _SheetCloseButton(onPressed: () => Navigator.pop(context, false)),
+                ],
+              ),
+              const SizedBox(height: 16),
+              body(context),
+              const SizedBox(height: 28),
+              SizedBox(
+                height: _PersonalizationScreenState._sheetButtonHeight,
+                width: double.infinity,
+                child: OutlinedButton(
+                  onPressed: () => Navigator.pop(context, false),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: AppConstants.appThemeColor,
+                    side: const BorderSide(color: AppConstants.appThemeColor, width: 1),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(_PersonalizationScreenState._sheetButtonRadius),
+                    ),
+                    backgroundColor: Colors.white,
+                  ),
+                  child: Text(
+                    'Cancel',
+                    style: AppTheme.getTextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                      color: AppConstants.appThemeColor,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+              SizedBox(
+                height: _PersonalizationScreenState._sheetButtonHeight,
+                width: double.infinity,
+                child: FilledButton(
+                  onPressed: () => Navigator.pop(context, true),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: confirmColor,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(_PersonalizationScreenState._sheetButtonRadius),
+                    ),
+                  ),
+                  child: Text(
+                    confirmLabel,
+                    style: AppTheme.getTextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.white,
+                    ),
+                  ),
                 ),
               ),
             ],

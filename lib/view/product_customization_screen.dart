@@ -44,6 +44,19 @@ class ProductCustomizationScreen extends StatefulWidget {
 class _ProductCustomizationScreenState extends State<ProductCustomizationScreen> {
   late ProductCustomizationBloc _bloc;
 
+  static const Color _bg = Color(0xFFF5F7FF);
+  static const Color _headerImageBg = Color(0xFFE9DFFB);
+  static const Color _closeBg = Color(0xFFF6F6F6);
+  static const Color _divider = Color(0xFFEEF4FF);
+  static const Color _accentText = Color(0xFF6E4185);
+  static const Color _primaryText = Color(0xFF242424);
+
+  String get _effectiveProductName =>
+      widget.isFromMenuScreen == true ? (widget.productName ?? '') : (widget.product?.productName ?? '');
+
+  String get _effectiveProductImage =>
+      widget.isFromMenuScreen == true ? (widget.productImage ?? '') : (widget.product?.productImage ?? '');
+
   @override
   void initState() {
     super.initState();
@@ -52,28 +65,28 @@ class _ProductCustomizationScreenState extends State<ProductCustomizationScreen>
         apiClient: UniversalApiClient.instance.appClient,
       ),
     );
-    
-    if (widget.isFromMenuScreen == true) {
-        _bloc.add(LoadProductPortions(
-        centralProductId: widget.centralProductId ?? '',
-        childProductId: widget.productId ?? '',
-        storeId: widget.storeId ?? '',
-        storeTypeId: widget.store?.storeTypeId ?? 0,
-      ));
-    }else {
-      _bloc.add(LoadProductPortions(
-        centralProductId: widget.product?.parentProductId ?? '',
-        childProductId: widget.product?.childProductId ?? '',
-        storeId: widget.store?.storeId ?? '',
-        storeTypeId: widget.store?.storeTypeId ?? 0,
-      ));
-    }
+
+    _loadPortions();
   }
 
   @override
   void dispose() {
     _bloc.close();
     super.dispose();
+  }
+
+  void _loadPortions() {
+    _bloc.add(
+      LoadProductPortions(
+        centralProductId: widget.isFromMenuScreen == true
+            ? (widget.centralProductId ?? '')
+            : (widget.product?.parentProductId ?? ''),
+        childProductId:
+            widget.isFromMenuScreen == true ? (widget.productId ?? '') : (widget.product?.childProductId ?? ''),
+        storeId: widget.isFromMenuScreen == true ? (widget.storeId ?? '') : (widget.store?.storeId ?? ''),
+        storeTypeId: widget.store?.storeTypeId ?? 0,
+      ),
+    );
   }
 
   @override
@@ -93,7 +106,7 @@ class _ProductCustomizationScreenState extends State<ProductCustomizationScreen>
         },
         child: Container(
           decoration: const BoxDecoration(
-            color: Color(0xFFF5F7FF),
+            color: _bg,
             borderRadius: BorderRadius.only(
               topLeft: Radius.circular(16),
               topRight: Radius.circular(16),
@@ -104,7 +117,7 @@ class _ProductCustomizationScreenState extends State<ProductCustomizationScreen>
               // Main content with light purple background
               Expanded(
                 child: Container(
-                  color: const Color(0xFFF5F7FF),
+                  color: _bg,
                   child: Column(
                     children: [
                       _buildHeader(),
@@ -128,35 +141,21 @@ class _ProductCustomizationScreenState extends State<ProductCustomizationScreen>
                                     Icon(
                                       Icons.error_outline,
                                       size: 64,
-                                      color: const Color(0xFF6E4185).withValues(alpha: 0.5),
+                                      color: _accentText.withValues(alpha: 0.5),
                                     ),
                                     const SizedBox(height: 16),
                                     Text(
                                       state.message,
                                       style: const TextStyle(
                                         fontSize: 16,
-                                        color: Color(0xFF6E4185),
+                                        color: _accentText,
                                       ),
                                       textAlign: TextAlign.center,
                                     ),
                                     const SizedBox(height: 24),
                                     ElevatedButton(
                                       onPressed: () {
-                                        if (widget.isFromMenuScreen == true) {
-                                          _bloc.add(LoadProductPortions(
-                                          centralProductId: widget.centralProductId ?? '',
-                                          childProductId: widget.productId ?? '',
-                                          storeId: widget.storeId ?? '',
-                                          storeTypeId: widget.store?.storeTypeId ?? 0,
-                                        ));
-                                        }else {
-                                        _bloc.add(LoadProductPortions(
-                                          centralProductId: widget.product?.parentProductId ?? '',
-                                          childProductId: widget.product?.childProductId ?? '',
-                                          storeId: widget.store?.storeId ?? '',
-                                          storeTypeId: widget.store?.storeTypeId ?? 0,
-                                        ));
-                                        }
+                                        _loadPortions();
                                       },
                                       style: ElevatedButton.styleFrom(
                                         backgroundColor: AppConstants.appThemeColor,
@@ -222,14 +221,14 @@ class _ProductCustomizationScreenState extends State<ProductCustomizationScreen>
                 width: 35,
                 height: 35,
                 decoration: BoxDecoration(
-                  color: const Color(0xFFE9DFFB),
+                  color: _headerImageBg,
                   borderRadius: BorderRadius.circular(6.22),
                 ),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(6.22),
-                  child: widget.product?.productImage.isNotEmpty ?? false
+                  child: _effectiveProductImage.isNotEmpty
                       ? Image.network(
-                          widget.isFromMenuScreen == true ? widget.productImage ?? '' : widget.product?.productImage ?? '',
+                          _effectiveProductImage,
                           fit: BoxFit.cover,
                           errorBuilder: (context, error, stackTrace) => const Icon(
                             Icons.restaurant,
@@ -247,11 +246,11 @@ class _ProductCustomizationScreenState extends State<ProductCustomizationScreen>
               const SizedBox(width: 10),
               Expanded(
                 child: Text(
-                 widget.isFromMenuScreen == true ? widget.productName ?? '' : widget.product?.productName ?? '',
+                  _effectiveProductName,
                   style: const TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.w700,
-                    color: Color(0xFF242424),
+                    color: _primaryText,
                   ),
                 ),
               ),
@@ -259,7 +258,7 @@ class _ProductCustomizationScreenState extends State<ProductCustomizationScreen>
                 width: 24,
                 height: 24,
                 decoration: BoxDecoration(
-                  color: const Color(0xFFF6F6F6),
+                  color: _closeBg,
                   borderRadius: BorderRadius.circular(38.18),
                 ),
                 child: IconButton(
@@ -317,7 +316,7 @@ class _ProductCustomizationScreenState extends State<ProductCustomizationScreen>
           style: TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w700,
-            color: Color(0xFF242424),
+            color: _primaryText,
           ),
         ),
         const SizedBox(height: 4),
@@ -326,7 +325,7 @@ class _ProductCustomizationScreenState extends State<ProductCustomizationScreen>
           style: TextStyle(
             fontSize: 12,
             fontWeight: FontWeight.w400,
-            color: Color(0xFF6E4185),
+            color: _accentText,
           ),
         ),
         const SizedBox(height: 8),
@@ -334,7 +333,7 @@ class _ProductCustomizationScreenState extends State<ProductCustomizationScreen>
           padding: const EdgeInsets.all(15),
           decoration: BoxDecoration(
             color: Colors.white,
-            border: Border.all(color: const Color(0xFFEEF4FF)),
+            border: Border.all(color: _divider),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Column(
@@ -361,7 +360,7 @@ class _ProductCustomizationScreenState extends State<ProductCustomizationScreen>
               style: const TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w400,
-                color: Color(0xFF242424),
+                color: _primaryText,
               ),
             ),
           ),
@@ -425,7 +424,7 @@ class _ProductCustomizationScreenState extends State<ProductCustomizationScreen>
               ? 'Required | Select any ${addOnCategory.maximumLimit}'
               : 'Optional | You can select up to ${addOnCategory.maximumLimit} items',
           style: AppTextStyles.addonDescription.copyWith(
-            color: const Color(0xFF6E4185),
+            color: _accentText,
           ),
         ),
         const SizedBox(height: 8),
@@ -433,7 +432,7 @@ class _ProductCustomizationScreenState extends State<ProductCustomizationScreen>
           padding: const EdgeInsets.all(15),
           decoration: BoxDecoration(
             color: Colors.white,
-            border: Border.all(color: const Color(0xFFEEF4FF)),
+            border: Border.all(color: _divider),
             borderRadius: BorderRadius.circular(8),
           ),
           child: addOnCategory.addOns.isNotEmpty
@@ -471,7 +470,7 @@ class _ProductCustomizationScreenState extends State<ProductCustomizationScreen>
               style: const TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w400,
-                color: Color(0xFF242424),
+                color: _primaryText,
               ),
             ),
           ),
@@ -587,7 +586,7 @@ class _ProductCustomizationScreenState extends State<ProductCustomizationScreen>
         return Container(
           padding: const EdgeInsets.only(top: 10),
           decoration: const BoxDecoration(
-            color: Color(0xFFF5F7FF),
+            color: _bg,
           ),
           child: Column(
             children: [
@@ -604,105 +603,22 @@ class _ProductCustomizationScreenState extends State<ProductCustomizationScreen>
                     if (!_validateRequiredOptions(state)) {
                       return; // Stop execution if validation fails
                     }
-                    
-                    if (state.selectedVariant != null) {
-                      // Format addons data for API
-                      final formattedAddOns = _formatAddOnsForAPI(state);
-                      
-                      if (formattedAddOns.isNotEmpty) {
-                        // Addons selected, use the new callback
-                        if (widget.onAddToCartWithAddOns != null) {
-                          if (widget.isFromMenuScreen == true) {
-                          widget.onAddToCartWithAddOns!(
-                              widget.product,
-                              widget.store,
-                              state.selectedVariant,
-                              formattedAddOns,
-                              state.selectedVariant?.childProductId ?? '',
-                          );
-                          }else {
-                            widget.onAddToCartWithAddOns!(
-                              widget.product,
-                              widget.store,
-                              state.selectedVariant,
-                              formattedAddOns,
-                              state.selectedVariant?.childProductId ?? '',
-                          );
-                          }
-                          Navigator.of(context).pop();
-                        }
-                      } else {
-                            widget.onAddToCartWithAddOns!(
-                              widget.product,
-                              widget.store,
-                              state.selectedVariant,
-                              formattedAddOns,
-                              state.selectedVariant?.childProductId ?? '',
-                            );
-                        Navigator.of(context).pop();
-                        // No addons selected, proceed with original logic
-                        // final customizations = <String, List<String>>{};
-                        
-                        // customizations['variant'] = [state.selectedVariant!.name];
-                        
-                        // for (final entry in state.selectedAddOns.entries) {
-                        //   if (entry.value.isNotEmpty) {
-                        //     final addOnCategory = state.selectedVariant!.addOns.firstWhere(
-                        //       (category) => category.name == entry.key,
-                        //     );
-                            
-                        //     final selectedItems = <String>[];
-                        //     for (final addOnId in entry.value) {
-                        //       final addOnItem = addOnCategory.addOns.firstWhere(
-                        //         (item) => item.id == addOnId,
-                        //       );
-                        //       selectedItems.add(addOnItem.name);
-                        //     }
-                            
-                        //     if (selectedItems.isNotEmpty) {
-                        //       customizations[entry.key] = selectedItems;
-                        //     }
-                        //   }
-                        // }
-                        
-                        // if (widget.onAddToCart != null) {
-                        //   final variantName = state.selectedVariant!.name;
-                          
-                        //   List<String> customizationDetails = [];
-                          
-                        //   for (final entry in state.selectedAddOns.entries) {
-                        //     if (entry.value.isNotEmpty) {
-                        //       final addOnCategory = state.selectedVariant!.addOns.firstWhere(
-                        //         (category) => category.name == entry.key,
-                        //       );
-                              
-                        //       final selectedItems = <String>[];
-                        //       for (final addOnId in entry.value) {
-                        //         final addOnItem = addOnCategory.addOns.firstWhere(
-                        //           (item) => item.id == addOnId,
-                        //         );
-                        //         selectedItems.add(addOnItem.name);
-                        //       }
-                              
-                        //       if (selectedItems.isNotEmpty) {
-                        //         customizationDetails.add("${entry.key}: ${selectedItems.join(', ')}");
-                        //       }
-                        //     }
-                        //   }
-                          
-                        //   String message = "[VARIANT_SELECTION] Added 1X ${widget.isFromMenuScreen == true ? widget.productName ?? '' : widget.product?.productName ?? ''} - $variantName";
-                        //   if (customizationDetails.isNotEmpty) {
-                        //     message += " with ${customizationDetails.join(', ')}";
-                        //   }
-                        //   message += " to cart";
-                          
-                        //   widget.onAddToCart!(message);
-                        // }
-                        
-                        // Navigator.of(context).pop();
-                        
-                      }
-                    }
+
+                    final selectedVariant = state.selectedVariant;
+                    if (selectedVariant == null) return;
+
+                    final onAddToCartWithAddOns = widget.onAddToCartWithAddOns;
+                    if (onAddToCartWithAddOns == null) return;
+
+                    final formattedAddOns = _formatAddOnsForAPI(state);
+                    onAddToCartWithAddOns(
+                      widget.product,
+                      widget.store,
+                      selectedVariant,
+                      formattedAddOns,
+                      selectedVariant.childProductId,
+                    );
+                    Navigator.of(context).pop();
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.transparent,
