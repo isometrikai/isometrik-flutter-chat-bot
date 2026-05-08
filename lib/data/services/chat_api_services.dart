@@ -120,6 +120,7 @@ class ChatApiServices {
       'store_category_id': storeCategoryId,
       'prescription_image_urls': prescriptionImageUrls,
       'table_booking': tableBookingData,
+      'enable_personalisation': Utility.getPersonalization(),
     };
 
     // Match existing endpoint used elsewhere
