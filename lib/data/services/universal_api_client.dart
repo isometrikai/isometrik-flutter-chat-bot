@@ -39,6 +39,13 @@ class UniversalApiClient {
     buildHeaders: _buildUserPreferenceHeaders,
   );
 
+  /// Customer preference API: PATCH /v1/customer/* with JSON `authorization` header
+  ApiClient get _customerPreferenceClient => ApiClient(
+    // Uses same baseApiUrl configured via ApiService.configure (e.g. https://api-stage.eazylife-online.com)
+    baseUrl: ApiService.baseApiUrl,
+    buildHeaders: _buildCustomerPreferenceHeaders,
+  );
+
   Future<Map<String, String>> _buildUserPreferenceHeaders() async {
     final raw = TokenManager.instance.userToken ?? '';
     final token = raw.isEmpty ? '' : (raw.startsWith('Bearer ') ? raw : 'Bearer $raw');
@@ -48,6 +55,20 @@ class UniversalApiClient {
       'language': 'en',
       'platform': Utility.getPlatform(),
       if (token.isNotEmpty) 'authorization': token,
+    };
+  }
+
+  /// Some easyagentapi endpoints expect a JSON string in `authorization` header
+  /// (not an `Authorization: Bearer ...` header). We pass through `userToken` verbatim.
+  Future<Map<String, String>> _buildCustomerPreferenceHeaders() async {
+    final raw = TokenManager.instance.userToken ?? '';
+    final platform = Utility.getPlatform();
+    return {
+      'accept': 'application/json',
+      'Content-Type': 'application/json',
+      'language': 'en',
+      'platform': platform.isNotEmpty ? platform : '3',
+      if (raw.isNotEmpty) 'authorization': raw,
     };
   }
 
@@ -161,6 +182,9 @@ class UniversalApiClient {
 
   /// Get user preference API client (POST/GET/PATCH userPreference)
   ApiClient get userPreferenceClient => _userPreferenceClient;
+
+  /// Get easyagentapi customer preference client (PATCH /v1/customer/*)
+  ApiClient get customerPreferenceClient => _customerPreferenceClient;
 
   /// Create a custom API client for any base URL
   ApiClient createClient(String baseUrl) {

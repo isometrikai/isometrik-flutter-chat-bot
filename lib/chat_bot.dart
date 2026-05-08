@@ -45,6 +45,7 @@ class ChatBot {
     required String zoneId,
     required String timezone,
     required String platform,
+    required bool personalization,
   }) {
     print('chatBotId: $chatBotId');
     print('appSecret: $appSecret');
@@ -97,6 +98,7 @@ class ChatBot {
       zoneId: zoneId,
       timezone: timezone,
       platform: platform,
+      personalization: personalization,
     );
   }
 

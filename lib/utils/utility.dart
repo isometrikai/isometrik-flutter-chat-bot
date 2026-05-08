@@ -10,6 +10,7 @@ class Utility {
   static String currencyCode = '';
   static String platform = '';
   static String name = '';
+  static bool personalization = true;
 
   static void showLoader({
     String? message,
@@ -130,6 +131,14 @@ class Utility {
 
   static void setName(String name) {
     Utility.name = name;
+  }
+
+  static void setPersonalization(bool personalization) {
+    Utility.personalization = personalization;
+  }
+
+  static bool getPersonalization() {
+    return personalization;
   }
 
   static String getName() {

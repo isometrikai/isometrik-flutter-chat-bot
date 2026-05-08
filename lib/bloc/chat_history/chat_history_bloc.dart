@@ -20,6 +20,7 @@ class ChatHistoryBloc extends Bloc<ChatHistoryEvent, ChatHistoryState> {
   bool? _isHealthCareChat;
   // Current search query
   String _currentQuery = '';
+  bool _isFromArchive = false;
 
   ChatHistoryBloc({ChatHistoryRepository? repository})
       : repository = repository ?? ChatHistoryRepository.instance,
@@ -28,6 +29,13 @@ class ChatHistoryBloc extends Bloc<ChatHistoryEvent, ChatHistoryState> {
     on<ChatHistoryRefreshed>(_onRefreshed);
     on<ChatHistoryLoadMoreRequested>(_onLoadMoreRequested);
     on<ChatHistoryDeleteRequested>(_onDeleteRequested);
+    on<ChatHistoryArchiveRequested>(_onArchiveRequested);
+    on<ChatHistoryUnarchiveRequested>(_onUnarchiveRequested);
+    on<ChatHistoryShareRequested>(_onShareRequested);
+    on<ChatHistorySharedSessionsFetchRequested>(_onSharedSessionsFetchRequested);
+    on<ChatHistorySharedSessionRevokeRequested>(_onSharedSessionRevokeRequested);
+    on<ChatHistoryArchiveAllRequested>(_onArchiveAllRequested);
+    on<ChatHistoryDeleteAllRequested>(_onDeleteAllRequested);
     on<ChatHistoryCategoryFilterRequested>(_onCategoryFilterRequested);
     on<ChatHistorySearchRequested>(_onSearchRequested);
   }
@@ -38,6 +46,7 @@ class ChatHistoryBloc extends Bloc<ChatHistoryEvent, ChatHistoryState> {
   ) async {
     Utility.showLoader();
     _currentSkip = 0;
+    _isFromArchive = event.isFromArchive;
     
     try {
       final sessions = await repository.fetchChatHistory(
@@ -49,6 +58,7 @@ class ChatHistoryBloc extends Bloc<ChatHistoryEvent, ChatHistoryState> {
         isServicesChat: _isServicesChat,
         isHealthCareChat: _isHealthCareChat,
         query: _currentQuery.isNotEmpty ? _currentQuery : null,
+        isFromArchive: _isFromArchive,
       );
       Utility.closeProgressDialog();
       
@@ -82,6 +92,7 @@ class ChatHistoryBloc extends Bloc<ChatHistoryEvent, ChatHistoryState> {
         isServicesChat: _isServicesChat,
         isHealthCareChat: _isHealthCareChat,
         query: _currentQuery.isNotEmpty ? _currentQuery : null,
+        isFromArchive: _isFromArchive,
       );
       
       final hasMore = sessions.length == _pageSize;
@@ -120,6 +131,7 @@ class ChatHistoryBloc extends Bloc<ChatHistoryEvent, ChatHistoryState> {
         isServicesChat: _isServicesChat,
         isHealthCareChat: _isHealthCareChat,
         query: _currentQuery.isNotEmpty ? _currentQuery : null,
+        isFromArchive: _isFromArchive,
       );
       
       final hasMore = newSessions.length == _pageSize;
@@ -158,7 +170,7 @@ class ChatHistoryBloc extends Bloc<ChatHistoryEvent, ChatHistoryState> {
       //     .where((session) => session.sessionId.toString() != event.sessionId)
       //     .toList();
       
-      add(ChatHistoryFetchRequested());
+      add(ChatHistoryFetchRequested(isFromArchive: _isFromArchive));
       emit(ChatHistoryDeleteSuccess(sessionId: event.sessionId));
       // emit(ChatHistoryLoadSuccess(
       //   sessions: updatedSessions,
@@ -176,6 +188,154 @@ class ChatHistoryBloc extends Bloc<ChatHistoryEvent, ChatHistoryState> {
     }
   }
 
+  Future<void> _onArchiveRequested(
+    ChatHistoryArchiveRequested event,
+    Emitter<ChatHistoryState> emit,
+  ) async {
+    final currentState = state;
+    if (currentState is! ChatHistoryLoadSuccess) {
+      return;
+    }
+
+    Utility.showLoader();
+
+    try {
+      await repository.archiveChat(sessionId: event.sessionId);
+      Utility.closeProgressDialog();
+
+      add(ChatHistoryFetchRequested());
+      emit(ChatHistoryArchiveSuccess(sessionId: event.sessionId));
+    } catch (e) {
+      Utility.closeProgressDialog();
+      emit(ChatHistoryArchiveFailure(
+        message: e.toString(),
+        sessionId: event.sessionId,
+      ));
+      emit(currentState);
+    }
+  }
+
+  Future<void> _onUnarchiveRequested(
+    ChatHistoryUnarchiveRequested event,
+    Emitter<ChatHistoryState> emit,
+  ) async {
+    final currentState = state;
+    if (currentState is! ChatHistoryLoadSuccess) {
+      return;
+    }
+
+    Utility.showLoader();
+
+    try {
+      await repository.unarchiveChat(sessionId: event.sessionId);
+      Utility.closeProgressDialog();
+
+      add(ChatHistoryFetchRequested(isFromArchive: _isFromArchive));
+      emit(ChatHistoryUnarchiveSuccess(sessionId: event.sessionId));
+    } catch (e) {
+      Utility.closeProgressDialog();
+      emit(ChatHistoryUnarchiveFailure(
+        message: e.toString(),
+        sessionId: event.sessionId,
+      ));
+      emit(currentState);
+    }
+  }
+
+  Future<void> _onShareRequested(
+    ChatHistoryShareRequested event,
+    Emitter<ChatHistoryState> emit,
+  ) async {
+    final currentState = state;
+    Utility.showLoader();
+
+    try {
+      final shareUrl = await repository.shareSession(sessionId: event.sessionId);
+      Utility.closeProgressDialog();
+      emit(ChatHistoryShareSuccess(sessionId: event.sessionId, shareUrl: shareUrl));
+      emit(currentState);
+    } catch (e) {
+      Utility.closeProgressDialog();
+      emit(ChatHistoryShareFailure(sessionId: event.sessionId, message: e.toString()));
+      emit(currentState);
+    }
+  }
+
+  Future<void> _onSharedSessionsFetchRequested(
+    ChatHistorySharedSessionsFetchRequested event,
+    Emitter<ChatHistoryState> emit,
+  ) async {
+    emit(const ChatHistorySharedSessionsLoadInProgress());
+    Utility.showLoader();
+    try {
+      final shares = await repository.fetchSharedSessions(isActive: event.isActive);
+      Utility.closeProgressDialog();
+      emit(ChatHistorySharedSessionsLoadSuccess(shares: shares));
+    } catch (e) {
+      Utility.closeProgressDialog();
+      emit(ChatHistorySharedSessionsLoadFailure(message: e.toString()));
+    }
+  }
+
+  Future<void> _onSharedSessionRevokeRequested(
+    ChatHistorySharedSessionRevokeRequested event,
+    Emitter<ChatHistoryState> emit,
+  ) async {
+    Utility.showLoader();
+    try {
+      await repository.revokeSharedSession(shareId: event.shareId);
+      Utility.closeProgressDialog();
+      emit(ChatHistorySharedSessionRevokeSuccess(shareId: event.shareId));
+
+      final shares = await repository.fetchSharedSessions(isActive: true);
+      emit(ChatHistorySharedSessionsLoadSuccess(shares: shares));
+    } catch (e) {
+      Utility.closeProgressDialog();
+      emit(ChatHistorySharedSessionRevokeFailure(shareId: event.shareId, message: e.toString()));
+    }
+  }
+
+  Future<void> _onArchiveAllRequested(
+    ChatHistoryArchiveAllRequested event,
+    Emitter<ChatHistoryState> emit,
+  ) async {
+    final currentState = state;
+    Utility.showLoader();
+
+    try {
+      await repository.archiveAllChats();
+      Utility.closeProgressDialog();
+
+      add(ChatHistoryFetchRequested());
+      emit(const ChatHistoryArchiveAllSuccess());
+    } catch (e) {
+      Utility.closeProgressDialog();
+      emit(ChatHistoryArchiveAllFailure(message: e.toString()));
+      emit(currentState);
+    }
+  }
+
+  Future<void> _onDeleteAllRequested(
+    ChatHistoryDeleteAllRequested event,
+    Emitter<ChatHistoryState> emit,
+  ) async {
+    final currentState = state;
+    Utility.showLoader();
+
+    try {
+      await repository.deleteAllChats();
+      Utility.closeProgressDialog();
+
+      add(ChatHistoryFetchRequested(isFromArchive: _isFromArchive));
+      emit(const ChatHistoryDeleteAllSuccess());
+      emit(currentState);
+    } catch (e) {
+      Utility.closeProgressDialog();
+      emit(ChatHistoryDeleteAllFailure(message: e.toString()));
+      emit(currentState);
+    }
+  }
+
   Future<void> _onCategoryFilterRequested(
     ChatHistoryCategoryFilterRequested event,
     Emitter<ChatHistoryState> emit,
@@ -188,6 +348,7 @@ class ChatHistoryBloc extends Bloc<ChatHistoryEvent, ChatHistoryState> {
     _isServicesChat = null;
     _isHealthCareChat = null;
     _currentQuery = '';
+    _isFromArchive = false;
     
     // Set the appropriate filter based on category
     switch (event.category) {
@@ -230,6 +391,7 @@ class ChatHistoryBloc extends Bloc<ChatHistoryEvent, ChatHistoryState> {
         isServicesChat: _isServicesChat,
         isHealthCareChat: _isHealthCareChat,
         query: _currentQuery.isNotEmpty ? _currentQuery : null,
+        isFromArchive: _isFromArchive,
       );
       Utility.closeProgressDialog();
       
@@ -252,6 +414,7 @@ class ChatHistoryBloc extends Bloc<ChatHistoryEvent, ChatHistoryState> {
   ) async {
     // Update search query
     _currentQuery = event.query;
+    _isFromArchive = false;
     
     // Reset pagination and fetch new data
     _currentSkip = 0;
@@ -268,6 +431,7 @@ class ChatHistoryBloc extends Bloc<ChatHistoryEvent, ChatHistoryState> {
         isServicesChat: _isServicesChat,
         isHealthCareChat: _isHealthCareChat,
         query: _currentQuery.isNotEmpty ? _currentQuery : null,
+        isFromArchive: _isFromArchive,
       );
       // Utility.closeProgressDialog();
       

@@ -8,7 +8,12 @@ abstract class ChatHistoryEvent extends Equatable {
 }
 
 class ChatHistoryFetchRequested extends ChatHistoryEvent {
-  const ChatHistoryFetchRequested();
+  // const ChatHistoryFetchRequested();
+  final bool isFromArchive;
+  const ChatHistoryFetchRequested({this.isFromArchive = false});
+
+  @override
+  List<Object?> get props => [isFromArchive];
 }
 
 class ChatHistoryRefreshed extends ChatHistoryEvent {
@@ -26,6 +31,59 @@ class ChatHistoryDeleteRequested extends ChatHistoryEvent {
   
   @override
   List<Object?> get props => [sessionId];
+}
+
+class ChatHistoryArchiveRequested extends ChatHistoryEvent {
+  final String sessionId;
+
+  const ChatHistoryArchiveRequested({required this.sessionId});
+
+  @override
+  List<Object?> get props => [sessionId];
+}
+
+class ChatHistoryUnarchiveRequested extends ChatHistoryEvent {
+  final String sessionId;
+
+  const ChatHistoryUnarchiveRequested({required this.sessionId});
+
+  @override
+  List<Object?> get props => [sessionId];
+}
+
+class ChatHistoryShareRequested extends ChatHistoryEvent {
+  final String sessionId;
+
+  const ChatHistoryShareRequested({required this.sessionId});
+
+  @override
+  List<Object?> get props => [sessionId];
+}
+
+class ChatHistorySharedSessionsFetchRequested extends ChatHistoryEvent {
+  final bool isActive;
+
+  const ChatHistorySharedSessionsFetchRequested({this.isActive = true});
+
+  @override
+  List<Object?> get props => [isActive];
+}
+
+class ChatHistorySharedSessionRevokeRequested extends ChatHistoryEvent {
+  final String shareId;
+
+  const ChatHistorySharedSessionRevokeRequested({required this.shareId});
+
+  @override
+  List<Object?> get props => [shareId];
+}
+
+class ChatHistoryArchiveAllRequested extends ChatHistoryEvent {
+  const ChatHistoryArchiveAllRequested();
+}
+
+class ChatHistoryDeleteAllRequested extends ChatHistoryEvent {
+  const ChatHistoryDeleteAllRequested();
 }
 
 class ChatHistoryCategoryFilterRequested extends ChatHistoryEvent {

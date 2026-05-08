@@ -114,6 +114,7 @@ class PlatformService {
         zoneId: config['zoneId'] ?? '',
         timezone: config['timezone'] ?? '',
         platform: config['platform'] ?? 0,
+        personalization: config['personalization'] ?? false,
       );
 
       print('✅ ApiService configured successfully');
@@ -147,6 +148,7 @@ class PlatformService {
             zoneId: '634e5da256ad3fd02bd3feb5',
             timezone: 'Asia/Kolkata',
             platform: '1',
+            personalization: true,
             // zoneId: '636dfc8c89b6a857b500ccd1',//dubai
             //  currencycode: 'AED',//dubai
             // currencysymbol: "2K8u2KU=",//"د.إ",//dubai
