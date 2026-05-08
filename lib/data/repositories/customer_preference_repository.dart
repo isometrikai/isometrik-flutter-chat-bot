@@ -13,7 +13,7 @@ class CustomerPreferenceRepository {
 
   Future<ApiResult> patchZainPersonalization({required bool enabled}) async {
     return _client.patch(_zainEndpoint, {
-      'zain_personalization': enabled,
+      'zain_personalisation': enabled,
     });
   }
 }

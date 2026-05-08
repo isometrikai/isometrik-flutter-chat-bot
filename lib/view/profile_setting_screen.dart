@@ -124,7 +124,7 @@ class ProfileSettingScreen extends StatelessWidget {
                               height: 20,
                               fit: BoxFit.cover,
                             ),
-                            label: 'Personalization',
+                            label: 'Data Control',
                             onTap: () {
                               Navigator.of(context).push(
                                 MaterialPageRoute<void>(

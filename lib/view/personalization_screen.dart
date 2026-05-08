@@ -8,6 +8,7 @@ import 'package:chat_bot/data/model/shared_session.dart';
 import 'package:chat_bot/utils/asset_path.dart';
 import 'package:chat_bot/utils/app_constants.dart';
 import 'package:chat_bot/utils/app_theme.dart';
+import 'package:chat_bot/utils/external_url.dart';
 import 'package:chat_bot/utils/utility.dart';
 import 'package:chat_bot/widgets/archived_chat_row.dart';
 import 'package:chat_bot/widgets/black_toast_view.dart';
@@ -675,7 +676,7 @@ class _SharedLinksManageSheet extends StatelessWidget {
           child: Row(
             children: [
               Expanded(flex: 22, child: Text('Name', style: _headerCellStyle())),
-              Expanded(flex: 10, child: Center(child: Text('Type', style: _headerCellStyle()))),
+              // Expanded(flex: 10, child: Center(child: Text('Type', style: _headerCellStyle()))),
               Expanded(
                 flex: 16,
                 child: Text(
@@ -749,8 +750,11 @@ class _SharedLinksManageSheet extends StatelessWidget {
           typeLabel: 'Chat',
           dateSharedLabel: _formatCreatedAt(s.createdAt),
           onOpenLink: () async {
-            await Clipboard.setData(ClipboardData(text: s.shareUrl));
-            onMessage('Link Copy');
+            try {
+              await openUrl(s.shareUrl);
+            } catch (_) {
+              onMessage('Could not open link');
+            }
           },
           onChat: () async {
             await Clipboard.setData(ClipboardData(text: s.shareUrl));
@@ -811,10 +815,10 @@ class _SharedLinkRow extends StatelessWidget {
                   ],
                 ),
               ),
-              Expanded(
-                flex: 10,
-                child: Center(child: Text(typeLabel, style: cellStyle, textAlign: TextAlign.center)),
-              ),
+              // Expanded(
+              //   flex: 10,
+              //   child: Center(child: Text(typeLabel, style: cellStyle, textAlign: TextAlign.center)),
+              // ),
               Expanded(
                 flex: 16,
                 child: Text(
