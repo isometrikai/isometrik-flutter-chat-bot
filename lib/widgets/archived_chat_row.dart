@@ -79,32 +79,40 @@ class ArchivedChatRow extends StatelessWidget {
                 width: trailingWidth,
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.end,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    IconButton(
-                      padding: EdgeInsets.zero,
-                      icon: SvgPicture.asset(
-                        AssetPath.get('images/ic_archive.svg'),
+                    InkWell(
+                      onTap: onUnarchive,
+                      child: SizedBox(
                         width: 22,
                         height: 22,
-                        colorFilter: const ColorFilter.mode(
-                          Color(0xFF424242),
-                          BlendMode.srcIn,
+                        child: SvgPicture.asset(
+                          AssetPath.get('images/ic_archive.svg'),
+                          width: 16,
+                          height: 16,
+                          colorFilter: const ColorFilter.mode(
+                            Color(0xFF424242),
+                            BlendMode.srcIn,
+                          ),
                         ),
                       ),
-                      onPressed: onUnarchive,
                     ),
-                    IconButton(
-                      padding: EdgeInsets.zero,
-                      icon: SvgPicture.asset(
-                        AssetPath.get('images/ic_trash.svg'),
+                    const SizedBox(width: 12),
+                    InkWell(
+                      onTap: onDelete,
+                      child: SizedBox(
                         width: 22,
                         height: 22,
-                        colorFilter: const ColorFilter.mode(
-                          Color(0xFF424242),
-                          BlendMode.srcIn,
+                        child: SvgPicture.asset(
+                          AssetPath.get('images/ic_trash.svg'),
+                          width: 16,
+                          height: 16,
+                          colorFilter: const ColorFilter.mode(
+                            Color(0xFF424242),
+                            BlendMode.srcIn,
+                          ),
                         ),
                       ),
-                      onPressed: onDelete,
                     ),
                   ],
                 ),

@@ -829,28 +829,34 @@ class _SharedLinkRow extends StatelessWidget {
                 width: _kManageTrailingColWidth,
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.end,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    IconButton(
-                      padding: EdgeInsets.zero,
-                      constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
-                      icon: SvgPicture.asset(
-                        AssetPath.get('images/ic_copy_link.svg'),
+                    InkWell(
+                      onTap: onChat,
+                      child: SizedBox(
                         width: 22,
                         height: 22,
-                        colorFilter: const ColorFilter.mode(Color(0xFF424242), BlendMode.srcIn),
+                        child: SvgPicture.asset(
+                          AssetPath.get('images/ic_copy_link.svg'),
+                          width: 16,
+                          height: 16,
+                          colorFilter: const ColorFilter.mode(Color(0xFF424242), BlendMode.srcIn),
+                        ),
                       ),
-                      onPressed: onChat,
                     ),
-                    IconButton(
-                      padding: EdgeInsets.zero,
-                      constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
-                      icon: SvgPicture.asset(
-                        AssetPath.get('images/ic_trash.svg'),
+                    const SizedBox(width: 12),
+                    InkWell(
+                      onTap: onDelete,
+                      child: SizedBox(
                         width: 22,
                         height: 22,
-                        colorFilter: const ColorFilter.mode(Color(0xFF424242), BlendMode.srcIn),
+                        child: SvgPicture.asset(
+                          AssetPath.get('images/ic_trash.svg'),
+                          width: 16,
+                          height: 16,
+                          colorFilter: const ColorFilter.mode(Color(0xFF424242), BlendMode.srcIn),
+                        ),
                       ),
-                      onPressed: onDelete,
                     ),
                   ],
                 ),
