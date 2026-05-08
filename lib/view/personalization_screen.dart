@@ -746,7 +746,7 @@ class _SharedLinksManageSheet extends StatelessWidget {
       itemBuilder: (context, index) {
         final s = shares[index];
         return _SharedLinkRow(
-          name: s.shareUrl,
+          name: s.title ?? s.shareUrl,
           typeLabel: 'Chat',
           dateSharedLabel: _formatCreatedAt(s.createdAt),
           onOpenLink: () async {
@@ -975,7 +975,7 @@ class _ArchivedChatsManageSheet extends StatelessWidget {
                   return ArchivedChatRow(
                     chatName: s.title.isNotEmpty ? s.title : 'Session ${s.sessionId}',
                     dateLabel: _formatDateLabel(s.timestamp),
-                    onOpenChat: () => onMessage('Open archived chat ${s.sessionId}'),
+                    onOpenChat: () => {},//onMessage('Open archived chat ${s.sessionId}'),
                     onUnarchive: () => context.read<ChatHistoryBloc>().add(
                           ChatHistoryUnarchiveRequested(sessionId: s.sessionId.toString()),
                         ),
