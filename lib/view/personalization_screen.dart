@@ -750,11 +750,11 @@ class _SharedLinksManageSheet extends StatelessWidget {
           typeLabel: 'Chat',
           dateSharedLabel: _formatCreatedAt(s.createdAt),
           onOpenLink: () async {
-            try {
-              await openUrl(s.shareUrl);
-            } catch (_) {
-              onMessage('Could not open link');
-            }
+            // try {
+            //   await openUrl(s.shareUrl);
+            // } catch (_) {
+            //   onMessage('Could not open link');
+            // }
           },
           onChat: () async {
             await Clipboard.setData(ClipboardData(text: s.shareUrl));
