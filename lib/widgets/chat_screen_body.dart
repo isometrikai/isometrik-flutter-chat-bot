@@ -22,12 +22,13 @@ class ChatScreenBody extends StatelessWidget {
   final GreetingResponse? greetingData;
   final Set<String> selectedOptionMessages;
   final List<ChatMessage> messages;
-  final Function(String, [String?, String?, String?]) onSendMessage;
+  final Function(String, [String?, String?, String?, Map<String, dynamic>?]) onSendMessage;
   final Function(ChatResponse) onHandleChatResponse;
   final Function(List<ChatHistoryDetail>) onHandleChatHistoryResponse;
   final VoidCallback onScrollToBottom;
   final VoidCallback onLoadChatbotData;
   final VoidCallback onRestartChatAPI;
+  final VoidCallback onRestartGreetingAPI;
   final Function(Set<String>) onUpdateSelectedOptions;
   final Function(List<ChatMessage>) onUpdateMessages;
   final String? pendingMessage;
@@ -67,6 +68,7 @@ class ChatScreenBody extends StatelessWidget {
     required this.onScrollToBottom,
     required this.onLoadChatbotData,
     required this.onRestartChatAPI,
+    required this.onRestartGreetingAPI,
     required this.onUpdateSelectedOptions,
     required this.onUpdateMessages,
     required this.pendingMessage,
@@ -88,6 +90,38 @@ class ChatScreenBody extends StatelessWidget {
     required this.isFromHistory, // Add the isFromHistory parameter
     required this.chatHistoryTitle, // Add the chatHistoryTitle parameter
   });
+
+  String _to24HourWithSeconds(String input) {
+    final raw = input.trim();
+    if (raw.isEmpty) return raw;
+
+    // Already 24-hour time? Normalize seconds to ":00" if missing.
+    final already24 = RegExp(r'^(\d{1,2}):(\d{2})(?::(\d{2}))?$').firstMatch(raw);
+    if (already24 != null) {
+      final h = int.tryParse(already24.group(1)!) ?? 0;
+      final m = int.tryParse(already24.group(2)!) ?? 0;
+      final s = already24.group(3);
+      final hh = h.clamp(0, 23).toString().padLeft(2, '0');
+      final mm = m.clamp(0, 59).toString().padLeft(2, '0');
+      final ss = (s == null || s.isEmpty) ? '00' : (int.tryParse(s) ?? 0).clamp(0, 59).toString().padLeft(2, '0');
+      return '$hh:$mm:$ss';
+    }
+
+    // 12-hour format like "06:05 pm" or "12:05 am".
+    final match12 = RegExp(r'^(\d{1,2}):(\d{2})\s*([ap]m)$', caseSensitive: false).firstMatch(raw);
+    if (match12 == null) return raw;
+
+    var hour = int.tryParse(match12.group(1)!) ?? 0;
+    final minute = int.tryParse(match12.group(2)!) ?? 0;
+    final suffix = match12.group(3)!.toLowerCase();
+
+    hour = hour % 12; // 12 -> 0 before applying pm rule
+    if (suffix == 'pm') hour += 12;
+
+    final hh = hour.clamp(0, 23).toString().padLeft(2, '0');
+    final mm = minute.clamp(0, 59).toString().padLeft(2, '0');
+    return '$hh:$mm:00';
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -152,9 +186,11 @@ class ChatScreenBody extends StatelessWidget {
             BlocListener<CartBloc, CartState>(
               listener: (context, state) {
                 if (state is CartProductAdded) {
-                  // onHideStoreCards();
-                  // Product added to cart successfully
-                  onSendMessage("I have updated the cart", null, null, state.storeCategoryId);
+                  if (state.needToSendMessage) {
+                    // onHideStoreCards();
+                    // Product added to cart successfully
+                    onSendMessage("I have updated the cart", null, null, state.storeCategoryId);
+                  }
                 } else if (state is CartLoaded) {
                   int cartCount = cartBloc.getTotalProductCount;
                   onUpdateCartCount(cartCount);
@@ -164,6 +200,11 @@ class ChatScreenBody extends StatelessWidget {
                   print('CartBloc CartEmpty: Setting cart count to 0');
                   onUpdateCartCount(0);
                   onUpdateGotStripePaymentCallback(false);
+                }else if (state is CartError) {
+                  BlackToastView.show(
+                    context,
+                    state.message,
+                  );
                 }
               },
             ),
@@ -190,6 +231,7 @@ class ChatScreenBody extends StatelessWidget {
                             .map((e) => e.toString())
                             .toList()
                         : null,
+                    tableBookingData: apiData['table_booking'] ?? {},
                   );
                   bloc.add(event);
                   onClearPendingMessage();
@@ -302,7 +344,14 @@ class ChatScreenBody extends StatelessWidget {
                         )
                          
                       else ...[
-                        buildInputArea(context),
+                        Column(
+                          children: [
+                            if (showGreetingOverlay == true) ...[
+                              _buildGreetingOptions(),
+                            ],
+                             buildInputArea(context),
+                          ],
+                        ),
                         // if (isRecording) _buildInputRecordingArea(context),
                       ]
                     ],
@@ -333,25 +382,20 @@ class ChatScreenBody extends StatelessWidget {
       elevation: 1,
       leading: IconButton(
         icon: SvgPicture.asset(
-          AssetPath.get('images/ic_history.svg'),
+          AssetPath.get('images/ic_sideMeu.svg'),
           width: 40,
           height: 40,
           fit: BoxFit.cover,
         ),
         onPressed: () async {
-          // Navigator.push(
-          //   context,
-          //   MaterialPageRoute(
-          //     builder: (context) => const ChatHistoryScreen(),
-          //   ),
-          // );
-          print('ChatScreen: $totalCartCount');
-          final result = await Navigator.push(
+         final result = await Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => ChatHistoryScreen()),
+            MaterialPageRoute(
+              builder: (context) => ProfileSettingScreen(greetingData: greetingData),
+            ),
           );
 
-          if (result != null && result is Map) {
+                if (result != null && result is Map) {
             final action = result['action'];
             
             if (action == 'new_chat_selected') {
@@ -360,19 +404,46 @@ class ChatScreenBody extends StatelessWidget {
           }
         },
       ),
+      //  IconButton(
+      //   icon: SvgPicture.asset(
+      //     AssetPath.get('images/ic_history.svg'),
+      //     width: 40,
+      //     height: 40,
+      //     fit: BoxFit.cover,
+      //   ),
+      //   onPressed: () async {
+      //     Navigator.push(
+      //       context,
+      //       MaterialPageRoute(
+      //         builder: (context) => const ProfileSettingScreen(),
+      //       ),
+      //     );
+      //     // print('ChatScreen: $totalCartCount');
+      //     // final result = await Navigator.push(
+      //     //   context,
+      //     //   MaterialPageRoute(builder: (context) => ChatHistoryScreen()),
+      //     // );
+
+      //     // if (result != null && result is Map) {
+      //     //   final action = result['action'];
+            
+      //     //   if (action == 'new_chat_selected') {
+      //     //     onRestartChatAPI();
+      //     //   }
+      //     // }
+      //   },
+      // ),
       title: Row(
         children: [
-          if (messages.isNotEmpty) ...[
           Container(
             child:
                     SvgPicture.asset(
                       AssetPath.get('images/ic_header_logo.svg'),
-                      width: 75,
-                      height: 23,
+                      // width: 75,
+                      // height: 23,
                       fit: BoxFit.cover,
                     )
           ),
-          ]
         ],
       ),
       actions: [
@@ -408,31 +479,31 @@ class ChatScreenBody extends StatelessWidget {
                                 : () => showNewChatConfirmation(context),
                       ),
                     ],
-                    if (greetingData?.personaTitle.isNotEmpty ?? false) ...[
-                      IconButton(
-                        icon: SvgPicture.asset(
-                        AssetPath.get('images/ic_chat_profile.svg'),
-                        width: 40,
-                        height: 40,
-                      ),
-                        onPressed: () {
-                          // OrderService().triggerPrescriptionScreenOpen({});
-                          Navigator.push(
-                            context,
-                            PageRouteBuilder(
-                              opaque: false,
-                              pageBuilder: (context, animation, secondaryAnimation) => PopupOverlayScreen(greetingData: greetingData),
-                              transitionsBuilder: (context, animation, secondaryAnimation, child) {
-                                return FadeTransition(
-                                  opacity: animation,
-                                  child: child,
-                                );
-                              },
-                            ),
-                          );
-                        },
-                      ),
-                    ],
+                    // if (greetingData?.personaTitle.isNotEmpty ?? false) ...[
+                    //   IconButton(
+                    //     icon: SvgPicture.asset(
+                    //     AssetPath.get('images/ic_chat_profile.svg'),
+                    //     width: 40,
+                    //     height: 40,
+                    //   ),
+                    //     onPressed: () {
+                    //       // OrderService().triggerPrescriptionScreenOpen({});
+                    //       Navigator.push(
+                    //         context,
+                    //         PageRouteBuilder(
+                    //           opaque: false,
+                    //           pageBuilder: (context, animation, secondaryAnimation) => PopupOverlayScreen(greetingData: greetingData),
+                    //           transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                    //             return FadeTransition(
+                    //               opacity: animation,
+                    //               child: child,
+                    //             );
+                    //           },
+                    //         ),
+                    //       );
+                    //     },
+                    //   ),
+                    // ],
                     IconButton(
                         icon: Opacity(
                           opacity: 1.0,
@@ -453,7 +524,7 @@ class ChatScreenBody extends StatelessWidget {
                                       vertical: 2,
                                     ),
                                     decoration: BoxDecoration(
-                                      color: const Color(0xFF6B46C1),
+                                      color: AppConstants.appThemeColor,
                                       // Purple color
                                       borderRadius: BorderRadius.circular(10),
                                     ),
@@ -628,7 +699,7 @@ class ChatScreenBody extends StatelessWidget {
                         },
                         style: OutlinedButton.styleFrom(
                           side: const BorderSide(
-                            color: Color(0xFF8E2FFD),
+                            color: AppConstants.appThemeColor,
                             width: 2,
                           ),
                           shape: RoundedRectangleBorder(
@@ -641,7 +712,7 @@ class ChatScreenBody extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w700,
-                            color: Color(0xFF8E2FFD),
+                            color: AppConstants.appThemeColor,
                           ),
                         ),
                       ),
@@ -671,18 +742,7 @@ class ChatScreenBody extends StatelessWidget {
                         ),
                         child: Ink(
                           decoration: BoxDecoration(
-                            gradient: const LinearGradient(
-                              colors: [
-                                Color(0xFF5186E0),
-                                Color(0xFF5E3DFE),
-                                Color(0xFF8E2FFD),
-                                Color(0xFFB02EFB),
-                                Color(0xFFD445EC),
-                              ],
-                              stops: [0.0, 0.24, 0.52, 0.73, 1.0],
-                              begin: Alignment.centerLeft,
-                              end: Alignment.centerRight,
-                            ),
+                            color: AppConstants.appThemeColor,
                             borderRadius: BorderRadius.circular(16),
                           ),
                           child: Container(
@@ -739,7 +799,7 @@ class ChatScreenBody extends StatelessWidget {
               ),
               const SizedBox(height: 16),
                Text(
-                'Exit zAIn?',
+                'Leave Chat?',
                 style: AppTextStyles.bodyText.copyWith(
                   fontSize: 24,
                   fontWeight: FontWeight.w700,
@@ -749,7 +809,7 @@ class ChatScreenBody extends StatelessWidget {
               ),
               const SizedBox(height: 20),
                Text(
-                'Are you sure you want to leave the chat? Your conversation history will be saved, but you will lose your current context.',
+                'Your current conversation will not be saved.However, you can view your conversation history anytime from the chat menu.',
                 style: AppTextStyles.subtitle.copyWith(
                   fontSize: 14, 
                   color: Color(0xFF242424), 
@@ -758,40 +818,11 @@ class ChatScreenBody extends StatelessWidget {
                 textAlign: TextAlign.left,
               ),
               const SizedBox(height: 40),
-              Row(
+              Column(
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  Expanded(
-                    child: SizedBox(
-                      height: 62,
-                      child: TextButton(
-                        onPressed: () => Navigator.of(context).pop(),
-                        style: TextButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          foregroundColor: Color(0xFF8E2FFD),
-                          padding: EdgeInsets.zero,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
-                            side: BorderSide(
-                              color: Color(0xFF8E2FFD),
-                              width: 1,
-                            ),
-                          ),
-                        ),
-                        child: Text(
-                          'Stay in chat',
-                          style: AppTextStyles.button.copyWith(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w700,
-                            color: Color(0xFF8E2FFD),
-                          ),
-                          overflow: TextOverflow.ellipsis,
-                          maxLines: 1,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
+                  SizedBox(
+                    width: double.infinity,
                     child: SizedBox(
                       height: 62,
                       child: TextButton(
@@ -807,8 +838,8 @@ class ChatScreenBody extends StatelessWidget {
                           }
                         },
                         style: TextButton.styleFrom(
-                          backgroundColor: Colors.transparent,
-                          foregroundColor: Colors.white,
+                           backgroundColor: Colors.white,
+                          foregroundColor: AppConstants.appThemeColor,
                           padding: EdgeInsets.zero,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(16),
@@ -816,23 +847,12 @@ class ChatScreenBody extends StatelessWidget {
                         ),
                         child: Container(
                           decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              colors: [
-                                Color(0xFF5186E0),
-                                Color(0xFF5E3DFE),
-                                Color(0xFF8E2FFD),
-                                Color(0xFFB02EFB),
-                                Color(0xFFD445EC),
-                              ],
-                              stops: [0.0, 0.24, 0.52, 0.73, 1.0],
-                              begin: Alignment.centerLeft,
-                              end: Alignment.centerRight,
-                            ),
-                            borderRadius: BorderRadius.circular(16),
+                            color: AppConstants.appThemeColor,
+                            borderRadius: BorderRadius.circular(8),
                           ),
                           child: Center(
                             child: Text(
-                              'Continue to app',
+                              'Yes, Go to Eazy App',
                               style: TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w700,
@@ -842,6 +862,38 @@ class ChatScreenBody extends StatelessWidget {
                               maxLines: 1,
                             ),
                           ),
+                        ),
+                      ),
+                    ),
+                  ),
+                 const SizedBox(height: 16),
+                   SizedBox(
+                    width: double.infinity,
+                    child: SizedBox(
+                      height: 62,
+                      child: TextButton(
+                        onPressed: () => Navigator.of(context).pop(),
+                        style: TextButton.styleFrom(
+                          backgroundColor: Colors.transparent,
+                          foregroundColor: Colors.white,
+                          padding: EdgeInsets.zero,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            side: BorderSide(
+                              color: AppConstants.appThemeColor,
+                              width: 1,
+                            ),
+                          ),
+                        ),
+                        child: Text(
+                          'Stay in chat',
+                          style: AppTextStyles.button.copyWith(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                            color: AppConstants.appThemeColor,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
                         ),
                       ),
                     ),
@@ -884,7 +936,13 @@ class ChatScreenBody extends StatelessWidget {
                         color:
                             message.isBot
                                 ? Color(int.parse('0xFFFFFFFF'))
-                                : Color(int.parse('0xFFF0DAFE')),
+                                : Color(int.parse('0xFFEDF3FF')),
+                        border: message.isBot == false
+                            ? Border.all(
+                                color: const Color(0xFFE9DFFB),
+                                width: 1,
+                              )
+                            : null,
                         // borderRadius: BorderRadius.circular(16),
                         borderRadius:
                             (message.isBot == false)
@@ -986,6 +1044,10 @@ class ChatScreenBody extends StatelessWidget {
             const SizedBox(height: 4), //12
             buildCartWidget(message.cartItems),
           ],
+          if (message.hasRestaurantSectionsWidget) ...[
+            const SizedBox(height: 4), //12
+            buildRestaurantSectionsWidget(context, message.restaurantSectionsItems),
+          ],
           if (message.hasServicesDeliveryOptionsWidget) ...[
             const SizedBox(height: 4), //12
             buildServicesDeliveryOptionsWidget(message.servicesDeliveryOptions),
@@ -1057,16 +1119,16 @@ class ChatScreenBody extends StatelessWidget {
         greetingData?.greeting.isNotEmpty == true
             ? greetingData!.greeting
             : 'Good evening';
-    final String subtitleText =
-        greetingData?.subtitle.isNotEmpty == true
-            ? greetingData!.subtitle
-            : 'Your intelligent life assistant is ready to help';
     final String weatherText =
         greetingData?.weatherText.isNotEmpty == true
             ? greetingData!.weatherText
             : 'dsada';
 
-    final List<GreetingOption> opts = (greetingData?.options ?? []).toList();
+    // final List<GreetingOption> opts = (greetingData?.options ?? []).toList();
+    
+    // Get device width and calculate dynamic width with 20 spacing on each side
+    final double deviceWidth = MediaQuery.of(context).size.width;
+    final double contentWidth = deviceWidth - 40; // 20 on left + 20 on right
 
     return GestureDetector(
       onTap: () {
@@ -1074,159 +1136,460 @@ class ChatScreenBody extends StatelessWidget {
       },
       child: SingleChildScrollView(
         // keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 360),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              // Top graphic group
-              SizedBox(
-                width: 90,
-                height: 90,
-                child: Stack(
-                  clipBehavior: Clip.none,
-                  children: [
-                    // Outer glow circle
-                    Container(
-                      width: 90,
-                      height: 90,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(110),
-                        gradient: const LinearGradient(
-                          begin: Alignment.centerLeft,
-                          end: Alignment.centerRight,
-                          colors: [
-                            Color(0x1AD445EC),
-                            Color(0x1AB02EFB),
-                            Color(0x1A8E2FFD),
-                            Color(0x1A5E3DFE),
-                            Color(0x1A5186E0),
-                          ],
-                        ),
+        child: Padding(
+          padding: const EdgeInsets.only(left: 20, right: 20, top: 10),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(maxWidth: contentWidth),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                SizedBox(
+                  height: 75,
+                  width: 75,
+                  child: SvgPicture.asset(
+                        AssetPath.get('images/ic_LogoTutorial.svg'),
+                        fit: BoxFit.contain,
                       ),
+                ),
+                SizedBox(
+                  width: contentWidth,
+                  child: _buildTitleWithHighlightedName(titleText),
+                ),
+                const SizedBox(height: 20),
+                SizedBox(
+                  width: contentWidth,
+                  child: Text(
+                    weatherText,
+                    textAlign: TextAlign.center,
+                    style: AppTextStyles.launchSubtitle.copyWith(
+                      color: const Color(0xFF7085AE),
                     ),
-                    // Center asset
-                    Align(
-                      alignment: Alignment.center,
-                      child: Container(
-                        width: 70,
-                        height: 70,
-                        decoration: const BoxDecoration(
-                          shape: BoxShape.circle,
-                          gradient: LinearGradient(
-                            begin: Alignment.centerLeft,
-                            end: Alignment.centerRight,
-                            colors: [
-                              Color(0xFFD445EC),
-                              Color(0xFFB02EFB),
-                              Color(0xFF8E2FFD),
-                              Color(0xFF5E3DFE),
-                              Color(0xFF5186E0),
+                  ),
+                ),
+                if (greetingData?.setupUserPreference == true) ...[
+                  const SizedBox(height: 16),
+                  Center(
+                    child: Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        onTap: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context) => CompleteSetupFlowScreen(onCallback: (data) {
+                                onRestartGreetingAPI();
+                              }),
+                            ),
+                          );
+                        },
+                        borderRadius: BorderRadius.circular(12),
+                        child: Container(
+                          width: 313,
+                          height: 46,
+                          padding: const EdgeInsets.symmetric(horizontal: 40),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFF3F7FF),
+                            border: Border.all(color: AppConstants.appThemeColor, width: 1),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                'Complete setup ->',
+                                style: AppTextStyles.launchSubtitle.copyWith(
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 16,
+                                  height: 1.2,
+                                  color: AppConstants.appThemeColor,
+                                ),
+                              ),
                             ],
                           ),
                         ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(12),
-                          child: SvgPicture.asset(
-                            AssetPath.get('images/ic_mainImg.svg'),
-                            fit: BoxFit.contain,
-                          ),
+                      ),
+                    ),
+                  ),
+                ],
+                if (greetingData?.reminders.isNotEmpty == true) ...[
+                  const SizedBox(height: 16),
+                  _BirthdayReminderCard(
+                    greetingReminder: greetingData?.reminders.first,
+                    onBookRestaurant: () {
+                      onSendMessage(
+                        greetingData?.reminders.first.buttons.first ?? '',
+                      );
+                    },
+                    onBrowseGifts: () {
+                      onSendMessage(greetingData?.reminders.first.buttons.last ?? '');
+                    },
+                  ),
+                ],
+                // const SizedBox(height: 16),
+                // // Weather information view
+                // Container(
+                //   width: contentWidth,
+                //   padding: const EdgeInsets.symmetric(
+                //     horizontal: 20,
+                //     vertical: 16,
+                //   ),
+                //   decoration: BoxDecoration(
+                //     color: const Color(0xFFF5F7FF),// Light purple background
+                //     borderRadius: BorderRadius.circular(8),
+                //   ),
+                //   child: Text(
+                //     weatherText,
+                //     textAlign: TextAlign.center,
+                //     style: AppTextStyles.launchWeather.copyWith(
+                //       color: const Color(0xFF2F3C70), // Darker purple text
+                //     ),
+                //   ),
+                // ),
+                const SizedBox(height: 40),
+                //Explore Our Services
+                Row(
+                  children: [
+                    Expanded(
+                      child: Container(
+                        height: 1,
+                        color: const Color(0xFFE0EBFF),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                      child: Text(
+                        'EXPLORE OUR SERVICES',
+                        style: AppTextStyles.body(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w400,
+                          color: const Color(0xFF7085AE),
                         ),
                       ),
                     ),
-                    Positioned(
-                      right: -6,
-                      top: -6,
-                      child: Opacity(
-                        opacity: 0.4,
-                        child: SvgPicture.asset(
-                          AssetPath.get('images/ic_topStar.svg'),
-                          width: 34,
-                          height: 34,
-                        ),
-                      ),
-                    ),
-                    Positioned(
-                      left: -10,
-                      bottom: -8,
-                      child: Opacity(
-                        opacity: 0.4,
-                        child: SvgPicture.asset(
-                          AssetPath.get('images/ic_topStar.svg'),
-                          width: 51,
-                          height: 51,
-                        ),
+                    Expanded(
+                      child: Container(
+                        height: 1,
+                        color: const Color(0xFFE0EBFF),
                       ),
                     ),
                   ],
                 ),
-              ),
-              const SizedBox(height: 12),
-              SizedBox(
-                width: 304,
-                child: Text(
-                  titleText,
-                  textAlign: TextAlign.center,
-                  style: AppTextStyles.launchTitle.copyWith(
-                    color: const Color(0xFF171212),
+                const SizedBox(height: 40),
+
+                //SET EXPLORE OPTIONS
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: [
+                      _buildCategoryItem(
+                        iconPath: 'ic_H_food.svg',
+                        label: 'Food',
+                      ),
+                      const SizedBox(width: 15),
+                      _buildCategoryItem(
+                        iconPath: 'ic_H_services.svg',
+                        label: 'Services',
+                      ),
+                      const SizedBox(width: 15),
+                      _buildCategoryItem(
+                        iconPath: 'ic_H_groceries.svg',
+                        label: 'Groceries',
+                      ),
+                      const SizedBox(width: 15),
+                      _buildCategoryItem(
+                        iconPath: 'ic_H_education.svg',
+                        label: 'Education',
+                      ),
+                      const SizedBox(width: 15),
+                      _buildCategoryItem(
+                        iconPath: 'ic_H_travel.svg',
+                        label: 'Travel',
+                      ),
+                      const SizedBox(width: 15),
+                      _buildCategoryItem(
+                        iconPath: 'ic_H_pharmacy.svg',
+                        label: 'Pharmacy',
+                      ),
+                    ],
                   ),
                 ),
-              ),
-              const SizedBox(height: 12),
-              SizedBox(
-                width: 323,
-                child: Text(
-                  subtitleText,
-                  textAlign: TextAlign.center,
-                  style: AppTextStyles.launchSubtitle.copyWith(
-                    color: const Color(0xFF6E4185),
+
+                const SizedBox(height: 40),
+                //Switch to Classic View
+                Container(
+                  width: contentWidth,
+                  height: 138,
+                  padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF5F7FF),
+                    border: Border.all(color: const Color(0xFFEEF4FF), width: 1),
+                    borderRadius: BorderRadius.circular(26),
                   ),
-                ),
-              ),
-              const SizedBox(height: 16),
-              // Weather information view
-              Container(
-                width: 340,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                  vertical: 16,
-                ),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFF5F0FF), // Light purple background
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: const Color(0xFFE8D5FF), width: 1),
-                ),
-                child: Text(
-                  weatherText,
-                  textAlign: TextAlign.center,
-                  style: AppTextStyles.launchWeather.copyWith(
-                    color: const Color(0xFF6E4185), // Darker purple text
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
-              // Options grid 1x1
-              ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 340),
-                child: Column(
-                  children:
-                      opts.map((opt) {
-                        return Padding(
-                          padding: const EdgeInsets.only(bottom: 10),
-                          child: GreetingOptionTile(
-                            option: opt,
-                            onTap: () {
-                              onSendMessage(opt.title);
-                            },
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // Text Block
+                      Flexible(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Text(
+                              'Switch to Classic View',
+                              style: AppTextStyles.body(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w700,
+                                color: const Color(0xFF2F3C70),
+                              ).copyWith(height: 1.2),
+                            ),
+                            const SizedBox(height: 2),
+                            SizedBox(
+                              width: 313,
+                              child: Text(
+                                "Prefer browsing? You're always in control",
+                                textAlign: TextAlign.center,
+                                style: AppTextStyles.body(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w400,
+                                  color: const Color(0xFF8294B8),
+                                ).copyWith(height: 1.4),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      // Button
+                      SizedBox(
+                        width: 313,
+                        height: 56,
+                        child: ElevatedButton(
+                          onPressed: () {
+                            // TODO: Handle button tap
+                            OrderService().triggerChatDismiss();
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppConstants.appThemeColor,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            padding: EdgeInsets.zero,
+                            minimumSize: const Size(313, 56),
+                            maximumSize: const Size(313, 56),
+                            fixedSize: const Size(313, 56),
+                            elevation: 0,
+                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                           ),
-                        );
-                      }).toList(),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 40),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  'Go To Eazy app',
+                                  style: AppTextStyles.body(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w700,
+                                    color: Colors.white,
+                                  ).copyWith(height: 1.2),
+                                ),
+                                const SizedBox(width: 8),
+                                Transform.rotate(
+                                  angle: 3.14159, // 180 degrees in radians
+                                  child: const Icon(
+                                    Icons.arrow_back,
+                                    color: Colors.white,
+                                    size: 14,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            ],
+                
+                // Options grid 1x1
+                // ConstrainedBox(
+                //   constraints: BoxConstraints(maxWidth: contentWidth),
+                //   child: Column(
+                //     children:
+                //         opts.map((opt) {
+                //           return Padding(
+                //             padding: const EdgeInsets.only(bottom: 10),
+                //             child: GreetingOptionTile(
+                //               option: opt,
+                //               onTap: () {
+                //                 onSendMessage(opt.title);
+                //               },
+                //             ),
+                //           );
+                //         }).toList(),
+                //   ),
+                // ),
+              ],
+            ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildGreetingOptions() {
+    final List<GreetingOption> opts = (greetingData?.options ?? []).toList();
+    print('Options count: ${opts.length}');
+    if (opts.isEmpty) {
+      print('Options list is empty');
+      return const SizedBox.shrink();
+    }
+    print('Rendering ${opts.length} options');
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: SizedBox(
+        height: 38,
+        child: ListView.builder(
+          scrollDirection: Axis.horizontal,
+          itemCount: opts.length,
+          itemBuilder: (context, index) {
+            final option = opts[index];
+            print('Rendering option $index: ${option.title}');
+            final displayText = option.emoji.isNotEmpty
+                ? '${option.emoji} ${option.title}'
+                : option.title;
+            return GestureDetector(
+              onTap: () {
+                print('Selected option title: ${option.title}');
+                onSendMessage(option.title);
+              },
+              child: Container(
+                margin: EdgeInsets.only(right: index < opts.length - 1 ? 12 : 0),
+                padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(
+                    color: const Color(0xFFE0EBFF),
+                    width: 1,
+                  ),
+                ),
+                child: Center(
+                  child: Text(
+                    displayText,
+                    style: AppTextStyles.restaurantDescription.copyWith(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w400,
+                      color: const Color(0xFF2F3C70),
+                      height: 1.4,
+                    ),
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTitleWithHighlightedName(String text) {
+    // Parse text to find name between quotes (handles both \"name\" and "name")
+    final baseStyle = AppTextStyles.launchTitle.copyWith(
+      color: const Color(0xFF171212),
+    );
+    final highlightedStyle = AppTextStyles.launchTitle.copyWith(
+      color: AppConstants.appThemeColor,
+    );
+
+    final List<TextSpan> spans = [];
+    // Pattern matches both escaped quotes (\") and regular quotes (")
+    final RegExp quotePattern = RegExp(r'(?:\\"|")([^"]+)(?:\\"|")');
+    
+    int lastEnd = 0;
+    final matches = quotePattern.allMatches(text);
+    
+    if (matches.isEmpty) {
+      // No matches found, return regular text
+      return Text(
+        text,
+        textAlign: TextAlign.center,
+        style: baseStyle,
+      );
+    }
+    
+    for (final match in matches) {
+      // Add text before the match
+      if (match.start > lastEnd) {
+        spans.add(TextSpan(
+          text: text.substring(lastEnd, match.start),
+          style: baseStyle,
+        ));
+      }
+      
+      // Add the highlighted name (without quotes)
+      spans.add(TextSpan(
+        text: match.group(1) ?? '',
+        style: highlightedStyle,
+      ));
+      
+      lastEnd = match.end;
+    }
+    
+    // Add remaining text after the last match
+    if (lastEnd < text.length) {
+      spans.add(TextSpan(
+        text: text.substring(lastEnd),
+        style: baseStyle,
+      ));
+    }
+    
+    return Text.rich(
+      TextSpan(children: spans),
+      textAlign: TextAlign.center,
+    );
+  }
+
+  Widget _buildCategoryItem({
+    String? iconPath,
+    required String label,
+  }) {
+    assert(iconPath != null,
+        'Either icon or iconPath must be provided');
+    return GestureDetector(
+      onTap: () {
+        // Handle category tap
+        // onSendMessage(label);
+      },
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 44,
+            height: 44,
+            alignment: Alignment.center,
+            child: SvgPicture.asset(
+                    AssetPath.get('images/$iconPath'),
+                    // width: 24,
+                    // height: 24,
+                    fit: BoxFit.contain,
+                  )
+          ),
+          const SizedBox(height: 4),
+          Text(
+            label,
+            textAlign: TextAlign.center,
+            style: AppTextStyles.body(
+              fontSize: 12,
+              fontWeight: FontWeight.w400,
+              color: const Color(0xFF2F3C70),
+            ).copyWith(height: 1.4),
+          ),
+        ],
       ),
     );
   }
@@ -1315,6 +1678,10 @@ class ChatScreenBody extends StatelessWidget {
                               builder: (context) {
                                 return RestaurantScreen(
                                   actionData: action,
+                                  isTableBookingFlow: widget.isTableBookingFlow,
+                                  onTableBookingTap: (store) {
+                                    onSendMessage('I want to book a table for ${store.storename}');
+                                  },
                                   onCheckout: (value) {
                                     if (isCartAPICalled == true) {
                                       onUpdateCartCount(
@@ -1377,18 +1744,22 @@ class ChatScreenBody extends StatelessWidget {
                     isApiLoading
                         ? () {}
                         : () async {
-                          print("Order Details: ${action.orderId}");
-                          // Call the order details API
-                          final orderDetails = await ChatApiServices.instance
-                              .getOrderDetails(
-                                orderId: action.orderId ?? '',
-                                type: 'masterOrder',
-                              );
-
-                          if (orderDetails != null) {
-                            OrderService().triggerOrderDetails(orderDetails);
+                          if (action.isTableBooking == true) {
+                            OrderService().triggerOrderDetails(action.toJson());
                           } else {
-                            print("Failed to fetch order details");
+                            print("Order Details: ${action.orderId}");
+                            // Call the order details API
+                            final orderDetails = await ChatApiServices.instance
+                                .getOrderDetails(
+                                  orderId: action.orderId ?? '',
+                                  type: 'masterOrder',
+                                );
+
+                            if (orderDetails != null) {
+                              OrderService().triggerOrderDetails(orderDetails);
+                            } else {
+                              print("Failed to fetch order details");
+                            }
                           }
                         },
               ),
@@ -1407,7 +1778,10 @@ class ChatScreenBody extends StatelessWidget {
                     isApiLoading
                         ? () {}
                         : () {
-                          if (action.storeTypeId ==
+                          if (action.storeCategoryId == FoodStoreCategoryId.healthCare.value) {
+                             print("action: ${action.toJson()}");
+                            OrderService().triggerStoreOrder(action.toJson());
+                          }else if (action.storeTypeId ==
                                   FoodCategory.grocery.value ||
                               action.storeTypeId ==
                                   FoodCategory.pharmacy.value ||
@@ -1506,6 +1880,47 @@ class ChatScreenBody extends StatelessWidget {
         }
 
         for (final widget in latestActionWidgets.where(
+          (w) => w.type == WidgetEnum.choose_date.value,
+        )) {
+          for (final action in widget.chooseDate) {
+            actionButtons.add(
+              buildActionButton(
+                text: action.buttonText,
+                onTap: () {
+                  // OrderService().triggerChooseDateScreenOpen();
+                   SelectTimeScreen.show(
+                    context,
+                    userId:
+                        action.storeId ??
+                        '', // TODO: Replace with actual userId
+                    storeCategoryId:
+                        action
+                            .storeCategoryId, // TODO: Replace with actual storeCategoryId
+                    timezone: ChatApiServices.instance.timezone ?? '',
+                    isForTableBooking: true,
+                    onTableBookingConfirm: (String selectedDateIso, String showDate) {
+                      final Map<String, dynamic>? dict = {
+                       "table_booking": {
+                            "booking_date": selectedDateIso,
+                            "booking_time": ""
+                        },
+                      };
+                      onSendMessage(
+                        'I want to book for $showDate',
+                        null,
+                        null,
+                        null,
+                        dict,
+                      );
+                    },
+                  );
+                },
+              ),
+            );
+          }
+        }
+
+        for (final widget in latestActionWidgets.where(
           (w) => w.type == WidgetEnum.schedule_later.value,
         )) {
           for (final action in widget.scheduledLater) {
@@ -1531,19 +1946,20 @@ class ChatScreenBody extends StatelessWidget {
                                     onConfirm: (String formattedDateTime, int timestamp) {
                                       // Handle the selected date and time
                                       print('Selected: $formattedDateTime (timestamp: $timestamp)');
-                                      onSendMessage('I have selected a schedule: \n$formattedDateTime', '', timestamp.toString());
+                                      onSendMessage('I want to book service for: \n$formattedDateTime', '', timestamp.toString());
                                     },
                                    );
                         // OrderService().triggerScheduledLaterScreenOpen(obj);
                           }else if (action.storeCategoryId == FoodStoreCategoryId.healthCare.value) {
                               SelectTimeScreen.show(
                                 context,
-                                userId: ChatApiServices.instance.userId ?? '', // TODO: Replace with actual userId
+                                userId: action.storeId ?? '', // TODO: Replace with actual userId
                                 storeCategoryId: action.storeCategoryId, // TODO: Replace with actual storeCategoryId
                                 timezone: ChatApiServices.instance.timezone ?? '',
-                                onConfirm: (selectedDate, selectedTimeSlot) {
+                                onConfirm: (String formattedDateTime, int timestamp) {
                                   // Handle confirmation
-                                  print('Selected date: $selectedDate, time: $selectedTimeSlot');
+                                  print('Selected: $formattedDateTime (timestamp: $timestamp)');
+                                  onSendMessage('I want to book an appointment for: \n$formattedDateTime', '', timestamp.toString());
                                 },
                               );
                           }
@@ -1647,6 +2063,24 @@ class ChatScreenBody extends StatelessWidget {
           }
         }
 
+        for (final widget in latestActionWidgets.where(
+          (w) => w.type == WidgetEnum.add_dependent.value,
+        )) {
+          for (final action in widget.addDependent) {
+            actionButtons.add(
+              buildActionButton(
+                text: action.buttonText,
+                onTap:
+                    isApiLoading
+                        ? () {}
+                        : () {
+                        OrderService().triggerClickManageScreenOpen({'action': 'add_dependent_healthcare'});
+                        },
+              ),
+            );
+          }
+        }
+
         for (final widgetType in [
           WidgetEnum.add_more.value,
           WidgetEnum.proceed_to_checkout.value,
@@ -1657,13 +2091,35 @@ class ChatScreenBody extends StatelessWidget {
           );
           for (final widget in widgets) {
             for (final item in widget.rawItems) {
-              final buttonText =
-                  item['button_text'] ?? item['title'] ?? 'Action';
+              final String buttonText =
+                  (item['button_text'] ?? item['title'] ?? 'Action').toString();
               actionButtons.add(
                 buildActionButton(
                   text: buttonText,
                   onTap: () {
-                    onSendMessage(buttonText);
+                    if (widget.isTableBookingFlow && widget.isTableBookingTimeSlot) {
+                      final bookingTime24 = _to24HourWithSeconds(buttonText);
+                      final existing = apiData['table_booking'];
+                      final Map<String, dynamic> tableBooking = {};
+                      if (existing is Map) {
+                        tableBooking.addAll(
+                          Map<String, dynamic>.from(existing),
+                        );
+                      }
+                      tableBooking['booking_time'] = bookingTime24;
+                      final Map<String, dynamic>? dict = {
+                        'table_booking': tableBooking,
+                      };
+                      onSendMessage(
+                        buttonText,
+                        null,
+                        null,
+                        null,
+                        dict,
+                      );
+                    }else {
+                      onSendMessage(buttonText);
+                    }
                   },
                 ),
               );
@@ -1673,6 +2129,40 @@ class ChatScreenBody extends StatelessWidget {
 
         if (actionButtons.isEmpty) {
           return const SizedBox.shrink();
+        }
+        final proceedToCheckoutWidget = latestActionWidgets.cast<dynamic>().firstWhere(
+          (w) => w?.type == WidgetEnum.proceed_to_checkout.value,
+          orElse: () => null,
+        );
+
+        final isTableBookingTimeSlot = proceedToCheckoutWidget?.isTableBookingTimeSlot == true;
+        final isTableBookingFlow = proceedToCheckoutWidget?.isTableBookingFlow == true;
+
+        if (isTableBookingFlow && isTableBookingTimeSlot) {
+          return Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            width: double.infinity,
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: SizedBox(
+                // 2-row horizontal grid; tweak if your button style changes.
+                height: 93,
+                child: GridView.builder(
+                  scrollDirection: Axis.horizontal,
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    mainAxisSpacing: 10,
+                    crossAxisSpacing: 18,
+                    // For horizontal grids, this controls each tile's width.
+                    mainAxisExtent: 90,
+                  ),
+                  physics: const BouncingScrollPhysics(),
+                  itemCount: actionButtons.length,
+                  itemBuilder: (context, index) => actionButtons[index],
+                ),
+              ),
+            ),
+          );
         }
 
         return Container(
@@ -1703,14 +2193,14 @@ class ChatScreenBody extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
         decoration: BoxDecoration(
           color: Colors.white,
-          border: Border.all(color: const Color(0xFF8E2FFD), width: 1),
+          border: Border.all(color: AppConstants.appThemeColor, width: 1),
           borderRadius: BorderRadius.circular(8),
         ),
         child: Text(
           text,
           style: AppTextStyles.button.copyWith(
             fontWeight: FontWeight.w400,
-            color: const Color(0xFF8E2FFD),
+            color: AppConstants.appThemeColor,
           ),
         ),
       ),
@@ -1776,7 +2266,7 @@ class ChatScreenBody extends StatelessWidget {
                                     color: const Color(0xFF242424),
                                   ),
                                   decoration: InputDecoration(
-                                    hintText: isRecording ? 'Listening...' : 'How can zAIn help you today?',
+                                    hintText: isRecording ? 'Listening...' : 'Ask me anything...',
                                     border: InputBorder.none,
                                     enabledBorder: InputBorder.none,
                                     focusedBorder: InputBorder.none,
@@ -1923,6 +2413,7 @@ class ChatScreenBody extends StatelessWidget {
                     ),
                   ),
                 ),
+                const SizedBox(height: 5),
               ],
             ),
           ),
@@ -1947,8 +2438,12 @@ class ChatScreenBody extends StatelessWidget {
           index: index,
           cartData: cartBloc.cartData,
           isFromChatHistory: isFromHistory,
+          isTableBookingFlow: storesWidget?.isTableBookingFlow ?? false,
           onAddToCart: (message, product, store, quantity) {
             onSendMessage(message);
+          },
+          onTableBookingTap: (store) {
+            onSendMessage('I want to book a table for ${store.storename}');
           },
           // onHide: onHideStoreCards,
           onQuantityChanged: (product, store, newQuantity, isIncrease) {
@@ -1956,17 +2451,17 @@ class ChatScreenBody extends StatelessWidget {
                 store.storeTypeId == FoodCategory.pharmacy.value) {
               onQuantityChangedForGrocery(
                 context,
-                product.parentProductId,
-                product.childProductId,
-                product.unitId,
+                product?.parentProductId ?? '',
+                product?.childProductId ?? '',
+                product?.unitId ?? '',
                 store.storeId,
                 store.storeCategoryId,
                 store.storeTypeId ?? -111,
-                product.variantsCount,
+                product?.variantsCount ?? 0,
                 newQuantity,
                 isIncrease,
-                product.productName,
-                product.productImage,
+                product?.productName ?? '',
+                product?.productImage ?? '',
               );
             } else {
               onQuantityChanged(
@@ -1978,10 +2473,113 @@ class ChatScreenBody extends StatelessWidget {
               );
             }
           },
-          onAddToCartRequested: (product, store) {
-            if ((product.variantsCount > 1 &&
+          onAddToCartRequested: (product, store, doctor) {
+            if (store.isDoctore == true && doctor != null) {
+              DoctorServiceTypeSheet.show(
+                context,
+                doctor: doctor,
+                store: store,
+                onServiceTypeSelected: (selectedType, selectedProduct) {
+                  // Selected: selectedType (DoctorServiceType), selectedProduct (Product? from store)
+                  final int serviceLocationAt;
+                  final String productName;
+                  int? estimatedProductPrice;
+                  switch (selectedType) {
+                    case DoctorServiceType.inCall:
+                      serviceLocationAt = 1;
+                      productName = "Visit at doctor's clinic";
+                      estimatedProductPrice = doctor.pricing?.inCallFee ?? 0;
+                      break;
+                    case DoctorServiceType.outCall:
+                      serviceLocationAt = 2;
+                      productName = "Doctor's at home";
+                      estimatedProductPrice = doctor.pricing?.outCallFee ?? 0;
+                      break;
+                    case DoctorServiceType.teleCall:
+                      serviceLocationAt = 3;
+                      productName = "Tele appointment";
+                      estimatedProductPrice = doctor.pricing?.teleCallFee ?? 0;
+                      break;
+                  }
+
+                  Map<String, dynamic> doctorParams = {
+                    "estimatedProductPrice": estimatedProductPrice,
+                    "productName": productName,
+                    "providerId": doctor.id,
+                    "cartType": 2,
+                    "storeId": store.storeId,
+                    "newQuantity": 0,
+                    "productId": "",
+                    "userType": 1,
+                    "unitId": "",
+                    "isDoctorFlow": true,
+                    "serviceLocationAt": serviceLocationAt,
+                    "longitude": ChatApiServices.instance.longitude ?? 0,
+                    "latitude": ChatApiServices.instance.latitude ?? 0,
+                    "centralProductId": "",
+                    "storeTypeId": store.storeTypeId ?? 25,
+                    "storeCategoryId": store.storeCategoryId,
+                    "offers": {
+                      "discountValue": 0,
+                      "offerFor": 0,
+                      "offerId": "",
+                      "offerName": {},
+                      "status": 0,
+                      "discountType": 0
+                    },
+                    "action": 1
+                  };
+
+                  // Add doctor first; then add product only after first API completes (one by one)
+                  cartBloc.add(
+                    CartAddItemRequested(
+                      storeId: store.storeId,
+                      cartType: 2,
+                      action: 1,
+                      storeCategoryId: store.storeCategoryId,
+                      newQuantity: 0,
+                      storeTypeId: store.storeTypeId ?? 25,
+                      productId: '',
+                      centralProductId: '',
+                      unitId: '',
+                      doctorParams: doctorParams,
+                      needToShowLoaderForCartFetch: selectedProduct == null,
+                      needToSendMessage: selectedProduct == null ? true : false,
+                    ),
+                  );
+
+                  if (selectedProduct != null) {
+                    cartBloc.stream
+                        .firstWhere(
+                          (state) =>
+                              state is CartProductAdded ,
+                        )
+                        .then((state) {
+                      if (state is CartProductAdded) {
+                        cartBloc.add(
+                          CartAddItemRequested(
+                            storeId: store.storeId,
+                            cartType: 2,
+                            action: 1,
+                            storeCategoryId: store.storeCategoryId,
+                            newQuantity: 1,
+                            storeTypeId: store.storeTypeId ?? -111,
+                            productId: selectedProduct.childProductId,
+                            centralProductId: selectedProduct.parentProductId,
+                            unitId: selectedProduct.unitId,
+                            needToShowLoaderForCartFetch: true,
+                            needToSendMessage: true,
+                          ),
+                        );
+                      }
+                    });
+                  }
+                },
+              );
+            } else {
+               if ((product != null && product.variantsCount > 1 &&
                     store.storeTypeId == FoodCategory.food.value) ||
-                (product.variantsCount > 0 &&
+                (product != null && product.variantsCount > 0 &&
                     (store.storeTypeId == FoodCategory.grocery.value ||
                         store.storeTypeId == FoodCategory.pharmacy.value ||
                         store.storeTypeId == FoodCategory.services.value))) {
@@ -2038,12 +2636,13 @@ class ChatScreenBody extends StatelessWidget {
                   newQuantity: 1,
                   // Add 1 item
                   storeTypeId: store.storeTypeId ?? -111,
-                  productId: product.childProductId,
-                  centralProductId: product.parentProductId,
-                  unitId: product.unitId,
+                  productId: product?.childProductId ?? '',
+                  centralProductId: product?.parentProductId ?? '',
+                  unitId: product?.unitId ?? '',
                   needToShowLoaderForCartFetch: false,
                 ),
               );
+            }
             }
           },
         );
@@ -2367,7 +2966,7 @@ class ChatScreenBody extends StatelessWidget {
 
   void onQuantityChanged(
     BuildContext context,
-    Product product,
+    Product? product,
     Store store,
     int newQuantity,
     bool isIncrease,
@@ -2375,7 +2974,7 @@ class ChatScreenBody extends StatelessWidget {
     if (isIncrease == false && newQuantity == 1) {
       //TODO:- 0 Quantity
       int? addToCartOnId;
-      if (product.variantsCount > 1) {
+      if (product != null && product.variantsCount > 1) {
         addToCartOnId = getAddToCartOnId(product.childProductId);
         print("addCartOnID: $addToCartOnId");
       }
@@ -2388,15 +2987,15 @@ class ChatScreenBody extends StatelessWidget {
           storeCategoryId: store.storeCategoryId,
           newQuantity: 0,
           storeTypeId: store.storeTypeId ?? -111,
-          productId: product.childProductId,
-          centralProductId: product.parentProductId,
-          unitId: product.unitId,
+          productId: product?.childProductId ?? '',
+          centralProductId: product?.parentProductId ?? '',
+          unitId: product?.unitId ?? '',
           addToCartOnId: addToCartOnId,
           needToShowLoaderForCartFetch: false,
         ),
       );
     } else if (newQuantity > 0 && isIncrease == true) {
-      if (product.variantsCount > 1) {
+      if (product != null && product.variantsCount > 1) {
         showModalBottomSheet(
           context: context,
           isScrollControlled: true,
@@ -2453,9 +3052,9 @@ class ChatScreenBody extends StatelessWidget {
             storeCategoryId: store.storeCategoryId,
             newQuantity: newQuantity + 1,
             storeTypeId: store.storeTypeId ?? -111,
-            productId: product.childProductId,
-            centralProductId: product.parentProductId,
-            unitId: product.unitId,
+            productId: product?.childProductId ?? '',
+            centralProductId: product?.parentProductId ?? '',
+            unitId: product?.unitId ?? '',
             needToShowLoaderForCartFetch: false,
           ),
         );
@@ -2463,14 +3062,14 @@ class ChatScreenBody extends StatelessWidget {
     } else {
       //TODO:- Remove Quantity
       int? addToCartOnId;
-      if (product.variantsCount > 1) {
+      if (product != null && product.variantsCount > 1) {
         addToCartOnId = getAddToCartOnId(product.childProductId);
         print("addCartOnID: $addToCartOnId");
       }
       int? existingProductQuantity;
       existingProductQuantity = newQuantity;
       if (addToCartOnId != null) {
-        existingProductQuantity = getExistingProductQuantity(product.childProductId, addToCartOnId);
+        existingProductQuantity = getExistingProductQuantity(product?.childProductId ?? '', addToCartOnId);
         print("existingProductQuantity: $existingProductQuantity");
       }
       cartBloc.add(
@@ -2482,9 +3081,9 @@ class ChatScreenBody extends StatelessWidget {
           storeCategoryId: store.storeCategoryId,
           newQuantity: (existingProductQuantity == 1) ? 0 : (existingProductQuantity ?? 0) - 1,
           storeTypeId: store.storeTypeId ?? -111,
-          productId: product.childProductId,
-          centralProductId: product.parentProductId,
-          unitId: product.unitId,
+          productId: product?.childProductId ?? '',
+          centralProductId: product?.parentProductId ?? '',
+          unitId: product?.unitId ?? '',
           addToCartOnId: addToCartOnId,
           needToShowLoaderForCartFetch: false,
         ),
@@ -3145,6 +3744,220 @@ class ChatScreenBody extends StatelessWidget {
       onSendMessage: (message) {
         onSendMessage(message);
       },
+    );
+  }
+
+  Widget buildRestaurantSectionsWidget(
+    BuildContext context,
+    List<WidgetAction> restaurantSectionsItems,
+  ) {
+    if (restaurantSectionsItems.isEmpty) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.only(left: 0.0),
+      child: RestaurantSectionsWidget(
+        restaurantSectionsItems: restaurantSectionsItems,
+      ),
+    );
+  }
+}
+
+/// Birthday reminder card shown after the Complete setup button.
+class _BirthdayReminderCard extends StatefulWidget {
+  final VoidCallback? onBookRestaurant;
+  final VoidCallback? onBrowseGifts;
+  final GreetingReminder? greetingReminder;
+
+  const _BirthdayReminderCard({
+    this.onBookRestaurant,
+    this.onBrowseGifts,
+    this.greetingReminder,
+  });
+
+  @override
+  State<_BirthdayReminderCard> createState() => _BirthdayReminderCardState();
+}
+
+class _BirthdayReminderCardState extends State<_BirthdayReminderCard> {
+  bool _visible = true;
+
+  @override
+  Widget build(BuildContext context) {
+    if (!_visible) return const SizedBox.shrink();
+
+    return Center(
+      child: SizedBox(
+        width: 343,
+        child: Stack(
+          clipBehavior: Clip.none,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(15),
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    Color(0xFFF5E0FF),
+                    Color(0xFFD59DFF),
+                  ],
+                  stops: [0.1555, 0.9554],
+                ),
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const SizedBox(height: 4),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        width: 39,
+                        height: 39,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(8.125),
+                        ),
+                        alignment: Alignment.center,
+                        child: Text(
+                          widget.greetingReminder?.emoji ?? '🎂',
+                          style: TextStyle(fontSize: 22),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 6,
+                                vertical: 3,
+                              ),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFECC6FE),
+                                borderRadius: BorderRadius.circular(80),
+                              ),
+                              child: Text(
+                                '${widget.greetingReminder?.daysUntil}',
+                                style: AppTextStyles.bodyText.copyWith(
+                                  fontSize: 10,
+                                  color: const Color(0xFF414F85),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                             Text(
+                              "${widget.greetingReminder?.title}!",
+                              style: AppTextStyles.heading(
+                                fontSize: 14,
+                                color: const Color(0xFF2F3C70),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    '${widget.greetingReminder?.subtitle}',
+                    style: AppTextStyles.bodyText.copyWith(
+                      fontSize: 12,
+                      color: const Color(0xFF2F3C70),
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Row(
+                    children: [
+                      Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          onTap: widget.onBookRestaurant,
+                          borderRadius: BorderRadius.circular(8),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 12,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Text(
+                              widget.greetingReminder?.buttons.first ?? 'Book Restaurant',
+                              style: AppTextStyles.bodyText.copyWith(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                color: const Color(0xFF007AFF),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          onTap: widget.onBrowseGifts,
+                          borderRadius: BorderRadius.circular(8),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 12,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Text(
+                              widget.greetingReminder?.buttons.last ?? 'Browse Gifts',
+                              style: AppTextStyles.bodyText.copyWith(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                color: const Color(0xFF007AFF),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            // Positioned(
+            //   top: 15,
+            //   right: 15,
+            //   child: Material(
+            //     color: Colors.transparent,
+            //     child: InkWell(
+            //       onTap: () => setState(() => _visible = false),
+            //       borderRadius: BorderRadius.circular(32),
+            //       child: Container(
+            //         width: 20,
+            //         height: 20,
+            //         decoration: BoxDecoration(
+            //           color: Colors.white.withOpacity(0.66),
+            //           borderRadius: BorderRadius.circular(32),
+            //         ),
+            //         alignment: Alignment.center,
+            //         child: Icon(
+            //           Icons.close,
+            //           size: 14,
+            //           color: const Color(0xFF242424),
+            //         ),
+            //       ),
+            //     ),
+            //   ),
+            // ),
+          ],
+        ),
+      ),
     );
   }
 }

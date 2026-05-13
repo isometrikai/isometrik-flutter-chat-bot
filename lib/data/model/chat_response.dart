@@ -95,12 +95,16 @@ class ChatWidget {
   final int widgetId;
   final int widgetsType;
   final String type;
+  final bool isTableBookingFlow;
+  final bool isTableBookingTimeSlot;
   final List<dynamic> widget; // Raw JSON data
 
   ChatWidget({
     required this.widgetId,
     required this.widgetsType,
     required this.type,
+    required this.isTableBookingFlow,
+    required this.isTableBookingTimeSlot,
     required this.widget,
   });
 
@@ -109,6 +113,8 @@ class ChatWidget {
       widgetId: json['widgetId'] ?? 0,
       widgetsType: json['widgets_type'] ?? 0,
       type: json['type'] ?? '',
+      isTableBookingFlow: json['is_table_booking_flow'] ?? false,
+      isTableBookingTimeSlot: json['is_table_booking_time_slot_selection'] ?? false,
       widget: (json['widget'] as List<dynamic>?) ?? [],
     );
   }
@@ -118,6 +124,8 @@ class ChatWidget {
       'widgetId': widgetId,
       'widgets_type': widgetsType,
       'type': type,
+      'is_table_booking_flow': isTableBookingFlow,
+      'is_table_booking_time_slot_selection': isTableBookingTimeSlot,
       'widget': widget,
     };
   }
@@ -129,11 +137,13 @@ class ChatWidget {
   bool get isSeeMoreWidget => type == WidgetEnum.see_more.value;
   bool get isMenuWidget => type == WidgetEnum.menu.value;
   bool get isCartWidget => type == WidgetEnum.cart.value;
+  bool get isRestaurantSectionsWidget => type == WidgetEnum.restaurant_sections.value;
   bool get isServicesDeliveryOptionsWidget => type == WidgetEnum.service_types.value;
   bool get isChooseAddressWidget => type == WidgetEnum.choose_address.value;
   bool get isChooseCardWidget => type == WidgetEnum.choose_card.value;
   bool get isAddAddressWidget => type == WidgetEnum.add_address.value;
   bool get isAddPaymentWidget => type == WidgetEnum.add_payment.value;
+  bool get isChooseDateWidget => type == WidgetEnum.choose_date.value;
   bool get isScheduledLaterWidget => type == WidgetEnum.schedule_later.value;
   bool get isSelectStaffWidget => type == WidgetEnum.staff_selection.value;
   bool get isPrescriptionScreenWidget => type == WidgetEnum.prescription_screen.value;
@@ -142,6 +152,7 @@ class ChatWidget {
   bool get isOrderConfirmedWidget => type == WidgetEnum.order_confirmed.value;
   bool get isOrderTrackingWidget => type == WidgetEnum.order_tracking.value;
   bool get isOrderDetailsWidget => type == WidgetEnum.order_details.value;
+  bool get isAddDependentWidget => type == WidgetEnum.add_dependent.value;
   bool get isButtonWidget => type == 'button';
   bool get isInputWidget => type == 'input';
   bool get isImageWidget => type == 'image';
@@ -237,6 +248,11 @@ class ChatWidget {
       ? widget.map((e) => WidgetAction.fromJson(e as Map<String, dynamic>)).toList()
       : [];
 
+  // Get choose_date actions (converted to models)
+  List<WidgetAction> get chooseDate => isChooseDateWidget
+      ? widget.map((e) => WidgetAction.fromJson(e as Map<String, dynamic>)).toList()
+      : [];
+
   // Get scheduled_later actions (converted to models)
   List<WidgetAction> get scheduledLater => isScheduledLaterWidget
       ? widget.map((e) => WidgetAction.fromJson(e as Map<String, dynamic>)).toList()
@@ -254,6 +270,11 @@ class ChatWidget {
 
   // Get online_payment_confirm_order actions (converted to models)
   List<WidgetAction> get onlinePaymentConfirmOrder => isOnlinePaymentConfirmOrderWidget
+      ? widget.map((e) => WidgetAction.fromJson(e as Map<String, dynamic>)).toList()
+      : [];
+
+  // Get add_dependent actions (converted to models)
+  List<WidgetAction> get addDependent => isAddDependentWidget
       ? widget.map((e) => WidgetAction.fromJson(e as Map<String, dynamic>)).toList()
       : [];
 
@@ -286,6 +307,14 @@ class ChatWidget {
   // Helper method to get cart items
   List<WidgetAction> getCartItems() {
     if (isCartWidget) {
+      return widget.map((item) => WidgetAction.fromJson(item as Map<String, dynamic>)).toList();
+    }
+    return [];
+  }
+
+  // Helper method to get restaurant sections items
+  List<WidgetAction> getRestaurantSectionsItems() {
+    if (isRestaurantSectionsWidget) {
       return widget.map((item) => WidgetAction.fromJson(item as Map<String, dynamic>)).toList();
     }
     return [];
@@ -522,6 +551,109 @@ class FinalPriceList {
   }
 }
 
+/// Pricing details for a doctor (optional in API response).
+class DoctorPricing {
+  final int inCallFee;
+  final int inCallAvgMin;
+  final int outCallFee;
+  final int outCallAvgMin;
+  final int teleCallFee;
+  final int teleCallAvgMin;
+  final bool isInCallFee;
+  final bool isOutCallFee;
+  final bool isTeleCallFee;
+
+  DoctorPricing({
+    required this.inCallFee,
+    required this.inCallAvgMin,
+    required this.outCallFee,
+    required this.outCallAvgMin,
+    required this.teleCallFee,
+    required this.teleCallAvgMin,
+    required this.isInCallFee,
+    required this.isOutCallFee,
+    required this.isTeleCallFee,
+  });
+
+  factory DoctorPricing.fromJson(Map<String, dynamic> json) {
+    return DoctorPricing(
+      inCallFee: (json['inCallFee'] as num?)?.toInt() ?? 0,
+      inCallAvgMin: (json['inCallAvgMin'] as num?)?.toInt() ?? 0,
+      outCallFee: (json['outCallFee'] as num?)?.toInt() ?? 0,
+      outCallAvgMin: (json['outCallAvgMin'] as num?)?.toInt() ?? 0,
+      teleCallFee: (json['teleCallFee'] as num?)?.toInt() ?? 0,
+      teleCallAvgMin: (json['teleCallAvgMin'] as num?)?.toInt() ?? 0,
+      isInCallFee: json['isInCallFee'] ?? false,
+      isOutCallFee: json['isOutCallFee'] ?? false,
+      isTeleCallFee: json['isTeleCallFee'] ?? false,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'inCallFee': inCallFee,
+      'inCallAvgMin': inCallAvgMin,
+      'outCallFee': outCallFee,
+      'outCallAvgMin': outCallAvgMin,
+      'teleCallFee': teleCallFee,
+      'teleCallAvgMin': teleCallAvgMin,
+      'isInCallFee': isInCallFee,
+      'isOutCallFee': isOutCallFee,
+      'isTeleCallFee': isTeleCallFee,
+    };
+  }
+}
+
+/// Doctor item from API doctorsList.
+class Doctor {
+  final String id;
+  final int serviceAvailability;
+  final String firstName;
+  final String lastName;
+  final String profilePic;
+  final double? rating;
+  final DoctorPricing? pricing;
+
+  Doctor({
+    required this.id,
+    required this.serviceAvailability,
+    required this.firstName,
+    required this.lastName,
+    required this.profilePic,
+    this.rating,
+    this.pricing,
+  });
+
+  String get fullName => '$firstName ${lastName.trim()}'.trim();
+
+  factory Doctor.fromJson(Map<String, dynamic> json) {
+    final pricingJson = json['pricing'];
+    return Doctor(
+      id: (json['_id'] ?? '').toString(),
+      serviceAvailability: (json['serviceAvailability'] as num?)?.toInt() ?? 0,
+      firstName: (json['firstName'] ?? '').toString(),
+      lastName: (json['lastName'] ?? '').toString(),
+      profilePic: (json['profilePic'] ?? '').toString(),
+      rating: json['rating'] != null ? (json['rating'] as num).toDouble() : null,
+      pricing: pricingJson != null && pricingJson is Map<String, dynamic>
+          ? DoctorPricing.fromJson(pricingJson)
+          : null,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      '_id': id,
+      'serviceAvailability': serviceAvailability,
+      'firstName': firstName,
+      'lastName': lastName,
+      'profilePic': profilePic,
+      if (rating != null) 'rating': rating,
+      if (pricing != null) 'pricing': pricing!.toJson(),
+    };
+  }
+}
+
 // Store Model for stores widget (now includes nested products)
 class Store {
   final String storename;
@@ -533,14 +665,16 @@ class Store {
   final String storeCategoryId;
   final String linkFromId;
   final int type;
-  final bool isDoctored;
+  final bool isDoctore;// for Healthcare Store
   final bool storeListing;
   final bool hyperlocal;
   final List<Product> products;
+  final List<Doctor> doctorsList;
   final int? storeTypeId;
   final bool storeIsOpen;
   final num supportedOrderTypes;
   final bool tableReservations;
+  final List<String> cuisines;
 
   Store({
     required this.storename,
@@ -551,15 +685,17 @@ class Store {
     required this.storeId,
     required this.storeCategoryId,
     required this.products,
+    required this.doctorsList,
     required this.linkFromId,
     required this.type,
-    required this.isDoctored,
+    required this.isDoctore,
     required this.storeListing,
     required this.hyperlocal,
     this.storeTypeId,
     required this.storeIsOpen,
     required this.supportedOrderTypes,
     required this.tableReservations,
+    required this.cuisines,
   });
 
   factory Store.fromJson(Map<String, dynamic> json) {
@@ -571,15 +707,21 @@ class Store {
     final String storeCategoryId = (json['storeCategoryId'] ?? '');
     final String linkFromId = (json['linkFromId'] ?? '');
     final int type = (json['type'] ?? 0);
-    final bool isDoctored = (json['isDoctored'] ?? false);
+    final bool isDoctore = (json['isDoctore'] ?? false);
     final bool storeListing = (json['storeListing'] ?? false);
     final bool hyperlocal = (json['hyperlocal'] ?? false);
     final int storeTypeId = (json['storeTypeId'] ?? 0);
     final bool storeIsOpen = (json['storeIsOpen'] ?? false);
     final int supportedOrderTypes = (json['supportedOrderTypes'] ?? 0);
     final bool tableReservations = (json['tableReservations'] ?? false);
+    final List<Doctor> doctorsList = (json['doctorsList'] as List<dynamic>? ?? [])
+        .map((e) => Doctor.fromJson(e as Map<String, dynamic>))
+        .toList();
     final List<Product> parsedProducts = (json['products'] as List<dynamic>? ?? [])
         .map((e) => Product.fromJson(e as Map<String, dynamic>))
+        .toList();
+    final List<String> cuisines = (json['cuisines'] as List<dynamic>? ?? [])
+        .map((e) => e.toString())
         .toList();
 
     // Process categorylist - remove duplicates before displaying
@@ -618,15 +760,17 @@ class Store {
       storeId: storeId,
       storeCategoryId: storeCategoryId,
       products: parsedProducts,
+      doctorsList: doctorsList,
       linkFromId: linkFromId,
       type: type,
-      isDoctored: isDoctored,
+      isDoctore: isDoctore,
       storeListing: storeListing,
       hyperlocal: hyperlocal,
       storeTypeId: storeTypeId,
       storeIsOpen: storeIsOpen,
       supportedOrderTypes: supportedOrderTypes,
       tableReservations: tableReservations,
+      cuisines: cuisines,
     );
   }
 
@@ -640,10 +784,13 @@ class Store {
       'storeId': storeId,
       'storeCategoryId': storeCategoryId,
       'products': products.map((p) => p.toJson()).toList(),
+      'doctorsList': doctorsList.map((d) => d.toJson()).toList(),
       'storeIsOpen': storeIsOpen,
       'storeTypeId': storeTypeId,
       'supportedOrderTypes': supportedOrderTypes,
       'tableReservations': tableReservations,
+      'isDoctore': isDoctore,
+      'cuisines': cuisines,
     };
   }
 }
@@ -830,6 +977,12 @@ class WidgetAction {
   final String? serviceRequestedTime;
   final String? orderAmount;
   final String? currency;
+  final String? bookingDate;
+  final String? bookingTime;
+  final num? partySize;
+  final bool? isTableBooking;
+  final String? sectionName;
+  final String? image;
 
   WidgetAction({
     required this.buttonText,
@@ -862,6 +1015,12 @@ class WidgetAction {
     this.serviceRequestedTime,
     this.orderAmount,
     this.currency,
+    this.bookingDate,
+    this.bookingTime,
+    this.partySize,
+    this.isTableBooking,
+    this.sectionName,
+    this.image,
   });
 
   factory WidgetAction.fromJson(Map<String, dynamic> json) {
@@ -900,6 +1059,12 @@ class WidgetAction {
         serviceRequestedTime: json['serviceRequestedTime']?.toString(),
         orderAmount: json['orderAmount']?.toString(),
         currency: json['currency']?.toString(),
+        bookingDate: json['bookingDate']?.toString(),
+        bookingTime: json['bookingTime']?.toString(),
+        partySize: json['partySize'] ?? 111,
+        isTableBooking: json['isTableBooking'] ?? false,
+        sectionName: json['sectionName']?.toString(),
+        image: json['image']?.toString(),
     );
   }
 
@@ -936,6 +1101,12 @@ class WidgetAction {
       'serviceRequestedTime': serviceRequestedTime,
       'orderAmount': orderAmount,
       'currency': currency,
+      'bookingDate': bookingDate,
+      'bookingTime': bookingTime,
+      'partySize': partySize,
+      'isTableBooking': isTableBooking,
+      'sectionName': sectionName,
+      'image': image,
     };
   }
 }

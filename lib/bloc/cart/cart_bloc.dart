@@ -215,6 +215,7 @@ class CartBloc extends Bloc<CartEvent, CartState> {
         unitId: '', //event.unitId,
         newAddOns: event.newAddOns,
         addToCartOnId: event.addToCartOnId,
+        doctorParams: event.doctorParams,
       );
 
       if (event.needToShowLoader) {
@@ -223,10 +224,11 @@ class CartBloc extends Bloc<CartEvent, CartState> {
 
       if (result.isSuccess) {
         isCartAPICalled = true;
-        emit(CartProductAdded(storeCategoryId: event.storeCategoryId));
+        emit(CartProductAdded(storeCategoryId: event.storeCategoryId, needToSendMessage: event.needToSendMessage));
         add(CartFetchRequested(needToShowLoader: event.needToShowLoaderForCartFetch));
       } else {
         add(CartFetchRequested(needToShowLoader: event.needToShowLoaderForCartFetch));
+        // Utility.showErrorBlackToast(result.message ?? 'Failed to add item to cart');// ISSUE IS BLACK TOAST NOT SHOWING
         emit(CartError(message: result.message ?? 'Failed to add item to cart'));
       }
     } catch (e) {

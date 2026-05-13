@@ -173,6 +173,17 @@ class _ChatScreenState extends State<ChatScreen> {
         // _sendMessage('Order placed successfully', null, null, null);
       }
     });
+
+    OrderService().setSelectClickManageCallback((Map<String, dynamic> clickManage) {
+      if (mounted) {
+        print('ChatScreen: Click manage received - $clickManage');
+        _apiData = {
+            ..._apiData,
+            "dependent_id": clickManage['dependentId'] ?? '',
+          };
+        _sendMessage('I have selected a dependent:\n${clickManage['firstName'] ?? ''} ${clickManage['lastName'] ?? ''}', null, null, null);
+      }
+    });
   }
 
   /// Sets up post-initialization tasks (keyboard listener, cart fetch, speech service)
@@ -247,7 +258,7 @@ class _ChatScreenState extends State<ChatScreen> {
     }
   }
 
-  void _sendMessage(String text, [String? scheduleLaterStaffId, String? serviceRequestedTime, String? storeCategoryId]) {
+  void _sendMessage(String text, [String? scheduleLaterStaffId, String? serviceRequestedTime, String? storeCategoryId, Map<String, dynamic>? dict]) {
     if (text.trim().isEmpty) return;
 
     // Prepare: hide stores/products from the last bot message if present
@@ -274,6 +285,7 @@ class _ChatScreenState extends State<ChatScreen> {
       }else {
         _apiData = {
           ..._apiData,
+          ...dict ?? {},
           'storeCategoryId': storeCategoryId,
         };
       }
@@ -336,6 +348,7 @@ class _ChatScreenState extends State<ChatScreen> {
         ChatWidget? storesWidget;
         ChatWidget? productsWidget;
         ChatWidget? cartWidget;
+        ChatWidget? restaurantSectionsWidget;
         ChatWidget? servicesDeliveryOptionsWidget;
         ChatWidget? chooseAddressWidget;
         ChatWidget? chooseCardWidget;
@@ -362,6 +375,12 @@ class _ChatScreenState extends State<ChatScreen> {
           cartWidget = botResponse.widgets.firstWhere((widget) => widget.isCartWidget);
         } catch (e) {
           cartWidget = null;
+        }
+
+        try {
+          restaurantSectionsWidget = botResponse.widgets.firstWhere((widget) => widget.isRestaurantSectionsWidget);
+        } catch (e) {
+          restaurantSectionsWidget = null;
         }
 
         try {
@@ -406,6 +425,7 @@ class _ChatScreenState extends State<ChatScreen> {
         bool hasStores = storesWidget != null;
         bool hasProducts = productsWidget != null;
         bool hasCart = cartWidget != null;
+        bool hasRestaurantSections = restaurantSectionsWidget != null;
         bool hasServicesDeliveryOptions = servicesDeliveryOptionsWidget != null;
         bool hasChooseAddress = chooseAddressWidget != null;
         bool hasChooseCard = chooseCardWidget != null;
@@ -421,6 +441,7 @@ class _ChatScreenState extends State<ChatScreen> {
             hasStoreCards: hasStores,
             hasProductCards: hasProducts,
             hasCartWidget: hasCart,
+            hasRestaurantSectionsWidget: hasRestaurantSections,
             hasServicesDeliveryOptionsWidget: hasServicesDeliveryOptions,
             hasChooseAddressWidget: hasChooseAddress,
             hasChooseCardWidget: hasChooseCard,
@@ -441,6 +462,7 @@ class _ChatScreenState extends State<ChatScreen> {
                 !hasStores &&
                         !hasProducts &&
                         !hasCart &&
+                        !hasRestaurantSections &&
                         !hasChooseAddress &&
                         !hasChooseCard &&
                         !hasOrderSummary &&
@@ -452,6 +474,7 @@ class _ChatScreenState extends State<ChatScreen> {
             stores: storesWidget?.stores ?? [],
             products: productsWidget?.products ?? [],
             cartItems: cartWidget?.getCartItems() ?? [],
+            restaurantSectionsItems: restaurantSectionsWidget?.getRestaurantSectionsItems() ?? [],
             servicesDeliveryOptions: servicesDeliveryOptionsWidget?.getServicesDeliveryOptions() ?? [],
             addressOptions: chooseAddressWidget?.getAddressOptions() ?? [],
             cardOptions: chooseCardWidget?.getCardOptions() ?? [],
@@ -479,6 +502,7 @@ class _ChatScreenState extends State<ChatScreen> {
                         // widget.type == WidgetEnum.add_address.value ||
                         // widget.type == WidgetEnum.add_payment.value ||
                         // widget.type == WidgetEnum.cart.value ||
+                        // widget.type == WidgetEnum.restaurant_sections.value ||
                         // widget.type == WidgetEnum.order_summary.value ||
                         // widget.type == WidgetEnum.choose_address.value ||
                         // widget.type == WidgetEnum.choose_card.value ||
@@ -502,6 +526,7 @@ class _ChatScreenState extends State<ChatScreen> {
     ChatWidget? storesWidget;
     ChatWidget? productsWidget;
     ChatWidget? cartWidget;
+    ChatWidget? restaurantSectionsWidget;
     ChatWidget? servicesDeliveryOptionsWidget;
     ChatWidget? chooseAddressWidget;
     ChatWidget? chooseCardWidget;
@@ -530,6 +555,12 @@ class _ChatScreenState extends State<ChatScreen> {
       cartWidget = response.widgets.firstWhere((widget) => widget.isCartWidget);
     } catch (e) {
       cartWidget = null;
+    }
+
+    try {
+      restaurantSectionsWidget = response.widgets.firstWhere((widget) => widget.isRestaurantSectionsWidget);
+    } catch (e) {
+      restaurantSectionsWidget = null;
     }
 
      try {
@@ -574,6 +605,7 @@ class _ChatScreenState extends State<ChatScreen> {
     bool hasStores = storesWidget != null;
     bool hasProducts = productsWidget != null;
     bool hasCart = cartWidget != null;
+    bool hasRestaurantSections = restaurantSectionsWidget != null;
     bool hasServicesDeliveryOptions = servicesDeliveryOptionsWidget != null;
     bool hasChooseAddress = chooseAddressWidget != null;
     bool hasChooseCard = chooseCardWidget != null;
@@ -590,6 +622,7 @@ class _ChatScreenState extends State<ChatScreen> {
           hasStoreCards: hasStores,
           hasProductCards: hasProducts,
           hasCartWidget: hasCart,
+          hasRestaurantSectionsWidget: hasRestaurantSections,
           hasServicesDeliveryOptionsWidget: hasServicesDeliveryOptions,
           hasChooseAddressWidget: hasChooseAddress,
           hasChooseCardWidget: hasChooseCard,
@@ -600,6 +633,7 @@ class _ChatScreenState extends State<ChatScreen> {
               !hasStores &&
               !hasProducts &&
               !hasCart &&
+              !hasRestaurantSections &&
               !hasServicesDeliveryOptions &&
               !hasChooseAddress &&
               !hasChooseCard &&
@@ -611,6 +645,7 @@ class _ChatScreenState extends State<ChatScreen> {
               !hasStores &&
                       !hasProducts &&
                       !hasCart &&
+                      !hasRestaurantSections &&
                       !hasServicesDeliveryOptions &&
                       !hasChooseAddress &&
                       !hasChooseCard &&
@@ -623,6 +658,7 @@ class _ChatScreenState extends State<ChatScreen> {
           stores: storesWidget?.stores ?? [],
           products: productsWidget?.products ?? [],
           cartItems: cartWidget?.getCartItems() ?? [],
+          restaurantSectionsItems: restaurantSectionsWidget?.getRestaurantSectionsItems() ?? [],
           servicesDeliveryOptions: servicesDeliveryOptionsWidget?.getServicesDeliveryOptions() ?? [],
           addressOptions: chooseAddressWidget?.getAddressOptions() ?? [],
           cardOptions: chooseCardWidget?.getCardOptions() ?? [],
@@ -630,6 +666,7 @@ class _ChatScreenState extends State<ChatScreen> {
           storesWidget: storesWidget,
           productsWidget: productsWidget,
           cartWidget: cartWidget,
+          restaurantSectionsWidget: restaurantSectionsWidget,
           servicesDeliveryOptionsWidget: servicesDeliveryOptionsWidget,
           chooseAddressWidget: chooseAddressWidget,
           chooseCardWidget: chooseCardWidget,
@@ -650,6 +687,7 @@ class _ChatScreenState extends State<ChatScreen> {
                     widget.type == WidgetEnum.add_address.value ||
                     widget.type == WidgetEnum.add_payment.value ||
                     widget.type == WidgetEnum.cart.value ||
+                    widget.type == WidgetEnum.restaurant_sections.value ||
                     widget.type == WidgetEnum.service_types.value ||
                     widget.type == WidgetEnum.order_summary.value ||
                     widget.type == WidgetEnum.choose_address.value ||
@@ -660,7 +698,9 @@ class _ChatScreenState extends State<ChatScreen> {
                     widget.type == WidgetEnum.schedule_later.value ||
                     widget.type == WidgetEnum.staff_selection.value ||
                     widget.type == WidgetEnum.prescription_screen.value ||
-                    widget.type == WidgetEnum.online_payment_confirm_order.value,
+                    widget.type == WidgetEnum.online_payment_confirm_order.value ||
+                    widget.type == WidgetEnum.add_dependent.value ||
+                    widget.type == WidgetEnum.choose_date.value,
               )
               .toList();
     });
@@ -819,6 +859,14 @@ class _ChatScreenState extends State<ChatScreen> {
     });
   }
 
+  Future<void> _restartGreetingAPI() async {
+    setState(() {
+      _greetingData = null;
+      _isDataLoaded = false;
+      _launchBloc.add(const LaunchRequested());
+    });
+  }
+
   @override
   void dispose() {
     if (widget.isFromHistory == false) {
@@ -908,6 +956,7 @@ class _ChatScreenState extends State<ChatScreen> {
       onScrollToBottom: _scrollToBottom,
       onLoadChatbotData: () {},
       onRestartChatAPI: _restartChatAPI,
+      onRestartGreetingAPI: _restartGreetingAPI,
       onUpdateSelectedOptions: (Set<String> newSet) {
         setState(() {
           _selectedOptionMessages = newSet;
@@ -974,78 +1023,61 @@ class _ChatScreenState extends State<ChatScreen> {
                 child: Stack(
                   clipBehavior: Clip.none,
                   children: [
-                    // Outer glow circle
-                    Container(
-                      width: 110,
-                      height: 110,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(110),
-                        gradient: const LinearGradient(
-                          begin: Alignment.centerLeft,
-                          end: Alignment.centerRight,
-                          colors: [
-                            Color(0x1AD445EC),
-                            Color(0x1AB02EFB),
-                            Color(0x1A8E2FFD),
-                            Color(0x1A5E3DFE),
-                            Color(0x1A5186E0),
-                          ],
-                        ),
-                      ),
-                    ),
-                    // Center asset
                     Align(
                       alignment: Alignment.center,
-                      child: Container(
-                        width: 90,
-                        height: 90,
-                        decoration: const BoxDecoration(
-                          shape: BoxShape.circle,
-                          gradient: LinearGradient(
-                            begin: Alignment.centerLeft,
-                            end: Alignment.centerRight,
-                            colors: [
-                              Color(0xFFD445EC),
-                              Color(0xFFB02EFB),
-                              Color(0xFF8E2FFD),
-                              Color(0xFF5E3DFE),
-                              Color(0xFF5186E0),
-                            ],
-                          ),
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(12),
-                          child: SvgPicture.asset(
-                            AssetPath.get('images/ic_mainImg_R.svg'),
-                            fit: BoxFit.contain,
-                          ),
-                        ),
+                      child: SvgPicture.asset(
+                        AssetPath.get('images/ic_LogoTutorial.svg'),
+                        fit: BoxFit.contain,
                       ),
-                    ),
-                    Positioned(
-                      right: -6,
-                      top: -6,
-                      child: Opacity(
-                        opacity: 0.4,
-                        child: SvgPicture.asset(
-                          AssetPath.get('images/ic_topStar.svg'),
-                          width: 44,
-                          height: 44,
-                        ),
-                      ),
-                    ),
-                    Positioned(
-                      left: -10,
-                      bottom: -8,
-                      child: Opacity(
-                        opacity: 0.4,
-                        child: SvgPicture.asset(
-                          AssetPath.get('images/ic_topStar.svg'),
-                          width: 61,
-                          height: 61,
-                        ),
-                      ),
-                    ),
+                    )
+                    // Outer glow circle
+                    // Container(
+                    //   width: 110,
+                    //   height: 110,
+                    //   decoration: BoxDecoration(
+                    //     borderRadius: BorderRadius.circular(110),
+                    //     gradient: const LinearGradient(
+                    //       begin: Alignment.centerLeft,
+                    //       end: Alignment.centerRight,
+                    //       colors: [
+                    //         Color(0x1AD445EC),
+                    //         Color(0x1AB02EFB),
+                    //         Color(0x1A8E2FFD),
+                    //         Color(0x1A5E3DFE),
+                    //         Color(0x1A5186E0),
+                    //       ],
+                    //     ),
+                    //   ),
+                    // ),
+                    // // Center asset
+                    // Align(
+                    //   alignment: Alignment.center,
+                    //   child: Container(
+                    //     width: 90,
+                    //     height: 90,
+                    //     decoration: const BoxDecoration(
+                    //       shape: BoxShape.circle,
+                    //       gradient: LinearGradient(
+                    //         begin: Alignment.centerLeft,
+                    //         end: Alignment.centerRight,
+                    //         colors: [
+                    //           Color(0xFFD445EC),
+                    //           Color(0xFFB02EFB),
+                    //           Color(0xFF8E2FFD),
+                    //           Color(0xFF5E3DFE),
+                    //           Color(0xFF5186E0),
+                    //         ],
+                    //       ),
+                    //     ),
+                    //     child: Padding(
+                    //       padding: const EdgeInsets.all(12),
+                    //       child: SvgPicture.asset(
+                    //         AssetPath.get('images/ic_mainImg_R.svg'),
+                    //         fit: BoxFit.contain,
+                    //       ),
+                    //     ),
+                    //   ),
+                    // ),
                   ],
                 ),
               ),

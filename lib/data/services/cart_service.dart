@@ -145,9 +145,10 @@ class CartService {
     required String unitId,
     List<Map<String, dynamic>>? newAddOns,
     dynamic addToCartOnId,
+    Map<String, dynamic>? doctorParams,
   }) async {
     try {
-      final body = {
+      Map<String, dynamic> body = {
         "offers": {},
         "storeId": storeId,
         "cartType": cartType,
@@ -163,6 +164,10 @@ class CartService {
         if (newAddOns != null) "newAddOns": newAddOns,
         if (addToCartOnId != null) "addToCartOnId": addToCartOnId.toString(),
       };
+      if (doctorParams != null) {
+        body.clear();
+        body = doctorParams;
+      }
 
       final result = await _client.post('/v1/cart', body);
       
@@ -175,8 +180,7 @@ class CartService {
         }
       } else {
         print(result.data?['message']);
-        // Utility.showErrorBlackToast(result.data?['message'] ?? 'Failed to add item to cart');
-        return ApiResult.error(result.message ?? 'Failed to add item to cart');
+        return ApiResult.error(result.data?['message'] ?? 'Failed to add item to cart');
       }
     } catch (e) {
       return ApiResult.error(e.toString());

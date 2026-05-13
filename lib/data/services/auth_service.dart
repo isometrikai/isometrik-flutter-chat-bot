@@ -8,6 +8,7 @@ import 'package:chat_bot/data/model/mygpts_model.dart';
 import 'package:chat_bot/data/model/chat_response.dart';
 import 'package:chat_bot/data/services/token_manager.dart';
 import 'package:chat_bot/data/services/universal_api_client.dart';
+import 'package:chat_bot/utils/utils.dart';
 
 import '../model/greeting_response.dart';
 
@@ -49,6 +50,7 @@ class AuthService {
     double? longitude,
     double? latitude,
     bool? needToShowTutorial,
+    bool? needToShowCompleteSetup,
     required String clientGuid,
     required String indexName,
     required String visitId,
@@ -147,6 +149,7 @@ class AuthService {
           'longitude': _longitude.toString(),
           'user_id': _userId ?? '',
           'username': _name ?? '',
+          'enable_personalisation': Utility.getPersonalization().toString()
           },
     );
     if (res.isSuccess && res.data != null) {

@@ -10,7 +10,9 @@ class SelectTimeScreen extends StatefulWidget {
   final String userId;
   final String storeCategoryId;
   final String timezone;
-  final Function(DateTime selectedDate, String selectedTime)? onConfirm;
+  final bool isForTableBooking;
+  final Function(String selectedTimeDate,int timestamp)? onConfirm;
+  final Function(String selectedDate, String showDate)? onTableBookingConfirm;
   
   const SelectTimeScreen({
     super.key,
@@ -18,6 +20,8 @@ class SelectTimeScreen extends StatefulWidget {
     required this.storeCategoryId,
     required this.timezone,
     this.onConfirm,
+    this.isForTableBooking = false,
+    this.onTableBookingConfirm,
   });
 
   /// Present the SelectTimeScreen as a modal bottom sheet
@@ -26,7 +30,9 @@ class SelectTimeScreen extends StatefulWidget {
     required String userId,
     required String storeCategoryId,
     required String timezone,
-    Function(DateTime selectedDate, String selectedTime)? onConfirm,
+    bool isForTableBooking = false,
+    Function(String selectedTimeDate,int timestamp)? onConfirm,
+    Function(String selectedDate, String showDate)? onTableBookingConfirm,
   }) async {
     return showModalBottomSheet(
       context: context,
@@ -41,6 +47,8 @@ class SelectTimeScreen extends StatefulWidget {
           storeCategoryId: storeCategoryId,
           timezone: timezone,
           onConfirm: onConfirm,
+          isForTableBooking: isForTableBooking,
+          onTableBookingConfirm: onTableBookingConfirm,
         ),
       ),
     );
@@ -59,9 +67,15 @@ class _SelectTimeScreenState extends State<SelectTimeScreen> {
   @override
   void initState() {
     super.initState();
-    // Initialize with next 7 days
     final now = DateTime.now();
-    availableDates = List.generate(7, (index) => now.add(Duration(days: index)));
+
+    // When booking a table, allow selecting from today up to next 30 days.
+    // Otherwise, keep existing behavior (next 7 days).
+    final daysToShow = widget.isForTableBooking ? 31 : 7; // includes today
+    availableDates = List.generate(
+      daysToShow,
+      (index) => now.add(Duration(days: index)),
+    );
     if (availableDates.isNotEmpty) {
       selectedDate = availableDates[0];
       // Fetch slots for the first date
@@ -76,10 +90,13 @@ class _SelectTimeScreenState extends State<SelectTimeScreen> {
     final month = date.month.toString().padLeft(2, '0');
     final day = date.day.toString().padLeft(2, '0');
     final year = date.year.toString();
-    return '$month/$day/$year';
+    return '$day/$month/$year';
   }
   
   void _fetchSlotsForDate(DateTime date) {
+    if (widget.isForTableBooking) {
+      return;
+    }
     final dateStr = _formatDateForApi(date);
     
     // Check if we already have slots for this date
@@ -128,6 +145,113 @@ class _SelectTimeScreenState extends State<SelectTimeScreen> {
     return false;
   }
 
+  /// Parses a time slot string like "12:05 AM - 12:10 AM" and returns
+  /// the start time as (hour24, minute). Returns null if parsing fails.
+  (int, int)? _parseTimeSlotStart(String timeSlotStr) {
+    final parts = timeSlotStr.split(' - ');
+    if (parts.isEmpty) return null;
+    final startPart = parts[0].trim(); // e.g. "12:05 AM"
+    final spaceIdx = startPart.lastIndexOf(' ');
+    if (spaceIdx <= 0) return null;
+    final timeStr = startPart.substring(0, spaceIdx).trim(); // "12:05"
+    final period = startPart.substring(spaceIdx + 1).trim().toUpperCase(); // "AM" or "PM"
+    final timeParts = timeStr.split(':');
+    if (timeParts.length < 2) return null;
+    final hour12 = int.tryParse(timeParts[0].trim());
+    final minute = int.tryParse(timeParts[1].trim());
+    if (hour12 == null || minute == null) return null;
+    int hour24 = hour12;
+    if (period == 'AM') {
+      hour24 = hour12 == 12 ? 0 : hour12;
+    } else {
+      hour24 = hour12 == 12 ? 12 : hour12 + 12;
+    }
+    return (hour24, minute);
+  }
+
+  /// Combines [date] and [timeSlotStr] (e.g. "12:05 AM - 12:10 AM") into a
+  /// DateTime in local timezone and returns millisecondsSinceEpoch.
+  int? _combinedTimestamp(DateTime date, String timeSlotStr) {
+    final parsed = _parseTimeSlotStart(timeSlotStr);
+    if (parsed == null) return null;
+    final (hour24, minute) = parsed;
+    final combined = DateTime(
+      date.year,
+      date.month,
+      date.day,
+      hour24,
+      minute,
+      0,
+      0,
+    );
+    return combined.millisecondsSinceEpoch;
+  }
+
+  /// Formats [dateTime] (in local timezone) as "Friday, February 27, 2026 at 3:36 PM".
+  String _formatDateTimeLocal(DateTime dateTime) {
+    const weekdays = [
+      'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'
+    ];
+    const months = [
+      'January', 'February', 'March', 'April', 'May', 'June',
+      'July', 'August', 'September', 'October', 'November', 'December'
+    ];
+    final weekday = weekdays[dateTime.weekday - 1];
+    final month = months[dateTime.month - 1];
+    final day = dateTime.day;
+    final year = dateTime.year;
+    final hour = dateTime.hour;
+    final minute = dateTime.minute;
+    final isPm = hour >= 12;
+    final hour12 = hour == 0 ? 12 : (hour > 12 ? hour - 12 : hour);
+    final minuteStr = minute.toString().padLeft(2, '0');
+    final period = isPm ? 'PM' : 'AM';
+    return '$weekday, $month $day, $year at $hour12:$minuteStr $period';
+  }
+
+  String _formatIsoDate(DateTime date) {
+    // YYYY-MM-DD
+    final y = date.year.toString().padLeft(4, '0');
+    final m = date.month.toString().padLeft(2, '0');
+    final d = date.day.toString().padLeft(2, '0');
+    return '$y-$m-$d';
+  }
+
+  String _dayOrdinalSuffix(int day) {
+    // Handles 11th/12th/13th correctly.
+    if (day % 100 >= 11 && day % 100 <= 13) return 'th';
+    switch (day % 10) {
+      case 1:
+        return 'st';
+      case 2:
+        return 'nd';
+      case 3:
+        return 'rd';
+      default:
+        return 'th';
+    }
+  }
+
+  String _formatMonthDayOrdinal(DateTime date) {
+    const months = [
+      'January',
+      'February',
+      'March',
+      'April',
+      'May',
+      'June',
+      'July',
+      'August',
+      'September',
+      'October',
+      'November',
+      'December',
+    ];
+    final month = months[date.month - 1];
+    final suffix = _dayOrdinalSuffix(date.day);
+    return '$month ${date.day}$suffix';
+  }
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -154,9 +278,9 @@ class _SelectTimeScreenState extends State<SelectTimeScreen> {
                         .toList();
                   });
                 } else if (state is StoreDetailsLoadFailure) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Failed to load time slots: ${state.message}')),
-                  );
+                  // ScaffoldMessenger.of(context).showSnackBar(
+                  //   SnackBar(content: Text('Failed to load time slots: ${state.message}')),
+                  // );
                 }
               },
               builder: (context, state) {
@@ -172,7 +296,7 @@ class _SelectTimeScreenState extends State<SelectTimeScreen> {
   Widget _buildModalContent(BuildContext context, StoreDetailsState state) {
     final screenHeight = MediaQuery.of(context).size.height;
     final safeAreaBottom = MediaQuery.of(context).padding.bottom;
-    final maxModalHeight = screenHeight * 0.7;
+    final maxModalHeight = widget.isForTableBooking ? screenHeight * 0.4 : screenHeight * 0.7;
     
     final isLoading = selectedDate != null && _isLoadingDate(state, selectedDate!);
     final timeSlots = currentTimeSlots;
@@ -258,7 +382,7 @@ class _SelectTimeScreenState extends State<SelectTimeScreen> {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: SizedBox(
-                height: 52,
+                height: 60,
                 child: ListView.builder(
                   scrollDirection: Axis.horizontal,
                   itemCount: availableDates.length,
@@ -273,11 +397,11 @@ class _SelectTimeScreenState extends State<SelectTimeScreen> {
                       child: GestureDetector(
                         onTap: () => _onDateSelected(date),
                         child: Container(
-                          width: isSelected ? 47 : 51,
-                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 9),
+                          width: 64,
+                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
                           decoration: BoxDecoration(
                             color: isSelected 
-                              ? const Color(0xFF8E2FFD)
+                              ? AppConstants.appThemeColor
                               : const Color(0xFFF5F7FF),
                             border: isSelected
                               ? null
@@ -288,6 +412,8 @@ class _SelectTimeScreenState extends State<SelectTimeScreen> {
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            mainAxisAlignment: MainAxisAlignment.center,
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
                               Text(
@@ -301,8 +427,11 @@ class _SelectTimeScreenState extends State<SelectTimeScreen> {
                                     : const Color(0xFF242424),
                                   height: 1.2,
                                 ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                textAlign: TextAlign.center,
                               ),
-                              const SizedBox(height: 0),
+                              const SizedBox(height: 2),
                               Text(
                                 _formatMonthDay(date),
                                 style: AppTextStyles.body(
@@ -314,6 +443,9 @@ class _SelectTimeScreenState extends State<SelectTimeScreen> {
                                     : const Color(0xFF242424),
                                   height: 1.4,
                                 ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                textAlign: TextAlign.center,
                               ),
                             ],
                           ),
@@ -326,7 +458,7 @@ class _SelectTimeScreenState extends State<SelectTimeScreen> {
             ),
             
             const SizedBox(height: 24),
-            
+            if (!widget.isForTableBooking) ...[
             // Time slots list
             Flexible(
               child: ConstrainedBox(
@@ -347,7 +479,7 @@ class _SelectTimeScreenState extends State<SelectTimeScreen> {
                   child: isLoading
                       ? const Center(
                           child: CircularProgressIndicator(
-                            color: Color(0xFF8E2FFD),
+                            color: AppConstants.appThemeColor,
                           ),
                         )
                       : timeSlots.isEmpty
@@ -403,7 +535,7 @@ class _SelectTimeScreenState extends State<SelectTimeScreen> {
                 ),
               ),
             ),
-            
+            ],
             const SizedBox(height: 24),
             
             // Confirm button
@@ -412,17 +544,7 @@ class _SelectTimeScreenState extends State<SelectTimeScreen> {
               child: Container(
                 height: 62,
                 decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [
-                      Color(0xFFD445EC),
-                      Color(0xFFB02EFB),
-                      Color(0xFF8E2FFD),
-                      Color(0xFF5E3DFE),
-                      Color(0xFF5186E0),
-                    ],
-                    begin: Alignment.centerLeft,
-                    end: Alignment.centerRight,
-                  ),
+                  color: AppConstants.appThemeColor,
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Material(
@@ -430,8 +552,25 @@ class _SelectTimeScreenState extends State<SelectTimeScreen> {
                   child: InkWell(
                     onTap: () {
                       if (selectedDate != null && selectedTimeSlot != null) {
-                        widget.onConfirm?.call(selectedDate!, selectedTimeSlot!);
+                        print('selectedDate: $selectedDate');
+                        print('selectedTimeSlot: $selectedTimeSlot');
+                        final timestamp = _combinedTimestamp(selectedDate!, selectedTimeSlot!);
+                        final ms = timestamp ?? selectedDate!.millisecondsSinceEpoch;
+                        final dateTimeLocal = DateTime.fromMillisecondsSinceEpoch(ms);
+                        final formatted = _formatDateTimeLocal(dateTimeLocal);
+                        widget.onConfirm?.call(
+                          formatted,
+                          ms,
+                        );
+                        print(formatted); // e.g. Friday, February 27, 2026 at 3:36 PM
                         Navigator.of(context).pop();
+                      }else if (widget.isForTableBooking) {
+                        if (selectedDate != null) {
+                          final isoDate = _formatIsoDate(selectedDate!);
+                          final showDate = _formatMonthDayOrdinal(selectedDate!);
+                          widget.onTableBookingConfirm?.call(isoDate, showDate);
+                          Navigator.of(context).pop();
+                        }
                       }
                     },
                     borderRadius: BorderRadius.circular(16),
@@ -467,7 +606,7 @@ class _SelectTimeScreenState extends State<SelectTimeScreen> {
       decoration: BoxDecoration(
         border: Border.all(
           color: isSelected 
-            ? const Color(0xFF8E2FFD)
+            ? AppConstants.appThemeColor
             : const Color(0xFFEEF4FF),
           width: 0.833333,
         ),
@@ -477,7 +616,7 @@ class _SelectTimeScreenState extends State<SelectTimeScreen> {
         ? Container(
             margin: const EdgeInsets.all(3),
             decoration: const BoxDecoration(
-              color: Color(0xFF8E2FFD),
+              color: AppConstants.appThemeColor,
               shape: BoxShape.circle,
             ),
           )

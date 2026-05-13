@@ -42,7 +42,7 @@ class MenuItemCard extends StatelessWidget {
     this.cartData,
     this.onQuantityChanged,
     this.isCustomizable = false,
-    this.purple = const Color(0xFF8E2FFD),
+    this.purple = AppConstants.appThemeColor,
     this.vegColor = const Color(0xFF66BB6A),
     this.nonVegColor = const Color(0xFFF44336),
     this.imageWidth,

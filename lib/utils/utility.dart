@@ -1,3 +1,4 @@
+import 'package:chat_bot/utils/app_constants.dart';
 import 'package:chat_bot/widgets/black_toast_view.dart';
 import 'package:flutter/material.dart';
 
@@ -7,6 +8,9 @@ class Utility {
   static bool isLoading = false;
   static String currencySymbol = '';
   static String currencyCode = '';
+  static String platform = '';
+  static String name = '';
+  static bool personalization = true;
 
   static void showLoader({
     String? message,
@@ -121,12 +125,36 @@ class Utility {
     Utility.currencyCode = currencyCode;
   }
 
+  static void setPlatform(String platform) {
+    Utility.platform = platform;
+  }
+
+  static void setName(String name) {
+    Utility.name = name;
+  }
+
+  static void setPersonalization(bool personalization) {
+    Utility.personalization = personalization;
+  }
+
+  static bool getPersonalization() {
+    return personalization;
+  }
+
+  static String getName() {
+    return name;
+  }
+
   static String getCurrencySymbol() {
     return currencySymbol;
   }
 
   static String getCurrencyCode() {
     return currencyCode;
+  }
+
+  static String getPlatform() {
+    return platform;
   }
 }
 
@@ -146,7 +174,7 @@ class AppLoader extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           CircularProgressIndicator(
-            color: Color(0xFF8E2FFD),
+            color: AppConstants.appThemeColor,
             strokeWidth: 4,
           ),
           if (message != null) ...[

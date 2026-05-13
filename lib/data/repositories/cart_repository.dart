@@ -28,6 +28,7 @@ class CartRepository {
     required String unitId,
     List<Map<String, dynamic>>? newAddOns,
     dynamic addToCartOnId,
+    Map<String, dynamic>? doctorParams,
   }) {
     return CartService.instance.addToCart(
       storeId: storeId,
@@ -41,6 +42,7 @@ class CartRepository {
       unitId: unitId,
       newAddOns: newAddOns,
       addToCartOnId: addToCartOnId,
+      doctorParams: doctorParams,
     );
   }
 

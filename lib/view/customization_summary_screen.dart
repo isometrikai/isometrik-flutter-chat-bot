@@ -1,4 +1,5 @@
 import 'package:chat_bot/data/model/universal_cart_response.dart' as cart_models;
+import 'package:chat_bot/utils/app_constants.dart';
 import 'package:chat_bot/utils/enum.dart';
 import 'package:flutter/material.dart';
 import 'package:chat_bot/data/data.dart';
@@ -339,7 +340,7 @@ class _CustomizationSummaryScreenState extends State<CustomizationSummaryScreen>
                 }
               },
               style: OutlinedButton.styleFrom(
-                side: const BorderSide(color: Color(0xFF8E2FFD), width: 2),
+                side: const BorderSide(color: AppConstants.appThemeColor, width: 2),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16),
                 ),
@@ -349,7 +350,7 @@ class _CustomizationSummaryScreenState extends State<CustomizationSummaryScreen>
                 "I'll choose",
                 style: AppTextStyles.button.copyWith(
                   fontSize: 16,
-                  color: const Color(0xFF8E2FFD),
+                  color: AppConstants.appThemeColor,
                 ),
               ),
             ),
@@ -381,18 +382,7 @@ class _CustomizationSummaryScreenState extends State<CustomizationSummaryScreen>
               ),
               child: Ink(
                 decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [
-                      Color(0xFF5186E0),
-                      Color(0xFF5E3DFE),
-                      Color(0xFF8E2FFD),
-                      Color(0xFFB02EFB),
-                      Color(0xFFD445EC),
-                    ],
-                    stops: [0.0, 0.24, 0.52, 0.73, 1.0],
-                    begin: Alignment.centerLeft,
-                    end: Alignment.centerRight,
-                  ),
+                  color: AppConstants.appThemeColor,
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Container(

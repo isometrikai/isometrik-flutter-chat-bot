@@ -11,6 +11,7 @@ class ChatMessage {
   final bool hasStoreCards;
   final bool hasProductCards;
   final bool hasCartWidget;
+  final bool hasRestaurantSectionsWidget;
   final bool hasServicesDeliveryOptionsWidget;
   final bool hasChooseAddressWidget;
   final bool hasChooseCardWidget;
@@ -22,6 +23,7 @@ class ChatMessage {
   final List<Store> stores;
   final List<Product> products;
   final List<WidgetAction> cartItems;
+  final List<WidgetAction> restaurantSectionsItems;
   final List<WidgetAction> servicesDeliveryOptions;
   final List<AddressOption> addressOptions;
   final List<CardOption> cardOptions;
@@ -29,6 +31,7 @@ class ChatMessage {
   final ChatWidget? storesWidget;
   final ChatWidget? productsWidget;
   final ChatWidget? cartWidget;
+  final ChatWidget? restaurantSectionsWidget;
   final ChatWidget? servicesDeliveryOptionsWidget;
       final ChatWidget? chooseAddressWidget;
     final ChatWidget? chooseCardWidget;
@@ -44,6 +47,7 @@ class ChatMessage {
     this.hasStoreCards = false,
     this.hasProductCards = false,
     this.hasCartWidget = false,
+    this.hasRestaurantSectionsWidget = false,
     this.hasServicesDeliveryOptionsWidget = false,
     this.hasChooseAddressWidget = false,
     this.hasChooseCardWidget = false,
@@ -55,6 +59,7 @@ class ChatMessage {
     this.stores = const [],
     this.products = const [],
     this.cartItems = const [],
+    this.restaurantSectionsItems = const [],
     this.servicesDeliveryOptions = const [],
     this.addressOptions = const [],
     this.cardOptions = const [],
@@ -62,6 +67,7 @@ class ChatMessage {
     this.storesWidget,
     this.productsWidget,
     this.cartWidget,
+    this.restaurantSectionsWidget,
     this.servicesDeliveryOptionsWidget,
     this.chooseAddressWidget,
     this.chooseCardWidget,
@@ -89,6 +95,7 @@ class ChatMessage {
     List<Store>? stores,
     List<Product>? products,
     List<WidgetAction>? cartItems,
+    List<WidgetAction>? restaurantSectionsItems,
     List<WidgetAction>? servicesDeliveryOptions,
     List<AddressOption>? addressOptions,
     List<CardOption>? cardOptions,
@@ -96,6 +103,7 @@ class ChatMessage {
     ChatWidget? storesWidget,
     ChatWidget? productsWidget,
     ChatWidget? cartWidget,
+    ChatWidget? restaurantSectionsWidget,
     ChatWidget? servicesDeliveryOptionsWidget,
     ChatWidget? chooseAddressWidget,
     ChatWidget? chooseCardWidget,
@@ -111,6 +119,7 @@ class ChatMessage {
       hasStoreCards: hasStoreCards ?? this.hasStoreCards,
       hasProductCards: hasProductCards ?? this.hasProductCards,
       hasCartWidget: hasCartWidget ?? this.hasCartWidget,
+      hasRestaurantSectionsWidget: hasRestaurantSectionsWidget ?? this.hasRestaurantSectionsWidget,
       hasServicesDeliveryOptionsWidget: hasServicesDeliveryOptionsWidget ?? this.hasServicesDeliveryOptionsWidget,
       hasChooseAddressWidget: hasChooseAddressWidget ?? this.hasChooseAddressWidget,
       hasChooseCardWidget: hasChooseCardWidget ?? this.hasChooseCardWidget,
@@ -122,6 +131,7 @@ class ChatMessage {
       stores: stores ?? this.stores,
       products: products ?? this.products,
       cartItems: cartItems ?? this.cartItems,
+      restaurantSectionsItems: restaurantSectionsItems ?? this.restaurantSectionsItems,
       servicesDeliveryOptions: servicesDeliveryOptions ?? this.servicesDeliveryOptions,
       addressOptions: addressOptions ?? this.addressOptions,
       cardOptions: cardOptions ?? this.cardOptions,

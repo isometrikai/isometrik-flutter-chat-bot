@@ -1,4 +1,5 @@
 import 'package:chat_bot/services/api_service.dart';
+import 'package:flutter/material.dart';
 
 /// Centralized constants for the application
 class AppConstants {
@@ -15,4 +16,9 @@ class AppConstants {
         ? 'https://easyagentapi-live.eazylife-online.com'
         : 'https://easyagentapi.eazylife-online.com';
   }
+
+  // Theme Colors
+  /// Primary app theme color - iOS Blue (#007AFF)
+  static const Color appThemeColor = Color(0xFF007AFF);
+  
 }

@@ -26,6 +26,7 @@ class ApiService {
     double? longitude,
     double? latitude,
     bool? needToShowTutorial,
+    bool? needToShowCompleteSetup,
     required String clientGuid,
     required String indexName,
     required String visitId,
@@ -36,6 +37,8 @@ class ApiService {
     required String currencysymbol,
     required String zoneId,
     required String timezone,
+    required String platform,
+    required bool personalization,
   }) {
     _isProduction = isProduction;
     _baseApiUrl = baseApiUrl.isNotEmpty 
@@ -55,6 +58,7 @@ class ApiService {
       longitude: longitude,
       latitude: latitude,
         needToShowTutorial: needToShowTutorial,
+        needToShowCompleteSetup: needToShowCompleteSetup,
       clientGuid: clientGuid,
       indexName: indexName,
       visitId: visitId,
@@ -100,6 +104,9 @@ class ApiService {
 
     Utility.setCurrencySymbol(currencysymbol);
     Utility.setCurrencyCode(currencycode);
+    Utility.setPlatform(platform);
+    Utility.setName(name);
+    Utility.setPersonalization(personalization);
   }
 
   static String removeTrailingSlash(String url) {

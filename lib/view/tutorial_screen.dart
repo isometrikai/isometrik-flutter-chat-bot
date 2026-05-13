@@ -1,3 +1,4 @@
+import 'package:chat_bot/services/callback_manage.dart';
 import 'package:chat_bot/view/chat_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -14,7 +15,7 @@ class TutorialScreen extends StatefulWidget {
   const TutorialScreen({
     super.key,
     this.currentStep = 1,
-    this.totalSteps = 6,
+    this.totalSteps = 5,
   });
 
   @override
@@ -45,18 +46,19 @@ class _TutorialScreenState extends State<TutorialScreen> {
         curve: Curves.easeInOut,
       );
     } else {
-       Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (context) => MultiBlocProvider(
-          providers: [
-            BlocProvider(create: (context) => ChatBloc()),
-            BlocProvider(create: (context) => CartBloc()),
-          ],
-          child: const ChatScreen(),
-        ),
-      ),
-    );
+      OrderService().triggerTutorialDismiss();
+    //    Navigator.pushReplacement(
+    //   context,
+    //   MaterialPageRoute(
+    //     builder: (context) => MultiBlocProvider(
+    //       providers: [
+    //         BlocProvider(create: (context) => ChatBloc()),
+    //         BlocProvider(create: (context) => CartBloc()),
+    //       ],
+    //       child: const ChatScreen(),
+    //     ),
+    //   ),
+    // );
     }
   }
 
@@ -89,6 +91,7 @@ class _TutorialScreenState extends State<TutorialScreen> {
               Expanded(
                 child: PageView.builder(
                   controller: _pageController,
+                  physics: const NeverScrollableScrollPhysics(),// Disable Swipe Horizontal Scroll
                   onPageChanged: (index) {
                     setState(() {
                       _currentPage = index;
@@ -113,56 +116,77 @@ class _TutorialScreenState extends State<TutorialScreen> {
   Widget _buildHeader() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      child: Stack(
+        alignment: Alignment.center,
         children: [
-              // Step indicator
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Text(
-                    (_currentPage + 1).toString().padLeft(2, '0'),
-                    style: 
-                    AppTextStyles.restaurantTitle.copyWith(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                      color: Color(0xFF8E2FFD),
-                      height: 1.2,
-                    ),  
-                  ),
-                  const SizedBox(width: 2),
-                  Container(
-                    padding: const EdgeInsets.only(bottom: 1),
-                    child: Text(
-                      '.${widget.totalSteps.toString().padLeft(2, '0')}',
-                      style:  
-                      AppTextStyles.restaurantDescription.copyWith(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w500,
-                        color: Color(0xFF171212),
-                        height: 1.2,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-          if (_currentPage != 5) ...[
-          // Skip button
-          GestureDetector(
-            onTap: () {
-              // Navigate to chat screen or main app
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => MultiBlocProvider(
-                    providers: [
-                      BlocProvider(create: (context) => ChatBloc()),
-                      BlocProvider(create: (context) => CartBloc()),
-                    ],
-                    child: const ChatScreen(),
+          if (_currentPage > 0)
+            Align(
+              alignment: Alignment.centerLeft,
+              child: GestureDetector(
+                onTap: _previousPage,
+                behavior: HitTestBehavior.opaque,
+                child: Padding(
+                  padding: const EdgeInsets.only(right: 8),
+                  child: SvgPicture.asset(
+                    AssetPath.get('images/ic_previous.svg'),
+                    width: 24,
+                    height: 24,
                   ),
                 ),
-              );
+              ),
+            ),
+          // Step indicator (centered)
+          Center(
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Text(
+                  (_currentPage + 1).toString().padLeft(2, '0'),
+                  style:
+                  AppTextStyles.restaurantTitle.copyWith(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                    color: AppConstants.appThemeColor,
+                    height: 1.2,
+                  ),
+                ),
+                const SizedBox(width: 2),
+                Container(
+                  padding: const EdgeInsets.only(bottom: 1),
+                  child: Text(
+                    '.${widget.totalSteps.toString().padLeft(2, '0')}',
+                    style:
+                    AppTextStyles.restaurantDescription.copyWith(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                      color: Color(0xFF171212),
+                      height: 1.2,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          if (_currentPage != 4)
+            Align(
+              alignment: Alignment.centerRight,
+              child: GestureDetector(
+            onTap: () {
+              OrderService().triggerTutorialDismiss();
+              // Navigate to chat screen or main app
+              // Navigator.pushReplacement(
+              //   context,
+              //   MaterialPageRoute(
+              //     builder: (context) => MultiBlocProvider(
+              //       providers: [
+              //         BlocProvider(create: (context) => ChatBloc()),
+              //         BlocProvider(create: (context) => CartBloc()),
+              //       ],
+              //       child: const ChatScreen(),
+              //     ),
+              //   ),
+              // );
             },
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 6),
@@ -172,16 +196,16 @@ class _TutorialScreenState extends State<TutorialScreen> {
               ),
               child:  Text(
                 'Skip',
-                style: 
+                style:
                 AppTextStyles.restaurantDescription.copyWith(
                   fontSize: 12,
                   fontWeight: FontWeight.w400,
-                  color: Color(0xFF6E4185),
+                  color: Color(0xFF414F85),
                   height: 1.4,
                 ),),
             ),
           ),
-          ]
+          ),
         ],
       ),
     );
@@ -191,7 +215,7 @@ class _TutorialScreenState extends State<TutorialScreen> {
     return Column(
       children: [
          Text(
-          'Welcome to your\nAI assistant!',
+          'Welcome to your\neazy assistant!',
           textAlign: TextAlign.center,
           style: AppTextStyles.restaurantTitle.copyWith(
             fontSize: 24,
@@ -202,13 +226,13 @@ class _TutorialScreenState extends State<TutorialScreen> {
         ),
         const SizedBox(height: 6),
          Text(
-          'Your Personal Assistant for Everything',
+          'Your AI Personal Assistant for everyday life',
           textAlign: TextAlign.center,
           style: 
           AppTextStyles.restaurantDescription.copyWith(
             fontSize: 14,
-            fontWeight: FontWeight.w400,
-            color: Color(0xFF6E4185),
+            fontWeight: FontWeight.w500,
+            color: Color(0xFF7085AE),
             height: 1.4,
           ),
         ),
@@ -224,11 +248,11 @@ class _TutorialScreenState extends State<TutorialScreen> {
         return _buildServiceSelectionPage();
       case 2:
         return _buildChatTutorialPage();
+      // case 3:
+      //   return _buildConversationExamplesPage();
       case 3:
-        return _buildConversationExamplesPage();
-      case 4:
         return _buildFeaturesPage();
-      case 5:
+      case 4:
         return _buildReadyToStartPage();
       default:
         return _buildWelcomePage();
@@ -258,9 +282,14 @@ class _TutorialScreenState extends State<TutorialScreen> {
             const SizedBox(height: 24),
             
             // Chat naturally section
-            _buildChatSection(),
+            // _buildChatSection(),
             
             const SizedBox(height: 20),
+            
+            // Bottom decorative star
+            SvgPicture.asset(
+              AssetPath.get('images/ic_first_star.svg'),
+            ),
           ],
         ),
       ),
@@ -279,6 +308,11 @@ class _TutorialScreenState extends State<TutorialScreen> {
             _buildServiceTitleSection(),
             
             const SizedBox(height: 24),
+
+             // Benefits Banner
+            _buildBenefitsBanner(),
+            
+            const SizedBox(height: 20),
             
             // Service Cards
             _buildServiceCards(),
@@ -286,9 +320,9 @@ class _TutorialScreenState extends State<TutorialScreen> {
             const SizedBox(height: 16),
             
             // Benefits Banner
-            _buildBenefitsBanner(),
+            // _buildBenefitsBanner(),
             
-            const SizedBox(height: 20),
+            // const SizedBox(height: 20),
           ],
         ),
       ),
@@ -317,7 +351,7 @@ class _TutorialScreenState extends State<TutorialScreen> {
           AppTextStyles.restaurantDescription.copyWith(
             fontSize: 14,
             fontWeight: FontWeight.w400,
-            color: Color(0xFF6E4185),
+            color: Color(0xFF7085AE),
             height: 1.4,
           ),
         ),
@@ -332,31 +366,36 @@ class _TutorialScreenState extends State<TutorialScreen> {
           title: 'Food',
           description: 'Order from 1000+ restaurants',
           emoji: '🍕',
+          iconPath: 'ic_food.svg',
         ),
         const SizedBox(height: 16),
         _buildServiceCard(
           title: 'Groceries',
           description: 'Fresh produce delivered',
           emoji: '🥑',
+          iconPath: 'ic_Groceries.svg',
         ),
         const SizedBox(height: 16),
         _buildServiceCard(
           title: 'Pharmacy',
           description: 'Medicines & health products',
           emoji: '💊',
+          iconPath: 'ic_pharmacy.svg',
         ),
-        // const SizedBox(height: 16),
-        // _buildServiceCard(
-        //   title: 'Shopping',
-        //   description: 'Browse products & deals',
-        //   emoji: '🛍️',
-        // ),
-        // const SizedBox(height: 16),
-        // _buildServiceCard(
-        //   title: 'Services',
-        //   description: 'Book appointments & more',
-        //   emoji: '🔧',
-        // ),
+        const SizedBox(height: 16),
+        _buildServiceCard(
+          title: 'Shopping',
+          description: 'Browse products & deals',
+          emoji: '🛍️',
+          iconPath: 'ic_shopping_s.svg',
+        ),
+        const SizedBox(height: 16),
+        _buildServiceCard(
+          title: 'Services',
+          description: 'Book appointments & more',
+          emoji: '🔧',
+          iconPath: 'ic_services.svg',
+        ),
       ],
     );
   }
@@ -364,57 +403,87 @@ class _TutorialScreenState extends State<TutorialScreen> {
   Widget _buildServiceCard({
     required String title,
     required String description,
-    required String emoji,
+    String? emoji,
+    String? iconPath,
   }) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(25),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: const Color(0xFFF5F7FF),
+        color: const Color(0xFFF8FAFF),
+        border: Border.all(color: const Color(0xFFE0EBFF), width: 1),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
+          Container(
+            width: 40,
+            height: 40,
+            padding: const EdgeInsets.all(4.5),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(40),
+            ),
+            child: Center(
+              child: iconPath != null
+                  ? SvgPicture.asset(
+                      AssetPath.get('images/$iconPath'),
+                      // width: 24,
+                      // height: 24,
+                      fit: BoxFit.scaleDown,
+                    )
+                  : Text(
+                      emoji ?? '',
+                      style: const TextStyle(fontSize: 18),
+                    ),
+            ),
+          ),
+          const SizedBox(width: 8),
           Expanded(
             child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
               children: [
-                Text(
-                  title,
-                  style: AppTextStyles.restaurantTitle.copyWith(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: Color(0xFF242424),
-                    height: 1.4,
-                  ),
+                Row(
+                  children: [
+                    // Expanded(
+                    //   child: 
+                      Text(
+                        title,
+                        style: AppTextStyles.restaurantTitle.copyWith(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: const Color(0xFF414F85),
+                          height: 1.4,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
+                      ),
+                    // ),
+                    if ((emoji ?? '').isNotEmpty) ...[
+                      const SizedBox(width: 8),
+                      Text(
+                        emoji!,
+                        style: const TextStyle(fontSize: 18),
+                      ),
+                    ],
+                  ],
                 ),
                 const SizedBox(height: 3),
                 Text(
                   description,
-                  style: 
-                  AppTextStyles.restaurantDescription.copyWith(
+                  style: AppTextStyles.restaurantDescription.copyWith(
                     fontSize: 12,
                     fontWeight: FontWeight.w400,
-                    color: Color(0xFF585C77),
+                    color: const Color(0xFF7085AE),
                     height: 1.4,
                   ),
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 2,
                 ),
               ],
-            ),
-          ),
-          Container(
-            width: 40,
-            height: 40,
-            decoration: const BoxDecoration(
-              color: Colors.white,
-              shape: BoxShape.circle,
-            ),
-            child: Center(
-              child: Text(
-                emoji,
-                style: const TextStyle(fontSize: 18),
-              ),
             ),
           ),
         ],
@@ -423,21 +492,58 @@ class _TutorialScreenState extends State<TutorialScreen> {
   }
 
   Widget _buildBenefitsBanner() {
+    const green = Color(0xFF13A755);
+    const dividerColor = Color(0xFFA9BCE3);
+    final textStyle = AppTextStyles.restaurantDescription.copyWith(
+      fontSize: 12,
+      fontWeight: FontWeight.w400,
+      color: green,
+      height: 1.4,
+    );
+
+    Widget _benefitItem(IconData icon, String label) {
+      return Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 14, color: green),
+          const SizedBox(width: 6),
+          Text(label, style: textStyle),
+        ],
+      );
+    }
+
+    Widget _divider() {
+      return Container(
+        width: 1,
+        height: 9,
+        color: dividerColor,
+      );
+    }
+
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(15),
+      padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 16),
       decoration: BoxDecoration(
-        color: const Color(0xFFE0FFEC),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(8),
       ),
-      child:  Text(
-        'Available 24/7 • Fast delivery • Secure payments',
-        textAlign: TextAlign.center,
-        style: AppTextStyles.restaurantDescription.copyWith(
-          fontSize: 12,
-          fontWeight: FontWeight.w500,
-          color: Color(0xFF37A03C),
-          height: 1.4,
+      child: FittedBox(
+        fit: BoxFit.scaleDown,
+        alignment: Alignment.center,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            _benefitItem(Icons.check_circle, 'Active 24/7'),
+            const SizedBox(width: 12),
+            _divider(),
+            const SizedBox(width: 12),
+            _benefitItem(Icons.schedule, '<2s response'),
+            const SizedBox(width: 12),
+            _divider(),
+            const SizedBox(width: 12),
+            _benefitItem(Icons.people, '50k+ assisted'),
+          ],
         ),
       ),
     );
@@ -470,7 +576,7 @@ class _TutorialScreenState extends State<TutorialScreen> {
     return Column(
       children: [
          Text(
-          'How to chat with AI',
+          'Ask Anything you want',
           textAlign: TextAlign.center,
           style: AppTextStyles.restaurantTitle.copyWith(
             fontSize: 20,
@@ -481,15 +587,26 @@ class _TutorialScreenState extends State<TutorialScreen> {
         ),
         const SizedBox(height: 12),
            Text(
-          'Simple ways to get what you need',
+          'Natural conversation, smart answers',
           textAlign: TextAlign.center,
           style: AppTextStyles.restaurantDescription.copyWith(
             fontSize: 14,
             fontWeight: FontWeight.w400,
-            color: Color(0xFF6E4185),
+            color: Color(0xFF7085AE),
             height: 1.4,
           ),
         ),
+        const SizedBox(height: 12),
+           Text(
+          'Just type naturally- ask questions, get recommendations, explore things, or have a friendly chat. Eazy understands context and provided helpful responses.',
+          textAlign: TextAlign.center,
+          style: AppTextStyles.restaurantDescription.copyWith(
+            fontSize: 14,
+            fontWeight: FontWeight.w400,
+            color: Color(0xFF2F3C70),
+            height: 1.4,
+          ),
+        )
       ],
     );
   }
@@ -501,99 +618,78 @@ class _TutorialScreenState extends State<TutorialScreen> {
         Stack(
           children: [
             _buildSpeakNaturallyCard(),
-            // Speech bubble emoji decoration
-            Positioned(
-              left: 2,
-              top: 70,
-              child: Transform.rotate(
-                angle: 0.32, // 18.09 degrees in radians
-                child:  Text(
-                  '💬',
-                  style: TextStyle(fontSize: 36),
-                ),
-              ),
-            ),
+            // // Speech bubble emoji decoration
+            // Positioned(
+            //   left: 2,
+            //   top: 70,
+            //   child: Transform.rotate(
+            //     angle: 0.32, // 18.09 degrees in radians
+            //     child:  Text(
+            //       '💬',
+            //       style: TextStyle(fontSize: 36),
+            //     ),
+            //   ),
+            // ),
           ],
         ),
         
-        const SizedBox(height: 24),
+        // const SizedBox(height: 24),
         
-        // Second Card - Get personalized help
-        Stack(
-          children: [
-            _buildPersonalizedHelpCard(),
-            // Sparkles emoji decoration
-            Positioned(
-              right: 2,
-              bottom: 0,
-              child: Transform.rotate(
-                angle: 0.22, // 12.55 degrees in radians
-                child: const Text(
-                  '✨',
-                  style: TextStyle(fontSize: 36),
-                ),
-              ),
-            ),
-          ],
-        ),
+        // // Second Card - Get personalized help
+        // Stack(
+        //   children: [
+        //     _buildPersonalizedHelpCard(),
+        //     // Sparkles emoji decoration
+        //     Positioned(
+        //       right: 2,
+        //       bottom: 0,
+        //       child: Transform.rotate(
+        //         angle: 0.22, // 12.55 degrees in radians
+        //         child: const Text(
+        //           '✨',
+        //           style: TextStyle(fontSize: 36),
+        //         ),
+        //       ),
+        //     ),
+        //   ],
+        // ),
       ],
     );
   }
 
   Widget _buildSpeakNaturallyCard() {
+    const bubbleTexts = [
+      'Need groceries for the week',
+      'Book a haircut for tomorrow',
+      'Show me electronics deals',
+      'What are some health dinner ideas?',
+      'I need medicine for headache',
+    ];
+
     return Container(
       width: 327,
-      padding: const EdgeInsets.fromLTRB(24, 24, 15, 24),
+      padding: const EdgeInsets.fromLTRB(15, 24, 15, 24),
       decoration: BoxDecoration(
-        color: const Color(0xFFF5F7FF),
+        color: const Color(0xFFF8FAFF),
+        border: Border.all(color: const Color(0xFFE0EBFF), width: 1),
         borderRadius: BorderRadius.circular(16),
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.end,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         mainAxisSize: MainAxisSize.min,
         children: [
-           Text(
-            'Just speak naturally',
-            style: 
-            AppTextStyles.restaurantTitle.copyWith(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              color: Color(0xFF242424),
-              height: 1.4,
+          for (var i = 0; i < bubbleTexts.length; i++) ...[
+            if (i > 0) const SizedBox(height: 6),
+            Row(
+              mainAxisAlignment: i.isEven ? MainAxisAlignment.start : MainAxisAlignment.end,
+              children: [
+                if (i.isOdd) const Spacer(),
+                _buildChatBubble(bubbleTexts[i], alignRight: i.isOdd),
+                if (i.isEven) const Spacer(),
+              ],
             ),
-          ),
-          const SizedBox(height: 12),
-          
-          // Chat examples
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // Left aligned bubble
-              Row(
-                children: [
-                  _buildChatBubble("I'm hungry, order some pizza"),
-                  const Spacer(),
-                ],
-              ),
-              const SizedBox(height: 4),
-              // Right aligned bubble
-              Row(
-                children: [
-                  const Spacer(),
-                  _buildChatBubble("Need groceries for the week"),
-                ],
-              ),
-              const SizedBox(height: 4),
-              // Left aligned bubble
-              Row(
-                children: [
-                  _buildChatBubble("Book a haircut for tomorrow"),
-                  const Spacer(),
-                ],
-              ),
-            ],
-          ),
+          ],
         ],
       ),
     );
@@ -637,21 +733,22 @@ class _TutorialScreenState extends State<TutorialScreen> {
     );
   }
 
-  Widget _buildChatBubble(String text) {
+  Widget _buildChatBubble(String text, {bool alignRight = true}) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+      padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
-        color: const Color(0xFFF0DAFE).withOpacity(0.8),
-        border: Border.all(color: const Color(0xFFE9DFFB)),
+        color: Colors.white.withOpacity(0.8),
+        border: Border.all(color: const Color(0xFFF0F4FF), width: 1),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Text(
         text,
+        textAlign: alignRight ? TextAlign.right : TextAlign.left,
         style: AppTextStyles.restaurantDescription.copyWith(
           fontSize: 12,
           fontWeight: FontWeight.w400,
-          color: Color(0xFF242424),
-          height: 1.3,
+          color: const Color(0xFF2F3C70),
+          height: 1.4,
         ),
       ),
     );
@@ -1010,7 +1107,7 @@ class _TutorialScreenState extends State<TutorialScreen> {
     return Column(
       children: [
          Text(
-          'Why choose AI assistant?',
+          'Why choose eazy?',
           textAlign: TextAlign.center,
           style: AppTextStyles.restaurantTitle.copyWith(
             fontSize: 20,
@@ -1027,7 +1124,7 @@ class _TutorialScreenState extends State<TutorialScreen> {
             fontSize: 14,
             fontWeight: FontWeight.w400,
             height: 1.4,
-            color: Color(0xFF6E4185),
+            color: Color(0xFF7085AE),
           ),
         ),
       ],
@@ -1036,39 +1133,40 @@ class _TutorialScreenState extends State<TutorialScreen> {
 
   Widget _buildFeaturesList() {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _buildFeatureCard(
-          icon: '⏱️',
+          icon: 'ic_available.svg',
           title: 'Available 24/7',
           description: 'Order anytime, day or night. I never sleep!',
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 24),
         _buildFeatureCard(
-          icon: '📍',
-          title: 'Location Smart',
-          description: 'Finds the best options near you automatically',
-        ),
-        const SizedBox(height: 16),
-        _buildFeatureCard(
-          icon: '❤️',
-          title: 'Learns Your Preferences',
-          description: 'Remembers your favorite orders and suggests them',
-        ),
-        const SizedBox(height: 16),
-        _buildFeatureCard(
-          icon: '⭐',
-          title: 'Best Quality',
-          description: 'Partners with top-rated stores only',
-        ),
-        const SizedBox(height: 16),
-        _buildFeatureCard(
-          icon: '📞',
+          icon: 'ic_real_time.svg',
           title: 'Real-time Updates',
           description: 'Track your orders and get instant notifications',
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 24),
         _buildFeatureCard(
-          icon: '🎁',
+          icon: 'ic_location.svg',
+          title: 'Location Smart',
+          description: 'Finds the best options near you automatically',
+        ),
+        const SizedBox(height: 24),
+        _buildFeatureCard(
+          icon: 'ic_learns.svg',
+          title: 'Learns Your Preferences',
+          description: 'Remembers your favorite orders and suggests them',
+        ),
+        const SizedBox(height: 24),
+        _buildFeatureCard(
+          icon: 'ic_best_quality.svg',
+          title: 'Best Quality',
+          description: 'Partners with top-rated stores only',
+        ),
+        const SizedBox(height: 24),
+        _buildFeatureCard(
+          icon: 'ic_special_deals.svg',
           title: 'Special Deals',
           description: 'Exclusive discounts and offers just for you',
         ),
@@ -1081,67 +1179,56 @@ class _TutorialScreenState extends State<TutorialScreen> {
     required String title,
     required String description,
   }) {
-    return Container(
-      width: 327,
-      constraints: const BoxConstraints(minHeight: 70),
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: const Color(0xFFF5F7FF),
-        border: Border.all(color: const Color(0xFFEEF4FF)),
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Icon
-          Container(
-            width: 34,
-            height: 34,
-            decoration: const BoxDecoration(
-              color: Colors.white,
-              shape: BoxShape.circle,
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Container(
+          // width: 40,
+          // height: 40,
+          // padding: const EdgeInsets.all(6),
+          // decoration: BoxDecoration(
+          //   color: const Color(0xFFF8FAFF),
+          //   border: Border.all(color: const Color(0xFFE0EBFF), width: 1),
+          //   borderRadius: BorderRadius.circular(10),
+          // ),
+          child: Center(
+            child: SvgPicture.asset(
+              AssetPath.get('images/$icon'),
+              width: 40,
+              height: 40,
+              fit: BoxFit.contain,
             ),
-            child: Center(
-              child: Text(
-                icon,
-                style: const TextStyle(fontSize: 16),
+          ),
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                title,
+                style: AppTextStyles.restaurantTitle.copyWith(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                  height: 1.4,
+                  color: const Color(0xFF2F3C70),
+                ),
               ),
-            ),
-          ),
-          const SizedBox(width: 8),
-          
-          // Text content
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  title,
-                  style: AppTextStyles.restaurantTitle.copyWith(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    height: 1.4,
-                    color: Color(0xFF242424),
-                  ),
+              const SizedBox(height: 3),
+              Text(
+                description,
+                style: AppTextStyles.restaurantDescription.copyWith(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w400,
+                  height: 1.4,
+                  color: const Color(0xFF7085AE),
                 ),
-                const SizedBox(height: 3),
-                Text(
-                  description,
-                  style: AppTextStyles.restaurantDescription.copyWith(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w400,
-                    height: 1.4,
-                    color: Color(0xFF585C77),
-                  ),
-                  softWrap: true,
-                  overflow: TextOverflow.visible,
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
@@ -1153,10 +1240,19 @@ class _TutorialScreenState extends State<TutorialScreen> {
           children: [
             const SizedBox(height: 20),
             
+            // Logo
+            SvgPicture.asset(
+              AssetPath.get('images/ic_LogoTutorial.svg'),
+              width: 120,
+              height: 120,
+            ),
+            
+            const SizedBox(height: 32),
+            
             // Title Section
             _buildReadyToStartTitleSection(),
             
-            const SizedBox(height: 24),
+            const SizedBox(height: 32),
             
             // Main Content
             _buildReadyToStartContent(),
@@ -1170,37 +1266,27 @@ class _TutorialScreenState extends State<TutorialScreen> {
 
   Widget _buildReadyToStartTitleSection() {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-         Text(
-          'Ready to Get Started?',
+        Text(
+          'Register and create account',
           textAlign: TextAlign.center,
           style: AppTextStyles.restaurantTitle.copyWith(
             fontWeight: FontWeight.w700,
             fontSize: 20,
             height: 1.2,
-            color: Color(0xFF171212),
+            color: const Color(0xFF171212),
           ),
         ),
-        const SizedBox(height: 8),
-         Text(
-          'Your AI assistant is ready to help!',
+        const SizedBox(height: 6),
+        Text(
+          'To get full access!',
           textAlign: TextAlign.center,
           style: AppTextStyles.restaurantDescription.copyWith(
             fontWeight: FontWeight.w400,
             fontSize: 14,
             height: 1.4,
-            color: Color(0xFF6E4185),
-          ),
-        ),
-        const SizedBox(height: 16),
-        const Text(
-          'Start chatting with AI to order food, shop for groceries, book services, and more. Just type what you need!',
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            fontWeight: FontWeight.w400,
-            fontSize: 14,
-            height: 1.4,
-            color: Color(0xFF242424),
+            color: const Color(0xFF7085AE),
           ),
         ),
       ],
@@ -1208,83 +1294,66 @@ class _TutorialScreenState extends State<TutorialScreen> {
   }
 
   Widget _buildReadyToStartContent() {
-    return Column(
-      children: [
-        // Try saying section
-        Container(
-          width: 327,
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            color: const Color(0xFFF5F7FF),
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: Column(
-            children: [
-              // Try saying header
-              Row(
-                children: [
-                   Text(
-                    'Try saying:',
-                    style: AppTextStyles.restaurantTitle.copyWith(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 16,
-                      height: 1.4,
-                      color: Color(0xFF242424),
-                    ),
-                  ),
-                  const Spacer(),
-                  // Chat bubble emoji
-                  Transform.rotate(
-                    angle: 0.32, // 18.09 degrees in radians
-                    child: const Text(
-                      '💬',
-                      style: TextStyle(fontSize: 32),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              
-              // Example messages
-              _buildExampleMessages(),
-            ],
-          ),
-        ),
-        
-        const SizedBox(height: 16),
-        
-        // Pro tip section
-        Container(
-          width: 327,
-          padding: const EdgeInsets.all(15),
-          decoration: BoxDecoration(
-            color: const Color(0xFFF5F7FF),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Row(
-            children: [
-              // Lightbulb emoji
-              const Text(
-                '💡',
-                style: TextStyle(fontSize: 36),
-              ),
-              const SizedBox(width: 11),
-              // Pro tip text
-              Expanded(
-                child: Text(
-                  'Pro tip: The more specific you are, the better I can help you!',
-                  style: AppTextStyles.restaurantTitle.copyWith(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 14,
-                    height: 1.4,
-                    color: Color(0xFF242424),
+    const features = [
+      'Order from 1000+ restaurants',
+      'Shop groceries & products',
+      'Book appointment & services',
+      'Secure payments & tracking',
+    ];
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.fromLTRB(51, 24, 51, 24),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF5F7FF),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          for (var i = 0; i < features.length; i++) ...[
+            if (i > 0) const SizedBox(height: 26),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Gradient icon
+                ShaderMask(
+                  shaderCallback: (bounds) => const LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Color(0xFF2D8AFF),
+                      Color(0xFF4EC4F8),
+                    ],
+                  ).createShader(bounds),
+                  child: const Icon(
+                    Icons.star,
+                    size: 20,
+                    color: Colors.white,
                   ),
                 ),
-              ),
-            ],
-          ),
-        ),
-      ],
+                const SizedBox(width: 6),
+                Flexible(
+                  child: Text(
+                    features[i],
+                    textAlign: TextAlign.center,
+                    style: AppTextStyles.restaurantTitle.copyWith(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 14,
+                      height: 1.2,
+                      color: const Color(0xFF2F3C70),
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    softWrap: false,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ],
+      ),
     );
   }
 
@@ -1332,24 +1401,24 @@ class _TutorialScreenState extends State<TutorialScreen> {
   Widget _buildMeetZainSection() {
     return Column(
       children: [
+        //  Text(
+        //   'Meet AI assistant',
+        //   style: AppTextStyles.restaurantTitle.copyWith(
+        //     fontWeight: FontWeight.w700,
+        //     fontSize: 20,
+        //     height: 1.2,
+        //     color: Color(0xFF171212),
+        //   ),
+        // ),
+        // const SizedBox(height: 8),
          Text(
-          'Meet AI assistant',
-          style: AppTextStyles.restaurantTitle.copyWith(
-            fontWeight: FontWeight.w700,
-            fontSize: 20,
-            height: 1.2,
-            color: Color(0xFF171212),
-          ),
-        ),
-        const SizedBox(height: 8),
-         Text(
-          'Your intelligent chatbot that can help you order food, shop for groceries, buy medicines, book services and much more - all through simple conversations!',
+          'Order food, shop groceries, buy medicines, book services, and more — all through simple conversations.',
           textAlign: TextAlign.center,
           style: AppTextStyles.restaurantDescription.copyWith(
             fontWeight: FontWeight.w400,
             fontSize: 14,
             height: 1.4,
-            color: Color(0xFF6E4185),
+            color: Color(0xFF2F3C70),
           ),
         ),
       ],
@@ -1412,34 +1481,12 @@ class _TutorialScreenState extends State<TutorialScreen> {
               _nextPage();
             },
             child: Container(
-              width: 327,
-              height: 62,
-              padding: const EdgeInsets.symmetric(horizontal: 25),
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  begin: Alignment.centerLeft,
-                  end: Alignment.centerRight,
-                  colors: [
-                    Color(0xFFD445EC),
-                    Color(0xFFB02EFB),
-                    Color(0xFF8E2FFD),
-                    Color(0xFF5E3DFE),
-                    Color(0xFF5186E0),
-                  ],
-                  stops: [0.0, 0.27, 0.48, 0.76, 1.0],
-                ),
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child:  Center(
-                child: Text(
-                  "Let's get started",
-                  style: AppTextStyles.restaurantTitle.copyWith(
-                    fontWeight: FontWeight.w700,
-                    fontSize: 16,
-                    height: 1.2,
-                    color: Colors.white,
-                  ),
-                ),
+              width: 60,
+              height: 60,
+              child: SvgPicture.asset(
+              AssetPath.get('images/ic_next.svg'),
+                width: 60,
+                height: 60,
               ),
             ),
           ),
@@ -1454,36 +1501,71 @@ class _TutorialScreenState extends State<TutorialScreen> {
       decoration: const BoxDecoration(
         color: Colors.white,
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          // Back Button
-          GestureDetector(
-            onTap: _previousPage,
-            child: SvgPicture.asset(
-              AssetPath.get('images/ic_previous.svg'),
-              width: 60,
-              height: 60,
+      child: _currentPage == 4
+          ? Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 2),
+              child: GestureDetector(
+                onTap: _nextPage,
+                child: Container(
+                  width: double.infinity,
+                  height: 62,
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  decoration: BoxDecoration(
+                    color: AppConstants.appThemeColor,
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        'Register',
+                        style: AppTextStyles.restaurantTitle.copyWith(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.white,
+                        ),
+                      ),
+                      // const SizedBox(width: 8),
+                      // SvgPicture.asset(
+                      //   AssetPath.get('images/ic_next.svg'),
+                      //   width: 20,
+                      //   height: 20,
+                      //   colorFilter: const ColorFilter.mode(
+                      //     Colors.white,
+                      //     BlendMode.srcIn,
+                      //   ),
+                      // ),
+                    ],
+                  ),
+                ),
+              ),
+            )
+          : Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                // Back Button
+                // GestureDetector(
+                //   onTap: _previousPage,
+                //   child: SvgPicture.asset(
+                //     AssetPath.get('images/ic_previous.svg'),
+                //     width: 60,
+                //     height: 60,
+                //   ),
+                // ),
+                
+                // const SizedBox(width: 48),
+                
+                // Next Button
+                GestureDetector(
+                  onTap: _nextPage,
+                  child: SvgPicture.asset(
+                    AssetPath.get('images/ic_next.svg'),
+                    width: 60,
+                    height: 60,
+                  ),
+                ),
+              ],
             ),
-          ),
-          
-          const SizedBox(width: 48),
-          
-          // Next Button
-          GestureDetector(
-            onTap: _nextPage,
-            child: _currentPage == 5 ? SvgPicture.asset(
-              AssetPath.get('images/ic_final.svg'),
-              width: 60,
-              height: 60,
-            ) : SvgPicture.asset(
-              AssetPath.get('images/ic_next.svg'),
-              width: 60,
-              height: 60,
-            ),
-          ),
-        ],
-      ),
     );
   }
 }

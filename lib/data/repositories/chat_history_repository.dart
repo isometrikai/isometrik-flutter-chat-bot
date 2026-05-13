@@ -1,4 +1,5 @@
 import 'package:chat_bot/data/model/chat_history_response.dart';
+import 'package:chat_bot/data/model/shared_session.dart';
 import 'package:chat_bot/data/api_client.dart';
 import 'package:chat_bot/data/services/universal_api_client.dart';
 
@@ -27,13 +28,21 @@ class ChatHistoryRepository {
     bool? isPharmacyChat,
     bool? isShoppingChat,
     bool? isServicesChat,
+    bool? isHealthCareChat,
     String? query,
+    bool? isFromArchive = false,
   }) async {
     
     final Map<String, String> queryParams = {
       'limit': limit.toString(),
       'skip': skip.toString(),
     };
+
+    if (isFromArchive == true) {
+      queryParams['archived_only'] = 'true';
+    }else {
+      queryParams['include_archived'] = 'false';
+    }
     
     // Add search query if specified
     if (query != null && query.isNotEmpty) {
@@ -55,6 +64,9 @@ class ChatHistoryRepository {
     }
     if (isServicesChat == true) {
       queryParams['is_services_chat'] = 'true';
+    }
+    if (isHealthCareChat == true) {
+      queryParams['is_health_care_chat'] = 'true';
     }
     
     try {
@@ -97,6 +109,145 @@ class ChatHistoryRepository {
       }
     } catch (e) {
       throw Exception('Error deleting chat: $e');
+    }
+  }
+
+  Future<void> deleteAllChats() async {
+    try {
+      final res = await _chatClient.delete('/v2/delete_all_chats/$userIds');
+
+      if (!res.isSuccess) {
+        throw Exception('Failed to delete all chats: ${res.message ?? 'Unknown error'}');
+      }
+    } catch (e) {
+      throw Exception('Error deleting all chats: $e');
+    }
+  }
+
+  Future<void> archiveChat({
+    required String sessionId,
+  }) async {
+    try {
+      // Use ApiClient which automatically handles token management
+      final res = await _chatClient.patch(
+        '/v2/archive_chat/$userIds/$sessionId',
+        const {},
+      );
+
+      if (!res.isSuccess) {
+        throw Exception('Failed to archive chat: ${res.message ?? 'Unknown error'}');
+      }
+    } catch (e) {
+      throw Exception('Error archiving chat: $e');
+    }
+  }
+
+  Future<void> archiveAllChats() async {
+    try {
+      final res = await _chatClient.patch(
+        '/v2/archive_all_chats/$userIds',
+        const {},
+      );
+
+      if (!res.isSuccess) {
+        throw Exception('Failed to archive all chats: ${res.message ?? 'Unknown error'}');
+      }
+    } catch (e) {
+      throw Exception('Error archiving all chats: $e');
+    }
+  }
+
+  Future<void> unarchiveChat({
+    required String sessionId,
+  }) async {
+    try {
+      final res = await _chatClient.patch(
+        '/v2/unarchive_chat/$userIds/$sessionId',
+        const {},
+      );
+
+      if (!res.isSuccess) {
+        throw Exception('Failed to unarchive chat: ${res.message ?? 'Unknown error'}');
+      }
+    } catch (e) {
+      throw Exception('Error unarchiving chat: $e');
+    }
+  }
+
+  Future<String> shareSession({
+    required String sessionId,
+  }) async {
+    try {
+      final res = await _chatClient.post(
+        '/v2/share_session/$sessionId',
+        <String, dynamic>{
+          'user_id': userIds,
+        },
+      );
+
+      if (!res.isSuccess || res.data == null) {
+        throw Exception('Failed to share chat: ${res.message ?? 'Unknown error'}');
+      }
+
+      if (res.data is Map<String, dynamic>) {
+        final data = res.data as Map<String, dynamic>;
+        final shareUrl = data['share_url'];
+        if (shareUrl is String && shareUrl.isNotEmpty) {
+          return shareUrl;
+        }
+        throw Exception('Invalid share response: missing share_url');
+      }
+
+      throw Exception('Invalid share response format');
+    } catch (e) {
+      throw Exception('Error sharing chat: $e');
+    }
+  }
+
+  Future<List<SharedSession>> fetchSharedSessions({
+    bool isActive = true,
+  }) async {
+    try {
+      final res = await _chatClient.get(
+        '/v2/shared_sessions/$userIds',
+        queryParameters: <String, String>{
+          'is_active': isActive ? 'true' : 'false',
+        },
+      );
+
+      if (!res.isSuccess || res.data == null) {
+        throw Exception('Failed to load shared sessions: ${res.message ?? 'Unknown error'}');
+      }
+
+      if (res.data is Map<String, dynamic>) {
+        final map = res.data as Map<String, dynamic>;
+        final shares = map['shares'];
+        if (shares is List) {
+          return shares
+              .whereType<Map<String, dynamic>>()
+              .map(SharedSession.fromJson)
+              .toList();
+        }
+        return const <SharedSession>[];
+      }
+
+      throw Exception('Invalid shared sessions response format');
+    } catch (e) {
+      throw Exception('Error fetching shared sessions: $e');
+    }
+  }
+
+  Future<void> revokeSharedSession({
+    required String shareId,
+  }) async {
+    try {
+      final res = await _chatClient.delete('/v2/share_session/$shareId/$userIds');
+
+      if (!res.isSuccess) {
+        throw Exception('Failed to revoke shared session: ${res.message ?? 'Unknown error'}');
+      }
+    } catch (e) {
+      throw Exception('Error revoking shared session: $e');
     }
   }
 }

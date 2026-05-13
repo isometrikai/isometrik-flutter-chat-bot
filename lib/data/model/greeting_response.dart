@@ -34,6 +34,55 @@ class GreetingOption {
   }
 }
 
+/// Model for reminder items in greeting responses
+class GreetingReminder {
+  final String eventType;
+  final String emoji;
+  final String daysUntil;
+  final String title;
+  final String subtitle;
+  final List<String> buttons;
+
+  GreetingReminder({
+    required this.eventType,
+    required this.emoji,
+    required this.daysUntil,
+    required this.title,
+    required this.subtitle,
+    required this.buttons,
+  });
+
+  factory GreetingReminder.fromJson(Map<String, dynamic> json) {
+    return GreetingReminder(
+      eventType: json['eventType']?.toString() ?? '',
+      emoji: json['emoji']?.toString() ?? '',
+      daysUntil: json['daysUntil']?.toString() ?? '',
+      title: json['title']?.toString() ?? '',
+      subtitle: json['subtitle']?.toString() ?? '',
+      buttons: (json['buttons'] as List<dynamic>?)
+              ?.map((e) => e.toString())
+              .toList() ??
+          <String>[],
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'eventType': eventType,
+      'emoji': emoji,
+      'daysUntil': daysUntil,
+      'title': title,
+      'subtitle': subtitle,
+      'buttons': buttons,
+    };
+  }
+
+  @override
+  String toString() {
+    return 'GreetingReminder(eventType: $eventType, title: $title, daysUntil: $daysUntil)';
+  }
+}
+
 /// Model for greeting-style responses
 class GreetingResponse {
   final String greeting;
@@ -42,6 +91,8 @@ class GreetingResponse {
   final String weatherText;
   final String personaTitle;
   final String personaDesc;
+  final bool setupUserPreference;
+  final List<GreetingReminder> reminders;
 
   GreetingResponse({
     required this.greeting,
@@ -50,6 +101,8 @@ class GreetingResponse {
     required this.weatherText,
     required this.personaTitle,
     required this.personaDesc,
+    required this.setupUserPreference,
+    this.reminders = const [],
   });
 
   factory GreetingResponse.fromJson(Map<String, dynamic> json) {
@@ -63,6 +116,11 @@ class GreetingResponse {
           <GreetingOption>[],
       personaTitle: json['personaTitle']?.toString() ?? '',
       personaDesc: json['personaDesc']?.toString() ?? '',
+      setupUserPreference: json['setupUserPreference'] ?? false,
+      reminders: (json['reminders'] as List<dynamic>?)
+          ?.map((item) => GreetingReminder.fromJson(item as Map<String, dynamic>))
+          .toList() ??
+          <GreetingReminder>[],
     );
   }
 
@@ -74,12 +132,14 @@ class GreetingResponse {
       'options': options.map((option) => option.toJson()).toList(),
       'personaTitle': personaTitle,
       'personaDesc': personaDesc,
+      'userPreference': setupUserPreference,
+      'reminders': reminders.map((r) => r.toJson()).toList(),
     };
   }
 
   @override
   String toString() {
-    return 'GreetingResponse(greeting: $greeting, subtitle: $subtitle, options: ${options.length}, personaTitle: $personaTitle, personaDesc: $personaDesc)';
+    return 'GreetingResponse(greeting: $greeting, subtitle: $subtitle, options: ${options.length}, reminders: ${reminders.length}, personaTitle: $personaTitle, personaDesc: $personaDesc)';
   }
 }
 

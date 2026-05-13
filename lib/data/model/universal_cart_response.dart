@@ -182,6 +182,7 @@ class UniversalCartData {
   final int visitFee;
   final List<Seller> sellers;
   final Accounting? accounting;
+  final String? providerName;
 
   UniversalCartData({
     required this.id,
@@ -220,6 +221,7 @@ class UniversalCartData {
     required this.visitFee,
     required this.sellers,
     this.accounting,
+    this.providerName,
   });
 
   factory UniversalCartData.fromJson(Map<String, dynamic> json) {
@@ -266,6 +268,7 @@ class UniversalCartData {
           ?.map((e) => Seller.fromJson(e))
           .toList() ?? [],
       accounting: json['accounting'] != null ? Accounting.fromJson(json['accounting']) : null,
+      providerName: json['providerName'] ?? '',
     );
   }
 
@@ -307,6 +310,7 @@ class UniversalCartData {
       'visitFee': visitFee,
       'sellers': sellers.map((e) => e.toJson()).toList(),
       'accounting': accounting?.toJson(),
+      'providerName': providerName,
     };
   }
 }

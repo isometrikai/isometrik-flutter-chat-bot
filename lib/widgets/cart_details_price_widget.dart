@@ -20,9 +20,10 @@ class CartDetailsPriceWidget extends StatelessWidget {
         item.productName != "Total To Pay" &&
         item.productName != "Delivery fee" &&
         item.productName != "Service Fee" &&
-        !_isTaxItem(item.productName!) &&
-        item.quantity != null && 
-        item.quantity!.isNotEmpty).toList();
+        !_isTaxItem(item.productName!) 
+        // &&  item.quantity != null && 
+        // item.quantity!.isNotEmpty
+        ).toList();
     
     final deliveryFeeItem = cartItems.where((item) => 
         item.productName == "Delivery fee").toList();

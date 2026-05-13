@@ -110,7 +110,7 @@ class OrderSummaryWidget extends StatelessWidget {
                           style: AppTextStyles.restaurantTitle.copyWith(
                             fontSize: 13,
                             fontWeight: FontWeight.w400,
-                            color: const Color(0xFF8E2FFD),
+                            color: AppConstants.appThemeColor,
                           ),
                         ),
                       ),
@@ -300,6 +300,26 @@ class OrderSummaryWidget extends StatelessWidget {
                             ),
                           ],
                         ),
+                        if(storeInfo.isTableBooking == true) ...[
+                          const SizedBox(height: 4),
+                          Text(
+                            'Booking Date and Time: ${storeInfo.bookingDate} ${storeInfo.bookingTime}',
+                            style: AppTextStyles.restaurantDescription.copyWith(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w300,
+                              color: Color(0xFF242424),
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            'Party Size: ${storeInfo.partySize}',
+                            style: AppTextStyles.restaurantDescription.copyWith(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w300,
+                              color: Color(0xFF242424),
+                            ),
+                          ),
+                        ],
                         // Add-ons section
                         if(item.addOns != null && item.addOns!.isNotEmpty) ...[
                           const SizedBox(height: 4),

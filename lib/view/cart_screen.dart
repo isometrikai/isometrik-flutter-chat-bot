@@ -57,6 +57,15 @@ class _CartScreenState extends State<CartScreen> {
     
     // Fetch cart data using BLoC
     context.read<CartBloc>().add(CartFetchRequested());
+
+    OrderService().setCartUpdateCallback((bool isCartUpdate) {
+      if (mounted && isCartUpdate) {
+        print('CartScreen: Cart update received - $isCartUpdate');
+        // isCartAPICalled = true;
+        needToCallChatScreenSendMessageAPI = false;
+        context.read<CartBloc>().add(CartFetchRequested());
+      }
+    });
   }
 
   @override
@@ -130,8 +139,9 @@ class _CartScreenState extends State<CartScreen> {
           {'name': '🍕 Restaurant', 'count': categoryCounts['restaurant']},
           {'name': '🥑 Grocery', 'count': categoryCounts['grocery']},
           {'name': '💊 Pharmacy', 'count': categoryCounts['pharmacy']},
-          // {'name': '🛒 Shopping', 'count': categoryCounts['shopping']},
-          // {'name': '💄 Services', 'count': categoryCounts['services']},
+          {'name': '🛒 Shopping', 'count': categoryCounts['shopping']},
+          {'name': '💄 Services', 'count': categoryCounts['services']},
+          {'name': '🏥 Health Care', 'count': categoryCounts['healthCare']},
         ];
 
         return Container(
@@ -174,9 +184,9 @@ class _CartScreenState extends State<CartScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
       decoration: BoxDecoration(
-        color: isSelected ? const Color(0xFFFDFAFF) : Colors.white,
+        // color: isSelected ? const Color(0xFFFDFAFF) : Colors.white,
         border: Border.all(
-          color: isSelected ? const Color(0xFF8E2FFD) : const Color(0xFFD8DEF3),
+          color: isSelected ? AppConstants.appThemeColor : const Color(0xFFD8DEF3),
         ),
         borderRadius: BorderRadius.circular(80),
       ),
@@ -196,7 +206,7 @@ class _CartScreenState extends State<CartScreen> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
               decoration: BoxDecoration(
-                color: const Color(0xFF8E2FFD),
+                color: AppConstants.appThemeColor,
                 borderRadius: BorderRadius.circular(39.59),
               ),
               child: Text(
@@ -220,11 +230,11 @@ class _CartScreenState extends State<CartScreen> {
     int pharmacyCount = 0;
     int shoppingCount = 0;
     int servicesCount = 0;
+    int healthCareCount = 0;
 
     if (state is CartLoaded && state.rawCartData != null) {
       for (final cartData in state.rawCartData!.data) {
         for (final seller in cartData.sellers) {
-          // storeTypeId 1 = Food, storeTypeId 2 = Grocery
           if (seller.storeTypeId == FoodCategory.food.value) {
             foodCount += seller.products.length;
           } else if (seller.storeTypeId == FoodCategory.grocery.value) {
@@ -236,7 +246,11 @@ class _CartScreenState extends State<CartScreen> {
           } else if (seller.storeTypeId == FoodCategory.pharmacy.value) {
             pharmacyCount += seller.products.length;
           } else if (seller.storeTypeId == FoodCategory.services.value) {
-            servicesCount += seller.products.length;
+            if (cartData.storeCategoryId == FoodStoreCategoryId.healthCare.value) {
+              healthCareCount += seller.products.length;
+            } else {
+              servicesCount += seller.products.length;
+            }
           }
         }
       }
@@ -248,6 +262,7 @@ class _CartScreenState extends State<CartScreen> {
       'pharmacy': pharmacyCount,
       'shopping': shoppingCount,
       'services': servicesCount,
+      'healthCare': healthCareCount,
     };
   }
 
@@ -257,7 +272,7 @@ class _CartScreenState extends State<CartScreen> {
         if (state is CartLoading) {
           return const Center(
             child: CircularProgressIndicator(
-              color: Color(0xFF8E2FFD),
+              color: AppConstants.appThemeColor,
             ),
           );
         }
@@ -373,7 +388,15 @@ class _CartScreenState extends State<CartScreen> {
           matches = true;
         }
         // 4: Services - storeTypeId = 25
-        else if (categoryIndex == 4 && seller.storeTypeId == FoodCategory.services.value) {
+        else if (categoryIndex == 4 && 
+                  seller.storeTypeId == FoodCategory.services.value && 
+                  cartData.storeCategoryId != FoodStoreCategoryId.healthCare.value) {
+          matches = true;
+        }
+        // 5: Health Care - storeTypeId = 25 AND storeCategoryId = healthCare
+        else if (categoryIndex == 5 && 
+                 seller.storeTypeId == FoodCategory.services.value && 
+                 cartData.storeCategoryId == FoodStoreCategoryId.healthCare.value) {
           matches = true;
         }
         
@@ -438,8 +461,8 @@ class _CartScreenState extends State<CartScreen> {
     
     return formattedAttributes.join('\n');
   }
+  // TODO:- Managed Cart OBJECT
 
-  /// Convert UniversalCartData to WidgetAction list for specific seller
   List<WidgetAction> _convertToWidgetActions(UniversalCartData cartData, Seller seller) {
     List<WidgetAction> widgetActions = [];
     
@@ -465,6 +488,8 @@ class _CartScreenState extends State<CartScreen> {
         String formattedAddOns = '';
         if (product.selectedAddOns != null && product.selectedAddOns!.isNotEmpty) {
           formattedAddOns = _formatSelectedAddOns(product.selectedAddOns!);
+        }else if (cartData.storeCategoryId == FoodStoreCategoryId.healthCare.value) {
+          formattedAddOns = "Service: ${productName}";
         }else if (product.attributes != null && product.attributes!.isNotEmpty && cartData.storeTypeId != FoodCategory.food.value) {
           formattedAddOns = _formatProductAttributes(product.attributes!);
         }
@@ -475,8 +500,8 @@ class _CartScreenState extends State<CartScreen> {
           subtitle: '',
           storeCategoryId: cartData.storeCategoryId,
           keyword: '',
-          quantity: '${totalQuantity}x',
-          productName: productName,
+          quantity: cartData.storeCategoryId == FoodStoreCategoryId.healthCare.value ? null : '${totalQuantity}x',
+          productName: cartData.storeCategoryId == FoodStoreCategoryId.healthCare.value ? cartData.providerName : productName,
           currencySymbol: cartData.currencyCode,
           productPrice: unitPrice,
           addOns: formattedAddOns,
@@ -667,16 +692,7 @@ class _CartScreenState extends State<CartScreen> {
                     child: Container(
                       height: 62,
                       decoration: BoxDecoration(
-                        gradient: const LinearGradient(
-                          colors: [
-                            Color(0xFF5186E0),
-                            Color(0xFF5E3DFE),
-                            Color(0xFF8E2FFD),
-                            Color(0xFFB02EFB),
-                            Color(0xFFD445EC),
-                          ],
-                          stops: [0.0, 0.24, 0.52, 0.73, 1.0],
-                        ),
+                        color: AppConstants.appThemeColor,
                         borderRadius: BorderRadius.circular(16),
                       ),
                       child: Center(

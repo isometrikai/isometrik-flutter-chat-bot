@@ -148,10 +148,10 @@ class _ChooseCardWidgetState extends State<ChooseCardWidget> {
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: isSelected ? const Color(0xFF8E2FFD) : const Color(0xFFDDE7FA),
+                  color: isSelected ? AppConstants.appThemeColor : const Color(0xFFDDE7FA),
                   width: 0.83,
                 ),
-                color: isSelected ? const Color(0xFF8E2FFD) : Colors.transparent,
+                color: isSelected ? AppConstants.appThemeColor : Colors.transparent,
               ),
               child: isSelected
                   ? const Icon(

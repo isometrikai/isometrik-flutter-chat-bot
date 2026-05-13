@@ -19,7 +19,7 @@ class GroceriesMenuScreen extends StatefulWidget {
 }
 
 class _GroceriesMenuScreenState extends State<GroceriesMenuScreen> {
-  static const Color _purple = Color(0xFF8E2FFD);
+  static const Color _purple = AppConstants.appThemeColor;
   static const Color _border = Color(0xFFD8DEF3);
   static const Color _veg = Color(0xFF66BB6A);
   static const Color _nonVeg = Color(0xFFF44336);
@@ -112,6 +112,11 @@ class _GroceriesMenuScreenState extends State<GroceriesMenuScreen> {
                             _updateCartData(state.rawCartData!.data);
                           } else if (state is CartEmpty) {
                             _updateCartData([]);
+                          } else if (state is CartError) {
+                            BlackToastView.show(
+                              context,
+                              state.message,
+                            );
                           }
                         },
                         child: BlocListener<GroceryMenuBloc, GroceryMenuState>(
