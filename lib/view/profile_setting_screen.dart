@@ -117,22 +117,22 @@ class ProfileSettingScreen extends StatelessWidget {
                         context,
                         title: 'SETTINGS',
                         items: [
-                          _SettingItem(
-                            icon: SvgPicture.asset(
-                              AssetPath.get('images/ic_personalization.svg'),
-                              width: 20,
-                              height: 20,
-                              fit: BoxFit.cover,
-                            ),
-                            label: 'Data Control',
-                            onTap: () {
-                              Navigator.of(context).push(
-                                MaterialPageRoute<void>(
-                                  builder: (context) => const PersonalizationScreen(),
-                                ),
-                              );
-                            },
-                          ),
+                          // _SettingItem(
+                          //   icon: SvgPicture.asset(
+                          //     AssetPath.get('images/ic_personalization.svg'),
+                          //     width: 20,
+                          //     height: 20,
+                          //     fit: BoxFit.cover,
+                          //   ),
+                          //   label: 'Data Control',
+                          //   onTap: () {
+                          //     Navigator.of(context).push(
+                          //       MaterialPageRoute<void>(
+                          //         builder: (context) => const PersonalizationScreen(),
+                          //       ),
+                          //     );
+                          //   },
+                          // ),
                           _SettingItem(
                             icon: SvgPicture.asset(
                               AssetPath.get('images/ic_S_HelpCenter.svg'),
