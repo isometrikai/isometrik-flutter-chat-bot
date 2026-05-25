@@ -413,12 +413,12 @@ class ChatHistoryBloc extends Bloc<ChatHistoryEvent, ChatHistoryState> {
     ChatHistoryExportDataRequested event,
     Emitter<ChatHistoryState> emit,
   ) async {
-    Utility.showLoader(message: 'Requesting export...');
+    Utility.showLoader();
 
     try {
       await repository.exportData(toEmail: event.toEmail);
       Utility.closeProgressDialog();
-      emit(const ChatHistoryExportDataSuccess());
+      emit(ChatHistoryExportDataSuccess());
     } catch (e) {
       Utility.closeProgressDialog();
       emit(ChatHistoryExportDataFailure(message: e.toString()));

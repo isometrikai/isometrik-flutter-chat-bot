@@ -204,7 +204,12 @@ class ChatHistorySharedSessionRevokeFailure extends ChatHistoryState {
 }
 
 class ChatHistoryExportDataSuccess extends ChatHistoryState {
-  const ChatHistoryExportDataSuccess();
+  final DateTime timestamp;
+
+  ChatHistoryExportDataSuccess() : timestamp = DateTime.now();
+
+  @override
+  List<Object?> get props => [timestamp];
 }
 
 class ChatHistoryExportDataFailure extends ChatHistoryState {
