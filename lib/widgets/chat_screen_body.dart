@@ -1177,6 +1177,7 @@ class ChatScreenBody extends StatelessWidget {
                           Navigator.of(context).push(
                             MaterialPageRoute(
                               builder: (context) => CompleteSetupFlowScreen(onCallback: (data) {
+                                print('MINE ISSUE 3');
                                 // onRestartGreetingAPI();
                               }),
                             ),
