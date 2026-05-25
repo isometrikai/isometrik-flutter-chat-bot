@@ -104,5 +104,14 @@ class ChatHistorySearchRequested extends ChatHistoryEvent {
   List<Object?> get props => [query];
 }
 
+class ChatHistoryExportDataRequested extends ChatHistoryEvent {
+  final String toEmail;
+
+  const ChatHistoryExportDataRequested({required this.toEmail});
+
+  @override
+  List<Object?> get props => [toEmail];
+}
+
 
 

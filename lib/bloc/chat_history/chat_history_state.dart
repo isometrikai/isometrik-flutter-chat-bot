@@ -203,5 +203,18 @@ class ChatHistorySharedSessionRevokeFailure extends ChatHistoryState {
   List<Object?> get props => [shareId, message];
 }
 
+class ChatHistoryExportDataSuccess extends ChatHistoryState {
+  const ChatHistoryExportDataSuccess();
+}
+
+class ChatHistoryExportDataFailure extends ChatHistoryState {
+  final String message;
+
+  const ChatHistoryExportDataFailure({required this.message});
+
+  @override
+  List<Object?> get props => [message];
+}
+
 
 

@@ -39,6 +39,7 @@ class ApiService {
     required String timezone,
     required String platform,
     required bool personalization,
+    required String emailId,
   }) {
     _isProduction = isProduction;
     _baseApiUrl = baseApiUrl.isNotEmpty 
@@ -107,6 +108,7 @@ class ApiService {
     Utility.setPlatform(platform);
     Utility.setName(name);
     Utility.setPersonalization(personalization);
+    Utility.setEmailId(emailId);
   }
 
   static String removeTrailingSlash(String url) {

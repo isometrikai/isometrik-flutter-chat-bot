@@ -38,6 +38,7 @@ class ChatHistoryBloc extends Bloc<ChatHistoryEvent, ChatHistoryState> {
     on<ChatHistoryDeleteAllRequested>(_onDeleteAllRequested);
     on<ChatHistoryCategoryFilterRequested>(_onCategoryFilterRequested);
     on<ChatHistorySearchRequested>(_onSearchRequested);
+    on<ChatHistoryExportDataRequested>(_onExportDataRequested);
   }
 
   Future<void> _onFetchRequested(
@@ -405,6 +406,22 @@ class ChatHistoryBloc extends Bloc<ChatHistoryEvent, ChatHistoryState> {
     } catch (e) {
       Utility.closeProgressDialog();
       emit(ChatHistoryLoadFailure(e.toString()));
+    }
+  }
+
+  Future<void> _onExportDataRequested(
+    ChatHistoryExportDataRequested event,
+    Emitter<ChatHistoryState> emit,
+  ) async {
+    Utility.showLoader(message: 'Requesting export...');
+
+    try {
+      await repository.exportData(toEmail: event.toEmail);
+      Utility.closeProgressDialog();
+      emit(const ChatHistoryExportDataSuccess());
+    } catch (e) {
+      Utility.closeProgressDialog();
+      emit(ChatHistoryExportDataFailure(message: e.toString()));
     }
   }
 

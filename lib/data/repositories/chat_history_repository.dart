@@ -250,5 +250,25 @@ class ChatHistoryRepository {
       throw Exception('Error revoking shared session: $e');
     }
   }
+
+  Future<void> exportData({
+    required String toEmail,
+  }) async {
+    try {
+      final res = await _chatClient.post(
+        '/v2/export/jobs',
+        <String, dynamic>{
+          'user_id': userIds,
+          'to_email': toEmail,
+        },
+      );
+
+      if (!res.isSuccess) {
+        throw Exception('Failed to request data export: ${res.message ?? 'Unknown error'}');
+      }
+    } catch (e) {
+      throw Exception('Error requesting data export: $e');
+    }
+  }
 }
 

@@ -10,6 +10,7 @@ class Utility {
   static String currencyCode = '';
   static String platform = '';
   static String name = '';
+  static String emailId = '';
   static bool personalization = true;
 
   static void showLoader({
@@ -133,6 +134,10 @@ class Utility {
     Utility.name = name;
   }
 
+  static void setEmailId(String emailId) {
+    Utility.emailId = emailId;
+  }
+
   static void setPersonalization(bool personalization) {
     Utility.personalization = personalization;
   }
@@ -143,6 +148,10 @@ class Utility {
 
   static String getName() {
     return name;
+  }
+
+  static String getEmailId() {
+    return emailId;
   }
 
   static String getCurrencySymbol() {

@@ -80,6 +80,10 @@ class _PersonalizationScreenState extends State<PersonalizationScreen> {
             BlackToastView.show(context, 'All chats deleted successfully');
           } else if (state is ChatHistoryDeleteAllFailure) {
             BlackToastView.show(context, 'Failed to delete all chats: ${state.message}');
+          } else if (state is ChatHistoryExportDataSuccess) {
+            BlackToastView.show(context, 'The export has been requested. You will receive an email shortly.');
+          } else if (state is ChatHistoryExportDataFailure) {
+            BlackToastView.show(context, 'Failed to request data export');
           }
         },
         child: Builder(
@@ -525,7 +529,14 @@ class _PersonalizationScreenState extends State<PersonalizationScreen> {
         ) ??
         false;
     if (!ok || !mounted) return;
-    _showSnack('Export requested — not wired to backend yet');
+
+    final email = Utility.getEmailId();
+    if (email.isEmpty) {
+      _showSnack('No email address configured');
+      return;
+    }
+
+    context.read<ChatHistoryBloc>().add(ChatHistoryExportDataRequested(toEmail: email));
   }
 
   void _showSharedLinksManage(BuildContext context) {

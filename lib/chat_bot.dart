@@ -46,6 +46,7 @@ class ChatBot {
     required String timezone,
     required String platform,
     required bool personalization,
+    required String emailId,
   }) {
     print('chatBotId: $chatBotId');
     print('appSecret: $appSecret');
@@ -71,6 +72,8 @@ class ChatBot {
     print('zoneId: $zoneId');
     print('timezone: $timezone');
     print('platform: $platform');
+    print('personalization: $personalization');
+    print('emailId: $emailId');
     isTutorialShown = needToShowTutorial;
     isCompleteSetupShown = needToShowCompleteSetup;
     ApiService.configure(
@@ -99,6 +102,7 @@ class ChatBot {
       timezone: timezone,
       platform: platform,
       personalization: personalization,
+      emailId: emailId,
     );
   }
 
