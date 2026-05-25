@@ -31,7 +31,7 @@ class SetupCompleteScreen extends StatelessWidget {
     } else {
       print('MINE ISSUE 1');
       onCallback("Data from Screen Complete Setup");
-      Navigator.popUntil(context, (route) => route.isFirst);
+      Navigator.popUntil(context, ModalRoute.withName(ChatScreen.routeName));
     }
   }
 

@@ -133,6 +133,7 @@ class ChatBot {
      Navigator.push(
         context,
         PageRouteBuilder(
+          settings: const RouteSettings(name: ChatScreen.routeName),
           pageBuilder: (context, animation, secondaryAnimation) =>
               MultiBlocProvider(
             providers: [

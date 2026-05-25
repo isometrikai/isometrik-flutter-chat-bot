@@ -13,6 +13,8 @@ import 'package:chat_bot/utils/utils.dart';
 import 'package:chat_bot/services/services.dart';
 
 class ChatScreen extends StatefulWidget {
+  static const String routeName = '/chatScreen';
+
   final MyGPTsResponse? chatbotData;
   final GreetingResponse? greetingData;
   final bool isFromHistory;

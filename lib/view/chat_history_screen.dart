@@ -539,6 +539,7 @@ class _ChatHistoryContentState extends State<_ChatHistoryContent> {
         Navigator.push(
           context,
           MaterialPageRoute(
+            settings: const RouteSettings(name: ChatScreen.routeName),
             builder: (context) => MultiBlocProvider(
               providers: [
                 BlocProvider(create: (context) => ChatBloc()),
