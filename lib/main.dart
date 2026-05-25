@@ -123,62 +123,28 @@ class PlatformService {
       if (AssetPath.isPackageMode == false) {
          print('❌ Error getting config from platform: $e');
       // Fallback to default values if iOS config fails
-          ApiService.configure(
-            chatBotId: '1476',
-            appSecret: "SFMyNTY.g3QAAAACZAAEZGF0YXQAAAADbQAAAAlhY2NvdW50SWRtAAAAGDY2YzQ2YWVhN2E2MDI5Yjk5MTNiMzIxOG0AAAAIa2V5c2V0SWRtAAAAJGFiZGFkNDQyLTA4YzktNDE4Ny1iYjk4LWUwMTAzYmY2YWYzOG0AAAAJcHJvamVjdElkbQAAACQ2Zjg4NzAwMi0yYzQ3LTQ4Y2EtYTQwNS0wZjk2NWVlNDAyNjFkAAZzaWduZWRuBgAUskFvkQE.esNFHT-JxzVtFpxylbJ8ik1lRZ-c75JjuCA0toa4C5M",
-            licenseKey: "lic-IMKMqJdO3e2HO+6qDxctvESxA+HkoLIThG9",
-            userId: "68c129ebbdaeb6000f7ed53c",
-            name: 'Chintu',
-            timestamp: '2025-07-28T12:30:00Z',
-            userToken: 'Bearer eyJhbGciOiJSU0EtT0FFUCIsImN0eSI6IkpXVCIsImVuYyI6IkExMjhHQ00iLCJ0eXAiOiJKV1QifQ.Mc2TdWuyXG2EF1qps_QnLTPpBWtzopsKFKWqYCl2v82uWhmxmVfqoydKfaMIKd8gJ0LIOdL_rKsfs3nSYZBDVL0qtB8JLXXJXfOoFT80N_GDyaomHj0SmKuvn3kUVu5bdOEoV2x9fMJQ-WO1qfa3yqrzRy6wKWCVMhmF94034FE.34xZcD6eKXr9oh_D.JfTfiXWZTFZ2iC6jIkwCVb7dKSsM5u4qe4hTw6h_PoFA9elTBXHY5nuwjhlooT941goc9yTH-Ri68DQbwMG384fd1NV4mxN_Ok19nSn_akv_LvacnIsXqVQNifK-OvmOzcSdXohZnrdOAP9Vbx4nyKs_yiQcjE3zKQnzegUQ5sm9xZTs7amPCJibnzEyiWvtwJIbRqP09t3JwVff3y4ZxWDrX4ivKI32_3rQtrjo3NBIEXuvsJUfaISjvF93a1qet9dx9GFjV88nQ57Z76RULjN53Z4guRjPsmioVavVSoyHqTnw4g9hzYDT6kxphYaygSuvBlLa2qbZ58Jo5afw0Wb-XCSO2K6_9OpdrC6D85uGSB8Vzc83yZk-QcqnkbTxWug61AtbHOLjJf1cStYQMBaXJ0of3KM0y2dMNtU_kmJQ_G_GXwHJvIU0M2su3ZfV2VLpNf9MCjzgtG6QKYDVoKYXrTrTBgfk2gAbBDicL1JV-G2qg0nLIKdAkJR8_e5STP6S1Je5i33Cy51uTPI3rnRSK5dNT7iZc0wK1QgCo1RoGomns1loR_2p_7vzhi6jX0z1BgYJwMYhxCCmSJw4LfV7JIAabh1EFg5HrroiLsHs2znwF6DGcYZzKVwOm0FL_1llVMlH-6YltIGOMvWErJHAE2NrWKLNpIBWlfTfSCw2qNDlaDV-xTuQg8EVFj34btofSmZHq7FlH6hWigYBw17NMFI8ea7Swck5-kJXeq2meOgFlsk5Y_4mYSc54znNASg3oLv33fG5hqoxxr1TV3o6zXMOl3Y1COFSBwokoV8hc7XVxg4hxcnHzzap7x7VT362zd8nnzma9C1keHFqFu-JP8Qcb7DqnRQCRsFfzzeIFwvdke-LT9GUO-eMH4hGYMuTZtIbJpkvIZG7GbBeM7biYqpPAiM-IuAOFv4qkAtHAHnC3B8Yd8saoqoB1lJcWlXQ7if-QQd_07eowZmm14jJdj0I8aUY2QhxyeQ_B1AX71714-8DDawxizkJ_QOfFD2q2uGwooBnlYaUfdVSET28hrqDRUy0-RdXD-GjEtqayOarSaSlTPIOu6T-4kb1DEDL1-yA1BcfPbtUhHdjAQB6RNo5LFNL8sIu7pKVDKprOIrxMdfE8zkjjUhwzciLP63FXAoHc39hlaNt6Mi_WpASXhvEeAIvA5CNKyD1jMbZcMpixZBEf-p-j1S-JVvg9SwyqOzm5182ipoFQZ7hD6fyANu8WqBWqcQzrALo-lD5Y2toUp23XjW552iOs_eRmBMKVSKZPIylEsjgZdiP5SRUvVs-qQRQO7kOObZNBVvGToXO-fKANbwbODucd_2vvB3WjTW9SDo5ndGCq4vQuzgF-NpgJTSYoE1lKZmDtEwQQA534FaSNvUA0SDplvz0US-UlsLJC2I0m-XuNdP9KB9ReOSuTC2qQxY13Q2DjPwdiD7KTcpAXE7_KitX6jZqmUlsIgEcKlmqY7GX9TrEd84s3Aj4B4tm3V3hU3vhlFzl0H-SmdsfiICZBZxFYY5jWaS_kblppmtT0so4P1cpjP5i4T78otinDiBME7VmoVz4D1YmgRDY6qWisJ23VG2iKe5hag1z_8doMCjn3b5ce3BaDyhcwXGEiEbhhWH-xgQDhelGFg5_IgPYztP-xcsAIrTsj2xMwyE4YE7ASF73hNvDR_Cux50EZXQFnnA85t7PrCQUFkdFr-vrLhwAyjq87foU5KpXdYBA9d10lBiYYkVRVCrpfVX8vsWNKy6eJWlf_kjfqIn5.vtfD3y3fAiC4YV9Uf6QyGg',
-            location: 'Banglore',
-            isProduction: false,
-            latitude: 13.02868,
-            longitude: 77.58952,
-            // latitude: 25.204849243164062,//dubai
-            // longitude: 55.2704849243164062,//dubai
-            clientGuid: '528a7d439df44f2b9457342b7b865be2',
-            indexName: 'hitechnology.20250821.105131',
-            visitId: '3c6b9339-c602-4af9-b454-0ec0df067181',
-            visitorId: '47daf829-b5df-4358-83ea-207aa4eaae15',
-            searchApiUrl: 'https://searchapi-dev.hawksearch.net/api/v2',
-            baseApiUrl: 'https://api-stage.eazylife-online.com',
-            currencycode: 'INR',//'AED',
-            currencysymbol: '4oK5',//"2K8u2KU=",//"د.إ",
-            zoneId: '634e5da256ad3fd02bd3feb5',
-            timezone: 'Asia/Kolkata',
-            platform: '1',
-            personalization: true,
-            emailId: 'chintu@gmail.com',
-            // zoneId: '636dfc8c89b6a857b500ccd1',//dubai
-            //  currencycode: 'AED',//dubai
-            // currencysymbol: "2K8u2KU=",//"د.إ",//dubai
-          );
-          
-// in bottom need to set production data for testing
           // ApiService.configure(
           //   chatBotId: '1476',
           //   appSecret: "SFMyNTY.g3QAAAACZAAEZGF0YXQAAAADbQAAAAlhY2NvdW50SWRtAAAAGDY2YzQ2YWVhN2E2MDI5Yjk5MTNiMzIxOG0AAAAIa2V5c2V0SWRtAAAAJGFiZGFkNDQyLTA4YzktNDE4Ny1iYjk4LWUwMTAzYmY2YWYzOG0AAAAJcHJvamVjdElkbQAAACQ2Zjg4NzAwMi0yYzQ3LTQ4Y2EtYTQwNS0wZjk2NWVlNDAyNjFkAAZzaWduZWRuBgAUskFvkQE.esNFHT-JxzVtFpxylbJ8ik1lRZ-c75JjuCA0toa4C5M",
           //   licenseKey: "lic-IMKMqJdO3e2HO+6qDxctvESxA+HkoLIThG9",
           //   userId: "68c129ebbdaeb6000f7ed53c",
           //   name: 'Chintu',
-          //   timestamp: '2026-02-26T12:30:00Z',
+          //   timestamp: '2025-07-28T12:30:00Z',
           //   userToken: 'Bearer eyJhbGciOiJSU0EtT0FFUCIsImN0eSI6IkpXVCIsImVuYyI6IkExMjhHQ00iLCJ0eXAiOiJKV1QifQ.Mc2TdWuyXG2EF1qps_QnLTPpBWtzopsKFKWqYCl2v82uWhmxmVfqoydKfaMIKd8gJ0LIOdL_rKsfs3nSYZBDVL0qtB8JLXXJXfOoFT80N_GDyaomHj0SmKuvn3kUVu5bdOEoV2x9fMJQ-WO1qfa3yqrzRy6wKWCVMhmF94034FE.34xZcD6eKXr9oh_D.JfTfiXWZTFZ2iC6jIkwCVb7dKSsM5u4qe4hTw6h_PoFA9elTBXHY5nuwjhlooT941goc9yTH-Ri68DQbwMG384fd1NV4mxN_Ok19nSn_akv_LvacnIsXqVQNifK-OvmOzcSdXohZnrdOAP9Vbx4nyKs_yiQcjE3zKQnzegUQ5sm9xZTs7amPCJibnzEyiWvtwJIbRqP09t3JwVff3y4ZxWDrX4ivKI32_3rQtrjo3NBIEXuvsJUfaISjvF93a1qet9dx9GFjV88nQ57Z76RULjN53Z4guRjPsmioVavVSoyHqTnw4g9hzYDT6kxphYaygSuvBlLa2qbZ58Jo5afw0Wb-XCSO2K6_9OpdrC6D85uGSB8Vzc83yZk-QcqnkbTxWug61AtbHOLjJf1cStYQMBaXJ0of3KM0y2dMNtU_kmJQ_G_GXwHJvIU0M2su3ZfV2VLpNf9MCjzgtG6QKYDVoKYXrTrTBgfk2gAbBDicL1JV-G2qg0nLIKdAkJR8_e5STP6S1Je5i33Cy51uTPI3rnRSK5dNT7iZc0wK1QgCo1RoGomns1loR_2p_7vzhi6jX0z1BgYJwMYhxCCmSJw4LfV7JIAabh1EFg5HrroiLsHs2znwF6DGcYZzKVwOm0FL_1llVMlH-6YltIGOMvWErJHAE2NrWKLNpIBWlfTfSCw2qNDlaDV-xTuQg8EVFj34btofSmZHq7FlH6hWigYBw17NMFI8ea7Swck5-kJXeq2meOgFlsk5Y_4mYSc54znNASg3oLv33fG5hqoxxr1TV3o6zXMOl3Y1COFSBwokoV8hc7XVxg4hxcnHzzap7x7VT362zd8nnzma9C1keHFqFu-JP8Qcb7DqnRQCRsFfzzeIFwvdke-LT9GUO-eMH4hGYMuTZtIbJpkvIZG7GbBeM7biYqpPAiM-IuAOFv4qkAtHAHnC3B8Yd8saoqoB1lJcWlXQ7if-QQd_07eowZmm14jJdj0I8aUY2QhxyeQ_B1AX71714-8DDawxizkJ_QOfFD2q2uGwooBnlYaUfdVSET28hrqDRUy0-RdXD-GjEtqayOarSaSlTPIOu6T-4kb1DEDL1-yA1BcfPbtUhHdjAQB6RNo5LFNL8sIu7pKVDKprOIrxMdfE8zkjjUhwzciLP63FXAoHc39hlaNt6Mi_WpASXhvEeAIvA5CNKyD1jMbZcMpixZBEf-p-j1S-JVvg9SwyqOzm5182ipoFQZ7hD6fyANu8WqBWqcQzrALo-lD5Y2toUp23XjW552iOs_eRmBMKVSKZPIylEsjgZdiP5SRUvVs-qQRQO7kOObZNBVvGToXO-fKANbwbODucd_2vvB3WjTW9SDo5ndGCq4vQuzgF-NpgJTSYoE1lKZmDtEwQQA534FaSNvUA0SDplvz0US-UlsLJC2I0m-XuNdP9KB9ReOSuTC2qQxY13Q2DjPwdiD7KTcpAXE7_KitX6jZqmUlsIgEcKlmqY7GX9TrEd84s3Aj4B4tm3V3hU3vhlFzl0H-SmdsfiICZBZxFYY5jWaS_kblppmtT0so4P1cpjP5i4T78otinDiBME7VmoVz4D1YmgRDY6qWisJ23VG2iKe5hag1z_8doMCjn3b5ce3BaDyhcwXGEiEbhhWH-xgQDhelGFg5_IgPYztP-xcsAIrTsj2xMwyE4YE7ASF73hNvDR_Cux50EZXQFnnA85t7PrCQUFkdFr-vrLhwAyjq87foU5KpXdYBA9d10lBiYYkVRVCrpfVX8vsWNKy6eJWlf_kjfqIn5.vtfD3y3fAiC4YV9Uf6QyGg',
-          //   // location: 'Banglore',
-          //   location: 'Dubai',
-          //   isProduction: true,
-          //   // latitude: 13.02868,
-          //   // longitude: 77.58952,
-          //   latitude: 25.204849243164062,//dubai
-          //   longitude: 55.2704849243164062,//dubai
+          //   location: 'Banglore',
+          //   isProduction: false,
+          //   latitude: 13.02868,
+          //   longitude: 77.58952,
+          //   // latitude: 25.204849243164062,//dubai
+          //   // longitude: 55.2704849243164062,//dubai
           //   clientGuid: '528a7d439df44f2b9457342b7b865be2',
-          //   indexName: 'hitechnology.20250821.105326',
-          //   visitId: '01e283c9-841b-4349-9d2d-39863fb3daed',
-          //   visitorId: '2b0a8996-a55e-4bdd-b4a7-3f85cae22bd6',
+          //   indexName: 'hitechnology.20250821.105131',
+          //   visitId: '3c6b9339-c602-4af9-b454-0ec0df067181',
+          //   visitorId: '47daf829-b5df-4358-83ea-207aa4eaae15',
           //   searchApiUrl: 'https://searchapi-dev.hawksearch.net/api/v2',
-          //   baseApiUrl: 'https://api-live.eazylife-online.com',
-          //   currencycode: 'INR',
-          //   currencysymbol: "NG9LNQ==",//"د.إ",
+          //   baseApiUrl: 'https://api-stage.eazylife-online.com',
+          //   currencycode: 'INR',//'AED',
+          //   currencysymbol: '4oK5',//"2K8u2KU=",//"د.إ",
           //   zoneId: '634e5da256ad3fd02bd3feb5',
           //   timezone: 'Asia/Kolkata',
           //   platform: '1',
@@ -188,6 +154,40 @@ class PlatformService {
           //   //  currencycode: 'AED',//dubai
           //   // currencysymbol: "2K8u2KU=",//"د.إ",//dubai
           // );
+          
+// in bottom need to set production data for testing
+          ApiService.configure(
+            chatBotId: '1476',
+            appSecret: "SFMyNTY.g3QAAAACZAAEZGF0YXQAAAADbQAAAAlhY2NvdW50SWRtAAAAGDY2YzQ2YWVhN2E2MDI5Yjk5MTNiMzIxOG0AAAAIa2V5c2V0SWRtAAAAJGFiZGFkNDQyLTA4YzktNDE4Ny1iYjk4LWUwMTAzYmY2YWYzOG0AAAAJcHJvamVjdElkbQAAACQ2Zjg4NzAwMi0yYzQ3LTQ4Y2EtYTQwNS0wZjk2NWVlNDAyNjFkAAZzaWduZWRuBgAUskFvkQE.esNFHT-JxzVtFpxylbJ8ik1lRZ-c75JjuCA0toa4C5M",
+            licenseKey: "lic-IMKMqJdO3e2HO+6qDxctvESxA+HkoLIThG9",
+            userId: "697c887549ce2251cb66c9e2",
+            name: 'Chetan',
+          timestamp: '2026-01-30T11:54:41Z',
+            userToken: 'Bearer eyJhbGciOiJSU0EtT0FFUCIsImN0eSI6IkpXVCIsImVuYyI6IkExMjhHQ00iLCJ0eXAiOiJKV1QifQ.QrzWhV1oB03-Rep444w8DsX_KvsyAZb0W_OoFeJ2D33Lm26ZVafbUB-TNck9EVgBP4C28-qr4vm2y_PnlVIx_oJskwG8pqKWgIl51pENIaAODUuG1UQlSClmg0UH6GX1DpRc9OEaVESSjrnCyChQ5pT7hG44yquRZpd9ZEOv78E.zH1E8QfouB98kAyw.W3Ecbwa235J_pQ2U_2hKsDChtm3DeaA1Y3uT_1cMZltI-me-uXy1zxVIa2_TOU9VxT_UKDC3GGpC20wGjhm8f21pwhJmGQ-fRn23Bk_Up5ZIuXVrjbXX02o_oSqFeD8Yln_Imf97Q_w-ql7oZd3oWfoRN4PouetL_zh_P92rOGR6x5eg-GtXXYsixudIph1Y09__-aIfBHNXGzM2X_05YBW3SfvuNn52vhwa9JdmwqyO6TppoCQ-OJ3q9v9kfRdfWVqIyjjYM4l3h6N1KoB75rNsoCl2fAwN22hltfvzKQKcpbdHSlII5zhOi9sKi_og_gRHkY5UGkCLLpJbarefS7-cIz6qaGO0oQqnf_2I_aRxRYeXS3JgeqZeDlwhn5LbmURSbju8PG6JHRrihVS6vBzHDX7SAKoeOVK6GsF51K2X0XYjEZ3KUuj7s2f4hFNGndcA20y2N_lc_GkEEOcz7TRQ8SkMZnrJBtcIk7Pkt8KW4M7GrvAMW5X_KRkQrpI596geB_Va2usKp5_LlIxDhFfAbnjK3rYDVhIiGxvkordhLKYul0QfSx5V-9uKmn_lX8JyqF5E4hZiFA83_uXnhafKohOfICBrIdbZE0orucdJ2bAp2FEWCczQExyY0qX6gHqkvfewSeFshM3u3SOYwQMrrDEG9Y3xrE283gkKM0PI1OJwv7Y2xAZY0c2krO8OeCPixZalBUY74rCHDCw8AZCUXFJViRSgGZ4sB4Ab6qIhqNZTsN3sypoM_dtN6EU11KGcqQjT0vTYt333ozevbCJ3SV7RbI4pYBIgzTSALk2nOE3-cjUT4GKKmvoniKpziWrKWha250Q_B7_nzwPYqVjqiwAZWPRvtsNMFL795togxhWZhV6-WXptgDpvyxKrWjDf49Yg-yD5j0rNNMS45Cer9SVB0WD5aae-By9zH3fM2Pwbm4Keep9ExFdIilWEZwaWhbpFpmDi1ugz_IGlDCTXMw0kJKdKpRIofGqSL31TbIn_S_7EIYr7pskuwgCSS8GbNcd3p9YJQKFTx6e2nusg1E2JL10V6tGc8JgcAFEIUNQXtvm2f3fOhJbdToLjd9eJ4a0sMxPludTZPqBHJ6xO1wBoXiWUwdtRpvfSyulSSBKGFkaYEV1DXviZqro0XauNBEoSvmQ-nUN_-yn_nPJA4SJ_7v0f3dmvcFBzMU_AX2N5fMzxfBZT1rxNgN01wASbEmOUSO3olbSypkAEB2IS9AMcBXMLb20I6fwRTAZg4wp96IkCS6OWlduuCjKklFxDcEuG6pDdRo5Dw135UWKNP3WvDNgEKi0uf_nHdlGspV-Zhgeu60jU5CTaQvmnX5Oh3k1hmec8-x2TS4IvMJ-HfSygGOapn94-Sz9yooCLyDKaDGU8qpyah0P-Dvpbt9h9s9PsFWw6eMnknQ0W1C-dtHbqlDmjO2g22mRS75Oj_dRem4ZPRkWJBVsnsljoGw3tVrqdurpZ0oXpyk4h5ZEdMfsOxnx_WST9gfxbG54-ya6HKzkUZKrjzZGfUftCK4pX7WHD2wvELteiWGwzdKlffR5WZccBdeW_dvuk7PxfWZu0vacEaadxBQXDb_uNeB_OFjS-UTq1M0xVJmcOe9KEfo2T0M2IQs-wQE7k-_8XKRYPE_mGGkJUBH7H46ghIjAr3emzzN1cSmo3aG51MuV9JgwhjnU9-agQAgL_wFUWeeoJixbfZpZvd9a3SNAz5lm_RwMdemCYB2eP15Vke8wK5Oi1RqwmhkTrRBTE53A2kuaBqzYxBTQ7g1Hkg7pP.zkTn2YLz7GWLoinpq-V5-w',
+            // location: 'Banglore',
+          location: 'Bengaluru, Karnataka, India',
+            isProduction: true,
+            latitude: 13.02868,
+            longitude: 77.58952,
+            // latitude: 25.204849243164062,//dubai
+            // longitude: 55.2704849243164062,//dubai
+            clientGuid: '528a7d439df44f2b9457342b7b865be2',
+            indexName: 'hitechnology.20250821.105326',
+            visitId: '01e283c9-841b-4349-9d2d-39863fb3daed',
+            visitorId: '2b0a8996-a55e-4bdd-b4a7-3f85cae22bd6',
+            searchApiUrl: 'https://searchapi-dev.hawksearch.net/api/v2',
+            baseApiUrl: 'https://api-live.eazylife-online.com',
+            currencycode: 'INR',
+            currencysymbol: "NG9LNQ==",//"د.إ",
+            zoneId: '634e5da256ad3fd02bd3feb5',
+            timezone: 'Asia/Kolkata',
+            platform: '1',
+            personalization: true,
+            emailId: 'chintu@gmail.com',
+            // zoneId: '636dfc8c89b6a857b500ccd1',//dubai
+            //  currencycode: 'AED',//dubai
+            // currencysymbol: "2K8u2KU=",//"د.إ",//dubai
+          );
 
           // ApiService.configure(
           //   chatBotId: '1476',

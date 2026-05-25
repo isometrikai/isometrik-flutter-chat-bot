@@ -554,11 +554,11 @@ class SelectedAddOn {
 
   factory SelectedAddOn.fromJson(Map<String, dynamic> json) {
     return SelectedAddOn(
-      name: json['name'] ?? '',
-      price: json['price'] ?? '',
-      id: json['id'] ?? '',
-      addOnId: json['addOnId'] ?? '',
-      addOnName: json['addOnName'] ?? '',
+      name: json['name']?.toString() ?? '',
+      price: json['price']?.toString() ?? '',
+      id: json['id']?.toString() ?? '',
+      addOnId: json['addOnId']?.toString() ?? '',
+      addOnName: json['addOnName']?.toString() ?? '',
     );
   }
 
@@ -584,8 +584,8 @@ class ProductAttribute {
 
   factory ProductAttribute.fromJson(Map<String, dynamic> json) {
     return ProductAttribute(
-      attrname: json['attrname'] ?? '',
-      value: json['value'] ?? '',
+      attrname: json['attrname']?.toString() ?? '',
+      value: json['value']?.toString() ?? '',
     );
   }
 
