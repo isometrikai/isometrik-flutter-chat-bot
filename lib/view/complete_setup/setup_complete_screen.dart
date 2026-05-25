@@ -26,10 +26,8 @@ class SetupCompleteScreen extends StatelessWidget {
 
   void _onLetsGetStarted(BuildContext context) {
     if (ChatBot.isCompleteSetupShown == true) {
-      print('MINE ISSUE 2');
       OrderService().triggerChatDismiss();
     } else {
-      print('MINE ISSUE 1');
       onCallback("Data from Screen Complete Setup");
       Navigator.popUntil(context, ModalRoute.withName(ChatScreen.routeName));
       // Navigator.of(context).pop();

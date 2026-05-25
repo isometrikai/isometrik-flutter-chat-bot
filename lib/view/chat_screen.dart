@@ -53,13 +53,9 @@ class _ChatScreenState extends State<ChatScreen> {
   void initState() {
     super.initState();
 
-    print('MINE ISSUE 4');
-
     if (widget.isFromHistory == true && widget.historySessionId != null) {
-      print('MINE ISSUE 5');
       _initializeHistoryMode();
     } else {
-      print('MINE ISSUE 6');
       _initializeNormalMode();
       _setupOrderServiceCallbacks();
       _setupPostInitializationTasks();
