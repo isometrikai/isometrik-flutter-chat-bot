@@ -656,7 +656,7 @@ class _ProductPreviewTile extends StatelessWidget {
             'Select',
             style: AppTextStyles.restaurantDescription.copyWith(
               fontWeight: FontWeight.w700,
-              fontSize: 8,
+              fontSize: 11,
               height: 1.2,
               color: Color(0xFFF44336),
             ),
