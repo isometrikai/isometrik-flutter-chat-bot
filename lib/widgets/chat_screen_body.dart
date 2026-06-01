@@ -1682,6 +1682,9 @@ class ChatScreenBody extends StatelessWidget {
                                   onTableBookingTap: (store) {
                                     onSendMessage('I want to book a table for ${store.storename}');
                                   },
+                                  onDonationTap: (store) {
+                                    onSendMessage('I want to donate for ${store.storename}');
+                                  },
                                   onCheckout: (value) {
                                     if (isCartAPICalled == true) {
                                       onUpdateCartCount(
@@ -2444,6 +2447,9 @@ class ChatScreenBody extends StatelessWidget {
           },
           onTableBookingTap: (store) {
             onSendMessage('I want to book a table for ${store.storename}');
+          },
+          onDonationTap: (store) {
+            onSendMessage('I want to donate for ${store.storename}');
           },
           // onHide: onHideStoreCards,
           onQuantityChanged: (product, store, newQuantity, isIncrease) {

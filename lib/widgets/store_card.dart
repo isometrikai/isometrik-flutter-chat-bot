@@ -20,6 +20,7 @@ class StoreCard extends StatelessWidget {
   final Function(chat.Store)? onTableBookingTap;
   final bool isFromChatHistory;
   final bool isTableBookingFlow;
+  final Function(chat.Store)? onDonationTap;
 
   StoreCard({
     super.key,
@@ -37,6 +38,7 @@ class StoreCard extends StatelessWidget {
     this.doctor,
     this.isTableBookingFlow = false,
     this.onTableBookingTap,
+    this.onDonationTap,
   });
 
   @override
@@ -99,7 +101,9 @@ class StoreCard extends StatelessWidget {
                             ),
                           ),
                           const SizedBox(width: 7),
-                          const Text(
+                          
+                          if (store.storeCategoryId != FoodStoreCategoryId.donation.value) ...[ 
+                            const Text(
                             '|',
                             style: TextStyle(
                               fontSize: 12,
@@ -121,6 +125,7 @@ class StoreCard extends StatelessWidget {
                               color: const Color(0xFF242424),
                             ),
                           ),
+                          ]
                         ],
                       ),
                       const SizedBox(height: 6),
@@ -181,7 +186,7 @@ class StoreCard extends StatelessWidget {
                         //     ),
                         //   ),
                         // ],
-                      ] else ...[
+                      ] else if (store.storeCategoryId != FoodStoreCategoryId.donation.value) ...[
                         if (store.storeIsOpen) ...[
                           Text(
                             store.cuisineDetails.isNotEmpty
@@ -232,6 +237,7 @@ class StoreCard extends StatelessWidget {
                         onQuantityChanged:
                             onQuantityChanged, // Pass quantity change callback
                         isFromChatHistory: isFromChatHistory,
+                        onDonationTap: onDonationTap,
                       ),
                   separatorBuilder: (_, __) => const SizedBox(width: 10),
                   itemCount: store.isDoctore == false ? store.products.length : store.doctorsList.length,
@@ -359,6 +365,7 @@ class _ProductPreviewTile extends StatelessWidget {
   final List<cart_models.UniversalCartData>? cartData; // Cart data from getCart API
   final Function(chat.Product?, chat.Store, int, bool)? onQuantityChanged; // Callback for quantity changes
   final bool isFromChatHistory;
+  final Function(chat.Store)? onDonationTap;
 
   const _ProductPreviewTile({
     this.product,
@@ -370,6 +377,7 @@ class _ProductPreviewTile extends StatelessWidget {
     this.cartData, // Add cart data parameter
     this.onQuantityChanged, // Add quantity change callback
     this.isFromChatHistory = false,
+    this.onDonationTap,
   });
 
   @override
@@ -393,7 +401,7 @@ class _ProductPreviewTile extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    if (store.isDoctore == false && product != null) ...[
+                    if (store.isDoctore == false && product != null && store.storeCategoryId != FoodStoreCategoryId.donation.value) ...[
                       SvgPicture.asset(
                         AssetPath.get(
                           product!.containsMeat
@@ -416,7 +424,7 @@ class _ProductPreviewTile extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 4),
-                    if (store.isDoctore == false && product != null) ...[
+                    if (store.isDoctore == false && product != null && store.storeCategoryId != FoodStoreCategoryId.donation.value) ...[
                       Row(
                         children: [
                           Text(
@@ -500,7 +508,13 @@ class _ProductPreviewTile extends StatelessWidget {
                     ),
                   ),
                   if (((store.storeTypeId ?? store.type) != FoodCategory.food.value) && ((store.storeTypeId ?? store.type) != FoodCategory.services.value)) ...[
-                    if (product?.instock == false) ...[
+                    if (store.storeCategoryId == FoodStoreCategoryId.donation.value) ...[
+                      Positioned(
+                        right: 4,
+                        bottom: 4,
+                        child: _buildDonationBadge(),
+                      ),
+                    ] else if (product?.instock == false) ...[
                       Positioned(
                         right: 4,
                         bottom: 4,
@@ -608,6 +622,44 @@ class _ProductPreviewTile extends StatelessWidget {
             fontSize: 8,
             height: 1.2,
             color: Color(0xFFF44336),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDonationBadge() {
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: () {
+        if (onDonationTap != null) {
+          onDonationTap!(store);
+        }
+      },
+      child: Container(
+        width: 70,
+        height: 27,
+        padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 0),
+        decoration: BoxDecoration(
+          color: const Color(0xFFFFFAFB),
+          borderRadius: BorderRadius.circular(8),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.08),
+              blurRadius: 4,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Center(
+          child: Text(
+            'Select',
+            style: AppTextStyles.restaurantDescription.copyWith(
+              fontWeight: FontWeight.w700,
+              fontSize: 8,
+              height: 1.2,
+              color: Color(0xFFF44336),
+            ),
           ),
         ),
       ),

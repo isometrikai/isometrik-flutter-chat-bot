@@ -14,7 +14,7 @@ class RestaurantScreen extends StatefulWidget {
   final bool isTableBookingFlow;
   final Function(bool)? onCheckout;
   final Function(chat.Store)? onTableBookingTap;
-
+  final Function(chat.Store)? onDonationTap;
 
   // final CartBloc? cartBloc; // Optional CartBloc parameter
 
@@ -25,6 +25,7 @@ class RestaurantScreen extends StatefulWidget {
     this.onCheckout,
     // this.cartBloc, // Optional parameter
     this.onTableBookingTap,
+    this.onDonationTap,
   });
 
   @override
@@ -888,6 +889,10 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
                   },
                   onTableBookingTap: (store) {
                     widget.onTableBookingTap?.call(store);
+                    Navigator.pop(context);
+                  },
+                  onDonationTap: (store) {
+                    widget.onDonationTap?.call(store);
                     Navigator.pop(context);
                   },
                   onAddToCartRequested: (product, store, doctor) {

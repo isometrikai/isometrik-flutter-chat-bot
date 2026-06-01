@@ -205,6 +205,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
   void _initializeSession(bool needToShowLoader) {
     sessionId = "";
+    StoreCategoryRegistry.clear();
     context.read<ChatBloc>().add(ChatSessionIdEvent(needToShowLoader: needToShowLoader));
   }
 

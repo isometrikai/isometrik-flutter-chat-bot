@@ -18,6 +18,7 @@ class ChatHistoryBloc extends Bloc<ChatHistoryEvent, ChatHistoryState> {
   bool? _isShoppingChat;
   bool? _isServicesChat;
   bool? _isHealthCareChat;
+  bool? _isDonationChat;
   // Current search query
   String _currentQuery = '';
   bool _isFromArchive = false;
@@ -58,6 +59,7 @@ class ChatHistoryBloc extends Bloc<ChatHistoryEvent, ChatHistoryState> {
         isPharmacyChat: _isPharmacyChat,
         isServicesChat: _isServicesChat,
         isHealthCareChat: _isHealthCareChat,
+        isDonationChat: _isDonationChat,
         query: _currentQuery.isNotEmpty ? _currentQuery : null,
         isFromArchive: _isFromArchive,
       );
@@ -92,6 +94,7 @@ class ChatHistoryBloc extends Bloc<ChatHistoryEvent, ChatHistoryState> {
         isShoppingChat: _isShoppingChat,
         isServicesChat: _isServicesChat,
         isHealthCareChat: _isHealthCareChat,
+        isDonationChat: _isDonationChat,
         query: _currentQuery.isNotEmpty ? _currentQuery : null,
         isFromArchive: _isFromArchive,
       );
@@ -131,6 +134,7 @@ class ChatHistoryBloc extends Bloc<ChatHistoryEvent, ChatHistoryState> {
         isShoppingChat: _isShoppingChat,
         isServicesChat: _isServicesChat,
         isHealthCareChat: _isHealthCareChat,
+        isDonationChat: _isDonationChat,
         query: _currentQuery.isNotEmpty ? _currentQuery : null,
         isFromArchive: _isFromArchive,
       );
@@ -348,6 +352,7 @@ class ChatHistoryBloc extends Bloc<ChatHistoryEvent, ChatHistoryState> {
     _isShoppingChat = null;
     _isServicesChat = null;
     _isHealthCareChat = null;
+    _isDonationChat = null;
     _currentQuery = '';
     _isFromArchive = false;
     
@@ -370,6 +375,8 @@ class ChatHistoryBloc extends Bloc<ChatHistoryEvent, ChatHistoryState> {
         break;
       case '🏥 Health Care':
         _isHealthCareChat = true;
+      case '💰 Donation':
+        _isDonationChat = true;
         break;
       case 'ALL':
       default:
@@ -391,6 +398,7 @@ class ChatHistoryBloc extends Bloc<ChatHistoryEvent, ChatHistoryState> {
         isShoppingChat: _isShoppingChat,
         isServicesChat: _isServicesChat,
         isHealthCareChat: _isHealthCareChat,
+        isDonationChat: _isDonationChat,
         query: _currentQuery.isNotEmpty ? _currentQuery : null,
         isFromArchive: _isFromArchive,
       );
@@ -447,6 +455,7 @@ class ChatHistoryBloc extends Bloc<ChatHistoryEvent, ChatHistoryState> {
         isShoppingChat: _isShoppingChat,
         isServicesChat: _isServicesChat,
         isHealthCareChat: _isHealthCareChat,
+        isDonationChat: _isDonationChat,
         query: _currentQuery.isNotEmpty ? _currentQuery : null,
         isFromArchive: _isFromArchive,
       );

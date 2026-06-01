@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:chat_bot/data/model/chat_response.dart';
 import 'package:chat_bot/data/services/chat_api_services.dart';
 import 'package:chat_bot/utils/api_result.dart';
+import 'package:chat_bot/utils/enum.dart';
 
 class HawkSearchService {
   HawkSearchService._internal();
@@ -96,7 +97,9 @@ class HawkSearchService {
 
       final Product? product = _mapDocumentToProduct(doc);
       if (product == null) continue;
-      if (product.isPrimary == false) continue;
+      if (product.storeCategoryId != FoodStoreCategoryId.donation.value) {
+       if (product.isPrimary == false) continue;
+      }
 
       storeIdToProducts.putIfAbsent(storeId, () => <Product>[]).add(product);
       // Keep one representative doc for store-level info
@@ -134,6 +137,7 @@ class HawkSearchService {
 
       final bool containsMeat = _firstBool(doc['containsmeat']);
       final String currencySymbol = _firstString(doc['currencysymbol']);
+      final String storeCategoryId = _firstString(doc['storecategoryid']);
       final String currency = _firstString(doc['currency']);
 
       // Extract isPrimary from storedata.metaData
@@ -182,6 +186,7 @@ class HawkSearchService {
         customizable: false,
         instock: instock,
         isPrimary: isPrimary,
+        storeCategoryId: storeCategoryId,
       );
     } catch (_) {
       return null;
