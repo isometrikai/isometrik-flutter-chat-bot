@@ -32,7 +32,10 @@ enum WidgetEnum {
   service_types,
   choose_date,
   add_dependent,
-  restaurant_sections;
+  restaurant_sections,
+  hotel_destination,
+  hotel_booking_dates,
+  hotel_occupancy;
 
   // Add string values for API communication
   String get value {

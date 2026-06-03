@@ -232,6 +232,7 @@ class ChatScreenBody extends StatelessWidget {
                             .toList()
                         : null,
                     tableBookingData: apiData['table_booking'] ?? {},
+                    hotelDestinationData: apiData['hotel_booking'] ?? {},
                   );
                   bloc.add(event);
                   onClearPendingMessage();
@@ -1048,6 +1049,10 @@ class ChatScreenBody extends StatelessWidget {
             const SizedBox(height: 4), //12
             buildRestaurantSectionsWidget(context, message.restaurantSectionsItems),
           ],
+          if (message.hasHotelDestinationSectionWidget) ...[
+            const SizedBox(height: 4), //12
+            buildHotelDestinationWidget(message.hotelDestinationItems),
+          ],
           if (message.hasServicesDeliveryOptionsWidget) ...[
             const SizedBox(height: 4), //12
             buildServicesDeliveryOptionsWidget(message.servicesDeliveryOptions),
@@ -1682,8 +1687,8 @@ class ChatScreenBody extends StatelessWidget {
                                   onTableBookingTap: (store) {
                                     onSendMessage('I want to book a table for ${store.storename}');
                                   },
-                                  onDonationTap: (store) {
-                                    onSendMessage('I want to donate for ${store.storename}');
+                                  onDonationTap: (store, product) {
+                                    onSendMessage('I want to donate for ${product?.productName ?? ''} from ${store.storename}');
                                   },
                                   onCheckout: (value) {
                                     if (isCartAPICalled == true) {
@@ -2088,6 +2093,8 @@ class ChatScreenBody extends StatelessWidget {
           WidgetEnum.add_more.value,
           WidgetEnum.proceed_to_checkout.value,
           WidgetEnum.cash_on_delivery.value,
+          WidgetEnum.hotel_booking_dates.value,
+          WidgetEnum.hotel_occupancy.value,
         ]) {
           final widgets = latestActionWidgets.where(
             (w) => w.type == widgetType,
@@ -2120,7 +2127,17 @@ class ChatScreenBody extends StatelessWidget {
                         null,
                         dict,
                       );
-                    }else {
+                    }else if (widget.type == WidgetEnum.hotel_booking_dates.value && widget.isHotelBookingFlow == true) {
+                      OrderService().triggerClickManageScreenOpen({
+                        'flow': 'HotelBooking',
+                        'screenName': 'HotelBookingDates',
+                      });
+                    } else if (widget.type == WidgetEnum.hotel_occupancy.value && widget.isHotelBookingFlow == true) {
+                      OrderService().triggerClickManageScreenOpen({
+                        'flow': 'HotelBooking',
+                        'screenName': 'HotelBookingGuests',
+                      });
+                    } else {
                       onSendMessage(buttonText);
                     }
                   },
@@ -2448,8 +2465,8 @@ class ChatScreenBody extends StatelessWidget {
           onTableBookingTap: (store) {
             onSendMessage('I want to book a table for ${store.storename}');
           },
-          onDonationTap: (store) {
-            onSendMessage('I want to donate for ${store.storename}');
+          onDonationTap: (store, product) {
+            onSendMessage('I want to donate for ${product?.productName ?? ''} from ${store.storename}');
           },
           // onHide: onHideStoreCards,
           onQuantityChanged: (product, store, newQuantity, isIncrease) {
@@ -3762,6 +3779,33 @@ class ChatScreenBody extends StatelessWidget {
       padding: const EdgeInsets.only(left: 0.0),
       child: RestaurantSectionsWidget(
         restaurantSectionsItems: restaurantSectionsItems,
+      ),
+    );
+  }
+
+  Widget buildHotelDestinationWidget(List<HotelDestination> destinations) {
+    if (destinations.isEmpty) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.only(left: 0.0),
+      child: HotelDestinationWidget(
+        destinations: destinations,
+        isFromChatHistory: isFromHistory,
+        onDestinationSelected: (destination) {
+          final hotelBookingData = {
+            'countryOfResidence': 'AE',
+            'hotelCoordinates': {
+              'lat': destination.lat,
+              'lng': destination.lng,
+            },
+          };
+          onSendMessage(
+            'I want to book hotels in ${destination.fullName}',
+            null,
+            null,
+            null,
+            {'hotel_booking': hotelBookingData},
+          );
+        },
       ),
     );
   }

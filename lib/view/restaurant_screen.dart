@@ -14,7 +14,7 @@ class RestaurantScreen extends StatefulWidget {
   final bool isTableBookingFlow;
   final Function(bool)? onCheckout;
   final Function(chat.Store)? onTableBookingTap;
-  final Function(chat.Store)? onDonationTap;
+  final Function(chat.Store, chat.Product?)? onDonationTap;
 
   // final CartBloc? cartBloc; // Optional CartBloc parameter
 
@@ -891,8 +891,8 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
                     widget.onTableBookingTap?.call(store);
                     Navigator.pop(context);
                   },
-                  onDonationTap: (store) {
-                    widget.onDonationTap?.call(store);
+                  onDonationTap: (store, product) {
+                    widget.onDonationTap?.call(store, product);
                     Navigator.pop(context);
                   },
                   onAddToCartRequested: (product, store, doctor) {

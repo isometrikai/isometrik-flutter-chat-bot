@@ -20,7 +20,7 @@ class StoreCard extends StatelessWidget {
   final Function(chat.Store)? onTableBookingTap;
   final bool isFromChatHistory;
   final bool isTableBookingFlow;
-  final Function(chat.Store)? onDonationTap;
+  final Function(chat.Store, chat.Product?)? onDonationTap;
 
   StoreCard({
     super.key,
@@ -365,7 +365,7 @@ class _ProductPreviewTile extends StatelessWidget {
   final List<cart_models.UniversalCartData>? cartData; // Cart data from getCart API
   final Function(chat.Product?, chat.Store, int, bool)? onQuantityChanged; // Callback for quantity changes
   final bool isFromChatHistory;
-  final Function(chat.Store)? onDonationTap;
+  final Function(chat.Store, chat.Product?)? onDonationTap;
 
   const _ProductPreviewTile({
     this.product,
@@ -633,7 +633,7 @@ class _ProductPreviewTile extends StatelessWidget {
       behavior: HitTestBehavior.opaque,
       onTap: () {
         if (onDonationTap != null) {
-          onDonationTap!(store);
+          onDonationTap!(store, product);
         }
       },
       child: Container(

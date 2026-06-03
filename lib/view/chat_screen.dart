@@ -176,14 +176,68 @@ class _ChatScreenState extends State<ChatScreen> {
       }
     });
 
-    OrderService().setSelectClickManageCallback((Map<String, dynamic> clickManage) {
+    OrderService().setSelectClickManageCallback((
+      Map<String, dynamic> clickManage,
+    ) {
       if (mounted) {
         print('ChatScreen: Click manage received - $clickManage');
-        _apiData = {
+        if (clickManage['flow'] == 'HotelBooking') {
+          if (clickManage['screenName'] == 'HotelBookingDates') {
+            final checkinDate = Utility.formatHotelBookingDate(
+              (clickManage['checkIn'] ?? '').toString(),
+            );
+            final checkoutDate = Utility.formatHotelBookingDate(
+              (clickManage['checkOut'] ?? '').toString(),
+            );
+            final existing = _apiData['hotel_booking'];
+            final Map<String, dynamic> hotelBooking;
+            if (existing is Map) {
+              hotelBooking = Map<String, dynamic>.from(existing);
+              hotelBooking['checkinDate'] = checkinDate;
+              hotelBooking['checkoutDate'] = checkoutDate;
+            } else {
+              hotelBooking = {
+                'checkinDate': checkinDate,
+                'checkoutDate': checkoutDate,
+                'countryOfResidence': 'AE',
+              };
+            }
+            _apiData = {..._apiData, 'hotel_booking': hotelBooking};
+            _sendMessage(
+              'I have selected the checkin and checkout dates: \n'
+              '${Utility.formatHotelBookingDateForDisplay((clickManage['checkIn'] ?? '').toString())} '
+              'to ${Utility.formatHotelBookingDateForDisplay((clickManage['checkOut'] ?? '').toString())}',
+            );
+          } else if (clickManage['screenName'] == 'HotelBookingGuests') {
+            final existing = _apiData['hotel_booking'];
+            final Map<String, dynamic> hotelBooking;
+            if (existing is Map) {
+              hotelBooking = Map<String, dynamic>.from(existing);
+              hotelBooking['occupancy'] = clickManage['occupancy'];
+            } else {
+              hotelBooking = {
+                'occupancy': clickManage['occupancy'],
+                'countryOfResidence': 'AE',
+              };
+            }
+            _apiData = {..._apiData, 'hotel_booking': hotelBooking};
+            _sendMessage(
+              'I have selected the number of guests:\n'
+              '${Utility.formatHotelOccupancyForDisplay(clickManage['occupancy'])}',
+            );
+          }
+        } else {
+          _apiData = {
             ..._apiData,
             "dependent_id": clickManage['dependentId'] ?? '',
           };
-        _sendMessage('I have selected a dependent:\n${clickManage['firstName'] ?? ''} ${clickManage['lastName'] ?? ''}', null, null, null);
+          _sendMessage(
+            'I have selected a dependent:\n${clickManage['firstName'] ?? ''} ${clickManage['lastName'] ?? ''}',
+            null,
+            null,
+            null,
+          );
+        }
       }
     });
   }
@@ -221,7 +275,8 @@ class _ChatScreenState extends State<ChatScreen> {
               message.hasChooseCardWidget ||
               message.hasOrderSummaryWidget ||
               message.hasOrderConfirmedWidget ||
-              message.hasServicesDeliveryOptionsWidget)) {
+              message.hasServicesDeliveryOptionsWidget ||
+              message.hasHotelDestinationSectionWidget)) {
         return i;
       }
     }
@@ -237,7 +292,8 @@ class _ChatScreenState extends State<ChatScreen> {
         message.hasChooseCardWidget ||
         message.hasOrderSummaryWidget ||
         message.hasOrderConfirmedWidget ||
-        message.hasServicesDeliveryOptionsWidget))
+        message.hasServicesDeliveryOptionsWidget ||
+        message.hasHotelDestinationSectionWidget))
       return message;
     return message.copyWith(
       hasStoreCards: false,
@@ -249,6 +305,7 @@ class _ChatScreenState extends State<ChatScreen> {
       // Keep cart widget visible
       hasCartWidget: message.hasCartWidget,
       hasServicesDeliveryOptionsWidget: false,
+      hasHotelDestinationSectionWidget: false,
     );
   }
 
@@ -357,6 +414,7 @@ class _ChatScreenState extends State<ChatScreen> {
         ChatWidget? chooseCardWidget;
         ChatWidget? orderSummaryWidget;
         ChatWidget? orderConfirmedWidget;
+        ChatWidget? hotelDestinationWidget;
 
         try {
           storesWidget = botResponse.widgets.firstWhere(
@@ -384,6 +442,12 @@ class _ChatScreenState extends State<ChatScreen> {
           restaurantSectionsWidget = botResponse.widgets.firstWhere((widget) => widget.isRestaurantSectionsWidget);
         } catch (e) {
           restaurantSectionsWidget = null;
+        }
+
+        try {
+          hotelDestinationWidget = botResponse.widgets.firstWhere((widget) => widget.isHotelDestinationWidget);
+        } catch (e) {
+          hotelDestinationWidget = null;
         }
 
         try {
@@ -429,6 +493,7 @@ class _ChatScreenState extends State<ChatScreen> {
         bool hasProducts = productsWidget != null;
         bool hasCart = cartWidget != null;
         bool hasRestaurantSections = restaurantSectionsWidget != null;
+        bool hasHotelDestinationSection = hotelDestinationWidget != null;
         bool hasServicesDeliveryOptions = servicesDeliveryOptionsWidget != null;
         bool hasChooseAddress = chooseAddressWidget != null;
         bool hasChooseCard = chooseCardWidget != null;
@@ -445,6 +510,7 @@ class _ChatScreenState extends State<ChatScreen> {
             hasProductCards: hasProducts,
             hasCartWidget: hasCart,
             hasRestaurantSectionsWidget: hasRestaurantSections,
+            hasHotelDestinationSectionWidget: hasHotelDestinationSection,
             hasServicesDeliveryOptionsWidget: hasServicesDeliveryOptions,
             hasChooseAddressWidget: hasChooseAddress,
             hasChooseCardWidget: hasChooseCard,
@@ -466,6 +532,7 @@ class _ChatScreenState extends State<ChatScreen> {
                         !hasProducts &&
                         !hasCart &&
                         !hasRestaurantSections &&
+                        !hasHotelDestinationSection &&
                         !hasChooseAddress &&
                         !hasChooseCard &&
                         !hasOrderSummary &&
@@ -478,6 +545,7 @@ class _ChatScreenState extends State<ChatScreen> {
             products: productsWidget?.products ?? [],
             cartItems: cartWidget?.getCartItems() ?? [],
             restaurantSectionsItems: restaurantSectionsWidget?.getRestaurantSectionsItems() ?? [],
+            hotelDestinationItems: hotelDestinationWidget?.getHotelDestinationItems() ?? [],
             servicesDeliveryOptions: servicesDeliveryOptionsWidget?.getServicesDeliveryOptions() ?? [],
             addressOptions: chooseAddressWidget?.getAddressOptions() ?? [],
             cardOptions: chooseCardWidget?.getCardOptions() ?? [],
@@ -535,7 +603,8 @@ class _ChatScreenState extends State<ChatScreen> {
     ChatWidget? chooseCardWidget;
     ChatWidget? orderSummaryWidget;
     ChatWidget? orderConfirmedWidget;
-    
+    ChatWidget? hotelDestinationWidget;
+
     // Capture needToEndThisChat from API response
     _needToEndThisChat = response.needToEndThisChat;
     try {
@@ -564,6 +633,12 @@ class _ChatScreenState extends State<ChatScreen> {
       restaurantSectionsWidget = response.widgets.firstWhere((widget) => widget.isRestaurantSectionsWidget);
     } catch (e) {
       restaurantSectionsWidget = null;
+    }
+
+    try {
+      hotelDestinationWidget = response.widgets.firstWhere((widget) => widget.isHotelDestinationWidget);
+    } catch (e) {
+      hotelDestinationWidget = null;
     }
 
      try {
@@ -614,6 +689,7 @@ class _ChatScreenState extends State<ChatScreen> {
     bool hasChooseCard = chooseCardWidget != null;
     bool hasOrderSummary = orderSummaryWidget != null;
     bool hasOrderConfirmed = orderConfirmedWidget != null;
+    bool hasHotelDestinationSections = hotelDestinationWidget != null;
 
     setState(() {
       messages.add(
@@ -626,6 +702,7 @@ class _ChatScreenState extends State<ChatScreen> {
           hasProductCards: hasProducts,
           hasCartWidget: hasCart,
           hasRestaurantSectionsWidget: hasRestaurantSections,
+          hasHotelDestinationSectionWidget: hasHotelDestinationSections,
           hasServicesDeliveryOptionsWidget: hasServicesDeliveryOptions,
           hasChooseAddressWidget: hasChooseAddress,
           hasChooseCardWidget: hasChooseCard,
@@ -637,6 +714,7 @@ class _ChatScreenState extends State<ChatScreen> {
               !hasProducts &&
               !hasCart &&
               !hasRestaurantSections &&
+              !hasHotelDestinationSections &&
               !hasServicesDeliveryOptions &&
               !hasChooseAddress &&
               !hasChooseCard &&
@@ -649,6 +727,7 @@ class _ChatScreenState extends State<ChatScreen> {
                       !hasProducts &&
                       !hasCart &&
                       !hasRestaurantSections &&
+                      !hasHotelDestinationSections &&
                       !hasServicesDeliveryOptions &&
                       !hasChooseAddress &&
                       !hasChooseCard &&
@@ -662,6 +741,7 @@ class _ChatScreenState extends State<ChatScreen> {
           products: productsWidget?.products ?? [],
           cartItems: cartWidget?.getCartItems() ?? [],
           restaurantSectionsItems: restaurantSectionsWidget?.getRestaurantSectionsItems() ?? [],
+          hotelDestinationItems: hotelDestinationWidget?.getHotelDestinationItems() ?? [],
           servicesDeliveryOptions: servicesDeliveryOptionsWidget?.getServicesDeliveryOptions() ?? [],
           addressOptions: chooseAddressWidget?.getAddressOptions() ?? [],
           cardOptions: chooseCardWidget?.getCardOptions() ?? [],
@@ -670,6 +750,7 @@ class _ChatScreenState extends State<ChatScreen> {
           productsWidget: productsWidget,
           cartWidget: cartWidget,
           restaurantSectionsWidget: restaurantSectionsWidget,
+          hotelDestinationWidget: hotelDestinationWidget,
           servicesDeliveryOptionsWidget: servicesDeliveryOptionsWidget,
           chooseAddressWidget: chooseAddressWidget,
           chooseCardWidget: chooseCardWidget,
@@ -691,6 +772,8 @@ class _ChatScreenState extends State<ChatScreen> {
                     widget.type == WidgetEnum.add_payment.value ||
                     widget.type == WidgetEnum.cart.value ||
                     widget.type == WidgetEnum.restaurant_sections.value ||
+                    widget.type == WidgetEnum.hotel_booking_dates.value ||
+                    widget.type == WidgetEnum.hotel_occupancy.value ||
                     widget.type == WidgetEnum.service_types.value ||
                     widget.type == WidgetEnum.order_summary.value ||
                     widget.type == WidgetEnum.choose_address.value ||

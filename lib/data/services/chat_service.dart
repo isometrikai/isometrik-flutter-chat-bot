@@ -17,6 +17,7 @@ class ChatService {
     String storeCategoryId = "",
     List<String> prescriptionImageUrls = const [],
     Map<String, dynamic> tableBookingData = const {},
+    Map<String, dynamic> hotelDestinationData = const {},
   }) {
     return ChatApiServices.instance.sendChatMessage(
       message: message,
@@ -31,6 +32,7 @@ class ChatService {
       storeCategoryId: storeCategoryId,
       prescriptionImageUrls: prescriptionImageUrls,
       tableBookingData: tableBookingData,
+      hotelDestinationData: hotelDestinationData,
     );
   }
 

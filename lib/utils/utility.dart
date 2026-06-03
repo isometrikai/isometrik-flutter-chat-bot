@@ -165,6 +165,119 @@ class Utility {
   static String getPlatform() {
     return platform;
   }
+
+  static const List<String> _monthNames = [
+    'January',
+    'February',
+    'March',
+    'April',
+    'May',
+    'June',
+    'July',
+    'August',
+    'September',
+    'October',
+    'November',
+    'December',
+  ];
+
+  /// Parses hotel date strings such as `2026-06-10`.
+  static DateTime? parseHotelBookingDate(String raw) {
+    final trimmed = raw.trim();
+    if (trimmed.isEmpty) return null;
+    return DateTime.tryParse(trimmed);
+  }
+
+  /// Returns `yyyy-MM-dd` (pass-through when already in that shape).
+  static String formatHotelBookingDate(String raw) {
+    final trimmed = raw.trim();
+    if (trimmed.isEmpty) return trimmed;
+
+    final parsed = parseHotelBookingDate(trimmed);
+    if (parsed == null) return trimmed;
+
+    final y = parsed.year.toString().padLeft(4, '0');
+    final m = parsed.month.toString().padLeft(2, '0');
+    final d = parsed.day.toString().padLeft(2, '0');
+    return '$y-$m-$d';
+  }
+
+  /// Chat display format: `10th June 2026`.
+  static String formatHotelBookingDateForDisplay(String raw) {
+    final parsed = parseHotelBookingDate(raw);
+    if (parsed == null) return raw.trim();
+
+    final day = parsed.day;
+    final suffix = (day >= 11 && day <= 13)
+        ? 'th'
+        : switch (day % 10) {
+            1 => 'st',
+            2 => 'nd',
+            3 => 'rd',
+            _ => 'th',
+          };
+
+    return '$day$suffix ${_monthNames[parsed.month - 1]} ${parsed.year}';
+  }
+
+  /// Formats hotel occupancy for chat, e.g.:
+  /// `Room 1: 3 adults, 1 child (age 2)\nRoom 2: 3 adults`
+  static String formatHotelOccupancyForDisplay(dynamic occupancy) {
+    if (occupancy == null) return '';
+
+    final List<dynamic> rooms;
+    if (occupancy is List) {
+      rooms = occupancy;
+    } else {
+      return occupancy.toString();
+    }
+
+    if (rooms.isEmpty) return '';
+
+    final buffer = StringBuffer();
+    for (int i = 0; i < rooms.length; i++) {
+      final room = rooms[i];
+      if (room is! Map) continue;
+
+      final map = Map<String, dynamic>.from(room);
+      final adults = (map['adults'] as num?)?.toInt() ?? 0;
+      final children = (map['childs'] as num?)?.toInt() ??
+          (map['children'] as num?)?.toInt() ??
+          0;
+      final childAgesRaw = map['childages'] ?? map['childAges'] ?? [];
+      final List<int> childAges = [];
+      if (childAgesRaw is List) {
+        for (final age in childAgesRaw) {
+          final parsed = int.tryParse(age.toString());
+          if (parsed != null) childAges.add(parsed);
+        }
+      }
+
+      if (buffer.isNotEmpty) buffer.writeln();
+      buffer.write('Room ${i + 1}: ');
+
+      final parts = <String>[];
+      if (adults > 0) {
+        parts.add('$adults ${adults == 1 ? 'adult' : 'adults'}');
+      }
+      if (children > 0) {
+        var childPart = '$children ${children == 1 ? 'child' : 'children'}';
+        if (childAges.isNotEmpty) {
+          childPart += childAges.length == 1
+              ? ' (age ${childAges.first})'
+              : ' (ages ${childAges.join(', ')})';
+        }
+        parts.add(childPart);
+      }
+      if (parts.isEmpty) {
+        buffer.write('No guests');
+      } else {
+        buffer.write(parts.join(', '));
+      }
+    }
+
+    return buffer.toString();
+  }
 }
 
 

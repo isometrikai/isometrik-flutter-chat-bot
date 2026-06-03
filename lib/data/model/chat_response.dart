@@ -97,6 +97,7 @@ class ChatWidget {
   final String type;
   final bool isTableBookingFlow;
   final bool isTableBookingTimeSlot;
+  final bool isHotelBookingFlow;
   final List<dynamic> widget; // Raw JSON data
 
   ChatWidget({
@@ -105,6 +106,7 @@ class ChatWidget {
     required this.type,
     required this.isTableBookingFlow,
     required this.isTableBookingTimeSlot,
+    required this.isHotelBookingFlow,
     required this.widget,
   });
 
@@ -115,6 +117,7 @@ class ChatWidget {
       type: json['type'] ?? '',
       isTableBookingFlow: json['is_table_booking_flow'] ?? false,
       isTableBookingTimeSlot: json['is_table_booking_time_slot_selection'] ?? false,
+      isHotelBookingFlow: json['is_hotel_booking_flow'] ?? false,
       widget: (json['widget'] as List<dynamic>?) ?? [],
     );
   }
@@ -125,6 +128,7 @@ class ChatWidget {
       'widgets_type': widgetsType,
       'type': type,
       'is_table_booking_flow': isTableBookingFlow,
+      'is_hotel_booking_flow': isHotelBookingFlow,
       'is_table_booking_time_slot_selection': isTableBookingTimeSlot,
       'widget': widget,
     };
@@ -153,6 +157,7 @@ class ChatWidget {
   bool get isOrderTrackingWidget => type == WidgetEnum.order_tracking.value;
   bool get isOrderDetailsWidget => type == WidgetEnum.order_details.value;
   bool get isAddDependentWidget => type == WidgetEnum.add_dependent.value;
+  bool get isHotelDestinationWidget => type == WidgetEnum.hotel_destination.value;
   bool get isButtonWidget => type == 'button';
   bool get isInputWidget => type == 'input';
   bool get isImageWidget => type == 'image';
@@ -361,6 +366,14 @@ class ChatWidget {
       }
     }
     return null;
+  }
+
+  // Helper method to get hotel destination items
+  List<HotelDestination> getHotelDestinationItems() {
+    if (isHotelDestinationWidget) {
+      return widget.map((item) => HotelDestination.fromJson(item as Map<String, dynamic>)).toList();
+    }
+    return [];
   }
 
   // Get raw store as JSON string by index
@@ -791,6 +804,55 @@ class Store {
       'tableReservations': tableReservations,
       'isDoctore': isDoctore,
       'cuisines': cuisines,
+    };
+  }
+}
+
+// Hotel Destination Model
+class HotelDestination {
+  final String id;
+  final String name;
+  final String fullName;
+  final String type;
+  final String country;
+  final String? state;
+  final double lat;
+  final double lng;
+
+  HotelDestination({
+    required this.id,
+    required this.name,
+    required this.fullName,
+    required this.type,
+    required this.country,
+    this.state,
+    required this.lat,
+    required this.lng,
+  });
+
+  factory HotelDestination.fromJson(Map<String, dynamic> json) {
+    return HotelDestination(
+      id: (json['id'] ?? '').toString(),
+      name: (json['name'] ?? '').toString(),
+      fullName: (json['full_name'] ?? '').toString(),
+      type: (json['type'] ?? '').toString(),
+      country: (json['country'] ?? '').toString(),
+      state: json['state']?.toString(),
+      lat: (json['lat'] as num?)?.toDouble() ?? 0.0,
+      lng: (json['lng'] as num?)?.toDouble() ?? 0.0,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+      'full_name': fullName,
+      'type': type,
+      'country': country,
+      'state': state,
+      'lat': lat,
+      'lng': lng,
     };
   }
 }
