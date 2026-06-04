@@ -1,8 +1,6 @@
 import 'package:chat_bot/utils/app_constants.dart';
 import 'package:chat_bot/widgets/black_toast_view.dart';
 import 'package:flutter/material.dart';
-import 'package:timezone/data/latest.dart' as tz_data;
-import 'package:timezone/timezone.dart' as tz;
 
 final GlobalKey<NavigatorState> kNavigatorKey = GlobalKey<NavigatorState>();
 
@@ -15,7 +13,18 @@ class Utility {
   static String emailId = '';
   static String timezone = '';
   static bool personalization = true;
-  static bool _timezonesInitialized = false;
+
+  /// Fixed UTC offsets for common IANA zones (no DST). Extend as needed.
+  static const Map<String, Duration> _ianaUtcOffsets = {
+    'Asia/Kolkata': Duration(hours: 5, minutes: 30),
+    'Asia/Calcutta': Duration(hours: 5, minutes: 30),
+    'Asia/Dubai': Duration(hours: 4),
+    'Asia/Riyadh': Duration(hours: 3),
+    'Asia/Singapore': Duration(hours: 8),
+    'Europe/London': Duration(hours: 0),
+    'America/New_York': Duration(hours: -5),
+    'America/Los_Angeles': Duration(hours: -8),
+  };
 
   static void showLoader({
     String? message,
@@ -158,28 +167,48 @@ class Utility {
     timezone = value;
   }
 
-  static void _ensureTimezonesInitialized() {
-    if (_timezonesInitialized) return;
-    tz_data.initializeTimeZones();
-    _timezonesInitialized = true;
+  /// Parses offsets like `+05:30`, `UTC+5:30`, or total minutes `330`.
+  static Duration? _parseUtcOffset(String value) {
+    final trimmed = value.trim();
+    if (trimmed.isEmpty) return null;
+
+    final minutesOnly = int.tryParse(trimmed);
+    if (minutesOnly != null) {
+      return Duration(minutes: minutesOnly);
+    }
+
+    final match = RegExp(
+      r'^(?:UTC)?\s*([+-])\s*(\d{1,2})(?::(\d{2}))?$',
+      caseSensitive: false,
+    ).firstMatch(trimmed.replaceAll(' ', ''));
+    if (match == null) return null;
+
+    final sign = match.group(1) == '-' ? -1 : 1;
+    final hours = int.parse(match.group(2)!);
+    final minutes = int.parse(match.group(3) ?? '0');
+    return Duration(
+      hours: sign * hours,
+      minutes: sign * minutes,
+    );
   }
 
-  /// Hour of day in the configured IANA timezone (e.g. Asia/Kolkata), or device local time.
+  /// Hour of day for [Utility.timezone], or device local time when unknown.
   static int currentHourInTimezone() {
-    final tzId = timezone.trim();
-    if (tzId.isNotEmpty && tzId.contains('/')) {
-      try {
-        _ensureTimezonesInitialized();
-        final location = tz.getLocation(tzId);
-        return tz.TZDateTime.now(location).hour;
-      } catch (_) {
-        // Fall back to device local time if timezone id is invalid.
-      }
+    final tzValue = timezone.trim();
+    if (tzValue.isEmpty) {
+      return DateTime.now().hour;
     }
+
+    final offset =
+        _parseUtcOffset(tzValue) ?? _ianaUtcOffsets[tzValue];
+    if (offset != null) {
+      return DateTime.now().toUtc().add(offset).hour;
+    }
+
     return DateTime.now().hour;
   }
 
-  /// Returns "Good morning", "Good afternoon", or "Good evening" for the user's timezone.
+  /// Returns "Good morning", "Good afternoon", or "Good evening".
   static String getTimeOfDayGreeting() {
     final hour = currentHourInTimezone();
     if (hour >= 5 && hour < 12) {
