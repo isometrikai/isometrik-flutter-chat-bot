@@ -107,6 +107,7 @@ class ApiService {
     Utility.setCurrencyCode(currencycode);
     Utility.setPlatform(platform);
     Utility.setName(name);
+    Utility.setTimezone(timezone);
     Utility.setPersonalization(personalization);
     Utility.setEmailId(emailId);
   }

@@ -1,6 +1,8 @@
 import 'package:chat_bot/utils/app_constants.dart';
 import 'package:chat_bot/widgets/black_toast_view.dart';
 import 'package:flutter/material.dart';
+import 'package:timezone/data/latest.dart' as tz_data;
+import 'package:timezone/timezone.dart' as tz;
 
 final GlobalKey<NavigatorState> kNavigatorKey = GlobalKey<NavigatorState>();
 
@@ -11,7 +13,9 @@ class Utility {
   static String platform = '';
   static String name = '';
   static String emailId = '';
+  static String timezone = '';
   static bool personalization = true;
+  static bool _timezonesInitialized = false;
 
   static void showLoader({
     String? message,
@@ -148,6 +152,43 @@ class Utility {
 
   static String getName() {
     return name;
+  }
+
+  static void setTimezone(String value) {
+    timezone = value;
+  }
+
+  static void _ensureTimezonesInitialized() {
+    if (_timezonesInitialized) return;
+    tz_data.initializeTimeZones();
+    _timezonesInitialized = true;
+  }
+
+  /// Hour of day in the configured IANA timezone (e.g. Asia/Kolkata), or device local time.
+  static int currentHourInTimezone() {
+    final tzId = timezone.trim();
+    if (tzId.isNotEmpty && tzId.contains('/')) {
+      try {
+        _ensureTimezonesInitialized();
+        final location = tz.getLocation(tzId);
+        return tz.TZDateTime.now(location).hour;
+      } catch (_) {
+        // Fall back to device local time if timezone id is invalid.
+      }
+    }
+    return DateTime.now().hour;
+  }
+
+  /// Returns "Good morning", "Good afternoon", or "Good evening" for the user's timezone.
+  static String getTimeOfDayGreeting() {
+    final hour = currentHourInTimezone();
+    if (hour >= 5 && hour < 12) {
+      return 'Good morning';
+    }
+    if (hour >= 12 && hour < 17) {
+      return 'Good afternoon';
+    }
+    return 'Good evening';
   }
 
   static String getEmailId() {

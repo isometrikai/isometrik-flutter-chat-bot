@@ -6,6 +6,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:lottie/lottie.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:chat_bot/data/data.dart';
 import 'package:chat_bot/bloc/bloc.dart';
 import 'package:chat_bot/widgets/widgets.dart';
@@ -58,7 +59,7 @@ class ChatScreenBody extends StatelessWidget {
     required this.messageFocusNode,
     required this.scrollController,
     this.chatbotData,
-    required this.greetingData,
+    this.greetingData,
     // required this.isLoadingData,
     required this.selectedOptionMessages,
     required this.messages,
@@ -245,8 +246,7 @@ class ChatScreenBody extends StatelessWidget {
                 });
               }
 
-              final bool showGreetingOverlay =
-                  messages.isEmpty && greetingData != null;
+              final bool showGreetingOverlay = messages.isEmpty;
               return Column(
                 children: [
                   Expanded(
@@ -1119,18 +1119,66 @@ class ChatScreenBody extends StatelessWidget {
     return html;
   }
 
-  Widget buildGreetingOverlay(BuildContext context) {
-    final String titleText =
-        greetingData?.greeting.isNotEmpty == true
-            ? greetingData!.greeting
-            : 'Good evening';
-    final String weatherText =
-        greetingData?.weatherText.isNotEmpty == true
-            ? greetingData!.weatherText
-            : 'dsada';
+  Widget _buildWeatherTextSection(double contentWidth) {
+    final String? weatherText = greetingData?.weatherText;
+    final bool hasWeatherText =
+        weatherText != null && weatherText.isNotEmpty;
 
-    // final List<GreetingOption> opts = (greetingData?.options ?? []).toList();
-    
+    if (hasWeatherText) {
+      return SizedBox(
+        width: contentWidth,
+        child: Text(
+          weatherText,
+          textAlign: TextAlign.center,
+          style: AppTextStyles.launchSubtitle.copyWith(
+            color: const Color(0xFF7085AE),
+          ),
+        ),
+      );
+    }
+
+    return SizedBox(
+      width: contentWidth,
+      height: 56,
+      child: Shimmer.fromColors(
+        baseColor: Colors.grey[300]!,
+        highlightColor: Colors.grey[100]!,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: contentWidth * 0.9,
+              height: 14,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(4),
+              ),
+            ),
+            const SizedBox(height: 7),
+            Container(
+              width: contentWidth * 0.8,
+              height: 14,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(4),
+              ),
+            ),
+            const SizedBox(height: 7),
+            Container(
+              width: contentWidth * 0.7,
+              height: 14,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(4),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget buildGreetingOverlay(BuildContext context) {
     // Get device width and calculate dynamic width with 20 spacing on each side
     final double deviceWidth = MediaQuery.of(context).size.width;
     final double contentWidth = deviceWidth - 40; // 20 on left + 20 on right
@@ -1159,19 +1207,10 @@ class ChatScreenBody extends StatelessWidget {
                 ),
                 SizedBox(
                   width: contentWidth,
-                  child: _buildTitleWithHighlightedName(titleText),
+                  child: _buildTitleWithHighlightedName(_greetingTitleText()),
                 ),
                 const SizedBox(height: 20),
-                SizedBox(
-                  width: contentWidth,
-                  child: Text(
-                    weatherText,
-                    textAlign: TextAlign.center,
-                    style: AppTextStyles.launchSubtitle.copyWith(
-                      color: const Color(0xFF7085AE),
-                    ),
-                  ),
-                ),
+                _buildWeatherTextSection(contentWidth),
                 if (greetingData?.setupUserPreference == true) ...[
                   const SizedBox(height: 16),
                   Center(
@@ -1446,6 +1485,72 @@ class ChatScreenBody extends StatelessWidget {
     );
   }
 
+  String _greetingTitleText() {
+    final timeGreeting = Utility.getTimeOfDayGreeting();
+    final userName = Utility.getName().trim();
+    if (userName.isEmpty) {
+      return '$timeGreeting\nHow can I help you today?';
+    }
+    return '$timeGreeting, "$userName"\nHow can I help you today?';
+  }
+
+  Widget _buildTitleWithHighlightedName(String text) {
+    // Parse text to find name between quotes (handles both \"name\" and "name")
+    final baseStyle = AppTextStyles.launchTitle.copyWith(
+      color: const Color(0xFF171212),
+    );
+    final highlightedStyle = AppTextStyles.launchTitle.copyWith(
+      color: AppConstants.appThemeColor,
+    );
+
+    final List<TextSpan> spans = [];
+    // Pattern matches both escaped quotes (\") and regular quotes (")
+    final RegExp quotePattern = RegExp(r'(?:\\"|")([^"]+)(?:\\"|")');
+
+    int lastEnd = 0;
+    final matches = quotePattern.allMatches(text);
+
+    if (matches.isEmpty) {
+      // No matches found, return regular text
+      return Text(
+        text,
+        textAlign: TextAlign.center,
+        style: baseStyle,
+      );
+    }
+
+    for (final match in matches) {
+      // Add text before the match
+      if (match.start > lastEnd) {
+        spans.add(TextSpan(
+          text: text.substring(lastEnd, match.start),
+          style: baseStyle,
+        ));
+      }
+
+      // Add the highlighted name (without quotes)
+      spans.add(TextSpan(
+        text: match.group(1) ?? '',
+        style: highlightedStyle,
+      ));
+
+      lastEnd = match.end;
+    }
+
+    // Add remaining text after the last match
+    if (lastEnd < text.length) {
+      spans.add(TextSpan(
+        text: text.substring(lastEnd),
+        style: baseStyle,
+      ));
+    }
+
+    return Text.rich(
+      TextSpan(children: spans),
+      textAlign: TextAlign.center,
+    );
+  }
+
   Widget _buildGreetingOptions() {
     final List<GreetingOption> opts = (greetingData?.options ?? []).toList();
     print('Options count: ${opts.length}');
@@ -1502,62 +1607,6 @@ class ChatScreenBody extends StatelessWidget {
     );
   }
 
-  Widget _buildTitleWithHighlightedName(String text) {
-    // Parse text to find name between quotes (handles both \"name\" and "name")
-    final baseStyle = AppTextStyles.launchTitle.copyWith(
-      color: const Color(0xFF171212),
-    );
-    final highlightedStyle = AppTextStyles.launchTitle.copyWith(
-      color: AppConstants.appThemeColor,
-    );
-
-    final List<TextSpan> spans = [];
-    // Pattern matches both escaped quotes (\") and regular quotes (")
-    final RegExp quotePattern = RegExp(r'(?:\\"|")([^"]+)(?:\\"|")');
-    
-    int lastEnd = 0;
-    final matches = quotePattern.allMatches(text);
-    
-    if (matches.isEmpty) {
-      // No matches found, return regular text
-      return Text(
-        text,
-        textAlign: TextAlign.center,
-        style: baseStyle,
-      );
-    }
-    
-    for (final match in matches) {
-      // Add text before the match
-      if (match.start > lastEnd) {
-        spans.add(TextSpan(
-          text: text.substring(lastEnd, match.start),
-          style: baseStyle,
-        ));
-      }
-      
-      // Add the highlighted name (without quotes)
-      spans.add(TextSpan(
-        text: match.group(1) ?? '',
-        style: highlightedStyle,
-      ));
-      
-      lastEnd = match.end;
-    }
-    
-    // Add remaining text after the last match
-    if (lastEnd < text.length) {
-      spans.add(TextSpan(
-        text: text.substring(lastEnd),
-        style: baseStyle,
-      ));
-    }
-    
-    return Text.rich(
-      TextSpan(children: spans),
-      textAlign: TextAlign.center,
-    );
-  }
 
   Widget _buildCategoryItem({
     String? iconPath,

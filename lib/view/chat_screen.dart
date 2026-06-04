@@ -3,8 +3,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_svg/flutter_svg.dart';
-import 'package:shimmer/shimmer.dart';
 import 'package:chat_bot/data/data.dart';
 import 'package:chat_bot/bloc/bloc.dart';
 import 'package:chat_bot/widgets/widgets.dart';
@@ -47,7 +45,6 @@ class _ChatScreenState extends State<ChatScreen> {
   late final LaunchBloc _launchBloc;
   MyGPTsResponse? _chatbotData;
   GreetingResponse? _greetingData;
-  bool _isDataLoaded = false;
 
   @override
   void initState() {
@@ -89,7 +86,6 @@ class _ChatScreenState extends State<ChatScreen> {
     if (widget.chatbotData != null) {
       _chatbotData = widget.chatbotData;
       _greetingData = widget.greetingData;
-      _isDataLoaded = true;
     } else {
       // Fetch data using LaunchBloc
       _launchBloc.add(const LaunchRequested());
@@ -948,86 +944,42 @@ class _ChatScreenState extends State<ChatScreen> {
   Future<void> _restartGreetingAPI() async {
     setState(() {
       _greetingData = null;
-      _isDataLoaded = false;
-      _launchBloc.add(const LaunchRequested());
     });
+    _launchBloc.add(const LaunchRequested());
   }
 
-  @override
-  void dispose() {
-    if (widget.isFromHistory == false) {
-      _messageFocusNode.removeListener(_onFocusChange);
-      _messageController.dispose();
-      _scrollController.dispose();
-      _messageFocusNode.dispose();
-      _launchBloc.close();
-      
-      // Clear speech service callback
-      _speechService.clearOnTextUpdateCallback();
-    }
-
-    // OrderService().clearCallback();
-    print("DISPOSE");
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    // If data is not loaded yet, show loading or handle LaunchBloc states
-    if (!_isDataLoaded && widget.isFromHistory == false) {
-      return BlocProvider.value(
-        value: _launchBloc,
-        child: BlocListener<LaunchBloc, LaunchState>(
-          listener: (context, state) {
-            if (state is LaunchSuccess) {
-              setState(() {
-                _chatbotData = state.chatbotData;
-                _greetingData = state.greetingData;
-                _isDataLoaded = true;
-              });
-            } else if (state is LaunchFailure) {
-              // Handle error - show error dialog or retry
-              showDialog(
-                context: context,
-                barrierDismissible: false,
-                builder: (BuildContext context) {
-                  return AlertDialog(
-                    title: const Text('Error'),
-                    content: const Text(
-                      'Something went wrong please try again later',
-                    ),
-                    actions: [
-                      TextButton(
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                          OrderService().triggerChatDismiss();
-                        },
-                        child: const Text('OK'),
-                      ),
-                    ],
-                  );
+  void _onLaunchState(BuildContext context, LaunchState state) {
+    if (state is LaunchSuccess) {
+      setState(() {
+        _chatbotData = state.chatbotData;
+        _greetingData = state.greetingData;
+      });
+    } else if (state is LaunchFailure) {
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext dialogContext) {
+          return AlertDialog(
+            title: const Text('Error'),
+            content: const Text(
+              'Something went wrong please try again later',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(dialogContext).pop();
+                  OrderService().triggerChatDismiss();
                 },
-              );
-            }
-          },
-          child: BlocBuilder<LaunchBloc, LaunchState>(
-            builder: (context, state) {
-              return Scaffold(
-                backgroundColor: Colors.white,
-                body: Container(
-                  color: Colors.white,
-                  width: double.infinity,
-                  height: double.infinity,
-                  child: Center(child: _buildShimmerGreetingOverlay(context)),
-                ),
-              );
-            },
-          ),
-        ),
+                child: const Text('OK'),
+              ),
+            ],
+          );
+        },
       );
     }
+  }
 
-    // Data is loaded, show the chat screen
+  Widget _buildChatScreenBody() {
     return ChatScreenBody(
       messageController: _messageController,
       messageFocusNode: _messageFocusNode,
@@ -1057,203 +1009,58 @@ class _ChatScreenState extends State<ChatScreen> {
       apiData: _apiData,
       onClearPendingMessage: _clearPendingMessage,
       sessionId: sessionId,
-      // Pass session ID
       latestActionWidgets: _latestActionWidgets,
       onHideStoreCards: _hideStoreCards,
-      // Add the callback
       onUpdateCartCount: _updateCartCount,
-      // Add the callback
       totalCartCount: _totalCartCount,
-      // Pass the cart count
       cartBloc: _cartBloc,
-      // Pass the cart bloc
       onStartSpeechRecording: _startSpeechRecording,
-      // Add start speech handler
       onStopSpeechRecording: _stopSpeechRecording,
-      // Add stop speech handler
       onCancelSpeechRecording: _cancelSpeechRecording,
-      // Add cancel speech handler
-      isRecording: _isRecording, // Pass recording state
-      needToEndThisChat: _needToEndThisChat, // Pass needToEndThisChat state
-      gotStripePaymentCallback: _gotStripePaymentCallback, // Pass gotStripePaymentCallback parameter
+      isRecording: _isRecording,
+      needToEndThisChat: _needToEndThisChat,
+      gotStripePaymentCallback: _gotStripePaymentCallback,
       onUpdateGotStripePaymentCallback: (bool value) {
         if (_gotStripePaymentCallback == true) {
           Timer(Duration(seconds: 2), () {
-            //  setState(() {
             _gotStripePaymentCallback = value;
-          // });
           });
         }
-      }, // Add callback to update gotStripePaymentCallback
-      isFromHistory: widget.isFromHistory, // Pass isFromHistory parameter
+      },
+      isFromHistory: widget.isFromHistory,
       chatHistoryTitle: widget.chatHistoryTitle,
     );
   }
 
-  Widget _buildShimmerGreetingOverlay(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-        FocusScope.of(context).unfocus();
-      },
-      child: SingleChildScrollView(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 360),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              // Top graphic group with shimmer
-              SizedBox(
-                width: 110,
-                height: 110,
-                child: Stack(
-                  clipBehavior: Clip.none,
-                  children: [
-                    Align(
-                      alignment: Alignment.center,
-                      child: SvgPicture.asset(
-                        AssetPath.get('images/ic_LogoTutorial.svg'),
-                        fit: BoxFit.contain,
-                      ),
-                    )
-                    // Outer glow circle
-                    // Container(
-                    //   width: 110,
-                    //   height: 110,
-                    //   decoration: BoxDecoration(
-                    //     borderRadius: BorderRadius.circular(110),
-                    //     gradient: const LinearGradient(
-                    //       begin: Alignment.centerLeft,
-                    //       end: Alignment.centerRight,
-                    //       colors: [
-                    //         Color(0x1AD445EC),
-                    //         Color(0x1AB02EFB),
-                    //         Color(0x1A8E2FFD),
-                    //         Color(0x1A5E3DFE),
-                    //         Color(0x1A5186E0),
-                    //       ],
-                    //     ),
-                    //   ),
-                    // ),
-                    // // Center asset
-                    // Align(
-                    //   alignment: Alignment.center,
-                    //   child: Container(
-                    //     width: 90,
-                    //     height: 90,
-                    //     decoration: const BoxDecoration(
-                    //       shape: BoxShape.circle,
-                    //       gradient: LinearGradient(
-                    //         begin: Alignment.centerLeft,
-                    //         end: Alignment.centerRight,
-                    //         colors: [
-                    //           Color(0xFFD445EC),
-                    //           Color(0xFFB02EFB),
-                    //           Color(0xFF8E2FFD),
-                    //           Color(0xFF5E3DFE),
-                    //           Color(0xFF5186E0),
-                    //         ],
-                    //       ),
-                    //     ),
-                    //     child: Padding(
-                    //       padding: const EdgeInsets.all(12),
-                    //       child: SvgPicture.asset(
-                    //         AssetPath.get('images/ic_mainImg_R.svg'),
-                    //         fit: BoxFit.contain,
-                    //       ),
-                    //     ),
-                    //   ),
-                    // ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 10),
+  @override
+  void dispose() {
+    if (widget.isFromHistory == false) {
+      _messageFocusNode.removeListener(_onFocusChange);
+      _messageController.dispose();
+      _scrollController.dispose();
+      _messageFocusNode.dispose();
+      _launchBloc.close();
+      
+      // Clear speech service callback
+      _speechService.clearOnTextUpdateCallback();
+    }
 
-              // Title shimmer
-              SizedBox(
-                width: double.infinity,
-                height: 60,
-                child: Shimmer.fromColors(
-                  baseColor: Colors.grey[300]!,
-                  highlightColor: Colors.grey[100]!,
-                  child: Container(
-                    width: 280,
-                    height: 24,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 10),
+    // OrderService().clearCallback();
+    print("DISPOSE");
+    super.dispose();
+  }
 
-              // Subtitle shimmer
-              SizedBox(
-                width: double.infinity,
-                height: 40,
-                child: Shimmer.fromColors(
-                  baseColor: Colors.grey[300]!,
-                  highlightColor: Colors.grey[100]!,
-                  child: Container(
-                    width: 250,
-                    height: 18,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 14),
+  @override
+  Widget build(BuildContext context) {
+    if (widget.isFromHistory) {
+      return _buildChatScreenBody();
+    }
 
-              // Weather information shimmer
-              Container(
-                width: double.infinity,
-                height: 130,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                  vertical: 16,
-                ),
-                child: Shimmer.fromColors(
-                  baseColor: Colors.grey[300]!,
-                  highlightColor: Colors.grey[100]!,
-                  child: Container(
-                    width: 200,
-                    height: 16,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 14),
-
-              // Options grid shimmer 2x2
-              ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 340),
-                child: Column(
-                  children: List.generate(3, (index) {
-                    return Shimmer.fromColors(
-                      baseColor: Colors.grey[300]!,
-                      highlightColor: Colors.grey[100]!,
-                      child: Container(
-                        width: double.infinity,
-                        height: 70,
-                        margin: const EdgeInsets.only(bottom: 10),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(5),
-                        ),
-                      ),
-                    );
-                  }),
-                ),
-              ),
-            ],
-          ),
-        ),
+    return BlocProvider.value(
+      value: _launchBloc,
+      child: BlocListener<LaunchBloc, LaunchState>(
+        listener: _onLaunchState,
+        child: _buildChatScreenBody(),
       ),
     );
   }
