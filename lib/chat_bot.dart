@@ -47,6 +47,8 @@ class ChatBot {
     required String platform,
     required bool personalization,
     required String emailId,
+    required String phoneNumber,
+    required String countryCode,
   }) {
     print('chatBotId: $chatBotId');
     print('appSecret: $appSecret');
@@ -74,6 +76,8 @@ class ChatBot {
     print('platform: $platform');
     print('personalization: $personalization');
     print('emailId: $emailId');
+    print('phoneNumber: $phoneNumber');
+    print('countryCode: $countryCode');
     isTutorialShown = needToShowTutorial;
     isCompleteSetupShown = needToShowCompleteSetup;
     ApiService.configure(
@@ -103,6 +107,8 @@ class ChatBot {
       platform: platform,
       personalization: personalization,
       emailId: emailId,
+      phoneNumber: phoneNumber,
+      countryCode: countryCode,
     );
   }
 

@@ -13,4 +13,7 @@ export 'cart_widget.dart';
 export 'cart_details_price_widget.dart';
 export 'restaurant_sections_widget.dart';
 export 'hotel_destination_widget.dart';
+export 'customer_profile_details_widget.dart';
+export 'hotels_widget.dart';
+export 'choose_room_bottom_sheet.dart';
 export 'screen_header.dart';

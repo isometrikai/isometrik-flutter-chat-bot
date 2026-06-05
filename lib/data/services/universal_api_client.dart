@@ -46,6 +46,12 @@ class UniversalApiClient {
     buildHeaders: _buildCustomerPreferenceHeaders,
   );
 
+  /// Xeni hotel APIs (availability, etc.)
+  ApiClient get _hotelAvailabilityClient => ApiClient(
+    baseUrl: ApiService.baseApiUrl,
+    buildHeaders: _buildHotelAvailabilityHeaders,
+  );
+
   Future<Map<String, String>> _buildUserPreferenceHeaders() async {
     final raw = TokenManager.instance.userToken ?? '';
     final token = raw.isEmpty ? '' : (raw.startsWith('Bearer ') ? raw : 'Bearer $raw');
@@ -69,6 +75,23 @@ class UniversalApiClient {
       'language': 'en',
       'platform': platform.isNotEmpty ? platform : '3',
       if (raw.isNotEmpty) 'authorization': raw,
+    };
+  }
+
+  Future<Map<String, String>> _buildHotelAvailabilityHeaders() async {
+    final raw = TokenManager.instance.userToken ?? '';
+    final token = raw.isEmpty
+        ? ''
+        : (raw.startsWith('Bearer ') ? raw : 'Bearer $raw');
+    final platform = Utility.getPlatform();
+    return {
+      'accept': 'application/json',
+      'Content-Type': 'application/json',
+      'language': 'en',
+      'platform': platform.isNotEmpty ? platform : '3',
+      'currencysymbol': Utility.getCurrencySymbol(),
+      'currencycode': Utility.getCurrencyCode(),
+      if (token.isNotEmpty) 'authorization': token,
     };
   }
 
@@ -185,6 +208,9 @@ class UniversalApiClient {
 
   /// Get easyagentapi customer preference client (PATCH /v1/customer/*)
   ApiClient get customerPreferenceClient => _customerPreferenceClient;
+
+  /// Xeni hotel availability client
+  ApiClient get hotelAvailabilityClient => _hotelAvailabilityClient;
 
   /// Create a custom API client for any base URL
   ApiClient createClient(String baseUrl) {

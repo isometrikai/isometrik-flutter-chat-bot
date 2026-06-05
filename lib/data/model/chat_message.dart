@@ -13,6 +13,8 @@ class ChatMessage {
   final bool hasCartWidget;
   final bool hasRestaurantSectionsWidget;
   final bool hasHotelDestinationSectionWidget;
+  final bool hasHotelsSectionWidget;
+  final bool hasCustomerProfileDetailsSectionWidget;
   final bool hasServicesDeliveryOptionsWidget;
   final bool hasChooseAddressWidget;
   final bool hasChooseCardWidget;
@@ -26,6 +28,8 @@ class ChatMessage {
   final List<WidgetAction> cartItems;
   final List<WidgetAction> restaurantSectionsItems;
   final List<HotelDestination> hotelDestinationItems;
+  final List<HotelDestination> customerProfileDetailsItems;
+  final List<HotelProperty> hotelsItems;
   final List<WidgetAction> servicesDeliveryOptions;
   final List<AddressOption> addressOptions;
   final List<CardOption> cardOptions;
@@ -40,7 +44,8 @@ class ChatMessage {
     final ChatWidget? orderSummaryWidget;
   final ChatWidget? orderConfirmedWidget;
   final ChatWidget? hotelDestinationWidget;
-
+  final ChatWidget? hotelsWidget;
+  final ChatWidget? customerProfileDetailsWidget;
   ChatMessage({
     required this.id,
     required this.text,
@@ -52,6 +57,8 @@ class ChatMessage {
     this.hasCartWidget = false,
     this.hasRestaurantSectionsWidget = false,
     this.hasHotelDestinationSectionWidget = false,
+    this.hasHotelsSectionWidget = false,
+    this.hasCustomerProfileDetailsSectionWidget = false,
     this.hasServicesDeliveryOptionsWidget = false,
     this.hasChooseAddressWidget = false,
     this.hasChooseCardWidget = false,
@@ -65,6 +72,8 @@ class ChatMessage {
     this.cartItems = const [],
     this.restaurantSectionsItems = const [],
     this.hotelDestinationItems = const [],
+    this.customerProfileDetailsItems = const [],
+    this.hotelsItems = const [],
     this.servicesDeliveryOptions = const [],
     this.addressOptions = const [],
     this.cardOptions = const [],
@@ -79,6 +88,8 @@ class ChatMessage {
     this.orderSummaryWidget,
     this.orderConfirmedWidget,
     this.hotelDestinationWidget,
+    this.customerProfileDetailsWidget,
+    this.hotelsWidget,
   });
 
   ChatMessage copyWith({
@@ -91,6 +102,8 @@ class ChatMessage {
     bool? hasProductCards,
     bool? hasCartWidget,
     bool? hasHotelDestinationSectionWidget,
+    bool? hasHotelsSectionWidget,
+    bool? hasCustomerProfileDetailsSectionWidget,
     bool? hasServicesDeliveryOptionsWidget,
     bool? hasChooseAddressWidget,
     bool? hasChooseCardWidget,
@@ -104,6 +117,8 @@ class ChatMessage {
     List<WidgetAction>? cartItems,
     List<WidgetAction>? restaurantSectionsItems,
     List<HotelDestination>? hotelDestinationItems,
+    List<HotelDestination>? customerProfileDetailsItems,
+    List<HotelProperty>? hotelsItems,
     List<WidgetAction>? servicesDeliveryOptions,
     List<AddressOption>? addressOptions,
     List<CardOption>? cardOptions,
@@ -118,6 +133,8 @@ class ChatMessage {
     ChatWidget? orderSummaryWidget,
     ChatWidget? orderConfirmedWidget,
     ChatWidget? hotelDestinationWidget,
+    ChatWidget? hotelsWidget,
+    ChatWidget? customerProfileDetailsWidget,
   }) {
     return ChatMessage(
       id: id ?? this.id,
@@ -130,6 +147,8 @@ class ChatMessage {
       hasCartWidget: hasCartWidget ?? this.hasCartWidget,
       hasRestaurantSectionsWidget: hasRestaurantSectionsWidget ?? this.hasRestaurantSectionsWidget,
       hasHotelDestinationSectionWidget: hasHotelDestinationSectionWidget ?? this.hasHotelDestinationSectionWidget,
+      hasHotelsSectionWidget: hasHotelsSectionWidget ?? this.hasHotelsSectionWidget,
+      hasCustomerProfileDetailsSectionWidget: hasCustomerProfileDetailsSectionWidget ?? this.hasCustomerProfileDetailsSectionWidget,
       hasServicesDeliveryOptionsWidget: hasServicesDeliveryOptionsWidget ?? this.hasServicesDeliveryOptionsWidget,
       hasChooseAddressWidget: hasChooseAddressWidget ?? this.hasChooseAddressWidget,
       hasChooseCardWidget: hasChooseCardWidget ?? this.hasChooseCardWidget,
@@ -143,6 +162,8 @@ class ChatMessage {
       cartItems: cartItems ?? this.cartItems,
       restaurantSectionsItems: restaurantSectionsItems ?? this.restaurantSectionsItems,
       hotelDestinationItems: hotelDestinationItems ?? this.hotelDestinationItems,
+      customerProfileDetailsItems: customerProfileDetailsItems ?? this.customerProfileDetailsItems,
+      hotelsItems: hotelsItems ?? this.hotelsItems,
       servicesDeliveryOptions: servicesDeliveryOptions ?? this.servicesDeliveryOptions,
       addressOptions: addressOptions ?? this.addressOptions,
       cardOptions: cardOptions ?? this.cardOptions,
@@ -156,6 +177,8 @@ class ChatMessage {
         orderSummaryWidget: orderSummaryWidget ?? this.orderSummaryWidget,
         orderConfirmedWidget: orderConfirmedWidget ?? this.orderConfirmedWidget,
         hotelDestinationWidget: hotelDestinationWidget ?? this.hotelDestinationWidget,
+        hotelsWidget: hotelsWidget ?? this.hotelsWidget,
+        customerProfileDetailsWidget: customerProfileDetailsWidget ?? this.customerProfileDetailsWidget,
     );
   }
 }

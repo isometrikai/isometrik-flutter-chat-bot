@@ -12,6 +12,8 @@ class Utility {
   static String name = '';
   static String emailId = '';
   static String timezone = '';
+  static String phoneNumber = '';
+  static String countryCode = '';
   static bool personalization = true;
 
   /// Fixed UTC offsets for common IANA zones (no DST). Extend as needed.
@@ -147,6 +149,14 @@ class Utility {
     Utility.name = name;
   }
 
+  static void setPhoneNumber(String phoneNumber) {
+    Utility.phoneNumber = phoneNumber;
+  }
+
+  static void setCountryCode(String countryCode) {
+    Utility.countryCode = countryCode;
+  }
+
   static void setEmailId(String emailId) {
     Utility.emailId = emailId;
   }
@@ -161,6 +171,14 @@ class Utility {
 
   static String getName() {
     return name;
+  }
+
+  static String getPhoneNumber() {
+    return phoneNumber;
+  }
+
+  static String getCountryCode() {
+    return countryCode;
   }
 
   static void setTimezone(String value) {
@@ -347,6 +365,81 @@ class Utility {
     }
 
     return buffer.toString();
+  }
+
+  static const List<String> _shortMonthNames = [
+    'Jan',
+    'Feb',
+    'Mar',
+    'Apr',
+    'May',
+    'Jun',
+    'Jul',
+    'Aug',
+    'Sep',
+    'Oct',
+    'Nov',
+    'Dec',
+  ];
+
+  /// Short date for hotel UI, e.g. `20 Mar`.
+  static String formatHotelDateShort(String raw) {
+    final parsed = parseHotelBookingDate(raw);
+    if (parsed == null) return raw.trim();
+    return '${parsed.day} ${_shortMonthNames[parsed.month - 1]}';
+  }
+
+  static int hotelBookingGuestCount(Map<String, dynamic> hotelBooking) {
+    final occupancy = hotelBooking['occupancy'];
+    if (occupancy is! List) return 0;
+
+    var total = 0;
+    for (final room in occupancy) {
+      if (room is! Map) continue;
+      final map = Map<String, dynamic>.from(room);
+      total += (map['adults'] as num?)?.toInt() ?? 0;
+      total += (map['childs'] as num?)?.toInt() ??
+          (map['children'] as num?)?.toInt() ??
+          0;
+    }
+    return total;
+  }
+
+  static int? hotelBookingNights(Map<String, dynamic> hotelBooking) {
+    final checkin = parseHotelBookingDate(
+      (hotelBooking['checkinDate'] ?? '').toString(),
+    );
+    final checkout = parseHotelBookingDate(
+      (hotelBooking['checkoutDate'] ?? '').toString(),
+    );
+    if (checkin == null || checkout == null) return null;
+    final nights = checkout.difference(checkin).inDays;
+    return nights > 0 ? nights : null;
+  }
+
+  /// e.g. `20 Mar – 22 Mar · 2 nights · 4 guests`
+  static String formatHotelBookingSummary(Map<String, dynamic> hotelBooking) {
+    final checkin = (hotelBooking['checkinDate'] ?? '').toString();
+    final checkout = (hotelBooking['checkoutDate'] ?? '').toString();
+    final parts = <String>[];
+
+    if (checkin.isNotEmpty && checkout.isNotEmpty) {
+      parts.add(
+        '${formatHotelDateShort(checkin)} – ${formatHotelDateShort(checkout)}',
+      );
+    }
+
+    final nights = hotelBookingNights(hotelBooking);
+    if (nights != null) {
+      parts.add('$nights night${nights == 1 ? '' : 's'}');
+    }
+
+    final guests = hotelBookingGuestCount(hotelBooking);
+    if (guests > 0) {
+      parts.add('$guests guest${guests == 1 ? '' : 's'}');
+    }
+
+    return parts.join(' · ');
   }
 }
 

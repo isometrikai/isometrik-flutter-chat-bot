@@ -1053,6 +1053,14 @@ class ChatScreenBody extends StatelessWidget {
             const SizedBox(height: 4), //12
             buildHotelDestinationWidget(message.hotelDestinationItems),
           ],
+          if (message.hasHotelsSectionWidget) ...[
+            const SizedBox(height: 4), //12
+            buildHotelsWidget(message.hotelsItems),
+          ],
+          if (message.hasCustomerProfileDetailsSectionWidget) ...[
+            const SizedBox(height: 4), //12
+            buildCustomerProfileDetailsWidget(message.customerProfileDetailsItems),
+          ],
           if (message.hasServicesDeliveryOptionsWidget) ...[
             const SizedBox(height: 4), //12
             buildServicesDeliveryOptionsWidget(message.servicesDeliveryOptions),
@@ -2138,12 +2146,80 @@ class ChatScreenBody extends StatelessWidget {
           }
         }
 
+        for (final widget in latestActionWidgets.where(
+          (w) => w.type == WidgetEnum.see_available_rooms.value,
+        )) {
+          for (final action in widget.seeAvailableRooms) {
+            actionButtons.add(
+              buildActionButton(
+                text: action.buttonText,
+                onTap: isApiLoading
+                    ? () {}
+                    : () => _openChooseRoomSheet(context, action),
+              ),
+            );
+          }
+        }
+
+        for (final widget in latestActionWidgets.where(
+          (w) => w.type == WidgetEnum.hotel_booking_for_me.value,
+        )) {
+          for (final action in widget.hotelBookingForMe) {
+            actionButtons.add(
+              buildActionButton(
+                text: action.buttonText,
+                onTap: isApiLoading
+                    ? () {}
+                    : () {
+                        apiData['hotel_booking'] = _hotelBookingWithForMeDetails();
+                         onSendMessage(action.buttonText);
+                      },
+              ),
+            );
+          }
+        }
+
+        for (final widget in latestActionWidgets.where(
+          (w) => w.type == WidgetEnum.hotel_booking_for_other.value,
+        )) {
+          for (final action in widget.hotelBookingForOther) {
+            actionButtons.add(
+              buildActionButton(
+                text: action.buttonText,
+                onTap: isApiLoading
+                    ? () {}
+                    : () {
+                        OrderService().triggerClickManageScreenOpen({
+                        'flow': 'HotelBooking',
+                        'screenName': 'HotelBookingUserDetails',
+                      });
+                      },
+              ),
+            );
+          }
+        }
+
+        for (final widget in latestActionWidgets.where(
+          (w) => w.type == WidgetEnum.see_more_hotels.value,
+        )) {
+          for (final action in widget.seeMoreHotels) {
+            actionButtons.add(
+              buildActionButton(
+                text: action.buttonText,
+                onTap: isApiLoading
+                    ? () {}
+                    : () => _openHotelSearchScreen(context, action),
+              ),
+            );
+          }
+        }
+
         for (final widgetType in [
           WidgetEnum.add_more.value,
           WidgetEnum.proceed_to_checkout.value,
           WidgetEnum.cash_on_delivery.value,
           WidgetEnum.hotel_booking_dates.value,
-          WidgetEnum.hotel_occupancy.value,
+          WidgetEnum.hotel_guests_rooms.value,
         ]) {
           final widgets = latestActionWidgets.where(
             (w) => w.type == widgetType,
@@ -2181,7 +2257,7 @@ class ChatScreenBody extends StatelessWidget {
                         'flow': 'HotelBooking',
                         'screenName': 'HotelBookingDates',
                       });
-                    } else if (widget.type == WidgetEnum.hotel_occupancy.value && widget.isHotelBookingFlow == true) {
+                    } else if (widget.type == WidgetEnum.hotel_guests_rooms.value && widget.isHotelBookingFlow == true) {
                       OrderService().triggerClickManageScreenOpen({
                         'flow': 'HotelBooking',
                         'screenName': 'HotelBookingGuests',
@@ -3832,6 +3908,16 @@ class ChatScreenBody extends StatelessWidget {
     );
   }
 
+  Widget buildCustomerProfileDetailsWidget(
+    List<HotelDestination> items,
+  ) {
+    if (items.isEmpty) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.only(left: 0.0),
+      child: CustomerProfileDetailsWidget(items: items),
+    );
+  }
+
   Widget buildHotelDestinationWidget(List<HotelDestination> destinations) {
     if (destinations.isEmpty) return const SizedBox.shrink();
     return Padding(
@@ -3854,6 +3940,147 @@ class ChatScreenBody extends StatelessWidget {
             null,
             {'hotel_booking': hotelBookingData},
           );
+        },
+      ),
+    );
+  }
+
+  Map<String, dynamic> _hotelBookingMap() {
+    final existing = apiData['hotel_booking'];
+    if (existing is Map) {
+      return Map<String, dynamic>.from(existing);
+    }
+    return {};
+  }
+
+  Map<String, dynamic> _hotelBookingWithForMeDetails() {
+    final hotelBooking = _hotelBookingMap();
+    final fullName = Utility.getName().trim();
+    final nameParts =
+        fullName.split(RegExp(r'\s+')).where((part) => part.isNotEmpty).toList();
+    final firstName = nameParts.isNotEmpty ? nameParts.first : '';
+    final lastName =
+        nameParts.length > 1 ? nameParts.sublist(1).join(' ') : '';
+
+    final existingPhone = hotelBooking['phone'];
+    final phoneMap = existingPhone is Map
+        ? Map<String, dynamic>.from(existingPhone)
+        : <String, dynamic>{};
+
+    hotelBooking
+      ..['email'] = Utility.getEmailId().trim()
+      ..['phone'] = {
+        'countryCode': (phoneMap['countryCode'] ?? '91').toString(),
+        'number': (phoneMap['number'] ?? '').toString(),
+      }
+      ..['rooms'] = [
+        {
+          'title': 'Mr',
+          'firstName': firstName,
+          'lastName': lastName,
+        },
+      ]
+      ..['countryOfResidence'] =
+          (hotelBooking['countryOfResidence'] ?? 'AE').toString();
+
+    return hotelBooking;
+  }
+
+  void _openHotelSearchScreen(BuildContext context, WidgetAction action) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => BlocProvider(
+          create: (_) => HotelSearchBloc(),
+          child: HotelSearchScreen(
+            actionData: action,
+            onHotelSelected: (property) {
+              final existing = apiData['hotel_booking'];
+              final Map<String, dynamic> hotelBooking;
+              if (existing is Map) {
+                hotelBooking = Map<String, dynamic>.from(existing);
+                hotelBooking['correlationId'] = property.correlationId;
+                hotelBooking['propertyId'] = property.propertyId;
+              } else {
+                hotelBooking = {
+                  'correlationId': property.correlationId,
+                  'propertyId': property.propertyId,
+                };
+              }
+              apiData['hotel_booking'] = hotelBooking;
+              Navigator.of(context).pop();
+              onSendMessage(
+                'I have selected hotel ${property.name}. Please show me available rooms',
+              );
+            },
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _openChooseRoomSheet(
+    BuildContext context,
+    WidgetAction action,
+  ) async {
+    final hotelBooking = _hotelBookingMap();
+    final hotelName = action.title.isNotEmpty
+        ? action.title
+        : (action.storeName ?? action.name ?? '');
+    final hotelImageUrl = action.image ?? '';
+
+    await ChooseRoomBottomSheet.show(
+      context,
+      hotelBooking: hotelBooking,
+      hotelName: hotelName,
+      hotelImageUrl: hotelImageUrl,
+      onNext: (selected) {
+         final existing = apiData['hotel_booking'];
+            final Map<String, dynamic> hotelBooking;
+            if (existing is Map) {
+              hotelBooking = Map<String, dynamic>.from(existing);
+              hotelBooking['roomId'] = selected.room.id;
+              hotelBooking['roomName'] = selected.room.name;
+              hotelBooking['availabilityToken'] = selected.bed?.availabilityToken ?? '';
+            } else {
+              hotelBooking = {
+                'roomId': selected.room.id,
+                'roomName': selected.room.name,
+                'availabilityToken': selected.bed?.availabilityToken ?? '',
+              };
+            }
+            apiData['hotel_booking'] = hotelBooking;
+
+        onSendMessage(
+          'I have selected room ${selected.room.name}'
+        );
+      },
+    );
+  }
+
+  Widget buildHotelsWidget(List<HotelProperty> hotels) {
+    if (hotels.isEmpty) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.only(left: 0.0),
+      child: HotelsWidget(
+        properties: hotels,
+        nights: HotelsWidget.nightsFromApiData(apiData),
+        isFromChatHistory: isFromHistory,
+        onOpenInApp: (property) {
+           final existing = apiData['hotel_booking'];
+            final Map<String, dynamic> hotelBooking;
+            if (existing is Map) {
+              hotelBooking = Map<String, dynamic>.from(existing);
+              hotelBooking['correlationId'] = property.correlationId;
+              hotelBooking['propertyId'] = property.propertyId;
+            } else {
+              hotelBooking = {
+                'correlationId': property.correlationId,
+                'propertyId': property.propertyId,
+              };
+            }
+            apiData['hotel_booking'] = hotelBooking;
+          onSendMessage('I have selected hotel ${property.name}. Please show me available rooms');
         },
       ),
     );

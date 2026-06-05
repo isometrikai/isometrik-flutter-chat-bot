@@ -116,6 +116,8 @@ class PlatformService {
         platform: config['platform'] ?? 0,
         personalization: config['personalization'] ?? false,
         emailId: config['emailId'] ?? '',
+        phoneNumber: config['phoneNumber'] ?? '',
+        countryCode: config['countryCode'] ?? '',
       );
 
       print('✅ ApiService configured successfully');
@@ -150,6 +152,8 @@ class PlatformService {
             platform: '1',
             personalization: true,
             emailId: 'chintu@gmail.com',
+            phoneNumber: '9988765433',
+            countryCode: '91',
             // zoneId: '636dfc8c89b6a857b500ccd1',//dubai
             //  currencycode: 'AED',//dubai
             // currencysymbol: "2K8u2KU=",//"د.إ",//dubai

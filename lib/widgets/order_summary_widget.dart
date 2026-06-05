@@ -232,7 +232,7 @@ class OrderSummaryWidget extends StatelessWidget {
                         ],
                       ],
                     ),
-                    if (storeInfo.address != null && storeInfo.address!.isNotEmpty) ...[    
+                    if (storeInfo.address != null && storeInfo.address!.isNotEmpty && storeInfo.address != 'N/A') ...[    
                       const SizedBox(height: 10),
                       // Address with icon
                     Row(

@@ -150,6 +150,12 @@ class ChatWidget {
   bool get isChooseDateWidget => type == WidgetEnum.choose_date.value;
   bool get isScheduledLaterWidget => type == WidgetEnum.schedule_later.value;
   bool get isSelectStaffWidget => type == WidgetEnum.staff_selection.value;
+  bool get isSeeAvailableRoomsWidget => type == WidgetEnum.see_available_rooms.value;
+  bool get isHotelBookingForMeWidget =>
+      type == WidgetEnum.hotel_booking_for_me.value;
+  bool get isHotelBookingForOtherWidget =>
+      type == WidgetEnum.hotel_booking_for_other.value;
+  bool get isSeeMoreHotelsWidget => type == WidgetEnum.see_more_hotels.value;
   bool get isPrescriptionScreenWidget => type == WidgetEnum.prescription_screen.value;
   bool get isOnlinePaymentConfirmOrderWidget => type == WidgetEnum.online_payment_confirm_order.value;
   bool get isOrderSummaryWidget => type == WidgetEnum.order_summary.value;
@@ -158,6 +164,8 @@ class ChatWidget {
   bool get isOrderDetailsWidget => type == WidgetEnum.order_details.value;
   bool get isAddDependentWidget => type == WidgetEnum.add_dependent.value;
   bool get isHotelDestinationWidget => type == WidgetEnum.hotel_destination.value;
+  bool get isCustomerProfileDetailsWidget => type == WidgetEnum.customer_profile_details.value;
+  bool get isHotelsWidget => type == WidgetEnum.hotels.value;
   bool get isButtonWidget => type == 'button';
   bool get isInputWidget => type == 'input';
   bool get isImageWidget => type == 'image';
@@ -260,6 +268,23 @@ class ChatWidget {
 
   // Get scheduled_later actions (converted to models)
   List<WidgetAction> get scheduledLater => isScheduledLaterWidget
+      ? widget.map((e) => WidgetAction.fromJson(e as Map<String, dynamic>)).toList()
+      : [];
+
+  // Get see_available_rooms actions (converted to models)
+  List<WidgetAction> get seeAvailableRooms => isSeeAvailableRoomsWidget
+      ? widget.map((e) => WidgetAction.fromJson(e as Map<String, dynamic>)).toList()
+      : [];
+
+  List<WidgetAction> get seeMoreHotels => isSeeMoreHotelsWidget
+      ? widget.map((e) => WidgetAction.fromJson(e as Map<String, dynamic>)).toList()
+      : [];
+
+  List<WidgetAction> get hotelBookingForMe => isHotelBookingForMeWidget
+      ? widget.map((e) => WidgetAction.fromJson(e as Map<String, dynamic>)).toList()
+      : [];
+
+  List<WidgetAction> get hotelBookingForOther => isHotelBookingForOtherWidget
       ? widget.map((e) => WidgetAction.fromJson(e as Map<String, dynamic>)).toList()
       : [];
 
@@ -372,6 +397,28 @@ class ChatWidget {
   List<HotelDestination> getHotelDestinationItems() {
     if (isHotelDestinationWidget) {
       return widget.map((item) => HotelDestination.fromJson(item as Map<String, dynamic>)).toList();
+    }
+    return [];
+  }
+
+  // Helper method to get customer profile details items
+  List<HotelDestination> getCustomerProfileDetailsItems() {
+    if (isCustomerProfileDetailsWidget) {
+      return widget
+          .map(
+            (item) => HotelDestination.fromJson(
+              item as Map<String, dynamic>,
+            ),
+          )
+          .toList();
+    }
+    return [];
+  }
+
+  // Helper method to get hotels items
+  List<HotelProperty> getHotelsItems() {
+    if (isHotelsWidget) {
+      return widget.map((item) => HotelProperty.fromJson(item as Map<String, dynamic>)).toList();
     }
     return [];
   }
@@ -818,6 +865,9 @@ class HotelDestination {
   final String? state;
   final double lat;
   final double lng;
+  final String title;
+  final String contact;
+  final String email;
 
   HotelDestination({
     required this.id,
@@ -828,6 +878,9 @@ class HotelDestination {
     this.state,
     required this.lat,
     required this.lng,
+    required this.title,
+    required this.contact,
+    required this.email,
   });
 
   factory HotelDestination.fromJson(Map<String, dynamic> json) {
@@ -840,6 +893,9 @@ class HotelDestination {
       state: json['state']?.toString(),
       lat: (json['lat'] as num?)?.toDouble() ?? 0.0,
       lng: (json['lng'] as num?)?.toDouble() ?? 0.0,
+      title: (json['title'] ?? '').toString(),
+      contact: (json['contact'] ?? '').toString(),
+      email: (json['email'] ?? '').toString(),
     );
   }
 
@@ -853,6 +909,225 @@ class HotelDestination {
       'state': state,
       'lat': lat,
       'lng': lng,
+      'title': title,
+      'contact': contact,
+      'email': email,
+    };
+  }
+}
+
+// Hotel Property Model (lodging search result)
+class HotelProperty {
+  final String propertyId;
+  final double distance;
+  final String name;
+  final HotelPropertyContact contact;
+  final HotelPropertyRatings ratings;
+  final HotelPropertyRate rate;
+  final HotelPropertyImage image;
+  final String chain;
+  final String correlationId;
+
+  HotelProperty({
+    required this.propertyId,
+    required this.distance,
+    required this.name,
+    required this.contact,
+    required this.ratings,
+    required this.rate,
+    required this.image,
+    required this.chain,
+    required this.correlationId,
+  });
+
+  factory HotelProperty.fromJson(Map<String, dynamic> json) {
+    return HotelProperty(
+      propertyId: (json['property_id'] ?? '').toString(),
+      distance: (json['distance'] as num?)?.toDouble() ?? 0.0,
+      name: (json['name'] ?? '').toString(),
+      contact: HotelPropertyContact.fromJson(
+        json['contact'] as Map<String, dynamic>? ?? {},
+      ),
+      ratings: HotelPropertyRatings.fromJson(
+        json['ratings'] as Map<String, dynamic>? ?? {},
+      ),
+      rate: HotelPropertyRate.fromJson(
+        json['rate'] as Map<String, dynamic>? ?? {},
+      ),
+      image: HotelPropertyImage.fromJson(
+        json['image'] as Map<String, dynamic>? ?? {},
+      ),
+      chain: (json['chain'] ?? '').toString(),
+      correlationId: (json['correlation_id'] ?? '').toString(),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'property_id': propertyId,
+      'distance': distance,
+      'name': name,
+      'contact': contact.toJson(),
+      'ratings': ratings.toJson(),
+      'rate': rate.toJson(),
+      'image': image.toJson(),
+      'chain': chain,
+      'correlation_id': correlationId,
+    };
+  }
+}
+
+class HotelPropertyContact {
+  final String phone;
+  final HotelPropertyAddress address;
+
+  HotelPropertyContact({
+    required this.phone,
+    required this.address,
+  });
+
+  factory HotelPropertyContact.fromJson(Map<String, dynamic> json) {
+    return HotelPropertyContact(
+      phone: (json['phone'] ?? '').toString(),
+      address: HotelPropertyAddress.fromJson(
+        json['address'] as Map<String, dynamic>? ?? {},
+      ),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'phone': phone,
+      'address': address.toJson(),
+    };
+  }
+}
+
+class HotelPropertyAddress {
+  final String line1;
+  final String country;
+  final String state;
+  final String city;
+  final String postalCode;
+
+  HotelPropertyAddress({
+    required this.line1,
+    required this.country,
+    required this.state,
+    required this.city,
+    required this.postalCode,
+  });
+
+  factory HotelPropertyAddress.fromJson(Map<String, dynamic> json) {
+    return HotelPropertyAddress(
+      line1: (json['line_1'] ?? '').toString(),
+      country: (json['country'] ?? '').toString(),
+      state: (json['state'] ?? '').toString(),
+      city: (json['city'] ?? '').toString(),
+      postalCode: (json['postal_code'] ?? '').toString(),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'line_1': line1,
+      'country': country,
+      'state': state,
+      'city': city,
+      'postal_code': postalCode,
+    };
+  }
+}
+
+class HotelPropertyRatings {
+  final double starRating;
+  final double userRating;
+
+  HotelPropertyRatings({
+    required this.starRating,
+    required this.userRating,
+  });
+
+  factory HotelPropertyRatings.fromJson(Map<String, dynamic> json) {
+    return HotelPropertyRatings(
+      starRating: (json['star_rating'] as num?)?.toDouble() ?? 0.0,
+      userRating: (json['user_rating'] as num?)?.toDouble() ?? 0.0,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'star_rating': starRating,
+      'user_rating': userRating,
+    };
+  }
+}
+
+class HotelPropertyRate {
+  final double recommendedSellingPrice;
+  final double baseRate;
+  final double totalRate;
+  final double taxAndFees;
+  final String currency;
+  final double savedPrice;
+
+  HotelPropertyRate({
+    required this.recommendedSellingPrice,
+    required this.baseRate,
+    required this.totalRate,
+    required this.taxAndFees,
+    required this.currency,
+    required this.savedPrice,
+  });
+
+  factory HotelPropertyRate.fromJson(Map<String, dynamic> json) {
+    return HotelPropertyRate(
+      recommendedSellingPrice:
+          (json['recommended_selling_price'] as num?)?.toDouble() ?? 0.0,
+      baseRate: (json['base_rate'] as num?)?.toDouble() ?? 0.0,
+      totalRate: (json['total_rate'] as num?)?.toDouble() ?? 0.0,
+      taxAndFees: (json['tax_and_fees'] as num?)?.toDouble() ?? 0.0,
+      currency: (json['currency'] ?? '').toString(),
+      savedPrice: (json['saved_price'] as num?)?.toDouble() ?? 0.0,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'recommended_selling_price': recommendedSellingPrice,
+      'base_rate': baseRate,
+      'total_rate': totalRate,
+      'tax_and_fees': taxAndFees,
+      'currency': currency,
+      'saved_price': savedPrice,
+    };
+  }
+}
+
+class HotelPropertyImage {
+  final String thumbnail;
+  final String large;
+  final String extraLarge;
+
+  HotelPropertyImage({
+    required this.thumbnail,
+    required this.large,
+    required this.extraLarge,
+  });
+
+  factory HotelPropertyImage.fromJson(Map<String, dynamic> json) {
+    return HotelPropertyImage(
+      thumbnail: (json['thumbnail'] ?? '').toString(),
+      large: (json['large'] ?? '').toString(),
+      extraLarge: (json['extra_large'] ?? '').toString(),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'thumbnail': thumbnail,
+      'large': large,
+      'extra_large': extraLarge,
     };
   }
 }
@@ -1045,6 +1320,15 @@ class WidgetAction {
   final bool? isTableBooking;
   final String? sectionName;
   final String? image;
+  final String? checkinDate;
+  final String? checkoutDate;
+  final num? lat;
+  final num? lng;
+  final String? countryOfResidence;
+  final bool? isAsync;
+  final List<Map<String, dynamic>>? occupancy;
+  final List<Map<String, dynamic>>? sort;
+  
 
   WidgetAction({
     required this.buttonText,
@@ -1083,6 +1367,14 @@ class WidgetAction {
     this.isTableBooking,
     this.sectionName,
     this.image,
+    this.checkinDate,
+    this.checkoutDate,
+    this.lat,
+    this.lng,
+    this.countryOfResidence,
+    this.isAsync,
+    this.occupancy,
+    this.sort,
   });
 
   factory WidgetAction.fromJson(Map<String, dynamic> json) {
@@ -1127,6 +1419,14 @@ class WidgetAction {
         isTableBooking: json['isTableBooking'] ?? false,
         sectionName: json['sectionName']?.toString(),
         image: json['image']?.toString(),
+        checkinDate: json['checkinDate']?.toString(),
+        checkoutDate: json['checkoutDate']?.toString(),
+        lat: json['lat'] ?? 0.0,
+        lng: json['lng'] ?? 0.0,
+        countryOfResidence: json['countryOfResidence']?.toString(),
+        isAsync: json['isAsync'] ?? false,
+        occupancy: _parseMapList(json['occupancy']),
+        sort: _parseMapList(json['sort']),
     );
   }
 
@@ -1169,8 +1469,27 @@ class WidgetAction {
       'isTableBooking': isTableBooking,
       'sectionName': sectionName,
       'image': image,
+      'checkinDate': checkinDate,
+      'checkoutDate': checkoutDate,
+      'lat': lat,
+      'lng': lng,
+      'countryOfResidence': countryOfResidence,
+      'isAsync': isAsync,
+      'occupancy': occupancy,
+      'sort': sort,
     };
   }
+}
+
+List<Map<String, dynamic>>? _parseMapList(dynamic value) {
+  if (value is! List) return null;
+
+  final parsed = value
+      .whereType<Map>()
+      .map((e) => Map<String, dynamic>.from(e))
+      .toList();
+
+  return parsed.isEmpty ? null : parsed;
 }
 
 double _parseDistanceKm(dynamic value) {

@@ -40,6 +40,8 @@ class ApiService {
     required String platform,
     required bool personalization,
     required String emailId,
+    required String phoneNumber,
+    required String countryCode,
   }) {
     _isProduction = isProduction;
     _baseApiUrl = baseApiUrl.isNotEmpty 
