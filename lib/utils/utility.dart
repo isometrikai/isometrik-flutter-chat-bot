@@ -417,6 +417,52 @@ class Utility {
     return nights > 0 ? nights : null;
   }
 
+  /// Compact guest label for summary cards, e.g. `4 adults and 1 child`.
+  static String formatHotelOccupancyCompact(
+    Map<String, dynamic> hotelBooking, {
+    int fallbackAdults = 0,
+  }) {
+    final occupancy = hotelBooking['occupancy'];
+    if (occupancy is! List || occupancy.isEmpty) {
+      if (fallbackAdults <= 0) return '';
+      return '$fallbackAdults ${fallbackAdults == 1 ? 'adult' : 'adults'}';
+    }
+
+    var adults = 0;
+    var children = 0;
+    for (final room in occupancy) {
+      if (room is! Map) continue;
+      final map = Map<String, dynamic>.from(room);
+      adults += (map['adults'] as num?)?.toInt() ?? 0;
+      children += (map['childs'] as num?)?.toInt() ??
+          (map['children'] as num?)?.toInt() ??
+          0;
+    }
+
+    if (adults <= 0 && children <= 0 && fallbackAdults > 0) {
+      return '$fallbackAdults ${fallbackAdults == 1 ? 'adult' : 'adults'}';
+    }
+
+    final parts = <String>[];
+    if (adults > 0) {
+      parts.add('$adults ${adults == 1 ? 'adult' : 'adults'}');
+    }
+    if (children > 0) {
+      parts.add('$children ${children == 1 ? 'child' : 'children'}');
+    }
+    if (parts.isEmpty) return '';
+    if (parts.length == 1) return parts.first;
+    return '${parts.first} and ${parts.last}';
+  }
+
+  static int hotelBookingRoomCount(Map<String, dynamic> hotelBooking) {
+    final occupancy = hotelBooking['occupancy'];
+    if (occupancy is List && occupancy.isNotEmpty) {
+      return occupancy.length;
+    }
+    return 1;
+  }
+
   /// e.g. `20 Mar – 22 Mar · 2 nights · 4 guests`
   static String formatHotelBookingSummary(Map<String, dynamic> hotelBooking) {
     final checkin = (hotelBooking['checkinDate'] ?? '').toString();

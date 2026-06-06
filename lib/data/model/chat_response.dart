@@ -156,6 +156,7 @@ class ChatWidget {
   bool get isHotelBookingForOtherWidget =>
       type == WidgetEnum.hotel_booking_for_other.value;
   bool get isSeeMoreHotelsWidget => type == WidgetEnum.see_more_hotels.value;
+  bool get isHotelConfirmBookingWidget => type == WidgetEnum.hotel_confirm_booking.value;
   bool get isPrescriptionScreenWidget => type == WidgetEnum.prescription_screen.value;
   bool get isOnlinePaymentConfirmOrderWidget => type == WidgetEnum.online_payment_confirm_order.value;
   bool get isOrderSummaryWidget => type == WidgetEnum.order_summary.value;
@@ -165,6 +166,8 @@ class ChatWidget {
   bool get isAddDependentWidget => type == WidgetEnum.add_dependent.value;
   bool get isHotelDestinationWidget => type == WidgetEnum.hotel_destination.value;
   bool get isCustomerProfileDetailsWidget => type == WidgetEnum.customer_profile_details.value;
+  bool get isHotelOrderSummaryWidget => type == WidgetEnum.hotel_order_summary.value;
+  bool get isHotelBookingConfirmedWidget => type == WidgetEnum.hotel_booking_confirmed.value;
   bool get isHotelsWidget => type == WidgetEnum.hotels.value;
   bool get isButtonWidget => type == 'button';
   bool get isInputWidget => type == 'input';
@@ -277,6 +280,10 @@ class ChatWidget {
       : [];
 
   List<WidgetAction> get seeMoreHotels => isSeeMoreHotelsWidget
+      ? widget.map((e) => WidgetAction.fromJson(e as Map<String, dynamic>)).toList()
+      : [];
+
+  List<WidgetAction> get hotelConfirmBooking => isHotelConfirmBookingWidget
       ? widget.map((e) => WidgetAction.fromJson(e as Map<String, dynamic>)).toList()
       : [];
 
@@ -419,6 +426,28 @@ class ChatWidget {
   List<HotelProperty> getHotelsItems() {
     if (isHotelsWidget) {
       return widget.map((item) => HotelProperty.fromJson(item as Map<String, dynamic>)).toList();
+    }
+    return [];
+  }
+
+  // Helper method to get hotel order summary items
+  List<HotelOrderSummary> getHotelOrderSummaryItems() {
+    if (isHotelOrderSummaryWidget) {
+      return widget
+          .map(
+            (item) => HotelOrderSummary.fromJson(
+              item as Map<String, dynamic>,
+            ),
+          )
+          .toList();
+    }
+    return [];
+  }
+
+  // Helper method to get hotel booking confirmed items
+  List<WidgetAction> getHotelBookingConfirmedItems() {
+    if (isHotelBookingConfirmedWidget) {
+      return widget.map((item) => WidgetAction.fromJson(item as Map<String, dynamic>)).toList();
     }
     return [];
   }
@@ -1132,6 +1161,268 @@ class HotelPropertyImage {
   }
 }
 
+// Hotel Order Summary Model (checkout / booking confirmation)
+class HotelOrderSummary {
+  final String checkinDate;
+  final String checkoutDate;
+  final String roomName;
+  final String roomBed;
+  final String description;
+  final int numberOfAdults;
+  final String status;
+  final bool refundable;
+  final List<String> boardBasis;
+  final double baseRate;
+  final double taxAndFees;
+  final double recommendedSellingPrice;
+  final double totalPrice;
+  final String currency;
+  final List<Map<String, dynamic>> additionalCharges;
+  final List<HotelCancellationPolicy> cancellationPolicy;
+  final bool allGuestInfoRequired;
+  final bool specialRequestSupported;
+  final HotelBookingGuest guest;
+  final HotelBookingPayment payment;
+  final String pricingToken;
+
+  HotelOrderSummary({
+    required this.checkinDate,
+    required this.checkoutDate,
+    required this.roomName,
+    required this.roomBed,
+    required this.description,
+    required this.numberOfAdults,
+    required this.status,
+    required this.refundable,
+    required this.boardBasis,
+    required this.baseRate,
+    required this.taxAndFees,
+    required this.recommendedSellingPrice,
+    required this.totalPrice,
+    required this.currency,
+    required this.additionalCharges,
+    required this.cancellationPolicy,
+    required this.allGuestInfoRequired,
+    required this.specialRequestSupported,
+    required this.guest,
+    required this.payment,
+    required this.pricingToken,
+  });
+
+  factory HotelOrderSummary.fromJson(Map<String, dynamic> json) {
+    return HotelOrderSummary(
+      checkinDate: (json['checkin_date'] ?? '').toString(),
+      checkoutDate: (json['checkout_date'] ?? '').toString(),
+      roomName: (json['room_name'] ?? '').toString(),
+      roomBed: (json['room_bed'] ?? '').toString(),
+      description: (json['description'] ?? '').toString(),
+      numberOfAdults: (json['number_of_adults'] as num?)?.toInt() ?? 0,
+      status: (json['status'] ?? '').toString(),
+      refundable: json['refundable'] == true,
+      boardBasis: (json['board_basis'] as List<dynamic>?)
+              ?.map((e) => e.toString())
+              .toList() ??
+          const [],
+      baseRate: (json['base_rate'] as num?)?.toDouble() ?? 0.0,
+      taxAndFees: (json['tax_and_fees'] as num?)?.toDouble() ?? 0.0,
+      recommendedSellingPrice:
+          (json['recommended_selling_price'] as num?)?.toDouble() ?? 0.0,
+      totalPrice: (json['total_price'] as num?)?.toDouble() ?? 0.0,
+      currency: (json['currency'] ?? '').toString(),
+      additionalCharges: (json['additional_charges'] as List<dynamic>?)
+              ?.whereType<Map>()
+              .map((e) => Map<String, dynamic>.from(e))
+              .toList() ??
+          const [],
+      cancellationPolicy: (json['cancellation_policy'] as List<dynamic>?)
+              ?.whereType<Map>()
+              .map(
+                (e) => HotelCancellationPolicy.fromJson(
+                  Map<String, dynamic>.from(e),
+                ),
+              )
+              .toList() ??
+          const [],
+      allGuestInfoRequired: json['all_guest_info_required'] == true,
+      specialRequestSupported: json['special_request_supported'] == true,
+      guest: HotelBookingGuest.fromJson(
+        json['guest'] as Map<String, dynamic>? ?? {},
+      ),
+      payment: HotelBookingPayment.fromJson(
+        json['payment'] as Map<String, dynamic>? ?? {},
+      ),
+      pricingToken: (json['pricingToken'] ?? '').toString(),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'checkin_date': checkinDate,
+      'checkout_date': checkoutDate,
+      'room_name': roomName,
+      'room_bed': roomBed,
+      'description': description,
+      'number_of_adults': numberOfAdults,
+      'status': status,
+      'refundable': refundable,
+      'board_basis': boardBasis,
+      'base_rate': baseRate,
+      'tax_and_fees': taxAndFees,
+      'recommended_selling_price': recommendedSellingPrice,
+      'total_price': totalPrice,
+      'currency': currency,
+      'additional_charges': additionalCharges,
+      'cancellation_policy':
+          cancellationPolicy.map((e) => e.toJson()).toList(),
+      'all_guest_info_required': allGuestInfoRequired,
+      'special_request_supported': specialRequestSupported,
+      'guest': guest.toJson(),
+      'payment': payment.toJson(),
+      'pricingToken': pricingToken,
+    };
+  }
+}
+
+class HotelCancellationPolicy {
+  final String start;
+  final String end;
+  final String type;
+  final double value;
+  final String currency;
+  final double estimateAmount;
+  final double billableAmount;
+  final String billableCurrency;
+
+  HotelCancellationPolicy({
+    required this.start,
+    required this.end,
+    required this.type,
+    required this.value,
+    required this.currency,
+    required this.estimateAmount,
+    required this.billableAmount,
+    required this.billableCurrency,
+  });
+
+  factory HotelCancellationPolicy.fromJson(Map<String, dynamic> json) {
+    return HotelCancellationPolicy(
+      start: (json['start'] ?? '').toString(),
+      end: (json['end'] ?? '').toString(),
+      type: (json['type'] ?? '').toString(),
+      value: (json['value'] as num?)?.toDouble() ?? 0.0,
+      currency: (json['currency'] ?? '').toString(),
+      estimateAmount: (json['estimate_amount'] as num?)?.toDouble() ?? 0.0,
+      billableAmount: (json['billable_amount'] as num?)?.toDouble() ?? 0.0,
+      billableCurrency: (json['billable_currency'] ?? '').toString(),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'start': start,
+      'end': end,
+      'type': type,
+      'value': value,
+      'currency': currency,
+      'estimate_amount': estimateAmount,
+      'billable_amount': billableAmount,
+      'billable_currency': billableCurrency,
+    };
+  }
+}
+
+class HotelBookingGuest {
+  final String name;
+  final String email;
+  final String phone;
+  final List<HotelGuestRoomInfo> rooms;
+
+  HotelBookingGuest({
+    required this.name,
+    required this.email,
+    required this.phone,
+    required this.rooms,
+  });
+
+  factory HotelBookingGuest.fromJson(Map<String, dynamic> json) {
+    return HotelBookingGuest(
+      name: (json['name'] ?? '').toString(),
+      email: (json['email'] ?? '').toString(),
+      phone: (json['phone'] ?? '').toString(),
+      rooms: (json['rooms'] as List<dynamic>?)
+              ?.whereType<Map>()
+              .map(
+                (e) => HotelGuestRoomInfo.fromJson(
+                  Map<String, dynamic>.from(e),
+                ),
+              )
+              .toList() ??
+          const [],
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'name': name,
+      'email': email,
+      'phone': phone,
+      'rooms': rooms.map((e) => e.toJson()).toList(),
+    };
+  }
+}
+
+class HotelGuestRoomInfo {
+  final String title;
+  final String firstName;
+  final String lastName;
+
+  HotelGuestRoomInfo({
+    required this.title,
+    required this.firstName,
+    required this.lastName,
+  });
+
+  factory HotelGuestRoomInfo.fromJson(Map<String, dynamic> json) {
+    return HotelGuestRoomInfo(
+      title: (json['title'] ?? '').toString(),
+      firstName: (json['firstName'] ?? '').toString(),
+      lastName: (json['lastName'] ?? '').toString(),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'title': title,
+      'firstName': firstName,
+      'lastName': lastName,
+    };
+  }
+}
+
+class HotelBookingPayment {
+  final String cardTitle;
+  final String cardId;
+
+  HotelBookingPayment({
+    required this.cardTitle,
+    required this.cardId,
+  });
+
+  factory HotelBookingPayment.fromJson(Map<String, dynamic> json) {
+    return HotelBookingPayment(
+      cardTitle: (json['card_title'] ?? '').toString(),
+      cardId: (json['card_id'] ?? '').toString(),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'card_title': cardTitle,
+      'card_id': cardId,
+    };
+  }
+}
+
 // LogoImages Model
 class LogoImages {
   final String logoImageMobile;
@@ -1328,6 +1619,7 @@ class WidgetAction {
   final bool? isAsync;
   final List<Map<String, dynamic>>? occupancy;
   final List<Map<String, dynamic>>? sort;
+  final String? pricingToken;
   
 
   WidgetAction({
@@ -1375,6 +1667,7 @@ class WidgetAction {
     this.isAsync,
     this.occupancy,
     this.sort,
+    this.pricingToken,
   });
 
   factory WidgetAction.fromJson(Map<String, dynamic> json) {
@@ -1427,6 +1720,7 @@ class WidgetAction {
         isAsync: json['isAsync'] ?? false,
         occupancy: _parseMapList(json['occupancy']),
         sort: _parseMapList(json['sort']),
+        pricingToken: json['pricingToken']?.toString(),
     );
   }
 
@@ -1477,6 +1771,7 @@ class WidgetAction {
       'isAsync': isAsync,
       'occupancy': occupancy,
       'sort': sort,
+      'pricingToken': pricingToken,
     };
   }
 }

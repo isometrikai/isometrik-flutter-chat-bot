@@ -1057,6 +1057,14 @@ class ChatScreenBody extends StatelessWidget {
             const SizedBox(height: 4), //12
             buildHotelsWidget(message.hotelsItems),
           ],
+          if (message.hasHotelOrderSummarySectionWidget) ...[
+            const SizedBox(height: 4), //12
+            buildHotelOrderSummaryWidget(message.hotelOrderSummaryItems),
+          ],
+          if (message.hasHotelBookingConfirmedSectionWidget) ...[
+            const SizedBox(height: 4), //12
+            buildHotelBookingConfirmedWidget(message.hotelBookingConfirmedItems),
+          ],
           if (message.hasCustomerProfileDetailsSectionWidget) ...[
             const SizedBox(height: 4), //12
             buildCustomerProfileDetailsWidget(message.customerProfileDetailsItems),
@@ -2209,6 +2217,35 @@ class ChatScreenBody extends StatelessWidget {
                 onTap: isApiLoading
                     ? () {}
                     : () => _openHotelSearchScreen(context, action),
+              ),
+            );
+          }
+        }
+
+         for (final widget in latestActionWidgets.where(
+          (w) => w.type == WidgetEnum.hotel_confirm_booking.value,
+        )) {
+          for (final action in widget.hotelConfirmBooking) {
+            actionButtons.add(
+              buildActionButton(
+                text: action.buttonText,
+                onTap:
+                    isApiLoading
+                        ? () {}
+                        : () {
+                          final existing = apiData['hotel_booking'];
+                          final Map<String, dynamic> hotelBooking;
+                          if (existing is Map) {
+                            hotelBooking = Map<String, dynamic>.from(existing);
+                            hotelBooking['pricingToken'] = action.pricingToken;
+                          } else {
+                            hotelBooking = {
+                              'pricingToken': action.pricingToken,
+                            };
+                          }
+                          apiData['hotel_booking'] = hotelBooking;
+                          onSendMessage(action.buttonText);
+                        },
               ),
             );
           }
@@ -3970,14 +4007,14 @@ class ChatScreenBody extends StatelessWidget {
     hotelBooking
       ..['email'] = Utility.getEmailId().trim()
       ..['phone'] = {
-        'countryCode': (phoneMap['countryCode'] ?? '91').toString(),
-        'number': (phoneMap['number'] ?? '').toString(),
+        'countryCode': Utility.getCountryCode().trim(),
+        'number': Utility.getPhoneNumber().trim(),
       }
       ..['rooms'] = [
         {
           'title': 'Mr',
           'firstName': firstName,
-          'lastName': lastName,
+          'lastName': firstName,
         },
       ]
       ..['countryOfResidence'] =
@@ -4083,6 +4120,25 @@ class ChatScreenBody extends StatelessWidget {
           onSendMessage('I have selected hotel ${property.name}. Please show me available rooms');
         },
       ),
+    );
+  }
+
+  Widget buildHotelOrderSummaryWidget(List<HotelOrderSummary> items) {
+    if (items.isEmpty) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.only(left: 0.0),
+      child: HotelOrderSummaryWidget(
+        items: items,
+        hotelBooking: _hotelBookingMap(),
+      ),
+    );
+  }
+
+  Widget buildHotelBookingConfirmedWidget(List<WidgetAction> items) {
+    if (items.isEmpty) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.only(left: 0.0),
+      child: HotelBookingConfirmedWidget(items: items),
     );
   }
 }

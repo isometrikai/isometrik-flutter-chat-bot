@@ -431,7 +431,8 @@ class _ChatScreenState extends State<ChatScreen> {
         ChatWidget? hotelDestinationWidget;
         ChatWidget? hotelsWidget;
         ChatWidget? customerProfileDetailsWidget;
-
+        ChatWidget? hotelOrderSummaryWidget;
+        ChatWidget? hotelBookingConfirmedWidget;
         try {
           storesWidget = botResponse.widgets.firstWhere(
             (widget) => widget.isStoresWidget,
@@ -470,6 +471,18 @@ class _ChatScreenState extends State<ChatScreen> {
           customerProfileDetailsWidget = botResponse.widgets.firstWhere((widget) => widget.isCustomerProfileDetailsWidget);
         } catch (e) {
           customerProfileDetailsWidget = null;
+        }
+
+        try {
+          hotelOrderSummaryWidget = botResponse.widgets.firstWhere((widget) => widget.isHotelOrderSummaryWidget);
+        } catch (e) {
+          hotelOrderSummaryWidget = null;
+        }
+
+        try {
+          hotelBookingConfirmedWidget = botResponse.widgets.firstWhere((widget) => widget.isHotelBookingConfirmedWidget);
+        } catch (e) {
+          hotelBookingConfirmedWidget = null;
         }
 
         try {
@@ -523,6 +536,8 @@ class _ChatScreenState extends State<ChatScreen> {
         bool hasRestaurantSections = restaurantSectionsWidget != null;
         bool hasHotelDestinationSection = hotelDestinationWidget != null;
         bool hasCustomerProfileDetailsSection = customerProfileDetailsWidget != null;
+        bool hasHotelOrderSummarySection = hotelOrderSummaryWidget != null;
+        bool hasHotelBookingConfirmedSection = hotelBookingConfirmedWidget != null;
         bool hasHotelsSection = hotelsWidget != null;
         bool hasServicesDeliveryOptions = servicesDeliveryOptionsWidget != null;
         bool hasChooseAddress = chooseAddressWidget != null;
@@ -543,6 +558,8 @@ class _ChatScreenState extends State<ChatScreen> {
             hasHotelDestinationSectionWidget: hasHotelDestinationSection,
             hasHotelsSectionWidget: hasHotelsSection,
             hasCustomerProfileDetailsSectionWidget: hasCustomerProfileDetailsSection,
+            hasHotelOrderSummarySectionWidget: hasHotelOrderSummarySection,
+            hasHotelBookingConfirmedSectionWidget: hasHotelBookingConfirmedSection,
             hasServicesDeliveryOptionsWidget: hasServicesDeliveryOptions,
             hasChooseAddressWidget: hasChooseAddress,
             hasChooseCardWidget: hasChooseCard,
@@ -567,6 +584,8 @@ class _ChatScreenState extends State<ChatScreen> {
                         !hasHotelDestinationSection &&
                         !hasCustomerProfileDetailsSection &&
                         !hasHotelsSection &&
+                        !hasHotelOrderSummarySection &&
+                        !hasHotelBookingConfirmedSection &&
                         !hasChooseAddress &&
                         !hasChooseCard &&
                         !hasOrderSummary &&
@@ -582,6 +601,8 @@ class _ChatScreenState extends State<ChatScreen> {
             hotelDestinationItems: hotelDestinationWidget?.getHotelDestinationItems() ?? [],
             customerProfileDetailsItems: customerProfileDetailsWidget?.getCustomerProfileDetailsItems() ?? [],
             hotelsItems: hotelsWidget?.getHotelsItems() ?? [],
+            hotelOrderSummaryItems: hotelOrderSummaryWidget?.getHotelOrderSummaryItems() ?? [],
+            hotelBookingConfirmedItems: hotelBookingConfirmedWidget?.getHotelBookingConfirmedItems() ?? [],
             servicesDeliveryOptions: servicesDeliveryOptionsWidget?.getServicesDeliveryOptions() ?? [],
             addressOptions: chooseAddressWidget?.getAddressOptions() ?? [],
             cardOptions: chooseCardWidget?.getCardOptions() ?? [],
@@ -642,7 +663,8 @@ class _ChatScreenState extends State<ChatScreen> {
     ChatWidget? hotelDestinationWidget;
     ChatWidget? hotelsWidget;
     ChatWidget? customerProfileDetailsWidget;
-
+    ChatWidget? hotelOrderSummaryWidget;
+    ChatWidget? hotelBookingConfirmedWidget;
     // Capture needToEndThisChat from API response
     _needToEndThisChat = response.needToEndThisChat;
     try {
@@ -683,6 +705,18 @@ class _ChatScreenState extends State<ChatScreen> {
       customerProfileDetailsWidget = response.widgets.firstWhere((widget) => widget.isCustomerProfileDetailsWidget);
     } catch (e) {
       customerProfileDetailsWidget = null;
+    }
+
+    try {
+      hotelOrderSummaryWidget = response.widgets.firstWhere((widget) => widget.isHotelOrderSummaryWidget);
+    } catch (e) {
+      hotelOrderSummaryWidget = null;
+    }
+
+    try {
+      hotelBookingConfirmedWidget = response.widgets.firstWhere((widget) => widget.isHotelBookingConfirmedWidget);
+    } catch (e) {
+      hotelBookingConfirmedWidget = null;
     }
 
     try {
@@ -742,7 +776,8 @@ class _ChatScreenState extends State<ChatScreen> {
     bool hasHotelDestinationSections = hotelDestinationWidget != null;
     bool hasHotelsSection = hotelsWidget != null;
     bool hasCustomerProfileDetailsSection = customerProfileDetailsWidget != null;
-
+    bool hasHotelOrderSummarySection = hotelOrderSummaryWidget != null;
+    bool hasHotelBookingConfirmedSection = hotelBookingConfirmedWidget != null;
     setState(() {
       messages.add(
         ChatMessage(
@@ -756,6 +791,8 @@ class _ChatScreenState extends State<ChatScreen> {
           hasRestaurantSectionsWidget: hasRestaurantSections,
           hasHotelDestinationSectionWidget: hasHotelDestinationSections,
           hasCustomerProfileDetailsSectionWidget: hasCustomerProfileDetailsSection,
+          hasHotelOrderSummarySectionWidget: hasHotelOrderSummarySection,
+          hasHotelBookingConfirmedSectionWidget: hasHotelBookingConfirmedSection,
           hasHotelsSectionWidget: hasHotelsSection,
           hasServicesDeliveryOptionsWidget: hasServicesDeliveryOptions,
           hasChooseAddressWidget: hasChooseAddress,
@@ -771,6 +808,8 @@ class _ChatScreenState extends State<ChatScreen> {
               !hasHotelDestinationSections &&
               !hasCustomerProfileDetailsSection &&
               !hasHotelsSection &&
+              !hasHotelOrderSummarySection &&
+              !hasHotelBookingConfirmedSection &&
               !hasServicesDeliveryOptions &&
               !hasChooseAddress &&
               !hasChooseCard &&
@@ -786,6 +825,8 @@ class _ChatScreenState extends State<ChatScreen> {
                       !hasHotelDestinationSections &&
                       !hasCustomerProfileDetailsSection &&
                       !hasHotelsSection &&
+                      !hasHotelOrderSummarySection &&
+                      !hasHotelBookingConfirmedSection &&
                       !hasServicesDeliveryOptions &&
                       !hasChooseAddress &&
                       !hasChooseCard &&
@@ -802,6 +843,8 @@ class _ChatScreenState extends State<ChatScreen> {
           hotelDestinationItems: hotelDestinationWidget?.getHotelDestinationItems() ?? [],
           customerProfileDetailsItems: customerProfileDetailsWidget?.getCustomerProfileDetailsItems() ?? [],
           hotelsItems: hotelsWidget?.getHotelsItems() ?? [],
+          hotelOrderSummaryItems: hotelOrderSummaryWidget?.getHotelOrderSummaryItems() ?? [],
+          hotelBookingConfirmedItems: hotelBookingConfirmedWidget?.getHotelBookingConfirmedItems() ?? [],
           servicesDeliveryOptions: servicesDeliveryOptionsWidget?.getServicesDeliveryOptions() ?? [],
           addressOptions: chooseAddressWidget?.getAddressOptions() ?? [],
           cardOptions: chooseCardWidget?.getCardOptions() ?? [],
@@ -813,6 +856,8 @@ class _ChatScreenState extends State<ChatScreen> {
           hotelDestinationWidget: hotelDestinationWidget,
           customerProfileDetailsWidget: customerProfileDetailsWidget,
           hotelsWidget: hotelsWidget,
+          hotelOrderSummaryWidget: hotelOrderSummaryWidget,
+          hotelBookingConfirmedWidget: hotelBookingConfirmedWidget,
           servicesDeliveryOptionsWidget: servicesDeliveryOptionsWidget,
           chooseAddressWidget: chooseAddressWidget,
           chooseCardWidget: chooseCardWidget,
@@ -839,6 +884,7 @@ class _ChatScreenState extends State<ChatScreen> {
                     widget.type == WidgetEnum.hotel_booking_for_me.value ||
                     widget.type == WidgetEnum.hotel_booking_for_other.value ||
                     widget.type == WidgetEnum.see_more_hotels.value ||
+                    widget.type == WidgetEnum.hotel_confirm_booking.value ||
                     widget.type == WidgetEnum.see_available_rooms.value ||
                     widget.type == WidgetEnum.service_types.value ||
                     widget.type == WidgetEnum.order_summary.value ||
