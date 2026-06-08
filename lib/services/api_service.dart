@@ -112,6 +112,8 @@ class ApiService {
     Utility.setTimezone(timezone);
     Utility.setPersonalization(personalization);
     Utility.setEmailId(emailId);
+    Utility.setPhoneNumber(phoneNumber);
+    Utility.setCountryCode(countryCode);
   }
 
   static String removeTrailingSlash(String url) {

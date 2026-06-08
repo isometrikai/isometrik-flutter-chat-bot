@@ -956,6 +956,9 @@ class HotelProperty {
   final HotelPropertyImage image;
   final String chain;
   final String correlationId;
+  final String checkinDate;
+  final String checkoutDate;
+  final List<Map<String, dynamic>> occupancy;
 
   HotelProperty({
     required this.propertyId,
@@ -967,6 +970,9 @@ class HotelProperty {
     required this.image,
     required this.chain,
     required this.correlationId,
+    required this.checkinDate,
+    required this.checkoutDate,
+    required this.occupancy,
   });
 
   factory HotelProperty.fromJson(Map<String, dynamic> json) {
@@ -988,6 +994,13 @@ class HotelProperty {
       ),
       chain: (json['chain'] ?? '').toString(),
       correlationId: (json['correlation_id'] ?? '').toString(),
+      checkinDate: (json['checkin_date'] ?? '').toString(),
+      checkoutDate: (json['checkout_date'] ?? '').toString(),
+      occupancy: (json['occupancy'] as List<dynamic>?)
+              ?.whereType<Map>()
+              .map((e) => Map<String, dynamic>.from(e))
+              .toList() ??
+          const [],
     );
   }
 
@@ -1002,6 +1015,9 @@ class HotelProperty {
       'image': image.toJson(),
       'chain': chain,
       'correlation_id': correlationId,
+      'checkin_date': checkinDate,
+      'checkout_date': checkoutDate,
+      'occupancy': occupancy,
     };
   }
 }

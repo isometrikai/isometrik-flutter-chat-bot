@@ -512,7 +512,7 @@ class _ProductPreviewTile extends StatelessWidget {
                       Positioned(
                         right: 4,
                         bottom: 4,
-                        child: _buildDonationBadge(),
+                        child: _buildDonationBadge(isFromChatHistory: isFromChatHistory),
                       ),
                     ] else if (product?.instock == false) ...[
                       Positioned(
@@ -628,7 +628,10 @@ class _ProductPreviewTile extends StatelessWidget {
     );
   }
 
-  Widget _buildDonationBadge() {
+  Widget _buildDonationBadge({required bool isFromChatHistory}) {
+    if (isFromChatHistory == true) {
+      return const SizedBox.shrink();
+    }
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: () {

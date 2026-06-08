@@ -236,6 +236,31 @@ class _ChatScreenState extends State<ChatScreen> {
             _sendMessage(
               'I have added the customer details.',
             );
+          } else if (clickManage['screenName'] == 'TravelHotelDetailsScreen') {
+            final existing = _apiData['hotel_booking'];
+            final Map<String, dynamic> hotelBooking;
+            if (existing is Map) {
+              hotelBooking = Map<String, dynamic>.from(existing);
+              hotelBooking['roomId'] = clickManage['roomId'];
+              hotelBooking['roomName'] = clickManage['roomName'];
+              hotelBooking['availabilityToken'] = clickManage['availabilityToken'];
+              hotelBooking['correlationId'] = clickManage['correlationId'];
+              hotelBooking['propertyId'] = clickManage['propertyId'];
+            } else {
+              hotelBooking = {
+                'roomId': clickManage['roomId'],
+                'roomName': clickManage['roomName'],
+                'availabilityToken': clickManage['availabilityToken'],
+                'correlationId': clickManage['correlationId'],
+                'propertyId': clickManage['propertyId'],
+              };
+            }
+            _apiData = {..._apiData, 'hotel_booking': hotelBooking};
+            if (clickManage['needToBack'] == true) {
+              Navigator.of(context).pop();
+            }
+
+            _sendMessage('I have selected room ${clickManage['roomName']}');
           }
         } else {
           _apiData = {

@@ -4050,6 +4050,19 @@ class ChatScreenBody extends StatelessWidget {
                 'I have selected hotel ${property.name}. Please show me available rooms',
               );
             },
+            onOpenInEazyApp: (property) {
+              OrderService().triggerClickManageScreenOpen({
+                'flow': 'HotelBooking',
+                'screenName': 'TravelHotelDetailsScreen',
+                'needToBack': true,
+                  'propertyId': property.propertyId,
+                  'correlationId': property.correlationId,
+                  'checkinDate': action.checkinDate,
+                  'checkoutDate': action.checkoutDate,
+                  'occupancy': action.occupancy,
+                  'countryOfResidence': action.countryOfResidence,
+                      });
+            },
           ),
         ),
       ),
@@ -4103,7 +4116,8 @@ class ChatScreenBody extends StatelessWidget {
         properties: hotels,
         nights: HotelsWidget.nightsFromApiData(apiData),
         isFromChatHistory: isFromHistory,
-        onOpenInApp: (property) {
+        onHotelSelected: (property) {
+          print('onOpenInApp, onOpenInApp 1');
            final existing = apiData['hotel_booking'];
             final Map<String, dynamic> hotelBooking;
             if (existing is Map) {
@@ -4118,6 +4132,19 @@ class ChatScreenBody extends StatelessWidget {
             }
             apiData['hotel_booking'] = hotelBooking;
           onSendMessage('I have selected hotel ${property.name}. Please show me available rooms');
+        },
+        onOpenInApp: (property) {
+          print('onOpenInApp, onOpenInApp 2 ${property.toJson()}');
+          OrderService().triggerClickManageScreenOpen({
+            'flow': 'HotelBooking',
+            'screenName': 'TravelHotelDetailsScreen',
+            'propertyId': property.propertyId,
+            'correlationId': property.correlationId,
+            'checkinDate': property.checkinDate,
+            'checkoutDate': property.checkoutDate,
+            'occupancy': property.occupancy,
+            'countryOfResidence': 'AE',
+          });
         },
       ),
     );

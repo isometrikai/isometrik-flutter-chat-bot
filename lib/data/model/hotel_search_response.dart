@@ -14,6 +14,7 @@ class HotelSearchResponse {
 
   factory HotelSearchResponse.fromJson(Map<String, dynamic> json) {
     final outer = json['data'];
+    final correlationId = (json['correlationId'] ?? '').toString();
     if (outer is! Map<String, dynamic>) {
       return const HotelSearchResponse();
     }
@@ -27,7 +28,13 @@ class HotelSearchResponse {
     final hotels = hotelsJson is List
         ? hotelsJson
             .whereType<Map>()
-            .map((e) => HotelProperty.fromJson(Map<String, dynamic>.from(e)))
+            .map((e) {
+              final map = Map<String, dynamic>.from(e);
+              if (correlationId.isNotEmpty) {
+                map['correlation_id'] = correlationId;
+              }
+              return HotelProperty.fromJson(map);
+            })
             .toList()
         : <HotelProperty>[];
 

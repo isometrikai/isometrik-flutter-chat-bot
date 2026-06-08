@@ -9,6 +9,7 @@ class HotelsWidget extends StatelessWidget {
   final List<HotelProperty> properties;
   final int? nights;
   final bool isFromChatHistory;
+  final void Function(HotelProperty property)? onHotelSelected;
   final void Function(HotelProperty property)? onOpenInApp;
 
   const HotelsWidget({
@@ -16,6 +17,7 @@ class HotelsWidget extends StatelessWidget {
     required this.properties,
     this.nights,
     this.isFromChatHistory = false,
+    this.onHotelSelected,
     this.onOpenInApp,
   });
 
@@ -53,6 +55,7 @@ class HotelsWidget extends StatelessWidget {
           property: properties[index],
           nights: nights,
           isFromChatHistory: isFromChatHistory,
+          onHotelSelected: onHotelSelected,
           onOpenInApp: onOpenInApp,
         );
       },
@@ -64,12 +67,14 @@ class _HotelPropertyCard extends StatelessWidget {
   final HotelProperty property;
   final int? nights;
   final bool isFromChatHistory;
+  final void Function(HotelProperty property)? onHotelSelected;
   final void Function(HotelProperty property)? onOpenInApp;
 
   const _HotelPropertyCard({
     required this.property,
     this.nights,
     this.isFromChatHistory = false,
+    this.onHotelSelected,
     this.onOpenInApp,
   });
 
@@ -88,7 +93,7 @@ class _HotelPropertyCard extends StatelessWidget {
     final showStrikethrough = property.rate.recommendedSellingPrice >
         property.rate.totalRate;
 
-    return Container(
+    final card = Container(
       padding: const EdgeInsets.all(15),
       decoration: BoxDecoration(
         color: _cardBackground,
@@ -138,6 +143,14 @@ class _HotelPropertyCard extends StatelessWidget {
           ],
         ],
       ),
+    );
+
+    if (onHotelSelected == null) return card;
+
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: () => onHotelSelected?.call(property),
+      child: card,
     );
   }
 

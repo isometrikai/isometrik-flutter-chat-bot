@@ -10,11 +10,13 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 class HotelSearchScreen extends StatefulWidget {
   final WidgetAction actionData;
   final void Function(HotelProperty property)? onHotelSelected;
+  final void Function(HotelProperty property)? onOpenInEazyApp;
 
   const HotelSearchScreen({
     super.key,
     required this.actionData,
     this.onHotelSelected,
+    this.onOpenInEazyApp,
   });
 
   @override
@@ -235,7 +237,8 @@ class _HotelSearchScreenState extends State<HotelSearchScreen> {
               HotelsWidget(
                 properties: state.filteredHotels,
                 nights: _nights,
-                onOpenInApp: widget.onHotelSelected,
+                onHotelSelected: widget.onHotelSelected,
+                onOpenInApp: widget.onOpenInEazyApp,
               ),
               const SizedBox(height: 24),
             ],
