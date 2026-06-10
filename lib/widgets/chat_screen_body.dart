@@ -4171,19 +4171,19 @@ class ChatScreenBody extends StatelessWidget {
           child: CarSearchScreen(
             actionData: action,
             onCarRentalSelected: (rental) {
-              final carBooking = _carBookingMap()
-                ..['correlationId'] = rental.correlationId
-                ..['availabilityToken'] = rental.availabilityToken
-                ..['id'] = rental.id
-                ..['pickup_date'] = rental.pickupDate.isNotEmpty
-                    ? rental.pickupDate
-                    : (action.pickupDate ?? '')
-                ..['return_date'] = rental.returnDate.isNotEmpty
-                    ? rental.returnDate
-                    : (action.returnDate ?? '')
-                ..['driver_age'] = rental.driverAge > 0
-                    ? rental.driverAge
-                    : action.driverAge;
+                final existing = apiData['car_booking'];
+            final Map<String, dynamic> carBooking;
+            if (existing is Map) {
+              carBooking = Map<String, dynamic>.from(existing);
+              carBooking['correlationId'] = rental.correlationId;
+              carBooking['availabilityToken'] = rental.availabilityToken;
+            } else {
+              carBooking = {
+                'correlationId': rental.correlationId,
+                'availabilityToken': rental.availabilityToken,
+              };
+            }
+
               apiData['car_booking'] = carBooking;
               Navigator.of(context).pop();
               onSendMessage('I have selected car ${rental.name}');
