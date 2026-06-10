@@ -4234,6 +4234,9 @@ class ChatScreenBody extends StatelessWidget {
           child: HotelSearchScreen(
             actionData: action,
             onHotelSelected: (property) {
+              if (isFromHistory) {
+                return;
+              }
               final existing = apiData['hotel_booking'];
               final Map<String, dynamic> hotelBooking;
               if (existing is Map) {
@@ -4319,6 +4322,9 @@ class ChatScreenBody extends StatelessWidget {
         nights: HotelsWidget.nightsFromApiData(apiData),
         isFromChatHistory: isFromHistory,
         onHotelSelected: (property) {
+          if (isFromHistory) {
+            return;
+          }
           print('onOpenInApp, onOpenInApp 1');
            final existing = apiData['hotel_booking'];
             final Map<String, dynamic> hotelBooking;
