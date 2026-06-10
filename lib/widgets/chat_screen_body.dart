@@ -1082,6 +1082,10 @@ class ChatScreenBody extends StatelessWidget {
             const SizedBox(height: 4), //12
             buildHotelBookingConfirmedWidget(message.hotelBookingConfirmedItems),
           ],
+          if (message.hasCarBookingConfirmedSectionWidget) ...[
+            const SizedBox(height: 4), //12
+            buildCarBookingConfirmedWidget(message.carBookingConfirmedItems),
+          ],
           if (message.hasCustomerProfileDetailsSectionWidget) ...[
             const SizedBox(height: 4), //12
             buildCustomerProfileDetailsWidget(message.customerProfileDetailsItems),
@@ -1834,8 +1838,13 @@ class ChatScreenBody extends StatelessWidget {
                     isApiLoading
                         ? () {}
                         : () async {
+                          print("widget: ${widget.toJson()}");
                           if (action.isTableBooking == true) {
                             OrderService().triggerOrderDetails(action.toJson());
+                          }else if (widget.isCarBookingFlow == true) {
+                            OrderService().triggerOrderDetails(widget.toJson());
+                          }else if (widget.isHotelBookingFlow == true) {
+                            OrderService().triggerOrderDetails(widget.toJson());
                           } else {
                             print("Order Details: ${action.orderId}");
                             // Call the order details API
@@ -2220,7 +2229,7 @@ class ChatScreenBody extends StatelessWidget {
                             'screenName': 'CarBookingDateTime',
                             'isForReturn': widget.isForReturn,
                             'isForPickup': widget.isForPickup,
-                            // 'pickup_date': action.pickupDate,
+                            'pickup_date': apiData['car_booking']['pickup_date'],
                           });
                         },
               ),
@@ -2376,6 +2385,11 @@ class ChatScreenBody extends StatelessWidget {
                         'flow': 'HotelBooking',
                         'screenName': 'HotelBookingGuests',
                       });
+                    }else if (widget.type == WidgetEnum.proceed_to_checkout.value && widget.isCarBookingFlow == true) {
+                        final String availabilityDetailsToken = (item['availability_details_token'] ?? '');
+                        print('availabilityDetailsToken: $availabilityDetailsToken');
+                      apiData['car_booking']['availabilityToken'] = availabilityDetailsToken;
+                      onSendMessage(buttonText);
                     } else {
                       onSendMessage(buttonText);
                     }
@@ -4183,7 +4197,6 @@ class ChatScreenBody extends StatelessWidget {
                 'availabilityToken': rental.availabilityToken,
               };
             }
-
               apiData['car_booking'] = carBooking;
               Navigator.of(context).pop();
               onSendMessage('I have selected car ${rental.name}');
@@ -4191,6 +4204,7 @@ class ChatScreenBody extends StatelessWidget {
             onOpenInEazyApp: (rental) {
               OrderService().triggerClickManageScreenOpen({
                 'flow': 'CarBooking',
+                'screenName': 'TravelCarDetailsScreen',
                 'needToBack': true,
                 'correlationId': rental.correlationId,
                 'availabilityToken': rental.availabilityToken,
@@ -4201,7 +4215,8 @@ class ChatScreenBody extends StatelessWidget {
                 'pickup_type': action.pickupType,
                 'return_type': action.returnType,
                 'driver_age': action.driverAge,
-                'country': action.country,
+                'countryOfResidence': action.country,
+                'currency': rental.currency,
               });
             },
           ),
@@ -4345,6 +4360,9 @@ class ChatScreenBody extends StatelessWidget {
         rentals: rentals,
         isFromChatHistory: isFromHistory,
         onCarRentalSelected: (rental) {
+          if (isFromHistory) {
+            return;
+          }
            final existing = apiData['car_booking'];
             final Map<String, dynamic> carBooking;
             if (existing is Map) {
@@ -4365,6 +4383,15 @@ class ChatScreenBody extends StatelessWidget {
         },
         onOpenInApp: (rental) {
           // TODO: implement car rental open-in-app flow
+            print('onOpenInApp, onOpenInApp 2 ${rental.toJson()}');
+          OrderService().triggerClickManageScreenOpen({
+            'flow': 'CarBooking',
+            'screenName': 'TravelCarDetailsScreen',
+            'correlationId': rental.correlationId,
+            'availabilityToken': rental.availabilityToken,
+            'currency': rental.currency,
+            'countryOfResidence': 'AE',
+          });
         },
       ),
     );
@@ -4397,6 +4424,14 @@ class ChatScreenBody extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(left: 0.0),
       child: HotelBookingConfirmedWidget(items: items),
+    );
+  }
+
+  Widget buildCarBookingConfirmedWidget(List<WidgetAction> items) {
+    if (items.isEmpty) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.only(left: 0.0),
+      child: CarBookingConfirmedWidget(items: items),
     );
   }
 }

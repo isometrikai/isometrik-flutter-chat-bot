@@ -3,11 +3,11 @@ import 'package:flutter/material.dart';
 import '../data/data.dart';
 import '../utils/utils.dart';
 
-/// Hotel booking confirmed card (Figma frame 1171284999).
-class HotelBookingConfirmedWidget extends StatelessWidget {
+/// Car booking confirmed card (matches hotel booking confirmed layout).
+class CarBookingConfirmedWidget extends StatelessWidget {
   final List<WidgetAction> items;
 
-  const HotelBookingConfirmedWidget({
+  const CarBookingConfirmedWidget({
     super.key,
     required this.items,
   });
@@ -48,6 +48,7 @@ class _ConfirmedCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bookingId = item.booking_id?.trim() ?? '';
+    final orderId = item.orderId?.trim() ?? '';
     final title = item.title.trim();
     final subtitle = item.subtitle.trim();
 
@@ -56,7 +57,7 @@ class _ConfirmedCard extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(15, 20, 15, 20),
       decoration: BoxDecoration(
         color: Colors.white,
-        border: Border.all(color: HotelBookingConfirmedWidget._borderColor),
+        border: Border.all(color: CarBookingConfirmedWidget._borderColor),
         borderRadius: BorderRadius.circular(16),
       ),
       child: Column(
@@ -69,7 +70,7 @@ class _ConfirmedCard extends StatelessWidget {
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
                 height: 1.2,
-                color: HotelBookingConfirmedWidget._titleColor,
+                color: CarBookingConfirmedWidget._titleColor,
               ),
             ),
           if (subtitle.isNotEmpty) ...[
@@ -80,20 +81,30 @@ class _ConfirmedCard extends StatelessWidget {
                 fontSize: 14,
                 fontWeight: FontWeight.w400,
                 height: 1.3,
-                color: HotelBookingConfirmedWidget._subtitleColor,
+                color: CarBookingConfirmedWidget._subtitleColor,
               ),
             ),
           ],
-          if (bookingId.isNotEmpty) ...[
+          if (bookingId.isNotEmpty || orderId.isNotEmpty) ...[
             const SizedBox(height: 12),
             Container(
               width: double.infinity,
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: HotelBookingConfirmedWidget._detailsBackground,
+                color: CarBookingConfirmedWidget._detailsBackground,
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: _IdRow(label: 'Booking ID', value: bookingId),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (bookingId.isNotEmpty) ...[
+                    _IdRow(label: 'Booking ID', value: bookingId),
+                    if (orderId.isNotEmpty) const SizedBox(height: 8),
+                  ],
+                  if (orderId.isNotEmpty)
+                    _IdRow(label: 'Order ID', value: orderId),
+                ],
+              ),
             ),
           ],
         ],
@@ -122,7 +133,7 @@ class _IdRow extends StatelessWidget {
             fontSize: 12,
             fontWeight: FontWeight.w500,
             height: 1.2,
-            color: HotelBookingConfirmedWidget._labelColor,
+            color: CarBookingConfirmedWidget._labelColor,
           ),
         ),
         const SizedBox(height: 2),
@@ -132,7 +143,7 @@ class _IdRow extends StatelessWidget {
             fontSize: 14,
             fontWeight: FontWeight.w600,
             height: 1.2,
-            color: HotelBookingConfirmedWidget._titleColor,
+            color: CarBookingConfirmedWidget._titleColor,
           ),
         ),
       ],

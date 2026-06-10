@@ -221,21 +221,17 @@ class _ChatScreenState extends State<ChatScreen> {
               'I have selected the number of guests:\n'
               '${Utility.formatHotelOccupancyForDisplay(clickManage['occupancy'])}',
             );
-          }else if (clickManage['screenName'] == 'HotelBookingUserDetails') {
+          } else if (clickManage['screenName'] == 'HotelBookingUserDetails') {
             final existing = _apiData['hotel_booking'];
             final Map<String, dynamic> hotelBooking;
             if (existing is Map) {
               hotelBooking = Map<String, dynamic>.from(existing);
               hotelBooking['hotel_booking'] = clickManage['hotel_booking'];
-            }else {
-              hotelBooking = {
-                'hotel_booking': clickManage['hotel_booking'],
-              };
+            } else {
+              hotelBooking = {'hotel_booking': clickManage['hotel_booking']};
             }
             _apiData = {..._apiData, 'hotel_booking': hotelBooking};
-            _sendMessage(
-              'I have added the customer details.',
-            );
+            _sendMessage('I have added the customer details.');
           } else if (clickManage['screenName'] == 'TravelHotelDetailsScreen') {
             final existing = _apiData['hotel_booking'];
             final Map<String, dynamic> hotelBooking;
@@ -243,7 +239,8 @@ class _ChatScreenState extends State<ChatScreen> {
               hotelBooking = Map<String, dynamic>.from(existing);
               hotelBooking['roomId'] = clickManage['roomId'];
               hotelBooking['roomName'] = clickManage['roomName'];
-              hotelBooking['availabilityToken'] = clickManage['availabilityToken'];
+              hotelBooking['availabilityToken'] =
+                  clickManage['availabilityToken'];
               hotelBooking['correlationId'] = clickManage['correlationId'];
               hotelBooking['propertyId'] = clickManage['propertyId'];
             } else {
@@ -262,52 +259,74 @@ class _ChatScreenState extends State<ChatScreen> {
 
             _sendMessage('I have selected room ${clickManage['roomName']}');
           }
-        }else if (clickManage['flow'] == 'CarBooking') {
-          if (clickManage['screenName'] == 'CarBookingDateTime' && clickManage['isForPickup'] == true) {
+        } else if (clickManage['flow'] == 'CarBooking') {
+          print('ChatScreen: Car booking received - $clickManage');
+          if (clickManage['screenName'] == 'CarBookingDateTime' &&
+              clickManage['isForPickup'] == true) {
             final existing = _apiData['car_booking'];
             final Map<String, dynamic> carBooking;
             if (existing is Map) {
               carBooking = Map<String, dynamic>.from(existing);
               carBooking['pickup_date'] = clickManage['pickup_date'];
             } else {
-              carBooking = {
-                'pickup_date': clickManage['pickup_date'],
-              };
+              carBooking = {'pickup_date': clickManage['pickup_date']};
             }
-             _apiData = {..._apiData, 'car_booking': carBooking};
+            _apiData = {..._apiData, 'car_booking': carBooking};
             _sendMessage(
               'I have selected the car pickup date and time. ${clickManage['pickup_date_display']}',
             );
-          }else  if (clickManage['screenName'] == 'CarBookingDateTime' && clickManage['isForReturn'] == true) {
+          } else if (clickManage['screenName'] == 'CarBookingDateTime' &&
+              clickManage['isForReturn'] == true) {
             final existing = _apiData['car_booking'];
             final Map<String, dynamic> carBooking;
             if (existing is Map) {
               carBooking = Map<String, dynamic>.from(existing);
               carBooking['return_date'] = clickManage['return_date'];
             } else {
-              carBooking = {
-                'return_date': clickManage['return_date'],
-              };
+              carBooking = {'return_date': clickManage['return_date']};
             }
-             _apiData = {..._apiData, 'car_booking': carBooking};
+            _apiData = {..._apiData, 'car_booking': carBooking};
             _sendMessage(
               'I have selected the car return date and time. ${clickManage['return_date_display']}',
             );
-          }else if (clickManage['screenName'] == 'CarDriverDetails') {
+          } else if (clickManage['screenName'] == 'CarDriverDetails') {
             final driverData = _driverDetailsFromClickManage(clickManage);
             final existing = _apiData['car_booking'];
             final Map<String, dynamic> carBooking;
             if (existing is Map) {
-              carBooking = Map<String, dynamic>.from(existing)..addAll(driverData);
+              carBooking = Map<String, dynamic>.from(existing)
+                ..addAll(driverData);
             } else {
               carBooking = driverData;
             }
             _apiData = {..._apiData, 'car_booking': carBooking};
-            _sendMessage(
-              'I have added the car driver details.',
-            );
-          }
+            _sendMessage('I have added the car driver details.');
+          }else if (clickManage['screenName'] == 'TravelCarDetailsScreen') {
+          print(
+            'ChatScreen: Travel car details screen received - $clickManage',
+          );
+
+          final existing = _apiData['car_booking'];
+          final Map<String, dynamic> carBooking;
+          if (existing is Map) {
+            carBooking = Map<String, dynamic>.from(existing);
+            carBooking['availabilityToken'] = clickManage['availabilityToken'];
+            carBooking['correlationId'] = clickManage['correlationId'];
+            carBooking['equipments'] = clickManage['equipments'];
           } else {
+            carBooking = {
+              'availabilityToken': clickManage['availabilityToken'],
+              'correlationId': clickManage['correlationId'],
+              'equipments': clickManage['equipments'],
+            };
+          }
+          _apiData = {..._apiData, 'car_booking': carBooking};
+          if (clickManage['needToBack'] == true) {
+            Navigator.of(context).pop();
+          }
+          _sendMessage('I have selected the car: ${clickManage['carName']}');
+        }
+        }  else {
           _apiData = {
             ..._apiData,
             "dependent_id": clickManage['dependentId'] ?? '',
@@ -551,6 +570,7 @@ class _ChatScreenState extends State<ChatScreen> {
         ChatWidget? hotelOrderSummaryWidget;
         ChatWidget? carOrderSummaryWidget;
         ChatWidget? hotelBookingConfirmedWidget;
+        ChatWidget? carBookingConfirmedWidget;
         try {
           storesWidget = botResponse.widgets.firstWhere(
             (widget) => widget.isStoresWidget,
@@ -628,6 +648,12 @@ class _ChatScreenState extends State<ChatScreen> {
         }
 
         try {
+          carBookingConfirmedWidget = botResponse.widgets.firstWhere((widget) => widget.isCarBookingConfirmedWidget);
+        } catch (e) {
+          carBookingConfirmedWidget = null;
+        }
+
+        try {
           hotelsWidget = botResponse.widgets.firstWhere((widget) => widget.isHotelsWidget);
         } catch (e) {
           hotelsWidget = null;
@@ -684,6 +710,7 @@ class _ChatScreenState extends State<ChatScreen> {
         bool hasHotelOrderSummarySection = hotelOrderSummaryWidget != null;
         bool hasCarOrderSummarySection = carOrderSummaryWidget != null;
         bool hasHotelBookingConfirmedSection = hotelBookingConfirmedWidget != null;
+        bool hasCarBookingConfirmedSection = carBookingConfirmedWidget != null;
         bool hasHotelsSection = hotelsWidget != null;
         bool hasServicesDeliveryOptions = servicesDeliveryOptionsWidget != null;
         bool hasChooseAddress = chooseAddressWidget != null;
@@ -710,6 +737,7 @@ class _ChatScreenState extends State<ChatScreen> {
             hasHotelOrderSummarySectionWidget: hasHotelOrderSummarySection,
             hasCarOrderSummarySectionWidget: hasCarOrderSummarySection,
             hasHotelBookingConfirmedSectionWidget: hasHotelBookingConfirmedSection,
+            hasCarBookingConfirmedSectionWidget: hasCarBookingConfirmedSection,
             hasServicesDeliveryOptionsWidget: hasServicesDeliveryOptions,
             hasChooseAddressWidget: hasChooseAddress,
             hasChooseCardWidget: hasChooseCard,
@@ -740,6 +768,7 @@ class _ChatScreenState extends State<ChatScreen> {
                         !hasHotelOrderSummarySection &&
                         !hasCarOrderSummarySection &&
                         !hasHotelBookingConfirmedSection &&
+                        !hasCarBookingConfirmedSection &&
                         !hasChooseAddress &&
                         !hasChooseCard &&
                         !hasOrderSummary &&
@@ -761,6 +790,7 @@ class _ChatScreenState extends State<ChatScreen> {
             hotelOrderSummaryItems: hotelOrderSummaryWidget?.getHotelOrderSummaryItems() ?? [],
             carOrderSummaryItems: carOrderSummaryWidget?.getCarOrderSummaryItems() ?? [],
             hotelBookingConfirmedItems: hotelBookingConfirmedWidget?.getHotelBookingConfirmedItems() ?? [],
+            carBookingConfirmedItems: carBookingConfirmedWidget?.getCarBookingConfirmedItems() ?? [],
             servicesDeliveryOptions: servicesDeliveryOptionsWidget?.getServicesDeliveryOptions() ?? [],
             addressOptions: chooseAddressWidget?.getAddressOptions() ?? [],
             cardOptions: chooseCardWidget?.getCardOptions() ?? [],
@@ -827,6 +857,7 @@ class _ChatScreenState extends State<ChatScreen> {
     ChatWidget? hotelOrderSummaryWidget;
     ChatWidget? carOrderSummaryWidget;
     ChatWidget? hotelBookingConfirmedWidget;
+    ChatWidget? carBookingConfirmedWidget;
     // Capture needToEndThisChat from API response
     _needToEndThisChat = response.needToEndThisChat;
     try {
@@ -906,6 +937,12 @@ class _ChatScreenState extends State<ChatScreen> {
     }
 
     try {
+      carBookingConfirmedWidget = response.widgets.firstWhere((widget) => widget.isCarBookingConfirmedWidget);
+    } catch (e) {
+      carBookingConfirmedWidget = null;
+    }
+
+    try {
       hotelsWidget = response.widgets.firstWhere((widget) => widget.isHotelsWidget);
     } catch (e) {
       hotelsWidget = null;
@@ -968,6 +1005,7 @@ class _ChatScreenState extends State<ChatScreen> {
     bool hasHotelOrderSummarySection = hotelOrderSummaryWidget != null;
     bool hasCarOrderSummarySection = carOrderSummaryWidget != null;
     bool hasHotelBookingConfirmedSection = hotelBookingConfirmedWidget != null;
+    bool hasCarBookingConfirmedSection = carBookingConfirmedWidget != null;
     setState(() {
       messages.add(
         ChatMessage(
@@ -987,6 +1025,7 @@ class _ChatScreenState extends State<ChatScreen> {
           hasHotelOrderSummarySectionWidget: hasHotelOrderSummarySection,
           hasCarOrderSummarySectionWidget: hasCarOrderSummarySection,
           hasHotelBookingConfirmedSectionWidget: hasHotelBookingConfirmedSection,
+          hasCarBookingConfirmedSectionWidget: hasCarBookingConfirmedSection,
           hasHotelsSectionWidget: hasHotelsSection,
           hasServicesDeliveryOptionsWidget: hasServicesDeliveryOptions,
           hasChooseAddressWidget: hasChooseAddress,
@@ -1008,6 +1047,7 @@ class _ChatScreenState extends State<ChatScreen> {
               !hasHotelOrderSummarySection &&
               !hasCarOrderSummarySection &&
               !hasHotelBookingConfirmedSection &&
+              !hasCarBookingConfirmedSection &&
               !hasServicesDeliveryOptions &&
               !hasChooseAddress &&
               !hasChooseCard &&
@@ -1029,6 +1069,7 @@ class _ChatScreenState extends State<ChatScreen> {
                       !hasHotelOrderSummarySection &&
                       !hasCarOrderSummarySection &&
                       !hasHotelBookingConfirmedSection &&
+                      !hasCarBookingConfirmedSection &&
                       !hasServicesDeliveryOptions &&
                       !hasChooseAddress &&
                       !hasChooseCard &&
@@ -1051,6 +1092,7 @@ class _ChatScreenState extends State<ChatScreen> {
           hotelOrderSummaryItems: hotelOrderSummaryWidget?.getHotelOrderSummaryItems() ?? [],
           carOrderSummaryItems: carOrderSummaryWidget?.getCarOrderSummaryItems() ?? [],
           hotelBookingConfirmedItems: hotelBookingConfirmedWidget?.getHotelBookingConfirmedItems() ?? [],
+          carBookingConfirmedItems: carBookingConfirmedWidget?.getCarBookingConfirmedItems() ?? [],
           servicesDeliveryOptions: servicesDeliveryOptionsWidget?.getServicesDeliveryOptions() ?? [],
           addressOptions: chooseAddressWidget?.getAddressOptions() ?? [],
           cardOptions: chooseCardWidget?.getCardOptions() ?? [],
@@ -1068,6 +1110,7 @@ class _ChatScreenState extends State<ChatScreen> {
           hotelOrderSummaryWidget: hotelOrderSummaryWidget,
           carOrderSummaryWidget: carOrderSummaryWidget,
           hotelBookingConfirmedWidget: hotelBookingConfirmedWidget,
+          carBookingConfirmedWidget: carBookingConfirmedWidget,
           servicesDeliveryOptionsWidget: servicesDeliveryOptionsWidget,
           chooseAddressWidget: chooseAddressWidget,
           chooseCardWidget: chooseCardWidget,

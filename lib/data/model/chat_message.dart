@@ -21,6 +21,7 @@ class ChatMessage {
   final bool hasHotelOrderSummarySectionWidget;
   final bool hasCarOrderSummarySectionWidget;
   final bool hasHotelBookingConfirmedSectionWidget;
+  final bool hasCarBookingConfirmedSectionWidget;
   final bool hasServicesDeliveryOptionsWidget;
   final bool hasChooseAddressWidget;
   final bool hasChooseCardWidget;
@@ -42,6 +43,7 @@ class ChatMessage {
   final List<HotelOrderSummary> hotelOrderSummaryItems;
   final List<CarOrderSummary> carOrderSummaryItems;
   final List<WidgetAction> hotelBookingConfirmedItems;
+  final List<WidgetAction> carBookingConfirmedItems;
   final List<WidgetAction> servicesDeliveryOptions;
   final List<AddressOption> addressOptions;
   final List<CardOption> cardOptions;
@@ -64,6 +66,7 @@ class ChatMessage {
   final ChatWidget? hotelOrderSummaryWidget;
   final ChatWidget? carOrderSummaryWidget;
   final ChatWidget? hotelBookingConfirmedWidget;
+  final ChatWidget? carBookingConfirmedWidget;
   ChatMessage({
     required this.id,
     required this.text,
@@ -83,6 +86,7 @@ class ChatMessage {
     this.hasHotelOrderSummarySectionWidget = false,
     this.hasCarOrderSummarySectionWidget = false,
     this.hasHotelBookingConfirmedSectionWidget = false,
+    this.hasCarBookingConfirmedSectionWidget = false,
     this.hasServicesDeliveryOptionsWidget = false,
     this.hasChooseAddressWidget = false,
     this.hasChooseCardWidget = false,
@@ -104,6 +108,7 @@ class ChatMessage {
     this.hotelOrderSummaryItems = const [],
     this.carOrderSummaryItems = const [],
     this.hotelBookingConfirmedItems = const [],
+    this.carBookingConfirmedItems = const [],
     this.servicesDeliveryOptions = const [],
     this.addressOptions = const [],
     this.cardOptions = const [],
@@ -126,6 +131,7 @@ class ChatMessage {
     this.hotelOrderSummaryWidget,
     this.carOrderSummaryWidget,
     this.hotelBookingConfirmedWidget,
+    this.carBookingConfirmedWidget,
   });
 
   ChatMessage copyWith({
@@ -146,6 +152,7 @@ class ChatMessage {
     bool? hasHotelOrderSummarySectionWidget,
     bool? hasCarOrderSummarySectionWidget,
     bool? hasHotelBookingConfirmedSectionWidget,
+    bool? hasCarBookingConfirmedSectionWidget,
     bool? hasServicesDeliveryOptionsWidget,
     bool? hasChooseAddressWidget,
     bool? hasChooseCardWidget,
@@ -167,6 +174,7 @@ class ChatMessage {
     List<HotelOrderSummary>? hotelOrderSummaryItems,
     List<CarOrderSummary>? carOrderSummaryItems,
     List<WidgetAction>? hotelBookingConfirmedItems,
+    List<WidgetAction>? carBookingConfirmedItems,
     List<WidgetAction>? servicesDeliveryOptions,
     List<AddressOption>? addressOptions,
     List<CardOption>? cardOptions,
@@ -208,6 +216,7 @@ class ChatMessage {
       hasHotelOrderSummarySectionWidget: hasHotelOrderSummarySectionWidget ?? this.hasHotelOrderSummarySectionWidget,
       hasCarOrderSummarySectionWidget: hasCarOrderSummarySectionWidget ?? this.hasCarOrderSummarySectionWidget,
       hasHotelBookingConfirmedSectionWidget: hasHotelBookingConfirmedSectionWidget ?? this.hasHotelBookingConfirmedSectionWidget,
+      hasCarBookingConfirmedSectionWidget: hasCarBookingConfirmedSectionWidget ?? this.hasCarBookingConfirmedSectionWidget,
       hasServicesDeliveryOptionsWidget: hasServicesDeliveryOptionsWidget ?? this.hasServicesDeliveryOptionsWidget,
       hasChooseAddressWidget: hasChooseAddressWidget ?? this.hasChooseAddressWidget,
       hasChooseCardWidget: hasChooseCardWidget ?? this.hasChooseCardWidget,
@@ -229,6 +238,7 @@ class ChatMessage {
       hotelOrderSummaryItems: hotelOrderSummaryItems ?? this.hotelOrderSummaryItems,
       carOrderSummaryItems: carOrderSummaryItems ?? this.carOrderSummaryItems,
       hotelBookingConfirmedItems: hotelBookingConfirmedItems ?? this.hotelBookingConfirmedItems,
+      carBookingConfirmedItems: carBookingConfirmedItems ?? this.carBookingConfirmedItems,
       servicesDeliveryOptions: servicesDeliveryOptions ?? this.servicesDeliveryOptions,
       addressOptions: addressOptions ?? this.addressOptions,
       cardOptions: cardOptions ?? this.cardOptions,
@@ -250,6 +260,7 @@ class ChatMessage {
         hotelOrderSummaryWidget: hotelOrderSummaryWidget ?? this.hotelOrderSummaryWidget,
         carOrderSummaryWidget: carOrderSummaryWidget ?? this.carOrderSummaryWidget,
         hotelBookingConfirmedWidget: hotelBookingConfirmedWidget ?? this.hotelBookingConfirmedWidget,
+        carBookingConfirmedWidget: carBookingConfirmedWidget ?? this.carBookingConfirmedWidget,
     );
   }
 }

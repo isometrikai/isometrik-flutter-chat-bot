@@ -33,7 +33,7 @@ enum WidgetEnum {
   choose_date,
   add_dependent,
   restaurant_sections,
-  hotel_destination,customer_profile_details,hotel_order_summary,hotel_booking_confirmed,car_pickup_places,car_dropoff_places,car_rentals_search,car_order_summary,
+  hotel_destination,customer_profile_details,hotel_order_summary,hotel_booking_confirmed,car_pickup_places,car_dropoff_places,car_rentals_search,car_order_summary,car_booking_confirmed,
   hotel_booking_dates,
   hotel_guests_rooms,
   hotels,

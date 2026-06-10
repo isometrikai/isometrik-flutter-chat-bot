@@ -187,6 +187,7 @@ class ChatWidget {
   bool get isHotelOrderSummaryWidget => type == WidgetEnum.hotel_order_summary.value;
   bool get isCarOrderSummaryWidget => type == WidgetEnum.car_order_summary.value;
   bool get isHotelBookingConfirmedWidget => type == WidgetEnum.hotel_booking_confirmed.value;
+  bool get isCarBookingConfirmedWidget => type == WidgetEnum.car_booking_confirmed.value;
   bool get isHotelsWidget => type == WidgetEnum.hotels.value;
   bool get isButtonWidget => type == 'button';
   bool get isInputWidget => type == 'input';
@@ -527,6 +528,13 @@ class ChatWidget {
     return [];
   }
 
+  // Helper method to get car booking confirmed items
+  List<WidgetAction> getCarBookingConfirmedItems() {
+    if (isCarBookingConfirmedWidget) {
+      return widget.map((item) => WidgetAction.fromJson(item as Map<String, dynamic>)).toList();
+    }
+    return [];
+  }
   // Get raw store as JSON string by index
   String? getRawStoreAsJsonString(int index) {
     final rawStore = getRawStore(index);
@@ -2246,6 +2254,9 @@ class WidgetAction {
   // final String? sortPrice;
   final int? page;
   final int? limit;
+  final String? booking_id;
+  final bool? isCarBookingFlow;
+  final bool? isHotelBookingFlow;
 
   WidgetAction({
     required this.buttonText,
@@ -2307,6 +2318,9 @@ class WidgetAction {
     // this.sortPrice,
     this.page,
     this.limit,
+    this.booking_id,
+    this.isCarBookingFlow,
+    this.isHotelBookingFlow,
   });
 
   factory WidgetAction.fromJson(Map<String, dynamic> json) {
@@ -2374,6 +2388,9 @@ class WidgetAction {
         // sortPrice: json['sort']?.toString(),
         page: json['page'] ?? 1,
         limit: json['limit'] ?? 50,
+        booking_id: json['booking_id']?.toString(),
+        isCarBookingFlow: json['is_car_booking_flow'] ?? false,
+        isHotelBookingFlow: json['is_hotel_booking_flow'] ?? false,
     );
   }
 
@@ -2439,6 +2456,9 @@ class WidgetAction {
       // 'sortPrice': sortPrice,
       'page': page,
       'limit': limit,
+      'booking_id': booking_id,
+      'isCarBookingFlow': isCarBookingFlow,
+      'isHotelBookingFlow': isHotelBookingFlow,
     };
   }
 }
