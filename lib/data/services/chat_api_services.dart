@@ -95,6 +95,7 @@ class ChatApiServices {
     List<String> prescriptionImageUrls = const [],
     Map<String, dynamic> tableBookingData = const {},
     Map<String, dynamic> hotelDestinationData = const {},
+    Map<String, dynamic> carPickupData = const {},
   }) async {
     final body = {
       'user_id': _userId,
@@ -122,6 +123,7 @@ class ChatApiServices {
       'prescription_image_urls': prescriptionImageUrls,
       'table_booking': tableBookingData,
       'hotel_booking': hotelDestinationData,
+      'car_booking': carPickupData,
       'enable_personalisation': Utility.getPersonalization(),
     };
 

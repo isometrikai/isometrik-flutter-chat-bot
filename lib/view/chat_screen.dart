@@ -262,7 +262,52 @@ class _ChatScreenState extends State<ChatScreen> {
 
             _sendMessage('I have selected room ${clickManage['roomName']}');
           }
-        } else {
+        }else if (clickManage['flow'] == 'CarBooking') {
+          if (clickManage['screenName'] == 'CarBookingDateTime' && clickManage['isForPickup'] == true) {
+            final existing = _apiData['car_booking'];
+            final Map<String, dynamic> carBooking;
+            if (existing is Map) {
+              carBooking = Map<String, dynamic>.from(existing);
+              carBooking['pickup_date'] = clickManage['pickup_date'];
+            } else {
+              carBooking = {
+                'pickup_date': clickManage['pickup_date'],
+              };
+            }
+             _apiData = {..._apiData, 'car_booking': carBooking};
+            _sendMessage(
+              'I have selected the car pickup date and time. ${clickManage['pickup_date_display']}',
+            );
+          }else  if (clickManage['screenName'] == 'CarBookingDateTime' && clickManage['isForReturn'] == true) {
+            final existing = _apiData['car_booking'];
+            final Map<String, dynamic> carBooking;
+            if (existing is Map) {
+              carBooking = Map<String, dynamic>.from(existing);
+              carBooking['return_date'] = clickManage['return_date'];
+            } else {
+              carBooking = {
+                'return_date': clickManage['return_date'],
+              };
+            }
+             _apiData = {..._apiData, 'car_booking': carBooking};
+            _sendMessage(
+              'I have selected the car return date and time. ${clickManage['return_date_display']}',
+            );
+          }else if (clickManage['screenName'] == 'CarDriverDetails') {
+            final driverData = _driverDetailsFromClickManage(clickManage);
+            final existing = _apiData['car_booking'];
+            final Map<String, dynamic> carBooking;
+            if (existing is Map) {
+              carBooking = Map<String, dynamic>.from(existing)..addAll(driverData);
+            } else {
+              carBooking = driverData;
+            }
+            _apiData = {..._apiData, 'car_booking': carBooking};
+            _sendMessage(
+              'I have added the car driver details.',
+            );
+          }
+          } else {
           _apiData = {
             ..._apiData,
             "dependent_id": clickManage['dependentId'] ?? '',
@@ -313,6 +358,9 @@ class _ChatScreenState extends State<ChatScreen> {
               message.hasOrderConfirmedWidget ||
               message.hasServicesDeliveryOptionsWidget ||
               message.hasHotelDestinationSectionWidget ||
+              message.hasCarPickupPlacesSectionWidget ||
+              message.hasCarDropoffPlacesSectionWidget ||
+              message.hasCarRentalsSearchSectionWidget ||
               message.hasHotelsSectionWidget)) {
         return i;
       }
@@ -331,6 +379,9 @@ class _ChatScreenState extends State<ChatScreen> {
         message.hasOrderConfirmedWidget ||
         message.hasServicesDeliveryOptionsWidget ||
         message.hasHotelDestinationSectionWidget ||
+        message.hasCarPickupPlacesSectionWidget ||
+        message.hasCarDropoffPlacesSectionWidget ||
+        message.hasCarRentalsSearchSectionWidget ||
         message.hasHotelsSectionWidget))
       return message;
     return message.copyWith(
@@ -344,8 +395,46 @@ class _ChatScreenState extends State<ChatScreen> {
       hasCartWidget: message.hasCartWidget,
       hasServicesDeliveryOptionsWidget: false,
       hasHotelDestinationSectionWidget: false,
+      hasCarPickupPlacesSectionWidget: false,
+      hasCarDropoffPlacesSectionWidget: false,
+      hasCarRentalsSearchSectionWidget: false,
       hasHotelsSectionWidget: false,
     );
+  }
+
+  Map<String, dynamic> _driverDetailsFromClickManage(
+    Map<String, dynamic> clickManage,
+  ) {
+    final driverDetails = clickManage['driver_details'];
+    final detailsMap = driverDetails is Map
+        ? Map<String, dynamic>.from(driverDetails)
+        : <String, dynamic>{};
+
+    final firstName = (detailsMap['first_name'] ?? '').toString().trim();
+    final lastName = (detailsMap['last_name'] ?? '').toString().trim();
+    final driverName =
+        [firstName, lastName].where((part) => part.isNotEmpty).join(' ');
+
+    final birthDateStr = (detailsMap['birth_date'] ?? '').toString();
+    int? driverAge;
+    if (birthDateStr.isNotEmpty) {
+      try {
+        final birthDate = DateTime.parse(birthDateStr);
+        final today = DateTime.now();
+        var age = today.year - birthDate.year;
+        if (today.month < birthDate.month ||
+            (today.month == birthDate.month && today.day < birthDate.day)) {
+          age--;
+        }
+        driverAge = age;
+      } catch (_) {}
+    }
+
+    return {
+      'driver_details': detailsMap,
+      'driver_name': driverName,
+      'driver_age': driverAge,
+    };
   }
 
   void _onFocusChange() {
@@ -454,9 +543,13 @@ class _ChatScreenState extends State<ChatScreen> {
         ChatWidget? orderSummaryWidget;
         ChatWidget? orderConfirmedWidget;
         ChatWidget? hotelDestinationWidget;
+        ChatWidget? carPickupPlacesWidget;
+        ChatWidget? carDropoffPlacesWidget;
+        ChatWidget? carRentalsSearchWidget;
         ChatWidget? hotelsWidget;
         ChatWidget? customerProfileDetailsWidget;
         ChatWidget? hotelOrderSummaryWidget;
+        ChatWidget? carOrderSummaryWidget;
         ChatWidget? hotelBookingConfirmedWidget;
         try {
           storesWidget = botResponse.widgets.firstWhere(
@@ -493,6 +586,24 @@ class _ChatScreenState extends State<ChatScreen> {
         }
 
         try {
+          carPickupPlacesWidget = botResponse.widgets.firstWhere((widget) => widget.isCarPickupPlacesWidget);
+        } catch (e) {
+          carPickupPlacesWidget = null;
+        }
+
+        try {
+          carDropoffPlacesWidget = botResponse.widgets.firstWhere((widget) => widget.isCarDropoffPlacesWidget);
+        } catch (e) {
+          carDropoffPlacesWidget = null;
+        }
+
+        try {
+          carRentalsSearchWidget = botResponse.widgets.firstWhere((widget) => widget.isCarRentalsSearchWidget);
+        } catch (e) {
+          carRentalsSearchWidget = null;
+        }
+
+        try {
           customerProfileDetailsWidget = botResponse.widgets.firstWhere((widget) => widget.isCustomerProfileDetailsWidget);
         } catch (e) {
           customerProfileDetailsWidget = null;
@@ -502,6 +613,12 @@ class _ChatScreenState extends State<ChatScreen> {
           hotelOrderSummaryWidget = botResponse.widgets.firstWhere((widget) => widget.isHotelOrderSummaryWidget);
         } catch (e) {
           hotelOrderSummaryWidget = null;
+        }
+
+        try {
+          carOrderSummaryWidget = botResponse.widgets.firstWhere((widget) => widget.isCarOrderSummaryWidget);
+        } catch (e) {
+          carOrderSummaryWidget = null;
         }
 
         try {
@@ -560,8 +677,12 @@ class _ChatScreenState extends State<ChatScreen> {
         bool hasCart = cartWidget != null;
         bool hasRestaurantSections = restaurantSectionsWidget != null;
         bool hasHotelDestinationSection = hotelDestinationWidget != null;
+        bool hasCarPickupPlacesSection = carPickupPlacesWidget != null;
+        bool hasCarDropoffPlacesSection = carDropoffPlacesWidget != null;
+        bool hasCarRentalsSearchSection = carRentalsSearchWidget != null;
         bool hasCustomerProfileDetailsSection = customerProfileDetailsWidget != null;
         bool hasHotelOrderSummarySection = hotelOrderSummaryWidget != null;
+        bool hasCarOrderSummarySection = carOrderSummaryWidget != null;
         bool hasHotelBookingConfirmedSection = hotelBookingConfirmedWidget != null;
         bool hasHotelsSection = hotelsWidget != null;
         bool hasServicesDeliveryOptions = servicesDeliveryOptionsWidget != null;
@@ -581,9 +702,13 @@ class _ChatScreenState extends State<ChatScreen> {
             hasCartWidget: hasCart,
             hasRestaurantSectionsWidget: hasRestaurantSections,
             hasHotelDestinationSectionWidget: hasHotelDestinationSection,
+            hasCarPickupPlacesSectionWidget: hasCarPickupPlacesSection,
+            hasCarDropoffPlacesSectionWidget: hasCarDropoffPlacesSection,
+            hasCarRentalsSearchSectionWidget: hasCarRentalsSearchSection,
             hasHotelsSectionWidget: hasHotelsSection,
             hasCustomerProfileDetailsSectionWidget: hasCustomerProfileDetailsSection,
             hasHotelOrderSummarySectionWidget: hasHotelOrderSummarySection,
+            hasCarOrderSummarySectionWidget: hasCarOrderSummarySection,
             hasHotelBookingConfirmedSectionWidget: hasHotelBookingConfirmedSection,
             hasServicesDeliveryOptionsWidget: hasServicesDeliveryOptions,
             hasChooseAddressWidget: hasChooseAddress,
@@ -607,9 +732,13 @@ class _ChatScreenState extends State<ChatScreen> {
                         !hasCart &&
                         !hasRestaurantSections &&
                         !hasHotelDestinationSection &&
+                        !hasCarPickupPlacesSection &&
+                        !hasCarDropoffPlacesSection &&
+                        !hasCarRentalsSearchSection &&
                         !hasCustomerProfileDetailsSection &&
                         !hasHotelsSection &&
                         !hasHotelOrderSummarySection &&
+                        !hasCarOrderSummarySection &&
                         !hasHotelBookingConfirmedSection &&
                         !hasChooseAddress &&
                         !hasChooseCard &&
@@ -624,9 +753,13 @@ class _ChatScreenState extends State<ChatScreen> {
             cartItems: cartWidget?.getCartItems() ?? [],
             restaurantSectionsItems: restaurantSectionsWidget?.getRestaurantSectionsItems() ?? [],
             hotelDestinationItems: hotelDestinationWidget?.getHotelDestinationItems() ?? [],
+            carPickupPlacesItems: carPickupPlacesWidget?.getCarPickupPlacesItems() ?? [],
+            carDropoffPlacesItems: carDropoffPlacesWidget?.getCarDropoffPlacesItems() ?? [],
+            carRentalsSearchItems: carRentalsSearchWidget?.getCarRentalsSearchItems() ?? [],
             customerProfileDetailsItems: customerProfileDetailsWidget?.getCustomerProfileDetailsItems() ?? [],
             hotelsItems: hotelsWidget?.getHotelsItems() ?? [],
             hotelOrderSummaryItems: hotelOrderSummaryWidget?.getHotelOrderSummaryItems() ?? [],
+            carOrderSummaryItems: carOrderSummaryWidget?.getCarOrderSummaryItems() ?? [],
             hotelBookingConfirmedItems: hotelBookingConfirmedWidget?.getHotelBookingConfirmedItems() ?? [],
             servicesDeliveryOptions: servicesDeliveryOptionsWidget?.getServicesDeliveryOptions() ?? [],
             addressOptions: chooseAddressWidget?.getAddressOptions() ?? [],
@@ -686,9 +819,13 @@ class _ChatScreenState extends State<ChatScreen> {
     ChatWidget? orderSummaryWidget;
     ChatWidget? orderConfirmedWidget;
     ChatWidget? hotelDestinationWidget;
+    ChatWidget? carPickupPlacesWidget;
+    ChatWidget? carDropoffPlacesWidget;
+    ChatWidget? carRentalsSearchWidget;
     ChatWidget? hotelsWidget;
     ChatWidget? customerProfileDetailsWidget;
     ChatWidget? hotelOrderSummaryWidget;
+    ChatWidget? carOrderSummaryWidget;
     ChatWidget? hotelBookingConfirmedWidget;
     // Capture needToEndThisChat from API response
     _needToEndThisChat = response.needToEndThisChat;
@@ -727,6 +864,24 @@ class _ChatScreenState extends State<ChatScreen> {
     }
 
     try {
+      carPickupPlacesWidget = response.widgets.firstWhere((widget) => widget.isCarPickupPlacesWidget);
+    } catch (e) {
+      carPickupPlacesWidget = null;
+    }
+
+    try {
+      carDropoffPlacesWidget = response.widgets.firstWhere((widget) => widget.isCarDropoffPlacesWidget);
+    } catch (e) {
+      carDropoffPlacesWidget = null;
+    }
+
+    try {
+      carRentalsSearchWidget = response.widgets.firstWhere((widget) => widget.isCarRentalsSearchWidget);
+    } catch (e) {
+      carRentalsSearchWidget = null;
+    }
+
+    try {
       customerProfileDetailsWidget = response.widgets.firstWhere((widget) => widget.isCustomerProfileDetailsWidget);
     } catch (e) {
       customerProfileDetailsWidget = null;
@@ -736,6 +891,12 @@ class _ChatScreenState extends State<ChatScreen> {
       hotelOrderSummaryWidget = response.widgets.firstWhere((widget) => widget.isHotelOrderSummaryWidget);
     } catch (e) {
       hotelOrderSummaryWidget = null;
+    }
+
+    try {
+      carOrderSummaryWidget = response.widgets.firstWhere((widget) => widget.isCarOrderSummaryWidget);
+    } catch (e) {
+      carOrderSummaryWidget = null;
     }
 
     try {
@@ -799,9 +960,13 @@ class _ChatScreenState extends State<ChatScreen> {
     bool hasOrderSummary = orderSummaryWidget != null;
     bool hasOrderConfirmed = orderConfirmedWidget != null;
     bool hasHotelDestinationSections = hotelDestinationWidget != null;
+    bool hasCarPickupPlacesSection = carPickupPlacesWidget != null;
+    bool hasCarDropoffPlacesSection = carDropoffPlacesWidget != null;
+    bool hasCarRentalsSearchSection = carRentalsSearchWidget != null;
     bool hasHotelsSection = hotelsWidget != null;
     bool hasCustomerProfileDetailsSection = customerProfileDetailsWidget != null;
     bool hasHotelOrderSummarySection = hotelOrderSummaryWidget != null;
+    bool hasCarOrderSummarySection = carOrderSummaryWidget != null;
     bool hasHotelBookingConfirmedSection = hotelBookingConfirmedWidget != null;
     setState(() {
       messages.add(
@@ -815,8 +980,12 @@ class _ChatScreenState extends State<ChatScreen> {
           hasCartWidget: hasCart,
           hasRestaurantSectionsWidget: hasRestaurantSections,
           hasHotelDestinationSectionWidget: hasHotelDestinationSections,
+          hasCarPickupPlacesSectionWidget: hasCarPickupPlacesSection,
+          hasCarDropoffPlacesSectionWidget: hasCarDropoffPlacesSection,
+          hasCarRentalsSearchSectionWidget: hasCarRentalsSearchSection,
           hasCustomerProfileDetailsSectionWidget: hasCustomerProfileDetailsSection,
           hasHotelOrderSummarySectionWidget: hasHotelOrderSummarySection,
+          hasCarOrderSummarySectionWidget: hasCarOrderSummarySection,
           hasHotelBookingConfirmedSectionWidget: hasHotelBookingConfirmedSection,
           hasHotelsSectionWidget: hasHotelsSection,
           hasServicesDeliveryOptionsWidget: hasServicesDeliveryOptions,
@@ -831,9 +1000,13 @@ class _ChatScreenState extends State<ChatScreen> {
               !hasCart &&
               !hasRestaurantSections &&
               !hasHotelDestinationSections &&
+              !hasCarPickupPlacesSection &&
+              !hasCarDropoffPlacesSection &&
+              !hasCarRentalsSearchSection &&
               !hasCustomerProfileDetailsSection &&
               !hasHotelsSection &&
               !hasHotelOrderSummarySection &&
+              !hasCarOrderSummarySection &&
               !hasHotelBookingConfirmedSection &&
               !hasServicesDeliveryOptions &&
               !hasChooseAddress &&
@@ -848,9 +1021,13 @@ class _ChatScreenState extends State<ChatScreen> {
                       !hasCart &&
                       !hasRestaurantSections &&
                       !hasHotelDestinationSections &&
+                      !hasCarPickupPlacesSection &&
+                      !hasCarDropoffPlacesSection &&
+                      !hasCarRentalsSearchSection &&
                       !hasCustomerProfileDetailsSection &&
                       !hasHotelsSection &&
                       !hasHotelOrderSummarySection &&
+                      !hasCarOrderSummarySection &&
                       !hasHotelBookingConfirmedSection &&
                       !hasServicesDeliveryOptions &&
                       !hasChooseAddress &&
@@ -866,9 +1043,13 @@ class _ChatScreenState extends State<ChatScreen> {
           cartItems: cartWidget?.getCartItems() ?? [],
           restaurantSectionsItems: restaurantSectionsWidget?.getRestaurantSectionsItems() ?? [],
           hotelDestinationItems: hotelDestinationWidget?.getHotelDestinationItems() ?? [],
+          carPickupPlacesItems: carPickupPlacesWidget?.getCarPickupPlacesItems() ?? [],
+          carDropoffPlacesItems: carDropoffPlacesWidget?.getCarDropoffPlacesItems() ?? [],
+          carRentalsSearchItems: carRentalsSearchWidget?.getCarRentalsSearchItems() ?? [],
           customerProfileDetailsItems: customerProfileDetailsWidget?.getCustomerProfileDetailsItems() ?? [],
           hotelsItems: hotelsWidget?.getHotelsItems() ?? [],
           hotelOrderSummaryItems: hotelOrderSummaryWidget?.getHotelOrderSummaryItems() ?? [],
+          carOrderSummaryItems: carOrderSummaryWidget?.getCarOrderSummaryItems() ?? [],
           hotelBookingConfirmedItems: hotelBookingConfirmedWidget?.getHotelBookingConfirmedItems() ?? [],
           servicesDeliveryOptions: servicesDeliveryOptionsWidget?.getServicesDeliveryOptions() ?? [],
           addressOptions: chooseAddressWidget?.getAddressOptions() ?? [],
@@ -879,9 +1060,13 @@ class _ChatScreenState extends State<ChatScreen> {
           cartWidget: cartWidget,
           restaurantSectionsWidget: restaurantSectionsWidget,
           hotelDestinationWidget: hotelDestinationWidget,
+          carPickupPlacesWidget: carPickupPlacesWidget,
+          carDropoffPlacesWidget: carDropoffPlacesWidget,
+          carRentalsSearchWidget: carRentalsSearchWidget,
           customerProfileDetailsWidget: customerProfileDetailsWidget,
           hotelsWidget: hotelsWidget,
           hotelOrderSummaryWidget: hotelOrderSummaryWidget,
+          carOrderSummaryWidget: carOrderSummaryWidget,
           hotelBookingConfirmedWidget: hotelBookingConfirmedWidget,
           servicesDeliveryOptionsWidget: servicesDeliveryOptionsWidget,
           chooseAddressWidget: chooseAddressWidget,
@@ -908,10 +1093,13 @@ class _ChatScreenState extends State<ChatScreen> {
                     widget.type == WidgetEnum.hotel_guests_rooms.value ||
                     widget.type == WidgetEnum.hotel_booking_for_me.value ||
                     widget.type == WidgetEnum.hotel_booking_for_other.value ||
+                    widget.type == WidgetEnum.car_driver_details.value ||
                     widget.type == WidgetEnum.see_more_hotels.value ||
+                    widget.type == WidgetEnum.see_more_cars.value ||
                     widget.type == WidgetEnum.hotel_confirm_booking.value ||
                     widget.type == WidgetEnum.see_available_rooms.value ||
                     widget.type == WidgetEnum.service_types.value ||
+                    widget.type == WidgetEnum.car_booking_date_time.value ||
                     widget.type == WidgetEnum.order_summary.value ||
                     widget.type == WidgetEnum.choose_address.value ||
                     widget.type == WidgetEnum.choose_card.value ||

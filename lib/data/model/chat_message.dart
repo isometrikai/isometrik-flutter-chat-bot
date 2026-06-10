@@ -13,9 +13,13 @@ class ChatMessage {
   final bool hasCartWidget;
   final bool hasRestaurantSectionsWidget;
   final bool hasHotelDestinationSectionWidget;
+  final bool hasCarPickupPlacesSectionWidget;
+  final bool hasCarDropoffPlacesSectionWidget;
+  final bool hasCarRentalsSearchSectionWidget;
   final bool hasHotelsSectionWidget;
   final bool hasCustomerProfileDetailsSectionWidget;
   final bool hasHotelOrderSummarySectionWidget;
+  final bool hasCarOrderSummarySectionWidget;
   final bool hasHotelBookingConfirmedSectionWidget;
   final bool hasServicesDeliveryOptionsWidget;
   final bool hasChooseAddressWidget;
@@ -30,9 +34,13 @@ class ChatMessage {
   final List<WidgetAction> cartItems;
   final List<WidgetAction> restaurantSectionsItems;
   final List<HotelDestination> hotelDestinationItems;
+  final List<CarPickupPlace> carPickupPlacesItems;
+  final List<CarPickupPlace> carDropoffPlacesItems;
+  final List<CarRentalSearch> carRentalsSearchItems;
   final List<HotelDestination> customerProfileDetailsItems;
   final List<HotelProperty> hotelsItems;
   final List<HotelOrderSummary> hotelOrderSummaryItems;
+  final List<CarOrderSummary> carOrderSummaryItems;
   final List<WidgetAction> hotelBookingConfirmedItems;
   final List<WidgetAction> servicesDeliveryOptions;
   final List<AddressOption> addressOptions;
@@ -48,9 +56,13 @@ class ChatMessage {
     final ChatWidget? orderSummaryWidget;
   final ChatWidget? orderConfirmedWidget;
   final ChatWidget? hotelDestinationWidget;
+  final ChatWidget? carPickupPlacesWidget;
+  final ChatWidget? carDropoffPlacesWidget;
+  final ChatWidget? carRentalsSearchWidget;
   final ChatWidget? hotelsWidget;
   final ChatWidget? customerProfileDetailsWidget;
   final ChatWidget? hotelOrderSummaryWidget;
+  final ChatWidget? carOrderSummaryWidget;
   final ChatWidget? hotelBookingConfirmedWidget;
   ChatMessage({
     required this.id,
@@ -63,9 +75,13 @@ class ChatMessage {
     this.hasCartWidget = false,
     this.hasRestaurantSectionsWidget = false,
     this.hasHotelDestinationSectionWidget = false,
+    this.hasCarPickupPlacesSectionWidget = false,
+    this.hasCarDropoffPlacesSectionWidget = false,
+    this.hasCarRentalsSearchSectionWidget = false,
     this.hasHotelsSectionWidget = false,
     this.hasCustomerProfileDetailsSectionWidget = false,
     this.hasHotelOrderSummarySectionWidget = false,
+    this.hasCarOrderSummarySectionWidget = false,
     this.hasHotelBookingConfirmedSectionWidget = false,
     this.hasServicesDeliveryOptionsWidget = false,
     this.hasChooseAddressWidget = false,
@@ -80,9 +96,13 @@ class ChatMessage {
     this.cartItems = const [],
     this.restaurantSectionsItems = const [],
     this.hotelDestinationItems = const [],
+    this.carPickupPlacesItems = const [],
+    this.carDropoffPlacesItems = const [],
+    this.carRentalsSearchItems = const [],
     this.customerProfileDetailsItems = const [],
     this.hotelsItems = const [],
     this.hotelOrderSummaryItems = const [],
+    this.carOrderSummaryItems = const [],
     this.hotelBookingConfirmedItems = const [],
     this.servicesDeliveryOptions = const [],
     this.addressOptions = const [],
@@ -98,9 +118,13 @@ class ChatMessage {
     this.orderSummaryWidget,
     this.orderConfirmedWidget,
     this.hotelDestinationWidget,
+    this.carPickupPlacesWidget,
+    this.carDropoffPlacesWidget,
+    this.carRentalsSearchWidget,
     this.customerProfileDetailsWidget,
     this.hotelsWidget,
     this.hotelOrderSummaryWidget,
+    this.carOrderSummaryWidget,
     this.hotelBookingConfirmedWidget,
   });
 
@@ -114,9 +138,13 @@ class ChatMessage {
     bool? hasProductCards,
     bool? hasCartWidget,
     bool? hasHotelDestinationSectionWidget,
+    bool? hasCarPickupPlacesSectionWidget,
+    bool? hasCarDropoffPlacesSectionWidget,
+    bool? hasCarRentalsSearchSectionWidget,
     bool? hasHotelsSectionWidget,
     bool? hasCustomerProfileDetailsSectionWidget,
     bool? hasHotelOrderSummarySectionWidget,
+    bool? hasCarOrderSummarySectionWidget,
     bool? hasHotelBookingConfirmedSectionWidget,
     bool? hasServicesDeliveryOptionsWidget,
     bool? hasChooseAddressWidget,
@@ -131,9 +159,13 @@ class ChatMessage {
     List<WidgetAction>? cartItems,
     List<WidgetAction>? restaurantSectionsItems,
     List<HotelDestination>? hotelDestinationItems,
+    List<CarPickupPlace>? carPickupPlacesItems,
+    List<CarPickupPlace>? carDropoffPlacesItems,
+    List<CarRentalSearch>? carRentalsSearchItems,
     List<HotelDestination>? customerProfileDetailsItems,
     List<HotelProperty>? hotelsItems,
     List<HotelOrderSummary>? hotelOrderSummaryItems,
+    List<CarOrderSummary>? carOrderSummaryItems,
     List<WidgetAction>? hotelBookingConfirmedItems,
     List<WidgetAction>? servicesDeliveryOptions,
     List<AddressOption>? addressOptions,
@@ -149,9 +181,13 @@ class ChatMessage {
     ChatWidget? orderSummaryWidget,
     ChatWidget? orderConfirmedWidget,
     ChatWidget? hotelDestinationWidget,
+    ChatWidget? carPickupPlacesWidget,
+    ChatWidget? carDropoffPlacesWidget,
+    ChatWidget? carRentalsSearchWidget,
     ChatWidget? hotelsWidget,
     ChatWidget? customerProfileDetailsWidget,
     ChatWidget? hotelOrderSummaryWidget,
+    ChatWidget? carOrderSummaryWidget,
   }) {
     return ChatMessage(
       id: id ?? this.id,
@@ -164,9 +200,13 @@ class ChatMessage {
       hasCartWidget: hasCartWidget ?? this.hasCartWidget,
       hasRestaurantSectionsWidget: hasRestaurantSectionsWidget ?? this.hasRestaurantSectionsWidget,
       hasHotelDestinationSectionWidget: hasHotelDestinationSectionWidget ?? this.hasHotelDestinationSectionWidget,
+      hasCarPickupPlacesSectionWidget: hasCarPickupPlacesSectionWidget ?? this.hasCarPickupPlacesSectionWidget,
+      hasCarDropoffPlacesSectionWidget: hasCarDropoffPlacesSectionWidget ?? this.hasCarDropoffPlacesSectionWidget,
+      hasCarRentalsSearchSectionWidget: hasCarRentalsSearchSectionWidget ?? this.hasCarRentalsSearchSectionWidget,
       hasHotelsSectionWidget: hasHotelsSectionWidget ?? this.hasHotelsSectionWidget,
       hasCustomerProfileDetailsSectionWidget: hasCustomerProfileDetailsSectionWidget ?? this.hasCustomerProfileDetailsSectionWidget,
       hasHotelOrderSummarySectionWidget: hasHotelOrderSummarySectionWidget ?? this.hasHotelOrderSummarySectionWidget,
+      hasCarOrderSummarySectionWidget: hasCarOrderSummarySectionWidget ?? this.hasCarOrderSummarySectionWidget,
       hasHotelBookingConfirmedSectionWidget: hasHotelBookingConfirmedSectionWidget ?? this.hasHotelBookingConfirmedSectionWidget,
       hasServicesDeliveryOptionsWidget: hasServicesDeliveryOptionsWidget ?? this.hasServicesDeliveryOptionsWidget,
       hasChooseAddressWidget: hasChooseAddressWidget ?? this.hasChooseAddressWidget,
@@ -181,9 +221,13 @@ class ChatMessage {
       cartItems: cartItems ?? this.cartItems,
       restaurantSectionsItems: restaurantSectionsItems ?? this.restaurantSectionsItems,
       hotelDestinationItems: hotelDestinationItems ?? this.hotelDestinationItems,
+      carPickupPlacesItems: carPickupPlacesItems ?? this.carPickupPlacesItems,
+      carDropoffPlacesItems: carDropoffPlacesItems ?? this.carDropoffPlacesItems,
+      carRentalsSearchItems: carRentalsSearchItems ?? this.carRentalsSearchItems,
       customerProfileDetailsItems: customerProfileDetailsItems ?? this.customerProfileDetailsItems,
       hotelsItems: hotelsItems ?? this.hotelsItems,
       hotelOrderSummaryItems: hotelOrderSummaryItems ?? this.hotelOrderSummaryItems,
+      carOrderSummaryItems: carOrderSummaryItems ?? this.carOrderSummaryItems,
       hotelBookingConfirmedItems: hotelBookingConfirmedItems ?? this.hotelBookingConfirmedItems,
       servicesDeliveryOptions: servicesDeliveryOptions ?? this.servicesDeliveryOptions,
       addressOptions: addressOptions ?? this.addressOptions,
@@ -198,9 +242,13 @@ class ChatMessage {
         orderSummaryWidget: orderSummaryWidget ?? this.orderSummaryWidget,
         orderConfirmedWidget: orderConfirmedWidget ?? this.orderConfirmedWidget,
         hotelDestinationWidget: hotelDestinationWidget ?? this.hotelDestinationWidget,
+        carPickupPlacesWidget: carPickupPlacesWidget ?? this.carPickupPlacesWidget,
+        carDropoffPlacesWidget: carDropoffPlacesWidget ?? this.carDropoffPlacesWidget,
+        carRentalsSearchWidget: carRentalsSearchWidget ?? this.carRentalsSearchWidget,
         hotelsWidget: hotelsWidget ?? this.hotelsWidget,
         customerProfileDetailsWidget: customerProfileDetailsWidget ?? this.customerProfileDetailsWidget,
         hotelOrderSummaryWidget: hotelOrderSummaryWidget ?? this.hotelOrderSummaryWidget,
+        carOrderSummaryWidget: carOrderSummaryWidget ?? this.carOrderSummaryWidget,
         hotelBookingConfirmedWidget: hotelBookingConfirmedWidget ?? this.hotelBookingConfirmedWidget,
     );
   }

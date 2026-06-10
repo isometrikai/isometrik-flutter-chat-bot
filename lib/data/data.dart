@@ -17,6 +17,7 @@ export 'model/user_preference_request.dart';
 export 'model/wallet_response.dart';
 export 'model/hotel_availability_response.dart';
 export 'model/hotel_search_response.dart';
+export 'model/car_search_response.dart';
 export 'services/services.dart';
 export 'repositories/repositories.dart';
 export 'api_client.dart';

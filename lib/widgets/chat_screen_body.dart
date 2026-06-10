@@ -234,6 +234,7 @@ class ChatScreenBody extends StatelessWidget {
                         : null,
                     tableBookingData: apiData['table_booking'] ?? {},
                     hotelDestinationData: apiData['hotel_booking'] ?? {},
+                    carPickupData: apiData['car_booking'] ?? {},
                   );
                   bloc.add(event);
                   onClearPendingMessage();
@@ -1053,13 +1054,29 @@ class ChatScreenBody extends StatelessWidget {
             const SizedBox(height: 4), //12
             buildHotelDestinationWidget(message.hotelDestinationItems),
           ],
+          if (message.hasCarPickupPlacesSectionWidget) ...[
+            const SizedBox(height: 4), //12
+            buildCarPickupPlacesWidget(message.carPickupPlacesItems),
+          ],
+          if (message.hasCarDropoffPlacesSectionWidget) ...[
+            const SizedBox(height: 4), //12
+            buildCarDropoffPlacesWidget(message.carDropoffPlacesItems),
+          ],
           if (message.hasHotelsSectionWidget) ...[
             const SizedBox(height: 4), //12
             buildHotelsWidget(message.hotelsItems),
           ],
+          if (message.hasCarRentalsSearchSectionWidget) ...[
+            const SizedBox(height: 4), //12
+            buildCarRentalsSearchWidget(message.carRentalsSearchItems),
+          ],
           if (message.hasHotelOrderSummarySectionWidget) ...[
             const SizedBox(height: 4), //12
             buildHotelOrderSummaryWidget(message.hotelOrderSummaryItems),
+          ],
+          if (message.hasCarOrderSummarySectionWidget) ...[
+            const SizedBox(height: 4), //12
+            buildCarOrderSummaryWidget(message.carOrderSummaryItems),
           ],
           if (message.hasHotelBookingConfirmedSectionWidget) ...[
             const SizedBox(height: 4), //12
@@ -2188,6 +2205,51 @@ class ChatScreenBody extends StatelessWidget {
         }
 
         for (final widget in latestActionWidgets.where(
+          (w) => w.type == WidgetEnum.car_booking_date_time.value,
+        )) {
+          for (final action in widget.carBookingDateTime) {
+            actionButtons.add(
+              buildActionButton(
+                text: action.buttonText,
+                onTap:
+                    isApiLoading
+                        ? () {}
+                        : () {
+                          OrderService().triggerClickManageScreenOpen({
+                            'flow': 'CarBooking',
+                            'screenName': 'CarBookingDateTime',
+                            'isForReturn': widget.isForReturn,
+                            'isForPickup': widget.isForPickup,
+                            // 'pickup_date': action.pickupDate,
+                          });
+                        },
+              ),
+            );
+          }
+        }
+
+         for (final widget in latestActionWidgets.where(
+          (w) => w.type == WidgetEnum.car_driver_details.value,
+        )) {
+          for (final action in widget.carDriverDetails) {
+            actionButtons.add(
+              buildActionButton(
+                text: action.buttonText,
+                onTap:
+                    isApiLoading
+                        ? () {}
+                        : () {
+                          OrderService().triggerClickManageScreenOpen({
+                            'flow': 'CarBooking',
+                            'screenName': 'CarDriverDetails',
+                          });
+                        },
+              ),
+            );
+          }
+        }
+
+        for (final widget in latestActionWidgets.where(
           (w) => w.type == WidgetEnum.hotel_booking_for_other.value,
         )) {
           for (final action in widget.hotelBookingForOther) {
@@ -2217,6 +2279,21 @@ class ChatScreenBody extends StatelessWidget {
                 onTap: isApiLoading
                     ? () {}
                     : () => _openHotelSearchScreen(context, action),
+              ),
+            );
+          }
+        }
+
+         for (final widget in latestActionWidgets.where(
+          (w) => w.type == WidgetEnum.see_more_cars.value,
+        )) {
+          for (final action in widget.seeMoreCars) {
+            actionButtons.add(
+              buildActionButton(
+                text: action.buttonText,
+                onTap: isApiLoading
+                    ? () {}
+                    : () => _openCarSearchScreen(context, action),
               ),
             );
           }
@@ -3982,6 +4059,68 @@ class ChatScreenBody extends StatelessWidget {
     );
   }
 
+  Widget buildCarPickupPlacesWidget(List<CarPickupPlace> places) {
+    return _buildCarPlacesWidget(
+      places: places,
+      onPlaceSelected: (place) {
+        final carBooking = _carBookingMap()
+          ..['countryOfResidence'] = 'AE'
+          ..['pickup_code'] = place.iataCode
+          ..['pickup_type'] = place.type
+          ..['pickup_geo'] =
+              '${place.coordinates.lat},${place.coordinates.lon}';
+        onSendMessage(
+          'I want to book car pickup from ${place.name}',
+          null,
+          null,
+          null,
+          {'car_booking': carBooking},
+        );
+      },
+    );
+  }
+
+  Widget buildCarDropoffPlacesWidget(List<CarPickupPlace> places) {
+    return _buildCarPlacesWidget(
+      places: places,
+      onPlaceSelected: (place) {
+        final carBooking = _carBookingMap()
+          ..['return_code'] = place.iataCode
+          ..['return_type'] = place.type;
+        onSendMessage(
+          'I want to drop off car at ${place.name}',
+          null,
+          null,
+          null,
+          {'car_booking': carBooking},
+        );
+      },
+    );
+  }
+
+  Widget _buildCarPlacesWidget({
+    required List<CarPickupPlace> places,
+    required void Function(CarPickupPlace place) onPlaceSelected,
+  }) {
+    if (places.isEmpty) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.only(left: 0.0),
+      child: CarPickupPlacesWidget(
+        places: places,
+        isFromChatHistory: isFromHistory,
+        onPlaceSelected: onPlaceSelected,
+      ),
+    );
+  }
+
+  Map<String, dynamic> _carBookingMap() {
+    final existing = apiData['car_booking'];
+    if (existing is Map) {
+      return Map<String, dynamic>.from(existing);
+    }
+    return {};
+  }
+
   Map<String, dynamic> _hotelBookingMap() {
     final existing = apiData['hotel_booking'];
     if (existing is Map) {
@@ -4021,6 +4160,54 @@ class ChatScreenBody extends StatelessWidget {
           (hotelBooking['countryOfResidence'] ?? 'AE').toString();
 
     return hotelBooking;
+  }
+
+  void _openCarSearchScreen(BuildContext context, WidgetAction action) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => BlocProvider(
+          create: (_) => CarSearchBloc(),
+          child: CarSearchScreen(
+            actionData: action,
+            onCarRentalSelected: (rental) {
+              final carBooking = _carBookingMap()
+                ..['correlationId'] = rental.correlationId
+                ..['availabilityToken'] = rental.availabilityToken
+                ..['id'] = rental.id
+                ..['pickup_date'] = rental.pickupDate.isNotEmpty
+                    ? rental.pickupDate
+                    : (action.pickupDate ?? '')
+                ..['return_date'] = rental.returnDate.isNotEmpty
+                    ? rental.returnDate
+                    : (action.returnDate ?? '')
+                ..['driver_age'] = rental.driverAge > 0
+                    ? rental.driverAge
+                    : action.driverAge;
+              apiData['car_booking'] = carBooking;
+              Navigator.of(context).pop();
+              onSendMessage('I have selected car ${rental.name}');
+            },
+            onOpenInEazyApp: (rental) {
+              OrderService().triggerClickManageScreenOpen({
+                'flow': 'CarBooking',
+                'needToBack': true,
+                'correlationId': rental.correlationId,
+                'availabilityToken': rental.availabilityToken,
+                'pickup_date': action.pickupDate,
+                'return_date': action.returnDate,
+                'pickup_code': action.pickupCode,
+                'return_code': action.returnCode,
+                'pickup_type': action.pickupType,
+                'return_type': action.returnType,
+                'driver_age': action.driverAge,
+                'country': action.country,
+              });
+            },
+          ),
+        ),
+      ),
+    );
   }
 
   void _openHotelSearchScreen(BuildContext context, WidgetAction action) {
@@ -4150,6 +4337,39 @@ class ChatScreenBody extends StatelessWidget {
     );
   }
 
+  Widget buildCarRentalsSearchWidget(List<CarRentalSearch> rentals) {
+    if (rentals.isEmpty) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.only(left: 0.0),
+      child: CarRentalsSearchWidget(
+        rentals: rentals,
+        isFromChatHistory: isFromHistory,
+        onCarRentalSelected: (rental) {
+           final existing = apiData['car_booking'];
+            final Map<String, dynamic> carBooking;
+            if (existing is Map) {
+              carBooking = Map<String, dynamic>.from(existing);
+              carBooking['correlationId'] = rental.correlationId;
+              carBooking['availabilityToken'] = rental.availabilityToken;
+            } else {
+              carBooking = {
+                'correlationId': rental.correlationId,
+                'availabilityToken': rental.availabilityToken,
+              };
+            }
+            apiData['car_booking'] = carBooking;
+            
+          onSendMessage(
+            'I have selected car ${rental.name}'
+          );
+        },
+        onOpenInApp: (rental) {
+          // TODO: implement car rental open-in-app flow
+        },
+      ),
+    );
+  }
+
   Widget buildHotelOrderSummaryWidget(List<HotelOrderSummary> items) {
     if (items.isEmpty) return const SizedBox.shrink();
     return Padding(
@@ -4157,6 +4377,17 @@ class ChatScreenBody extends StatelessWidget {
       child: HotelOrderSummaryWidget(
         items: items,
         hotelBooking: _hotelBookingMap(),
+      ),
+    );
+  }
+
+  Widget buildCarOrderSummaryWidget(List<CarOrderSummary> items) {
+    if (items.isEmpty) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.only(left: 0.0),
+      child: CarOrderSummaryWidget(
+        items: items,
+        carBooking: _carBookingMap(),
       ),
     );
   }

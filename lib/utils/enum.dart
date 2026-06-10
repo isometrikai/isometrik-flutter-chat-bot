@@ -33,11 +33,11 @@ enum WidgetEnum {
   choose_date,
   add_dependent,
   restaurant_sections,
-  hotel_destination,customer_profile_details,hotel_order_summary,hotel_booking_confirmed,
+  hotel_destination,customer_profile_details,hotel_order_summary,hotel_booking_confirmed,car_pickup_places,car_dropoff_places,car_rentals_search,car_order_summary,
   hotel_booking_dates,
   hotel_guests_rooms,
   hotels,
-  see_available_rooms,hotel_booking_for_me,hotel_booking_for_other,see_more_hotels,hotel_confirm_booking;
+  see_available_rooms,hotel_booking_for_me,hotel_booking_for_other,see_more_hotels,hotel_confirm_booking,car_booking_date_time,car_driver_details,see_more_cars;
 
   // Add string values for API communication
   String get value {

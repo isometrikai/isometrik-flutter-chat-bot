@@ -98,6 +98,9 @@ class ChatWidget {
   final bool isTableBookingFlow;
   final bool isTableBookingTimeSlot;
   final bool isHotelBookingFlow;
+  final bool isCarBookingFlow;
+  final bool isForReturn;
+  final bool? isForPickup;
   final List<dynamic> widget; // Raw JSON data
 
   ChatWidget({
@@ -107,6 +110,9 @@ class ChatWidget {
     required this.isTableBookingFlow,
     required this.isTableBookingTimeSlot,
     required this.isHotelBookingFlow,
+    required this.isCarBookingFlow,
+    required this.isForReturn,
+    required this.isForPickup,
     required this.widget,
   });
 
@@ -118,7 +124,10 @@ class ChatWidget {
       isTableBookingFlow: json['is_table_booking_flow'] ?? false,
       isTableBookingTimeSlot: json['is_table_booking_time_slot_selection'] ?? false,
       isHotelBookingFlow: json['is_hotel_booking_flow'] ?? false,
+      isCarBookingFlow: json['is_car_booking_flow'] ?? false,
       widget: (json['widget'] as List<dynamic>?) ?? [],
+      isForReturn: json['isForReturn'] ?? false,
+      isForPickup: json['isForPickup'] ?? false,
     );
   }
 
@@ -130,7 +139,10 @@ class ChatWidget {
       'is_table_booking_flow': isTableBookingFlow,
       'is_hotel_booking_flow': isHotelBookingFlow,
       'is_table_booking_time_slot_selection': isTableBookingTimeSlot,
+      'is_car_booking_flow': isCarBookingFlow,
       'widget': widget,
+      'isForReturn': isForReturn,
+      'isForPickup': isForPickup,
     };
   }
 
@@ -151,11 +163,14 @@ class ChatWidget {
   bool get isScheduledLaterWidget => type == WidgetEnum.schedule_later.value;
   bool get isSelectStaffWidget => type == WidgetEnum.staff_selection.value;
   bool get isSeeAvailableRoomsWidget => type == WidgetEnum.see_available_rooms.value;
+  bool get isCarBookingDateTimeWidget => type == WidgetEnum.car_booking_date_time.value;
   bool get isHotelBookingForMeWidget =>
       type == WidgetEnum.hotel_booking_for_me.value;
   bool get isHotelBookingForOtherWidget =>
       type == WidgetEnum.hotel_booking_for_other.value;
+  bool get isCarDriverDetailsWidget => type == WidgetEnum.car_driver_details.value;
   bool get isSeeMoreHotelsWidget => type == WidgetEnum.see_more_hotels.value;
+  bool get isSeeMoreCarsWidget => type == WidgetEnum.see_more_cars.value;
   bool get isHotelConfirmBookingWidget => type == WidgetEnum.hotel_confirm_booking.value;
   bool get isPrescriptionScreenWidget => type == WidgetEnum.prescription_screen.value;
   bool get isOnlinePaymentConfirmOrderWidget => type == WidgetEnum.online_payment_confirm_order.value;
@@ -165,8 +180,12 @@ class ChatWidget {
   bool get isOrderDetailsWidget => type == WidgetEnum.order_details.value;
   bool get isAddDependentWidget => type == WidgetEnum.add_dependent.value;
   bool get isHotelDestinationWidget => type == WidgetEnum.hotel_destination.value;
+  bool get isCarPickupPlacesWidget => type == WidgetEnum.car_pickup_places.value;
+  bool get isCarDropoffPlacesWidget => type == WidgetEnum.car_dropoff_places.value;
+  bool get isCarRentalsSearchWidget => type == WidgetEnum.car_rentals_search.value;
   bool get isCustomerProfileDetailsWidget => type == WidgetEnum.customer_profile_details.value;
   bool get isHotelOrderSummaryWidget => type == WidgetEnum.hotel_order_summary.value;
+  bool get isCarOrderSummaryWidget => type == WidgetEnum.car_order_summary.value;
   bool get isHotelBookingConfirmedWidget => type == WidgetEnum.hotel_booking_confirmed.value;
   bool get isHotelsWidget => type == WidgetEnum.hotels.value;
   bool get isButtonWidget => type == 'button';
@@ -283,6 +302,10 @@ class ChatWidget {
       ? widget.map((e) => WidgetAction.fromJson(e as Map<String, dynamic>)).toList()
       : [];
 
+  List<WidgetAction> get seeMoreCars => isSeeMoreCarsWidget
+      ? widget.map((e) => WidgetAction.fromJson(e as Map<String, dynamic>)).toList()
+      : [];
+
   List<WidgetAction> get hotelConfirmBooking => isHotelConfirmBookingWidget
       ? widget.map((e) => WidgetAction.fromJson(e as Map<String, dynamic>)).toList()
       : [];
@@ -292,6 +315,14 @@ class ChatWidget {
       : [];
 
   List<WidgetAction> get hotelBookingForOther => isHotelBookingForOtherWidget
+      ? widget.map((e) => WidgetAction.fromJson(e as Map<String, dynamic>)).toList()
+      : [];
+
+  List<WidgetAction> get carDriverDetails => isCarDriverDetailsWidget
+      ? widget.map((e) => WidgetAction.fromJson(e as Map<String, dynamic>)).toList()
+      : [];
+
+  List<WidgetAction> get carBookingDateTime => isCarBookingDateTimeWidget
       ? widget.map((e) => WidgetAction.fromJson(e as Map<String, dynamic>)).toList()
       : [];
 
@@ -408,6 +439,36 @@ class ChatWidget {
     return [];
   }
 
+  // Helper method to get car pickup places items
+  List<CarPickupPlace> getCarPickupPlacesItems() {
+    if (isCarPickupPlacesWidget) {
+      return widget.map((item) => CarPickupPlace.fromJson(item as Map<String, dynamic>)).toList();
+    }
+    return [];
+  }
+
+  // Helper method to get car dropoff places items
+  List<CarPickupPlace> getCarDropoffPlacesItems() {
+    if (isCarDropoffPlacesWidget) {
+      return widget.map((item) => CarPickupPlace.fromJson(item as Map<String, dynamic>)).toList();
+    }
+    return [];
+  }
+
+  // Helper method to get car rentals search items
+  List<CarRentalSearch> getCarRentalsSearchItems() {
+    if (isCarRentalsSearchWidget) {
+      return widget
+          .map(
+            (item) => CarRentalSearch.fromJson(
+              item as Map<String, dynamic>,
+            ),
+          )
+          .toList();
+    }
+    return [];
+  }
+
   // Helper method to get customer profile details items
   List<HotelDestination> getCustomerProfileDetailsItems() {
     if (isCustomerProfileDetailsWidget) {
@@ -436,6 +497,20 @@ class ChatWidget {
       return widget
           .map(
             (item) => HotelOrderSummary.fromJson(
+              item as Map<String, dynamic>,
+            ),
+          )
+          .toList();
+    }
+    return [];
+  }
+
+  // Helper method to get car order summary items
+  List<CarOrderSummary> getCarOrderSummaryItems() {
+    if (isCarOrderSummaryWidget) {
+      return widget
+          .map(
+            (item) => CarOrderSummary.fromJson(
               item as Map<String, dynamic>,
             ),
           )
@@ -945,6 +1020,343 @@ class HotelDestination {
   }
 }
 
+// Airport / car pickup place model
+class AirportCoordinates {
+  final double lat;
+  final double lon;
+
+  AirportCoordinates({
+    required this.lat,
+    required this.lon,
+  });
+
+  factory AirportCoordinates.fromJson(Map<String, dynamic> json) {
+    return AirportCoordinates(
+      lat: (json['lat'] as num?)?.toDouble() ?? 0.0,
+      lon: (json['lon'] as num?)?.toDouble() ?? 0.0,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'lat': lat,
+      'lon': lon,
+    };
+  }
+}
+
+class CarPickupPlace {
+  final String id;
+  final String name;
+  final String cityName;
+  final String countryName;
+  final String iataCode;
+  final String type;
+  final AirportCoordinates coordinates;
+  final String regionId;
+
+  CarPickupPlace({
+    required this.id,
+    required this.name,
+    required this.cityName,
+    required this.countryName,
+    required this.iataCode,
+    required this.type,
+    required this.coordinates,
+    required this.regionId,
+  });
+
+  factory CarPickupPlace.fromJson(Map<String, dynamic> json) {
+    final coordinatesJson = json['coordinates'];
+    return CarPickupPlace(
+      id: (json['id'] ?? '').toString(),
+      name: (json['name'] ?? '').toString(),
+      cityName: (json['city_name'] ?? '').toString(),
+      countryName: (json['country_name'] ?? '').toString(),
+      iataCode: (json['iata_code'] ?? '').toString(),
+      type: (json['type'] ?? '').toString(),
+      coordinates: coordinatesJson is Map<String, dynamic>
+          ? AirportCoordinates.fromJson(coordinatesJson)
+          : AirportCoordinates(lat: 0.0, lon: 0.0),
+      regionId: (json['region_id'] ?? '').toString(),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+      'city_name': cityName,
+      'country_name': countryName,
+      'iata_code': iataCode,
+      'type': type,
+      'coordinates': coordinates.toJson(),
+      'region_id': regionId,
+    };
+  }
+}
+
+// Car Rental Search Model (vehicle rental search result)
+class CarRentalSearch {
+  final String id;
+  final String name;
+  final String vendor;
+  final String currency;
+  final double amount;
+  final String availabilityToken;
+  final String correlationId;
+  final String pickupDate;
+  final String returnDate;
+  final int driverAge;
+  final CarRentalSearchRaw raw;
+
+  CarRentalSearch({
+    required this.id,
+    required this.name,
+    required this.vendor,
+    required this.currency,
+    required this.amount,
+    required this.availabilityToken,
+    required this.correlationId,
+    required this.pickupDate,
+    required this.returnDate,
+    required this.driverAge,
+    required this.raw,
+  });
+
+  factory CarRentalSearch.fromJson(Map<String, dynamic> json) {
+    if (_isAvailabilityApiItem(json)) {
+      return CarRentalSearch.fromAvailabilityJson(json);
+    }
+
+    return CarRentalSearch(
+      id: (json['id'] ?? '').toString(),
+      name: (json['name'] ?? '').toString(),
+      vendor: (json['vendor'] ?? '').toString(),
+      currency: (json['currency'] ?? '').toString(),
+      amount: (json['amount'] as num?)?.toDouble() ?? 0.0,
+      availabilityToken: (json['availability_token'] ??
+              json['availabilityToken'] ??
+              '')
+          .toString(),
+      correlationId:
+          (json['correlation_id'] ?? json['correlationId'] ?? '').toString(),
+      pickupDate: (json['pickup_date'] ?? '').toString(),
+      returnDate: (json['return_date'] ?? '').toString(),
+      driverAge: (json['driver_age'] as num?)?.toInt() ?? 0,
+      raw: CarRentalSearchRaw.fromJson(
+        json['raw'] as Map<String, dynamic>? ?? {},
+      ),
+    );
+  }
+
+  /// Parses GET /v1/xeni/cars/rentals `available_cars` items.
+  factory CarRentalSearch.fromAvailabilityJson(
+    Map<String, dynamic> json, {
+    String correlationId = '',
+    String pickupDate = '',
+    String returnDate = '',
+    int driverAge = 0,
+  }) {
+    final vehicleJson = json['vehicle'] as Map<String, dynamic>? ?? {};
+    final vehicle = CarRentalVehicle.fromJson(vehicleJson);
+    final preferredCharge = _preferredVehicleCharge(json);
+    final id = (json['id'] ?? '').toString();
+    final availabilityToken = (json['availability_token'] ??
+            json['availabilityToken'] ??
+            '')
+        .toString();
+    final vendor = (json['rental_car_brand'] ?? json['vendor'] ?? '')
+        .toString();
+    final name = vehicle.name.trim().isNotEmpty
+        ? vehicle.name
+        : (json['name'] ?? '').toString();
+
+    return CarRentalSearch(
+      id: id,
+      name: name,
+      vendor: vendor,
+      currency: (preferredCharge['currency_code'] ?? json['currency'] ?? '')
+          .toString(),
+      amount: (preferredCharge['total_price'] as num?)?.toDouble() ??
+          (preferredCharge['base_price'] as num?)?.toDouble() ??
+          (json['amount'] as num?)?.toDouble() ??
+          0.0,
+      availabilityToken: availabilityToken,
+      correlationId: correlationId.isNotEmpty
+          ? correlationId
+          : (json['correlation_id'] ?? json['correlationId'] ?? '').toString(),
+      pickupDate: pickupDate.isNotEmpty
+          ? pickupDate
+          : (json['pickup_date'] ?? json['pick_up_date_time'] ?? '').toString(),
+      returnDate: returnDate.isNotEmpty
+          ? returnDate
+          : (json['return_date'] ?? json['return_date_time'] ?? '').toString(),
+      driverAge: driverAge > 0
+          ? driverAge
+          : (json['driver_age'] as num?)?.toInt() ?? 0,
+      raw: CarRentalSearchRaw(
+        id: id,
+        availabilityToken: availabilityToken,
+        status: (json['status'] ?? '').toString(),
+        rentalCarBrand: vendor,
+        vehicle: vehicle,
+      ),
+    );
+  }
+
+  static bool _isAvailabilityApiItem(Map<String, dynamic> json) {
+    return json.containsKey('rental_car_brand') ||
+        json.containsKey('rental_rate') ||
+        json.containsKey('available_cars');
+  }
+
+  static Map<String, dynamic> _preferredVehicleCharge(Map<String, dynamic> json) {
+    final rentalRate = json['rental_rate'];
+    if (rentalRate is! Map) return {};
+
+    final charges = rentalRate['vehicle_charges'];
+    if (charges is! List) return {};
+
+    for (final charge in charges) {
+      if (charge is Map &&
+          charge['purpose']?.toString().toLowerCase() == 'preferred') {
+        return Map<String, dynamic>.from(charge);
+      }
+    }
+
+    for (final charge in charges) {
+      if (charge is Map && charge['total_price'] != null) {
+        return Map<String, dynamic>.from(charge);
+      }
+    }
+
+    if (charges.isNotEmpty && charges.first is Map) {
+      return Map<String, dynamic>.from(charges.first as Map);
+    }
+
+    return {};
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+      'vendor': vendor,
+      'currency': currency,
+      'amount': amount,
+      'availability_token': availabilityToken,
+      'correlation_id': correlationId,
+      'pickup_date': pickupDate,
+      'return_date': returnDate,
+      'driver_age': driverAge,
+      'raw': raw.toJson(),
+    };
+  }
+}
+
+class CarRentalSearchRaw {
+  final String id;
+  final String availabilityToken;
+  final String status;
+  final String rentalCarBrand;
+  final CarRentalVehicle vehicle;
+
+  CarRentalSearchRaw({
+    required this.id,
+    required this.availabilityToken,
+    required this.status,
+    required this.rentalCarBrand,
+    required this.vehicle,
+  });
+
+  factory CarRentalSearchRaw.fromJson(Map<String, dynamic> json) {
+    return CarRentalSearchRaw(
+      id: (json['id'] ?? '').toString(),
+      availabilityToken: (json['availability_token'] ?? '').toString(),
+      status: (json['status'] ?? '').toString(),
+      rentalCarBrand: (json['rental_car_brand'] ?? '').toString(),
+      vehicle: CarRentalVehicle.fromJson(
+        json['vehicle'] as Map<String, dynamic>? ?? {},
+      ),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'availability_token': availabilityToken,
+      'status': status,
+      'rental_car_brand': rentalCarBrand,
+      'vehicle': vehicle.toJson(),
+    };
+  }
+}
+
+class CarRentalVehicle {
+  final bool airConditioning;
+  final String transmissionType;
+  final String fuelType;
+  final String driveType;
+  final int passengerQuantity;
+  final int baggageQuantity;
+  final String vehicleSize;
+  final String vehicleType;
+  final String sippCode;
+  final String name;
+  final int doorCount;
+  final String pictureUrl;
+
+  CarRentalVehicle({
+    required this.airConditioning,
+    required this.transmissionType,
+    required this.fuelType,
+    required this.driveType,
+    required this.passengerQuantity,
+    required this.baggageQuantity,
+    required this.vehicleSize,
+    required this.vehicleType,
+    required this.sippCode,
+    required this.name,
+    required this.doorCount,
+    required this.pictureUrl,
+  });
+
+  factory CarRentalVehicle.fromJson(Map<String, dynamic> json) {
+    return CarRentalVehicle(
+      airConditioning: json['air_conditioning'] == true,
+      transmissionType: (json['transmission_type'] ?? '').toString(),
+      fuelType: (json['fuel_type'] ?? '').toString(),
+      driveType: (json['drive_type'] ?? '').toString(),
+      passengerQuantity: (json['passenger_quantity'] as num?)?.toInt() ?? 0,
+      baggageQuantity: (json['baggage_quantity'] as num?)?.toInt() ?? 0,
+      vehicleSize: (json['vehicle_size'] ?? '').toString(),
+      vehicleType: (json['vehicle_type'] ?? '').toString(),
+      sippCode: (json['sipp_code'] ?? '').toString(),
+      name: (json['name'] ?? '').toString(),
+      doorCount: (json['door_count'] as num?)?.toInt() ?? 0,
+      pictureUrl: (json['picture_url'] ?? '').toString(),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'air_conditioning': airConditioning,
+      'transmission_type': transmissionType,
+      'fuel_type': fuelType,
+      'drive_type': driveType,
+      'passenger_quantity': passengerQuantity,
+      'baggage_quantity': baggageQuantity,
+      'vehicle_size': vehicleSize,
+      'vehicle_type': vehicleType,
+      'sipp_code': sippCode,
+      'name': name,
+      'door_count': doorCount,
+      'picture_url': pictureUrl,
+    };
+  }
+}
+
 // Hotel Property Model (lodging search result)
 class HotelProperty {
   final String propertyId;
@@ -1439,6 +1851,190 @@ class HotelBookingPayment {
   }
 }
 
+// Car Order Summary Model (checkout / booking confirmation)
+class CarOrderSummary {
+  final String availabilityDetailsToken;
+  final String pickUpDateTime;
+  final String returnDateTime;
+  final String rentalCarBrand;
+  final CarRentalVehicle vehicle;
+  final List<CarRentalLocationDetail> locationDetails;
+  final String correlationId;
+  final String availabilityToken;
+  final String pickupCode;
+  final String returnCode;
+  final String pickupDate;
+  final String returnDate;
+  final String countryOfResidence;
+  final int driverAge;
+  final String driverName;
+  final String pickupType;
+  final String returnType;
+  final String? carName;
+  final double totalPrice;
+  final String currencyCode;
+  final HotelBookingPayment payment;
+
+  CarOrderSummary({
+    required this.availabilityDetailsToken,
+    required this.pickUpDateTime,
+    required this.returnDateTime,
+    required this.rentalCarBrand,
+    required this.vehicle,
+    required this.locationDetails,
+    required this.correlationId,
+    required this.availabilityToken,
+    required this.pickupCode,
+    required this.returnCode,
+    required this.pickupDate,
+    required this.returnDate,
+    required this.countryOfResidence,
+    required this.driverAge,
+    required this.driverName,
+    required this.pickupType,
+    required this.returnType,
+    this.carName,
+    required this.totalPrice,
+    required this.currencyCode,
+    required this.payment,
+  });
+
+  factory CarOrderSummary.fromJson(Map<String, dynamic> json) {
+    return CarOrderSummary(
+      availabilityDetailsToken:
+          (json['availability_details_token'] ?? '').toString(),
+      pickUpDateTime: (json['pick_up_date_time'] ?? '').toString(),
+      returnDateTime: (json['return_date_time'] ?? '').toString(),
+      rentalCarBrand: (json['rental_car_brand'] ?? '').toString(),
+      vehicle: CarRentalVehicle.fromJson(
+        json['vehicle'] as Map<String, dynamic>? ?? {},
+      ),
+      locationDetails: (json['location_details'] as List<dynamic>?)
+              ?.whereType<Map>()
+              .map(
+                (e) => CarRentalLocationDetail.fromJson(
+                  Map<String, dynamic>.from(e),
+                ),
+              )
+              .toList() ??
+          const [],
+      correlationId: (json['correlationId'] ?? '').toString(),
+      availabilityToken: (json['availabilityToken'] ?? '').toString(),
+      pickupCode: (json['pickup_code'] ?? '').toString(),
+      returnCode: (json['return_code'] ?? '').toString(),
+      pickupDate: (json['pickup_date'] ?? '').toString(),
+      returnDate: (json['return_date'] ?? '').toString(),
+      countryOfResidence: (json['countryOfResidence'] ?? '').toString(),
+      driverAge: (json['driver_age'] as num?)?.toInt() ?? 0,
+      driverName: (json['driver_name'] ?? '').toString(),
+      pickupType: (json['pickup_type'] ?? '').toString(),
+      returnType: (json['return_type'] ?? '').toString(),
+      carName: json['car_name']?.toString(),
+      totalPrice: (json['total_price'] as num?)?.toDouble() ?? 0.0,
+      currencyCode: (json['currency_code'] ?? '').toString(),
+      payment: HotelBookingPayment.fromJson(
+        json['payment'] as Map<String, dynamic>? ?? {},
+      ),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'availability_details_token': availabilityDetailsToken,
+      'pick_up_date_time': pickUpDateTime,
+      'return_date_time': returnDateTime,
+      'rental_car_brand': rentalCarBrand,
+      'vehicle': vehicle.toJson(),
+      'location_details': locationDetails.map((e) => e.toJson()).toList(),
+      'correlationId': correlationId,
+      'availabilityToken': availabilityToken,
+      'pickup_code': pickupCode,
+      'return_code': returnCode,
+      'pickup_date': pickupDate,
+      'return_date': returnDate,
+      'countryOfResidence': countryOfResidence,
+      'driver_age': driverAge,
+      'driver_name': driverName,
+      'pickup_type': pickupType,
+      'return_type': returnType,
+      'car_name': carName,
+      'total_price': totalPrice,
+      'currency_code': currencyCode,
+      'payment': payment.toJson(),
+    };
+  }
+}
+
+class CarRentalLocationDetail {
+  final bool atAirport;
+  final String name;
+  final String iataCode;
+  final CarRentalLocationAddress address;
+
+  CarRentalLocationDetail({
+    required this.atAirport,
+    required this.name,
+    required this.iataCode,
+    required this.address,
+  });
+
+  factory CarRentalLocationDetail.fromJson(Map<String, dynamic> json) {
+    return CarRentalLocationDetail(
+      atAirport: json['at_airport'] == true,
+      name: (json['name'] ?? '').toString(),
+      iataCode: (json['iata_code'] ?? '').toString(),
+      address: CarRentalLocationAddress.fromJson(
+        json['address'] as Map<String, dynamic>? ?? {},
+      ),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'at_airport': atAirport,
+      'name': name,
+      'iata_code': iataCode,
+      'address': address.toJson(),
+    };
+  }
+}
+
+class CarRentalLocationAddress {
+  final String street;
+  final String city;
+  final String state;
+  final String country;
+  final String postalCode;
+
+  CarRentalLocationAddress({
+    required this.street,
+    required this.city,
+    required this.state,
+    required this.country,
+    required this.postalCode,
+  });
+
+  factory CarRentalLocationAddress.fromJson(Map<String, dynamic> json) {
+    return CarRentalLocationAddress(
+      street: (json['street'] ?? '').toString(),
+      city: (json['city'] ?? '').toString(),
+      state: (json['state'] ?? '').toString(),
+      country: (json['country'] ?? '').toString(),
+      postalCode: (json['postal_code'] ?? '').toString(),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'street': street,
+      'city': city,
+      'state': state,
+      'country': country,
+      'postal_code': postalCode,
+    };
+  }
+}
+
 // LogoImages Model
 class LogoImages {
   final String logoImageMobile;
@@ -1636,7 +2232,20 @@ class WidgetAction {
   final List<Map<String, dynamic>>? occupancy;
   final List<Map<String, dynamic>>? sort;
   final String? pricingToken;
-  
+  final bool? isForPickup;
+  final String? country;
+  final String? pickupDate;
+  final String? returnDate;
+  final String? pickupType;
+  final String? returnType;
+  final String? pickupCode;
+  final String? returnCode;
+  final String? pickupGeo;
+  final int? driverAge;
+  final String? correlationId;
+  // final String? sortPrice;
+  final int? page;
+  final int? limit;
 
   WidgetAction({
     required this.buttonText,
@@ -1684,6 +2293,20 @@ class WidgetAction {
     this.occupancy,
     this.sort,
     this.pricingToken,
+    this.isForPickup,
+    this.country,
+    this.pickupDate,
+    this.returnDate,
+    this.pickupType,
+    this.returnType,
+    this.pickupCode,
+    this.returnCode,
+    this.pickupGeo,
+    this.driverAge,
+    this.correlationId,
+    // this.sortPrice,
+    this.page,
+    this.limit,
   });
 
   factory WidgetAction.fromJson(Map<String, dynamic> json) {
@@ -1737,6 +2360,20 @@ class WidgetAction {
         occupancy: _parseMapList(json['occupancy']),
         sort: _parseMapList(json['sort']),
         pricingToken: json['pricingToken']?.toString(),
+        isForPickup: json['isForPickup'] ?? false,
+        country: json['country']?.toString(),
+        pickupDate: json['pickup_date']?.toString(),
+        returnDate: json['return_date']?.toString(),
+        pickupType: json['pickup_type']?.toString(),
+        returnType: json['return_type']?.toString(),
+        pickupCode: json['pickup_code']?.toString(),
+        returnCode: json['return_code']?.toString(),
+        pickupGeo: json['pickup_geo']?.toString(),
+        driverAge: json['driver_age'] ?? 0,
+        correlationId: json['correlationId']?.toString(),
+        // sortPrice: json['sort']?.toString(),
+        page: json['page'] ?? 1,
+        limit: json['limit'] ?? 50,
     );
   }
 
@@ -1788,6 +2425,20 @@ class WidgetAction {
       'occupancy': occupancy,
       'sort': sort,
       'pricingToken': pricingToken,
+      'isForPickup': isForPickup,
+      'country': country,
+      'pickupDate': pickupDate,
+      'returnDate': returnDate,
+      'pickupType': pickupType,
+      'returnType': returnType,
+      'pickupCode': pickupCode,
+      'returnCode': returnCode,
+      'pickupGeo': pickupGeo,
+      'driverAge': driverAge,
+      'correlationId': correlationId,
+      // 'sortPrice': sortPrice,
+      'page': page,
+      'limit': limit,
     };
   }
 }
