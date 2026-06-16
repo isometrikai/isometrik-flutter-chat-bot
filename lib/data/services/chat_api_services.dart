@@ -1,6 +1,7 @@
 import 'package:chat_bot/data/api_client.dart';
 import 'package:chat_bot/data/model/chat_response.dart';
 import 'package:chat_bot/data/model/chat_history_response.dart';
+import 'package:chat_bot/data/model/customer_profile_response.dart';
 import 'package:chat_bot/data/model/session_id_response.dart';
 import 'package:chat_bot/data/services/universal_api_client.dart';
 import 'package:chat_bot/utils/log.dart';
@@ -152,6 +153,18 @@ class ChatApiServices {
     final res = await _chatClient.post('/v2/create_session', body);
     if (res.isSuccess && res.data != null) {
       return SessionIdResponse.fromJson(res.data as Map<String, dynamic>);
+    }
+    return null;
+  }
+
+  Future<CustomerProfileResponse?> fetchCustomerProfile() async {
+    try {
+      final res = await _appClient.get('/v1/customer/profile');
+      if (res.isSuccess && res.data is Map<String, dynamic>) {
+        return CustomerProfileResponse.fromJson(res.data as Map<String, dynamic>);
+      }
+    } catch (e) {
+      AppLog.error('Error fetching customer profile: $e');
     }
     return null;
   }

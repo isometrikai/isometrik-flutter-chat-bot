@@ -55,6 +55,11 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
       if (response != null) {
         sessionId = response.sessionId.toString();
         StoreCategoryRegistry.update(response.storeCategories);
+        final zainPersonalization =
+            await ChatService.instance.fetchCustomerProfilePersonalization();
+        if (zainPersonalization != null) {
+          Utility.setPersonalization(zainPersonalization);
+        }
         // emit(ChatLoadedWithSessionId(response.sessionId.toString()));
       }
       if (event.needToShowLoader) {
