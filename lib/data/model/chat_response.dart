@@ -2466,6 +2466,7 @@ class FlightOrderSummary {
   final String cabinSearchSessionId;
   final List<FlightOrderTravelerInfo> travelerInfo;
   final FlightOrderContact contact;
+  final HotelBookingPayment payment;
 
   FlightOrderSummary({
     required this.flights,
@@ -2482,6 +2483,7 @@ class FlightOrderSummary {
     required this.cabinSearchSessionId,
     required this.travelerInfo,
     required this.contact,
+    required this.payment,
   });
 
   factory FlightOrderSummary.fromJson(Map<String, dynamic> json) {
@@ -2550,6 +2552,9 @@ class FlightOrderSummary {
       contact: FlightOrderContact.fromJson(
         json['contact'] as Map<String, dynamic>? ?? {},
       ),
+      payment: HotelBookingPayment.fromJson(
+        json['payment'] as Map<String, dynamic>? ?? {},
+      ),
     );
   }
 
@@ -2570,6 +2575,7 @@ class FlightOrderSummary {
       'cabinSearchSessionId': cabinSearchSessionId,
       'travelerInfo': travelerInfo.map((e) => e.toJson()).toList(),
       'contact': contact.toJson(),
+      'payment': payment.toJson(),
     };
   }
 }

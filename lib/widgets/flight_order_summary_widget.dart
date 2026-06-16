@@ -56,12 +56,17 @@ class _FlightBookingSummaryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final segments = _allSegments();
-    final firstSegment = segments.isNotEmpty ? segments.first : null;
-    final lastSegment = segments.isNotEmpty ? segments.last : null;
+    final outboundSegments = _outboundSegments();
+    final outboundFirst =
+        outboundSegments.isNotEmpty ? outboundSegments.first : null;
+    final destinationSegment = _destinationSegment();
     final priceLines = _priceLines();
     final promoLine = _promoLine();
     final paymentTitle = _paymentTitle();
+    final detailLines = _detailLines(
+      outboundFirst: outboundFirst,
+      destinationSegment: destinationSegment,
+    );
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(0.5, 0.5, 0.5, 1),
@@ -97,45 +102,10 @@ class _FlightBookingSummaryCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    if (_airlineLine(firstSegment).isNotEmpty) ...[
-                      _SummaryLine(text: _airlineLine(firstSegment)),
-                      const SizedBox(height: 10),
+                    for (int i = 0; i < detailLines.length; i++) ...[
+                      detailLines[i],
+                      if (i < detailLines.length - 1) const SizedBox(height: 10),
                     ],
-                    if (_routeTypeLine().isNotEmpty) ...[
-                      _SummaryLine(text: _routeTypeLine()),
-                      const SizedBox(height: 10),
-                    ],
-                    if (_travellerLine().isNotEmpty) ...[
-                      _SummaryLine(text: _travellerLine()),
-                      const SizedBox(height: 10),
-                    ],
-                    if (_cabinLine(firstSegment).isNotEmpty) ...[
-                      _SummaryLine(text: _cabinLine(firstSegment)),
-                      const SizedBox(height: 10),
-                    ],
-                    if (firstSegment != null &&
-                        firstSegment.departureAirport.isNotEmpty) ...[
-                      _AirportLine(
-                        airportCode: firstSegment.departureAirport,
-                        airportName: firstSegment.departureAirportName,
-                      ),
-                      const SizedBox(height: 10),
-                    ],
-                    if (lastSegment != null &&
-                        lastSegment.arrivalAirport.isNotEmpty) ...[
-                      _AirportLine(
-                        airportCode: lastSegment.arrivalAirport,
-                        airportName: lastSegment.arrivalAirportName,
-                      ),
-                      const SizedBox(height: 10),
-                    ],
-                    if (_departureDateLine().isNotEmpty) ...[
-                      _SummaryLine(text: _departureDateLine()),
-                      if (_isRoundTrip && _returnDateLine().isNotEmpty)
-                        const SizedBox(height: 10),
-                    ],
-                    if (_isRoundTrip && _returnDateLine().isNotEmpty)
-                      _SummaryLine(text: _returnDateLine()),
                   ],
                 ),
               ),
@@ -201,15 +171,99 @@ class _FlightBookingSummaryCard extends StatelessWidget {
     );
   }
 
-  List<FlightOrderSegment> _allSegments() {
-    return summary.flights
-        .expand((flight) => flight.flightSegments)
-        .toList(growable: false);
+  List<FlightOrderSegment> _outboundSegments() {
+    if (summary.flights.isEmpty) return const [];
+    return summary.flights.first.flightSegments;
+  }
+
+  List<FlightOrderSegment> _returnSegments() {
+    if (summary.flights.length < 2) return const [];
+    return summary.flights[1].flightSegments;
+  }
+
+  FlightOrderSegment? _destinationSegment() {
+    final outbound = _outboundSegments();
+    if (outbound.isEmpty) return null;
+
+    if (_isRoundTrip) {
+      final origin = summary.tripInfo.tripOrigin.trim().toUpperCase();
+      final tripDestination =
+          summary.tripInfo.tripDestination.trim().toUpperCase();
+
+      // Round trip back to origin (e.g. DXB -> BKK -> DXB): show visited city.
+      if (origin.isNotEmpty &&
+          tripDestination.isNotEmpty &&
+          origin == tripDestination) {
+        return outbound.last;
+      }
+
+      if (tripDestination.isNotEmpty) {
+        for (final segment in outbound.reversed) {
+          if (segment.arrivalAirport.toUpperCase() == tripDestination) {
+            return segment;
+          }
+        }
+      }
+    }
+
+    return outbound.last;
   }
 
   bool get _isRoundTrip {
     final route = summary.tripInfo.routeType.toLowerCase();
-    return route.contains('round');
+    return route.contains('round') ||
+        route.contains('return') ||
+        summary.flights.length > 1;
+  }
+
+  List<Widget> _detailLines({
+    required FlightOrderSegment? outboundFirst,
+    required FlightOrderSegment? destinationSegment,
+  }) {
+    final lines = <Widget>[];
+
+    void addLine(Widget line) => lines.add(line);
+
+    final airline = _airlineLine(outboundFirst);
+    if (airline.isNotEmpty) addLine(_SummaryLine(text: airline));
+
+    final routeType = _routeTypeLine();
+    if (routeType.isNotEmpty) addLine(_SummaryLine(text: routeType));
+
+    final travellers = _travellerLine();
+    if (travellers.isNotEmpty) addLine(_SummaryLine(text: travellers));
+
+    final cabin = _cabinLine(outboundFirst);
+    if (cabin.isNotEmpty) addLine(_SummaryLine(text: cabin));
+
+    if (outboundFirst != null && outboundFirst.departureAirport.isNotEmpty) {
+      addLine(
+        _AirportLine(
+          airportCode: outboundFirst.departureAirport,
+          airportName: outboundFirst.departureAirportName,
+        ),
+      );
+    }
+
+    if (destinationSegment != null &&
+        destinationSegment.arrivalAirport.isNotEmpty) {
+      addLine(
+        _AirportLine(
+          airportCode: destinationSegment.arrivalAirport,
+          airportName: destinationSegment.arrivalAirportName,
+        ),
+      );
+    }
+
+    final departureDate = _departureDateLine();
+    if (departureDate.isNotEmpty) addLine(_SummaryLine(text: departureDate));
+
+    if (_isRoundTrip) {
+      final returnDate = _returnDateLine();
+      if (returnDate.isNotEmpty) addLine(_SummaryLine(text: returnDate));
+    }
+
+    return lines;
   }
 
   String _airlineLine(FlightOrderSegment? segment) {
@@ -227,7 +281,9 @@ class _FlightBookingSummaryCard extends StatelessWidget {
     if (route.isEmpty) return '';
 
     final normalized = route.toLowerCase();
-    if (normalized.contains('round')) return '🔁 Round Trip';
+    if (normalized.contains('round') || normalized.contains('return')) {
+      return '🔁 Round Trip';
+    }
     if (normalized.contains('one')) return '🔁 One Way';
     return '🔁 $route';
   }
@@ -292,9 +348,10 @@ class _FlightBookingSummaryCard extends StatelessWidget {
   }
 
   String _departureDateRaw() {
-    final segments = _allSegments();
-    if (segments.isNotEmpty && segments.first.departureDate.isNotEmpty) {
-      return segments.first.departureDate;
+    final outboundSegments = _outboundSegments();
+    if (outboundSegments.isNotEmpty &&
+        outboundSegments.first.departureDate.isNotEmpty) {
+      return outboundSegments.first.departureDate;
     }
     if (summary.tripInfo.travelDate.isNotEmpty) {
       return summary.tripInfo.travelDate;
@@ -306,10 +363,25 @@ class _FlightBookingSummaryCard extends StatelessWidget {
     final bookingReturn = (flightBooking['return_date'] ?? '').toString();
     if (bookingReturn.isNotEmpty) return bookingReturn;
 
+    final returnSegments = _returnSegments();
+    if (returnSegments.isNotEmpty) {
+      final lastArrival = returnSegments.last.arrivalDate.trim();
+      if (lastArrival.isNotEmpty) return lastArrival;
+
+      final firstDeparture = returnSegments.first.departureDate.trim();
+      if (firstDeparture.isNotEmpty) return firstDeparture;
+    }
+
     if (summary.flights.length > 1) {
-      final returnSegments = summary.flights.last.flightSegments;
-      if (returnSegments.isNotEmpty) {
-        return returnSegments.last.arrivalDate;
+      final returnFlight = summary.flights.last;
+      if (returnFlight.flightSegments.isNotEmpty) {
+        final lastSegment = returnFlight.flightSegments.last;
+        if (lastSegment.arrivalDate.isNotEmpty) {
+          return lastSegment.arrivalDate;
+        }
+        if (lastSegment.departureDate.isNotEmpty) {
+          return lastSegment.departureDate;
+        }
       }
     }
 
@@ -322,10 +394,13 @@ class _FlightBookingSummaryCard extends StatelessWidget {
     if (summary.passengerFare.isNotEmpty) {
       for (final fare in summary.passengerFare) {
         if (fare.quantity <= 0) continue;
+        final amount =
+            fare.basePrice > 0 ? fare.basePrice : fare.totalPrice;
+        if (amount <= 0) continue;
         lines.add(
           _PriceLine(
             label: _fareLabel(fare),
-            amount: fare.totalPrice,
+            amount: amount,
           ),
         );
       }
@@ -337,11 +412,11 @@ class _FlightBookingSummaryCard extends StatelessWidget {
       lines.add(_PriceLine(label: label, amount: summary.basePrice));
     }
 
-    // if (summary.taxAndFees > 0) {
-      // lines.add(
-      //   _PriceLine(label: 'Taxes & Fees', amount: summary.taxAndFees),
-      // );
-    // }
+    if (summary.taxAndFees > 0) {
+      lines.add(
+        _PriceLine(label: 'Taxes & Fees', amount: summary.taxAndFees),
+      );
+    }
 
     return lines;
   }
@@ -366,6 +441,9 @@ class _FlightBookingSummaryCard extends StatelessWidget {
   }
 
   String _paymentTitle() {
+    final summaryPayment = summary.payment.cardTitle.trim();
+    if (summaryPayment.isNotEmpty) return summaryPayment;
+
     return [
       flightBooking['paymentTypeText'],
       flightBooking['payment_title'],
