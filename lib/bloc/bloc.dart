@@ -34,3 +34,6 @@ export 'hotel_search/hotel_search_state.dart';
 export 'car_search/car_search_bloc.dart';
 export 'car_search/car_search_event.dart';
 export 'car_search/car_search_state.dart';
+export 'flight_search/flight_search_bloc.dart';
+export 'flight_search/flight_search_event.dart';
+export 'flight_search/flight_search_state.dart';

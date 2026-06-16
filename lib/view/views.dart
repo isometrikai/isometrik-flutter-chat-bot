@@ -16,6 +16,7 @@ export 'restaurant_menu_screen.dart';
 export 'restaurant_screen.dart';
 export 'hotel_search_screen.dart';
 export 'car_search_screen.dart';
+export 'flight_search_screen.dart';
 export 'restaurant_sections_gallery_screen.dart';
 export 'select_time_screen.dart';
 export 'select_datetime_screen.dart';

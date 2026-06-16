@@ -32,6 +32,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
         tableBookingData: event.tableBookingData,
         hotelDestinationData: event.hotelDestinationData,
         carPickupData: event.carPickupData,
+        flightBookingData: event.flightBookingData,
       );
       print('CHINTU: $chat');
       if (chat != null) {

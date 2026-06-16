@@ -235,6 +235,7 @@ class ChatScreenBody extends StatelessWidget {
                     tableBookingData: apiData['table_booking'] ?? {},
                     hotelDestinationData: apiData['hotel_booking'] ?? {},
                     carPickupData: apiData['car_booking'] ?? {},
+                    flightBookingData: apiData['flight_booking'] ?? {},
                   );
                   bloc.add(event);
                   onClearPendingMessage();
@@ -1062,6 +1063,14 @@ class ChatScreenBody extends StatelessWidget {
             const SizedBox(height: 4), //12
             buildCarDropoffPlacesWidget(message.carDropoffPlacesItems),
           ],
+          if (message.hasFlightOriginPlacesSectionWidget) ...[
+            const SizedBox(height: 4), //12
+            buildFlightOriginPlacesWidget(message.flightOriginPlacesItems),
+          ],
+          if (message.hasFlightDestinationPlacesSectionWidget) ...[
+            const SizedBox(height: 4), //12
+            buildFlightDestinationPlacesWidget(message.flightDestinationPlacesItems),
+          ],
           if (message.hasHotelsSectionWidget) ...[
             const SizedBox(height: 4), //12
             buildHotelsWidget(message.hotelsItems),
@@ -1069,6 +1078,10 @@ class ChatScreenBody extends StatelessWidget {
           if (message.hasCarRentalsSearchSectionWidget) ...[
             const SizedBox(height: 4), //12
             buildCarRentalsSearchWidget(message.carRentalsSearchItems),
+          ],
+          if (message.hasFlightsSearchSectionWidget) ...[
+            const SizedBox(height: 4), //12
+            buildFlightsSearchWidget(message.flightsSearchItems),
           ],
           if (message.hasHotelOrderSummarySectionWidget) ...[
             const SizedBox(height: 4), //12
@@ -1078,6 +1091,10 @@ class ChatScreenBody extends StatelessWidget {
             const SizedBox(height: 4), //12
             buildCarOrderSummaryWidget(message.carOrderSummaryItems),
           ],
+          if (message.hasFlightOrderSummarySectionWidget) ...[
+            const SizedBox(height: 4), //12
+            buildFlightOrderSummaryWidget(message.flightOrderSummaryItems),
+          ],
           if (message.hasHotelBookingConfirmedSectionWidget) ...[
             const SizedBox(height: 4), //12
             buildHotelBookingConfirmedWidget(message.hotelBookingConfirmedItems),
@@ -1085,6 +1102,10 @@ class ChatScreenBody extends StatelessWidget {
           if (message.hasCarBookingConfirmedSectionWidget) ...[
             const SizedBox(height: 4), //12
             buildCarBookingConfirmedWidget(message.carBookingConfirmedItems),
+          ],
+          if (message.hasFlightBookingConfirmedSectionWidget) ...[
+            const SizedBox(height: 4), //12
+            buildFlightBookingConfirmedWidget(message.flightBookingConfirmedItems),
           ],
           if (message.hasCustomerProfileDetailsSectionWidget) ...[
             const SizedBox(height: 4), //12
@@ -2308,6 +2329,21 @@ class ChatScreenBody extends StatelessWidget {
           }
         }
 
+        for (final widget in latestActionWidgets.where(
+          (w) => w.type == WidgetEnum.see_more_flights.value,
+        )) {
+          for (final action in widget.seeMoreFlights) {
+            actionButtons.add(
+              buildActionButton(
+                text: action.buttonText,
+                onTap: isApiLoading
+                    ? () {}
+                    : () => _openFlightSearchScreen(context, action),
+              ),
+            );
+          }
+        }
+
          for (final widget in latestActionWidgets.where(
           (w) => w.type == WidgetEnum.hotel_confirm_booking.value,
         )) {
@@ -2337,12 +2373,82 @@ class ChatScreenBody extends StatelessWidget {
           }
         }
 
+         for (final widget in latestActionWidgets.where(
+          (w) => w.type == WidgetEnum.flight_booking_date_time.value,
+        )) {
+          for (final action in widget.flightBookingDateTime) {
+            actionButtons.add(
+              buildActionButton(
+                text: action.buttonText,
+                onTap:
+                    isApiLoading
+                        ? () {}
+                        : () {
+                          OrderService().triggerClickManageScreenOpen({
+                            'flow': 'FlightBooking',
+                            'screenName': 'TravelFlightDateScreen',
+                            'isDeparture': widget.isDeparture,
+                            'departure_date': apiData['flight_booking']['departure_date'],
+                          });
+                        },
+              ),
+            );
+          }
+        }
+
+         for (final widget in latestActionWidgets.where(
+          (w) => w.type == WidgetEnum.flight_add_member.value,
+        )) {
+          for (final action in widget.flightAddMember) {
+            actionButtons.add(
+              buildActionButton(
+                text: action.buttonText,
+                onTap:
+                    isApiLoading
+                        ? () {}
+                        : () {
+                           OrderService().triggerClickManageScreenOpen({
+                            'flow': 'FlightBooking',
+                            'screenName': 'TravelFlightPassengerScreen',
+                          });
+                        },
+              ),
+            );
+          }
+        }
+
+        for (final widget in latestActionWidgets.where(
+          (w) => w.type == WidgetEnum.flight_traveller_details.value,
+        )) {
+          for (final action in widget.flightTravellerDetails) {
+            actionButtons.add(
+              buildActionButton(
+                text: action.buttonText,
+                onTap:
+                    isApiLoading
+                        ? () {}
+                        : () {
+                          OrderService().triggerClickManageScreenOpen({
+                            'flow': 'FlightBooking',
+                            'screenName': 'TravelFlightPassengerDetailsScreen',
+                            'adults': apiData['flight_booking']['adults'],
+                            'children': apiData['flight_booking']['children'],
+                            'infants': apiData['flight_booking']['infants'],
+                          });
+                        },
+              ),
+            );
+          }
+        }
+
         for (final widgetType in [
           WidgetEnum.add_more.value,
           WidgetEnum.proceed_to_checkout.value,
           WidgetEnum.cash_on_delivery.value,
           WidgetEnum.hotel_booking_dates.value,
           WidgetEnum.hotel_guests_rooms.value,
+          WidgetEnum.trip_type_selection.value,
+          WidgetEnum.flight_cabin_type.value,
         ]) {
           final widgets = latestActionWidgets.where(
             (w) => w.type == widgetType,
@@ -2385,10 +2491,39 @@ class ChatScreenBody extends StatelessWidget {
                         'flow': 'HotelBooking',
                         'screenName': 'HotelBookingGuests',
                       });
+                    } else if (widget.type == WidgetEnum.trip_type_selection.value && widget.isFlightBookingFlow == true) {
+                         final existing = apiData['flight_booking'];
+                      final Map<String, dynamic> flightBooking;
+                      if (existing is Map) {
+                        flightBooking = Map<String, dynamic>.from(existing);
+                        flightBooking['trip_type'] = item['trip_type'];
+                      } else {
+                        flightBooking = {
+                          'trip_type': item['trip_type'],
+                        };
+                      }
+                      apiData['flight_booking'] = flightBooking;
+                      onSendMessage(buttonText);
+                    }else if (widget.type == WidgetEnum.flight_cabin_type.value && widget.isFlightBookingFlow == true) {
+                         final existing = apiData['flight_booking'];
+                      final Map<String, dynamic> flightBooking;
+                      if (existing is Map) {
+                        flightBooking = Map<String, dynamic>.from(existing);
+                        flightBooking['cabinType'] = item['cabinType'];
+                      } else {
+                        flightBooking = {
+                          'cabinType': item['cabinType'],
+                        };
+                      }
+                      apiData['flight_booking'] = flightBooking;
+                      onSendMessage(buttonText);
                     }else if (widget.type == WidgetEnum.proceed_to_checkout.value && widget.isCarBookingFlow == true) {
                         final String availabilityDetailsToken = (item['availability_details_token'] ?? '');
-                        print('availabilityDetailsToken: $availabilityDetailsToken');
                       apiData['car_booking']['availabilityToken'] = availabilityDetailsToken;
+                      onSendMessage(buttonText);
+                    }else if (widget.type == WidgetEnum.proceed_to_checkout.value && widget.isFlightBookingFlow == true) {
+                      final String availabilityToken = (item['cabin_availability_token'] ?? '');
+                      apiData['flight_booking']['cabin_availability_token'] = availabilityToken;
                       onSendMessage(buttonText);
                     } else {
                       onSendMessage(buttonText);
@@ -4112,6 +4247,50 @@ class ChatScreenBody extends StatelessWidget {
     );
   }
 
+  Widget buildFlightOriginPlacesWidget(List<CarPickupPlace> places) {
+    if (places.isEmpty) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.only(left: 0.0),
+      child: FlightOriginPlacesWidget(
+        places: places,
+        isFromChatHistory: isFromHistory,
+        onPlaceSelected: (place) {
+          final flightBooking = _flightBookingMap()
+            ..['flight_origin'] = place.iataCode;
+          onSendMessage(
+            'I want to book flight from ${place.name}',
+            null,
+            null,
+            null,
+            {'flight_booking': flightBooking},
+          );
+        },
+      ),
+    );
+  }
+
+  Widget buildFlightDestinationPlacesWidget(List<CarPickupPlace> places) {
+    if (places.isEmpty) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.only(left: 0.0),
+      child: FlightDestinationPlacesWidget(
+        places: places,
+        isFromChatHistory: isFromHistory,
+        onPlaceSelected: (place) {
+          final flightBooking = _flightBookingMap()
+            ..['flight_destination'] = place.iataCode;
+          onSendMessage(
+            'I want to book flight to ${place.name}',
+            null,
+            null,
+            null,
+            {'flight_booking': flightBooking},
+          );
+        },
+      ),
+    );
+  }
+
   Widget _buildCarPlacesWidget({
     required List<CarPickupPlace> places,
     required void Function(CarPickupPlace place) onPlaceSelected,
@@ -4129,6 +4308,14 @@ class ChatScreenBody extends StatelessWidget {
 
   Map<String, dynamic> _carBookingMap() {
     final existing = apiData['car_booking'];
+    if (existing is Map) {
+      return Map<String, dynamic>.from(existing);
+    }
+    return {};
+  }
+
+  Map<String, dynamic> _flightBookingMap() {
+    final existing = apiData['flight_booking'];
     if (existing is Map) {
       return Map<String, dynamic>.from(existing);
     }
@@ -4174,6 +4361,85 @@ class ChatScreenBody extends StatelessWidget {
           (hotelBooking['countryOfResidence'] ?? 'AE').toString();
 
     return hotelBooking;
+  }
+
+  void _openFlightSearchScreen(BuildContext context, WidgetAction action) {
+    final flightBooking = _flightBookingMap();
+    final routeType = FlightSearchRepository.resolveRouteType(
+      action,
+      flightBooking.isNotEmpty ? flightBooking : null,
+    );
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => BlocProvider(
+          create: (_) => FlightSearchBloc(),
+          child: FlightSearchScreen(
+            actionData: action,
+            flightBooking: flightBooking.isNotEmpty ? flightBooking : null,
+            onFlightSelected: (flight, cabin) {
+              final existing = apiData['flight_booking'];
+              final Map<String, dynamic> updatedFlightBooking;
+              if (existing is Map) {
+                updatedFlightBooking = Map<String, dynamic>.from(existing);
+                updatedFlightBooking['correlationId'] = flight.correlationId;
+                updatedFlightBooking['cabinSearchSessionId'] =
+                    cabin.cabinSearchSessionId;
+                updatedFlightBooking['routeType'] = routeType;
+              } else {
+                updatedFlightBooking = {
+                  'correlationId': flight.correlationId,
+                  'cabinSearchSessionId': cabin.cabinSearchSessionId,
+                  'routeType': routeType,
+                };
+              }
+              apiData['flight_booking'] = updatedFlightBooking;
+              Navigator.of(context).pop();
+              onSendMessage(
+                _flightSelectionMessage(flight, cabin, routeType),
+              );
+            },
+            onOpenInEazyApp: (flight, cabin) {
+              OrderService().triggerClickManageScreenOpen({
+                'flow': 'FlightBooking',
+                'screenName': 'TravelFlightDetailsScreen',
+                'correlationId': flight.correlationId,
+                'cabinSearchSessionId': cabin.cabinSearchSessionId,
+                'routeType': routeType,
+                'adults': flightBooking['adults'],
+                'children': flightBooking['children'],
+                'infants': flightBooking['infants'],
+                'airlineName': flight.segments.isNotEmpty
+                    ? flight.segments.first.airlineName
+                    : 'flight',
+                'needToBack': true,
+              });
+            },
+          ),
+        ),
+      ),
+    );
+  }
+
+  String _flightSelectionMessage(
+    FlightSearch flight,
+    FlightSearchCabin cabin,
+    String routeType,
+  ) {
+    final airlineName = flight.segments.isNotEmpty
+        ? flight.segments.first.airlineName
+        : 'flight';
+
+    if (routeType == 'return' && flight.segments.length > 1) {
+      final outbound = flight.segments.first;
+      final inbound = flight.segments.last;
+      return 'I have selected $airlineName round-trip flight '
+          '(${outbound.departureAirport}-${outbound.arrivalAirport} / '
+          '${inbound.departureAirport}-${inbound.arrivalAirport}) ${cabin.cabin}';
+    }
+
+    return 'I have selected flight $airlineName ${cabin.cabin}';
   }
 
   void _openCarSearchScreen(BuildContext context, WidgetAction action) {
@@ -4403,6 +4669,52 @@ class ChatScreenBody extends StatelessWidget {
     );
   }
 
+  Widget buildFlightsSearchWidget(List<FlightSearch> flights) {
+    if (flights.isEmpty) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.only(left: 0.0),
+      child: FlightsSearchWidget(
+        flights: flights,
+        isFromChatHistory: isFromHistory,
+        onFlightSelected: (flight, cabin) {
+          if (isFromHistory) {
+            return;
+          }
+           final existing = apiData['flight_booking'];
+            final Map<String, dynamic> flightBooking;
+            if (existing is Map) {
+              flightBooking = Map<String, dynamic>.from(existing);
+              flightBooking['correlationId'] = flight.correlationId;
+              flightBooking['cabinSearchSessionId'] = cabin.cabinSearchSessionId;
+            } else {
+              flightBooking = {
+                'correlationId': flight.correlationId,
+                'cabinSearchSessionId': cabin.cabinSearchSessionId,
+              };
+            }
+            apiData['flight_booking'] = flightBooking;
+            
+          onSendMessage(
+            'I have selected flight ${flight.segments.isNotEmpty ? flight.segments.first.airlineName : 'flight'} ${cabin.cabin}'
+          );
+        },
+        onOpenInApp: (flight, cabin) {
+          OrderService().triggerClickManageScreenOpen({
+            'flow': 'FlightBooking',
+            'screenName': 'TravelFlightDetailsScreen',
+            'correlationId': flight.correlationId,
+            'cabinSearchSessionId': cabin.cabinSearchSessionId,
+            'adults': apiData['flight_booking']['adults'],
+            'children': apiData['flight_booking']['children'],
+            'infants': apiData['flight_booking']['infants'],
+            'airlineName': flight.segments.isNotEmpty ? flight.segments.first.airlineName : 'flight',
+            'needToBack': false
+          });
+        },
+      ),
+    );
+  }
+
   Widget buildHotelOrderSummaryWidget(List<HotelOrderSummary> items) {
     if (items.isEmpty) return const SizedBox.shrink();
     return Padding(
@@ -4425,6 +4737,17 @@ class ChatScreenBody extends StatelessWidget {
     );
   }
 
+  Widget buildFlightOrderSummaryWidget(List<FlightOrderSummary> items) {
+    if (items.isEmpty) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.only(left: 0.0),
+      child: FlightOrderSummaryWidget(
+        items: items,
+        flightBooking: _flightBookingMap(),
+      ),
+    );
+  }
+
   Widget buildHotelBookingConfirmedWidget(List<WidgetAction> items) {
     if (items.isEmpty) return const SizedBox.shrink();
     return Padding(
@@ -4438,6 +4761,14 @@ class ChatScreenBody extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(left: 0.0),
       child: CarBookingConfirmedWidget(items: items),
+    );
+  }
+
+  Widget buildFlightBookingConfirmedWidget(List<WidgetAction> items) {
+    if (items.isEmpty) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.only(left: 0.0),
+      child: FlightBookingConfirmedWidget(items: items),
     );
   }
 }
