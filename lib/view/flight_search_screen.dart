@@ -2,10 +2,15 @@ import 'package:chat_bot/bloc/flight_search/flight_search_bloc.dart';
 import 'package:chat_bot/bloc/flight_search/flight_search_event.dart';
 import 'package:chat_bot/bloc/flight_search/flight_search_state.dart';
 import 'package:chat_bot/data/data.dart';
-import 'package:chat_bot/utils/utils.dart';
 import 'package:chat_bot/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+
+import 'widgets/search_result_states.dart';
+import 'widgets/search_screen_scaffold.dart';
+
+const _defaultFlightSearchTitle = 'Choose from available flights';
+const _noFlightsMessage = 'No Flights Found';
 
 class FlightSearchScreen extends StatefulWidget {
   final WidgetAction actionData;
@@ -29,9 +34,6 @@ class FlightSearchScreen extends StatefulWidget {
 
 class _FlightSearchScreenState extends State<FlightSearchScreen> {
   final ScrollController _scrollController = ScrollController();
-
-  static const Color _accentPurple = Color(0xFF8E2FFD);
-  static const String _noFlightsMessage = 'No Flights Found';
 
   @override
   void initState() {
@@ -70,86 +72,66 @@ class _FlightSearchScreenState extends State<FlightSearchScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Column(
-            children: [
-              const SizedBox(height: 24),
-              ScreenHeader(
-                title: widget.actionData.title.isNotEmpty
-                    ? widget.actionData.title
-                    : 'Choose from available flights',
-                subtitle: widget.actionData.subtitle.isNotEmpty
-                    ? widget.actionData.subtitle
-                    : null,
-                onClose: () => Navigator.of(context).pop(),
-              ),
-              const SizedBox(height: 16),
-              Expanded(child: _buildFlightList()),
-            ],
-          ),
-        ),
+    return SearchScreenScaffold(
+      title: searchScreenTitle(widget.actionData, _defaultFlightSearchTitle),
+      subtitle: searchScreenSubtitle(widget.actionData),
+      body: _FlightSearchList(
+        scrollController: _scrollController,
+        onFlightSelected: widget.onFlightSelected,
+        onOpenInEazyApp: widget.onOpenInEazyApp,
       ),
     );
   }
+}
 
-  Widget _buildFlightList() {
+class _FlightSearchList extends StatelessWidget {
+  final ScrollController scrollController;
+  final void Function(FlightSearch flight, FlightSearchCabin cabin)?
+      onFlightSelected;
+  final void Function(FlightSearch flight, FlightSearchCabin cabin)?
+      onOpenInEazyApp;
+
+  const _FlightSearchList({
+    required this.scrollController,
+    this.onFlightSelected,
+    this.onOpenInEazyApp,
+  });
+
+  @override
+  Widget build(BuildContext context) {
     return BlocBuilder<FlightSearchBloc, FlightSearchState>(
       builder: (context, state) {
-        if (state is FlightSearchInitial || state is FlightSearchLoadInProgress) {
-          return const Center(
-            child: CircularProgressIndicator(
-              color: _accentPurple,
-            ),
-          );
-        }
-
-        if (state is FlightSearchLoadFailure ||
-            (state is FlightSearchLoadSuccess && state.flights.isEmpty)) {
-          return _buildNoFlightsFound();
-        }
-
-        if (state is FlightSearchLoadSuccess) {
-          return ListView(
-            controller: _scrollController,
-            padding: EdgeInsets.zero,
-            children: [
-              FlightsSearchWidget(
-                flights: state.flights,
-                onFlightSelected: widget.onFlightSelected,
-                onOpenInApp: widget.onOpenInEazyApp,
-              ),
-              if (state.isLoadingMore)
-                const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 16),
-                  child: Center(
-                    child: CircularProgressIndicator(
-                      color: _accentPurple,
-                    ),
-                  ),
+        return switch (state) {
+          FlightSearchInitial() || FlightSearchLoadInProgress() =>
+            const SearchResultLoading(),
+          FlightSearchLoadFailure() =>
+            const SearchResultEmpty(message: _noFlightsMessage),
+          FlightSearchLoadSuccess(:final flights) when flights.isEmpty =>
+            const SearchResultEmpty(message: _noFlightsMessage),
+          FlightSearchLoadSuccess(
+            :final flights,
+            :final isLoadingMore,
+          ) =>
+            ListView(
+              controller: scrollController,
+              padding: EdgeInsets.zero,
+              children: [
+                FlightsSearchWidget(
+                  flights: flights,
+                  onFlightSelected: onFlightSelected,
+                  onOpenInApp: onOpenInEazyApp,
                 ),
-              const SizedBox(height: 24),
-            ],
-          );
-        }
-
-        return _buildNoFlightsFound();
+                if (isLoadingMore)
+                  const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 16),
+                    child: SearchResultLoading(),
+                  ),
+                const SizedBox(height: 24),
+              ],
+            ),
+          _ => const SearchResultEmpty(message: _noFlightsMessage),
+        };
       },
-    );
-  }
-
-  Widget _buildNoFlightsFound() {
-    return Center(
-      child: Text(
-        _noFlightsMessage,
-        textAlign: TextAlign.center,
-        style: AppTextStyles.bodyText.copyWith(
-          color: const Color(0xFF979797),
-        ),
-      ),
     );
   }
 }
