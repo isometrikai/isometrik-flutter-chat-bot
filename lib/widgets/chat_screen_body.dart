@@ -441,7 +441,7 @@ class ChatScreenBody extends StatelessWidget {
           Container(
             child:
                     SvgPicture.asset(
-                      AssetPath.get('images/ic_header_logo.svg'),
+                      AssetPath.get('images/ic_header_logo_R.svg'),
                       // width: 75,
                       // height: 23,
                       fit: BoxFit.cover,
@@ -855,7 +855,7 @@ class ChatScreenBody extends StatelessWidget {
                           ),
                           child: Center(
                             child: Text(
-                              'Yes, Go to Eazy App',
+                              'Yes, Go to App',
                               style: TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w700,
@@ -1259,7 +1259,7 @@ class ChatScreenBody extends StatelessWidget {
                   height: 75,
                   width: 75,
                   child: SvgPicture.asset(
-                        AssetPath.get('images/ic_LogoTutorial.svg'),
+                        AssetPath.get('images/ic_mainImg_R.svg'),
                         fit: BoxFit.contain,
                       ),
                 ),
@@ -1492,7 +1492,7 @@ class ChatScreenBody extends StatelessWidget {
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 Text(
-                                  'Go To Eazy app',
+                                  'Go To App',
                                   style: AppTextStyles.body(
                                     fontSize: 16,
                                     fontWeight: FontWeight.w700,
