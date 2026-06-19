@@ -2525,6 +2525,10 @@ class ChatScreenBody extends StatelessWidget {
                       final String availabilityToken = (item['cabin_availability_token'] ?? '');
                       apiData['flight_booking']['cabin_availability_token'] = availabilityToken;
                       onSendMessage(buttonText);
+                    }else if (widget.type == WidgetEnum.proceed_to_checkout.value && widget.isHotelBookingFlow == true) {
+                      final String pricingToken = (item['pricingToken'] ?? '');
+                      apiData['hotel_booking']['pricingToken'] = pricingToken;
+                      onSendMessage(buttonText);
                     } else {
                       onSendMessage(buttonText);
                     }
