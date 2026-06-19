@@ -55,7 +55,7 @@ class _ChatHistoryContentState extends State<_ChatHistoryContent> {
   DateTime? _lastQueryAt;
 
   // final List<String> _categories = ['All', '🍕 Restaurant', '🥑 Grocery', '💊 Pharmacy'];
-  final List<String> _categories = ['All', '🍕 Restaurant', '🥑 Grocery', '💊 Pharmacy', '🛒 Shopping', '💄 Services', "🏥 Health Care"];
+  final List<String> _categories = ['All', '🍕 Restaurant', '🥑 Grocery', '💊 Pharmacy', '🛒 Shopping', '💄 Services', "🏥 Health Care", "💰 Donation"];
 
   @override
   void initState() {
@@ -115,6 +115,15 @@ class _ChatHistoryContentState extends State<_ChatHistoryContent> {
               BlackToastView.show(context, 'Chat deleted successfully');
             } else if (state is ChatHistoryDeleteFailure) {
               BlackToastView.show(context, 'Failed to delete chat: ${state.message}');
+            } else if (state is ChatHistoryArchiveSuccess) {
+              BlackToastView.show(context, 'Chat archived successfully');
+            } else if (state is ChatHistoryArchiveFailure) {
+              BlackToastView.show(context, 'Failed to archive chat: ${state.message}');
+            } else if (state is ChatHistoryShareSuccess) {
+              Clipboard.setData(ClipboardData(text: state.shareUrl));
+              BlackToastView.show(context, 'Share link copied');
+            } else if (state is ChatHistoryShareFailure) {
+              BlackToastView.show(context, 'Failed to share chat: ${state.message}');
             }
           },
           child: Column(
@@ -525,71 +534,167 @@ class _ChatHistoryContentState extends State<_ChatHistoryContent> {
         ? session.title 
         : 'Session ${session.sessionId}';
         
-    return Dismissible(
-      key: Key(session.sessionId.toString()),
-      direction: DismissDirection.endToStart,
-      background: Container(
-        margin: const EdgeInsets.only(bottom: 10),
-        decoration: BoxDecoration(
-          color: Colors.red,
-          borderRadius: BorderRadius.circular(8),
-        ),
-        alignment: Alignment.centerRight,
-        padding: const EdgeInsets.only(right: 20),
-        child: const Icon(
-          Icons.delete,
-          color: Colors.white,
-          size: 24,
-        ),
-      ),
-      confirmDismiss: (direction) async {
-        // Show confirmation dialog
-        _showDeleteChatConfirmation(context, session.sessionId.toString(), displayText);
-        return false; // Don't dismiss automatically, let the confirmation dialog handle it
-      },
-      child: GestureDetector(
-        onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => MultiBlocProvider(
-                providers: [
-                  BlocProvider(create: (context) => ChatBloc()),
-                  BlocProvider(create: (context) => CartBloc()),
-                ],
-                child: ChatScreen(
-                  isFromHistory: true,
-                  historySessionId: session.sessionId.toString(),
-                  chatHistoryTitle: displayText,
-                ),
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            settings: const RouteSettings(name: ChatScreen.routeName),
+            builder: (context) => MultiBlocProvider(
+              providers: [
+                BlocProvider(create: (context) => ChatBloc()),
+                BlocProvider(create: (context) => CartBloc()),
+              ],
+              child: ChatScreen(
+                isFromHistory: true,
+                historySessionId: session.sessionId.toString(),
+                chatHistoryTitle: displayText,
               ),
             ),
-          );
-        },
-        child: Container(
-          margin: const EdgeInsets.only(bottom: 10),
-          padding: const EdgeInsets.all(10),
-          decoration: BoxDecoration(
-            color: const Color(0xFFF5F7FF),
-            border: Border.all(color: const Color(0xFFEEF4FF)),
-            borderRadius: BorderRadius.circular(8),
           ),
-          child: Row(
-            children: [
-              Expanded(
-                child: Text(
-                  displayText,
-                  style: AppTextStyles.chatMessage.copyWith(
-                    color: const Color(0xFF242424),
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+        );
+      },
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 10),
+        padding: const EdgeInsets.only(left: 10, right: 10, top: 0, bottom: 0),
+        decoration: BoxDecoration(
+          color: const Color(0xFFF5F7FF),
+          border: Border.all(color: const Color(0xFFEEF4FF)),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: Text(
+                displayText,
+                style: AppTextStyles.chatMessage.copyWith(
+                  color: const Color(0xFF242424),
                 ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
-            ],
-          ),
+            ),
+            const SizedBox(width: 8),
+            IconButton(
+              tooltip: 'More',
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints(),
+              icon: const Icon(
+                Icons.more_vert,
+                color: Color(0xFF242424),
+                size: 22,
+              ),
+              onPressed: () {
+                _showChatMoreOptions(
+                  context,
+                  chatId: session.sessionId.toString(),
+                  chatTitle: displayText,
+                );
+              },
+            ),
+          ],
         ),
       ),
+    );
+  }
+
+  void _showChatMoreOptions(
+    BuildContext context, {
+    required String chatId,
+    required String chatTitle,
+  }) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(8)),
+      ),
+      builder: (BuildContext bottomSheetContext) {
+        Widget optionTile({
+          required IconData icon,
+          required String title,
+          required VoidCallback onTap,
+          Color? iconColor,
+          Color? textColor,
+        }) {
+          return ListTile(
+            contentPadding: EdgeInsets.zero,
+            leading: Icon(icon, color: iconColor ?? const Color(0xFF242424)),
+            title: Text(
+              title,
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+                color: textColor ?? const Color(0xFF242424),
+              ),
+            ),
+            onTap: onTap,
+          );
+        }
+
+        return Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: Colors.grey[300],
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
+              const Text(
+                'Chat options',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                  color: Colors.black,
+                ),
+                textAlign: TextAlign.left,
+              ),
+              const SizedBox(height: 16),
+              optionTile(
+                icon: Icons.share_outlined,
+                title: 'Share Chat',
+                onTap: () {
+                  Navigator.of(bottomSheetContext).pop();
+                  context.read<ChatHistoryBloc>().add(
+                        ChatHistoryShareRequested(sessionId: chatId),
+                      );
+                },
+              ),
+              optionTile(
+                icon: Icons.archive_outlined,
+                title: 'Archive Chat',
+                onTap: () {
+                  Navigator.of(bottomSheetContext).pop();
+                  context.read<ChatHistoryBloc>().add(
+                        ChatHistoryArchiveRequested(sessionId: chatId),
+                      );
+                },
+              ),
+              optionTile(
+                icon: Icons.delete_outline,
+                title: 'Delete Chat',
+                iconColor: Colors.red,
+                textColor: Colors.red,
+                onTap: () {
+                  Navigator.of(bottomSheetContext).pop();
+                  _showDeleteChatConfirmation(context, chatId, chatTitle);
+                },
+              ),
+              const SizedBox(height: 8),
+            ],
+          ),
+        );
+      },
     );
   }
 

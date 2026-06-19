@@ -5,6 +5,7 @@ export 'asset_helper.dart';
 export 'asset_path.dart';
 export 'chat_bot_config.dart';
 export 'enum.dart';
+export 'store_category_registry.dart';
 export 'log.dart';
 export 'text_styles.dart';
 export 'user_preferences.dart';

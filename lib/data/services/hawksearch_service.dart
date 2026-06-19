@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:chat_bot/data/model/chat_response.dart';
 import 'package:chat_bot/data/services/chat_api_services.dart';
 import 'package:chat_bot/utils/api_result.dart';
+import 'package:chat_bot/utils/enum.dart';
 
 class HawkSearchService {
   HawkSearchService._internal();
@@ -96,7 +97,9 @@ class HawkSearchService {
 
       final Product? product = _mapDocumentToProduct(doc);
       if (product == null) continue;
-      if (product.isPrimary == false) continue;
+      if (product.storeCategoryId != FoodStoreCategoryId.donation.value) {
+       if (product.isPrimary == false) continue;
+      }
 
       storeIdToProducts.putIfAbsent(storeId, () => <Product>[]).add(product);
       // Keep one representative doc for store-level info
@@ -134,6 +137,7 @@ class HawkSearchService {
 
       final bool containsMeat = _firstBool(doc['containsmeat']);
       final String currencySymbol = _firstString(doc['currencysymbol']);
+      final String storeCategoryId = _firstString(doc['storecategoryid']);
       final String currency = _firstString(doc['currency']);
 
       // Extract isPrimary from storedata.metaData
@@ -182,6 +186,7 @@ class HawkSearchService {
         customizable: false,
         instock: instock,
         isPrimary: isPrimary,
+        storeCategoryId: storeCategoryId,
       );
     } catch (_) {
       return null;
@@ -273,6 +278,42 @@ class HawkSearchService {
       return false;
     })();
 
+    final List<String> cuisines = (() {
+      final dynamic raw = storeData['cuisines'];
+      if (raw is List) {
+        return raw
+            .map((e) => e?.toString().trim() ?? '')
+            .where((e) => e.isNotEmpty)
+            .toList();
+      }
+      if (raw is String && raw.trim().isNotEmpty) {
+        // Sometimes this arrives as a python-style list string: "['A', 'B']"
+        try {
+          String fixed = raw;
+          fixed = fixed.replaceAll('True', 'true');
+          fixed = fixed.replaceAll('False', 'false');
+          fixed = fixed.replaceAll('None', 'null');
+          fixed = _replaceQuotesSafely(fixed);
+          final decoded = jsonDecode(fixed);
+          if (decoded is List) {
+            return decoded
+                .map((e) => e?.toString().trim() ?? '')
+                .where((e) => e.isNotEmpty)
+                .toList();
+          }
+        } catch (_) {
+          // Fall through to comma-split
+        }
+
+        return raw
+            .split(',')
+            .map((e) => e.trim())
+            .where((e) => e.isNotEmpty)
+            .toList();
+      }
+      return <String>[];
+    })();
+
      final bool tableReservations = (() {
       final dynamic sd = storeData['tableReservations'];
       if (sd == 'True' || sd == true) {
@@ -323,6 +364,7 @@ class HawkSearchService {
         supportedOrderTypes: supportedOrderTypes,
         tableReservations: tableReservations,
         doctorsList: doctorsList,
+        cuisines: cuisines,
     );
   }
 
@@ -345,6 +387,16 @@ class HawkSearchService {
             if (hex.isNotEmpty) map['_id'] = hex;
           }
         }
+
+        // Normalize rating to num so Doctor.fromJson won't throw on (e.g.) "4.5"
+        final dynamic ratingRaw = map['rating'];
+        if (ratingRaw is String) {
+          final parsed = double.tryParse(ratingRaw.trim());
+          if (parsed != null) map['rating'] = parsed;
+        } else if (ratingRaw is int) {
+          map['rating'] = ratingRaw.toDouble();
+        }
+
         result.add(Doctor.fromJson(map));
       } catch (_) {
         // Skip malformed provider entries

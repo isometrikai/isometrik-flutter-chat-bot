@@ -16,6 +16,10 @@ class ChatService {
     String serviceRequestedTime = "",
     String storeCategoryId = "",
     List<String> prescriptionImageUrls = const [],
+    Map<String, dynamic> tableBookingData = const {},
+    Map<String, dynamic> hotelDestinationData = const {},
+    Map<String, dynamic> carPickupData = const {},
+    Map<String, dynamic> flightBookingData = const {},
   }) {
     return ChatApiServices.instance.sendChatMessage(
       message: message,
@@ -29,11 +33,20 @@ class ChatService {
       serviceRequestedTime: serviceRequestedTime,
       storeCategoryId: storeCategoryId,
       prescriptionImageUrls: prescriptionImageUrls,
+      tableBookingData: tableBookingData,
+      hotelDestinationData: hotelDestinationData,
+      carPickupData: carPickupData,
+      flightBookingData: flightBookingData,
     );
   }
 
   Future<SessionIdResponse?> getSessionId() {
     return ChatApiServices.instance.getSessionId();
+  }
+
+  Future<bool?> fetchCustomerProfilePersonalization() async {
+    final profile = await ChatApiServices.instance.fetchCustomerProfile();
+    return profile?.zainPersonalization;
   }
 
   Future<List<ChatHistoryDetail>> fetchChatHistory(String sessionId) {

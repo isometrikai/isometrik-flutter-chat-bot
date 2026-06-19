@@ -2,6 +2,7 @@ import 'package:chat_bot/bloc/cart/cart_bloc.dart';
 import 'package:chat_bot/bloc/chat_event.dart';
 import 'package:chat_bot/bloc/chat_state.dart';
 import 'package:chat_bot/data/data.dart';
+import 'package:chat_bot/utils/store_category_registry.dart';
 import 'package:chat_bot/utils/utility.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -28,6 +29,10 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
         serviceRequestedTime: event.serviceRequestedTime,
         storeCategoryId: event.storeCategoryId,
         prescriptionImageUrls: event.prescriptionImageUrls,
+        tableBookingData: event.tableBookingData,
+        hotelDestinationData: event.hotelDestinationData,
+        carPickupData: event.carPickupData,
+        flightBookingData: event.flightBookingData,
       );
       print('CHINTU: $chat');
       if (chat != null) {
@@ -49,6 +54,12 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
       final response = await ChatService.instance.getSessionId();
       if (response != null) {
         sessionId = response.sessionId.toString();
+        StoreCategoryRegistry.update(response.storeCategories);
+        final zainPersonalization =
+            await ChatService.instance.fetchCustomerProfilePersonalization();
+        if (zainPersonalization != null) {
+          Utility.setPersonalization(zainPersonalization);
+        }
         // emit(ChatLoadedWithSessionId(response.sessionId.toString()));
       }
       if (event.needToShowLoader) {

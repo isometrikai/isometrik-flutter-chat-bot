@@ -17,7 +17,10 @@ class StoreCard extends StatelessWidget {
   final Function(chat.Product?, chat.Store, chat.Doctor?)? onAddToCartRequested; // New callback for cart requests
   final List<cart_models.UniversalCartData>? cartData; // Cart data from getCart API
   final Function(chat.Product?, chat.Store, int, bool)? onQuantityChanged; // Callback for quantity changes
+  final Function(chat.Store)? onTableBookingTap;
   final bool isFromChatHistory;
+  final bool isTableBookingFlow;
+  final Function(chat.Store, chat.Product?)? onDonationTap;
 
   StoreCard({
     super.key,
@@ -33,6 +36,9 @@ class StoreCard extends StatelessWidget {
     this.onQuantityChanged, // Add quantity change callback
     this.isFromChatHistory = false,
     this.doctor,
+    this.isTableBookingFlow = false,
+    this.onTableBookingTap,
+    this.onDonationTap,
   });
 
   @override
@@ -95,7 +101,9 @@ class StoreCard extends StatelessWidget {
                             ),
                           ),
                           const SizedBox(width: 7),
-                          const Text(
+                          
+                          if (store.storeCategoryId != FoodStoreCategoryId.donation.value) ...[ 
+                            const Text(
                             '|',
                             style: TextStyle(
                               fontSize: 12,
@@ -117,6 +125,7 @@ class StoreCard extends StatelessWidget {
                               color: const Color(0xFF242424),
                             ),
                           ),
+                          ]
                         ],
                       ),
                       const SizedBox(height: 6),
@@ -157,7 +166,27 @@ class StoreCard extends StatelessWidget {
                             ),
                           ),
                         ],
-                      ] else ...[
+                      ] else if (store.storeCategoryId == FoodStoreCategoryId.healthCare.value) ...[
+                        // if (store.storeIsOpen) ...[
+                          Text(
+                            '${store.cuisines.isNotEmpty ? store.cuisines.join(', ') : ''}',
+                            maxLines: 1,
+                            style: AppTextStyles.restaurantDescription.copyWith(
+                              color: const Color(0xFF6E4185),
+                            ),
+                          ),
+                        // ] else ...[
+                        //   Text(
+                        //     'Store is closed',
+                        //     maxLines: 1,
+                        //     style: AppTextStyles.restaurantDescription.copyWith(
+                        //       color: const Color(0xFFF44336),
+                        //       fontWeight: FontWeight.w600,
+                        //       fontSize: 12,
+                        //     ),
+                        //   ),
+                        // ],
+                      ] else if (store.storeCategoryId != FoodStoreCategoryId.donation.value) ...[
                         if (store.storeIsOpen) ...[
                           Text(
                             store.cuisineDetails.isNotEmpty
@@ -186,7 +215,8 @@ class StoreCard extends StatelessWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 12),
+            if (isTableBookingFlow == false) ...[
+             const SizedBox(height: 12),
               SizedBox(
                 height: 113,
                 child: ListView.separated(
@@ -207,42 +237,81 @@ class StoreCard extends StatelessWidget {
                         onQuantityChanged:
                             onQuantityChanged, // Pass quantity change callback
                         isFromChatHistory: isFromChatHistory,
+                        onDonationTap: onDonationTap,
                       ),
                   separatorBuilder: (_, __) => const SizedBox(width: 10),
                   itemCount: store.isDoctore == false ? store.products.length : store.doctorsList.length,
                 ),
               ),
+            ],
               if (isFromChatHistory == false) ...[
             const SizedBox(height: 15),
-            GestureDetector(
-              onTap: () {
-                if (onTap != null) {
-                  onTap!.call();
-                  return;
-                }
-                if (storesWidget != null) {
-                  print('StoreCard: onTap called - $index');
-                  final Map<String, dynamic>? storeJson = storesWidget!.getRawStore(index);
-                  print('StoreCard: storeJson - $storeJson');
-                  OrderService().triggerStoreOrder(storeJson ?? {});
-                }
-              },
-              child: Row(
-                children: [
-                  const SizedBox(width: 3),
-                  SvgPicture.asset(
-                    AssetPath.get('images/ic_eazy_app.svg'),
-                    fit: BoxFit.contain,
+            Row(
+              children: [
+                GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: () {
+                    if (onTap != null) {
+                      onTap!.call();
+                      return;
+                    }
+                    if (storesWidget != null) {
+                      print('StoreCard: onTap called - $index');
+                      final Map<String, dynamic>? storeJson =
+                          storesWidget!.getRawStore(index);
+                      print('StoreCard: storeJson - $storeJson');
+                      OrderService().triggerStoreOrder(storeJson ?? {});
+                    }
+                  },
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const SizedBox(width: 3),
+                      SvgPicture.asset(
+                        AssetPath.get('images/ic_eazy_app.svg'),
+                        fit: BoxFit.contain,
+                        colorFilter: ColorFilter.mode(
+                          AppConstants.appThemeColor, // Your desired color
+                          BlendMode.srcIn,
+                        ),
+                      ),
+                      const SizedBox(width: 5),
+                      Text(
+                        'Open in app',
+                        style: AppTextStyles.restaurantDescription.copyWith(
+                          color: AppConstants.appThemeColor,
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(width: 5),
-                  Text(
-                    'Open in app',
-                    style: AppTextStyles.restaurantDescription.copyWith(
-                      color: AppConstants.appThemeColor,
+                ),
+                const Spacer(),
+                if (isTableBookingFlow == true)
+                  GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onTap: () {
+                      if (onTap != null) {
+                        onTap!.call();
+                        return;
+                      }
+                      if (storesWidget != null) {
+                        onTableBookingTap?.call(store);
+                      }
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 3),
+                      child: Text(
+                        'Book a Table',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppTextStyles.restaurantDescription.copyWith(
+                          color: AppConstants.appThemeColor,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
                     ),
                   ),
-                ],
-              ),
+              ],
             ),
             ],
           ],
@@ -296,6 +365,7 @@ class _ProductPreviewTile extends StatelessWidget {
   final List<cart_models.UniversalCartData>? cartData; // Cart data from getCart API
   final Function(chat.Product?, chat.Store, int, bool)? onQuantityChanged; // Callback for quantity changes
   final bool isFromChatHistory;
+  final Function(chat.Store, chat.Product?)? onDonationTap;
 
   const _ProductPreviewTile({
     this.product,
@@ -307,6 +377,7 @@ class _ProductPreviewTile extends StatelessWidget {
     this.cartData, // Add cart data parameter
     this.onQuantityChanged, // Add quantity change callback
     this.isFromChatHistory = false,
+    this.onDonationTap,
   });
 
   @override
@@ -330,7 +401,7 @@ class _ProductPreviewTile extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    if (store.isDoctore == false && product != null) ...[
+                    if (store.isDoctore == false && product != null && store.storeCategoryId != FoodStoreCategoryId.donation.value) ...[
                       SvgPicture.asset(
                         AssetPath.get(
                           product!.containsMeat
@@ -353,7 +424,7 @@ class _ProductPreviewTile extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 4),
-                    if (store.isDoctore == false && product != null) ...[
+                    if (store.isDoctore == false && product != null && store.storeCategoryId != FoodStoreCategoryId.donation.value) ...[
                       Row(
                         children: [
                           Text(
@@ -380,6 +451,25 @@ class _ProductPreviewTile extends StatelessWidget {
                           ],
                         ],
                       ),
+                    ]else ...[
+                      if (doctor?.rating != null && doctor?.rating != 0.0) ...[
+                       Row(
+                        children: [
+                          const Icon(
+                            Icons.star,
+                            size: 14,
+                            color: AppConstants.appThemeColor,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            '${doctor?.rating?.toStringAsFixed(1) ?? ''}',
+                            style: AppTextStyles.restaurantDescription.copyWith(
+                              color: const Color(0xFF242424),
+                            ),
+                          ),
+                        ],
+                      ),
+                      ]
                     ]
                   ],
                 ),
@@ -418,7 +508,13 @@ class _ProductPreviewTile extends StatelessWidget {
                     ),
                   ),
                   if (((store.storeTypeId ?? store.type) != FoodCategory.food.value) && ((store.storeTypeId ?? store.type) != FoodCategory.services.value)) ...[
-                    if (product?.instock == false) ...[
+                    if (store.storeCategoryId == FoodStoreCategoryId.donation.value) ...[
+                      Positioned(
+                        right: 4,
+                        bottom: 4,
+                        child: _buildDonationBadge(isFromChatHistory: isFromChatHistory),
+                      ),
+                    ] else if (product?.instock == false) ...[
                       Positioned(
                         right: 4,
                         bottom: 4,
@@ -526,6 +622,47 @@ class _ProductPreviewTile extends StatelessWidget {
             fontSize: 8,
             height: 1.2,
             color: Color(0xFFF44336),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDonationBadge({required bool isFromChatHistory}) {
+    if (isFromChatHistory == true) {
+      return const SizedBox.shrink();
+    }
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: () {
+        if (onDonationTap != null) {
+          onDonationTap!(store, product);
+        }
+      },
+      child: Container(
+        width: 70,
+        height: 27,
+        padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 0),
+        decoration: BoxDecoration(
+          color: const Color(0xFFFFFAFB),
+          borderRadius: BorderRadius.circular(8),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.08),
+              blurRadius: 4,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Center(
+          child: Text(
+            'Select',
+            style: AppTextStyles.restaurantDescription.copyWith(
+              fontWeight: FontWeight.w700,
+              fontSize: 11,
+              height: 1.2,
+              color: Color(0xFFF44336),
+            ),
           ),
         ),
       ),

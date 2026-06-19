@@ -60,6 +60,7 @@ class _LaunchScreenState extends State<LaunchScreen> {
     if (!mounted) return;
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(
+        settings: const RouteSettings(name: ChatScreen.routeName),
         builder: (context) => MultiBlocProvider(
           providers: [
             BlocProvider(create: (context) => ChatBloc()),

@@ -45,6 +45,10 @@ class ChatBot {
     required String zoneId,
     required String timezone,
     required String platform,
+    required bool personalization,
+    required String emailId,
+    required String phoneNumber,
+    required String countryCode,
   }) {
     print('chatBotId: $chatBotId');
     print('appSecret: $appSecret');
@@ -70,6 +74,10 @@ class ChatBot {
     print('zoneId: $zoneId');
     print('timezone: $timezone');
     print('platform: $platform');
+    print('personalization: $personalization');
+    print('emailId: $emailId');
+    print('phoneNumber: $phoneNumber');
+    print('countryCode: $countryCode');
     isTutorialShown = needToShowTutorial;
     isCompleteSetupShown = needToShowCompleteSetup;
     ApiService.configure(
@@ -97,6 +105,10 @@ class ChatBot {
       zoneId: zoneId,
       timezone: timezone,
       platform: platform,
+      personalization: personalization,
+      emailId: emailId,
+      phoneNumber: phoneNumber,
+      countryCode: countryCode,
     );
   }
 
@@ -127,6 +139,7 @@ class ChatBot {
      Navigator.push(
         context,
         PageRouteBuilder(
+          settings: const RouteSettings(name: ChatScreen.routeName),
           pageBuilder: (context, animation, secondaryAnimation) =>
               MultiBlocProvider(
             providers: [

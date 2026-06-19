@@ -142,6 +142,7 @@ class _CartScreenState extends State<CartScreen> {
           {'name': '🛒 Shopping', 'count': categoryCounts['shopping']},
           {'name': '💄 Services', 'count': categoryCounts['services']},
           {'name': '🏥 Health Care', 'count': categoryCounts['healthCare']},
+          {'name': '💰 Donation', 'count': categoryCounts['donation']},
         ];
 
         return Container(
@@ -231,6 +232,7 @@ class _CartScreenState extends State<CartScreen> {
     int shoppingCount = 0;
     int servicesCount = 0;
     int healthCareCount = 0;
+    int donationCount = 0;
 
     if (state is CartLoaded && state.rawCartData != null) {
       for (final cartData in state.rawCartData!.data) {
@@ -251,6 +253,8 @@ class _CartScreenState extends State<CartScreen> {
             } else {
               servicesCount += seller.products.length;
             }
+          } else if (seller.storeTypeId == FoodCategory.donation.value) {
+            donationCount += seller.products.length;
           }
         }
       }
@@ -263,6 +267,7 @@ class _CartScreenState extends State<CartScreen> {
       'shopping': shoppingCount,
       'services': servicesCount,
       'healthCare': healthCareCount,
+      'donation': donationCount,
     };
   }
 
@@ -397,6 +402,10 @@ class _CartScreenState extends State<CartScreen> {
         else if (categoryIndex == 5 && 
                  seller.storeTypeId == FoodCategory.services.value && 
                  cartData.storeCategoryId == FoodStoreCategoryId.healthCare.value) {
+          matches = true;
+        }
+        // 6: Donation - storeTypeId = 26
+        else if (categoryIndex == 6 && seller.storeTypeId == FoodCategory.donation.value) {
           matches = true;
         }
         

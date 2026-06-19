@@ -39,7 +39,7 @@ class AvailabilitySlotsRepository {
     );
 
     if (!res.isSuccess || res.data == null) {
-      throw Exception(res.message ?? 'Failed to load availability slots');
+      throw Exception(res.message ?? '');
     }
 
     final AvailabilitySlotsResponse parsed = AvailabilitySlotsResponse.fromJson(

@@ -11,15 +11,21 @@ import 'package:chat_bot/services/services.dart';
 
 class RestaurantScreen extends StatefulWidget {
   final chat.WidgetAction? actionData;
+  final bool isTableBookingFlow;
   final Function(bool)? onCheckout;
+  final Function(chat.Store)? onTableBookingTap;
+  final Function(chat.Store, chat.Product?)? onDonationTap;
 
   // final CartBloc? cartBloc; // Optional CartBloc parameter
 
   const RestaurantScreen({
     super.key,
     this.actionData,
+    this.isTableBookingFlow = false,
     this.onCheckout,
     // this.cartBloc, // Optional parameter
+    this.onTableBookingTap,
+    this.onDonationTap,
   });
 
   @override
@@ -101,6 +107,11 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
         _updateCartData(state.rawCartData!.data);
       } else if (state is CartEmpty) {
         _updateCartData([]);
+      } else if (state is CartError) {
+        BlackToastView.show(
+          context,
+          state.message,
+        );
       }
     });
   }
@@ -863,6 +874,7 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
           itemBuilder: (context, index) {
               try {
                 return StoreCard(
+                  isTableBookingFlow: widget.isTableBookingFlow,
                   store: restaurants[index],
                   storesWidget: null,
                   index: index,
@@ -874,6 +886,14 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
                         restaurants[index].toJson();
                     OrderService().triggerStoreOrder(storeJson);
                     // Navigator.pop(context);
+                  },
+                  onTableBookingTap: (store) {
+                    widget.onTableBookingTap?.call(store);
+                    Navigator.pop(context);
+                  },
+                  onDonationTap: (store, product) {
+                    widget.onDonationTap?.call(store, product);
+                    Navigator.pop(context);
                   },
                   onAddToCartRequested: (product, store, doctor) {
                     if (store.isDoctore == true && doctor != null) {

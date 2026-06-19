@@ -10,6 +10,23 @@ class Utility {
   static String currencyCode = '';
   static String platform = '';
   static String name = '';
+  static String emailId = '';
+  static String timezone = '';
+  static String phoneNumber = '';
+  static String countryCode = '';
+  static bool personalization = true;
+
+  /// Fixed UTC offsets for common IANA zones (no DST). Extend as needed.
+  static const Map<String, Duration> _ianaUtcOffsets = {
+    'Asia/Kolkata': Duration(hours: 5, minutes: 30),
+    'Asia/Calcutta': Duration(hours: 5, minutes: 30),
+    'Asia/Dubai': Duration(hours: 4),
+    'Asia/Riyadh': Duration(hours: 3),
+    'Asia/Singapore': Duration(hours: 8),
+    'Europe/London': Duration(hours: 0),
+    'America/New_York': Duration(hours: -5),
+    'America/Los_Angeles': Duration(hours: -8),
+  };
 
   static void showLoader({
     String? message,
@@ -132,8 +149,97 @@ class Utility {
     Utility.name = name;
   }
 
+  static void setPhoneNumber(String phoneNumber) {
+    Utility.phoneNumber = phoneNumber;
+  }
+
+  static void setCountryCode(String countryCode) {
+    Utility.countryCode = countryCode;
+  }
+
+  static void setEmailId(String emailId) {
+    Utility.emailId = emailId;
+  }
+
+  static void setPersonalization(bool personalization) {
+    Utility.personalization = personalization;
+  }
+
+  static bool getPersonalization() {
+    return personalization;
+  }
+
   static String getName() {
     return name;
+  }
+
+  static String getPhoneNumber() {
+    return phoneNumber;
+  }
+
+  static String getCountryCode() {
+    return countryCode;
+  }
+
+  static void setTimezone(String value) {
+    timezone = value;
+  }
+
+  /// Parses offsets like `+05:30`, `UTC+5:30`, or total minutes `330`.
+  static Duration? _parseUtcOffset(String value) {
+    final trimmed = value.trim();
+    if (trimmed.isEmpty) return null;
+
+    final minutesOnly = int.tryParse(trimmed);
+    if (minutesOnly != null) {
+      return Duration(minutes: minutesOnly);
+    }
+
+    final match = RegExp(
+      r'^(?:UTC)?\s*([+-])\s*(\d{1,2})(?::(\d{2}))?$',
+      caseSensitive: false,
+    ).firstMatch(trimmed.replaceAll(' ', ''));
+    if (match == null) return null;
+
+    final sign = match.group(1) == '-' ? -1 : 1;
+    final hours = int.parse(match.group(2)!);
+    final minutes = int.parse(match.group(3) ?? '0');
+    return Duration(
+      hours: sign * hours,
+      minutes: sign * minutes,
+    );
+  }
+
+  /// Hour of day for [Utility.timezone], or device local time when unknown.
+  static int currentHourInTimezone() {
+    final tzValue = timezone.trim();
+    if (tzValue.isEmpty) {
+      return DateTime.now().hour;
+    }
+
+    final offset =
+        _parseUtcOffset(tzValue) ?? _ianaUtcOffsets[tzValue];
+    if (offset != null) {
+      return DateTime.now().toUtc().add(offset).hour;
+    }
+
+    return DateTime.now().hour;
+  }
+
+  /// Returns "Good morning", "Good afternoon", or "Good evening".
+  static String getTimeOfDayGreeting() {
+    final hour = currentHourInTimezone();
+    if (hour >= 5 && hour < 12) {
+      return 'Good morning';
+    }
+    if (hour >= 12 && hour < 17) {
+      return 'Good afternoon';
+    }
+    return 'Good evening';
+  }
+
+  static String getEmailId() {
+    return emailId;
   }
 
   static String getCurrencySymbol() {
@@ -146,6 +252,240 @@ class Utility {
 
   static String getPlatform() {
     return platform;
+  }
+
+  static const List<String> _monthNames = [
+    'January',
+    'February',
+    'March',
+    'April',
+    'May',
+    'June',
+    'July',
+    'August',
+    'September',
+    'October',
+    'November',
+    'December',
+  ];
+
+  /// Parses hotel date strings such as `2026-06-10`.
+  static DateTime? parseHotelBookingDate(String raw) {
+    final trimmed = raw.trim();
+    if (trimmed.isEmpty) return null;
+    return DateTime.tryParse(trimmed);
+  }
+
+  /// Returns `yyyy-MM-dd` (pass-through when already in that shape).
+  static String formatHotelBookingDate(String raw) {
+    final trimmed = raw.trim();
+    if (trimmed.isEmpty) return trimmed;
+
+    final parsed = parseHotelBookingDate(trimmed);
+    if (parsed == null) return trimmed;
+
+    final y = parsed.year.toString().padLeft(4, '0');
+    final m = parsed.month.toString().padLeft(2, '0');
+    final d = parsed.day.toString().padLeft(2, '0');
+    return '$y-$m-$d';
+  }
+
+  /// Chat display format: `10th June 2026`.
+  static String formatHotelBookingDateForDisplay(String raw) {
+    final parsed = parseHotelBookingDate(raw);
+    if (parsed == null) return raw.trim();
+
+    final day = parsed.day;
+    final suffix = (day >= 11 && day <= 13)
+        ? 'th'
+        : switch (day % 10) {
+            1 => 'st',
+            2 => 'nd',
+            3 => 'rd',
+            _ => 'th',
+          };
+
+    return '$day$suffix ${_monthNames[parsed.month - 1]} ${parsed.year}';
+  }
+
+  /// Formats hotel occupancy for chat, e.g.:
+  /// `Room 1: 3 adults, 1 child (age 2)\nRoom 2: 3 adults`
+  static String formatHotelOccupancyForDisplay(dynamic occupancy) {
+    if (occupancy == null) return '';
+
+    final List<dynamic> rooms;
+    if (occupancy is List) {
+      rooms = occupancy;
+    } else {
+      return occupancy.toString();
+    }
+
+    if (rooms.isEmpty) return '';
+
+    final buffer = StringBuffer();
+    for (int i = 0; i < rooms.length; i++) {
+      final room = rooms[i];
+      if (room is! Map) continue;
+
+      final map = Map<String, dynamic>.from(room);
+      final adults = (map['adults'] as num?)?.toInt() ?? 0;
+      final children = (map['childs'] as num?)?.toInt() ??
+          (map['children'] as num?)?.toInt() ??
+          0;
+      final childAgesRaw = map['childages'] ?? map['childAges'] ?? [];
+      final List<int> childAges = [];
+      if (childAgesRaw is List) {
+        for (final age in childAgesRaw) {
+          final parsed = int.tryParse(age.toString());
+          if (parsed != null) childAges.add(parsed);
+        }
+      }
+
+      if (buffer.isNotEmpty) buffer.writeln();
+      buffer.write('Room ${i + 1}: ');
+
+      final parts = <String>[];
+      if (adults > 0) {
+        parts.add('$adults ${adults == 1 ? 'adult' : 'adults'}');
+      }
+      if (children > 0) {
+        var childPart = '$children ${children == 1 ? 'child' : 'children'}';
+        if (childAges.isNotEmpty) {
+          childPart += childAges.length == 1
+              ? ' (age ${childAges.first})'
+              : ' (ages ${childAges.join(', ')})';
+        }
+        parts.add(childPart);
+      }
+      if (parts.isEmpty) {
+        buffer.write('No guests');
+      } else {
+        buffer.write(parts.join(', '));
+      }
+    }
+
+    return buffer.toString();
+  }
+
+  static const List<String> _shortMonthNames = [
+    'Jan',
+    'Feb',
+    'Mar',
+    'Apr',
+    'May',
+    'Jun',
+    'Jul',
+    'Aug',
+    'Sep',
+    'Oct',
+    'Nov',
+    'Dec',
+  ];
+
+  /// Short date for hotel UI, e.g. `20 Mar`.
+  static String formatHotelDateShort(String raw) {
+    final parsed = parseHotelBookingDate(raw);
+    if (parsed == null) return raw.trim();
+    return '${parsed.day} ${_shortMonthNames[parsed.month - 1]}';
+  }
+
+  static int hotelBookingGuestCount(Map<String, dynamic> hotelBooking) {
+    final occupancy = hotelBooking['occupancy'];
+    if (occupancy is! List) return 0;
+
+    var total = 0;
+    for (final room in occupancy) {
+      if (room is! Map) continue;
+      final map = Map<String, dynamic>.from(room);
+      total += (map['adults'] as num?)?.toInt() ?? 0;
+      total += (map['childs'] as num?)?.toInt() ??
+          (map['children'] as num?)?.toInt() ??
+          0;
+    }
+    return total;
+  }
+
+  static int? hotelBookingNights(Map<String, dynamic> hotelBooking) {
+    final checkin = parseHotelBookingDate(
+      (hotelBooking['checkinDate'] ?? '').toString(),
+    );
+    final checkout = parseHotelBookingDate(
+      (hotelBooking['checkoutDate'] ?? '').toString(),
+    );
+    if (checkin == null || checkout == null) return null;
+    final nights = checkout.difference(checkin).inDays;
+    return nights > 0 ? nights : null;
+  }
+
+  /// Compact guest label for summary cards, e.g. `4 adults and 1 child`.
+  static String formatHotelOccupancyCompact(
+    Map<String, dynamic> hotelBooking, {
+    int fallbackAdults = 0,
+  }) {
+    final occupancy = hotelBooking['occupancy'];
+    if (occupancy is! List || occupancy.isEmpty) {
+      if (fallbackAdults <= 0) return '';
+      return '$fallbackAdults ${fallbackAdults == 1 ? 'adult' : 'adults'}';
+    }
+
+    var adults = 0;
+    var children = 0;
+    for (final room in occupancy) {
+      if (room is! Map) continue;
+      final map = Map<String, dynamic>.from(room);
+      adults += (map['adults'] as num?)?.toInt() ?? 0;
+      children += (map['childs'] as num?)?.toInt() ??
+          (map['children'] as num?)?.toInt() ??
+          0;
+    }
+
+    if (adults <= 0 && children <= 0 && fallbackAdults > 0) {
+      return '$fallbackAdults ${fallbackAdults == 1 ? 'adult' : 'adults'}';
+    }
+
+    final parts = <String>[];
+    if (adults > 0) {
+      parts.add('$adults ${adults == 1 ? 'adult' : 'adults'}');
+    }
+    if (children > 0) {
+      parts.add('$children ${children == 1 ? 'child' : 'children'}');
+    }
+    if (parts.isEmpty) return '';
+    if (parts.length == 1) return parts.first;
+    return '${parts.first} and ${parts.last}';
+  }
+
+  static int hotelBookingRoomCount(Map<String, dynamic> hotelBooking) {
+    final occupancy = hotelBooking['occupancy'];
+    if (occupancy is List && occupancy.isNotEmpty) {
+      return occupancy.length;
+    }
+    return 1;
+  }
+
+  /// e.g. `20 Mar – 22 Mar · 2 nights · 4 guests`
+  static String formatHotelBookingSummary(Map<String, dynamic> hotelBooking) {
+    final checkin = (hotelBooking['checkinDate'] ?? '').toString();
+    final checkout = (hotelBooking['checkoutDate'] ?? '').toString();
+    final parts = <String>[];
+
+    if (checkin.isNotEmpty && checkout.isNotEmpty) {
+      parts.add(
+        '${formatHotelDateShort(checkin)} – ${formatHotelDateShort(checkout)}',
+      );
+    }
+
+    final nights = hotelBookingNights(hotelBooking);
+    if (nights != null) {
+      parts.add('$nights night${nights == 1 ? '' : 's'}');
+    }
+
+    final guests = hotelBookingGuestCount(hotelBooking);
+    if (guests > 0) {
+      parts.add('$guests guest${guests == 1 ? '' : 's'}');
+    }
+
+    return parts.join(' · ');
   }
 }
 

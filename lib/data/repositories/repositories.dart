@@ -10,4 +10,8 @@ export 'store_details_repository.dart';
 export 'availability_slots_repository.dart';
 export 'user_preference_repository.dart';
 export 'wallet_repository.dart';
+export 'hotel_availability_repository.dart';
+export 'hotel_search_repository.dart';
+export 'car_search_repository.dart';
+export 'flight_search_repository.dart';
 

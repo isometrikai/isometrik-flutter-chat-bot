@@ -20,6 +20,10 @@ class ChatLoadEvent extends ChatEvent {
   final String serviceRequestedTime;
   final String storeCategoryId;
   final List<String> prescriptionImageUrls;
+  final Map<String, dynamic> tableBookingData;
+  final Map<String, dynamic> hotelDestinationData;
+  final Map<String, dynamic> carPickupData;
+  final Map<String, dynamic> flightBookingData;
   const ChatLoadEvent({
     required this.message,
     this.agentId = "67a9df239dbfc422720f19b5",
@@ -32,6 +36,10 @@ class ChatLoadEvent extends ChatEvent {
     this.serviceRequestedTime = "",
     this.storeCategoryId = "",
     this.prescriptionImageUrls = const [],
+    this.tableBookingData = const {},
+    this.hotelDestinationData = const {},
+    this.carPickupData = const {},
+    this.flightBookingData = const {},
   }) : sessionId = sessionId ?? "default-session";
 
   static Future<ChatLoadEvent> create({
@@ -46,6 +54,10 @@ class ChatLoadEvent extends ChatEvent {
     String serviceRequestedTime = "",
     String storeCategoryId = "",
     List<String>? prescriptionImageUrls,
+    Map<String, dynamic>? tableBookingData,
+    Map<String, dynamic>? hotelDestinationData,
+    Map<String, dynamic>? carPickupData,
+    Map<String, dynamic>? flightBookingData,
   }) async {
     String deviceId = fingerPrintId ?? await _getDeviceId();
     
@@ -61,6 +73,10 @@ class ChatLoadEvent extends ChatEvent {
       serviceRequestedTime: serviceRequestedTime,
       storeCategoryId: storeCategoryId,
       prescriptionImageUrls: prescriptionImageUrls ?? [],
+      tableBookingData: tableBookingData ?? {},
+      hotelDestinationData: hotelDestinationData ?? {},
+      carPickupData: carPickupData ?? {},
+      flightBookingData: flightBookingData ?? {},
     );
   }
 
