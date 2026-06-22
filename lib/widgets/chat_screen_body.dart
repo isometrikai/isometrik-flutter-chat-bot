@@ -573,21 +573,45 @@ class ChatScreenBody extends StatelessWidget {
                                     ),
                                   );
                                   }else {
-                                    Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder:
-                                          (context) => BlocProvider(
-                                            create: (context) => CartBloc(),
-                                            child: CartScreen(
-                                              needToEndThisChat: needToEndThisChat,
-                                              onCheckout: (message, storeCategoryId) {
-                                                onSendMessage(message, null, null, storeCategoryId);
-                                              },
-                                            ),
-                                          ),
-                                    ),
-                                  );
+                                    final userId = ChatApiServices.instance.userId ?? '';
+                          final orderId = 'XCBID-0000000094';
+                          final data = <String, dynamic>{
+                                "metadata": {
+                                    "trigger": "order",
+                                    "orderId": orderId,
+                                    "userType": "user",
+                                    "paymentAction": 2,
+                                    "userId": userId
+                                },
+                                "userId": userId,
+                                "amount": '1350.13',
+                                "currency": 'AED',
+                                "userType": "user",
+                                "capture": false,
+                                "paymentAction": 2,
+                                "orderId": orderId
+                            };
+                            if (gotStripePaymentCallback == false) {
+                               Timer(Duration(seconds: 1), () {
+                                print("Timer completed");
+                                OrderService().triggerStripePlaceOrderScreenOpen(data);
+                              });
+                            }
+                                  //   Navigator.push(
+                                  //   context,
+                                  //   MaterialPageRoute(
+                                  //     builder:
+                                  //         (context) => BlocProvider(
+                                  //           create: (context) => CartBloc(),
+                                  //           child: CartScreen(
+                                  //             needToEndThisChat: needToEndThisChat,
+                                  //             onCheckout: (message, storeCategoryId) {
+                                  //               onSendMessage(message, null, null, storeCategoryId);
+                                  //             },
+                                  //           ),
+                                  //         ),
+                                  //   ),
+                                  // );
                                   }
                                 },
                       ),
