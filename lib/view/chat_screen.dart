@@ -9,6 +9,9 @@ import 'package:chat_bot/widgets/widgets.dart';
 import 'package:chat_bot/widgets/chat_screen_body.dart';
 import 'package:chat_bot/utils/utils.dart';
 import 'package:chat_bot/services/services.dart';
+import 'package:chat_bot/view/chat/chat_catalog_utils.dart';
+import 'package:chat_bot/view/chat/chat_message_mapper.dart';
+import 'package:chat_bot/view/chat/chat_order_service_handler.dart';
 
 class ChatScreen extends StatefulWidget {
   static const String routeName = '/chatScreen';

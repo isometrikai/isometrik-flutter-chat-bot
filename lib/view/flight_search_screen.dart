@@ -6,6 +6,7 @@ import 'package:chat_bot/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import 'widgets/search_paginated_scroll.dart';
 import 'widgets/search_result_states.dart';
 import 'widgets/search_screen_scaffold.dart';
 
@@ -33,12 +34,9 @@ class FlightSearchScreen extends StatefulWidget {
 }
 
 class _FlightSearchScreenState extends State<FlightSearchScreen> {
-  final ScrollController _scrollController = ScrollController();
-
   @override
   void initState() {
     super.initState();
-    _scrollController.addListener(_onScroll);
     context.read<FlightSearchBloc>().add(
           FlightSearchFetchRequested(
             action: widget.actionData,
@@ -49,34 +47,13 @@ class _FlightSearchScreenState extends State<FlightSearchScreen> {
   }
 
   @override
-  void dispose() {
-    _scrollController
-      ..removeListener(_onScroll)
-      ..dispose();
-    super.dispose();
-  }
-
-  void _onScroll() {
-    if (!_scrollController.hasClients) return;
-
-    final position = _scrollController.position;
-    if (position.pixels < position.maxScrollExtent - 200) return;
-
-    context.read<FlightSearchBloc>().add(
-          FlightSearchLoadMoreRequested(
-            action: widget.actionData,
-            flightBooking: widget.flightBooking,
-          ),
-        );
-  }
-
-  @override
   Widget build(BuildContext context) {
     return SearchScreenScaffold(
       title: searchScreenTitle(widget.actionData, _defaultFlightSearchTitle),
       subtitle: searchScreenSubtitle(widget.actionData),
       body: _FlightSearchList(
-        scrollController: _scrollController,
+        actionData: widget.actionData,
+        flightBooking: widget.flightBooking,
         onFlightSelected: widget.onFlightSelected,
         onOpenInEazyApp: widget.onOpenInEazyApp,
       ),
@@ -84,18 +61,43 @@ class _FlightSearchScreenState extends State<FlightSearchScreen> {
   }
 }
 
-class _FlightSearchList extends StatelessWidget {
-  final ScrollController scrollController;
+class _FlightSearchList extends StatefulWidget {
+  final WidgetAction actionData;
+  final Map<String, dynamic>? flightBooking;
   final void Function(FlightSearch flight, FlightSearchCabin cabin)?
       onFlightSelected;
   final void Function(FlightSearch flight, FlightSearchCabin cabin)?
       onOpenInEazyApp;
 
   const _FlightSearchList({
-    required this.scrollController,
+    required this.actionData,
+    this.flightBooking,
     this.onFlightSelected,
     this.onOpenInEazyApp,
   });
+
+  @override
+  State<_FlightSearchList> createState() => _FlightSearchListState();
+}
+
+class _FlightSearchListState extends State<_FlightSearchList> {
+  late final SearchPaginatedScrollController _pagination =
+      SearchPaginatedScrollController(onNearBottom: _loadMore);
+
+  @override
+  void dispose() {
+    _pagination.dispose();
+    super.dispose();
+  }
+
+  void _loadMore() {
+    context.read<FlightSearchBloc>().add(
+          FlightSearchLoadMoreRequested(
+            action: widget.actionData,
+            flightBooking: widget.flightBooking,
+          ),
+        );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -113,13 +115,13 @@ class _FlightSearchList extends StatelessWidget {
             :final isLoadingMore,
           ) =>
             ListView(
-              controller: scrollController,
+              controller: _pagination.controller,
               padding: EdgeInsets.zero,
               children: [
                 FlightsSearchWidget(
                   flights: flights,
-                  onFlightSelected: onFlightSelected,
-                  onOpenInApp: onOpenInEazyApp,
+                  onFlightSelected: widget.onFlightSelected,
+                  onOpenInApp: widget.onOpenInEazyApp,
                 ),
                 if (isLoadingMore)
                   const Padding(
