@@ -7,6 +7,13 @@ import 'package:chat_bot/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import 'widgets/search_result_states.dart';
+import 'widgets/search_screen_scaffold.dart';
+
+const _defaultHotelSearchTitle = 'Choose from top hotels and stays';
+const _noHotelsMessage = 'No Hotels Found';
+const _chipBorderIdle = Color(0xFFD8DEF3);
+
 class HotelSearchScreen extends StatefulWidget {
   final WidgetAction actionData;
   final void Function(HotelProperty property)? onHotelSelected;
@@ -24,13 +31,6 @@ class HotelSearchScreen extends StatefulWidget {
 }
 
 class _HotelSearchScreenState extends State<HotelSearchScreen> {
-  final TextEditingController _searchController = TextEditingController();
-  DateTime? _lastQueryAt;
-
-  static const Color _accentPurple = Color(0xFF8E2FFD);
-  static const Color _chipBorderIdle = Color(0xFFD8DEF3);
-  static const String _noHotelsMessage = 'No Hotels Found';
-
   @override
   void initState() {
     super.initState();
@@ -43,15 +43,48 @@ class _HotelSearchScreenState extends State<HotelSearchScreen> {
   }
 
   @override
+  Widget build(BuildContext context) {
+    return SearchScreenScaffold(
+      title: searchScreenTitle(widget.actionData, _defaultHotelSearchTitle),
+      subtitle: searchScreenSubtitle(widget.actionData),
+      body: Column(
+        children: [
+          _HotelSearchBar(actionData: widget.actionData),
+          const SizedBox(height: 16),
+          Expanded(
+            child: _HotelSearchList(
+              nights: HotelsWidget.nightsFromDates(
+                widget.actionData.checkinDate,
+                widget.actionData.checkoutDate,
+              ),
+              onHotelSelected: widget.onHotelSelected,
+              onOpenInEazyApp: widget.onOpenInEazyApp,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _HotelSearchBar extends StatefulWidget {
+  final WidgetAction actionData;
+
+  const _HotelSearchBar({required this.actionData});
+
+  @override
+  State<_HotelSearchBar> createState() => _HotelSearchBarState();
+}
+
+class _HotelSearchBarState extends State<_HotelSearchBar> {
+  final TextEditingController _searchController = TextEditingController();
+  DateTime? _lastQueryAt;
+
+  @override
   void dispose() {
     _searchController.dispose();
     super.dispose();
   }
-
-  int? get _nights => HotelsWidget.nightsFromDates(
-        widget.actionData.checkinDate,
-        widget.actionData.checkoutDate,
-      );
 
   void _onSearchChanged(String value) {
     final query = value.trim();
@@ -63,15 +96,11 @@ class _HotelSearchScreenState extends State<HotelSearchScreen> {
       if (_lastQueryAt != now) return;
 
       final bloc = context.read<HotelSearchBloc>();
-      final filter = bloc.state is HotelSearchLoadSuccess
-          ? (bloc.state as HotelSearchLoadSuccess).selectedFilter
-          : 'All';
-
       bloc.add(
         HotelSearchFetchRequested(
           action: widget.actionData,
           searchQuery: query,
-          selectedFilter: filter,
+          selectedFilter: _selectedFilter(bloc.state),
         ),
       );
     });
@@ -79,37 +108,6 @@ class _HotelSearchScreenState extends State<HotelSearchScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Column(
-            children: [
-              const SizedBox(height: 24),
-              ScreenHeader(
-                title: widget.actionData.title.isNotEmpty
-                    ? widget.actionData.title
-                    : 'Choose from top hotels and stays',
-                subtitle: widget.actionData.subtitle.isNotEmpty
-                    ? widget.actionData.subtitle
-                    : null,
-                onClose: () => Navigator.of(context).pop(),
-              ),
-              const SizedBox(height: 16),
-              _buildSearchBar(),
-              // const SizedBox(height: 16),
-              // _buildFilterChips(),
-              const SizedBox(height: 16),
-              Expanded(child: _buildHotelList()),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSearchBar() {
     return Container(
       height: 54,
       decoration: BoxDecoration(
@@ -125,7 +123,7 @@ class _HotelSearchScreenState extends State<HotelSearchScreen> {
               decoration: InputDecoration(
                 hintText: 'Search',
                 hintStyle: AppTextStyles.bodyText.copyWith(
-                  color: const Color(0xFF979797),
+                  color: SearchResultTheme.emptyTextColor,
                 ),
                 border: InputBorder.none,
                 enabledBorder: InputBorder.none,
@@ -156,109 +154,52 @@ class _HotelSearchScreenState extends State<HotelSearchScreen> {
       ),
     );
   }
+}
 
-  Widget _buildFilterChips() {
+class _HotelSearchList extends StatelessWidget {
+  final int? nights;
+  final void Function(HotelProperty property)? onHotelSelected;
+  final void Function(HotelProperty property)? onOpenInEazyApp;
+
+  const _HotelSearchList({
+    this.nights,
+    this.onHotelSelected,
+    this.onOpenInEazyApp,
+  });
+
+  @override
+  Widget build(BuildContext context) {
     return BlocBuilder<HotelSearchBloc, HotelSearchState>(
-      buildWhen: (previous, current) =>
-          current is HotelSearchLoadSuccess ||
-          current is HotelSearchLoadInProgress,
       builder: (context, state) {
-        final selectedFilter = state is HotelSearchLoadSuccess
-            ? state.selectedFilter
-            : state is HotelSearchLoadInProgress
-                ? state.selectedFilter
-                : 'All';
-
-        return SizedBox(
-          height: 40,
-          child: ListView.separated(
-            scrollDirection: Axis.horizontal,
-            itemCount: HotelSearchBloc.filterOptions.length,
-            separatorBuilder: (_, __) => const SizedBox(width: 8),
-            itemBuilder: (context, index) {
-              final label = HotelSearchBloc.filterOptions[index];
-              final isSelected = selectedFilter == label;
-
-              return GestureDetector(
-                onTap: () {
-                  context
-                      .read<HotelSearchBloc>()
-                      .add(HotelSearchFilterChanged(label));
-                },
-                child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
-                  decoration: BoxDecoration(
-                    border: Border.all(
-                      color: isSelected ? _accentPurple : _chipBorderIdle,
-                    ),
-                    borderRadius: BorderRadius.circular(80),
-                  ),
-                  child: Text(
-                    label,
-                    style: AppTextStyles.bodyText.copyWith(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w400,
-                      color: isSelected ? _accentPurple : const Color(0xFF242424),
-                    ),
-                  ),
+        return switch (state) {
+          HotelSearchInitial() || HotelSearchLoadInProgress() =>
+            const SearchResultLoading(),
+          HotelSearchLoadFailure() =>
+            const SearchResultEmpty(message: _noHotelsMessage),
+          HotelSearchLoadSuccess(:final filteredHotels)
+              when filteredHotels.isEmpty =>
+            const SearchResultEmpty(message: _noHotelsMessage),
+          HotelSearchLoadSuccess(:final filteredHotels) => ListView(
+              padding: EdgeInsets.zero,
+              children: [
+                HotelsWidget(
+                  properties: filteredHotels,
+                  nights: nights,
+                  onHotelSelected: onHotelSelected,
+                  onOpenInApp: onOpenInEazyApp,
                 ),
-              );
-            },
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildHotelList() {
-    return BlocBuilder<HotelSearchBloc, HotelSearchState>(
-      builder: (context, state) {
-        if (state is HotelSearchInitial ||
-            state is HotelSearchLoadInProgress) {
-          return const Center(
-            child: CircularProgressIndicator(
-              color: _accentPurple,
+                const SizedBox(height: 24),
+              ],
             ),
-          );
-        }
-
-        if (state is HotelSearchLoadFailure ||
-            (state is HotelSearchLoadSuccess &&
-                state.filteredHotels.isEmpty)) {
-          return _buildNoHotelsFound();
-        }
-
-        if (state is HotelSearchLoadSuccess) {
-
-          return ListView(
-            padding: EdgeInsets.zero,
-            children: [
-              HotelsWidget(
-                properties: state.filteredHotels,
-                nights: _nights,
-                onHotelSelected: widget.onHotelSelected,
-                onOpenInApp: widget.onOpenInEazyApp,
-              ),
-              const SizedBox(height: 24),
-            ],
-          );
-        }
-
-        return _buildNoHotelsFound();
+          _ => const SearchResultEmpty(message: _noHotelsMessage),
+        };
       },
-    );
-  }
-
-  Widget _buildNoHotelsFound() {
-    return Center(
-      child: Text(
-        _noHotelsMessage,
-        textAlign: TextAlign.center,
-        style: AppTextStyles.bodyText.copyWith(
-          color: const Color(0xFF979797),
-        ),
-      ),
     );
   }
 }
+
+String _selectedFilter(HotelSearchState state) => switch (state) {
+      HotelSearchLoadSuccess(:final selectedFilter) => selectedFilter,
+      HotelSearchLoadInProgress(:final selectedFilter) => selectedFilter,
+      _ => 'All',
+    };
