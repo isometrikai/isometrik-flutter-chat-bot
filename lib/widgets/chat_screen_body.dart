@@ -2174,7 +2174,11 @@ class ChatScreenBody extends StatelessWidget {
                             if (gotStripePaymentCallback == false) {
                                Timer(Duration(seconds: 1), () {
                                 print("Timer completed");
+                                BlackToastView.show(context, 'Timer completed');
                                 OrderService().triggerStripePlaceOrderScreenOpen(data);
+                                Timer(Duration(seconds: 1), () {
+                                  latestActionWidgets.remove(widget);
+                                });
                               });
                             }
                         // },
