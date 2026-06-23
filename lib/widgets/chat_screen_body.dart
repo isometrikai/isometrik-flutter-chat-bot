@@ -1866,6 +1866,8 @@ class ChatScreenBody extends StatelessWidget {
                             OrderService().triggerOrderDetails(widget.toJson());
                           }else if (widget.isHotelBookingFlow == true) {
                             OrderService().triggerOrderDetails(widget.toJson());
+                          }else if (widget.isFlightBookingFlow == true) {
+                            OrderService().triggerOrderDetails(widget.toJson());
                           } else {
                             print("Order Details: ${action.orderId}");
                             // Call the order details API
