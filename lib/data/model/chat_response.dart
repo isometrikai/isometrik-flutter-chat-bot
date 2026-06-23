@@ -212,6 +212,7 @@ class ChatWidget {
   bool get isHotelBookingConfirmedWidget => type == WidgetEnum.hotel_booking_confirmed.value;
   bool get isCarBookingConfirmedWidget => type == WidgetEnum.car_booking_confirmed.value;
   bool get isFlightBookingConfirmedWidget => type == WidgetEnum.flight_booking_confirmed.value;
+  bool get isPackageInstructionsWidget => type == WidgetEnum.package_instructions.value;
   bool get isPackageTypesWidget => type == WidgetEnum.package_types.value;
   bool get isHotelsWidget => type == WidgetEnum.hotels.value;
   bool get isButtonWidget => type == 'button';
@@ -337,6 +338,10 @@ class ChatWidget {
       : [];
 
   List<WidgetAction> get addDropoffAddress => isAddDropoffAddressWidget
+      ? widget.map((e) => WidgetAction.fromJson(e as Map<String, dynamic>)).toList()
+      : [];
+
+  List<WidgetAction> get packageInstructions => isPackageInstructionsWidget
       ? widget.map((e) => WidgetAction.fromJson(e as Map<String, dynamic>)).toList()
       : [];
 

@@ -2373,6 +2373,23 @@ class ChatScreenBody extends StatelessWidget {
           }
         }
 
+        for (final widget in latestActionWidgets.where(
+          (w) => w.type == WidgetEnum.package_instructions.value,
+        )) {
+          for (final action in widget.packageInstructions) {
+            actionButtons.add(
+              buildActionButton(text: action.buttonText, onTap: isApiLoading ? () {} : () {
+                OrderService().triggerClickManageScreenOpen({
+                'flow': 'PackageDelivery',
+                'screenName': 'PackageDeliveryInstructions',
+                'action': 'PackageDeliveryInstructions',
+                'packageTypeId': apiData['package_delivery']['package_type_id'] ?? '',
+              });
+              }),
+            );
+          }
+        }
+
          for (final widget in latestActionWidgets.where(
           (w) => w.type == WidgetEnum.hotel_confirm_booking.value,
         )) {

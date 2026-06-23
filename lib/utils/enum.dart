@@ -37,7 +37,7 @@ enum WidgetEnum {
   hotel_booking_dates,
   hotel_guests_rooms,
   hotels,
-  see_available_rooms,hotel_booking_for_me,hotel_booking_for_other,see_more_hotels,hotel_confirm_booking,car_booking_date_time,car_driver_details,see_more_cars,trip_type_selection,flight_booking_date_time,flight_add_member,flight_cabin_type,flight_traveller_details,see_more_flights,add_dropoff_address;
+  see_available_rooms,hotel_booking_for_me,hotel_booking_for_other,see_more_hotels,hotel_confirm_booking,car_booking_date_time,car_driver_details,see_more_cars,trip_type_selection,flight_booking_date_time,flight_add_member,flight_cabin_type,flight_traveller_details,see_more_flights,add_dropoff_address,package_instructions;
 
   // Add string values for API communication
   String get value {

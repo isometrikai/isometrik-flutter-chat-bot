@@ -428,6 +428,21 @@ class _ChatScreenState extends State<ChatScreen> {
                 }
                 _apiData['package_delivery'] = packageDeliveryData;
                 _sendMessage('I have selected drop off address.\n${clickManage['fullAddress'] ?? ''}');
+          }else if (clickManage['screenName'] == 'PackageDeliveryInstructions') {
+             final existing = _apiData['package_delivery'];
+                final Map<String, dynamic> packageDeliveryData;
+                if (existing is Map) {
+                  packageDeliveryData = Map<String, dynamic>.from(existing);
+                  packageDeliveryData['package_images'] = clickManage['imageUrls'];
+                  packageDeliveryData['package_instructions'] = clickManage['packageInstructions'];
+                } else {
+                  packageDeliveryData = {
+                    'package_images': clickManage['imageUrls'],
+                    'package_instructions': clickManage['packageInstructions'],
+                  };
+                }
+                _apiData['package_delivery'] = packageDeliveryData;
+                _sendMessage('I have added package instructions or Images.');
           }
         } else {
           _apiData = {
@@ -486,7 +501,8 @@ class _ChatScreenState extends State<ChatScreen> {
               message.hasFlightDestinationPlacesSectionWidget ||
               message.hasCarRentalsSearchSectionWidget ||
               message.hasFlightsSearchSectionWidget ||
-              message.hasHotelsSectionWidget)) {
+              message.hasHotelsSectionWidget ||
+              message.hasPackageTypesSectionWidget)) {
         return i;
       }
     }
@@ -510,7 +526,8 @@ class _ChatScreenState extends State<ChatScreen> {
         message.hasFlightDestinationPlacesSectionWidget ||
         message.hasCarRentalsSearchSectionWidget ||
         message.hasFlightsSearchSectionWidget ||
-        message.hasHotelsSectionWidget))
+        message.hasHotelsSectionWidget ||
+        message.hasPackageTypesSectionWidget))
       return message;
     return message.copyWith(
       hasStoreCards: false,
@@ -530,6 +547,7 @@ class _ChatScreenState extends State<ChatScreen> {
       hasCarRentalsSearchSectionWidget: false,
       hasFlightsSearchSectionWidget: false,
       hasHotelsSectionWidget: false,
+      hasPackageTypesSectionWidget: false,
     );
   }
 
@@ -1397,6 +1415,7 @@ class _ChatScreenState extends State<ChatScreen> {
                     widget.type == WidgetEnum.see_more_cars.value ||
                     widget.type == WidgetEnum.see_more_flights.value ||
                     widget.type == WidgetEnum.add_dropoff_address.value ||
+                    widget.type == WidgetEnum.package_instructions.value ||
                     widget.type == WidgetEnum.trip_type_selection.value ||
                     widget.type == WidgetEnum.flight_booking_date_time.value ||
                     widget.type == WidgetEnum.flight_add_member.value ||
