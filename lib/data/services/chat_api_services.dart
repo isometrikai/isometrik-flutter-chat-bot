@@ -98,6 +98,7 @@ class ChatApiServices {
     Map<String, dynamic> hotelDestinationData = const {},
     Map<String, dynamic> carPickupData = const {},
     Map<String, dynamic> flightBookingData = const {},
+    Map<String, dynamic> packageDeliveryData = const {},
   }) async {
     final body = {
       'user_id': _userId,
@@ -127,6 +128,7 @@ class ChatApiServices {
       'hotel_booking': hotelDestinationData,
       'car_booking': carPickupData,
       'flight_booking': flightBookingData,
+      'package_delivery': packageDeliveryData,
       'enable_personalisation': Utility.getPersonalization(),
     };
 

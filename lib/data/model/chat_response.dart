@@ -100,6 +100,7 @@ class ChatWidget {
   final bool isHotelBookingFlow;
   final bool isCarBookingFlow;
   final bool isFlightBookingFlow;
+  final bool isPackageTypesFlow;
   final bool isForReturn;
   final bool? isForPickup;
   final bool? isDeparture;
@@ -114,6 +115,7 @@ class ChatWidget {
     required this.isFlightBookingFlow,
     required this.isHotelBookingFlow,
     required this.isCarBookingFlow,
+    required this.isPackageTypesFlow,
     required this.isForReturn,
     required this.isForPickup,
     required this.isDeparture,
@@ -133,6 +135,7 @@ class ChatWidget {
       isForReturn: json['isForReturn'] ?? false,
       isForPickup: json['isForPickup'] ?? false,
       isFlightBookingFlow: json['is_flight_booking'] ?? false,
+      isPackageTypesFlow: json['is_package_flow'] ?? false,
       isDeparture: json['isDeparture'] ?? false,
     );
   }
@@ -150,6 +153,7 @@ class ChatWidget {
       'isForReturn': isForReturn,
       'isForPickup': isForPickup,
       'is_flight_booking_flow': isFlightBookingFlow,
+      'is_package_flow': isPackageTypesFlow,
       'isDeparture': isDeparture,
     };
   }
@@ -180,6 +184,7 @@ class ChatWidget {
   bool get isSeeMoreHotelsWidget => type == WidgetEnum.see_more_hotels.value;
   bool get isSeeMoreCarsWidget => type == WidgetEnum.see_more_cars.value;
   bool get isSeeMoreFlightsWidget => type == WidgetEnum.see_more_flights.value;
+  bool get isAddDropoffAddressWidget => type == WidgetEnum.add_dropoff_address.value;
   bool get isTripTypeSelectionWidget => type == WidgetEnum.trip_type_selection.value;
   bool get isFlightBookingDateTimeWidget => type == WidgetEnum.flight_booking_date_time.value;
   bool get isFlightAddMemberWidget => type == WidgetEnum.flight_add_member.value;
@@ -207,6 +212,7 @@ class ChatWidget {
   bool get isHotelBookingConfirmedWidget => type == WidgetEnum.hotel_booking_confirmed.value;
   bool get isCarBookingConfirmedWidget => type == WidgetEnum.car_booking_confirmed.value;
   bool get isFlightBookingConfirmedWidget => type == WidgetEnum.flight_booking_confirmed.value;
+  bool get isPackageTypesWidget => type == WidgetEnum.package_types.value;
   bool get isHotelsWidget => type == WidgetEnum.hotels.value;
   bool get isButtonWidget => type == 'button';
   bool get isInputWidget => type == 'input';
@@ -327,6 +333,10 @@ class ChatWidget {
       : [];
 
   List<WidgetAction> get seeMoreFlights => isSeeMoreFlightsWidget
+      ? widget.map((e) => WidgetAction.fromJson(e as Map<String, dynamic>)).toList()
+      : [];
+
+  List<WidgetAction> get addDropoffAddress => isAddDropoffAddressWidget
       ? widget.map((e) => WidgetAction.fromJson(e as Map<String, dynamic>)).toList()
       : [];
 
@@ -611,6 +621,16 @@ class ChatWidget {
   List<WidgetAction> getFlightBookingConfirmedItems() {
     if (isFlightBookingConfirmedWidget) {
       return widget.map((item) => WidgetAction.fromJson(item as Map<String, dynamic>)).toList();
+    }
+    return [];
+  }
+
+  // Helper method to get package types items
+  List<SendPackageType> getPackageTypesItems() {
+    if (isPackageTypesWidget) {
+      return widget
+          .map((item) => SendPackageType.fromJson(item as Map<String, dynamic>))
+          .toList();
     }
     return [];
   }
@@ -1179,6 +1199,35 @@ class CarPickupPlace {
       'type': type,
       'coordinates': coordinates.toJson(),
       'region_id': regionId,
+    };
+  }
+}
+
+// Send package type model for package_types widget
+class SendPackageType {
+  final String id;
+  final String sendPackageTypeName;
+  final String sendPackageTypeImage;
+
+  SendPackageType({
+    required this.id,
+    required this.sendPackageTypeName,
+    required this.sendPackageTypeImage,
+  });
+
+  factory SendPackageType.fromJson(Map<String, dynamic> json) {
+    return SendPackageType(
+      id: (json['_id'] ?? '').toString(),
+      sendPackageTypeName: (json['sendPackageTypeName'] ?? '').toString(),
+      sendPackageTypeImage: (json['sendPackageTypeImage'] ?? '').toString(),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      '_id': id,
+      'sendPackageTypeName': sendPackageTypeName,
+      'sendPackageTypeImage': sendPackageTypeImage,
     };
   }
 }

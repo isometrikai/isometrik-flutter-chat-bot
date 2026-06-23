@@ -33,11 +33,11 @@ enum WidgetEnum {
   choose_date,
   add_dependent,
   restaurant_sections,
-  hotel_destination,customer_profile_details,hotel_order_summary,hotel_booking_confirmed,car_pickup_places,car_dropoff_places,car_rentals_search,car_order_summary,car_booking_confirmed,flight_origin_places,flight_destination_places,flights_search,flight_order_summary,flight_booking_confirmed,
+  hotel_destination,customer_profile_details,hotel_order_summary,hotel_booking_confirmed,car_pickup_places,car_dropoff_places,car_rentals_search,car_order_summary,car_booking_confirmed,flight_origin_places,flight_destination_places,flights_search,flight_order_summary,flight_booking_confirmed,package_types,
   hotel_booking_dates,
   hotel_guests_rooms,
   hotels,
-  see_available_rooms,hotel_booking_for_me,hotel_booking_for_other,see_more_hotels,hotel_confirm_booking,car_booking_date_time,car_driver_details,see_more_cars,trip_type_selection,flight_booking_date_time,flight_add_member,flight_cabin_type,flight_traveller_details,see_more_flights;
+  see_available_rooms,hotel_booking_for_me,hotel_booking_for_other,see_more_hotels,hotel_confirm_booking,car_booking_date_time,car_driver_details,see_more_cars,trip_type_selection,flight_booking_date_time,flight_add_member,flight_cabin_type,flight_traveller_details,see_more_flights,add_dropoff_address;
 
   // Add string values for API communication
   String get value {

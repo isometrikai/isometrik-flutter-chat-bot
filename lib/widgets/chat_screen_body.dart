@@ -236,6 +236,7 @@ class ChatScreenBody extends StatelessWidget {
                     hotelDestinationData: apiData['hotel_booking'] ?? {},
                     carPickupData: apiData['car_booking'] ?? {},
                     flightBookingData: apiData['flight_booking'] ?? {},
+                    packageDeliveryData: apiData['package_delivery'] ?? {},
                   );
                   bloc.add(event);
                   onClearPendingMessage();
@@ -1130,6 +1131,10 @@ class ChatScreenBody extends StatelessWidget {
           if (message.hasOrderConfirmedWidget) ...[
             const SizedBox(height: 4), //12
             buildOrderConfirmedWidget(message.orderConfirmedWidget!),
+          ],
+          if (message.hasPackageTypesSectionWidget) ...[
+            const SizedBox(height: 4), //12
+            buildPackageTypesWidget(message.packageTypesItems),
           ],
         ],
       ),
@@ -2346,6 +2351,24 @@ class ChatScreenBody extends StatelessWidget {
                     ? () {}
                     : () => _openFlightSearchScreen(context, action),
               ),
+            );
+          }
+        }
+
+        for (final widget in latestActionWidgets.where(
+          (w) => w.type == WidgetEnum.add_dropoff_address.value,
+        )) {
+          for (final action in widget.addDropoffAddress) {
+            actionButtons.add(
+              buildActionButton(text: action.buttonText, onTap: isApiLoading ? () {} : () {
+                OrderService().triggerClickManageScreenOpen({
+                'flow': 'PackageDelivery',
+                'screenName': 'PackageDeliveryDropoffAddress',
+                'action': 'PackageDeliveryDropoffAddress',
+                'selectAddressId': apiData['package_delivery']['pickup_address_id'] ?? '',
+                'userId': ChatApiServices.instance.userId ?? '',
+              });
+              }),
             );
           }
         }
@@ -4121,10 +4144,27 @@ class ChatScreenBody extends StatelessWidget {
         print(
           'Selected address: ${selectedAddress.name} - ${selectedAddress.address}',
         );
+        if (addressOptions.first.isPackageDelivery == true) {
+          final existing = apiData['package_delivery'];
+          final Map<String, dynamic> packageDeliveryData;
+          if (existing is Map) {
+            packageDeliveryData = Map<String, dynamic>.from(existing);
+            packageDeliveryData['pickup_address_id'] =
+                selectedAddress.addressId;
+          } else {
+            packageDeliveryData = {
+              'pickup_address_id': selectedAddress.addressId,
+            };
+          }
+          apiData['package_delivery'] = packageDeliveryData;
+          onSendMessage('I have selected picked up address.\n${selectedAddress.address}.');
+        }
       },
       onSendMessage: (message) {
         // Automatically send the selected address message
-        onSendMessage(message);
+        if (addressOptions.first.isPackageDelivery == false) {
+          onSendMessage(message);
+        }
       },
     );
   }
@@ -4146,6 +4186,33 @@ class ChatScreenBody extends StatelessWidget {
 
   Widget buildOrderSummaryWidget(List<WidgetAction> orderSummaryItems) {
     return OrderSummaryWidget(orderItems: orderSummaryItems, isFromChatHistory: isFromHistory);
+  }
+
+  Widget buildPackageTypesWidget(List<SendPackageType> packageTypes) {
+    if (packageTypes.isEmpty) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.only(left: 0.0),
+      child: PackageTypesWidget(
+        packageTypes: packageTypes,
+        isFromChatHistory: isFromHistory,
+        onPackageTypeSelected: (packageType) {
+          final existing = apiData['package_delivery'];
+              final Map<String, dynamic> packageDeliveryData;
+              if (existing is Map) {
+                packageDeliveryData = Map<String, dynamic>.from(existing);
+                packageDeliveryData['package_type_id'] = packageType.id;
+              } else {
+                packageDeliveryData = {
+                  'package_type_id': packageType.id,
+                };
+              }
+              apiData['package_delivery'] = packageDeliveryData;
+              onSendMessage(
+                'I want to book package types in ${packageType.sendPackageTypeName}',
+              );
+        },
+      ),
+    );
   }
 
   Widget buildOrderConfirmedWidget(ChatWidget orderConfirmedWidget) {
@@ -4334,6 +4401,14 @@ class ChatScreenBody extends StatelessWidget {
 
   Map<String, dynamic> _hotelBookingMap() {
     final existing = apiData['hotel_booking'];
+    if (existing is Map) {
+      return Map<String, dynamic>.from(existing);
+    }
+    return {};
+  }
+
+  Map<String, dynamic> _packageDeliveryMap() {
+    final existing = apiData['package_delivery'];
     if (existing is Map) {
       return Map<String, dynamic>.from(existing);
     }
