@@ -6,12 +6,14 @@ class SearchScreenScaffold extends StatelessWidget {
   final String title;
   final String? subtitle;
   final Widget body;
+  final VoidCallback? onClose;
 
   const SearchScreenScaffold({
     super.key,
     required this.title,
     this.subtitle,
     required this.body,
+    this.onClose,
   });
 
   @override
@@ -27,7 +29,7 @@ class SearchScreenScaffold extends StatelessWidget {
               ScreenHeader(
                 title: title,
                 subtitle: subtitle,
-                onClose: () => Navigator.of(context).pop(),
+                onClose: onClose ?? () => Navigator.of(context).pop(),
               ),
               const SizedBox(height: 16),
               Expanded(child: body),
