@@ -384,7 +384,7 @@ class ChatScreenBody extends StatelessWidget {
       scrolledUnderElevation: 0,
       systemOverlayStyle: SystemUiOverlayStyle.dark,
       elevation: 1,
-      toolbarHeight: 64,
+      // toolbarHeight: 64,
       leadingWidth: 48,
       titleSpacing: 0,
       centerTitle: false,
@@ -441,28 +441,18 @@ class ChatScreenBody extends StatelessWidget {
       //     // }
       //   },
       // ),
-      title: Align(
-        alignment: Alignment.centerLeft,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const SizedBox(height: 15),
-            SvgPicture.asset(
-              AssetPath.get('images/ic_header_logo.svg'),
-              fit: BoxFit.cover,
-            ),
-            // if (Utility.getLocation().trim().isNotEmpty)
-            //   Text(
-            //     Utility.getLocation(),
-            //     maxLines: 1,
-            //     overflow: TextOverflow.ellipsis,
-            //     style: AppTextStyles.caption.copyWith(
-            //       color: const Color(0xFF979797),
-            //     ),
-            //   ),
-          ],
-        ),
+      title: Row(
+        children: [
+          Container(
+            child:
+                    SvgPicture.asset(
+                      AssetPath.get('images/ic_header_logo.svg'),
+                      // width: 75,
+                      // height: 23,
+                      fit: BoxFit.cover,
+                    )
+          ),
+        ],
       ),
       actions: [
         BlocBuilder<CartBloc, CartState>(
