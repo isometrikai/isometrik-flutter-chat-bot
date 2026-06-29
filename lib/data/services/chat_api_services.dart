@@ -18,7 +18,7 @@ class ChatApiServices {
   String? _userId;
   String? _name;
   String? _timestamp;
-  String? _location;
+  // String? _location;
   double? _longitude;
   double? _latitude;
   String? _clientGuid;
@@ -26,7 +26,7 @@ class ChatApiServices {
   String? _visitId;
   String? _visitorId;
   String? _searchApiUrl;
-  String? _zoneId;
+  // String? _zoneId;
   String? _timezone;
 
   late final ApiClient _chatClient = UniversalApiClient.instance.chatClient;
@@ -39,7 +39,7 @@ class ChatApiServices {
     required String name,
     required String timestamp,
     required String userToken,
-    String? location,
+    // String? location,
     double? longitude,
     double? latitude,
     required String clientGuid,
@@ -47,14 +47,14 @@ class ChatApiServices {
     required String visitId,
     required String visitorId,
     required String searchApiUrl,
-    required String zoneId,
+    // required String zoneId,
     required String timezone,
   }) {
     _chatBotId = chatBotId;
     _userId = userId;
     _name = name;
     _timestamp = timestamp;
-    _location = location;
+    // _location = location;
     _longitude = longitude;
     _latitude = latitude;
     _clientGuid = clientGuid;
@@ -62,7 +62,7 @@ class ChatApiServices {
     _visitId = visitId;
     _visitorId = visitorId;
     _searchApiUrl = searchApiUrl;
-    _zoneId = zoneId;
+    // _zoneId = zoneId;
     _timezone = timezone;
   }
 
@@ -110,7 +110,7 @@ class ChatApiServices {
       'visit_id': _visitId ?? '',
       'visitor_id': _visitorId ?? '',
       'search_api_url': _searchApiUrl ?? '',
-      'zone_id': _zoneId ?? '',
+      'zone_id': Utility.getZoneId(),
       'location': {
         'latitude': (latitude == 0.0 ? (_latitude ?? 0.0) : latitude).toString(),
         'longitude': (longitude == 0.0 ? (_longitude ?? 0.0) : longitude).toString(),
@@ -118,7 +118,7 @@ class ChatApiServices {
       'user_data': {
         'name': _name ?? '',
         'timestamp': _timestamp ?? '',
-        'location': _location ?? '',
+        'location': Utility.getLocation(),
       },
       'staff_id': staffId,
       'service_requested_time': serviceRequestedTime,

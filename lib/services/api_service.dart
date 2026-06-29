@@ -57,7 +57,7 @@ class ApiService {
       name: name,
       timestamp: timestamp,
       userToken: userToken,
-      location: location,
+      // location: location,
       longitude: longitude,
       latitude: latitude,
         needToShowTutorial: needToShowTutorial,
@@ -78,7 +78,7 @@ class ApiService {
       name: name,
       timestamp: timestamp,
       userToken: userToken,
-      location: location,
+      // location: location,
       longitude: longitude,
       latitude: latitude,
       clientGuid: clientGuid,
@@ -86,7 +86,7 @@ class ApiService {
       visitId: visitId,
       visitorId: visitorId,
       searchApiUrl: removeTrailingSlash(searchApiUrl),
-      zoneId: zoneId,
+      // zoneId: zoneId,
       timezone: timezone,
     );
 
@@ -114,6 +114,8 @@ class ApiService {
     Utility.setEmailId(emailId);
     Utility.setPhoneNumber(phoneNumber);
     Utility.setCountryCode(countryCode);
+    Utility.setLocation(location ?? '');
+    Utility.setZoneId(zoneId);
   }
 
   static String removeTrailingSlash(String url) {

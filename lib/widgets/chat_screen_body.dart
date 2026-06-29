@@ -384,6 +384,10 @@ class ChatScreenBody extends StatelessWidget {
       scrolledUnderElevation: 0,
       systemOverlayStyle: SystemUiOverlayStyle.dark,
       elevation: 1,
+      toolbarHeight: 64,
+      leadingWidth: 48,
+      titleSpacing: 0,
+      centerTitle: false,
       leading: IconButton(
         icon: SvgPicture.asset(
           AssetPath.get('images/ic_sideMeu.svg'),
@@ -437,18 +441,28 @@ class ChatScreenBody extends StatelessWidget {
       //     // }
       //   },
       // ),
-      title: Row(
-        children: [
-          Container(
-            child:
-                    SvgPicture.asset(
-                      AssetPath.get('images/ic_header_logo.svg'),
-                      // width: 75,
-                      // height: 23,
-                      fit: BoxFit.cover,
-                    )
-          ),
-        ],
+      title: Align(
+        alignment: Alignment.centerLeft,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox(height: 15),
+            SvgPicture.asset(
+              AssetPath.get('images/ic_header_logo.svg'),
+              fit: BoxFit.cover,
+            ),
+            // if (Utility.getLocation().trim().isNotEmpty)
+            //   Text(
+            //     Utility.getLocation(),
+            //     maxLines: 1,
+            //     overflow: TextOverflow.ellipsis,
+            //     style: AppTextStyles.caption.copyWith(
+            //       color: const Color(0xFF979797),
+            //     ),
+            //   ),
+          ],
+        ),
       ),
       actions: [
         BlocBuilder<CartBloc, CartState>(
@@ -629,8 +643,8 @@ class ChatScreenBody extends StatelessWidget {
         overflow: TextOverflow.ellipsis,
         style: const TextStyle(
                     fontWeight: FontWeight.w700,
-                    fontSize: 24,
-                    height: 1.2,
+                    fontSize: 20,
+                    // height: 1.2,
                     color: Color(0xFF171212),
                   ),
       ),

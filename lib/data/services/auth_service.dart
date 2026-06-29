@@ -24,7 +24,7 @@ class AuthService {
   String? _name;
   String? _timestamp;
   String? _userToken;
-  String? _location;
+  // String? _location;
   double? _longitude;
   double? _latitude;
 
@@ -46,7 +46,7 @@ class AuthService {
     required String name,
     required String timestamp,
     required String userToken,
-    String? location,
+    // String? location,
     double? longitude,
     double? latitude,
     bool? needToShowTutorial,
@@ -65,7 +65,7 @@ class AuthService {
     _name = name;
     _timestamp = timestamp;
     _userToken = userToken;
-    _location = location;
+    // _location = location;
     _longitude = longitude;
     _latitude = latitude;
     
@@ -144,7 +144,7 @@ class AuthService {
       '/v2/home-screen',
        queryParameters: { 'username': _name ?? '',
         'timestamp': _timestamp ?? '',
-        'location': _location ?? '',
+        'location': Utility.getLocation(),
           'latitude': _latitude.toString(),
           'longitude': _longitude.toString(),
           'user_id': _userId ?? '',

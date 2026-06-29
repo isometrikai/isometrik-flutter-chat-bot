@@ -368,8 +368,8 @@ class _SelectTimeScreenState extends State<SelectTimeScreen> {
                       child: Center(
                         child: SvgPicture.asset(
                           AssetPath.get('images/ic_close.svg'),
-                          width: 16,
-                          height: 16,
+                          width: 30,
+                          height: 30,
                         ),
                       ),
                     ),
