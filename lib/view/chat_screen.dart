@@ -461,6 +461,15 @@ class _ChatScreenState extends State<ChatScreen> {
             print(clickManage['location']);
             Utility.setLocation(clickManage['location']);
           }
+          if (clickManage['latitude'] != null) {
+            print(clickManage['latitude']);
+            Utility.setLatitude(clickManage['latitude']);
+          }
+          if (clickManage['longitude'] != null) {
+            print(clickManage['longitude']);
+            Utility.setLongitude(clickManage['longitude']);
+          }
+          setState(() {});
         } else {
           _apiData = {
             ..._apiData,

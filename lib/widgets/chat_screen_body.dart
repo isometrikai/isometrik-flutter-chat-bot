@@ -2091,8 +2091,8 @@ class ChatScreenBody extends StatelessWidget {
                                     context,
                                     initialDate: DateTime.now(),
                                     storeId: action.storeId ?? '',
-                                    latitude: ChatApiServices.instance.latitude,
-                                    longitude: ChatApiServices.instance.longitude,
+                                    latitude: Utility.getLatitude(),
+                                    longitude: Utility.getLongitude(),
                                     timezone: ChatApiServices.instance.timezone ?? '',
                                     onConfirm: (String formattedDateTime, int timestamp) {
                                       // Handle the selected date and time
@@ -2999,8 +2999,8 @@ class ChatScreenBody extends StatelessWidget {
                     "unitId": "",
                     "isDoctorFlow": true,
                     "serviceLocationAt": serviceLocationAt,
-                    "longitude": ChatApiServices.instance.longitude ?? 0,
-                    "latitude": ChatApiServices.instance.latitude ?? 0,
+                    "longitude": Utility.getLongitude(),
+                    "latitude": Utility.getLatitude(),
                     "centralProductId": "",
                     "storeTypeId": store.storeTypeId ?? 25,
                     "storeCategoryId": store.storeCategoryId,

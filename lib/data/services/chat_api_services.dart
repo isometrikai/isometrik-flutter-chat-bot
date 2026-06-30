@@ -19,8 +19,8 @@ class ChatApiServices {
   String? _name;
   String? _timestamp;
   // String? _location;
-  double? _longitude;
-  double? _latitude;
+  // double? _longitude;
+  // double? _latitude;
   String? _clientGuid;
   String? _indexName;
   String? _visitId;
@@ -40,8 +40,8 @@ class ChatApiServices {
     required String timestamp,
     required String userToken,
     // String? location,
-    double? longitude,
-    double? latitude,
+    // double? longitude,
+    // double? latitude,
     required String clientGuid,
     required String indexName,
     required String visitId,
@@ -55,8 +55,8 @@ class ChatApiServices {
     _name = name;
     _timestamp = timestamp;
     // _location = location;
-    _longitude = longitude;
-    _latitude = latitude;
+    // _longitude = longitude;
+    // _latitude = latitude;
     _clientGuid = clientGuid;
     _indexName = indexName;
     _visitId = visitId;
@@ -75,10 +75,10 @@ class ChatApiServices {
   String? get userId => _userId;
   
   /// Get the configured latitude
-  double? get latitude => _latitude;
+  // double? get latitude => _latitude;
   
   /// Get the configured longitude
-  double? get longitude => _longitude;
+  // double? get longitude => _longitude;
 
   String? get timezone => _timezone;
 
@@ -88,8 +88,8 @@ class ChatApiServices {
     required String fingerPrintId,
     required String sessionId,
     bool isLoggedIn = false,
-    double longitude = 0.0,
-    double latitude = 0.0,
+    // double longitude = 0.0,
+    // double latitude = 0.0,
     String staffId = "",
     String serviceRequestedTime = "",
     String storeCategoryId = "",
@@ -112,8 +112,8 @@ class ChatApiServices {
       'search_api_url': _searchApiUrl ?? '',
       'zone_id': Utility.getZoneId(),
       'location': {
-        'latitude': (latitude == 0.0 ? (_latitude ?? 0.0) : latitude).toString(),
-        'longitude': (longitude == 0.0 ? (_longitude ?? 0.0) : longitude).toString(),
+        'latitude': Utility.getLatitude().toString(),
+        'longitude': Utility.getLongitude().toString(),
       },
       'user_data': {
         'name': _name ?? '',
