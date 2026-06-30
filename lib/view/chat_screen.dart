@@ -455,7 +455,6 @@ class _ChatScreenState extends State<ChatScreen> {
                 _sendMessage('I have added package instructions or Images.');
           }
         } else if (clickManage['flow'] == 'ChangeCountry') {
-          Timer.periodic(Duration(seconds: 5), (timer) {
             final currency = (clickManage['currency']?.toString() ?? '').trim();
             final currencySymbol =
                 (clickManage['currencySymbol']?.toString() ?? '').trim();
@@ -494,9 +493,10 @@ class _ChatScreenState extends State<ChatScreen> {
               print('longitude: $longitude');
               Utility.setLongitude(longitude);
             }
-            
+            Timer.periodic(Duration(seconds: 5), (timer) {
             setState(() {
               _location = Utility.getLocation();
+              print('CHINTU 66: $_location');
             });
           });
         } else {
