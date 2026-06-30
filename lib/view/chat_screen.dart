@@ -466,7 +466,8 @@ class _ChatScreenState extends State<ChatScreen> {
             Utility.setCurrencyCode(currency);
           }
           if (currencySymbol.isNotEmpty) {
-            Utility.setCurrencySymbol(currencySymbol);
+            // Utility.setCurrencySymbol(currencySymbol);
+            Utility.setCurrencySymbol(currency);
           }
           if (zoneId.isNotEmpty) {
             Utility.setZoneId(zoneId);
@@ -479,12 +480,10 @@ class _ChatScreenState extends State<ChatScreen> {
           if (location.isNotEmpty) {
             Utility.setLocation(location);
           }
-          final latStr = latitude?.toString().trim() ?? '';
-          if (latStr.isNotEmpty) {
+          if (latitude.isNotEmpty) {
             Utility.setLatitude(latitude);
           }
-          final lngStr = longitude?.toString().trim() ?? '';
-          if (lngStr.isNotEmpty) {
+          if (longitude.isNotEmpty) {
             Utility.setLongitude(longitude);
           }
         } else {
