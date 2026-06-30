@@ -441,18 +441,38 @@ class ChatScreenBody extends StatelessWidget {
       //     // }
       //   },
       // ),
-      title: Row(
-        children: [
-          Container(
-            child:
-                    SvgPicture.asset(
-                      AssetPath.get('images/ic_header_logo.svg'),
-                      // width: 75,
-                      // height: 23,
-                      fit: BoxFit.cover,
-                    )
-          ),
-        ],
+      title: Align(
+        alignment: Alignment.centerLeft,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SvgPicture.asset(
+              AssetPath.get('images/ic_header_logo.svg'),
+              width: 55,
+              height: 24,
+              fit: BoxFit.cover,
+            ),
+            if (Utility.getLocation().trim().isNotEmpty)
+            GestureDetector(
+              onTap: () {
+                OrderService().triggerClickManageScreenOpen({
+                    'flow': 'ChangeCountry',
+                    'screenName': 'ChangeCountryScreen',
+                    'action': 'ChangeCountryScreen',
+                  });
+              },
+              child: Text(
+                Utility.getLocation(),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: AppTextStyles.caption.copyWith(
+                  color: const Color(0xFF8E2FFD),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
       actions: [
         BlocBuilder<CartBloc, CartState>(
