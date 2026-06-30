@@ -457,10 +457,11 @@ class _ChatScreenState extends State<ChatScreen> {
           if (currency.isNotEmpty) {
             print('currency: $currency');
             Utility.setCurrencyCode(currency);
+            Utility.setCurrencySymbol(currency);
           }
           if (currencySymbol.isNotEmpty) {
             print('currencySymbol: $currencySymbol');
-            Utility.setCurrencySymbol(currencySymbol);
+            // Utility.setCurrencySymbol(currencySymbol);
           }
           if (zoneId.isNotEmpty) {
             print('zoneId: $zoneId');
