@@ -40,6 +40,7 @@ class _ChatScreenState extends State<ChatScreen> {
   final SpeechService _speechService = SpeechService();
   bool _isSpeechAvailable = false;
   bool _isRecording = false;
+  String _location = Utility.getLocation();
 
   // LaunchBloc related variables
   late final LaunchBloc _launchBloc;
@@ -445,33 +446,52 @@ class _ChatScreenState extends State<ChatScreen> {
                 _sendMessage('I have added package instructions or Images.');
           }
         } else if (clickManage['flow'] == 'ChangeCountry') {
-          if (clickManage['currency'].isNotEmpty) {
-            print('currency: ${clickManage['currency']}');
-            Utility.setCurrencyCode(clickManage['currency']);
+          final currency = (clickManage['currency']?.toString() ?? '').trim();
+          final currencySymbol =
+              (clickManage['currencySymbol']?.toString() ?? '').trim();
+          final zoneId = (clickManage['zoneId']?.toString() ?? '').trim();
+          final location = (clickManage['location']?.toString() ?? '').trim();
+          final latitude = clickManage['latitude'];
+          final longitude = clickManage['longitude'];
+
+          if (currency.isNotEmpty) {
+            print('currency: $currency');
+            Utility.setCurrencyCode(currency);
           }
-          if (clickManage['currencySymbol'].isNotEmpty) {
-            print('currencySymbol: ${clickManage['currencySymbol']}');
-            Utility.setCurrencySymbol(clickManage['currencySymbol']);
+          if (currencySymbol.isNotEmpty) {
+            print('currencySymbol: $currencySymbol');
+            Utility.setCurrencySymbol(currencySymbol);
           }
-          if (clickManage['zoneId'].isNotEmpty) {
-            print('zoneId: ${clickManage['zoneId']}');
-            Utility.setZoneId(clickManage['zoneId']);
+          if (zoneId.isNotEmpty) {
+            print('zoneId: $zoneId');
+            Utility.setZoneId(zoneId);
           }
-          if (clickManage['location'].isNotEmpty) {
-            print('location: ${clickManage['location']}');
-            Utility.setLocation(clickManage['location']);
-          }else {
-            BlackToastView.show(context, 'We don\'t operate in this location at the moment.');
+          if (location.isNotEmpty) {
+            print('location: $location');
+            Utility.setLocation(location);
+          } else {
+            BlackToastView.show(
+              context,
+              'We don\'t operate in this location at the moment.',
+            );
           }
-          if (clickManage['latitude'].isNotEmpty) {
-            print('latitude: ${clickManage['latitude']}');
-            Utility.setLatitude(clickManage['latitude']);
+          if (latitude != null && latitude.toString().trim().isNotEmpty) {
+            print('latitude: $latitude');
+            Utility.setLatitude(
+              latitude is double ? latitude : double.tryParse('$latitude') ?? 0.0,
+            );
           }
-          if (clickManage['longitude'].isNotEmpty) {
-            print('longitude: ${clickManage['longitude']}');
-            Utility.setLongitude(clickManage['longitude']);
+          if (longitude != null && longitude.toString().trim().isNotEmpty) {
+            print('longitude: $longitude');
+            Utility.setLongitude(
+              longitude is double
+                  ? longitude
+                  : double.tryParse('$longitude') ?? 0.0,
+            );
           }
-          setState(() {});
+          setState(() {
+            _location = Utility.getLocation();
+          });
         } else {
           _apiData = {
             ..._apiData,
@@ -1711,6 +1731,7 @@ class _ChatScreenState extends State<ChatScreen> {
       },
       isFromHistory: widget.isFromHistory,
       chatHistoryTitle: widget.chatHistoryTitle,
+      location: _location,
     );
   }
 

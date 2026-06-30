@@ -53,6 +53,7 @@ class ChatScreenBody extends StatelessWidget {
   final Function(bool) onUpdateGotStripePaymentCallback; // Add callback to update gotStripePaymentCallback
   final bool isFromHistory; // Add isFromHistory parameter
   final String? chatHistoryTitle; // Add chatHistoryTitle parameter
+  final String location;
 
   const ChatScreenBody({
     required this.messageController,
@@ -90,6 +91,7 @@ class ChatScreenBody extends StatelessWidget {
     required this.onUpdateGotStripePaymentCallback, // Add callback to update gotStripePaymentCallback
     required this.isFromHistory, // Add the isFromHistory parameter
     required this.chatHistoryTitle, // Add the chatHistoryTitle parameter
+    required this.location,
   });
 
   String _to24HourWithSeconds(String input) {
@@ -466,8 +468,8 @@ class ChatScreenBody extends StatelessWidget {
                 children: [
                   Flexible(
                     child: Text(
-                      Utility.getLocation().trim().isNotEmpty
-                          ? Utility.getLocation().trim()
+                      location.trim().isNotEmpty
+                          ? location.trim()
                           : 'Select Location',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
