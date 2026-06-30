@@ -444,6 +444,23 @@ class _ChatScreenState extends State<ChatScreen> {
                 _apiData['package_delivery'] = packageDeliveryData;
                 _sendMessage('I have added package instructions or Images.');
           }
+        } else if (clickManage['flow'] == 'ChangeCountry') {
+          if (clickManage['currency'] != null) {
+            print(clickManage['currency']);
+            Utility.setCurrencyCode(clickManage['currency']);
+          }
+          if (clickManage['currencySymbol'] != null) {
+            print(clickManage['currencySymbol']);
+            Utility.setCurrencySymbol(clickManage['currencySymbol']);
+          }
+          if (clickManage['zoneId'] != null) {
+            print(clickManage['zoneId']);
+            Utility.setZoneId(clickManage['zoneId']);
+          }
+          if (clickManage['location'] != null) {
+            print(clickManage['location']);
+            Utility.setLocation(clickManage['location']);
+          }
         } else {
           _apiData = {
             ..._apiData,
