@@ -465,29 +465,23 @@ class _ChatScreenState extends State<ChatScreen> {
           if (zoneId.isNotEmpty) {
             print('zoneId: $zoneId');
             Utility.setZoneId(zoneId);
-          }
-          if (location.isNotEmpty) {
-            print('location: $location');
-            Utility.setLocation(location);
           } else {
             BlackToastView.show(
               context,
               'We don\'t operate in this location at the moment.',
             );
           }
-          if (latitude != null && latitude.toString().trim().isNotEmpty) {
-            print('latitude: $latitude');
-            Utility.setLatitude(
-              latitude is double ? latitude : double.tryParse('$latitude') ?? 0.0,
-            );
+          if (location.isNotEmpty) {
+            print('location: $location');
+            Utility.setLocation(location);
           }
-          if (longitude != null && longitude.toString().trim().isNotEmpty) {
+          if (latitude.isNotEmpty) {
+            print('latitude: $latitude');
+            Utility.setLatitude(latitude);
+          }
+          if (longitude.isNotEmpty) {
             print('longitude: $longitude');
-            Utility.setLongitude(
-              longitude is double
-                  ? longitude
-                  : double.tryParse('$longitude') ?? 0.0,
-            );
+            Utility.setLongitude(longitude);
           }
           setState(() {
             _location = Utility.getLocation();
@@ -675,7 +669,7 @@ class _ChatScreenState extends State<ChatScreen> {
         };
       }
 
-      print('CHINTU: _apiData: $_apiData');
+      print('USER DATA: _apiData: $_apiData');
     });
 
     _messageController.clear();

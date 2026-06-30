@@ -35,13 +35,14 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
         flightBookingData: event.flightBookingData,
         packageDeliveryData: event.packageDeliveryData,
       );
-      print('CHINTU: $chat');
+      print('CHINTU 22: $chat');
       if (chat != null) {
         emit(ChatLoaded(chat));
       } else {
         emit(ChatError('Failed to send message'));
       }
     } catch (e) {
+      print('CHINTU  11: $e');
       emit(ChatError(e.toString()));
     }
   }
