@@ -445,30 +445,30 @@ class _ChatScreenState extends State<ChatScreen> {
                 _sendMessage('I have added package instructions or Images.');
           }
         } else if (clickManage['flow'] == 'ChangeCountry') {
-          if (clickManage['currency'] != null) {
-            print(clickManage['currency']);
+          if (clickManage['currency'].isNotEmpty) {
+            print('currency: ${clickManage['currency']}');
             Utility.setCurrencyCode(clickManage['currency']);
           }
-          if (clickManage['currencySymbol'] != null) {
-            print(clickManage['currencySymbol']);
+          if (clickManage['currencySymbol'].isNotEmpty) {
+            print('currencySymbol: ${clickManage['currencySymbol']}');
             Utility.setCurrencySymbol(clickManage['currencySymbol']);
           }
-          if (clickManage['zoneId'] != null) {
-            print(clickManage['zoneId']);
+          if (clickManage['zoneId'].isNotEmpty) {
+            print('zoneId: ${clickManage['zoneId']}');
             Utility.setZoneId(clickManage['zoneId']);
           }
-          if (clickManage['location'] != null) {
-            print(clickManage['location']);
+          if (clickManage['location'].isNotEmpty) {
+            print('location: ${clickManage['location']}');
             Utility.setLocation(clickManage['location']);
           }else {
             BlackToastView.show(context, 'We don\'t operate in this location at the moment.');
           }
-          if (clickManage['latitude'] != null) {
-            print(clickManage['latitude']);
+          if (clickManage['latitude'].isNotEmpty) {
+            print('latitude: ${clickManage['latitude']}');
             Utility.setLatitude(clickManage['latitude']);
           }
-          if (clickManage['longitude'] != null) {
-            print(clickManage['longitude']);
+          if (clickManage['longitude'].isNotEmpty) {
+            print('longitude: ${clickManage['longitude']}');
             Utility.setLongitude(clickManage['longitude']);
           }
           setState(() {});
