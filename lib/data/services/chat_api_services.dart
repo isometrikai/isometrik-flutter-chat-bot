@@ -131,7 +131,6 @@ class ChatApiServices {
       'package_delivery': packageDeliveryData,
       'enable_personalisation': Utility.getPersonalization(),
     };
-    print('CHINTU 33: $body');
 
     // Match existing endpoint used elsewhere
     final res = await _chatClient.post('/v2/chatbot', body);

@@ -94,6 +94,15 @@ class _ChatScreenState extends State<ChatScreen> {
     
     // Normal mode initialization
     _initializeSession(false);
+    // Timer.periodic(Duration(seconds: 60), (timer) {
+
+    //         Utility.setLocation('location');
+
+         
+    //       setState(() {
+    //         _location = Utility.getLocation();
+    //       });
+    // });
   }
 
   /// Sets up all OrderService callbacks
@@ -446,46 +455,49 @@ class _ChatScreenState extends State<ChatScreen> {
                 _sendMessage('I have added package instructions or Images.');
           }
         } else if (clickManage['flow'] == 'ChangeCountry') {
-          final currency = (clickManage['currency']?.toString() ?? '').trim();
-          final currencySymbol =
-              (clickManage['currencySymbol']?.toString() ?? '').trim();
-          final zoneId = (clickManage['zoneId']?.toString() ?? '').trim();
-          final location = (clickManage['location']?.toString() ?? '').trim();
-          final latitude = clickManage['latitude'];
-          final longitude = clickManage['longitude'];
+          Timer.periodic(Duration(seconds: 5), (timer) {
+            final currency = (clickManage['currency']?.toString() ?? '').trim();
+            final currencySymbol =
+                (clickManage['currencySymbol']?.toString() ?? '').trim();
+            final zoneId = (clickManage['zoneId']?.toString() ?? '').trim();
+            final location = (clickManage['location']?.toString() ?? '').trim();
+            final latitude = clickManage['latitude'];
+            final longitude = clickManage['longitude'];
 
-          if (currency.isNotEmpty) {
-            print('currency: $currency');
-            Utility.setCurrencyCode(currency);
-            Utility.setCurrencySymbol(currency);
-          }
-          if (currencySymbol.isNotEmpty) {
-            print('currencySymbol: $currencySymbol');
-            // Utility.setCurrencySymbol(currencySymbol);
-          }
-          if (zoneId.isNotEmpty) {
-            print('zoneId: $zoneId');
-            Utility.setZoneId(zoneId);
-          } else {
-            BlackToastView.show(
-              context,
-              'We don\'t operate in this location at the moment.',
-            );
-          }
-          if (location.isNotEmpty) {
-            print('location: $location');
-            Utility.setLocation(location);
-          }
-          if (latitude.isNotEmpty) {
-            print('latitude: $latitude');
-            Utility.setLatitude(latitude);
-          }
-          if (longitude.isNotEmpty) {
-            print('longitude: $longitude');
-            Utility.setLongitude(longitude);
-          }
-          setState(() {
-            _location = Utility.getLocation();
+            if (currency.isNotEmpty) {
+              print('currency: $currency');
+              Utility.setCurrencyCode(currency);
+              Utility.setCurrencySymbol(currency);
+            }
+            if (currencySymbol.isNotEmpty) {
+              print('currencySymbol: $currencySymbol');
+              // Utility.setCurrencySymbol(currencySymbol);
+            }
+            if (zoneId.isNotEmpty) {
+              print('zoneId: $zoneId');
+              Utility.setZoneId(zoneId);
+            } else {
+              BlackToastView.show(
+                context,
+                'We don\'t operate in this location at the moment.',
+              );
+            }
+            if (location.isNotEmpty) {
+              print('location: $location');
+              Utility.setLocation(location);
+            }
+            if (latitude.isNotEmpty) {
+              print('latitude: $latitude');
+              Utility.setLatitude(latitude);
+            }
+            if (longitude.isNotEmpty) {
+              print('longitude: $longitude');
+              Utility.setLongitude(longitude);
+            }
+            
+            setState(() {
+              _location = Utility.getLocation();
+            });
           });
         } else {
           _apiData = {
