@@ -453,7 +453,6 @@ class ChatScreenBody extends StatelessWidget {
               height: 24,
               fit: BoxFit.cover,
             ),
-            if (Utility.getLocation().trim().isNotEmpty)
             GestureDetector(
               onTap: () {
                 OrderService().triggerClickManageScreenOpen({
@@ -462,13 +461,28 @@ class ChatScreenBody extends StatelessWidget {
                     'action': 'ChangeCountryScreen',
                   });
               },
-              child: Text(
-                Utility.getLocation(),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: AppTextStyles.caption.copyWith(
-                  color: const Color(0xFF8E2FFD),
-                ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Flexible(
+                    child: Text(
+                      Utility.getLocation().trim().isNotEmpty
+                          ? Utility.getLocation().trim()
+                          : 'Select Location',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppTextStyles.caption.copyWith(
+                        color: const Color(0xFF8E2FFD),
+                      ),
+                    ),
+                  ),
+                  const Icon(
+                    Icons.arrow_drop_down,
+                    color: Color(0xFF8E2FFD),
+                    size: 25,
+                  ),
+                  const SizedBox(width: 15),
+                ],
               ),
             ),
           ],

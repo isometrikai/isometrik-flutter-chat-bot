@@ -460,6 +460,8 @@ class _ChatScreenState extends State<ChatScreen> {
           if (clickManage['location'] != null) {
             print(clickManage['location']);
             Utility.setLocation(clickManage['location']);
+          }else {
+            BlackToastView.show(context, 'We don\'t operate in this location at the moment.');
           }
           if (clickManage['latitude'] != null) {
             print(clickManage['latitude']);
