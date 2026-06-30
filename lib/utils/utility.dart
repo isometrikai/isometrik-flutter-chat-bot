@@ -16,6 +16,7 @@ class Utility {
   static String countryCode = '';
   static bool personalization = true;
   static String location = '';
+  static final ValueNotifier<String> locationNotifier = ValueNotifier('');
   static String zoneId = '';
   static double latitude = 0.0;
   static double longitude = 0.0;
@@ -171,6 +172,9 @@ class Utility {
 
   static void setLocation(String location) {
     Utility.location = location;
+    if (locationNotifier.value != location) {
+      locationNotifier.value = location;
+    }
   }
 
   static void setZoneId(String zoneId) {
