@@ -49,7 +49,20 @@ class CartScreen extends StatefulWidget {
 }
 
 class _CartScreenState extends State<CartScreen> {
-  int selectedCategoryIndex = 0; // 0 for Restaurant, 1 for Grocery, 2 for Pharmacy, 3 for Shopping
+  static const _categoryCountKeys = [
+    'restaurant',
+    'grocery',
+    'pharmacy',
+    'shopping',
+    'services',
+    'healthCare',
+    'donation',
+  ];
+
+  int selectedCategoryIndex = 0;
+  bool _categorySelectionInitialized = false;
+  final List<GlobalKey> _categoryChipKeys =
+      List.generate(_categoryCountKeys.length, (_) => GlobalKey());
 
   @override
   void initState() {
@@ -68,9 +81,49 @@ class _CartScreenState extends State<CartScreen> {
     });
   }
 
+  void _initializeCategorySelection(CartState state) {
+    if (_categorySelectionInitialized || state is! CartLoaded) return;
+
+    final firstIndexWithData = _firstCategoryIndexWithData(state);
+    if (firstIndexWithData != null && selectedCategoryIndex != firstIndexWithData) {
+      setState(() => selectedCategoryIndex = firstIndexWithData);
+    }
+    _categorySelectionInitialized = true;
+    if (firstIndexWithData != null) {
+      _scrollToSelectedCategory();
+    }
+  }
+
+  void _scrollToSelectedCategory() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final chipContext = _categoryChipKeys[selectedCategoryIndex].currentContext;
+      if (chipContext == null) return;
+      Scrollable.ensureVisible(
+        chipContext,
+        alignment: 0.5,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
+    });
+  }
+
+  int? _firstCategoryIndexWithData(CartState state) {
+    final categoryCounts = _calculateCategoryCounts(state);
+    for (int i = 0; i < _categoryCountKeys.length; i++) {
+      if ((categoryCounts[_categoryCountKeys[i]] ?? 0) > 0) {
+        return i;
+      }
+    }
+    return null;
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return BlocListener<CartBloc, CartState>(
+      listenWhen: (previous, current) => current is CartLoaded,
+      listener: (context, state) => _initializeCategorySelection(state),
+      child: Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
         child: Column(
@@ -92,6 +145,7 @@ class _CartScreenState extends State<CartScreen> {
           ],
         ),
       ),
+    ),
     );
   }
 
@@ -156,10 +210,13 @@ class _CartScreenState extends State<CartScreen> {
               final category = categories[index];
               final isSelected = selectedCategoryIndex == index;
               return GestureDetector(
+                key: _categoryChipKeys[index],
                 onTap: () {
                   setState(() {
                     selectedCategoryIndex = index;
+                    _categorySelectionInitialized = true;
                   });
+                  _scrollToSelectedCategory();
                 },
                 child: Container(
                   margin: const EdgeInsets.only(right: 8),

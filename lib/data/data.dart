@@ -6,7 +6,7 @@ export 'model/greeting_response.dart';
 export 'model/grocery_product_details_response.dart';
 export 'model/mygpts_model.dart' hide JsonParsingExtension;
 export 'model/product_portion_response.dart';
-export 'model/restaurant_menu_response.dart';
+export 'model/restaurant_menu_response.dart' hide LogoImages;
 export 'model/session_id_response.dart';
 export 'model/store_details_response.dart';
 export 'model/availability_slots_response.dart';

@@ -3309,6 +3309,7 @@ class WidgetAction {
   final int? children;
   final int? infants;
   final List<FlightInfo>? flightInfo;
+  final String? propertyId;
 
   WidgetAction({
     required this.buttonText,
@@ -3380,6 +3381,7 @@ class WidgetAction {
     this.children,
     this.infants,
     this.flightInfo,
+    this.propertyId,
   });
 
   factory WidgetAction.fromJson(Map<String, dynamic> json) {
@@ -3457,6 +3459,7 @@ class WidgetAction {
         children: json['children'] ?? 0,
         infants: json['infants'] ?? 0,
         flightInfo: _parseFlightInfoList(json['flightInfo'] ?? json['flight_info']),
+        propertyId: json['propertyId']?.toString(),
     );
   }
 
@@ -3532,6 +3535,7 @@ class WidgetAction {
       'children': children,
       'infants': infants,
       'flightInfo': flightInfo?.map((e) => e.toJson()).toList(),
+      'propertyId': propertyId,
     };
   }
 }

@@ -4523,7 +4523,7 @@ class ChatScreenBody extends StatelessWidget {
           create: (_) => FlightSearchBloc(),
           child: FlightSearchScreen(
             actionData: action,
-            flightBooking: flightBooking.isNotEmpty ? flightBooking : null,
+            flightBooking: action.toJson(), //flightBooking.isNotEmpty ? flightBooking : null,
             onFlightSelected: (flight, cabin) {
               final existing = apiData['flight_booking'];
               final Map<String, dynamic> updatedFlightBooking;
@@ -4690,7 +4690,7 @@ class ChatScreenBody extends StatelessWidget {
     BuildContext context,
     WidgetAction action,
   ) async {
-    final hotelBooking = _hotelBookingMap();
+    // final hotelBooking = _hotelBookingMap();
     final hotelName = action.title.isNotEmpty
         ? action.title
         : (action.storeName ?? action.name ?? '');
@@ -4698,7 +4698,7 @@ class ChatScreenBody extends StatelessWidget {
 
     await ChooseRoomBottomSheet.show(
       context,
-      hotelBooking: hotelBooking,
+      hotelBooking: action.toJson(),
       hotelName: hotelName,
       hotelImageUrl: hotelImageUrl,
       onNext: (selected) {
