@@ -27,7 +27,7 @@ class _CarSearchScreenState extends State<CarSearchScreen> {
   final TextEditingController _searchController = TextEditingController();
   DateTime? _lastQueryAt;
 
-  static const Color _accentPurple = Color(0xFF8E2FFD);
+  // static const Color _accentPurple = Color(0xFF8E2FFD);
   static const Color _chipBorderIdle = Color(0xFFD8DEF3);
   static const String _noCarsMessage = 'No Cars Found';
 
@@ -145,7 +145,7 @@ class _CarSearchScreenState extends State<CarSearchScreen> {
         if (state is CarSearchInitial || state is CarSearchLoadInProgress) {
           return const Center(
             child: CircularProgressIndicator(
-              color: _accentPurple,
+              color: AppConstants.appThemeColor,
             ),
           );
         }

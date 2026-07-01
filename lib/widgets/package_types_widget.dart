@@ -19,7 +19,7 @@ class PackageTypesWidget extends StatelessWidget {
 
   static const Color _borderColor = Color(0xFFE9DFFB);
   static const Color _rowBackground = Color(0xFFF5F7FF);
-  static const Color _labelColor = Color(0xFF8E2FFD);
+  // static const Color _labelColor = Color(0xFF8E2FFD);
   static const Color _headerColor = Color(0xFF242424);
 
   @override
@@ -94,7 +94,7 @@ class _PackageTypeRow extends StatelessWidget {
           fontSize: 14,
           fontWeight: FontWeight.w400,
           height: 1.4,
-          color: PackageTypesWidget._labelColor,
+          color: AppConstants.appThemeColor,
         ),
       ),
     );

@@ -37,11 +37,15 @@ class CategoryData {
 class CartScreen extends StatefulWidget {
   final Function(String, String?)? onCheckout;
   final bool needToEndThisChat;
+  final bool needToShowCheckoutButton;
+  final String? storeCategoryId;
 
   const CartScreen({
     super.key,
     this.onCheckout,
     this.needToEndThisChat = false,
+    this.needToShowCheckoutButton = true,
+    this.storeCategoryId,
   });
 
   @override
@@ -58,6 +62,16 @@ class _CartScreenState extends State<CartScreen> {
     'healthCare',
     'donation',
   ];
+
+  static const _storeCategoryToChipIndex = <FoodStoreCategoryId, int>{
+    FoodStoreCategoryId.food: 0,
+    FoodStoreCategoryId.grocery: 1,
+    FoodStoreCategoryId.pharmacy: 2,
+    FoodStoreCategoryId.shopping: 3,
+    FoodStoreCategoryId.services: 4,
+    FoodStoreCategoryId.healthCare: 5,
+    FoodStoreCategoryId.donation: 6,
+  };
 
   int selectedCategoryIndex = 0;
   bool _categorySelectionInitialized = false;
@@ -84,14 +98,31 @@ class _CartScreenState extends State<CartScreen> {
   void _initializeCategorySelection(CartState state) {
     if (_categorySelectionInitialized || state is! CartLoaded) return;
 
-    final firstIndexWithData = _firstCategoryIndexWithData(state);
-    if (firstIndexWithData != null && selectedCategoryIndex != firstIndexWithData) {
-      setState(() => selectedCategoryIndex = firstIndexWithData);
-    }
-    _categorySelectionInitialized = true;
-    if (firstIndexWithData != null) {
+    if (widget.needToShowCheckoutButton) {
+      final firstIndexWithData = _firstCategoryIndexWithData(state);
+      if (firstIndexWithData != null &&
+          selectedCategoryIndex != firstIndexWithData) {
+        setState(() => selectedCategoryIndex = firstIndexWithData);
+      }
+      if (firstIndexWithData != null) {
+        _scrollToSelectedCategory();
+      }
+    } else {
+      final categoryIndex =
+          _categoryIndexForStoreCategoryId(widget.storeCategoryId);
+      if (categoryIndex != null &&
+          selectedCategoryIndex != categoryIndex) {
+        setState(() => selectedCategoryIndex = categoryIndex);
+      }
       _scrollToSelectedCategory();
     }
+    _categorySelectionInitialized = true;
+  }
+
+  int? _categoryIndexForStoreCategoryId(String? storeCategoryId) {
+    if (storeCategoryId == null || storeCategoryId.isEmpty) return null;
+    return _storeCategoryToChipIndex[
+        FoodStoreCategoryId.fromValue(storeCategoryId)];
   }
 
   void _scrollToSelectedCategory() {
@@ -138,7 +169,7 @@ class _CartScreenState extends State<CartScreen> {
             Expanded(
               child: _buildCartContent(),
             ),
-            if (widget.needToEndThisChat == false) ...[
+            if (widget.needToEndThisChat == false && widget.needToShowCheckoutButton == true) ...[
               // Bottom action buttons
               _buildBottomActions(),
             ],
@@ -652,7 +683,27 @@ class _CartScreenState extends State<CartScreen> {
   }
 
   Widget _buildStoreInfoCard(CategoryData categoryData) {
-    return Container(
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: widget.needToEndThisChat
+          ? null
+          : () {
+              print("storeCategoryId: ${categoryData.storeCategoryId}");
+              print("storeTypeId: ${categoryData.storeTypeId}");
+              print("storeListing: ${categoryData.storeListing}");
+              print("hyperlocal: ${categoryData.hyperlocal}");
+              print("storeId: ${categoryData.storeId}");
+              print("companyType: ${categoryData.companyType}");
+              OrderService().triggerStoreOrder({
+                'storeCategoryId': categoryData.storeCategoryId,
+                'storeTypeId': categoryData.storeTypeId,
+                'storeListing': categoryData.storeListing,
+                'hyperlocal': categoryData.hyperlocal,
+                'storeId': categoryData.storeId,
+                'companyType': categoryData.companyType,
+              });
+            },
+      child: Container(
       padding: const EdgeInsets.all(15),
       decoration: BoxDecoration(
         color: const Color(0xFFF5F7FF),
@@ -694,45 +745,37 @@ class _CartScreenState extends State<CartScreen> {
                         color: const Color(0xFF242424),
                       ),
                     ),
+                    Text(
+                      'Visit Store',
+                      style: AppTextStyles.bodyText.copyWith(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 12,
+                        color: AppConstants.appThemeColor,
+                      ),
+                    ) 
                   ],
                 ),
               ),
+              
               const SizedBox(width: 5),
               if (widget.needToEndThisChat == false) ...[
-                  GestureDetector(
-                    onTap: () {
-                      print("storeCategoryId: ${categoryData.storeCategoryId}");
-                      print("storeTypeId: ${categoryData.storeTypeId}");
-                      print("storeListing: ${categoryData.storeListing}");
-                      print("hyperlocal: ${categoryData.hyperlocal}");
-                      print("storeId: ${categoryData.storeId}");
-                      print("companyType: ${categoryData.companyType}");
-                      OrderService().triggerStoreOrder({
-                        'storeCategoryId': categoryData.storeCategoryId,
-                        'storeTypeId': categoryData.storeTypeId,
-                        'storeListing': categoryData.storeListing,
-                        'hyperlocal': categoryData.hyperlocal,
-                        'storeId': categoryData.storeId,
-                        'companyType': categoryData.companyType,
-                      });
-                    },
-                    child: Container(
-                      width: 30,
-                      height: 30,
-                      alignment: Alignment.centerRight,
-                      child:  SvgPicture.asset(
-                        AssetPath.get('images/ic_info_cart.svg'),
-                        width: 20,
-                        height: 20,
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-                  ),  
+                Container(
+                  width: 30,
+                  height: 30,
+                  alignment: Alignment.centerRight,
+                  child: SvgPicture.asset(
+                    AssetPath.get('images/ic_info_cart.svg'),
+                    width: 20,
+                    height: 20,
+                    fit: BoxFit.cover,
+                  ),
+                ),
               ],
             ],
           ),
         ],
       ),
+    ),
     );
   }
 

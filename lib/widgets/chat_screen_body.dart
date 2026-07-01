@@ -329,21 +329,72 @@ class ChatScreenBody extends StatelessWidget {
                       if (needToEndThisChat == true)
                         Container(
                           width: double.infinity,
-                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                           margin: const EdgeInsets.fromLTRB(16, 10, 16, 40),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFF5F0FF), // Light purple background
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: const Color(0xFFE8D5FF), width: 1),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 15,
                           ),
-                          child: Text(
-                            'This session has ended. Please click the reload button to begin a new chat',
-                            style: AppTextStyles.bodyText.copyWith(
-                              fontSize: 14,
-                              color: const Color(0xFF6E4185), // Darker purple text
-                              fontWeight: FontWeight.w500,
-                            ),
-                            textAlign: TextAlign.center,
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFF4F0FF),
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Text(
+                                'This session has ended. Start a new chat to keep going.',
+                                style: AppTextStyles.bodyText.copyWith(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w400,
+                                  height: 1.4,
+                                  color: const Color(0xFF242424),
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                              const SizedBox(height: 10),
+                              SizedBox(
+                                        width: 190,
+                                        height: 47,
+                                        child: DecoratedBox(
+                                          decoration: BoxDecoration(
+                                            color: AppConstants.appThemeColor,
+                                            borderRadius: BorderRadius.circular(8),
+                                          ),
+                                          child: ElevatedButton(
+                                            onPressed: state is ChatLoading
+                                                ? null
+                                                : () => showNewChatConfirmation(context),
+                                            style: ElevatedButton.styleFrom(
+                                              backgroundColor: Colors.transparent,
+                                              shadowColor: Colors.transparent,
+                                              padding: const EdgeInsets.symmetric(
+                                                horizontal: 12, // reduced from 38 so text fits
+                                                vertical: 14,
+                                              ),
+                                              minimumSize: Size.zero,
+                                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius: BorderRadius.circular(8),
+                                              ),
+                                            ),
+                                            child: FittedBox(
+                                              fit: BoxFit.scaleDown,
+                                              child: Text(
+                                                'Start new chat',
+                                                style: AppTextStyles.button.copyWith(
+                                                  fontSize: 16,
+                                                  fontWeight: FontWeight.w700,
+                                                  height: 1.2,
+                                                  color: Colors.white,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      )
+                            ],
                           ),
                         )
                          

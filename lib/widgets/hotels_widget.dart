@@ -83,8 +83,8 @@ class _HotelPropertyCard extends StatelessWidget {
   static const Color _titleColor = Color(0xFF242424);
   static const Color _locationColor = Color(0xFF979797);
   static const Color _nightsLabelColor = Color(0xFF94A0AF);
-  static const Color _accentPurple = Color(0xFF8E2FFD);
-  static const Color _starColor = Color(0xFFA674BF);
+  // static const Color _accentPurple = Color(0xFF8E2FFD);
+  // static const Color _starColor = Color(0xFFA674BF);
 
   @override
   Widget build(BuildContext context) {
@@ -272,7 +272,7 @@ class _HotelPropertyCard extends StatelessWidget {
             height: 12.96,
             fit: BoxFit.contain,
             colorFilter: const ColorFilter.mode(
-              _accentPurple,
+              AppConstants.appThemeColor,
               BlendMode.srcIn,
             ),
           ),
@@ -283,7 +283,7 @@ class _HotelPropertyCard extends StatelessWidget {
               fontSize: 12,
               fontWeight: FontWeight.w400,
               height: 1.4,
-              color: _accentPurple,
+              color: AppConstants.appThemeColor,
             ),
           ),
         ],
@@ -347,7 +347,7 @@ class _RatingBadge extends StatelessWidget {
           const Icon(
             Icons.star,
             size: 12,
-            color: _HotelPropertyCard._starColor,
+            color: AppConstants.appThemeColor,
           ),
           const SizedBox(width: 4),
           Text(

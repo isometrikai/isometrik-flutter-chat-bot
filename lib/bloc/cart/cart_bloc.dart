@@ -19,6 +19,90 @@ class CartBloc extends Bloc<CartEvent, CartState> {
     return totalProductCount;
   }
 
+  int get getFoodCategoryCount {
+    int foodCount = 0;
+    for (final cartData in globalCartData) {
+      for (final seller in cartData.sellers) {
+        if (seller.storeTypeId == FoodCategory.food.value) {
+          foodCount += seller.products.length;
+        }
+      }
+    }
+    return foodCount;
+  }
+  
+  int get getGroceryCategoryCount {
+    int groceryCount = 0;
+    for (final cartData in globalCartData) {
+      for (final seller in cartData.sellers) {
+        if (seller.storeTypeId == FoodCategory.grocery.value && cartData.storeCategoryId == FoodStoreCategoryId.grocery.value) {
+          groceryCount += seller.products.length;
+        }
+      }
+    }
+    return groceryCount;
+  }
+
+  int get getPharmacyCategoryCount {
+    int pharmacyCount = 0;
+    for (final cartData in globalCartData) {
+      for (final seller in cartData.sellers) {
+        if (seller.storeTypeId == FoodCategory.pharmacy.value) {
+          pharmacyCount += seller.products.length;
+        }
+      }
+    }
+    return pharmacyCount;
+  }
+
+  int get getShoppingCategoryCount {
+    int shoppingCount = 0;
+    for (final cartData in globalCartData) {
+      for (final seller in cartData.sellers) {
+        if (seller.storeTypeId == FoodCategory.grocery.value && cartData.storeCategoryId == FoodStoreCategoryId.shopping.value) {
+          shoppingCount += seller.products.length;
+        }
+      }
+    }
+    return shoppingCount;
+  }
+
+  int get getServicesCategoryCount {
+    int servicesCount = 0;
+    for (final cartData in globalCartData) {
+      for (final seller in cartData.sellers) {
+        if (seller.storeTypeId == FoodCategory.services.value && cartData.storeCategoryId == FoodStoreCategoryId.services.value) {
+          servicesCount += seller.products.length;
+        }
+      }
+    }
+    return servicesCount;
+  }
+
+  int get getHealthCareCategoryCount {
+    int healthCareCount = 0;
+    for (final cartData in globalCartData) {
+      for (final seller in cartData.sellers) {
+        if (seller.storeTypeId == FoodCategory.services.value && cartData.storeCategoryId == FoodStoreCategoryId.healthCare.value) {
+          healthCareCount += seller.products.length;
+        }
+      }
+    }
+    return healthCareCount;
+  }
+
+  int get getDonationCategoryCount {
+    int donationCount = 0;
+    for (final cartData in globalCartData) {
+      for (final seller in cartData.sellers) {
+        if (seller.storeTypeId == FoodCategory.donation.value) {
+          donationCount += seller.products.length;
+        }
+      }
+    }
+    return donationCount;
+  }
+
   CartBloc({CartRepository? repository})
       : repository = repository ?? const CartRepository(),
         super(CartInitial()) {

@@ -18,7 +18,7 @@ class CarPickupPlacesWidget extends StatelessWidget {
 
   static const Color _borderColor = Color(0xFFE9DFFB);
   static const Color _rowBackground = Color(0xFFF5F7FF);
-  static const Color _labelColor = Color(0xFF8E2FFD);
+  // static const Color _labelColor = Color(0xFF8E2FFD);
 
   @override
   Widget build(BuildContext context) {
@@ -83,7 +83,7 @@ class _PickupPlaceRow extends StatelessWidget {
           fontSize: 14,
           fontWeight: FontWeight.w400,
           height: 1.4,
-          color: CarPickupPlacesWidget._labelColor,
+          color: AppConstants.appThemeColor,
         ),
       ),
     );

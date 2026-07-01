@@ -91,7 +91,7 @@ class _DestinationRow extends StatelessWidget {
           fontSize: 14,
           fontWeight: FontWeight.w400,
           height: 1.4,
-          color: HotelDestinationWidget._labelColor,
+          color: AppConstants.appThemeColor,
         ),
       ),
     );

@@ -326,22 +326,34 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen>
                         : null;
                 final String storeName = _resolveStoreName(storeData);
 
-                return Column(
-                  children: <Widget>[
-                    _buildAnimatedHeader(storeData, storeName),
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
-                      child: _buildDietToggles(),
-                    ),
-                    const SizedBox(height: 16),
-                    Expanded(
-                      child: SingleChildScrollView(
-                        controller: _scrollController,
-                        padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
-                        child: _buildMenuContent(state),
-                      ),
-                    ),
-                  ],
+                return BlocBuilder<CartBloc, CartState>(
+                  builder: (BuildContext context, CartState cartState) {
+                    final int itemCount = cartBloc.getFoodCategoryCount;
+                    return Column(
+                      children: <Widget>[
+                        _buildAnimatedHeader(storeData, storeName),
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
+                          child: _buildDietToggles(),
+                        ),
+                        const SizedBox(height: 16),
+                        Expanded(
+                          child: SingleChildScrollView(
+                            controller: _scrollController,
+                            padding: EdgeInsets.fromLTRB(
+                              16,
+                              0,
+                              16,
+                              itemCount > 0 ? 16 : 24,
+                            ),
+                            child: _buildMenuContent(state),
+                          ),
+                        ),
+                        if (itemCount > 0)
+                          _buildBottomCartBar(itemCount),
+                      ],
+                    );
+                  },
                 );
               },
             ),
@@ -395,8 +407,8 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen>
     const Color cardBackground = Color(0xFFF5F7FF);
     const Color cardBorder = Color(0xFFEEF4FF);
     const Color titleColor = Color(0xFF242424);
-    const Color starColor = Color(0xFFA674BF);
-    const Color accentPurple = Color(0xFF8E2FFD);
+    // const Color starColor = Color(0xFFA674BF);
+    // const Color accentPurple = Color(0xFF8E2FFD);
 
     final String storeName = _resolveStoreName(storeData);
     final String imageUrl =
@@ -446,7 +458,7 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen>
                           const Icon(
                             Icons.star,
                             size: 12,
-                            color: starColor,
+                            color: AppConstants.appThemeColor,
                           ),
                           const SizedBox(width: 4),
                           Text(
@@ -479,7 +491,7 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen>
                         height: 12.96,
                         fit: BoxFit.contain,
                         colorFilter: const ColorFilter.mode(
-                          accentPurple,
+                          AppConstants.appThemeColor,
                           BlendMode.srcIn,
                         ),
                       ),
@@ -487,7 +499,7 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen>
                       Text(
                         'Open in Eazy app',
                         style: AppTextStyles.restaurantDescription.copyWith(
-                          color: accentPurple,
+                          color: AppConstants.appThemeColor,
                         ),
                       ),
                     ],
@@ -1187,89 +1199,107 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen>
     return null;
   }
 
-  // Widget _buildBottomCartBar() {
-  //   return GestureDetector(
-  //     onTap: _onAddToCart,
-  //     child: Container(
-  //       width: double.infinity,
-  //       height: 105.56,
-  //       padding: const EdgeInsets.only(top: 10),
-  //       decoration: const BoxDecoration(
-  //         color: Color(0xFFF5F7FF),
-  //       ),
-  //       child: Center(
-  //         child: Container(
-  //           width: 343,
-  //           height: 62,
-  //           decoration: BoxDecoration(
-  //             gradient: const LinearGradient(
-  //               begin: Alignment.centerLeft,
-  //               end: Alignment.centerRight,
-  //               colors: [
-  //                 Color(0xFFD445EC),
-  //                 Color(0xFFB02EFB),
-  //                 Color(0xFF8E2FFD),
-  //                 Color(0xFF5E3DFE),
-  //                 Color(0xFF5186E0),
-  //               ],
-  //               stops: [0.0, 0.27, 0.48, 0.76, 1.0],
-  //             ),
-  //             borderRadius: BorderRadius.circular(16),
-  //           ),
-  //           child: Row(
-  //             children: [
-  //               // Left side - Price and items
-  //               Padding(
-  //                 padding: const EdgeInsets.only(left: 25, top: 13),
-  //                 child: Column(
-  //                   crossAxisAlignment: CrossAxisAlignment.start,
-  //                   children: [
-  //                     Text(
-  //                       'د.إ${_cartTotal.toStringAsFixed(2)}',
-  //                       style: const TextStyle(
-  //                         fontFamily: 'aed',
-  //                         fontSize: 16,
-  //                         fontWeight: FontWeight.w400,
-  //                         height: 1.2,
-  //                         color: Colors.white,
-  //                       ),
-  //                     ),
-  //                     const SizedBox(height: 2),
-  //                     Text(
-  //                       '${_cartItems.toString().padLeft(2, '0')} items',
-  //                       style: const TextStyle(
-  //                         fontFamily: 'Plus Jakarta Sans',
-  //                         fontSize: 12,
-  //                         fontWeight: FontWeight.w400,
-  //                         height: 1.4,
-  //                         color: Colors.white,
-  //                       ),
-  //                     ),
-  //                   ],
-  //                 ),
-  //               ),
-  //               const Spacer(),
-  //               // Right side - Checkout button
-  //               Padding(
-  //                 padding: const EdgeInsets.only(right: 25),
-  //                 child: const Text(
-  //                   'Checkout',
-  //                   style: TextStyle(
-  //                     fontFamily: 'Plus Jakarta Sans',
-  //                     fontSize: 16,
-  //                     fontWeight: FontWeight.w700,
-  //                     height: 1.2,
-  //                     color: Colors.white,
-  //                   ),
-  //                 ),
-  //               ),
-  //             ],
-  //           ),
-  //         ),
-  //       ),
-  //     ),
-  //   );
-  // }
+  void _onViewCart() {
+    Navigator.push(
+      context,
+      MaterialPageRoute<void>(
+        builder: (BuildContext context) => BlocProvider<CartBloc>.value(
+          value: cartBloc,
+          child: CartScreen(
+            needToShowCheckoutButton: false,
+            storeCategoryId: widget.actionData?.storeCategoryId,
+            onCheckout: (String message, String? storeCategoryId) {
+              if (widget.onCheckout != null) {
+                widget.onCheckout!(true);
+              }
+              Navigator.of(context).pop();
+            },
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildBottomCartBar(int itemCount) {
+    final String itemLabel =
+        itemCount == 1 ? '1 Item added' : '$itemCount Items added';
+    final double bottomInset = MediaQuery.of(context).padding.bottom;
+
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        boxShadow: <BoxShadow>[
+          BoxShadow(
+            color: const Color(0xFFD4D4D4).withValues(alpha: 0.25),
+            offset: const Offset(0, -4),
+            blurRadius: 9,
+          ),
+        ],
+      ),
+      padding: EdgeInsets.fromLTRB(16, 15, 16, bottomInset > 0 ? 8 : 16),
+      child: GestureDetector(
+        onTap: _onViewCart,
+        child: Container(
+          height: 55,
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          decoration: BoxDecoration(
+            // gradient: const LinearGradient(
+            //   begin: Alignment.centerLeft,
+            //   end: Alignment.centerRight,
+            //   colors: <Color>[
+            //     Color(0xFFD445EC),
+            //     Color(0xFFB02EFB),
+            //     Color(0xFF8E2FFD),
+            //     Color(0xFF5E3DFE),
+            //     Color(0xFF5186E0),
+            //   ],
+            //   stops: <double>[0.0, 0.27, 0.48, 0.76, 1.0],
+            // ),
+            color: AppConstants.appThemeColor,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: <Widget>[
+              Text(
+                itemLabel,
+                style: const TextStyle(
+                  fontWeight: FontWeight.w700,
+                  fontSize: 14,
+                  height: 1.2,
+                  color: Colors.white,
+                ),
+              ),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  const Text(
+                    'View cart',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 14,
+                      height: 1.2,
+                      color: Colors.white,
+                    ),
+                  ),
+                  const SizedBox(width: 5),
+                  Transform.rotate(
+                    angle: -1.5708,
+                    child: const Icon(
+                      Icons.keyboard_arrow_down,
+                      color: Colors.white,
+                      size: 20,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 
   // Update cart data from getCart API response
   void _updateCartData(List<UniversalCartData> cartData) {
