@@ -232,13 +232,17 @@ class _ChatScreenState extends State<ChatScreen> {
             );
           } else if (clickManage['screenName'] == 'HotelBookingUserDetails') {
             final existing = _apiData['hotel_booking'];
+            final userDetails = clickManage['hotel_booking'];
             final Map<String, dynamic> hotelBooking;
             if (existing is Map) {
               hotelBooking = Map<String, dynamic>.from(existing);
-              hotelBooking['hotel_booking'] = clickManage['hotel_booking'];
             } else {
-              hotelBooking = {'hotel_booking': clickManage['hotel_booking']};
+              hotelBooking = {};
             }
+            if (userDetails is Map) {
+              hotelBooking.addAll(Map<String, dynamic>.from(userDetails));
+            }
+            hotelBooking.remove('hotel_booking');
             _apiData = {..._apiData, 'hotel_booking': hotelBooking};
             _sendMessage('I have added the customer details.');
           } else if (clickManage['screenName'] == 'TravelHotelDetailsScreen') {
