@@ -4408,7 +4408,7 @@ class ChatScreenBody extends StatelessWidget {
           ..['pickup_geo'] =
               '${place.coordinates.lat},${place.coordinates.lon}';
         onSendMessage(
-          'I want to book car pickup from ${place.name}',
+          'I want to pick up the car from ${place.name}',
           null,
           null,
           null,
@@ -4426,7 +4426,7 @@ class ChatScreenBody extends StatelessWidget {
           ..['return_code'] = place.iataCode
           ..['return_type'] = place.type;
         onSendMessage(
-          'I want to drop off car at ${place.name}',
+          'I want to drop off the car at ${place.name}',
           null,
           null,
           null,
