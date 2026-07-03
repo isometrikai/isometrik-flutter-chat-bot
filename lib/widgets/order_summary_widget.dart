@@ -431,34 +431,41 @@ class OrderSummaryWidget extends StatelessWidget {
     return 'د.إ${value.toStringAsFixed(value.truncateToDouble() == value ? 0 : 2)}';
   }
 
-  String _formatServiceTime(String? isoDateString) {
-    if (isoDateString == null || isoDateString.isEmpty) {
+  String _formatServiceTime(String? timeString) {
+    if (timeString == null || timeString.isEmpty) {
       return '';
     }
 
     try {
-      final dateTime = DateTime.parse(isoDateString);
-      
-      // Format: "Dec 25, 2023 at 10:20 AM"
-      final months = [
-        'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-        'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+      final trimmed = timeString.trim();
+      final DateTime dateTime;
+
+      final timestamp = int.tryParse(trimmed);
+      if (timestamp != null) {
+        final ms = trimmed.length > 10 ? timestamp : timestamp * 1000;
+        dateTime = DateTime.fromMillisecondsSinceEpoch(ms, isUtc: true).toLocal();
+      } else {
+        dateTime = DateTime.parse(trimmed).toLocal();
+      }
+
+      const months = [
+        'January', 'February', 'March', 'April', 'May', 'June',
+        'July', 'August', 'September', 'October', 'November', 'December',
       ];
-      
+
       final month = months[dateTime.month - 1];
-      final day = dateTime.day;
+      final day = dateTime.day.toString().padLeft(2, '0');
       final year = dateTime.year;
-      
+
       final hour = dateTime.hour;
       final minute = dateTime.minute;
       final period = hour >= 12 ? 'PM' : 'AM';
       final displayHour = hour > 12 ? hour - 12 : (hour == 0 ? 12 : hour);
       final displayMinute = minute.toString().padLeft(2, '0');
-      
+
       return '$month $day, $year at $displayHour:$displayMinute $period';
     } catch (e) {
-      // If parsing fails, return the original string
-      return isoDateString;
+      return timeString;
     }
   }
 }
