@@ -169,7 +169,7 @@ class MenuItemCard extends StatelessWidget {
 
   Widget _buildQuantityControls() {
     
-    if (storeType != FoodCategory.food.value) {
+    if (storeType != FoodCategory.food.value && storeType != FoodCategory.services.value) {
       if (!instock ) {
         return _buildOutOfStockButton();
       }
@@ -293,7 +293,7 @@ class MenuItemCard extends StatelessWidget {
 
   Widget _buildAddButton() {
     
-    if (storeType != FoodCategory.food.value) {
+    if (storeType != FoodCategory.food.value && storeType != FoodCategory.services.value) {
       if (!instock ) {
         return _buildOutOfStockButton();
       }
