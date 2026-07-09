@@ -889,6 +889,9 @@ class Doctor {
   final String profilePic;
   final double? rating;
   final DoctorPricing? pricing;
+  final num? consultation_fee;
+  final String? currencySymbol;
+  final int? storeLocationAt;
 
   Doctor({
     required this.id,
@@ -898,6 +901,9 @@ class Doctor {
     required this.profilePic,
     this.rating,
     this.pricing,
+    this.consultation_fee,
+    this.currencySymbol,
+    this.storeLocationAt,
   });
 
   String get fullName => '$firstName ${lastName.trim()}'.trim();
@@ -914,6 +920,9 @@ class Doctor {
       pricing: pricingJson != null && pricingJson is Map<String, dynamic>
           ? DoctorPricing.fromJson(pricingJson)
           : null,
+          consultation_fee: json['consultation_fee'] ?? 0,
+          currencySymbol: json['currency_code']?.toString() ?? '',
+          storeLocationAt: json['storeLocationAt'] ?? 0,
     );
   }
 
@@ -926,6 +935,9 @@ class Doctor {
       'profilePic': profilePic,
       if (rating != null) 'rating': rating,
       if (pricing != null) 'pricing': pricing!.toJson(),
+      'consultation_fee': consultation_fee,
+      'currencySymbol': currencySymbol,
+      'storeLocationAt': storeLocationAt,
     };
   }
 }
@@ -951,6 +963,7 @@ class Store {
   final num supportedOrderTypes;
   final bool tableReservations;
   final List<String> cuisines;
+  final int? companytype;
 
   Store({
     required this.storename,
@@ -972,6 +985,7 @@ class Store {
     required this.supportedOrderTypes,
     required this.tableReservations,
     required this.cuisines,
+     this.companytype,
   });
 
   factory Store.fromJson(Map<String, dynamic> json) {
@@ -990,6 +1004,7 @@ class Store {
     final bool storeIsOpen = (json['storeIsOpen'] ?? false);
     final int supportedOrderTypes = (json['supportedOrderTypes'] ?? 0);
     final bool tableReservations = (json['tableReservations'] ?? false);
+    final int companytype = (json['companyType'] ?? 0);
     final List<Doctor> doctorsList = (json['doctorsList'] as List<dynamic>? ?? [])
         .map((e) => Doctor.fromJson(e as Map<String, dynamic>))
         .toList();
@@ -1047,6 +1062,7 @@ class Store {
       supportedOrderTypes: supportedOrderTypes,
       tableReservations: tableReservations,
       cuisines: cuisines,
+      companytype: companytype,
     );
   }
 
@@ -1067,6 +1083,7 @@ class Store {
       'tableReservations': tableReservations,
       'isDoctore': isDoctore,
       'cuisines': cuisines,
+      'companytype': companytype,
     };
   }
 }
@@ -3310,6 +3327,7 @@ class WidgetAction {
   final int? infants;
   final List<FlightInfo>? flightInfo;
   final String? propertyId;
+  final bool? isDoctorFlow;
 
   WidgetAction({
     required this.buttonText,
@@ -3382,6 +3400,7 @@ class WidgetAction {
     this.infants,
     this.flightInfo,
     this.propertyId,
+    this.isDoctorFlow,
   });
 
   factory WidgetAction.fromJson(Map<String, dynamic> json) {
@@ -3460,6 +3479,7 @@ class WidgetAction {
         infants: json['infants'] ?? 0,
         flightInfo: _parseFlightInfoList(json['flightInfo'] ?? json['flight_info']),
         propertyId: json['propertyId']?.toString(),
+        isDoctorFlow: json['isDoctorFlow'] ?? false,
     );
   }
 
@@ -3536,6 +3556,7 @@ class WidgetAction {
       'infants': infants,
       'flightInfo': flightInfo?.map((e) => e.toJson()).toList(),
       'propertyId': propertyId,
+      'isDoctorFlow': isDoctorFlow,
     };
   }
 }

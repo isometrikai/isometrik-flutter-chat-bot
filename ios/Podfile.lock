@@ -1,20 +1,26 @@
 PODS:
   - Flutter (1.0.0)
+  - flutter_tts (0.0.1):
+    - Flutter
   - unique_identifier (0.0.1):
     - Flutter
 
 DEPENDENCIES:
   - Flutter (from `Flutter`)
+  - flutter_tts (from `.symlinks/plugins/flutter_tts/ios`)
   - unique_identifier (from `.symlinks/plugins/unique_identifier/ios`)
 
 EXTERNAL SOURCES:
   Flutter:
     :path: Flutter
+  flutter_tts:
+    :path: ".symlinks/plugins/flutter_tts/ios"
   unique_identifier:
     :path: ".symlinks/plugins/unique_identifier/ios"
 
 SPEC CHECKSUMS:
   Flutter: cabc95a1d2626b1b06e7179b784ebcf0c0cde467
+  flutter_tts: 35ac3c7d42412733e795ea96ad2d7e05d0a75113
   unique_identifier: 759d781cf134d96de2161628a1d52014df19599c
 
 PODFILE CHECKSUM: 198be3bdd0ca202819cd93d3dbee92cea9d303ab

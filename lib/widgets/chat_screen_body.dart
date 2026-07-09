@@ -10,6 +10,7 @@ import 'package:shimmer/shimmer.dart';
 import 'package:chat_bot/data/data.dart';
 import 'package:chat_bot/bloc/bloc.dart';
 import 'package:chat_bot/widgets/widgets.dart';
+import 'package:chat_bot/widgets/message_speaker_button.dart';
 import 'package:chat_bot/view/views.dart';
 import 'package:chat_bot/utils/utils.dart';
 import 'package:chat_bot/services/services.dart';
@@ -1230,6 +1231,20 @@ class ChatScreenBody extends StatelessWidget {
           if (message.hasPackageTypesSectionWidget) ...[
             const SizedBox(height: 4), //12
             buildPackageTypesWidget(message.packageTypesItems),
+          ],
+          if (message.text.trim().isNotEmpty && message.isBot) ...[
+            const SizedBox(height: 4),
+            Padding(
+              padding: EdgeInsets.only(
+                left: message.isBot ? 0 : 50,
+                right: message.isBot ? 50 : 0,
+              ),
+              child: MessageSpeakerButton(
+                messageId: message.id,
+                text: message.text,
+                isBot: message.isBot,
+              ),
+            ),
           ],
         ],
       ),
@@ -3031,36 +3046,36 @@ class ChatScreenBody extends StatelessWidget {
           },
           onAddToCartRequested: (product, store, doctor) {
             if (store.isDoctore == true && doctor != null) {
-              DoctorServiceTypeSheet.show(
-                context,
-                doctor: doctor,
-                store: store,
-                onServiceTypeSelected: (selectedType, selectedProduct) {
+              // DoctorServiceTypeSheet.show(
+              //   context,
+              //   doctor: doctor,
+              //   store: store,
+              //   onServiceTypeSelected: (selectedType, selectedProduct) {
                   // Selected: selectedType (DoctorServiceType), selectedProduct (Product? from store)
-                  final int serviceLocationAt;
-                  final String productName;
-                  int? estimatedProductPrice;
-                  switch (selectedType) {
-                    case DoctorServiceType.inCall:
-                      serviceLocationAt = 1;
-                      productName = "Visit at doctor's clinic";
-                      estimatedProductPrice = doctor.pricing?.inCallFee ?? 0;
-                      break;
-                    case DoctorServiceType.outCall:
-                      serviceLocationAt = 2;
-                      productName = "Doctor's at home";
-                      estimatedProductPrice = doctor.pricing?.outCallFee ?? 0;
-                      break;
-                    case DoctorServiceType.teleCall:
-                      serviceLocationAt = 3;
-                      productName = "Tele appointment";
-                      estimatedProductPrice = doctor.pricing?.teleCallFee ?? 0;
-                      break;
-                  }
+                  // final int serviceLocationAt;
+                  //  String productName;
+                  // int? estimatedProductPrice;
+                  // switch (doctor.storeLocationAt) {
+                  //   case 1:
+                  //     serviceLocationAt = 1;
+                  //     productName = "Visit at doctor's clinic";
+                  //     // estimatedProductPrice = doctor.pricing?.inCallFee ?? 0;
+                  //     break;
+                  //   case 2:
+                  //     // serviceLocationAt = 2;
+                  //     productName = "Doctor's at home";
+                  //     // estimatedProductPrice = doctor.pricing?.outCallFee ?? 0;
+                  //     break;
+                  //   case 3:
+                  //     // serviceLocationAt = 3;
+                  //     productName = "Tele appointment";
+                  //     // estimatedProductPrice = doctor.pricing?.teleCallFee ?? 0;
+                  //     break;
+                  // }
 
                   Map<String, dynamic> doctorParams = {
-                    "estimatedProductPrice": estimatedProductPrice,
-                    "productName": productName,
+                    "estimatedProductPrice": doctor.consultation_fee ?? 0,
+                    "productName": doctor.storeLocationAt == 1 ? "Visit at doctor's clinic" : doctor.storeLocationAt == 2 ? "Doctor's at home" : "Tele appointment",
                     "providerId": doctor.id,
                     "cartType": 2,
                     "storeId": store.storeId,
@@ -3069,7 +3084,7 @@ class ChatScreenBody extends StatelessWidget {
                     "userType": 1,
                     "unitId": "",
                     "isDoctorFlow": true,
-                    "serviceLocationAt": serviceLocationAt,
+                    "serviceLocationAt": doctor.storeLocationAt ?? 0,
                     "longitude": Utility.getLongitude(),
                     "latitude": Utility.getLatitude(),
                     "centralProductId": "",
@@ -3099,12 +3114,12 @@ class ChatScreenBody extends StatelessWidget {
                       centralProductId: '',
                       unitId: '',
                       doctorParams: doctorParams,
-                      needToShowLoaderForCartFetch: selectedProduct == null,
-                      needToSendMessage: selectedProduct == null ? true : false,
+                      needToShowLoaderForCartFetch: store.products.isEmpty,
+                      needToSendMessage: store.products.isEmpty ? true : false,
                     ),
                   );
-
-                  if (selectedProduct != null) {
+                  if (store.products.isNotEmpty) {
+                  // if (selectedProduct != null) {
                     cartBloc.stream
                         .firstWhere(
                           (state) =>
@@ -3120,9 +3135,9 @@ class ChatScreenBody extends StatelessWidget {
                             storeCategoryId: store.storeCategoryId,
                             newQuantity: 1,
                             storeTypeId: store.storeTypeId ?? -111,
-                            productId: selectedProduct.childProductId,
-                            centralProductId: selectedProduct.parentProductId,
-                            unitId: selectedProduct.unitId,
+                            productId: product?.childProductId ?? '',
+                            centralProductId: product?.parentProductId ?? '',
+                            unitId: product?.unitId ?? '',
                             needToShowLoaderForCartFetch: true,
                             needToSendMessage: true,
                           ),
@@ -3130,8 +3145,8 @@ class ChatScreenBody extends StatelessWidget {
                       }
                     });
                   }
-                },
-              );
+                // },
+              // );
             } else {
                if ((product != null && product.variantsCount > 1 &&
                     store.storeTypeId == FoodCategory.food.value) ||

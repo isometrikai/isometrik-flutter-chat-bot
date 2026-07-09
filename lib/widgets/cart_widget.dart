@@ -164,7 +164,7 @@ class CartWidget extends StatelessWidget {
   Widget _buildCartItem(WidgetAction item) {
     final quantity = item.quantity ?? '';
     final productName = item.productName ?? '';
-    final currencySymbol = item.currencySymbol ?? 'د.إ';
+    final currencySymbol = item.currencySymbol ?? 'AED';
     final price = item.productPrice ?? 0;
 
     return Padding(
@@ -176,12 +176,29 @@ class CartWidget extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Expanded(
-                child: Text(
-                  quantity.isNotEmpty ? '$quantity× $productName' : productName,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w400,
-                    color: Color(0xFF242424),
+                child: Text.rich(
+                  TextSpan(
+                    children: [
+                      TextSpan(
+                        text: quantity.isNotEmpty
+                            ? '$quantity× $productName'
+                            : productName,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w400,
+                          color: Color(0xFF242424),
+                        ),
+                      ),
+                      if (item.isDoctorFlow == true && quantity.isEmpty && item.addOns != null && item.addOns!.isNotEmpty)
+                        const TextSpan(
+                          text: '(Consultation Fee)',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w400,
+                            color: Color(0xFF979797),
+                          ),
+                        ),
+                    ],
                   ),
                   maxLines: 4,
                   overflow: TextOverflow.ellipsis,
