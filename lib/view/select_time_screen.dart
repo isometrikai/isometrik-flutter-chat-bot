@@ -132,10 +132,31 @@ class _SelectTimeScreenState extends State<SelectTimeScreen> {
     return '${months[date.month - 1]} ${date.day}';
   }
   
+  bool _isSameDay(DateTime a, DateTime b) {
+    return a.year == b.year && a.month == b.month && a.day == b.day;
+  }
+
   List<String> get currentTimeSlots {
     if (selectedDate == null) return [];
     final dateStr = _formatDateForApi(selectedDate!);
-    return dateTimeSlotsMap[dateStr] ?? [];
+    final slots = dateTimeSlotsMap[dateStr] ?? [];
+    final now = DateTime.now();
+
+    if (!_isSameDay(selectedDate!, now)) return slots;
+
+    return slots.where((slot) {
+      final parsed = _parseTimeSlotStart(slot);
+      if (parsed == null) return true;
+      final (hour24, minute) = parsed;
+      final slotStart = DateTime(
+        selectedDate!.year,
+        selectedDate!.month,
+        selectedDate!.day,
+        hour24,
+        minute,
+      );
+      return slotStart.isAfter(now);
+    }).toList();
   }
   
   bool _isLoadingDate(StoreDetailsState state, DateTime date) {
