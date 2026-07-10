@@ -251,7 +251,27 @@ class OrderSummaryWidget extends StatelessWidget {
                         ),
                       ],
                     ),
-                    ],  
+                    ], 
+                    if (storeInfo.storeCategoryId == FoodStoreCategoryId.healthCare.value) ...[
+                      const SizedBox(height: 10),
+                       Row(
+                              children: [
+                                const Text('⏰ ', style: TextStyle(fontSize: 16)),
+                                Expanded(
+                                  child: Text(
+                                    storeInfo.isScheduled == true 
+                                        ? 'Scheduled for ${_formatServiceTime(storeInfo.serviceRequestedTime)}' 
+                                        : 'Book Now',
+                                    style: AppTextStyles.restaurantDescription.copyWith(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w400,
+                                      color: const Color(0xFF242424),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                    ], 
                     ],
                   ),
                 ),
