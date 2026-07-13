@@ -598,10 +598,11 @@ class _CartScreenState extends State<CartScreen> {
           storeCategoryId: cartData.storeCategoryId,
           keyword: '',
           quantity: cartData.storeCategoryId == FoodStoreCategoryId.healthCare.value ? null : '${totalQuantity}x',
-          productName: cartData.storeCategoryId == FoodStoreCategoryId.healthCare.value ? cartData.providerName : productName,
+          productName: (cartData.storeCategoryId == FoodStoreCategoryId.healthCare.value && product.productType != 1) ? cartData.providerName : productName,
           currencySymbol: cartData.currencyCode,
           productPrice: unitPrice,
           addOns: formattedAddOns,
+          productType: product.productType,
         ));
       }
     }

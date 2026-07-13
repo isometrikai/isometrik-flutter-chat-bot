@@ -3328,6 +3328,7 @@ class WidgetAction {
   final List<FlightInfo>? flightInfo;
   final String? propertyId;
   final bool? isDoctorFlow;
+  final num? productType;
 
   WidgetAction({
     required this.buttonText,
@@ -3401,6 +3402,7 @@ class WidgetAction {
     this.flightInfo,
     this.propertyId,
     this.isDoctorFlow,
+    this.productType,
   });
 
   factory WidgetAction.fromJson(Map<String, dynamic> json) {
@@ -3480,6 +3482,7 @@ class WidgetAction {
         flightInfo: _parseFlightInfoList(json['flightInfo'] ?? json['flight_info']),
         propertyId: json['propertyId']?.toString(),
         isDoctorFlow: json['isDoctorFlow'] ?? false,
+        productType: json['productType'] ?? 0,
     );
   }
 
@@ -3557,6 +3560,7 @@ class WidgetAction {
       'flightInfo': flightInfo?.map((e) => e.toJson()).toList(),
       'propertyId': propertyId,
       'isDoctorFlow': isDoctorFlow,
+      'productType': productType,
     };
   }
 }

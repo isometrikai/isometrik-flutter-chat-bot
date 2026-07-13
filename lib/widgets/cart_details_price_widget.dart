@@ -180,7 +180,7 @@ class CartDetailsPriceWidget extends StatelessWidget {
                           color: Color(0xFF242424),
                         ),
                       ),
-                      if (item.storeCategoryId == FoodStoreCategoryId.healthCare.value)
+                      if (item.storeCategoryId == FoodStoreCategoryId.healthCare.value && item.productType != 1)
                         const TextSpan(
                           text: '(Consultation Fee)',
                           style: TextStyle(
@@ -215,7 +215,7 @@ class CartDetailsPriceWidget extends StatelessWidget {
               ),
             ],
           ),
-          if(addOns.isNotEmpty) ...[
+          if(addOns.isNotEmpty && (item.storeCategoryId == FoodStoreCategoryId.healthCare.value && item.productType != 1)) ...[
             Row(
               children: [
                 Expanded(
