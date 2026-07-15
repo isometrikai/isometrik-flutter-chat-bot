@@ -169,7 +169,7 @@ class MenuItemCard extends StatelessWidget {
 
   Widget _buildQuantityControls() {
     
-    if (storeType != FoodCategory.food.value) {
+    if (storeType != FoodCategory.food.value && storeType != FoodCategory.services.value) {
       if (!instock ) {
         return _buildOutOfStockButton();
       }
@@ -227,75 +227,64 @@ class MenuItemCard extends StatelessWidget {
 
   Widget _buildQuantityControlsUI(int quantity) {
     return Container(
+      width: double.infinity,
       height: 37,
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: purple, width: 1),
+        border: Border.all(color: AppConstants.appThemeColor, width: 1),
       ),
       child: Row(
-        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          // Decrease button
-          GestureDetector(
-            onTap: () {
-              if (onQuantityChanged != null && productId != null && centralProductId != null) {
-                onQuantityChanged!(productId!, centralProductId!, quantity, false, isCustomizable);
-              }
-            },
-            child: Container(
-              width: 37,
-              height: 37,
-              decoration: BoxDecoration(
-                color: purple,
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(8),
-                  bottomLeft: Radius.circular(8),
+            // Decrease button
+            GestureDetector(
+              onTap: () {
+                if (onQuantityChanged != null && productId != null && centralProductId != null) {
+                  onQuantityChanged!(productId!, centralProductId!, quantity, false, isCustomizable);
+                }
+              },
+              child: Container(
+                width: cardWidth == null ? 32 : 40,
+                height: 37,
+                alignment: Alignment.center,
+                // color: Colors.red,
+                child: const Icon(
+                  Icons.remove,
+                  size: 20,
+                  color: AppConstants.appThemeColor,
                 ),
               ),
-              child: const Icon(
-                Icons.remove,
-                size: 20,
-                color: Colors.white,
-              ),
             ),
-          ),
-          // Quantity display
-          Expanded(
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8),
+            // Quantity display
+            Container(
+              padding: EdgeInsets.symmetric(horizontal: cardWidth == null ? 10 : 20),
               alignment: Alignment.center,
               child: Text(
                 '$quantity',
                 style: AppTextStyles.button.copyWith(
-                  color: purple,
+                  color: AppConstants.appThemeColor,
                 ),
               ),
             ),
-          ),
-          // Increase button
-          GestureDetector(
-            onTap: () {
-              if (onQuantityChanged != null && productId != null && centralProductId != null) {
-                onQuantityChanged!(productId!, centralProductId!, quantity, true, isCustomizable);
-              }
-            },
-            child: Container(
-              width: 37,
-              height: 37,
-              decoration: BoxDecoration(
-                color: purple,
-                borderRadius: const BorderRadius.only(
-                  topRight: Radius.circular(8),
-                  bottomRight: Radius.circular(8),
+            // Increase button
+            GestureDetector(
+              onTap: () {
+                if (onQuantityChanged != null && productId != null && centralProductId != null) {
+                  onQuantityChanged!(productId!, centralProductId!, quantity, true, isCustomizable);
+                }
+              },
+              child: Container(
+                width: cardWidth == null ? 32 : 40,
+                height: 37,
+                alignment: Alignment.center,
+                // color: Colors.red,
+                child: const Icon(
+                  Icons.add,
+                  size: 20,
+                  color: AppConstants.appThemeColor,
                 ),
               ),
-              child: const Icon(
-                Icons.add,
-                size: 20,
-                color: Colors.white,
-              ),
-            ),
           ),
         ],
       ),
@@ -304,7 +293,7 @@ class MenuItemCard extends StatelessWidget {
 
   Widget _buildAddButton() {
     
-    if (storeType != FoodCategory.food.value) {
+    if (storeType != FoodCategory.food.value && storeType != FoodCategory.services.value) {
       if (!instock ) {
         return _buildOutOfStockButton();
       }
@@ -344,7 +333,7 @@ class MenuItemCard extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Text(
-            storeIsOpen == false ? 'STORE CLOSED' : 'OUT OF STOCK',
+            'OUT OF STOCK',//storeIsOpen == false ? 'STORE CLOSED' : 'OUT OF STOCK',
             style: AppTextStyles.button.copyWith(
               fontWeight: cardWidth != null ? FontWeight.w700 : FontWeight.w500,
               fontSize: cardWidth != null ? 14 : 12,

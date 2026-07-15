@@ -137,7 +137,7 @@ class _DoctorServiceTypeSheetState extends State<DoctorServiceTypeSheet> {
                   // Section 1: Products (no default selection)
                   if (_products.isNotEmpty) ...[
                     Text(
-                      'Products',
+                      'Recommended Tests & Procedures',
                       style: AppTextStyles.productTitle.copyWith(
                         fontSize: 18,
                         fontWeight: FontWeight.w600,
@@ -148,7 +148,7 @@ class _DoctorServiceTypeSheetState extends State<DoctorServiceTypeSheet> {
                     ..._products.map((product) {
                       final isSelected = _selectedProduct == product;
                       final priceText =
-                          '${product.currencySymbol.isNotEmpty ? product.currencySymbol : Utility.getCurrencyCode()} ${product.finalPrice.toStringAsFixed(0)}';
+                          '${product.currency.isNotEmpty ? product.currency : Utility.getCurrencyCode()} ${product.finalPrice.toStringAsFixed(0)}';
                       return GestureDetector(
                         onTap: () =>
                             setState(() => _selectedProduct = isSelected ? null : product),
@@ -213,7 +213,7 @@ class _DoctorServiceTypeSheetState extends State<DoctorServiceTypeSheet> {
                   ],
                   // Section 2: Doctor service type (first option selected by default)
                   Text(
-                    'Select service type',
+                    'How would you like to consult',
                     style: AppTextStyles.productTitle.copyWith(
                       fontSize: 18,
                       fontWeight: FontWeight.w600,

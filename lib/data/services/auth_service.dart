@@ -24,9 +24,9 @@ class AuthService {
   String? _name;
   String? _timestamp;
   String? _userToken;
-  String? _location;
-  double? _longitude;
-  double? _latitude;
+  // String? _location;
+  // double? _longitude;
+  // double? _latitude;
 
   // Endpoints
   // static const String _chatEndpoint = '/v2/chatbot';
@@ -46,9 +46,9 @@ class AuthService {
     required String name,
     required String timestamp,
     required String userToken,
-    String? location,
-    double? longitude,
-    double? latitude,
+    // String? location,
+    // double? longitude,
+    // double? latitude,
     bool? needToShowTutorial,
     bool? needToShowCompleteSetup,
     required String clientGuid,
@@ -65,9 +65,9 @@ class AuthService {
     _name = name;
     _timestamp = timestamp;
     _userToken = userToken;
-    _location = location;
-    _longitude = longitude;
-    _latitude = latitude;
+    // _location = location;
+    // _longitude = longitude;
+    // _latitude = latitude;
     
     // Configure token manager
     TokenManager.instance.configure(
@@ -144,9 +144,9 @@ class AuthService {
       '/v2/home-screen',
        queryParameters: { 'username': _name ?? '',
         'timestamp': _timestamp ?? '',
-        'location': _location ?? '',
-          'latitude': _latitude.toString(),
-          'longitude': _longitude.toString(),
+        'location': Utility.getLocation(),
+          'latitude': Utility.getLatitude().toString(),
+          'longitude': Utility.getLongitude().toString(),
           'user_id': _userId ?? '',
           'username': _name ?? '',
           'enable_personalisation': Utility.getPersonalization().toString()

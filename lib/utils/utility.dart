@@ -15,6 +15,11 @@ class Utility {
   static String phoneNumber = '';
   static String countryCode = '';
   static bool personalization = true;
+  static String location = '';
+  static final ValueNotifier<String> locationNotifier = ValueNotifier('');
+  static String zoneId = '';
+  static double latitude = 0.0;
+  static double longitude = 0.0;
 
   /// Fixed UTC offsets for common IANA zones (no DST). Extend as needed.
   static const Map<String, Duration> _ianaUtcOffsets = {
@@ -165,6 +170,25 @@ class Utility {
     Utility.personalization = personalization;
   }
 
+  static void setLocation(String location) {
+    Utility.location = location;
+    if (locationNotifier.value != location) {
+      locationNotifier.value = location;
+    }
+  }
+
+  static void setZoneId(String zoneId) {
+    Utility.zoneId = zoneId;
+  }
+
+  static void setLatitude(double latitude) {
+    Utility.latitude = latitude;
+  }
+
+  static void setLongitude(double longitude) {
+    Utility.longitude = longitude;
+  }
+
   static bool getPersonalization() {
     return personalization;
   }
@@ -183,6 +207,22 @@ class Utility {
 
   static void setTimezone(String value) {
     timezone = value;
+  }
+
+  static String getLocation() {
+    return location;
+  }
+
+  static String getZoneId() {
+    return zoneId;
+  }
+
+  static double getLatitude() {
+    return latitude;
+  }
+
+  static double getLongitude() {
+    return longitude;
   }
 
   /// Parses offsets like `+05:30`, `UTC+5:30`, or total minutes `330`.

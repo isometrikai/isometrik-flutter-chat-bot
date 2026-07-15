@@ -37,11 +37,15 @@ class CategoryData {
 class CartScreen extends StatefulWidget {
   final Function(String, String?)? onCheckout;
   final bool needToEndThisChat;
+  final bool needToShowCheckoutButton;
+  final String? storeCategoryId;
 
   const CartScreen({
     super.key,
     this.onCheckout,
     this.needToEndThisChat = false,
+    this.needToShowCheckoutButton = true,
+    this.storeCategoryId,
   });
 
   @override
@@ -49,7 +53,30 @@ class CartScreen extends StatefulWidget {
 }
 
 class _CartScreenState extends State<CartScreen> {
-  int selectedCategoryIndex = 0; // 0 for Restaurant, 1 for Grocery, 2 for Pharmacy, 3 for Shopping
+  static const _categoryCountKeys = [
+    'restaurant',
+    'grocery',
+    'pharmacy',
+    'shopping',
+    'services',
+    'healthCare',
+    'donation',
+  ];
+
+  static const _storeCategoryToChipIndex = <FoodStoreCategoryId, int>{
+    FoodStoreCategoryId.food: 0,
+    FoodStoreCategoryId.grocery: 1,
+    FoodStoreCategoryId.pharmacy: 2,
+    FoodStoreCategoryId.shopping: 3,
+    FoodStoreCategoryId.services: 4,
+    FoodStoreCategoryId.healthCare: 5,
+    FoodStoreCategoryId.donation: 6,
+  };
+
+  int selectedCategoryIndex = 0;
+  bool _categorySelectionInitialized = false;
+  final List<GlobalKey> _categoryChipKeys =
+      List.generate(_categoryCountKeys.length, (_) => GlobalKey());
 
   @override
   void initState() {
@@ -68,9 +95,66 @@ class _CartScreenState extends State<CartScreen> {
     });
   }
 
+  void _initializeCategorySelection(CartState state) {
+    if (_categorySelectionInitialized || state is! CartLoaded) return;
+
+    if (widget.needToShowCheckoutButton) {
+      final firstIndexWithData = _firstCategoryIndexWithData(state);
+      if (firstIndexWithData != null &&
+          selectedCategoryIndex != firstIndexWithData) {
+        setState(() => selectedCategoryIndex = firstIndexWithData);
+      }
+      if (firstIndexWithData != null) {
+        _scrollToSelectedCategory();
+      }
+    } else {
+      final categoryIndex =
+          _categoryIndexForStoreCategoryId(widget.storeCategoryId);
+      if (categoryIndex != null &&
+          selectedCategoryIndex != categoryIndex) {
+        setState(() => selectedCategoryIndex = categoryIndex);
+      }
+      _scrollToSelectedCategory();
+    }
+    _categorySelectionInitialized = true;
+  }
+
+  int? _categoryIndexForStoreCategoryId(String? storeCategoryId) {
+    if (storeCategoryId == null || storeCategoryId.isEmpty) return null;
+    return _storeCategoryToChipIndex[
+        FoodStoreCategoryId.fromValue(storeCategoryId)];
+  }
+
+  void _scrollToSelectedCategory() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final chipContext = _categoryChipKeys[selectedCategoryIndex].currentContext;
+      if (chipContext == null) return;
+      Scrollable.ensureVisible(
+        chipContext,
+        alignment: 0.5,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
+    });
+  }
+
+  int? _firstCategoryIndexWithData(CartState state) {
+    final categoryCounts = _calculateCategoryCounts(state);
+    for (int i = 0; i < _categoryCountKeys.length; i++) {
+      if ((categoryCounts[_categoryCountKeys[i]] ?? 0) > 0) {
+        return i;
+      }
+    }
+    return null;
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return BlocListener<CartBloc, CartState>(
+      listenWhen: (previous, current) => current is CartLoaded,
+      listener: (context, state) => _initializeCategorySelection(state),
+      child: Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
         child: Column(
@@ -85,13 +169,14 @@ class _CartScreenState extends State<CartScreen> {
             Expanded(
               child: _buildCartContent(),
             ),
-            if (widget.needToEndThisChat == false) ...[
+            if (widget.needToEndThisChat == false && widget.needToShowCheckoutButton == true) ...[
               // Bottom action buttons
               _buildBottomActions(),
             ],
           ],
         ),
       ),
+    ),
     );
   }
 
@@ -156,10 +241,13 @@ class _CartScreenState extends State<CartScreen> {
               final category = categories[index];
               final isSelected = selectedCategoryIndex == index;
               return GestureDetector(
+                key: _categoryChipKeys[index],
                 onTap: () {
                   setState(() {
                     selectedCategoryIndex = index;
+                    _categorySelectionInitialized = true;
                   });
+                  _scrollToSelectedCategory();
                 },
                 child: Container(
                   margin: const EdgeInsets.only(right: 8),
@@ -510,10 +598,11 @@ class _CartScreenState extends State<CartScreen> {
           storeCategoryId: cartData.storeCategoryId,
           keyword: '',
           quantity: cartData.storeCategoryId == FoodStoreCategoryId.healthCare.value ? null : '${totalQuantity}x',
-          productName: cartData.storeCategoryId == FoodStoreCategoryId.healthCare.value ? cartData.providerName : productName,
+          productName: (cartData.storeCategoryId == FoodStoreCategoryId.healthCare.value && product.productType != 1) ? cartData.providerName : productName,
           currencySymbol: cartData.currencyCode,
           productPrice: unitPrice,
           addOns: formattedAddOns,
+          productType: product.productType,
         ));
       }
     }
@@ -595,7 +684,27 @@ class _CartScreenState extends State<CartScreen> {
   }
 
   Widget _buildStoreInfoCard(CategoryData categoryData) {
-    return Container(
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: widget.needToEndThisChat
+          ? null
+          : () {
+              print("storeCategoryId: ${categoryData.storeCategoryId}");
+              print("storeTypeId: ${categoryData.storeTypeId}");
+              print("storeListing: ${categoryData.storeListing}");
+              print("hyperlocal: ${categoryData.hyperlocal}");
+              print("storeId: ${categoryData.storeId}");
+              print("companyType: ${categoryData.companyType}");
+              OrderService().triggerStoreOrder({
+                'storeCategoryId': categoryData.storeCategoryId,
+                'storeTypeId': categoryData.storeTypeId,
+                'storeListing': categoryData.storeListing,
+                'hyperlocal': categoryData.hyperlocal,
+                'storeId': categoryData.storeId,
+                'companyType': categoryData.companyType,
+              });
+            },
+      child: Container(
       padding: const EdgeInsets.all(15),
       decoration: BoxDecoration(
         color: const Color(0xFFF5F7FF),
@@ -637,45 +746,37 @@ class _CartScreenState extends State<CartScreen> {
                         color: const Color(0xFF242424),
                       ),
                     ),
+                    Text(
+                      'Visit Store',
+                      style: AppTextStyles.bodyText.copyWith(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 12,
+                        color: AppConstants.appThemeColor,
+                      ),
+                    ) 
                   ],
                 ),
               ),
+              
               const SizedBox(width: 5),
               if (widget.needToEndThisChat == false) ...[
-                  GestureDetector(
-                    onTap: () {
-                      print("storeCategoryId: ${categoryData.storeCategoryId}");
-                      print("storeTypeId: ${categoryData.storeTypeId}");
-                      print("storeListing: ${categoryData.storeListing}");
-                      print("hyperlocal: ${categoryData.hyperlocal}");
-                      print("storeId: ${categoryData.storeId}");
-                      print("companyType: ${categoryData.companyType}");
-                      OrderService().triggerStoreOrder({
-                        'storeCategoryId': categoryData.storeCategoryId,
-                        'storeTypeId': categoryData.storeTypeId,
-                        'storeListing': categoryData.storeListing,
-                        'hyperlocal': categoryData.hyperlocal,
-                        'storeId': categoryData.storeId,
-                        'companyType': categoryData.companyType,
-                      });
-                    },
-                    child: Container(
-                      width: 30,
-                      height: 30,
-                      alignment: Alignment.centerRight,
-                      child:  SvgPicture.asset(
-                        AssetPath.get('images/ic_info_cart.svg'),
-                        width: 20,
-                        height: 20,
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-                  ),  
+                Container(
+                  width: 30,
+                  height: 30,
+                  alignment: Alignment.centerRight,
+                  child: SvgPicture.asset(
+                    AssetPath.get('images/ic_info_cart.svg'),
+                    width: 20,
+                    height: 20,
+                    fit: BoxFit.cover,
+                  ),
+                ),
               ],
             ],
           ),
         ],
       ),
+    ),
     );
   }
 

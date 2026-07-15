@@ -93,6 +93,15 @@ class _ChatScreenState extends State<ChatScreen> {
     
     // Normal mode initialization
     _initializeSession(false);
+    // Timer.periodic(Duration(seconds: 60), (timer) {
+
+    //         Utility.setLocation('location');
+
+         
+    //       setState(() {
+    //         _location = Utility.getLocation();
+    //       });
+    // });
   }
 
   /// Sets up all OrderService callbacks
@@ -223,13 +232,17 @@ class _ChatScreenState extends State<ChatScreen> {
             );
           } else if (clickManage['screenName'] == 'HotelBookingUserDetails') {
             final existing = _apiData['hotel_booking'];
+            final userDetails = clickManage['hotel_booking'];
             final Map<String, dynamic> hotelBooking;
             if (existing is Map) {
               hotelBooking = Map<String, dynamic>.from(existing);
-              hotelBooking['hotel_booking'] = clickManage['hotel_booking'];
             } else {
-              hotelBooking = {'hotel_booking': clickManage['hotel_booking']};
+              hotelBooking = {};
             }
+            if (userDetails is Map) {
+              hotelBooking.addAll(Map<String, dynamic>.from(userDetails));
+            }
+            hotelBooking.remove('hotel_booking');
             _apiData = {..._apiData, 'hotel_booking': hotelBooking};
             _sendMessage('I have added the customer details.');
           } else if (clickManage['screenName'] == 'TravelHotelDetailsScreen') {
@@ -414,6 +427,69 @@ class _ChatScreenState extends State<ChatScreen> {
             'I have selected flight ${ clickManage['airlineName'] }'
           );
           }
+        }else if (clickManage['flow'] == 'PackageDelivery') {
+          if (clickManage['screenName'] == 'PackageDeliveryDropoffAddress') {
+             final existing = _apiData['package_delivery'];
+                final Map<String, dynamic> packageDeliveryData;
+                if (existing is Map) {
+                  packageDeliveryData = Map<String, dynamic>.from(existing);
+                  packageDeliveryData['dropoff_address_id'] = clickManage['dropoff_address_id'];
+                } else {
+                  packageDeliveryData = {
+                    'dropoff_address_id': clickManage['dropoff_address_id'],
+                  };
+                }
+                _apiData['package_delivery'] = packageDeliveryData;
+                _sendMessage('I have selected drop off address.\n${clickManage['fullAddress'] ?? ''}');
+          }else if (clickManage['screenName'] == 'PackageDeliveryInstructions') {
+             final existing = _apiData['package_delivery'];
+                final Map<String, dynamic> packageDeliveryData;
+                if (existing is Map) {
+                  packageDeliveryData = Map<String, dynamic>.from(existing);
+                  packageDeliveryData['package_images'] = clickManage['imageUrls'];
+                  packageDeliveryData['package_instructions'] = clickManage['packageInstructions'];
+                } else {
+                  packageDeliveryData = {
+                    'package_images': clickManage['imageUrls'],
+                    'package_instructions': clickManage['packageInstructions'],
+                  };
+                }
+                _apiData['package_delivery'] = packageDeliveryData;
+                _sendMessage('I have added package instructions or Images.');
+          }
+        } else if (clickManage['flow'] == 'ChangeCountry') {
+          final currency = (clickManage['currency']?.toString() ?? '').trim();
+          final currencySymbol =
+              (clickManage['currencySymbol']?.toString() ?? '').trim();
+          final zoneId = (clickManage['zoneId']?.toString() ?? '').trim();
+          final location = (clickManage['location']?.toString() ?? '').trim();
+          final latitude = clickManage['latitude'];
+          final longitude = clickManage['longitude'];
+
+          if (currency.isNotEmpty) {
+            Utility.setCurrencyCode(currency);
+          }
+          if (currencySymbol.isNotEmpty) {
+            // Utility.setCurrencySymbol(currencySymbol);
+            Utility.setCurrencySymbol(currency);
+          }
+          if (zoneId.isNotEmpty) {
+            Utility.setZoneId(zoneId);
+          } else {
+            BlackToastView.show(
+              context,
+              'We don\'t operate in this location at the moment.',
+            );
+          }
+          if (location.isNotEmpty) {
+            Utility.setLocation(location);
+          }
+          if (latitude.isNotEmpty) {
+            Utility.setLatitude(latitude);
+          }
+          if (longitude.isNotEmpty) {
+            Utility.setLongitude(longitude);
+          }
         } else {
           _apiData = {
             ..._apiData,
@@ -471,7 +547,8 @@ class _ChatScreenState extends State<ChatScreen> {
               message.hasFlightDestinationPlacesSectionWidget ||
               message.hasCarRentalsSearchSectionWidget ||
               message.hasFlightsSearchSectionWidget ||
-              message.hasHotelsSectionWidget)) {
+              message.hasHotelsSectionWidget ||
+              message.hasPackageTypesSectionWidget)) {
         return i;
       }
     }
@@ -495,7 +572,8 @@ class _ChatScreenState extends State<ChatScreen> {
         message.hasFlightDestinationPlacesSectionWidget ||
         message.hasCarRentalsSearchSectionWidget ||
         message.hasFlightsSearchSectionWidget ||
-        message.hasHotelsSectionWidget))
+        message.hasHotelsSectionWidget ||
+        message.hasPackageTypesSectionWidget))
       return message;
     return message.copyWith(
       hasStoreCards: false,
@@ -515,6 +593,7 @@ class _ChatScreenState extends State<ChatScreen> {
       hasCarRentalsSearchSectionWidget: false,
       hasFlightsSearchSectionWidget: false,
       hasHotelsSectionWidget: false,
+      hasPackageTypesSectionWidget: false,
     );
   }
 
@@ -594,7 +673,7 @@ class _ChatScreenState extends State<ChatScreen> {
         };
       }
 
-      print('CHINTU: _apiData: $_apiData');
+      print('USER DATA: _apiData: $_apiData');
     });
 
     _messageController.clear();
@@ -673,6 +752,7 @@ class _ChatScreenState extends State<ChatScreen> {
         ChatWidget? hotelBookingConfirmedWidget;
         ChatWidget? carBookingConfirmedWidget;
         ChatWidget? flightBookingConfirmedWidget;
+        ChatWidget? packageTypesWidget;
         try {
           storesWidget = botResponse.widgets.firstWhere(
             (widget) => widget.isStoresWidget,
@@ -786,6 +866,12 @@ class _ChatScreenState extends State<ChatScreen> {
         }
 
         try {
+          packageTypesWidget = botResponse.widgets.firstWhere((widget) => widget.isPackageTypesWidget);
+        } catch (e) {
+          packageTypesWidget = null;
+        }
+
+        try {
           hotelsWidget = botResponse.widgets.firstWhere((widget) => widget.isHotelsWidget);
         } catch (e) {
           hotelsWidget = null;
@@ -848,6 +934,7 @@ class _ChatScreenState extends State<ChatScreen> {
         bool hasHotelBookingConfirmedSection = hotelBookingConfirmedWidget != null;
         bool hasCarBookingConfirmedSection = carBookingConfirmedWidget != null;
         bool hasFlightBookingConfirmedSection = flightBookingConfirmedWidget != null;
+        bool hasPackageTypesSection = packageTypesWidget != null;
         bool hasHotelsSection = hotelsWidget != null;
         bool hasServicesDeliveryOptions = servicesDeliveryOptionsWidget != null;
         bool hasChooseAddress = chooseAddressWidget != null;
@@ -880,6 +967,7 @@ class _ChatScreenState extends State<ChatScreen> {
             hasHotelBookingConfirmedSectionWidget: hasHotelBookingConfirmedSection,
             hasCarBookingConfirmedSectionWidget: hasCarBookingConfirmedSection,
             hasFlightBookingConfirmedSectionWidget: hasFlightBookingConfirmedSection,
+            hasPackageTypesSectionWidget: hasPackageTypesSection,
             hasServicesDeliveryOptionsWidget: hasServicesDeliveryOptions,
             hasChooseAddressWidget: hasChooseAddress,
             hasChooseCardWidget: hasChooseCard,
@@ -916,6 +1004,7 @@ class _ChatScreenState extends State<ChatScreen> {
                         !hasHotelBookingConfirmedSection &&
                         !hasCarBookingConfirmedSection &&
                         !hasFlightBookingConfirmedSection &&
+                        !hasPackageTypesSection &&
                         !hasChooseAddress &&
                         !hasChooseCard &&
                         !hasOrderSummary &&
@@ -943,6 +1032,7 @@ class _ChatScreenState extends State<ChatScreen> {
             hotelBookingConfirmedItems: hotelBookingConfirmedWidget?.getHotelBookingConfirmedItems() ?? [],
             carBookingConfirmedItems: carBookingConfirmedWidget?.getCarBookingConfirmedItems() ?? [],
             flightBookingConfirmedItems: flightBookingConfirmedWidget?.getFlightBookingConfirmedItems() ?? [],
+            packageTypesItems: packageTypesWidget?.getPackageTypesItems() ?? [],
             servicesDeliveryOptions: servicesDeliveryOptionsWidget?.getServicesDeliveryOptions() ?? [],
             addressOptions: chooseAddressWidget?.getAddressOptions() ?? [],
             cardOptions: chooseCardWidget?.getCardOptions() ?? [],
@@ -1015,6 +1105,7 @@ class _ChatScreenState extends State<ChatScreen> {
     ChatWidget? hotelBookingConfirmedWidget;
     ChatWidget? carBookingConfirmedWidget;
     ChatWidget? flightBookingConfirmedWidget;
+    ChatWidget? packageTypesWidget;
     // Capture needToEndThisChat from API response
     _needToEndThisChat = response.needToEndThisChat;
     try {
@@ -1130,6 +1221,12 @@ class _ChatScreenState extends State<ChatScreen> {
     }
 
     try {
+      packageTypesWidget = response.widgets.firstWhere((widget) => widget.isPackageTypesWidget);
+    } catch (e) {
+      packageTypesWidget = null;
+    }
+
+    try {
       hotelsWidget = response.widgets.firstWhere((widget) => widget.isHotelsWidget);
     } catch (e) {
       hotelsWidget = null;
@@ -1198,6 +1295,7 @@ class _ChatScreenState extends State<ChatScreen> {
     bool hasHotelBookingConfirmedSection = hotelBookingConfirmedWidget != null;
     bool hasCarBookingConfirmedSection = carBookingConfirmedWidget != null;
     bool hasFlightBookingConfirmedSection = flightBookingConfirmedWidget != null;
+    bool hasPackageTypesSection = packageTypesWidget != null;
     setState(() {
       messages.add(
         ChatMessage(
@@ -1223,6 +1321,7 @@ class _ChatScreenState extends State<ChatScreen> {
           hasHotelBookingConfirmedSectionWidget: hasHotelBookingConfirmedSection,
           hasCarBookingConfirmedSectionWidget: hasCarBookingConfirmedSection,
           hasFlightBookingConfirmedSectionWidget: hasFlightBookingConfirmedSection,
+          hasPackageTypesSectionWidget: hasPackageTypesSection,
           hasHotelsSectionWidget: hasHotelsSection,
           hasServicesDeliveryOptionsWidget: hasServicesDeliveryOptions,
           hasChooseAddressWidget: hasChooseAddress,
@@ -1250,6 +1349,7 @@ class _ChatScreenState extends State<ChatScreen> {
               !hasHotelBookingConfirmedSection &&
               !hasCarBookingConfirmedSection &&
               !hasFlightBookingConfirmedSection &&
+              !hasPackageTypesSection &&
               !hasServicesDeliveryOptions &&
               !hasChooseAddress &&
               !hasChooseCard &&
@@ -1277,6 +1377,7 @@ class _ChatScreenState extends State<ChatScreen> {
                       !hasHotelBookingConfirmedSection &&
                       !hasCarBookingConfirmedSection &&
                       !hasFlightBookingConfirmedSection &&
+                      !hasPackageTypesSection &&
                       !hasServicesDeliveryOptions &&
                       !hasChooseAddress &&
                       !hasChooseCard &&
@@ -1305,6 +1406,7 @@ class _ChatScreenState extends State<ChatScreen> {
           hotelBookingConfirmedItems: hotelBookingConfirmedWidget?.getHotelBookingConfirmedItems() ?? [],
           carBookingConfirmedItems: carBookingConfirmedWidget?.getCarBookingConfirmedItems() ?? [],
           flightBookingConfirmedItems: flightBookingConfirmedWidget?.getFlightBookingConfirmedItems() ?? [],
+          packageTypesItems: packageTypesWidget?.getPackageTypesItems() ?? [],
           servicesDeliveryOptions: servicesDeliveryOptionsWidget?.getServicesDeliveryOptions() ?? [],
           addressOptions: chooseAddressWidget?.getAddressOptions() ?? [],
           cardOptions: chooseCardWidget?.getCardOptions() ?? [],
@@ -1328,6 +1430,7 @@ class _ChatScreenState extends State<ChatScreen> {
           hotelBookingConfirmedWidget: hotelBookingConfirmedWidget,
           carBookingConfirmedWidget: carBookingConfirmedWidget,
           flightBookingConfirmedWidget: flightBookingConfirmedWidget,
+          packageTypesWidget: packageTypesWidget,
           servicesDeliveryOptionsWidget: servicesDeliveryOptionsWidget,
           chooseAddressWidget: chooseAddressWidget,
           chooseCardWidget: chooseCardWidget,
@@ -1357,6 +1460,8 @@ class _ChatScreenState extends State<ChatScreen> {
                     widget.type == WidgetEnum.see_more_hotels.value ||
                     widget.type == WidgetEnum.see_more_cars.value ||
                     widget.type == WidgetEnum.see_more_flights.value ||
+                    widget.type == WidgetEnum.add_dropoff_address.value ||
+                    widget.type == WidgetEnum.package_instructions.value ||
                     widget.type == WidgetEnum.trip_type_selection.value ||
                     widget.type == WidgetEnum.flight_booking_date_time.value ||
                     widget.type == WidgetEnum.flight_add_member.value ||

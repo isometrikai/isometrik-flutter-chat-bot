@@ -3,33 +3,35 @@ import 'package:flutter/material.dart';
 import '../data/data.dart';
 import '../utils/utils.dart';
 
-/// Flight origin place picker card (same layout as car dropoff places).
-class FlightOriginPlacesWidget extends StatelessWidget {
-  final List<CarPickupPlace> places;
-  final void Function(CarPickupPlace place)? onPlaceSelected;
+class PackageTypesWidget extends StatelessWidget {
+  final List<SendPackageType> packageTypes;
+  final void Function(SendPackageType packageType)? onPackageTypeSelected;
   final bool isFromChatHistory;
+  final String headerText;
 
-  const FlightOriginPlacesWidget({
+  const PackageTypesWidget({
     super.key,
-    required this.places,
-    this.onPlaceSelected,
+    required this.packageTypes,
+    this.onPackageTypeSelected,
     this.isFromChatHistory = false,
+    this.headerText = 'Select a category below',
   });
 
   static const Color _borderColor = Color(0xFFE9DFFB);
   static const Color _rowBackground = Color(0xFFF5F7FF);
   // static const Color _labelColor = Color(0xFF8E2FFD);
+  static const Color _headerColor = Color(0xFF242424);
 
   @override
   Widget build(BuildContext context) {
-    if (places.isEmpty) return const SizedBox.shrink();
+    if (packageTypes.isEmpty) return const SizedBox.shrink();
 
     return Align(
       alignment: Alignment.centerLeft,
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 294),
         child: Container(
-          padding: const EdgeInsets.all(15),
+          padding: const EdgeInsets.fromLTRB(15, 20, 15, 15),
           decoration: BoxDecoration(
             color: Colors.white,
             border: Border.all(color: _borderColor),
@@ -39,14 +41,23 @@ class FlightOriginPlacesWidget extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             mainAxisSize: MainAxisSize.min,
             children: [
-              for (int i = 0; i < places.length; i++) ...[
-                _FlightOriginPlaceRow(
-                  label: places[i].name,
+              Text(
+                headerText,
+                style: AppTextStyles.bodyText.copyWith(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w400,
+                  height: 1.4,
+                  color: _headerColor,
+                ),
+              ),
+              for (int i = 0; i < packageTypes.length; i++) ...[
+                const SizedBox(height: 10),
+                _PackageTypeRow(
+                  label: packageTypes[i].sendPackageTypeName,
                   onTap: isFromChatHistory
                       ? null
-                      : () => onPlaceSelected?.call(places[i]),
+                      : () => onPackageTypeSelected?.call(packageTypes[i]),
                 ),
-                if (i < places.length - 1) const SizedBox(height: 10),
               ],
             ],
           ),
@@ -56,11 +67,11 @@ class FlightOriginPlacesWidget extends StatelessWidget {
   }
 }
 
-class _FlightOriginPlaceRow extends StatelessWidget {
+class _PackageTypeRow extends StatelessWidget {
   final String label;
   final VoidCallback? onTap;
 
-  const _FlightOriginPlaceRow({
+  const _PackageTypeRow({
     required this.label,
     this.onTap,
   });
@@ -71,7 +82,7 @@ class _FlightOriginPlaceRow extends StatelessWidget {
       height: 36,
       padding: const EdgeInsets.symmetric(horizontal: 8),
       decoration: BoxDecoration(
-        color: FlightOriginPlacesWidget._rowBackground,
+        color: PackageTypesWidget._rowBackground,
         borderRadius: BorderRadius.circular(8),
       ),
       alignment: Alignment.centerLeft,

@@ -23,8 +23,8 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
         fingerPrintId: event.fingerPrintId,
         sessionId: event.sessionId,
         isLoggedIn: event.isLoggedIn,
-        longitude: double.parse(event.longitude),
-        latitude: double.parse(event.latitude),
+        // longitude: double.parse(event.longitude),
+        // latitude: double.parse(event.latitude),
         staffId: event.staffId,
         serviceRequestedTime: event.serviceRequestedTime,
         storeCategoryId: event.storeCategoryId,
@@ -33,14 +33,15 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
         hotelDestinationData: event.hotelDestinationData,
         carPickupData: event.carPickupData,
         flightBookingData: event.flightBookingData,
+        packageDeliveryData: event.packageDeliveryData,
       );
-      print('CHINTU: $chat');
       if (chat != null) {
         emit(ChatLoaded(chat));
       } else {
         emit(ChatError('Failed to send message'));
       }
     } catch (e) {
+      print('ERROR catched in chat bloc: $e');
       emit(ChatError(e.toString()));
     }
   }

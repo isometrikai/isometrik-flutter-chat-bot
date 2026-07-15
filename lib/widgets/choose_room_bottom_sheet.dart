@@ -55,7 +55,7 @@ class ChooseRoomBottomSheet extends StatelessWidget {
   }
 
   static const Color _sheetBackground = Color(0xFFF5F7FF);
-  static const Color _accentPurple = Color(0xFF8E2FFD);
+  // static const Color _accentPurple = Color(0xFF8E2FFD);
   static const Color _labelPurple = Color(0xFF6E4185);
   static const Color _titleColor = Color(0xFF242424);
   static const Color _mutedGrey = Color(0xFF979797);
@@ -179,7 +179,9 @@ class ChooseRoomBottomSheet extends StatelessWidget {
         if (state is HotelAvailabilityLoadInProgress) {
           return const Padding(
             padding: EdgeInsets.symmetric(vertical: 48),
-            child: Center(child: CircularProgressIndicator()),
+            child: Center(child: CircularProgressIndicator(
+              color: AppConstants.appThemeColor,
+            )),
           );
         }
 
@@ -457,7 +459,7 @@ class _RoomRadio extends StatelessWidget {
         shape: BoxShape.circle,
         border: Border.all(
           color: isSelected
-              ? ChooseRoomBottomSheet._accentPurple
+              ? AppConstants.appThemeColor
               : ChooseRoomBottomSheet._radioBorderIdle,
           width: 0.83,
         ),
@@ -465,7 +467,7 @@ class _RoomRadio extends StatelessWidget {
       child: isSelected
           ? Container(
               decoration: const BoxDecoration(
-                color: ChooseRoomBottomSheet._accentPurple,
+                color: AppConstants.appThemeColor,
                 shape: BoxShape.circle,
               ),
             )
@@ -490,19 +492,16 @@ class _GradientNextButton extends StatelessWidget {
       width: double.infinity,
       child: DecoratedBox(
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: enabled
-                ? const [
-                    Color(0xFFD445EC),
-                    Color(0xFFB02EFB),
-                    Color(0xFF8E2FFD),
-                    Color(0xFF5E3DFE),
-                    Color(0xFF5186E0),
-                  ]
-                : const [Color(0xFFE5E7EB), Color(0xFFD1D5DB)],
-            begin: Alignment.centerLeft,
-            end: Alignment.centerRight,
-          ),
+          // gradient: LinearGradient(
+          //   colors: enabled
+          //       ? [
+          //          AppConstants.appThemeColor,
+          //         ]
+          //       : const [Color(0xFFE5E7EB), Color(0xFFD1D5DB)],
+          //   begin: Alignment.centerLeft,
+          //   end: Alignment.centerRight,
+          // ),
+          color: enabled ? AppConstants.appThemeColor : Color(0xFFD1D5DB),
           borderRadius: BorderRadius.circular(16),
         ),
         child: ElevatedButton(
