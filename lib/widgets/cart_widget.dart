@@ -57,75 +57,76 @@ class CartWidget extends StatelessWidget {
         children: [
           // Store name section
           if (storeNameItem != null) ...[
-
-            Container(
-              margin: const EdgeInsets.fromLTRB(16, 18, 16, 0),
-              height: 50,
-              decoration: BoxDecoration(
-                color: const Color(0xFFF5F7FF),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              padding: const EdgeInsets.fromLTRB(10, 10, 0, 10),
-              child: Row(
-                children: [
-                  SvgPicture.asset(
-                        AssetPath.get('images/ic_storeCart.svg'),
-                        width: 30,
-                        height: 30,
-                        fit: BoxFit.cover,
-                      ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Text(
-                      storeNameItem.storeName ?? '',
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: AppTextStyles.restaurantTitle.copyWith(
-                        fontWeight: FontWeight.w600,
-                        fontSize: 14,
-                        height: 1.4,
-                        color: Color(0xFF242424),
+            GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap:
+                  isFromChatHistory
+                      ? null
+                      : () {
+                        print("storeNameItem: ${storeNameItem.toJson()}");
+                        OrderService().triggerStoreOrder(
+                          storeNameItem.toJson(),
+                        );
+                      },
+              child: Container(
+                margin: const EdgeInsets.fromLTRB(16, 18, 16, 0),
+                height: 60,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF5F7FF),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                padding: const EdgeInsets.fromLTRB(10, 10, 0, 10),
+                child: Row(
+                  children: [
+                    SvgPicture.asset(
+                      AssetPath.get('images/ic_storeCart.svg'),
+                      width: 30,
+                      height: 30,
+                      fit: BoxFit.cover,
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            storeNameItem.storeName ?? '',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: AppTextStyles.restaurantTitle.copyWith(
+                              fontWeight: FontWeight.w600,
+                              fontSize: 14,
+                              height: 1.4,
+                              color: Color(0xFF242424),
+                            ),
+                          ),
+                          Text(
+                            'Visit Store',
+                            style: AppTextStyles.bodyText.copyWith(
+                              fontWeight: FontWeight.w600,
+                              fontSize: 12,
+                              color: AppConstants.appThemeColor,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                  ),
-                  // const SizedBox(width: 5),
-                  if(isFromChatHistory == false) ...[
-                  GestureDetector(
-                    onTap: () {
-                      print("storeNameItem: ${storeNameItem.toJson()}");
-                      OrderService().triggerStoreOrder(storeNameItem.toJson());
-                    },
-                    child: Container(
-                      // margin: const EdgeInsets.only(right: 15),
-                      width: 45,
-                      // height: double.infinity,
-                      // color: Colors.red,
-                      alignment: Alignment.center,
-                      child:  SvgPicture.asset(
-                        AssetPath.get('images/ic_info_cart.svg'),
-                        width: 16,
-                        height: 16,
-                        fit: BoxFit.cover,
+                    if (isFromChatHistory == false) ...[
+                      Container(
+                        width: 45,
+                        alignment: Alignment.center,
+                        child: SvgPicture.asset(
+                          AssetPath.get('images/ic_info_cart.svg'),
+                          width: 16,
+                          height: 16,
+                          fit: BoxFit.cover,
+                        ),
                       ),
-                      ),
-                    ),   
+                    ],
                   ],
-                ],
+                ),
               ),
             ),
-            // Container(
-            //   height: 1,
-            //   margin: const EdgeInsets.symmetric(horizontal: 16),
-            //   decoration: BoxDecoration(
-            //     border: Border(
-            //       bottom: BorderSide(
-            //         color: const Color(0xFFE6E6FA),
-            //         width: 1,
-            //         style: BorderStyle.solid,
-            //       ),
-            //     ),
-            //   ),
-            // ),
           ],
           // Regular items section
           if (regularItems.isNotEmpty) ...[
@@ -163,7 +164,7 @@ class CartWidget extends StatelessWidget {
   Widget _buildCartItem(WidgetAction item) {
     final quantity = item.quantity ?? '';
     final productName = item.productName ?? '';
-    final currencySymbol = item.currencySymbol ?? 'د.إ';
+    final currencySymbol = item.currencySymbol ?? 'AED';
     final price = item.productPrice ?? 0;
 
     return Padding(
@@ -175,12 +176,29 @@ class CartWidget extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Expanded(
-                child: Text(
-                  quantity.isNotEmpty ? '$quantity× $productName' : productName,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w400,
-                    color: Color(0xFF242424),
+                child: Text.rich(
+                  TextSpan(
+                    children: [
+                      TextSpan(
+                        text: quantity.isNotEmpty
+                            ? '$quantity× $productName'
+                            : productName,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w400,
+                          color: Color(0xFF242424),
+                        ),
+                      ),
+                      if (item.isDoctorFlow == true && quantity.isEmpty && item.addOns != null && item.addOns!.isNotEmpty)
+                        const TextSpan(
+                          text: '(Consultation Fee)',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w400,
+                            color: Color(0xFF979797),
+                          ),
+                        ),
+                    ],
                   ),
                   maxLines: 4,
                   overflow: TextOverflow.ellipsis,

@@ -1,3 +1,4 @@
+import 'package:chat_bot/utils/enum.dart';
 import 'package:flutter/material.dart';
 import 'package:chat_bot/data/data.dart';
 
@@ -137,17 +138,72 @@ class CartDetailsPriceWidget extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              //  child: Text.rich(
+              //     TextSpan(
+              //       children: [
+              //         TextSpan(
+              //           text: quantity.isNotEmpty
+              //               ? '$quantity× $productName'
+              //               : productName,
+              //           style: const TextStyle(
+              //             fontSize: 16,
+              //             fontWeight: FontWeight.w400,
+              //             color: Color(0xFF242424),
+              //           ),
+              //         ),
+              //         if (item.isDoctorFlow == true && quantity.isEmpty && item.addOns != null && item.addOns!.isNotEmpty)
+              //           const TextSpan(
+              //             text: '(Consultation Fee)',
+              //             style: TextStyle(
+              //               fontSize: 12,
+              //               fontWeight: FontWeight.w400,
+              //               color: Color(0xFF979797),
+              //             ),
+              //           ),
+              //       ],
+              //     ),
+              //     maxLines: 4,
+              //     overflow: TextOverflow.ellipsis,
+              //   ),
               Expanded(
-                child: Text(
-                  quantity.isNotEmpty ? '$quantity $productName' : productName,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w400,
-                    color: Color(0xFF242424),
+                child: 
+                Text.rich(
+                  TextSpan(
+                    children: [
+                      TextSpan(
+                        text: quantity.isNotEmpty
+                            ? '$quantity× $productName'
+                            : productName,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w400,
+                          color: Color(0xFF242424),
+                        ),
+                      ),
+                      if (item.storeCategoryId == FoodStoreCategoryId.healthCare.value && item.productType != 1)
+                        const TextSpan(
+                          text: '(Consultation Fee)',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w400,
+                            color: Color(0xFF979797),
+                          ),
+                        ),
+                    ],
                   ),
                   maxLines: 4,
                   overflow: TextOverflow.ellipsis,
                 ),
+                // Text(
+                //   quantity.isNotEmpty ? '$quantity $productName' : productName,
+                //   style: const TextStyle(
+                //     fontSize: 16,
+                //     fontWeight: FontWeight.w400,
+                //     color: Color(0xFF242424),
+                //   ),
+                //   maxLines: 4,
+                //   overflow: TextOverflow.ellipsis,
+                // ),
               ),
               Text(
                 '$currencySymbol ${price}',//toStringAsFixed(0)
@@ -159,7 +215,7 @@ class CartDetailsPriceWidget extends StatelessWidget {
               ),
             ],
           ),
-          if(addOns.isNotEmpty) ...[
+          if(addOns.isNotEmpty && (item.storeCategoryId == FoodStoreCategoryId.healthCare.value && item.productType != 1)) ...[
             Row(
               children: [
                 Expanded(

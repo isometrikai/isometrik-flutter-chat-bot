@@ -4,6 +4,7 @@ import 'package:chat_bot/data/model/chat_response.dart';
 import 'package:chat_bot/data/services/chat_api_services.dart';
 import 'package:chat_bot/utils/api_result.dart';
 import 'package:chat_bot/utils/enum.dart';
+import 'package:chat_bot/utils/utility.dart';
 
 class HawkSearchService {
   HawkSearchService._internal();
@@ -15,8 +16,8 @@ class HawkSearchService {
   String _visitId = '';
   String _visitorId = '';
   String _searchApiUrl = '';
-  double _latitude = -1;
-  double _longitude = -1;
+  // double _latitude = -1;
+  // double _longitude = -1;
 
   /// Configure HawkSearch service with required parameters
   void configure({
@@ -25,16 +26,16 @@ class HawkSearchService {
     required String visitId,
     required String visitorId,
     required String searchApiUrl,
-    required double latitude,
-    required double longitude,
+    // required double latitude,
+    // required double longitude,
   }) {
     _clientGuid = clientGuid;
     _indexName = indexName;
     _visitId = visitId;
     _visitorId = visitorId;
     _searchApiUrl = searchApiUrl;
-    _latitude = latitude;
-    _longitude = longitude;
+    // _latitude = latitude;
+    // _longitude = longitude;
   }
 
   /// Calls HawkSearch and returns a list of `Store` grouped with their `Product`s.
@@ -54,8 +55,8 @@ class HawkSearchService {
       "SearchWithin": storeCategoryId,
       'ClientData': {
         'Origin': {
-          'Latitude': _latitude,
-          'Longitude': _longitude,
+          'Latitude': Utility.getLatitude(),
+          'Longitude': Utility.getLongitude(),
         },
         'VisitId': _visitId,
         'VisitorId': _visitorId,

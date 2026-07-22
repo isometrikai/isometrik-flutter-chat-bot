@@ -24,6 +24,7 @@ class ChatLoadEvent extends ChatEvent {
   final Map<String, dynamic> hotelDestinationData;
   final Map<String, dynamic> carPickupData;
   final Map<String, dynamic> flightBookingData;
+  final Map<String, dynamic> packageDeliveryData;
   const ChatLoadEvent({
     required this.message,
     this.agentId = "67a9df239dbfc422720f19b5",
@@ -40,6 +41,7 @@ class ChatLoadEvent extends ChatEvent {
     this.hotelDestinationData = const {},
     this.carPickupData = const {},
     this.flightBookingData = const {},
+    this.packageDeliveryData = const {},
   }) : sessionId = sessionId ?? "default-session";
 
   static Future<ChatLoadEvent> create({
@@ -58,6 +60,7 @@ class ChatLoadEvent extends ChatEvent {
     Map<String, dynamic>? hotelDestinationData,
     Map<String, dynamic>? carPickupData,
     Map<String, dynamic>? flightBookingData,
+    Map<String, dynamic>? packageDeliveryData,
   }) async {
     String deviceId = fingerPrintId ?? await _getDeviceId();
     
@@ -77,6 +80,7 @@ class ChatLoadEvent extends ChatEvent {
       hotelDestinationData: hotelDestinationData ?? {},
       carPickupData: carPickupData ?? {},
       flightBookingData: flightBookingData ?? {},
+      packageDeliveryData: packageDeliveryData ?? {},
     );
   }
 

@@ -18,15 +18,15 @@ class ChatApiServices {
   String? _userId;
   String? _name;
   String? _timestamp;
-  String? _location;
-  double? _longitude;
-  double? _latitude;
+  // String? _location;
+  // double? _longitude;
+  // double? _latitude;
   String? _clientGuid;
   String? _indexName;
   String? _visitId;
   String? _visitorId;
   String? _searchApiUrl;
-  String? _zoneId;
+  // String? _zoneId;
   String? _timezone;
 
   late final ApiClient _chatClient = UniversalApiClient.instance.chatClient;
@@ -39,30 +39,30 @@ class ChatApiServices {
     required String name,
     required String timestamp,
     required String userToken,
-    String? location,
-    double? longitude,
-    double? latitude,
+    // String? location,
+    // double? longitude,
+    // double? latitude,
     required String clientGuid,
     required String indexName,
     required String visitId,
     required String visitorId,
     required String searchApiUrl,
-    required String zoneId,
+    // required String zoneId,
     required String timezone,
   }) {
     _chatBotId = chatBotId;
     _userId = userId;
     _name = name;
     _timestamp = timestamp;
-    _location = location;
-    _longitude = longitude;
-    _latitude = latitude;
+    // _location = location;
+    // _longitude = longitude;
+    // _latitude = latitude;
     _clientGuid = clientGuid;
     _indexName = indexName;
     _visitId = visitId;
     _visitorId = visitorId;
     _searchApiUrl = searchApiUrl;
-    _zoneId = zoneId;
+    // _zoneId = zoneId;
     _timezone = timezone;
   }
 
@@ -75,10 +75,10 @@ class ChatApiServices {
   String? get userId => _userId;
   
   /// Get the configured latitude
-  double? get latitude => _latitude;
+  // double? get latitude => _latitude;
   
   /// Get the configured longitude
-  double? get longitude => _longitude;
+  // double? get longitude => _longitude;
 
   String? get timezone => _timezone;
 
@@ -88,8 +88,8 @@ class ChatApiServices {
     required String fingerPrintId,
     required String sessionId,
     bool isLoggedIn = false,
-    double longitude = 0.0,
-    double latitude = 0.0,
+    // double longitude = 0.0,
+    // double latitude = 0.0,
     String staffId = "",
     String serviceRequestedTime = "",
     String storeCategoryId = "",
@@ -98,6 +98,7 @@ class ChatApiServices {
     Map<String, dynamic> hotelDestinationData = const {},
     Map<String, dynamic> carPickupData = const {},
     Map<String, dynamic> flightBookingData = const {},
+    Map<String, dynamic> packageDeliveryData = const {},
   }) async {
     final body = {
       'user_id': _userId,
@@ -109,15 +110,15 @@ class ChatApiServices {
       'visit_id': _visitId ?? '',
       'visitor_id': _visitorId ?? '',
       'search_api_url': _searchApiUrl ?? '',
-      'zone_id': _zoneId ?? '',
+      'zone_id': Utility.getZoneId(),
       'location': {
-        'latitude': (latitude == 0.0 ? (_latitude ?? 0.0) : latitude).toString(),
-        'longitude': (longitude == 0.0 ? (_longitude ?? 0.0) : longitude).toString(),
+        'latitude': Utility.getLatitude().toString(),
+        'longitude': Utility.getLongitude().toString(),
       },
       'user_data': {
         'name': _name ?? '',
         'timestamp': _timestamp ?? '',
-        'location': _location ?? '',
+        'location': Utility.getLocation(),
       },
       'staff_id': staffId,
       'service_requested_time': serviceRequestedTime,
@@ -127,6 +128,7 @@ class ChatApiServices {
       'hotel_booking': hotelDestinationData,
       'car_booking': carPickupData,
       'flight_booking': flightBookingData,
+      'package_delivery': packageDeliveryData,
       'enable_personalisation': Utility.getPersonalization(),
     };
 

@@ -608,6 +608,7 @@ class Product {
   final String? storeId;
   final List<SelectedAddOn>? selectedAddOns;
   final List<ProductAttribute>? attributes;
+  final num? productType;
 
   Product({
     required this.id,
@@ -620,6 +621,7 @@ class Product {
     this.storeId,
     this.selectedAddOns,
     this.attributes,
+    this.productType,
   });
 
   factory Product.fromJson(Map<String, dynamic> json) {
@@ -642,6 +644,7 @@ class Product {
               .map((e) => ProductAttribute.fromJson(e))
               .toList()
           : null,
+      productType: json['productType'] ?? 0,
     );
   }
 
@@ -657,6 +660,7 @@ class Product {
       'storeId': storeId,
       'selectedAddOns': selectedAddOns?.map((e) => e.toJson()).toList(),
       'attributes': attributes?.map((e) => e.toJson()).toList(),
+      'productType': productType,
     };
   }
 }

@@ -30,7 +30,7 @@ class FlightSearchScreen extends StatefulWidget {
 class _FlightSearchScreenState extends State<FlightSearchScreen> {
   final ScrollController _scrollController = ScrollController();
 
-  static const Color _accentPurple = Color(0xFF8E2FFD);
+  // static const Color _accentPurple = Color(0xFF8E2FFD);
   static const String _noFlightsMessage = 'No Flights Found';
 
   @override
@@ -102,7 +102,7 @@ class _FlightSearchScreenState extends State<FlightSearchScreen> {
         if (state is FlightSearchInitial || state is FlightSearchLoadInProgress) {
           return const Center(
             child: CircularProgressIndicator(
-              color: _accentPurple,
+              color: AppConstants.appThemeColor,
             ),
           );
         }
@@ -127,7 +127,7 @@ class _FlightSearchScreenState extends State<FlightSearchScreen> {
                   padding: EdgeInsets.symmetric(vertical: 16),
                   child: Center(
                     child: CircularProgressIndicator(
-                      color: _accentPurple,
+                      color: AppConstants.appThemeColor,
                     ),
                   ),
                 ),

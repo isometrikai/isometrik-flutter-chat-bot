@@ -216,33 +216,47 @@ class StoreCard extends StatelessWidget {
               ],
             ),
             if (isTableBookingFlow == false) ...[
-             const SizedBox(height: 12),
-              SizedBox(
-                height: 113,
-                child: ListView.separated(
-                  scrollDirection: Axis.horizontal,
-                  padding: EdgeInsets.zero,
-                  itemBuilder:
-                      (context, i) => _ProductPreviewTile(
-                        product: store.isDoctore == false ? store.products[i] : null,
-                        doctor: store.isDoctore == false ? null : store.doctorsList[i],
-                        store: store,
-                        onAddToCart: onAddToCart,
-                        onHide: onHide,
-                        // Pass the onHide callback
-                        onAddToCartRequested: onAddToCartRequested,
-                        // Pass the new callback
-                        cartData: cartData,
-                        // Pass cart data
-                        onQuantityChanged:
-                            onQuantityChanged, // Pass quantity change callback
-                        isFromChatHistory: isFromChatHistory,
-                        onDonationTap: onDonationTap,
-                      ),
-                  separatorBuilder: (_, __) => const SizedBox(width: 10),
-                  itemCount: store.isDoctore == false ? store.products.length : store.doctorsList.length,
+              const SizedBox(height: 12),
+              if (store.companytype == 1 && store.isDoctore == true)
+                ...[
+                  _buildDoctorBookingRow(context),
+                ] else ...[
+                SizedBox(
+                  height: 113,
+                  child: ListView.separated(
+                    scrollDirection: Axis.horizontal,
+                    padding: EdgeInsets.zero,
+                    itemBuilder:
+                        (context, i) => _ProductPreviewTile(
+                          product:
+                              store.isDoctore == false
+                                  ? store.products[i]
+                                  : null,
+                          doctor:
+                              store.isDoctore == false
+                                  ? null
+                                  : store.doctorsList[i],
+                          store: store,
+                          onAddToCart: onAddToCart,
+                          onHide: onHide,
+                          // Pass the onHide callback
+                          onAddToCartRequested: onAddToCartRequested,
+                          // Pass the new callback
+                          cartData: cartData,
+                          // Pass cart data
+                          onQuantityChanged:
+                              onQuantityChanged, // Pass quantity change callback
+                          isFromChatHistory: isFromChatHistory,
+                          onDonationTap: onDonationTap,
+                        ),
+                    separatorBuilder: (_, __) => const SizedBox(width: 10),
+                    itemCount:
+                        store.isDoctore == false
+                            ? store.products.length
+                            : store.doctorsList.length,
+                  ),
                 ),
-              ),
+              ],
             ],
               if (isFromChatHistory == false) ...[
             const SizedBox(height: 15),
@@ -318,6 +332,89 @@ class StoreCard extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Widget _buildDoctorBookingRow(BuildContext context) {
+    final minFee = _getMinimumConsultationFee();
+    final currency = _getDoctorCurrencySymbol();
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        if (minFee != null) ...[
+        Text(
+                            'Fees: ${currency} ${minFee.toStringAsFixed(0)}',
+                            style: AppTextStyles.productPrice.copyWith(
+                              color: const Color(0xFF242424),
+                              fontSize: 14,
+                            ),
+                          ),
+        ] else ...[
+          const SizedBox.shrink(),
+        ],
+        if (isFromChatHistory == false && store.storeIsOpen == true)
+          GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: () {
+              if (onTap != null) {
+                onTap!.call();
+                return;
+              }
+              if (storesWidget != null) {
+                // final Map<String, dynamic>? storeJson =
+                //     storesWidget!.getRawStore(index);
+                // OrderService().triggerStoreOrder(storeJson ?? {});
+                onAddToCartRequested?.call(null, store, store.doctorsList.isNotEmpty ? store.doctorsList[0] : null);
+              }
+            },
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              decoration: BoxDecoration(
+                color: AppConstants.appThemeColor,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    'Add',
+                    style: AppTextStyles.restaurantDescription.copyWith(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 14,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+
+  num? _getMinimumConsultationFee() {
+    if (store.doctorsList.isEmpty) return null;
+
+    num? minFee;
+    for (final doctor in store.doctorsList) {
+      final fee = doctor.consultation_fee;
+      if (fee == null || fee <= 0) continue;
+      if (minFee == null || fee < minFee) {
+        minFee = fee;
+      }
+    }
+    return minFee;
+  }
+
+  String _getDoctorCurrencySymbol() {
+    for (final doctor in store.doctorsList) {
+      final symbol = doctor.currencySymbol;
+      if (symbol != null && symbol.isNotEmpty) {
+        return symbol;
+      }
+    }
+    return 'AED';
   }
 
   Widget _buildLogo() {
@@ -453,6 +550,13 @@ class _ProductPreviewTile extends StatelessWidget {
                       ),
                     ]else ...[
                       if (doctor?.rating != null && doctor?.rating != 0.0) ...[
+                        Text(
+                            'Fees: ${doctor?.currencySymbol} ${doctor?.consultation_fee?.toStringAsFixed(0)}',
+                            style: AppTextStyles.productPrice.copyWith(
+                              color: const Color(0xFF242424),
+                              fontSize: 12,
+                            ),
+                          ),
                        Row(
                         children: [
                           const Icon(
@@ -540,6 +644,9 @@ class _ProductPreviewTile extends StatelessWidget {
               ...[
               ]
           ] else if (((store.storeTypeId ?? store.type) == FoodCategory.services.value)) ...[
+              Positioned(
+                  right: 0, bottom: -4, child: _buildAddButton(context)),
+          ] else if (((store.storeCategoryId) == FoodStoreCategoryId.healthCare.value)) ...[
               Positioned(
                   right: 0, bottom: -4, child: _buildAddButton(context)),
           ] else ...[
