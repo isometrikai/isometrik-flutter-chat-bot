@@ -57,9 +57,9 @@ class ApiService {
       name: name,
       timestamp: timestamp,
       userToken: userToken,
-      // location: location,
-      // longitude: longitude,
-      // latitude: latitude,
+      location: location,
+      longitude: longitude,
+      latitude: latitude,
         needToShowTutorial: needToShowTutorial,
         needToShowCompleteSetup: needToShowCompleteSetup,
       clientGuid: clientGuid,
@@ -78,15 +78,15 @@ class ApiService {
       name: name,
       timestamp: timestamp,
       userToken: userToken,
-      // location: location,
-      // longitude: longitude,
-      // latitude: latitude,
+      location: location,
+      longitude: longitude,
+      latitude: latitude,
       clientGuid: clientGuid,
       indexName: indexName,
       visitId: visitId,
       visitorId: visitorId,
       searchApiUrl: removeTrailingSlash(searchApiUrl),
-      // zoneId: zoneId,
+      zoneId: zoneId,
       timezone: timezone,
     );
 
@@ -97,8 +97,8 @@ class ApiService {
       visitId: visitId,
       visitorId: visitorId,
       searchApiUrl: removeTrailingSlash(searchApiUrl),
-      // latitude: latitude ?? 0.0,
-      // longitude: longitude ?? 0.0,
+      latitude: latitude ?? 0.0,
+      longitude: longitude ?? 0.0,
     );
 
     ChatHistoryRepository.instance.configure(
@@ -114,10 +114,6 @@ class ApiService {
     Utility.setEmailId(emailId);
     Utility.setPhoneNumber(phoneNumber);
     Utility.setCountryCode(countryCode);
-    Utility.setLocation(location ?? '');
-    Utility.setZoneId(zoneId);
-    Utility.setLatitude(latitude ?? 0.0);
-    Utility.setLongitude(longitude ?? 0.0);
   }
 
   static String removeTrailingSlash(String url) {

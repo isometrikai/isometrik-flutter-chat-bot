@@ -19,24 +19,16 @@ class RestaurantMenuScreen extends StatefulWidget {
   State<RestaurantMenuScreen> createState() => _RestaurantMenuScreenState();
 }
 
-class _RestaurantMenuScreenState extends State<RestaurantMenuScreen>
-    with SingleTickerProviderStateMixin {
+class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
   static const Color _purple = AppConstants.appThemeColor;
   static const Color _border = Color(0xFFD8DEF3);
   static const Color _labelGrey = Color(0xFF979797);
   static const Color _veg = Color(0xFF66BB6A);
   static const Color _nonVeg = Color(0xFFF44336);
-  static const Duration _headerAnimDuration = Duration(milliseconds: 300);
-  static const double _collapseScrollDistance = 80;
 
   final TextEditingController _searchController = TextEditingController();
-  final ScrollController _scrollController = ScrollController();
-  final GlobalKey _expandedHeaderKey = GlobalKey();
   late final RestaurantMenuBloc _bloc;
   late final CartBloc cartBloc;
-  late final AnimationController _collapseController;
-  late final Animation<double> _collapseAnimation;
-  double _measuredExpandedHeaderHeight = 0;
 
   // Dynamic data from API
   List<ProductCategory> _categories = <ProductCategory>[];
@@ -67,18 +59,6 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen>
     cartBloc.add(CartFetchRequested(needToShowLoader: false));
     _bloc.add(const RestaurantMenuRequested());
 
-    _collapseController = AnimationController(
-      vsync: this,
-      duration: _headerAnimDuration,
-    );
-    _collapseAnimation = CurvedAnimation(
-      parent: _collapseController,
-      curve: Curves.easeInOutCubic,
-      reverseCurve: Curves.easeInOutCubic,
-    );
-
-    _scrollController.addListener(_onScroll);
-
     OrderService().setCartUpdateCallback((bool isCartUpdate) {
       if (mounted && isCartUpdate) {
         print('RestaurantMenuScreen: Cart update received - $isCartUpdate');
@@ -91,184 +71,9 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen>
 
   @override
   void dispose() {
-    _scrollController.removeListener(_onScroll);
-    _scrollController.dispose();
-    _collapseController.dispose();
     _searchController.dispose();
     _bloc.close();
     super.dispose();
-  }
-
-  void _onScroll() {
-    if (!_scrollController.hasClients) return;
-
-    final double progress =
-        (_scrollController.offset / _collapseScrollDistance).clamp(0.0, 1.0);
-
-    if ((progress - _collapseController.value).abs() > 0.001) {
-      _collapseController.value = progress;
-    }
-  }
-
-  void _onClose() {
-    if (widget.onCheckout != null) {
-      widget.onCheckout!(true);
-    }
-    Navigator.of(context).pop();
-  }
-
-  String _resolveStoreName(StoreData? storeData) {
-    if (storeData?.storeName.isNotEmpty == true) {
-      return storeData!.storeName;
-    }
-    if (widget.actionData?.storeName?.isNotEmpty == true) {
-      return widget.actionData!.storeName!;
-    }
-    return widget.actionData?.title ?? '';
-  }
-
-  void _scheduleMeasureExpandedHeader() {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      final RenderBox? box =
-          _expandedHeaderKey.currentContext?.findRenderObject() as RenderBox?;
-      final double height = box?.size.height ?? 0;
-      if (height > 0 && (height - _measuredExpandedHeaderHeight).abs() > 1) {
-        setState(() => _measuredExpandedHeaderHeight = height);
-      }
-    });
-  }
-
-  double _fallbackExpandedHeaderHeight(StoreData? storeData) {
-    double height = 16 + 56;
-    final String subtitle = widget.actionData?.subtitle ?? '';
-    if (subtitle.isNotEmpty) {
-      height += 12 + 44;
-    }
-    if (_resolveStoreName(storeData).isNotEmpty) {
-      height += 8 + 115 + 8;
-    }
-    return height;
-  }
-
-  Widget _buildCloseAction() {
-    return IconButton(
-      icon: SvgPicture.asset(
-        AssetPath.get('images/ic_close.svg'),
-        width: 40,
-        height: 40,
-      ),
-      padding: EdgeInsets.zero,
-      onPressed: _onClose,
-    );
-  }
-
-  Widget _buildExpandedHeader(StoreData? storeData, {Key? key}) {
-    return Column(
-      key: key,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
-      children: <Widget>[
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-          child: ScreenHeader(
-            title: widget.actionData?.title ?? '',
-            subtitle: widget.actionData?.subtitle ?? '',
-            onClose: _onClose,
-          ),
-        ),
-        const SizedBox(height: 8),
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
-          child: _buildStoreInfoCard(storeData),
-        ),
-        const SizedBox(height: 8),
-      ],
-    );
-  }
-
-  Widget _buildAnimatedHeader(StoreData? storeData, String storeName) {
-    _scheduleMeasureExpandedHeader();
-
-    return AnimatedBuilder(
-      animation: _collapseAnimation,
-      builder: (BuildContext context, Widget? child) {
-        final double t = _collapseAnimation.value;
-
-        if (t <= 0.001) {
-          return _buildExpandedHeader(storeData, key: _expandedHeaderKey);
-        }
-
-        if (t >= 0.999) {
-          return _buildCollapsedNavBar(storeName);
-        }
-
-        final double expandedHeight =
-            _measuredExpandedHeaderHeight > 0
-                ? _measuredExpandedHeaderHeight
-                : _fallbackExpandedHeaderHeight(storeData);
-        final double height =
-            expandedHeight + (kToolbarHeight - expandedHeight) * t;
-
-        return SizedBox(
-          height: height,
-          width: double.infinity,
-          child: ClipRect(
-            child: Stack(
-              clipBehavior: Clip.hardEdge,
-              alignment: Alignment.topCenter,
-              children: <Widget>[
-                IgnorePointer(
-                  ignoring: t > 0.5,
-                  child: Opacity(
-                    opacity: (1 - t).clamp(0.0, 1.0),
-                    child: _buildExpandedHeader(storeData),
-                  ),
-                ),
-                IgnorePointer(
-                  ignoring: t < 0.5,
-                  child: Opacity(
-                    opacity: t.clamp(0.0, 1.0),
-                    child: _buildCollapsedNavBar(storeName),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildCollapsedNavBar(String storeName) {
-    return Material(
-      key: const ValueKey<String>('collapsed-header'),
-      color: Colors.white,
-      child: SizedBox(
-        height: kToolbarHeight,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Row(
-            children: <Widget>[
-              Expanded(
-                child: Text(
-                  storeName,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w700,
-                    fontSize: 20,
-                    height: 1.2,
-                    color: Color(0xFF171212),
-                  ),
-                ),
-              ),
-              _buildCloseAction(),
-            ],
-          ),
-        ),
-      ),
-    );
   }
 
   void _clearCart() {
@@ -302,6 +107,7 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen>
 
   @override
   Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
     return MultiBlocProvider(
       providers: [
         BlocProvider.value(value: _bloc),
@@ -310,246 +116,108 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen>
       child: Scaffold(
         backgroundColor: Colors.white,
         body: SafeArea(
-          child: BlocListener<CartBloc, CartState>(
-            listener: (BuildContext context, CartState state) {
-              if (state is CartLoaded && state.rawCartData != null) {
-                _updateCartData(state.rawCartData!.data);
-              } else if (state is CartEmpty) {
-                _updateCartData([]);
-              }
-            },
-            child: BlocBuilder<RestaurantMenuBloc, RestaurantMenuState>(
-              builder: (BuildContext context, RestaurantMenuState state) {
-                final StoreData? storeData =
-                    state is RestaurantMenuLoadSuccess
-                        ? state.storeData
-                        : null;
-                final String storeName = _resolveStoreName(storeData);
-
-                return BlocBuilder<CartBloc, CartState>(
-                  builder: (BuildContext context, CartState cartState) {
-                    final int itemCount = cartBloc.getFoodCategoryCount;
-                    return Column(
-                      children: <Widget>[
-                        _buildAnimatedHeader(storeData, storeName),
-                        Padding(
-                          padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
-                          child: _buildDietToggles(),
-                        ),
-                        const SizedBox(height: 16),
-                        Expanded(
-                          child: SingleChildScrollView(
-                            controller: _scrollController,
-                            padding: EdgeInsets.fromLTRB(
-                              16,
-                              0,
-                              16,
-                              itemCount > 0 ? 16 : 24,
-                            ),
-                            child: _buildMenuContent(state),
-                          ),
-                        ),
-                        if (itemCount > 0)
-                          _buildBottomCartBar(itemCount),
-                      ],
-                    );
-                  },
-                );
-              },
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildMenuContent(RestaurantMenuState state) {
-    if (state is RestaurantMenuInitial ||
-        state is RestaurantMenuLoadInProgress) {
-      return const SizedBox.shrink();
-    }
-    if (state is RestaurantMenuLoadFailure) {
-      return Padding(
-        padding: const EdgeInsets.only(top: 32),
-        child: Text(
-          state.message,
-          style: AppTextStyles.bodyText.copyWith(
-            color: Colors.red,
-          ),
-        ),
-      );
-    }
-    final categories = (state as RestaurantMenuLoadSuccess).categories;
-    _categories = categories;
-
-    if (categories.isEmpty) {
-      return Padding(
-        padding: const EdgeInsets.only(top: 32),
-        child: Text(
-          'No menu available',
-          style: AppTextStyles.bodyText.copyWith(
-            color: const Color(0xFF6E4185),
-          ),
-        ),
-      );
-    }
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        _buildMainCategories(),
-        const SizedBox(height: 24),
-        _buildCurrentCategorySection(),
-      ],
-    );
-  }
-
-  Widget _buildStoreInfoCard(StoreData? storeData) {
-    const Color cardBackground = Color(0xFFF5F7FF);
-    const Color cardBorder = Color(0xFFEEF4FF);
-    const Color titleColor = Color(0xFF242424);
-    // const Color starColor = Color(0xFFA674BF);
-    // const Color accentPurple = Color(0xFF8E2FFD);
-
-    final String storeName = _resolveStoreName(storeData);
-    final String imageUrl =
-        storeData?.logoImages?.imageUrl.isNotEmpty == true
-            ? storeData!.logoImages!.imageUrl
-            : (widget.actionData?.image ?? '');
-    final double avgRating = storeData?.avgRating ?? 0;
-
-    if (storeName.isEmpty) {
-      return const SizedBox.shrink();
-    }
-
-    return Container(
-      padding: const EdgeInsets.all(15),
-      decoration: BoxDecoration(
-        color: cardBackground,
-        border: Border.all(color: cardBorder),
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          _buildStoreLogo(imageUrl),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    Text(
-                      storeName,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: AppTextStyles.restaurantTitle.copyWith(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w800,
-                        height: 1.2,
-                        color: titleColor,
-                      ),
-                    ),
-                    if (avgRating > 0) ...<Widget>[
-                      const SizedBox(height: 3),
-                      Row(
-                        children: <Widget>[
-                          const Icon(
-                            Icons.star,
-                            size: 12,
-                            color: AppConstants.appThemeColor,
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            avgRating.toStringAsFixed(1),
-                            style: AppTextStyles.restaurantDescription.copyWith(
-                              color: titleColor,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ],
-                ),
-                const SizedBox(height: 10),
-                GestureDetector(
-                  behavior: HitTestBehavior.opaque,
-                  onTap: () {
-                    if (widget.actionData != null) {
-                      OrderService().triggerStoreOrder(
-                        widget.actionData!.toJson(),
-                      );
+          child: Column(
+            children: <Widget>[
+              // Fixed header
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                child: ScreenHeader(
+                  title: widget.actionData?.title ?? '',
+                  subtitle: widget.actionData?.subtitle ?? '',
+                  onClose: () {
+                    if (widget.onCheckout != null) {
+                      widget.onCheckout!(true);
                     }
+                    Navigator.of(context).pop();
                   },
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
+                ),
+              ),
+                const SizedBox(height: 8),
+                 Padding(
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                 child: _buildDietToggles(),
+                 ),
+                  const SizedBox(height: 16),
+            
+              // Main scrollable content
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
-                      SvgPicture.asset(
-                        AssetPath.get('images/ic_eazy_app.svg'),
-                        width: 13.8,
-                        height: 12.96,
-                        fit: BoxFit.contain,
-                        colorFilter: const ColorFilter.mode(
-                          AppConstants.appThemeColor,
-                          BlendMode.srcIn,
-                        ),
-                      ),
-                      const SizedBox(width: 5),
-                      Text(
-                        'Open in Eazy app',
-                        style: AppTextStyles.restaurantDescription.copyWith(
-                          color: AppConstants.appThemeColor,
+                      // const SizedBox(height: 16),
+                      // _buildSearchBar(theme),
+                      // const SizedBox(height: 16),
+                      // _buildDietToggles(),
+                      // const SizedBox(height: 16),
+                      BlocListener<CartBloc, CartState>(
+                        listener: (context, state) {
+                          if (state is CartLoaded &&
+                              state.rawCartData != null) {
+                            _updateCartData(state.rawCartData!.data);
+                          } else if (state is CartEmpty) {
+                            _updateCartData([]);
+                          }
+                        },
+                        child: BlocBuilder<
+                          RestaurantMenuBloc,
+                          RestaurantMenuState
+                        >(
+                          builder: (context, state) {
+                            if (state is RestaurantMenuInitial ||
+                                state is RestaurantMenuLoadInProgress) {
+                              return Container();
+                              // const Padding(
+                              //   padding: EdgeInsets.only(top: 32),
+                              //   child: Center(child: CircularProgressIndicator()),
+                              // );
+                            }
+                            if (state is RestaurantMenuLoadFailure) {
+                              return Padding(
+                                padding: const EdgeInsets.only(top: 32),
+                                child: Text(
+                                  state.message,
+                                  style: AppTextStyles.bodyText.copyWith(
+                                    color: Colors.red,
+                                  ),
+                                ),
+                              );
+                            }
+                            final categories =
+                                (state as RestaurantMenuLoadSuccess).categories;
+                            _categories = categories;
+
+                            if (categories.isEmpty) {
+                              return Padding(
+                                padding: const EdgeInsets.only(top: 32),
+                                child: Text(
+                                  'No menu available',
+                                  style: AppTextStyles.bodyText.copyWith(
+                                    color: const Color(0xFF6E4185),
+                                  ),
+                                ),
+                              );
+                            }
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: <Widget>[
+                                _buildMainCategories(),
+                                const SizedBox(height: 24),
+                                _buildCurrentCategorySection(),
+                              ],
+                            );
+                          },
                         ),
                       ),
                     ],
                   ),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
-    );
-  }
-
-  Widget _buildStoreLogo(String imageUrl) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(14),
-      child: SizedBox(
-        width: 69,
-        height: 69,
-        child:
-            imageUrl.isNotEmpty
-                ? Image.network(
-                  imageUrl,
-                  fit: BoxFit.cover,
-                  loadingBuilder: (
-                    BuildContext context,
-                    Widget child,
-                    ImageChunkEvent? loadingProgress,
-                  ) {
-                    if (loadingProgress == null) return child;
-                    return _buildStoreLogoPlaceholder();
-                  },
-                  errorBuilder:
-                      (
-                        BuildContext context,
-                        Object error,
-                        StackTrace? stackTrace,
-                      ) => _buildStoreLogoPlaceholder(),
-                )
-                : _buildStoreLogoPlaceholder(),
-      ),
-    );
-  }
-
-  Widget _buildStoreLogoPlaceholder() {
-    return SvgPicture.asset(
-      AssetPath.get('images/ic_placeHolder.svg'),
-      width: 69,
-      height: 69,
-      fit: BoxFit.cover,
     );
   }
 
@@ -1199,107 +867,89 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen>
     return null;
   }
 
-  void _onViewCart() {
-    Navigator.push(
-      context,
-      MaterialPageRoute<void>(
-        builder: (BuildContext context) => BlocProvider<CartBloc>.value(
-          value: cartBloc,
-          child: CartScreen(
-            needToShowCheckoutButton: false,
-            storeCategoryId: widget.actionData?.storeCategoryId,
-            onCheckout: (String message, String? storeCategoryId) {
-              if (widget.onCheckout != null) {
-                widget.onCheckout!(true);
-              }
-              Navigator.of(context).pop();
-            },
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildBottomCartBar(int itemCount) {
-    final String itemLabel =
-        itemCount == 1 ? '1 Item added' : '$itemCount Items added';
-    final double bottomInset = MediaQuery.of(context).padding.bottom;
-
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        boxShadow: <BoxShadow>[
-          BoxShadow(
-            color: const Color(0xFFD4D4D4).withValues(alpha: 0.25),
-            offset: const Offset(0, -4),
-            blurRadius: 9,
-          ),
-        ],
-      ),
-      padding: EdgeInsets.fromLTRB(16, 15, 16, bottomInset > 0 ? 8 : 16),
-      child: GestureDetector(
-        onTap: _onViewCart,
-        child: Container(
-          height: 55,
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-          decoration: BoxDecoration(
-            // gradient: const LinearGradient(
-            //   begin: Alignment.centerLeft,
-            //   end: Alignment.centerRight,
-            //   colors: <Color>[
-            //     Color(0xFFD445EC),
-            //     Color(0xFFB02EFB),
-            //     Color(0xFF8E2FFD),
-            //     Color(0xFF5E3DFE),
-            //     Color(0xFF5186E0),
-            //   ],
-            //   stops: <double>[0.0, 0.27, 0.48, 0.76, 1.0],
-            // ),
-            color: AppConstants.appThemeColor,
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: <Widget>[
-              Text(
-                itemLabel,
-                style: const TextStyle(
-                  fontWeight: FontWeight.w700,
-                  fontSize: 14,
-                  height: 1.2,
-                  color: Colors.white,
-                ),
-              ),
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  const Text(
-                    'View cart',
-                    style: TextStyle(
-                      fontWeight: FontWeight.w700,
-                      fontSize: 14,
-                      height: 1.2,
-                      color: Colors.white,
-                    ),
-                  ),
-                  const SizedBox(width: 5),
-                  Transform.rotate(
-                    angle: -1.5708,
-                    child: const Icon(
-                      Icons.keyboard_arrow_down,
-                      color: Colors.white,
-                      size: 20,
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
+  // Widget _buildBottomCartBar() {
+  //   return GestureDetector(
+  //     onTap: _onAddToCart,
+  //     child: Container(
+  //       width: double.infinity,
+  //       height: 105.56,
+  //       padding: const EdgeInsets.only(top: 10),
+  //       decoration: const BoxDecoration(
+  //         color: Color(0xFFF5F7FF),
+  //       ),
+  //       child: Center(
+  //         child: Container(
+  //           width: 343,
+  //           height: 62,
+  //           decoration: BoxDecoration(
+  //             gradient: const LinearGradient(
+  //               begin: Alignment.centerLeft,
+  //               end: Alignment.centerRight,
+  //               colors: [
+  //                 Color(0xFFD445EC),
+  //                 Color(0xFFB02EFB),
+  //                 Color(0xFF8E2FFD),
+  //                 Color(0xFF5E3DFE),
+  //                 Color(0xFF5186E0),
+  //               ],
+  //               stops: [0.0, 0.27, 0.48, 0.76, 1.0],
+  //             ),
+  //             borderRadius: BorderRadius.circular(16),
+  //           ),
+  //           child: Row(
+  //             children: [
+  //               // Left side - Price and items
+  //               Padding(
+  //                 padding: const EdgeInsets.only(left: 25, top: 13),
+  //                 child: Column(
+  //                   crossAxisAlignment: CrossAxisAlignment.start,
+  //                   children: [
+  //                     Text(
+  //                       'د.إ${_cartTotal.toStringAsFixed(2)}',
+  //                       style: const TextStyle(
+  //                         fontFamily: 'aed',
+  //                         fontSize: 16,
+  //                         fontWeight: FontWeight.w400,
+  //                         height: 1.2,
+  //                         color: Colors.white,
+  //                       ),
+  //                     ),
+  //                     const SizedBox(height: 2),
+  //                     Text(
+  //                       '${_cartItems.toString().padLeft(2, '0')} items',
+  //                       style: const TextStyle(
+  //                         fontFamily: 'Plus Jakarta Sans',
+  //                         fontSize: 12,
+  //                         fontWeight: FontWeight.w400,
+  //                         height: 1.4,
+  //                         color: Colors.white,
+  //                       ),
+  //                     ),
+  //                   ],
+  //                 ),
+  //               ),
+  //               const Spacer(),
+  //               // Right side - Checkout button
+  //               Padding(
+  //                 padding: const EdgeInsets.only(right: 25),
+  //                 child: const Text(
+  //                   'Checkout',
+  //                   style: TextStyle(
+  //                     fontFamily: 'Plus Jakarta Sans',
+  //                     fontSize: 16,
+  //                     fontWeight: FontWeight.w700,
+  //                     height: 1.2,
+  //                     color: Colors.white,
+  //                   ),
+  //                 ),
+  //               ),
+  //             ],
+  //           ),
+  //         ),
+  //       ),
+  //     ),
+  //   );
+  // }
 
   // Update cart data from getCart API response
   void _updateCartData(List<UniversalCartData> cartData) {

@@ -27,7 +27,6 @@ class ChatMessage {
   final bool hasHotelBookingConfirmedSectionWidget;
   final bool hasCarBookingConfirmedSectionWidget;
   final bool hasFlightBookingConfirmedSectionWidget;
-  final bool hasPackageTypesSectionWidget;
   final bool hasServicesDeliveryOptionsWidget;
   final bool hasChooseAddressWidget;
   final bool hasChooseCardWidget;
@@ -55,7 +54,6 @@ class ChatMessage {
   final List<WidgetAction> hotelBookingConfirmedItems;
   final List<WidgetAction> carBookingConfirmedItems;
   final List<WidgetAction> flightBookingConfirmedItems;
-  final List<SendPackageType> packageTypesItems;
   final List<WidgetAction> servicesDeliveryOptions;
   final List<AddressOption> addressOptions;
   final List<CardOption> cardOptions;
@@ -84,7 +82,6 @@ class ChatMessage {
   final ChatWidget? hotelBookingConfirmedWidget;
   final ChatWidget? carBookingConfirmedWidget;
   final ChatWidget? flightBookingConfirmedWidget;
-  final ChatWidget? packageTypesWidget;
   ChatMessage({
     required this.id,
     required this.text,
@@ -110,7 +107,6 @@ class ChatMessage {
     this.hasHotelBookingConfirmedSectionWidget = false,
     this.hasCarBookingConfirmedSectionWidget = false,
     this.hasFlightBookingConfirmedSectionWidget = false,
-    this.hasPackageTypesSectionWidget = false,
     this.hasServicesDeliveryOptionsWidget = false,
     this.hasChooseAddressWidget = false,
     this.hasChooseCardWidget = false,
@@ -138,7 +134,6 @@ class ChatMessage {
     this.hotelBookingConfirmedItems = const [],
     this.carBookingConfirmedItems = const [],
     this.flightBookingConfirmedItems = const [],
-    this.packageTypesItems = const [],
     this.servicesDeliveryOptions = const [],
     this.addressOptions = const [],
     this.cardOptions = const [],
@@ -167,7 +162,6 @@ class ChatMessage {
     this.hotelBookingConfirmedWidget,
     this.carBookingConfirmedWidget,
     this.flightBookingConfirmedWidget,
-    this.packageTypesWidget,
   });
 
   ChatMessage copyWith({
@@ -194,7 +188,6 @@ class ChatMessage {
     bool? hasHotelBookingConfirmedSectionWidget,
     bool? hasCarBookingConfirmedSectionWidget,
     bool? hasFlightBookingConfirmedSectionWidget,
-    bool? hasPackageTypesSectionWidget,
     bool? hasServicesDeliveryOptionsWidget,
     bool? hasChooseAddressWidget,
     bool? hasChooseCardWidget,
@@ -222,7 +215,6 @@ class ChatMessage {
     List<WidgetAction>? hotelBookingConfirmedItems,
     List<WidgetAction>? carBookingConfirmedItems,
     List<WidgetAction>? flightBookingConfirmedItems,
-    List<SendPackageType>? packageTypesItems,
     List<WidgetAction>? servicesDeliveryOptions,
     List<AddressOption>? addressOptions,
     List<CardOption>? cardOptions,
@@ -274,7 +266,6 @@ class ChatMessage {
       hasHotelBookingConfirmedSectionWidget: hasHotelBookingConfirmedSectionWidget ?? this.hasHotelBookingConfirmedSectionWidget,
       hasCarBookingConfirmedSectionWidget: hasCarBookingConfirmedSectionWidget ?? this.hasCarBookingConfirmedSectionWidget,
       hasFlightBookingConfirmedSectionWidget: hasFlightBookingConfirmedSectionWidget ?? this.hasFlightBookingConfirmedSectionWidget,
-      hasPackageTypesSectionWidget: hasPackageTypesSectionWidget ?? this.hasPackageTypesSectionWidget,
       hasServicesDeliveryOptionsWidget: hasServicesDeliveryOptionsWidget ?? this.hasServicesDeliveryOptionsWidget,
       hasChooseAddressWidget: hasChooseAddressWidget ?? this.hasChooseAddressWidget,
       hasChooseCardWidget: hasChooseCardWidget ?? this.hasChooseCardWidget,
@@ -302,7 +293,6 @@ class ChatMessage {
       hotelBookingConfirmedItems: hotelBookingConfirmedItems ?? this.hotelBookingConfirmedItems,
       carBookingConfirmedItems: carBookingConfirmedItems ?? this.carBookingConfirmedItems,
       flightBookingConfirmedItems: flightBookingConfirmedItems ?? this.flightBookingConfirmedItems,
-      packageTypesItems: packageTypesItems ?? this.packageTypesItems,
       servicesDeliveryOptions: servicesDeliveryOptions ?? this.servicesDeliveryOptions,
       addressOptions: addressOptions ?? this.addressOptions,
       cardOptions: cardOptions ?? this.cardOptions,
@@ -330,7 +320,6 @@ class ChatMessage {
         hotelBookingConfirmedWidget: hotelBookingConfirmedWidget ?? this.hotelBookingConfirmedWidget,
         carBookingConfirmedWidget: carBookingConfirmedWidget ?? this.carBookingConfirmedWidget,
         flightBookingConfirmedWidget: flightBookingConfirmedWidget ?? this.flightBookingConfirmedWidget,
-        packageTypesWidget: packageTypesWidget ?? this.packageTypesWidget,
     );
   }
 }

@@ -69,7 +69,7 @@ class _CarRentalSearchCard extends StatelessWidget {
   static const Color _mutedColor = Color(0xFFA2A2A2);
   static const Color _specColor = Color(0xFF979797);
   static const Color _daysLabelColor = Color(0xFF94A0AF);
-  // static const Color _accentPurple = Color(0xFF8E2FFD);
+  static const Color _accentPurple = Color(0xFF8E2FFD);
 
   @override
   Widget build(BuildContext context) {
@@ -268,7 +268,7 @@ class _CarRentalSearchCard extends StatelessWidget {
             height: 12.96,
             fit: BoxFit.contain,
             colorFilter: const ColorFilter.mode(
-              AppConstants.appThemeColor,
+              _accentPurple,
               BlendMode.srcIn,
             ),
           ),
@@ -279,7 +279,7 @@ class _CarRentalSearchCard extends StatelessWidget {
               fontSize: 12,
               fontWeight: FontWeight.w400,
               height: 1.4,
-              color: AppConstants.appThemeColor,
+              color: _accentPurple,
             ),
           ),
         ],

@@ -5,22 +5,16 @@ import '../utils/utils.dart';
 class AddressOption {
   final String name;
   final String address;
-  final bool isPackageDelivery;
-  final String addressId;
 
   AddressOption({
     required this.name,
     required this.address,
-    required this.isPackageDelivery,
-    required this.addressId,
   });
 
   factory AddressOption.fromJson(Map<String, dynamic> json) {
     return AddressOption(
       name: json['name'] ?? '',
       address: json['address'] ?? '',
-      isPackageDelivery: json['is_package_flow'] ?? false,
-      addressId: json['addressId'] ?? '',
     );
   }
 }

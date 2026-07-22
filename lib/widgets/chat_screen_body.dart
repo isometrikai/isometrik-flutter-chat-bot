@@ -10,7 +10,6 @@ import 'package:shimmer/shimmer.dart';
 import 'package:chat_bot/data/data.dart';
 import 'package:chat_bot/bloc/bloc.dart';
 import 'package:chat_bot/widgets/widgets.dart';
-import 'package:chat_bot/widgets/message_speaker_button.dart';
 import 'package:chat_bot/view/views.dart';
 import 'package:chat_bot/utils/utils.dart';
 import 'package:chat_bot/services/services.dart';
@@ -237,7 +236,6 @@ class ChatScreenBody extends StatelessWidget {
                     hotelDestinationData: apiData['hotel_booking'] ?? {},
                     carPickupData: apiData['car_booking'] ?? {},
                     flightBookingData: apiData['flight_booking'] ?? {},
-                    packageDeliveryData: apiData['package_delivery'] ?? {},
                   );
                   bloc.add(event);
                   onClearPendingMessage();
@@ -330,72 +328,21 @@ class ChatScreenBody extends StatelessWidget {
                       if (needToEndThisChat == true)
                         Container(
                           width: double.infinity,
+                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                           margin: const EdgeInsets.fromLTRB(16, 10, 16, 40),
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 10,
-                            vertical: 15,
-                          ),
                           decoration: BoxDecoration(
-                            color: const Color(0xFFF4F0FF),
-                            borderRadius: BorderRadius.circular(16),
+                            color: const Color(0xFFF5F0FF), // Light purple background
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: const Color(0xFFE8D5FF), width: 1),
                           ),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              Text(
-                                'This session has ended. Start a new chat to keep going.',
-                                style: AppTextStyles.bodyText.copyWith(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w400,
-                                  height: 1.4,
-                                  color: const Color(0xFF242424),
-                                ),
-                                textAlign: TextAlign.center,
-                              ),
-                              const SizedBox(height: 10),
-                              SizedBox(
-                                        width: 190,
-                                        height: 47,
-                                        child: DecoratedBox(
-                                          decoration: BoxDecoration(
-                                            color: AppConstants.appThemeColor,
-                                            borderRadius: BorderRadius.circular(8),
-                                          ),
-                                          child: ElevatedButton(
-                                            onPressed: state is ChatLoading
-                                                ? null
-                                                : () => showNewChatConfirmation(context),
-                                            style: ElevatedButton.styleFrom(
-                                              backgroundColor: Colors.transparent,
-                                              shadowColor: Colors.transparent,
-                                              padding: const EdgeInsets.symmetric(
-                                                horizontal: 12, // reduced from 38 so text fits
-                                                vertical: 14,
-                                              ),
-                                              minimumSize: Size.zero,
-                                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                                              shape: RoundedRectangleBorder(
-                                                borderRadius: BorderRadius.circular(8),
-                                              ),
-                                            ),
-                                            child: FittedBox(
-                                              fit: BoxFit.scaleDown,
-                                              child: Text(
-                                                'Start new chat',
-                                                style: AppTextStyles.button.copyWith(
-                                                  fontSize: 16,
-                                                  fontWeight: FontWeight.w700,
-                                                  height: 1.2,
-                                                  color: Colors.white,
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                      )
-                            ],
+                          child: Text(
+                            'This session has ended. Please click the reload button to begin a new chat',
+                            style: AppTextStyles.bodyText.copyWith(
+                              fontSize: 14,
+                              color: const Color(0xFF6E4185), // Darker purple text
+                              fontWeight: FontWeight.w500,
+                            ),
+                            textAlign: TextAlign.center,
                           ),
                         )
                          
@@ -436,10 +383,6 @@ class ChatScreenBody extends StatelessWidget {
       scrolledUnderElevation: 0,
       systemOverlayStyle: SystemUiOverlayStyle.dark,
       elevation: 1,
-      // toolbarHeight: 64,
-      leadingWidth: 48,
-      titleSpacing: 0,
-      centerTitle: false,
       leading: IconButton(
         icon: SvgPicture.asset(
           AssetPath.get('images/ic_sideMeu.svg'),
@@ -493,58 +436,18 @@ class ChatScreenBody extends StatelessWidget {
       //     // }
       //   },
       // ),
-      title: Align(
-        alignment: Alignment.centerLeft,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            SvgPicture.asset(
-              AssetPath.get('images/ic_header_logo.svg'),
-              width: 55,
-              height: 24,
-              fit: BoxFit.cover,
-            ),
-            ValueListenableBuilder<String>(
-              valueListenable: Utility.locationNotifier,
-              builder: (context, locationValue, _) {
-                final displayLocation = locationValue.trim().isNotEmpty
-                    ? locationValue.trim()
-                    : 'Select Location';
-                return GestureDetector(
-                  onTap: () {
-                    OrderService().triggerClickManageScreenOpen({
-                      'flow': 'ChangeCountry',
-                      'screenName': 'ChangeCountryScreen',
-                      'action': 'ChangeCountryScreen',
-                    });
-                  },
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Flexible(
-                        child: Text(
-                          displayLocation,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: AppTextStyles.caption.copyWith(
-                            color: const Color(0xFF8E2FFD),
-                          ),
-                        ),
-                      ),
-                      const Icon(
-                        Icons.arrow_drop_down,
-                        color: Color(0xFF8E2FFD),
-                        size: 25,
-                      ),
-                      const SizedBox(width: 15),
-                    ],
-                  ),
-                );
-              },
-            ),
-          ],
-        ),
+      title: Row(
+        children: [
+          Container(
+            child:
+                    SvgPicture.asset(
+                      AssetPath.get('images/ic_header_logo_R.svg'),
+                      // width: 75,
+                      // height: 23,
+                      fit: BoxFit.cover,
+                    )
+          ),
+        ],
       ),
       actions: [
         BlocBuilder<CartBloc, CartState>(
@@ -725,8 +628,8 @@ class ChatScreenBody extends StatelessWidget {
         overflow: TextOverflow.ellipsis,
         style: const TextStyle(
                     fontWeight: FontWeight.w700,
-                    fontSize: 20,
-                    // height: 1.2,
+                    fontSize: 24,
+                    height: 1.2,
                     color: Color(0xFF171212),
                   ),
       ),
@@ -952,7 +855,7 @@ class ChatScreenBody extends StatelessWidget {
                           ),
                           child: Center(
                             child: Text(
-                              'Yes, Go to Eazy App',
+                              'Yes, Go to App',
                               style: TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w700,
@@ -1228,24 +1131,6 @@ class ChatScreenBody extends StatelessWidget {
             const SizedBox(height: 4), //12
             buildOrderConfirmedWidget(message.orderConfirmedWidget!),
           ],
-          if (message.hasPackageTypesSectionWidget) ...[
-            const SizedBox(height: 4), //12
-            buildPackageTypesWidget(message.packageTypesItems),
-          ],
-          if (message.text.trim().isNotEmpty && message.isBot) ...[
-            const SizedBox(height: 4),
-            Padding(
-              padding: EdgeInsets.only(
-                left: message.isBot ? 0 : 50,
-                right: message.isBot ? 50 : 0,
-              ),
-              child: MessageSpeakerButton(
-                messageId: message.id,
-                text: message.text,
-                isBot: message.isBot,
-              ),
-            ),
-          ],
         ],
       ),
     );
@@ -1374,7 +1259,7 @@ class ChatScreenBody extends StatelessWidget {
                   height: 75,
                   width: 75,
                   child: SvgPicture.asset(
-                        AssetPath.get('images/ic_LogoTutorial.svg'),
+                        AssetPath.get('images/ic_mainImg_R.svg'),
                         fit: BoxFit.contain,
                       ),
                 ),
@@ -1607,7 +1492,7 @@ class ChatScreenBody extends StatelessWidget {
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 Text(
-                                  'Go To Eazy App',
+                                  'Go To App',
                                   style: AppTextStyles.body(
                                     fontSize: 16,
                                     fontWeight: FontWeight.w700,
@@ -1981,8 +1866,6 @@ class ChatScreenBody extends StatelessWidget {
                             OrderService().triggerOrderDetails(widget.toJson());
                           }else if (widget.isHotelBookingFlow == true) {
                             OrderService().triggerOrderDetails(widget.toJson());
-                          }else if (widget.isFlightBookingFlow == true) {
-                            OrderService().triggerOrderDetails(widget.toJson());
                           } else {
                             print("Order Details: ${action.orderId}");
                             // Call the order details API
@@ -2177,8 +2060,8 @@ class ChatScreenBody extends StatelessWidget {
                                     context,
                                     initialDate: DateTime.now(),
                                     storeId: action.storeId ?? '',
-                                    latitude: Utility.getLatitude(),
-                                    longitude: Utility.getLongitude(),
+                                    latitude: ChatApiServices.instance.latitude,
+                                    longitude: ChatApiServices.instance.longitude,
                                     timezone: ChatApiServices.instance.timezone ?? '',
                                     onConfirm: (String formattedDateTime, int timestamp) {
                                       // Handle the selected date and time
@@ -2291,11 +2174,7 @@ class ChatScreenBody extends StatelessWidget {
                             if (gotStripePaymentCallback == false) {
                                Timer(Duration(seconds: 1), () {
                                 print("Timer completed");
-                                // BlackToastView.show(context, 'Timer completed');
                                 OrderService().triggerStripePlaceOrderScreenOpen(data);
-                                Timer(Duration(seconds: 1), () {
-                                  latestActionWidgets.remove(widget);
-                                });
                               });
                             }
                         // },
@@ -2461,41 +2340,6 @@ class ChatScreenBody extends StatelessWidget {
                     ? () {}
                     : () => _openFlightSearchScreen(context, action),
               ),
-            );
-          }
-        }
-
-        for (final widget in latestActionWidgets.where(
-          (w) => w.type == WidgetEnum.add_dropoff_address.value,
-        )) {
-          for (final action in widget.addDropoffAddress) {
-            actionButtons.add(
-              buildActionButton(text: action.buttonText, onTap: isApiLoading ? () {} : () {
-                OrderService().triggerClickManageScreenOpen({
-                'flow': 'PackageDelivery',
-                'screenName': 'PackageDeliveryDropoffAddress',
-                'action': 'PackageDeliveryDropoffAddress',
-                'selectAddressId': apiData['package_delivery']['pickup_address_id'] ?? '',
-                'userId': ChatApiServices.instance.userId ?? '',
-              });
-              }),
-            );
-          }
-        }
-
-        for (final widget in latestActionWidgets.where(
-          (w) => w.type == WidgetEnum.package_instructions.value,
-        )) {
-          for (final action in widget.packageInstructions) {
-            actionButtons.add(
-              buildActionButton(text: action.buttonText, onTap: isApiLoading ? () {} : () {
-                OrderService().triggerClickManageScreenOpen({
-                'flow': 'PackageDelivery',
-                'screenName': 'PackageDeliveryInstructions',
-                'action': 'PackageDeliveryInstructions',
-                'packageTypeId': apiData['package_delivery']['package_type_id'] ?? '',
-              });
-              }),
             );
           }
         }
@@ -3046,36 +2890,36 @@ class ChatScreenBody extends StatelessWidget {
           },
           onAddToCartRequested: (product, store, doctor) {
             if (store.isDoctore == true && doctor != null) {
-              // DoctorServiceTypeSheet.show(
-              //   context,
-              //   doctor: doctor,
-              //   store: store,
-              //   onServiceTypeSelected: (selectedType, selectedProduct) {
+              DoctorServiceTypeSheet.show(
+                context,
+                doctor: doctor,
+                store: store,
+                onServiceTypeSelected: (selectedType, selectedProduct) {
                   // Selected: selectedType (DoctorServiceType), selectedProduct (Product? from store)
-                  // final int serviceLocationAt;
-                  //  String productName;
-                  // int? estimatedProductPrice;
-                  // switch (doctor.storeLocationAt) {
-                  //   case 1:
-                  //     serviceLocationAt = 1;
-                  //     productName = "Visit at doctor's clinic";
-                  //     // estimatedProductPrice = doctor.pricing?.inCallFee ?? 0;
-                  //     break;
-                  //   case 2:
-                  //     // serviceLocationAt = 2;
-                  //     productName = "Doctor's at home";
-                  //     // estimatedProductPrice = doctor.pricing?.outCallFee ?? 0;
-                  //     break;
-                  //   case 3:
-                  //     // serviceLocationAt = 3;
-                  //     productName = "Tele appointment";
-                  //     // estimatedProductPrice = doctor.pricing?.teleCallFee ?? 0;
-                  //     break;
-                  // }
+                  final int serviceLocationAt;
+                  final String productName;
+                  int? estimatedProductPrice;
+                  switch (selectedType) {
+                    case DoctorServiceType.inCall:
+                      serviceLocationAt = 1;
+                      productName = "Visit at doctor's clinic";
+                      estimatedProductPrice = doctor.pricing?.inCallFee ?? 0;
+                      break;
+                    case DoctorServiceType.outCall:
+                      serviceLocationAt = 2;
+                      productName = "Doctor's at home";
+                      estimatedProductPrice = doctor.pricing?.outCallFee ?? 0;
+                      break;
+                    case DoctorServiceType.teleCall:
+                      serviceLocationAt = 3;
+                      productName = "Tele appointment";
+                      estimatedProductPrice = doctor.pricing?.teleCallFee ?? 0;
+                      break;
+                  }
 
                   Map<String, dynamic> doctorParams = {
-                    "estimatedProductPrice": doctor.consultation_fee ?? 0,
-                    "productName": doctor.storeLocationAt == 1 ? "Visit at doctor's clinic" : doctor.storeLocationAt == 2 ? "Doctor's at home" : "Tele appointment",
+                    "estimatedProductPrice": estimatedProductPrice,
+                    "productName": productName,
                     "providerId": doctor.id,
                     "cartType": 2,
                     "storeId": store.storeId,
@@ -3084,9 +2928,9 @@ class ChatScreenBody extends StatelessWidget {
                     "userType": 1,
                     "unitId": "",
                     "isDoctorFlow": true,
-                    "serviceLocationAt": doctor.storeLocationAt ?? 0,
-                    "longitude": Utility.getLongitude(),
-                    "latitude": Utility.getLatitude(),
+                    "serviceLocationAt": serviceLocationAt,
+                    "longitude": ChatApiServices.instance.longitude ?? 0,
+                    "latitude": ChatApiServices.instance.latitude ?? 0,
                     "centralProductId": "",
                     "storeTypeId": store.storeTypeId ?? 25,
                     "storeCategoryId": store.storeCategoryId,
@@ -3114,12 +2958,12 @@ class ChatScreenBody extends StatelessWidget {
                       centralProductId: '',
                       unitId: '',
                       doctorParams: doctorParams,
-                      needToShowLoaderForCartFetch: store.products.isEmpty,
-                      needToSendMessage: store.products.isEmpty ? true : false,
+                      needToShowLoaderForCartFetch: selectedProduct == null,
+                      needToSendMessage: selectedProduct == null ? true : false,
                     ),
                   );
-                  if (store.products.isNotEmpty) {
-                  // if (selectedProduct != null) {
+
+                  if (selectedProduct != null) {
                     cartBloc.stream
                         .firstWhere(
                           (state) =>
@@ -3135,9 +2979,9 @@ class ChatScreenBody extends StatelessWidget {
                             storeCategoryId: store.storeCategoryId,
                             newQuantity: 1,
                             storeTypeId: store.storeTypeId ?? -111,
-                            productId: product?.childProductId ?? '',
-                            centralProductId: product?.parentProductId ?? '',
-                            unitId: product?.unitId ?? '',
+                            productId: selectedProduct.childProductId,
+                            centralProductId: selectedProduct.parentProductId,
+                            unitId: selectedProduct.unitId,
                             needToShowLoaderForCartFetch: true,
                             needToSendMessage: true,
                           ),
@@ -3145,8 +2989,8 @@ class ChatScreenBody extends StatelessWidget {
                       }
                     });
                   }
-                // },
-              // );
+                },
+              );
             } else {
                if ((product != null && product.variantsCount > 1 &&
                     store.storeTypeId == FoodCategory.food.value) ||
@@ -4271,27 +4115,10 @@ class ChatScreenBody extends StatelessWidget {
         print(
           'Selected address: ${selectedAddress.name} - ${selectedAddress.address}',
         );
-        if (addressOptions.first.isPackageDelivery == true) {
-          final existing = apiData['package_delivery'];
-          final Map<String, dynamic> packageDeliveryData;
-          if (existing is Map) {
-            packageDeliveryData = Map<String, dynamic>.from(existing);
-            packageDeliveryData['pickup_address_id'] =
-                selectedAddress.addressId;
-          } else {
-            packageDeliveryData = {
-              'pickup_address_id': selectedAddress.addressId,
-            };
-          }
-          apiData['package_delivery'] = packageDeliveryData;
-          onSendMessage('I have selected picked up address.\n${selectedAddress.address}.');
-        }
       },
       onSendMessage: (message) {
         // Automatically send the selected address message
-        if (addressOptions.first.isPackageDelivery == false) {
-          onSendMessage(message);
-        }
+        onSendMessage(message);
       },
     );
   }
@@ -4313,33 +4140,6 @@ class ChatScreenBody extends StatelessWidget {
 
   Widget buildOrderSummaryWidget(List<WidgetAction> orderSummaryItems) {
     return OrderSummaryWidget(orderItems: orderSummaryItems, isFromChatHistory: isFromHistory);
-  }
-
-  Widget buildPackageTypesWidget(List<SendPackageType> packageTypes) {
-    if (packageTypes.isEmpty) return const SizedBox.shrink();
-    return Padding(
-      padding: const EdgeInsets.only(left: 0.0),
-      child: PackageTypesWidget(
-        packageTypes: packageTypes,
-        isFromChatHistory: isFromHistory,
-        onPackageTypeSelected: (packageType) {
-          final existing = apiData['package_delivery'];
-              final Map<String, dynamic> packageDeliveryData;
-              if (existing is Map) {
-                packageDeliveryData = Map<String, dynamic>.from(existing);
-                packageDeliveryData['package_type_id'] = packageType.id;
-              } else {
-                packageDeliveryData = {
-                  'package_type_id': packageType.id,
-                };
-              }
-              apiData['package_delivery'] = packageDeliveryData;
-              onSendMessage(
-                'I want to book package types in ${packageType.sendPackageTypeName}',
-              );
-        },
-      ),
-    );
   }
 
   Widget buildOrderConfirmedWidget(ChatWidget orderConfirmedWidget) {
@@ -4423,7 +4223,7 @@ class ChatScreenBody extends StatelessWidget {
           ..['pickup_geo'] =
               '${place.coordinates.lat},${place.coordinates.lon}';
         onSendMessage(
-          'I have selected ${place.name} as the pickup location.',
+          'I want to book car pickup from ${place.name}',
           null,
           null,
           null,
@@ -4441,7 +4241,7 @@ class ChatScreenBody extends StatelessWidget {
           ..['return_code'] = place.iataCode
           ..['return_type'] = place.type;
         onSendMessage(
-          'I have selected ${place.name} as the drop-off location.',
+          'I want to drop off car at ${place.name}',
           null,
           null,
           null,
@@ -4534,14 +4334,6 @@ class ChatScreenBody extends StatelessWidget {
     return {};
   }
 
-  Map<String, dynamic> _packageDeliveryMap() {
-    final existing = apiData['package_delivery'];
-    if (existing is Map) {
-      return Map<String, dynamic>.from(existing);
-    }
-    return {};
-  }
-
   Map<String, dynamic> _hotelBookingWithForMeDetails() {
     final hotelBooking = _hotelBookingMap();
     final fullName = Utility.getName().trim();
@@ -4589,7 +4381,7 @@ class ChatScreenBody extends StatelessWidget {
           create: (_) => FlightSearchBloc(),
           child: FlightSearchScreen(
             actionData: action,
-            flightBooking: action.toJson(), //flightBooking.isNotEmpty ? flightBooking : null,
+            flightBooking: flightBooking.isNotEmpty ? flightBooking : null,
             onFlightSelected: (flight, cabin) {
               final existing = apiData['flight_booking'];
               final Map<String, dynamic> updatedFlightBooking;
@@ -4756,7 +4548,7 @@ class ChatScreenBody extends StatelessWidget {
     BuildContext context,
     WidgetAction action,
   ) async {
-    // final hotelBooking = _hotelBookingMap();
+    final hotelBooking = _hotelBookingMap();
     final hotelName = action.title.isNotEmpty
         ? action.title
         : (action.storeName ?? action.name ?? '');
@@ -4764,7 +4556,7 @@ class ChatScreenBody extends StatelessWidget {
 
     await ChooseRoomBottomSheet.show(
       context,
-      hotelBooking: action.toJson(),
+      hotelBooking: hotelBooking,
       hotelName: hotelName,
       hotelImageUrl: hotelImageUrl,
       onNext: (selected) {

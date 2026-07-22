@@ -267,13 +267,12 @@ class _SelectDateTimeScreenState extends State<SelectDateTimeScreen> {
           topRight: Radius.circular(16),
         ),
       ),
-      child: SingleChildScrollView(
-        child: Padding(
-          padding: EdgeInsets.only(bottom: safeAreaBottom),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            mainAxisSize: MainAxisSize.min,
-            children: [
+      child: Padding(
+        padding: EdgeInsets.only(bottom: safeAreaBottom),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          mainAxisSize: MainAxisSize.min,
+          children: [
             // Header section
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 40, 16, 16),
@@ -324,8 +323,8 @@ class _SelectDateTimeScreenState extends State<SelectDateTimeScreen> {
                       child: Center(
                         child: SvgPicture.asset(
                           AssetPath.get('images/ic_close.svg'),
-                          width: 30,
-                          height: 30,
+                          width: 16,
+                          height: 16,
                         ),
                       ),
                     ),
@@ -407,10 +406,10 @@ class _SelectDateTimeScreenState extends State<SelectDateTimeScreen> {
             const SizedBox(height: 24),
             
             // Calendar and Time Picker
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
+            Flexible(
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                margin: const EdgeInsets.symmetric(horizontal: 16),
+                padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
                   color: Colors.white,
                   border: Border.all(
@@ -419,22 +418,16 @@ class _SelectDateTimeScreenState extends State<SelectDateTimeScreen> {
                   ),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: CupertinoTheme(
-                  data: const CupertinoThemeData(
-                    brightness: Brightness.light,
-                  ),
-                  child: CupertinoCalendar(
-                    mainColor: AppConstants.appThemeColor,
-                    mode: CupertinoCalendarMode.dateTime,
-                    initialDateTime: selectedDateTime ?? minimumDateTime,
-                    minimumDateTime: minimumDateTime,
-                    maximumDateTime: maximumDateTime,
-                    onDateTimeChanged: (DateTime newDateTime) {
-                      setState(() {
-                        selectedDateTime = newDateTime;
-                      });
-                    },
-                  ),
+                child: CupertinoCalendar(
+                  mode: CupertinoCalendarMode.dateTime,
+                  initialDateTime: selectedDateTime ?? minimumDateTime,
+                  minimumDateTime: minimumDateTime,
+                  maximumDateTime: maximumDateTime,
+                  onDateTimeChanged: (DateTime newDateTime) {
+                    setState(() {
+                      selectedDateTime = newDateTime;
+                    });
+                  },
                 ),
               ),
             ),
@@ -484,7 +477,6 @@ class _SelectDateTimeScreenState extends State<SelectDateTimeScreen> {
             
             const SizedBox(height: 16),
           ],
-        ),
         ),
       ),
     );

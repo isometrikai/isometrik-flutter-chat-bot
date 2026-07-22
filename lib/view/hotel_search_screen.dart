@@ -27,7 +27,7 @@ class _HotelSearchScreenState extends State<HotelSearchScreen> {
   final TextEditingController _searchController = TextEditingController();
   DateTime? _lastQueryAt;
 
-  // static const Color _accentPurple = Color(0xFF8E2FFD);
+  static const Color _accentPurple = Color(0xFF8E2FFD);
   static const Color _chipBorderIdle = Color(0xFFD8DEF3);
   static const String _noHotelsMessage = 'No Hotels Found';
 
@@ -190,7 +190,7 @@ class _HotelSearchScreenState extends State<HotelSearchScreen> {
                       const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
                   decoration: BoxDecoration(
                     border: Border.all(
-                      color: isSelected ? AppConstants.appThemeColor : _chipBorderIdle,
+                      color: isSelected ? _accentPurple : _chipBorderIdle,
                     ),
                     borderRadius: BorderRadius.circular(80),
                   ),
@@ -199,7 +199,7 @@ class _HotelSearchScreenState extends State<HotelSearchScreen> {
                     style: AppTextStyles.bodyText.copyWith(
                       fontSize: 14,
                       fontWeight: FontWeight.w400,
-                      color: isSelected ? AppConstants.appThemeColor : const Color(0xFF242424),
+                      color: isSelected ? _accentPurple : const Color(0xFF242424),
                     ),
                   ),
                 ),
@@ -218,7 +218,7 @@ class _HotelSearchScreenState extends State<HotelSearchScreen> {
             state is HotelSearchLoadInProgress) {
           return const Center(
             child: CircularProgressIndicator(
-              color: AppConstants.appThemeColor,
+              color: _accentPurple,
             ),
           );
         }

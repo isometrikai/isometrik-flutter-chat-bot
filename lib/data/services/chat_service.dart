@@ -10,8 +10,8 @@ class ChatService {
     required String fingerPrintId,
     required String sessionId,
     bool isLoggedIn = false,
-    // double longitude = 0.0,
-    // double latitude = 0.0,
+    double longitude = 0.0,
+    double latitude = 0.0,
     String staffId = "",
     String serviceRequestedTime = "",
     String storeCategoryId = "",
@@ -20,7 +20,6 @@ class ChatService {
     Map<String, dynamic> hotelDestinationData = const {},
     Map<String, dynamic> carPickupData = const {},
     Map<String, dynamic> flightBookingData = const {},
-    Map<String, dynamic> packageDeliveryData = const {},
   }) {
     return ChatApiServices.instance.sendChatMessage(
       message: message,
@@ -28,8 +27,8 @@ class ChatService {
       fingerPrintId: fingerPrintId,
       sessionId: sessionId,
       isLoggedIn: isLoggedIn,
-      // longitude: longitude,
-      // latitude: latitude,
+      longitude: longitude,
+      latitude: latitude,
       staffId: staffId,
       serviceRequestedTime: serviceRequestedTime,
       storeCategoryId: storeCategoryId,
@@ -38,7 +37,6 @@ class ChatService {
       hotelDestinationData: hotelDestinationData,
       carPickupData: carPickupData,
       flightBookingData: flightBookingData,
-      packageDeliveryData: packageDeliveryData,
     );
   }
 

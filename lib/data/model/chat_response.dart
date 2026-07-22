@@ -100,7 +100,6 @@ class ChatWidget {
   final bool isHotelBookingFlow;
   final bool isCarBookingFlow;
   final bool isFlightBookingFlow;
-  final bool isPackageTypesFlow;
   final bool isForReturn;
   final bool? isForPickup;
   final bool? isDeparture;
@@ -115,7 +114,6 @@ class ChatWidget {
     required this.isFlightBookingFlow,
     required this.isHotelBookingFlow,
     required this.isCarBookingFlow,
-    required this.isPackageTypesFlow,
     required this.isForReturn,
     required this.isForPickup,
     required this.isDeparture,
@@ -135,7 +133,6 @@ class ChatWidget {
       isForReturn: json['isForReturn'] ?? false,
       isForPickup: json['isForPickup'] ?? false,
       isFlightBookingFlow: json['is_flight_booking'] ?? false,
-      isPackageTypesFlow: json['is_package_flow'] ?? false,
       isDeparture: json['isDeparture'] ?? false,
     );
   }
@@ -153,7 +150,6 @@ class ChatWidget {
       'isForReturn': isForReturn,
       'isForPickup': isForPickup,
       'is_flight_booking_flow': isFlightBookingFlow,
-      'is_package_flow': isPackageTypesFlow,
       'isDeparture': isDeparture,
     };
   }
@@ -184,7 +180,6 @@ class ChatWidget {
   bool get isSeeMoreHotelsWidget => type == WidgetEnum.see_more_hotels.value;
   bool get isSeeMoreCarsWidget => type == WidgetEnum.see_more_cars.value;
   bool get isSeeMoreFlightsWidget => type == WidgetEnum.see_more_flights.value;
-  bool get isAddDropoffAddressWidget => type == WidgetEnum.add_dropoff_address.value;
   bool get isTripTypeSelectionWidget => type == WidgetEnum.trip_type_selection.value;
   bool get isFlightBookingDateTimeWidget => type == WidgetEnum.flight_booking_date_time.value;
   bool get isFlightAddMemberWidget => type == WidgetEnum.flight_add_member.value;
@@ -212,8 +207,6 @@ class ChatWidget {
   bool get isHotelBookingConfirmedWidget => type == WidgetEnum.hotel_booking_confirmed.value;
   bool get isCarBookingConfirmedWidget => type == WidgetEnum.car_booking_confirmed.value;
   bool get isFlightBookingConfirmedWidget => type == WidgetEnum.flight_booking_confirmed.value;
-  bool get isPackageInstructionsWidget => type == WidgetEnum.package_instructions.value;
-  bool get isPackageTypesWidget => type == WidgetEnum.package_types.value;
   bool get isHotelsWidget => type == WidgetEnum.hotels.value;
   bool get isButtonWidget => type == 'button';
   bool get isInputWidget => type == 'input';
@@ -334,14 +327,6 @@ class ChatWidget {
       : [];
 
   List<WidgetAction> get seeMoreFlights => isSeeMoreFlightsWidget
-      ? widget.map((e) => WidgetAction.fromJson(e as Map<String, dynamic>)).toList()
-      : [];
-
-  List<WidgetAction> get addDropoffAddress => isAddDropoffAddressWidget
-      ? widget.map((e) => WidgetAction.fromJson(e as Map<String, dynamic>)).toList()
-      : [];
-
-  List<WidgetAction> get packageInstructions => isPackageInstructionsWidget
       ? widget.map((e) => WidgetAction.fromJson(e as Map<String, dynamic>)).toList()
       : [];
 
@@ -629,16 +614,6 @@ class ChatWidget {
     }
     return [];
   }
-
-  // Helper method to get package types items
-  List<SendPackageType> getPackageTypesItems() {
-    if (isPackageTypesWidget) {
-      return widget
-          .map((item) => SendPackageType.fromJson(item as Map<String, dynamic>))
-          .toList();
-    }
-    return [];
-  }
   // Get raw store as JSON string by index
   String? getRawStoreAsJsonString(int index) {
     final rawStore = getRawStore(index);
@@ -889,9 +864,6 @@ class Doctor {
   final String profilePic;
   final double? rating;
   final DoctorPricing? pricing;
-  final num? consultation_fee;
-  final String? currencySymbol;
-  final int? storeLocationAt;
 
   Doctor({
     required this.id,
@@ -901,9 +873,6 @@ class Doctor {
     required this.profilePic,
     this.rating,
     this.pricing,
-    this.consultation_fee,
-    this.currencySymbol,
-    this.storeLocationAt,
   });
 
   String get fullName => '$firstName ${lastName.trim()}'.trim();
@@ -920,9 +889,6 @@ class Doctor {
       pricing: pricingJson != null && pricingJson is Map<String, dynamic>
           ? DoctorPricing.fromJson(pricingJson)
           : null,
-          consultation_fee: json['consultation_fee'] ?? 0,
-          currencySymbol: json['currency_code']?.toString() ?? '',
-          storeLocationAt: json['storeLocationAt'] ?? 0,
     );
   }
 
@@ -935,9 +901,6 @@ class Doctor {
       'profilePic': profilePic,
       if (rating != null) 'rating': rating,
       if (pricing != null) 'pricing': pricing!.toJson(),
-      'consultation_fee': consultation_fee,
-      'currencySymbol': currencySymbol,
-      'storeLocationAt': storeLocationAt,
     };
   }
 }
@@ -963,7 +926,6 @@ class Store {
   final num supportedOrderTypes;
   final bool tableReservations;
   final List<String> cuisines;
-  final int? companytype;
 
   Store({
     required this.storename,
@@ -985,7 +947,6 @@ class Store {
     required this.supportedOrderTypes,
     required this.tableReservations,
     required this.cuisines,
-     this.companytype,
   });
 
   factory Store.fromJson(Map<String, dynamic> json) {
@@ -1004,7 +965,6 @@ class Store {
     final bool storeIsOpen = (json['storeIsOpen'] ?? false);
     final int supportedOrderTypes = (json['supportedOrderTypes'] ?? 0);
     final bool tableReservations = (json['tableReservations'] ?? false);
-    final int companytype = (json['companyType'] ?? 0);
     final List<Doctor> doctorsList = (json['doctorsList'] as List<dynamic>? ?? [])
         .map((e) => Doctor.fromJson(e as Map<String, dynamic>))
         .toList();
@@ -1062,7 +1022,6 @@ class Store {
       supportedOrderTypes: supportedOrderTypes,
       tableReservations: tableReservations,
       cuisines: cuisines,
-      companytype: companytype,
     );
   }
 
@@ -1083,7 +1042,6 @@ class Store {
       'tableReservations': tableReservations,
       'isDoctore': isDoctore,
       'cuisines': cuisines,
-      'companytype': companytype,
     };
   }
 }
@@ -1221,35 +1179,6 @@ class CarPickupPlace {
       'type': type,
       'coordinates': coordinates.toJson(),
       'region_id': regionId,
-    };
-  }
-}
-
-// Send package type model for package_types widget
-class SendPackageType {
-  final String id;
-  final String sendPackageTypeName;
-  final String sendPackageTypeImage;
-
-  SendPackageType({
-    required this.id,
-    required this.sendPackageTypeName,
-    required this.sendPackageTypeImage,
-  });
-
-  factory SendPackageType.fromJson(Map<String, dynamic> json) {
-    return SendPackageType(
-      id: (json['_id'] ?? '').toString(),
-      sendPackageTypeName: (json['sendPackageTypeName'] ?? '').toString(),
-      sendPackageTypeImage: (json['sendPackageTypeImage'] ?? '').toString(),
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      '_id': id,
-      'sendPackageTypeName': sendPackageTypeName,
-      'sendPackageTypeImage': sendPackageTypeImage,
     };
   }
 }
@@ -3326,9 +3255,6 @@ class WidgetAction {
   final int? children;
   final int? infants;
   final List<FlightInfo>? flightInfo;
-  final String? propertyId;
-  final bool? isDoctorFlow;
-  final num? productType;
 
   WidgetAction({
     required this.buttonText,
@@ -3400,9 +3326,6 @@ class WidgetAction {
     this.children,
     this.infants,
     this.flightInfo,
-    this.propertyId,
-    this.isDoctorFlow,
-    this.productType,
   });
 
   factory WidgetAction.fromJson(Map<String, dynamic> json) {
@@ -3480,9 +3403,6 @@ class WidgetAction {
         children: json['children'] ?? 0,
         infants: json['infants'] ?? 0,
         flightInfo: _parseFlightInfoList(json['flightInfo'] ?? json['flight_info']),
-        propertyId: json['propertyId']?.toString(),
-        isDoctorFlow: json['isDoctorFlow'] ?? false,
-        productType: json['productType'] ?? 0,
     );
   }
 
@@ -3558,9 +3478,6 @@ class WidgetAction {
       'children': children,
       'infants': infants,
       'flightInfo': flightInfo?.map((e) => e.toJson()).toList(),
-      'propertyId': propertyId,
-      'isDoctorFlow': isDoctorFlow,
-      'productType': productType,
     };
   }
 }

@@ -42,6 +42,7 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
   DateTime? _lastQueryAt;
 
   // Cart state
+  int _cartItems = 0;
   List<UniversalCartData> _cartData = []; // Store cart data from getCart API
 
   @override
@@ -619,45 +620,27 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return MultiBlocProvider(
-      providers: [
-        BlocProvider<RestaurantBloc>.value(value: _bloc),
-        BlocProvider<CartBloc>.value(value: cartBloc),
-      ],
+    return BlocProvider.value(
+      value: _bloc,
       child: Scaffold(
         backgroundColor: Colors.white,
         body: SafeArea(
-          child: BlocBuilder<CartBloc, CartState>(
-            builder: (BuildContext context, CartState cartState) {
-              int itemCount = 0;
-              if (widget.actionData?.storeCategoryId == FoodStoreCategoryId.grocery.value) {
-                itemCount = cartBloc.getGroceryCategoryCount;
-              } else if (widget.actionData?.storeCategoryId == FoodStoreCategoryId.pharmacy.value) {
-                itemCount = cartBloc.getPharmacyCategoryCount;
-              } else if (widget.actionData?.storeCategoryId == FoodStoreCategoryId.services.value) {
-                itemCount = cartBloc.getServicesCategoryCount;
-              } else if (widget.actionData?.storeCategoryId == FoodStoreCategoryId.healthCare.value) {
-                itemCount = cartBloc.getHealthCareCategoryCount;
-              } else if (widget.actionData?.storeCategoryId == FoodStoreCategoryId.shopping.value) {
-                itemCount = cartBloc.getShoppingCategoryCount;
-              } else if (widget.actionData?.storeCategoryId == FoodStoreCategoryId.donation.value) {
-                itemCount = cartBloc.getDonationCategoryCount;
-              } else if (widget.actionData?.storeCategoryId == FoodStoreCategoryId.food.value) {
-                itemCount = cartBloc.getFoodCategoryCount;
-              }
-
-              return Column(
-                children: <Widget>[
+          child: Stack(
+            children: [
+              // Main content
+              Column(
+                children: [
                   Expanded(
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16),
                       child: Column(
-                        children: <Widget>[
+                        children: [
                           const SizedBox(height: 24),
                           ScreenHeader(
                             title: widget.actionData?.title ?? '',
                             subtitle: widget.actionData?.subtitle ?? '',
                             onClose: () {
+                              // _onAddToCart();
                               if (widget.onCheckout != null) {
                                 widget.onCheckout!(true);
                               }
@@ -668,115 +651,22 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
                           _buildSearchBar(),
                           const SizedBox(height: 16),
                           Expanded(child: _buildRestaurantList()),
+                          // Add bottom padding to account for the cart bar (only when items exist)
+                          if (_cartItems > 0) const SizedBox(height: 105),
                         ],
                       ),
                     ),
                   ),
-                  if (itemCount > 0) _buildBottomCartBar(itemCount),
-                ],
-              );
-            },
-          ),
-        ),
-      ),
-    );
-  }
-
-  void _onViewCart() {
-    Navigator.push(
-      context,
-      MaterialPageRoute<void>(
-        builder: (BuildContext context) => BlocProvider<CartBloc>.value(
-          value: cartBloc,
-          child: CartScreen(
-            needToShowCheckoutButton: false,
-            storeCategoryId: widget.actionData?.storeCategoryId,
-            onCheckout: (String message, String? storeCategoryId) {
-              if (widget.onCheckout != null) {
-                widget.onCheckout!(true);
-              }
-              Navigator.of(context).pop();
-            },
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildBottomCartBar(int itemCount) {
-    final String itemLabel =
-        itemCount == 1 ? '1 Item added' : '$itemCount Items added';
-    final double bottomInset = MediaQuery.of(context).padding.bottom;
-
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        boxShadow: <BoxShadow>[
-          BoxShadow(
-            color: const Color(0xFFD4D4D4).withValues(alpha: 0.25),
-            offset: const Offset(0, -4),
-            blurRadius: 9,
-          ),
-        ],
-      ),
-      padding: EdgeInsets.fromLTRB(16, 15, 16, bottomInset > 0 ? 8 : 16),
-      child: GestureDetector(
-        onTap: _onViewCart,
-        child: Container(
-          height: 55,
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-          decoration: BoxDecoration(
-            // gradient: const LinearGradient(
-            //   begin: Alignment.centerLeft,
-            //   end: Alignment.centerRight,
-            //   colors: <Color>[
-            //     Color(0xFFD445EC),
-            //     Color(0xFFB02EFB),
-            //     Color(0xFF8E2FFD),
-            //     Color(0xFF5E3DFE),
-            //     Color(0xFF5186E0),
-            //   ],
-            //   stops: <double>[0.0, 0.27, 0.48, 0.76, 1.0],
-            // ),
-            color: AppConstants.appThemeColor,
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: <Widget>[
-              Text(
-                itemLabel,
-                style: const TextStyle(
-                  fontWeight: FontWeight.w700,
-                  fontSize: 14,
-                  height: 1.2,
-                  color: Colors.white,
-                ),
-              ),
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  const Text(
-                    'View cart',
-                    style: TextStyle(
-                      fontWeight: FontWeight.w700,
-                      fontSize: 14,
-                      height: 1.2,
-                      color: Colors.white,
-                    ),
-                  ),
-                  const SizedBox(width: 5),
-                  Transform.rotate(
-                    angle: -1.5708,
-                    child: const Icon(
-                      Icons.keyboard_arrow_down,
-                      color: Colors.white,
-                      size: 20,
-                    ),
-                  ),
                 ],
               ),
+              // // Bottom cart bar - positioned absolutely at the bottom (only show when items exist)
+              // if (_cartItems > 0)
+              //   Positioned(
+              //     left: 0,
+              //     right: 0,
+              //     bottom: 0,
+              //     child: _buildBottomCartBar(),
+              //   ),
             ],
           ),
         ),
@@ -822,6 +712,90 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
       ),
     );
   }
+
+  // Widget _buildBottomCartBar() {
+  //   return GestureDetector(
+  //     onTap: _onAddToCart,
+  //     child: Container(
+  //       width: double.infinity,
+  //       height: 105.56,
+  //       padding: const EdgeInsets.only(top: 10),
+  //       decoration: const BoxDecoration(
+  //         color: Color(0xFFF5F7FF),
+  //       ),
+  //       child: Center(
+  //         child: Container(
+  //           width: 343,
+  //           height: 62,
+  //           decoration: BoxDecoration(
+  //             gradient: const LinearGradient(
+  //               begin: Alignment.centerLeft,
+  //               end: Alignment.centerRight,
+  //               colors: [
+  //                 Color(0xFFD445EC),
+  //                 Color(0xFFB02EFB),
+  //                 Color(0xFF8E2FFD),
+  //                 Color(0xFF5E3DFE),
+  //                 Color(0xFF5186E0),
+  //               ],
+  //               stops: [0.0, 0.27, 0.48, 0.76, 1.0],
+  //             ),
+  //             borderRadius: BorderRadius.circular(16),
+  //           ),
+  //           child: Row(
+  //             children: [
+  //               // Left side - Price and items
+  //               Padding(
+  //                 padding: const EdgeInsets.only(left: 25, top: 13),
+  //                 child: Column(
+  //                   crossAxisAlignment: CrossAxisAlignment.start,
+  //                   children: [
+  //                     Text(
+  //                       'د.إ${_cartTotal.toStringAsFixed(2)}',
+  //                       style: const TextStyle(
+  //                         fontFamily: 'aed',
+  //                         fontSize: 16,
+  //                         fontWeight: FontWeight.w400,
+  //                         height: 1.2,
+  //                         color: Colors.white,
+  //                       ),
+  //                     ),
+  //                     const SizedBox(height: 2),
+  //                     Text(
+  //                       '${_cartItems.toString().padLeft(2, '0')} items',
+  //                       style: const TextStyle(
+  //                         fontFamily: 'Plus Jakarta Sans',
+  //                         fontSize: 12,
+  //                         fontWeight: FontWeight.w400,
+  //                         height: 1.4,
+  //                         color: Colors.white,
+  //                       ),
+  //                     ),
+  //                   ],
+  //                 ),
+  //               ),
+  //               const Spacer(),
+  //               // Right side - Checkout button
+  //               Padding(
+  //                 padding: const EdgeInsets.only(right: 25),
+  //                 child: const Text(
+  //                   'Checkout',
+  //                   style: TextStyle(
+  //                     fontFamily: 'Plus Jakarta Sans',
+  //                     fontSize: 16,
+  //                     fontWeight: FontWeight.w700,
+  //                     height: 1.2,
+  //                     color: Colors.white,
+  //                   ),
+  //                 ),
+  //               ),
+  //             ],
+  //           ),
+  //         ),
+  //       ),
+  //     ),
+  //   );
+  // }
 
   Widget _buildSearchBar() {
     return Container(
@@ -962,8 +936,8 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
                                 "unitId": "",
                                 "isDoctorFlow": true,
                                 "serviceLocationAt": serviceLocationAt,
-                                "longitude": Utility.getLongitude(),
-                                "latitude": Utility.getLatitude(),
+                                "longitude": ChatApiServices.instance.longitude ?? 0,
+                                "latitude": ChatApiServices.instance.latitude ?? 0,
                                 "centralProductId": "",
                                 "storeTypeId": store.storeTypeId ?? 25,
                                 "storeCategoryId": store.storeCategoryId,

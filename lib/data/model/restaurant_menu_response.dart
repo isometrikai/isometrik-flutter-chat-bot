@@ -36,28 +36,6 @@ class RestaurantMenuData {
   }
 }
 
-class LogoImages {
-  final String logoImageMobile;
-  final String logoImageThumb;
-
-  LogoImages({
-    required this.logoImageMobile,
-    required this.logoImageThumb,
-  });
-
-  factory LogoImages.fromJson(Map<String, dynamic> json) {
-    return LogoImages(
-      logoImageMobile: (json['logoImageMobile'] ?? '').toString(),
-      logoImageThumb: (json['logoImageThumb'] ?? '').toString(),
-    );
-  }
-
-  String get imageUrl {
-    if (logoImageMobile.isNotEmpty) return logoImageMobile;
-    return logoImageThumb;
-  }
-}
-
 class StoreData {
   final String storeId;
   final String storeName;
@@ -65,7 +43,6 @@ class StoreData {
   final String cuisines;
   final double avgRating;
   final bool storeIsOpen;
-  final LogoImages? logoImages;
 
   StoreData({
     required this.storeId,
@@ -74,7 +51,6 @@ class StoreData {
     required this.cuisines,
     required this.avgRating,
     required this.storeIsOpen,
-    this.logoImages,
   });
 
   factory StoreData.fromJson(Map<String, dynamic> json) {
@@ -85,10 +61,6 @@ class StoreData {
       cuisines: json['cuisines'] ?? '',
       avgRating: (json['avgRating'] ?? 0.0).toDouble(),
       storeIsOpen: json['storeIsOpen'] ?? false,
-      logoImages:
-          json['logoImages'] is Map<String, dynamic>
-              ? LogoImages.fromJson(json['logoImages'] as Map<String, dynamic>)
-              : null,
     );
   }
 }
