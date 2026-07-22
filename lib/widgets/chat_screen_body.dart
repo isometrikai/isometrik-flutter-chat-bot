@@ -1232,20 +1232,20 @@ class ChatScreenBody extends StatelessWidget {
             const SizedBox(height: 4), //12
             buildPackageTypesWidget(message.packageTypesItems),
           ],
-          // if (message.text.trim().isNotEmpty && message.isBot) ...[
-          //   const SizedBox(height: 4),
-          //   Padding(
-          //     padding: EdgeInsets.only(
-          //       left: message.isBot ? 0 : 50,
-          //       right: message.isBot ? 50 : 0,
-          //     ),
-          //     child: MessageSpeakerButton(
-          //       messageId: message.id,
-          //       text: message.text,
-          //       isBot: message.isBot,
-          //     ),
-          //   ),
-          // ],
+          if (message.text.trim().isNotEmpty && message.isBot) ...[
+            const SizedBox(height: 4),
+            Padding(
+              padding: EdgeInsets.only(
+                left: message.isBot ? 0 : 50,
+                right: message.isBot ? 50 : 0,
+              ),
+              child: MessageSpeakerButton(
+                messageId: message.id,
+                text: message.text,
+                isBot: message.isBot,
+              ),
+            ),
+          ],
         ],
       ),
     );
