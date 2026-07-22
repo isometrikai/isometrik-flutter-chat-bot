@@ -89,7 +89,7 @@ class _FlightSearchCard extends StatelessWidget {
   static const Color _amenityTextColor = Color(0xFF242424);
   static const Color _amenityIconColor = Color(0xFFA674BF);
   static const Color _perAdultColor = Color(0xFFA2A2A2);
-  // static const Color _accentPurple = Color(0xFF8E2FFD);
+  static const Color _accentPurple = Color(0xFF8E2FFD);
   static const Color _pathLineColor = Color(0xFFEDE8F4);
 
   @override
@@ -451,7 +451,7 @@ class _FlightSearchCard extends StatelessWidget {
             height: 12.96,
             fit: BoxFit.contain,
             colorFilter: const ColorFilter.mode(
-              AppConstants.appThemeColor,
+              _accentPurple,
               BlendMode.srcIn,
             ),
           ),
@@ -462,7 +462,7 @@ class _FlightSearchCard extends StatelessWidget {
               fontSize: 12,
               fontWeight: FontWeight.w400,
               height: 1.4,
-              color: AppConstants.appThemeColor,
+              color: _accentPurple,
             ),
           ),
         ],

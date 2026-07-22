@@ -215,7 +215,7 @@ class _TutorialScreenState extends State<TutorialScreen> {
     return Column(
       children: [
          Text(
-          'Welcome to your\neazy assistant!',
+          'Welcome to your\nAI assistant!',
           textAlign: TextAlign.center,
           style: AppTextStyles.restaurantTitle.copyWith(
             fontSize: 24,
@@ -598,7 +598,7 @@ class _TutorialScreenState extends State<TutorialScreen> {
         ),
         const SizedBox(height: 12),
            Text(
-          'Just type naturally- ask questions, get recommendations, explore things, or have a friendly chat. Eazy understands context and provided helpful responses.',
+          'Just type naturally- ask questions, get recommendations, explore things, or have a friendly chat. App understands context and provided helpful responses.',
           textAlign: TextAlign.center,
           style: AppTextStyles.restaurantDescription.copyWith(
             fontSize: 14,
@@ -1107,7 +1107,7 @@ class _TutorialScreenState extends State<TutorialScreen> {
     return Column(
       children: [
          Text(
-          'Why choose eazy?',
+          'Why choose App?',
           textAlign: TextAlign.center,
           style: AppTextStyles.restaurantTitle.copyWith(
             fontSize: 20,
@@ -1242,7 +1242,7 @@ class _TutorialScreenState extends State<TutorialScreen> {
             
             // Logo
             SvgPicture.asset(
-              AssetPath.get('images/ic_LogoTutorial.svg'),
+              AssetPath.get('images/ic_mainImg_R.svg'),
               width: 120,
               height: 120,
             ),
@@ -1393,7 +1393,7 @@ class _TutorialScreenState extends State<TutorialScreen> {
 
   Widget _buildCentralImage() {
     return SvgPicture.asset(
-      AssetPath.get('images/ic_LogoTutorial.svg'),
+      AssetPath.get('images/ic_mainImg_R.svg'),
       fit: BoxFit.contain,
     );
   }

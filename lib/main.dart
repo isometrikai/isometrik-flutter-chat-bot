@@ -133,30 +133,30 @@ class PlatformService {
             name: 'Chintu',
             timestamp: '2025-07-28T12:30:00Z',
             userToken: 'Bearer eyJhbGciOiJSU0EtT0FFUCIsImN0eSI6IkpXVCIsImVuYyI6IkExMjhHQ00iLCJ0eXAiOiJKV1QifQ.dYEcFtz6bknvkTamUwzuZTcUpG4hTTkHDLay_XNfsCnSbGDfM77Y3OizkWOye2OtXtBJpO-VCnb5PtRzOB3VgH4OArfY_uWNMWGh9MHqXa_vSqbZvjn9ag2OK_na7tyk_uYLe-JLf1TXTm4DkK7JXn9IqrMy8-FExV9TomQGkNY.dvExnsdEnCzAA1hB.9mEmrxcAjmqLNd5C5PkWoJgWNyXmg0zcJW5SWztebsW2rP97_9n63wQTR1RPONBTRRMCPgxctNuknnVLpLxNwTdFgSJZqzhJNcmKjCob3YrXh9E0nTabS8TfpFhP8tO2v4TW_hk1hvIqUTrCIbwxFQuWVyg2rK9KCVOaGc3iHRyNlziOxxH4nH-5U5Y2QS4zFWQlTNYTg2HCsjh8pHFvBEqgVm16t5pdjkb3pduM-WigQu96S6lw6Wft5t3wsvG5X9nGmxvox_9D-Ui6beuAEfRE6fI-B8HbRPA0S9JI-wGyu1CJrFy4omtyjQsY1oZAJG6jwD0y5K-7kM3qbmOTlw9_o544ZegT9Ns4Ac54_iX8JG-XKmiase4CdkkSZzIi1kV-usYiON6JYOBI6-C3EqKAObUwYOvpANsvmQpunKvw3rPg-CvFGLAodAQ0RKxQgpve0npht4b3sbHDP_j6w6SJ2TOASpiwWdxmODjk5N9MP69sPS7UGMaDiptP5QYNZ_9elaDp1HBLwmiSJ7xa0-0WxQJO_juKWZ5AiCRHsCnWt6R_Iled0rTJy0LfNENDCUVmwOAMPPP8Ln_uGsIoIHJzeIvOVgSlHAnsUqV6EMICnoKsirgrHwwO8Lj8KXTL6KeYHuKX__4KtARWzl5mbf-Wt2tRtLbGe-algHYg_Swhuf1VvfSBmpjsYYOX3vAyqQJBP1IlWOtFWtRmiYcnXeYByynUp-48orAFgCP2BWkc8dAp9MBPQ5eAPw0now7N6WaQN6K3iFjBNMG3aiS4p5WMkjM4yeMdl5rP4RbXumLqyaqyb1uhd77PDYBFk7BmGQeSs1fZNnCUXSZvlUyQ9EOVErPeLmPpGLzUB9PG5Fl6C76-3WA3PFZv3--ARf3zzFfxQ4eyjO0fiVI8RFkEx6T5r9VIdxgK0cyCvBG6hbtfAmZpWg4tVkk98K1C5TUMMqmHzXNZiiT4DXfUgn6zf15MQxUyD581aNA8S49in6inIuKVmFleKL6lJ2AydICyNu7okdrmxJ4N4LIyH1ZRId90yeCH17rT_tfgrMBBE1tvzTg6hMvkggcbGIkLxnT_CzzPgDgvGG0oFuZ-1qmub15uNoz_JuKPm3YLsdwjLQZauuJqPMWAzfa6wXYOt7rKPoR5NpKEa95YLdDxWwjPucr5h_WAFR4WBS12ylx7ZAt07N4wIqcpnR3t_Ohc0fsUA6dSiwdfiNnOnYVF2x2Y7U1E3vjXWJqVkmQDNpKAHm5jAp2IdGfg_c27gLeRwsftrZrlyOSKGC5czKrgl2gUniCp-t9IRvZSPReip1T7zbV51Y-rMvkvtdPrunBKi3bwNd1rZ28yqQZcIkeT-Qa8lOF6UyMPdnDBvcN7z6ebtvKuRmjRhwT1dlRZjL3TJzx4cfWI7OIvSGwO7XP6kE4OmCHRtxkywktIkgCvXI2i2mxHwRYsf5kdgLBGhnEmVZE1qUC1bK2qBgKuaFdAm4TQ_vV6tKTEM6XiAo4UyAMSU-f3Q5xwVrfO6Yqu4wUMXcDonoo8kBC875PSpejVwj_CpAEXsjU-OQEegDzNpPhIxFuFyiuxF9nuyG9BUPJJqiMm99oX7z_-OHYpcsdwcgrOaDsCvyXf7D98d96BagC2R938W9tbCBs-I0kz0ZKzM4xw1NkSTOtzc_AXgPdU5Wug_6w9Yp208OoHA6754wFDTBrWxA6dEc-jQ390y92z9ZseeJM4eDiU2g3_oCMrtMYGZNse820OAlZsP4gcKQKr81icKintWajzmA.eISy_Pxlceh9Mbf4SkIS0w',
-            location: 'Dubai',
+            location: 'Banglore',
             isProduction: false,
-            // latitude: 13.02868,
-            // longitude: 77.58952,
-            latitude: 25.204849243164062,//dubai
-            longitude: 55.2704849243164062,//dubai
+            latitude: 13.02868,
+            longitude: 77.58952,
+            // latitude: 25.204849243164062,//dubai
+            // longitude: 55.2704849243164062,//dubai
             clientGuid: '528a7d439df44f2b9457342b7b865be2',
             indexName: 'hitechnology.20250821.105131',
             visitId: '3c6b9339-c602-4af9-b454-0ec0df067181',
             visitorId: '47daf829-b5df-4358-83ea-207aa4eaae15',
             searchApiUrl: 'https://searchapi-dev.hawksearch.net/api/v2',
             baseApiUrl: 'https://api-stage.eazylife-online.com',
-            // currencycode: 'INR',//'AED',
-            // currencysymbol: '4oK5',//"2K8u2KU=",//"د.إ",
-            // zoneId: '634e5da256ad3fd02bd3feb5',
+            currencycode: 'INR',//'AED',
+            currencysymbol: '4oK5',//"2K8u2KU=",//"د.إ",
+            zoneId: '634e5da256ad3fd02bd3feb5',
             timezone: 'Asia/Kolkata',
             platform: '1',
             personalization: true,
             emailId: 'chintu@gmail.com',
             phoneNumber: '9988765433',
             countryCode: '91',
-            zoneId: '636dfc8c89b6a857b500ccd1',//dubai
-             currencycode: 'AED',//dubai
-            currencysymbol: "2K8u2KU=",//"د.إ",//dubai
+            // zoneId: '636dfc8c89b6a857b500ccd1',//dubai
+            //  currencycode: 'AED',//dubai
+            // currencysymbol: "2K8u2KU=",//"د.إ",//dubai
           );
           
 // in bottom need to set production data for testing

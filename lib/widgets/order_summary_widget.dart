@@ -251,27 +251,7 @@ class OrderSummaryWidget extends StatelessWidget {
                         ),
                       ],
                     ),
-                    ], 
-                    if (storeInfo.storeCategoryId == FoodStoreCategoryId.healthCare.value) ...[
-                      const SizedBox(height: 10),
-                       Row(
-                              children: [
-                                const Text('⏰ ', style: TextStyle(fontSize: 16)),
-                                Expanded(
-                                  child: Text(
-                                    storeInfo.isScheduled == true 
-                                        ? 'Scheduled for ${_formatServiceTime(storeInfo.serviceRequestedTime)}' 
-                                        : 'Book Now',
-                                    style: AppTextStyles.restaurantDescription.copyWith(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w400,
-                                      color: const Color(0xFF242424),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                    ], 
+                    ],  
                     ],
                   ),
                 ),
@@ -451,41 +431,34 @@ class OrderSummaryWidget extends StatelessWidget {
     return 'د.إ${value.toStringAsFixed(value.truncateToDouble() == value ? 0 : 2)}';
   }
 
-  String _formatServiceTime(String? timeString) {
-    if (timeString == null || timeString.isEmpty) {
+  String _formatServiceTime(String? isoDateString) {
+    if (isoDateString == null || isoDateString.isEmpty) {
       return '';
     }
 
     try {
-      final trimmed = timeString.trim();
-      final DateTime dateTime;
-
-      final timestamp = int.tryParse(trimmed);
-      if (timestamp != null) {
-        final ms = trimmed.length > 10 ? timestamp : timestamp * 1000;
-        dateTime = DateTime.fromMillisecondsSinceEpoch(ms, isUtc: true).toLocal();
-      } else {
-        dateTime = DateTime.parse(trimmed).toLocal();
-      }
-
-      const months = [
-        'January', 'February', 'March', 'April', 'May', 'June',
-        'July', 'August', 'September', 'October', 'November', 'December',
+      final dateTime = DateTime.parse(isoDateString);
+      
+      // Format: "Dec 25, 2023 at 10:20 AM"
+      final months = [
+        'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+        'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
       ];
-
+      
       final month = months[dateTime.month - 1];
-      final day = dateTime.day.toString().padLeft(2, '0');
+      final day = dateTime.day;
       final year = dateTime.year;
-
+      
       final hour = dateTime.hour;
       final minute = dateTime.minute;
       final period = hour >= 12 ? 'PM' : 'AM';
       final displayHour = hour > 12 ? hour - 12 : (hour == 0 ? 12 : hour);
       final displayMinute = minute.toString().padLeft(2, '0');
-
+      
       return '$month $day, $year at $displayHour:$displayMinute $period';
     } catch (e) {
-      return timeString;
+      // If parsing fails, return the original string
+      return isoDateString;
     }
   }
 }
