@@ -19,13 +19,15 @@ Future<void> _bootstrapAndRun() async {
   await EasyLocalization.ensureInitialized();
   await PlatformService.initializeFromPlatform();
 
+  // Utility.getLanguage() (from platform/config) is the source of truth.
   runApp(
     EasyLocalization(
       supportedLocales: AppLocale.supportedLocales,
       path: 'assets/translations',
       fallbackLocale: const Locale('en'),
-      startLocale: Locale(Utility.getLanguage()),
+      startLocale: AppLocale.locale,
       useOnlyLangCode: true,
+      saveLocale: false,
       child: const MyApp(),
     ),
   );
@@ -52,15 +54,32 @@ class MyApp extends StatelessWidget {
     print('STEP 1');
     Utility.setCurrentContext(context);
 
+    // Keep EasyLocalization in sync with Utility.getLanguage().
+    final appLocale = AppLocale.locale;
+    if (context.locale != appLocale) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (context.mounted) {
+          context.setLocale(appLocale);
+        }
+      });
+    }
+
     return MaterialApp(
       title: 'Chat Bot',
       navigatorKey: kNavigatorKey,
-      locale: context.locale,
+      locale: appLocale,
       supportedLocales: context.supportedLocales,
       localizationsDelegates: context.localizationDelegates,
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
       themeMode: ThemeMode.system,
+      // Apply RTL/LTR to the whole app (all routes: chat, profile, cart, …).
+      builder: (context, child) {
+        return Directionality(
+          textDirection: AppLocale.textDirection,
+          child: child ?? const SizedBox.shrink(),
+        );
+      },
       home: MultiBlocProvider(
         providers: [
           BlocProvider(create: (context) => ChatBloc()),

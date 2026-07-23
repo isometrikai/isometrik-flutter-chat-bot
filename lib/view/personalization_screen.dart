@@ -57,7 +57,8 @@ class _PersonalizationScreenState extends State<PersonalizationScreen> {
     final contentW = math.min(screenW, 375.0);
     final horizontalInset = (screenW - contentW) / 2;
 
-    return BlocProvider(
+    return AppLocale.wrap(
+      BlocProvider(
       create: (context) => ChatHistoryBloc(),
       child: BlocListener<ChatHistoryBloc, ChatHistoryState>(
         listener: (context, state) {
@@ -166,6 +167,7 @@ class _PersonalizationScreenState extends State<PersonalizationScreen> {
           },
         ),
       ),
+    ),
     );
   }
 

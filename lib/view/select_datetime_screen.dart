@@ -42,13 +42,15 @@ class SelectDateTimeScreen extends StatefulWidget {
       backgroundColor: Colors.transparent,
       isDismissible: true,
       enableDrag: true,
-      builder: (context) => SelectDateTimeScreen(
-        initialDate: initialDate,
-        onConfirm: onConfirm,
-        storeId: storeId,
-        latitude: latitude,
-        longitude: longitude,
-        timezone: timezone,
+      builder: (context) => AppLocale.wrap(
+        SelectDateTimeScreen(
+          initialDate: initialDate,
+          onConfirm: onConfirm,
+          storeId: storeId,
+          latitude: latitude,
+          longitude: longitude,
+          timezone: timezone,
+        ),
       ),
     );
   }

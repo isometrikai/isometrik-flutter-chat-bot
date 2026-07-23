@@ -11,7 +11,8 @@ class PopupOverlayScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return  Scaffold(
+    return AppLocale.wrap(
+      Scaffold(
       backgroundColor: Colors.transparent,
       body: GestureDetector(
         onTap: () {
@@ -32,6 +33,7 @@ class PopupOverlayScreen extends StatelessWidget {
           ),
         ),
       ),
+    ),
     );
   }
 

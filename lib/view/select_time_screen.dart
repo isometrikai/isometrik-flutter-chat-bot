@@ -40,15 +40,17 @@ class SelectTimeScreen extends StatefulWidget {
       backgroundColor: Colors.transparent,
       isDismissible: true,
       enableDrag: true,
-      builder: (context) => BlocProvider(
-        create: (context) => StoreDetailsBloc(),
-        child: SelectTimeScreen(
-          userId: userId,
-          storeCategoryId: storeCategoryId,
-          timezone: timezone,
-          onConfirm: onConfirm,
-          isForTableBooking: isForTableBooking,
-          onTableBookingConfirm: onTableBookingConfirm,
+      builder: (context) => AppLocale.wrap(
+        BlocProvider(
+          create: (context) => StoreDetailsBloc(),
+          child: SelectTimeScreen(
+            userId: userId,
+            storeCategoryId: storeCategoryId,
+            timezone: timezone,
+            onConfirm: onConfirm,
+            isForTableBooking: isForTableBooking,
+            onTableBookingConfirm: onTableBookingConfirm,
+          ),
         ),
       ),
     );

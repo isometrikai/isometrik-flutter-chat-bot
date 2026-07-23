@@ -78,7 +78,8 @@ class _HotelSearchScreenState extends State<HotelSearchScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return AppLocale.wrap(
+      Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
         child: Padding(
@@ -105,6 +106,7 @@ class _HotelSearchScreenState extends State<HotelSearchScreen> {
           ),
         ),
       ),
+    ),
     );
   }
 

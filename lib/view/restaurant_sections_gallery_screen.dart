@@ -54,7 +54,8 @@ class _RestaurantSectionsGalleryScreenState
         ? images[math.min(_selectedImageIndex, images.length - 1)]
         : null;
 
-    return Scaffold(
+    return AppLocale.wrap(
+      Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
         child: Column(
@@ -188,6 +189,7 @@ class _RestaurantSectionsGalleryScreenState
           ],
         ),
       ),
+    ),
     );
   }
 }

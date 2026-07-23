@@ -60,7 +60,7 @@ class _LaunchScreenState extends State<LaunchScreen> {
     // }
     if (!mounted) return;
     Navigator.of(context).pushReplacement(
-      MaterialPageRoute(
+      AppLocale.materialRoute(
         settings: const RouteSettings(name: ChatScreen.routeName),
         builder: (context) => MultiBlocProvider(
           providers: [
@@ -109,7 +109,8 @@ class _LaunchScreenState extends State<LaunchScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider.value(
+    return AppLocale.wrap(
+      BlocProvider.value(
       value: _bloc,
       child: BlocListener<LaunchBloc, LaunchState>(
         listener: (context, state) {
@@ -153,6 +154,7 @@ class _LaunchScreenState extends State<LaunchScreen> {
           ),
         ),
       ),
+    ),
     );
   }
 }

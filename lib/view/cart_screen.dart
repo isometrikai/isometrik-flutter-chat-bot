@@ -151,7 +151,8 @@ class _CartScreenState extends State<CartScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<CartBloc, CartState>(
+    return AppLocale.wrap(
+      BlocListener<CartBloc, CartState>(
       listenWhen: (previous, current) => current is CartLoaded,
       listener: (context, state) => _initializeCategorySelection(state),
       child: Scaffold(
@@ -176,6 +177,7 @@ class _CartScreenState extends State<CartScreen> {
           ],
         ),
       ),
+    ),
     ),
     );
   }

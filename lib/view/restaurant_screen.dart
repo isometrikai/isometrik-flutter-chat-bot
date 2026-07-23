@@ -619,7 +619,8 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return MultiBlocProvider(
+    return AppLocale.wrap(
+      MultiBlocProvider(
       providers: [
         BlocProvider<RestaurantBloc>.value(value: _bloc),
         BlocProvider<CartBloc>.value(value: cartBloc),
@@ -679,13 +680,14 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
           ),
         ),
       ),
+    ),
     );
   }
 
   void _onViewCart() {
     Navigator.push(
       context,
-      MaterialPageRoute<void>(
+      AppLocale.materialRoute<void>(
         builder: (BuildContext context) => BlocProvider<CartBloc>.value(
           value: cartBloc,
           child: CartScreen(

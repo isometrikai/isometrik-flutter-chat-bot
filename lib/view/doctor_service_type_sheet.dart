@@ -50,13 +50,15 @@ class DoctorServiceTypeSheet extends StatefulWidget {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => DoctorServiceTypeSheet(
-        doctor: doctor,
-        store: store,
-        onConfirm: (type, product) {
-          onServiceTypeSelected?.call(type, product);
-          Navigator.of(context).pop((type, product));
-        },
+      builder: (context) => AppLocale.wrap(
+        DoctorServiceTypeSheet(
+          doctor: doctor,
+          store: store,
+          onConfirm: (type, product) {
+            onServiceTypeSelected?.call(type, product);
+            Navigator.of(context).pop((type, product));
+          },
+        ),
       ),
     );
   }

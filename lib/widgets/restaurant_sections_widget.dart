@@ -68,7 +68,7 @@ class RestaurantSectionsWidget extends StatelessWidget {
                 child: OutlinedButton(
                   onPressed: () {
                     Navigator.of(context).push(
-                      MaterialPageRoute(
+                      AppLocale.materialRoute(
                         builder: (_) => RestaurantSectionsGalleryScreen(
                           storeName: storeName,
                           sections: sectionToImages,

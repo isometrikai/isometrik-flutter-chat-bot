@@ -36,7 +36,8 @@ class SetupCompleteScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return AppLocale.wrap(
+      Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
         child: Column(
@@ -178,6 +179,7 @@ class SetupCompleteScreen extends StatelessWidget {
           ],
         ),
       ),
+    ),
     );
   }
 }

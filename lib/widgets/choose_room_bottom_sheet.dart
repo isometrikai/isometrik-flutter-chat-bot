@@ -32,22 +32,24 @@ class ChooseRoomBottomSheet extends StatelessWidget {
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (sheetContext) {
-        return BlocProvider(
-          create: (_) => HotelAvailabilityBloc()
-            ..add(
-              HotelAvailabilityFetchRequested(
-                hotelBooking: hotelBooking,
-                hotelName: hotelName,
-                hotelImageUrl: hotelImageUrl,
+        return AppLocale.wrap(
+          BlocProvider(
+            create: (_) => HotelAvailabilityBloc()
+              ..add(
+                HotelAvailabilityFetchRequested(
+                  hotelBooking: hotelBooking,
+                  hotelName: hotelName,
+                  hotelImageUrl: hotelImageUrl,
+                ),
               ),
+            child: ChooseRoomBottomSheet(
+              hotelName: hotelName,
+              hotelImageUrl: hotelImageUrl,
+              onNext: (selection) {
+                onNext?.call(selection);
+                Navigator.of(sheetContext).pop(selection);
+              },
             ),
-          child: ChooseRoomBottomSheet(
-            hotelName: hotelName,
-            hotelImageUrl: hotelImageUrl,
-            onNext: (selection) {
-              onNext?.call(selection);
-              Navigator.of(sheetContext).pop(selection);
-            },
           ),
         );
       },

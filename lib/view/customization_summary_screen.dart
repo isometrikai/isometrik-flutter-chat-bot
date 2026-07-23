@@ -36,7 +36,8 @@ class _CustomizationSummaryScreenState extends State<CustomizationSummaryScreen>
 
   @override
   Widget build(BuildContext context) {
-    return ClipRRect(
+    return AppLocale.wrap(
+      ClipRRect(
       borderRadius: const BorderRadiusDirectional.only(
         topStart: Radius.circular(16),
         topEnd: Radius.circular(16),
@@ -63,6 +64,7 @@ class _CustomizationSummaryScreenState extends State<CustomizationSummaryScreen>
           ),
         ),
       ),
+    ),
     );
   }
 

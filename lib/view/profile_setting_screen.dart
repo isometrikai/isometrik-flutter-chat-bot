@@ -36,7 +36,8 @@ class ProfileSettingScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final userId = ChatApiServices.instance.userId ?? '';
-    return BlocProvider(
+    return AppLocale.wrap(
+      BlocProvider(
       create: (context) => WalletBloc()
         ..add(WalletFetchRequested(userId: userId, userType: 'customer')),
       child: Scaffold(
@@ -79,7 +80,7 @@ class ProfileSettingScreen extends StatelessWidget {
                             label: AppTranslations.yourPreferences,
                             onTap: () {
                                Navigator.of(context).push(
-                                MaterialPageRoute(
+                                AppLocale.materialRoute(
                                   builder: (context) => CompleteSetupFlowScreen(onCallback: (data) {
                                     // onRestartGreetingAPI();
                                   }),
@@ -128,7 +129,7 @@ class ProfileSettingScreen extends StatelessWidget {
                             label: AppTranslations.dataControl,
                             onTap: () {
                               Navigator.of(context).push(
-                                MaterialPageRoute<void>(
+                                AppLocale.materialRoute<void>(
                                   builder: (context) => const PersonalizationScreen(),
                                 ),
                               );
@@ -226,6 +227,7 @@ class ProfileSettingScreen extends StatelessWidget {
           ),
         ),
       ),
+    ),
     ),
     );
   }
@@ -477,7 +479,7 @@ class ProfileSettingScreen extends StatelessWidget {
           
                       final result = await Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => ChatHistoryScreen()),
+                        AppLocale.materialRoute(builder: (context) => ChatHistoryScreen()),
                       );
 
                       // if (result != null && result is Map) {
@@ -504,7 +506,9 @@ class ProfileSettingScreen extends StatelessWidget {
                             context,
                             PageRouteBuilder(
                               opaque: false,
-                              pageBuilder: (context, animation, secondaryAnimation) => PopupOverlayScreen(greetingData: greetingData),
+                              pageBuilder: (context, animation, secondaryAnimation) => AppLocale.wrap(
+                                PopupOverlayScreen(greetingData: greetingData),
+                              ),
                               transitionsBuilder: (context, animation, secondaryAnimation, child) {
                                 return FadeTransition(
                                   opacity: animation,

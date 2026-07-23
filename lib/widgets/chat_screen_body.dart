@@ -450,7 +450,7 @@ class ChatScreenBody extends StatelessWidget {
         onPressed: () async {
          final result = await Navigator.push(
             context,
-            MaterialPageRoute(
+            AppLocale.materialRoute(
               builder: (context) => ProfileSettingScreen(greetingData: greetingData),
             ),
           );
@@ -474,7 +474,7 @@ class ChatScreenBody extends StatelessWidget {
       //   onPressed: () async {
       //     Navigator.push(
       //       context,
-      //       MaterialPageRoute(
+      //       AppLocale.materialRoute(
       //         builder: (context) => const ProfileSettingScreen(),
       //       ),
       //     );
@@ -656,7 +656,7 @@ class ChatScreenBody extends StatelessWidget {
                                   if (isFromHistory == true) {
                                     Navigator.push(
                                     context,
-                                    MaterialPageRoute(
+                                    AppLocale.materialRoute(
                                       builder:
                                           (context) => BlocProvider(
                                             create: (context) => CartBloc(),
@@ -672,7 +672,7 @@ class ChatScreenBody extends StatelessWidget {
                                   }else {
                                     Navigator.push(
                                     context,
-                                    MaterialPageRoute(
+                                    AppLocale.materialRoute(
                                       builder:
                                           (context) => BlocProvider(
                                             create: (context) => CartBloc(),
@@ -1386,7 +1386,7 @@ class ChatScreenBody extends StatelessWidget {
                       child: InkWell(
                         onTap: () {
                           Navigator.of(context).push(
-                            MaterialPageRoute(
+                            AppLocale.materialRoute(
                               builder: (context) => CompleteSetupFlowScreen(onCallback: (data) {
                                 onRestartGreetingAPI();
                               }),
@@ -1903,7 +1903,7 @@ class ChatScreenBody extends StatelessWidget {
                         : () {
                           Navigator.push(
                             context,
-                            MaterialPageRoute(
+                            AppLocale.materialRoute(
                               builder: (context) {
                                 return RestaurantScreen(
                                   actionData: action,
@@ -2028,7 +2028,7 @@ class ChatScreenBody extends StatelessWidget {
                                   FoodCategory.services.value) {
                             Navigator.push(
                               context,
-                              MaterialPageRoute(
+                              AppLocale.materialRoute(
                                 builder:
                                     (context) => GroceriesMenuScreen(
                                       actionData: action,
@@ -2053,7 +2053,7 @@ class ChatScreenBody extends StatelessWidget {
                           } else {
                             Navigator.push(
                               context,
-                              MaterialPageRoute(
+                              AppLocale.materialRoute(
                                 builder:
                                     (context) => RestaurantMenuScreen(
                                       actionData: action,
@@ -4586,7 +4586,7 @@ class ChatScreenBody extends StatelessWidget {
 
     Navigator.push(
       context,
-      MaterialPageRoute(
+                              AppLocale.materialRoute(
         builder: (context) => BlocProvider(
           create: (_) => FlightSearchBloc(),
           child: FlightSearchScreen(
@@ -4659,7 +4659,7 @@ class ChatScreenBody extends StatelessWidget {
   void _openCarSearchScreen(BuildContext context, WidgetAction action) {
     Navigator.push(
       context,
-      MaterialPageRoute(
+                              AppLocale.materialRoute(
         builder: (context) => BlocProvider(
           create: (_) => CarSearchBloc(),
           child: CarSearchScreen(
@@ -4708,7 +4708,7 @@ class ChatScreenBody extends StatelessWidget {
   void _openHotelSearchScreen(BuildContext context, WidgetAction action) {
     Navigator.push(
       context,
-      MaterialPageRoute(
+                              AppLocale.materialRoute(
         builder: (context) => BlocProvider(
           create: (_) => HotelSearchBloc(),
           child: HotelSearchScreen(

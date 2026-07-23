@@ -122,7 +122,6 @@ class ChatBot {
   await EasyLocalization.ensureInitialized();
   Utility.setCurrentContext(context);
 
-  final lang = Utility.getLanguage();
   final path = AssetPath.isPackageMode
       ? 'packages/chat_bot/assets/translations'
       : 'assets/translations';
@@ -131,14 +130,17 @@ class ChatBot {
         supportedLocales: AppLocale.supportedLocales,
         path: path,
         fallbackLocale: const Locale('en'),
-        startLocale: Locale(lang.isEmpty ? 'en' : lang),
+        startLocale: AppLocale.locale,
         useOnlyLangCode: true,
         saveLocale: false,
         child: Builder(
           builder: (ctx) => Localizations(
-            locale: ctx.locale,
+            locale: AppLocale.locale,
             delegates: ctx.localizationDelegates,
-            child: child,
+            child: Directionality(
+              textDirection: AppLocale.textDirection,
+              child: child,
+            ),
           ),
         ),
       );

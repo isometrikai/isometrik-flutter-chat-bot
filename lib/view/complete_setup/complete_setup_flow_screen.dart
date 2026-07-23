@@ -76,14 +76,15 @@ class _CompleteSetupFlowScreenState extends State<CompleteSetupFlowScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider.value(
+    return AppLocale.wrap(
+      BlocProvider.value(
       value: userPreferenceBloc,
       child: BlocListener<UserPreferenceBloc, UserPreferenceState>(
         listenWhen: (prev, curr) => curr.submitStatus != prev.submitStatus,
         listener: (context, state) {
           if (state.isSubmitSuccess) {
             Navigator.of(context).pushReplacement(
-              MaterialPageRoute(
+              AppLocale.materialRoute(
                 builder: (context) =>  SetupCompleteScreen(onCallback: widget.onCallback),
               ),
             );
@@ -130,6 +131,7 @@ class _CompleteSetupFlowScreenState extends State<CompleteSetupFlowScreen> {
           ),
         ),
       ),
+    ),
     );
   }
 

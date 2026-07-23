@@ -59,7 +59,8 @@ class _GroceryCustomizationScreenState extends State<GroceryCustomizationScreen>
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider.value(
+    return AppLocale.wrap(
+      BlocProvider.value(
       value: _bloc,
       child: BlocListener<GroceryCustomizationBloc, GroceryCustomizationState>(
         listener: (context, state) {
@@ -174,6 +175,7 @@ class _GroceryCustomizationScreenState extends State<GroceryCustomizationScreen>
           ),
         ),
       ),
+    ),
     );
   }
 

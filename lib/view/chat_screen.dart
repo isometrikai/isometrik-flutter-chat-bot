@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -1753,23 +1752,18 @@ class _ChatScreenState extends State<ChatScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final Widget body;
     if (widget.isFromHistory) {
-      body = _buildChatScreenBody();
-    } else {
-      body = BlocProvider.value(
+      return AppLocale.wrap(_buildChatScreenBody());
+    }
+
+    return AppLocale.wrap(
+      BlocProvider.value(
         value: _launchBloc,
         child: BlocListener<LaunchBloc, LaunchState>(
           listener: _onLaunchState,
           child: _buildChatScreenBody(),
         ),
-      );
-    }
-
-    // Ensure chat UI follows EasyLocalization locale direction (RTL for Arabic).
-    return Directionality(
-      textDirection: AppLocale.textDirectionOf(context.locale),
-      child: body,
+      ),
     );
   }
 }

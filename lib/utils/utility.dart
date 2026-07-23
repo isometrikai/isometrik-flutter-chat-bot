@@ -191,7 +191,16 @@ class Utility {
   }
 
   static void setLanguage(String language) {
-    Utility.language = language;
+    final raw = language.trim().toLowerCase();
+    if (raw.startsWith('ar')) {
+      Utility.language = 'ar';
+    } else if (raw.startsWith('en')) {
+      Utility.language = 'en';
+    } else if (raw.isEmpty) {
+      Utility.language = 'en';
+    } else {
+      Utility.language = raw.split(RegExp(r'[-_]')).first;
+    }
   }
 
   static String getLanguage() {

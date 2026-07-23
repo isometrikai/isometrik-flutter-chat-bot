@@ -70,7 +70,8 @@ class _FlightSearchScreenState extends State<FlightSearchScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return AppLocale.wrap(
+      Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
         child: Padding(
@@ -93,6 +94,7 @@ class _FlightSearchScreenState extends State<FlightSearchScreen> {
           ),
         ),
       ),
+    ),
     );
   }
 

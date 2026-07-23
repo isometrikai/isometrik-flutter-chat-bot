@@ -78,7 +78,8 @@ class _ProductCustomizationScreenState extends State<ProductCustomizationScreen>
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider.value(
+    return AppLocale.wrap(
+      BlocProvider.value(
       value: _bloc,
       child: BlocListener<ProductCustomizationBloc, ProductCustomizationState>(
         listener: (context, state) {
@@ -190,6 +191,7 @@ class _ProductCustomizationScreenState extends State<ProductCustomizationScreen>
           ),
         ),
       ),
+    ),
     );
   }
 

@@ -62,7 +62,8 @@ class _CarSearchScreenState extends State<CarSearchScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return AppLocale.wrap(
+      Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
         child: Padding(
@@ -87,6 +88,7 @@ class _CarSearchScreenState extends State<CarSearchScreen> {
           ),
         ),
       ),
+    ),
     );
   }
 

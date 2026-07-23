@@ -33,9 +33,11 @@ class _ChatHistoryScreenState extends State<ChatHistoryScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => ChatHistoryBloc()..add(const ChatHistoryFetchRequested()),
-      child: _ChatHistoryContent(scrollController: _scrollController),
+    return AppLocale.wrap(
+      BlocProvider(
+        create: (context) => ChatHistoryBloc()..add(const ChatHistoryFetchRequested()),
+        child: _ChatHistoryContent(scrollController: _scrollController),
+      ),
     );
   }
 }
@@ -583,7 +585,7 @@ class _ChatHistoryContentState extends State<_ChatHistoryContent> {
       onTap: () {
         Navigator.push(
           context,
-          MaterialPageRoute(
+          AppLocale.materialRoute(
             settings: const RouteSettings(name: ChatScreen.routeName),
             builder: (context) => MultiBlocProvider(
               providers: [
