@@ -1,7 +1,10 @@
 library chat_bot;
 
+import 'package:chat_bot/utils/app_locale.dart';
+import 'package:chat_bot/utils/asset_path.dart';
 import 'package:chat_bot/view/complete_setup/complete_setup_flow_screen.dart';
 import 'package:chat_bot/view/tutorial_screen.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:chat_bot/bloc/chat_bloc.dart';
@@ -117,7 +120,29 @@ class ChatBot {
 
   static void openChatBot(BuildContext context) async {
     // Set current context for fallback when navigator key is not available
-    Utility.setCurrentContext(context);
+    // Utility.setCurrentContext(context);
+    await EasyLocalization.ensureInitialized();
+  Utility.setCurrentContext(context);
+  final lang = Utility.getLanguage();
+  final path = AssetPath.isPackageMode
+      ? 'packages/chat_bot/assets/translations'
+      : 'assets/translations';
+      
+  Widget wrap(Widget child) => EasyLocalization(
+        supportedLocales: AppLocale.supportedLocales,
+        path: path,
+        fallbackLocale: const Locale('en'),
+        startLocale: Locale(lang),
+        useOnlyLangCode: true,
+        child: Builder(
+          builder: (ctx) => Localizations.override(
+            context: ctx,
+            locale: ctx.locale,
+            child: child,
+          ),
+        ),
+      );
+      
     if (isTutorialShown == true) {
       Navigator.push(
         context,
