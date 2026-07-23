@@ -118,22 +118,22 @@ class ChatBot {
     );
   }
 
-  static void openChatBot(BuildContext context) async {
-    // Set current context for fallback when navigator key is not available
-    // Utility.setCurrentContext(context);
-    await EasyLocalization.ensureInitialized();
+  static Future<void> openChatBot(BuildContext context) async {
+  await EasyLocalization.ensureInitialized();
   Utility.setCurrentContext(context);
+
   final lang = Utility.getLanguage();
   final path = AssetPath.isPackageMode
       ? 'packages/chat_bot/assets/translations'
       : 'assets/translations';
-      
+
   Widget wrap(Widget child) => EasyLocalization(
         supportedLocales: AppLocale.supportedLocales,
         path: path,
         fallbackLocale: const Locale('en'),
         startLocale: Locale(lang),
         useOnlyLangCode: true,
+        saveLocale: false,
         child: Builder(
           builder: (ctx) => Localizations.override(
             context: ctx,
@@ -142,46 +142,49 @@ class ChatBot {
           ),
         ),
       );
-      
-    if (isTutorialShown == true) {
-      Navigator.push(
-        context,
-        PageRouteBuilder(
-          pageBuilder: (context, animation, secondaryAnimation) =>
-              const TutorialScreen(),
-          transitionDuration: Duration.zero,
-          reverseTransitionDuration: Duration.zero,
-        ),
-      );
-    }else if (isCompleteSetupShown == true) {
-      Navigator.push(
-        context,
-        PageRouteBuilder(
-          pageBuilder: (context, animation, secondaryAnimation) =>
-              CompleteSetupFlowScreen(onCallback: (data) {
-                print('Data from Complete Setup Flow Screen: $data');
-              }),
-        ),
-      );
-    } else {
-     Navigator.push(
-        context,
-        PageRouteBuilder(
-          settings: const RouteSettings(name: ChatScreen.routeName),
-          pageBuilder: (context, animation, secondaryAnimation) =>
-              MultiBlocProvider(
+
+  if (isTutorialShown == true) {
+    Navigator.push(
+      context,
+      PageRouteBuilder(
+        pageBuilder: (context, animation, secondaryAnimation) =>
+            wrap(const TutorialScreen()),
+        transitionDuration: Duration.zero,
+        reverseTransitionDuration: Duration.zero,
+      ),
+    );
+  } else if (isCompleteSetupShown == true) {
+    Navigator.push(
+      context,
+      PageRouteBuilder(
+        pageBuilder: (context, animation, secondaryAnimation) =>
+            wrap(CompleteSetupFlowScreen(onCallback: (data) {
+              print('Data from Complete Setup Flow Screen: $data');
+            })),
+        transitionDuration: Duration.zero,
+        reverseTransitionDuration: Duration.zero,
+      ),
+    );
+  } else {
+    Navigator.push(
+      context,
+      PageRouteBuilder(
+        settings: const RouteSettings(name: ChatScreen.routeName),
+        pageBuilder: (context, animation, secondaryAnimation) => wrap(
+          MultiBlocProvider(
             providers: [
               BlocProvider(create: (context) => ChatBloc()),
               BlocProvider(create: (context) => CartBloc()),
             ],
             child: const ChatScreen(),
           ),
-          transitionDuration: Duration.zero,
-          reverseTransitionDuration: Duration.zero,
         ),
-      );
-    }
+        transitionDuration: Duration.zero,
+        reverseTransitionDuration: Duration.zero,
+      ),
+    );
   }
+}
     // Navigator.push(
     //     context,
     //     MaterialPageRoute(builder: (context) => const TutorialScreen()),
