@@ -170,7 +170,7 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen>
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
         Padding(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+          padding: const EdgeInsetsDirectional.fromSTEB(16, 16, 16, 0),
           child: ScreenHeader(
             title: widget.actionData?.title ?? '',
             subtitle: widget.actionData?.subtitle ?? '',
@@ -179,7 +179,7 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen>
         ),
         const SizedBox(height: 8),
         Padding(
-          padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
+          padding: const EdgeInsetsDirectional.fromSTEB(16, 0, 16, 0),
           child: _buildStoreInfoCard(storeData),
         ),
         const SizedBox(height: 8),
@@ -333,14 +333,14 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen>
                       children: <Widget>[
                         _buildAnimatedHeader(storeData, storeName),
                         Padding(
-                          padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
+                          padding: const EdgeInsetsDirectional.fromSTEB(16, 0, 16, 0),
                           child: _buildDietToggles(),
                         ),
                         const SizedBox(height: 16),
                         Expanded(
                           child: SingleChildScrollView(
                             controller: _scrollController,
-                            padding: EdgeInsets.fromLTRB(
+                            padding: EdgeInsetsDirectional.fromSTEB(
                               16,
                               0,
                               16,
@@ -386,7 +386,7 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen>
       return Padding(
         padding: const EdgeInsets.only(top: 32),
         child: Text(
-          'No menu available',
+          AppTranslations.noMenuAvailable,
           style: AppTextStyles.bodyText.copyWith(
             color: const Color(0xFF6E4185),
           ),
@@ -497,7 +497,7 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen>
                       ),
                       const SizedBox(width: 5),
                       Text(
-                        'Open in Eazy app',
+                        AppTranslations.openInEazyApp,
                         style: AppTextStyles.restaurantDescription.copyWith(
                           color: AppConstants.appThemeColor,
                         ),
@@ -568,7 +568,7 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen>
             child: TextField(
               controller: _searchController,
               decoration: InputDecoration(
-                hintText: 'Search',
+                hintText: AppTranslations.search,
                 hintStyle: AppTextStyles.bodyText.copyWith(color: _labelGrey),
                 border: InputBorder.none,
               ),
@@ -616,9 +616,9 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen>
                 ),
                 child: Stack(
                   children: <Widget>[
-                    AnimatedPositioned(
+                    AnimatedPositionedDirectional(
                       duration: const Duration(milliseconds: 200),
-                      left: _filterNonVeg ? 22 : 2,
+                      start: _filterNonVeg ? 22 : 2,
                       top: 2,
                       child: Container(
                         width: 16,
@@ -668,9 +668,9 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen>
                 ),
                 child: Stack(
                   children: <Widget>[
-                    AnimatedPositioned(
+                    AnimatedPositionedDirectional(
                       duration: const Duration(milliseconds: 200),
-                      left: _filterVeg ? 22 : 2,
+                      start: _filterVeg ? 22 : 2,
                       top: 2,
                       child: Container(
                         width: 16,
@@ -722,7 +722,7 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen>
               ),
               alignment: Alignment.center,
               child: Text(
-                index == 0 ? 'ALL' : _categories[index - 1].catName,
+                index == 0 ? AppTranslations.filterAllCaps : _categories[index - 1].catName,
                 style: AppTextStyles.button.copyWith(
                   color: const Color(0xFF242424),
                   fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
@@ -847,7 +847,7 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen>
           child: Padding(
             padding: const EdgeInsets.only(top: 50),
             child: Text(
-              'No Products found',
+              AppTranslations.noProductsFound,
               style: AppTextStyles.bodyText.copyWith(
                 color: const Color(0xFF6E4185),
                 fontSize: 16,
@@ -876,7 +876,7 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen>
         child: Padding(
           padding: const EdgeInsets.only(top: 50),
           child: Text(
-            'No Products found',
+            AppTranslations.noProductsFound,
             style: AppTextStyles.bodyText.copyWith(
               color: const Color(0xFF6E4185),
               fontSize: 16,
@@ -1222,7 +1222,7 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen>
 
   Widget _buildBottomCartBar(int itemCount) {
     final String itemLabel =
-        itemCount == 1 ? '1 Item added' : '$itemCount Items added';
+        itemCount == 1 ? AppTranslations.oneItemAdded : AppTranslations.itemsAdded(itemCount.toString());
     final double bottomInset = MediaQuery.of(context).padding.bottom;
 
     return Container(
@@ -1237,7 +1237,7 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen>
           ),
         ],
       ),
-      padding: EdgeInsets.fromLTRB(16, 15, 16, bottomInset > 0 ? 8 : 16),
+      padding: EdgeInsetsDirectional.fromSTEB(16, 15, 16, bottomInset > 0 ? 8 : 16),
       child: GestureDetector(
         onTap: _onViewCart,
         child: Container(
@@ -1274,8 +1274,8 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen>
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
-                  const Text(
-                    'View cart',
+                  Text(
+                    AppTranslations.viewCart,
                     style: TextStyle(
                       fontWeight: FontWeight.w700,
                       fontSize: 14,

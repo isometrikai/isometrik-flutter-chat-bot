@@ -89,8 +89,8 @@ class MenuItemCard extends StatelessWidget {
                         ),
                 ),
                 if (storeType == FoodCategory.grocery.value) ...[
-                  Positioned(
-                    left: 8,
+                  PositionedDirectional(
+                    start: 8,
                     top: 8,
                     child: SvgPicture.asset(
                       AssetPath.get(isVeg ? 'images/ic_Veg.svg' : 'images/ic_NonVeg.svg'),
@@ -313,7 +313,7 @@ class MenuItemCard extends StatelessWidget {
         }
       },
       child: Text(
-        'Add',
+        AppTranslations.add,
         style: AppTextStyles.button.copyWith(
           color: purple,
         ),
@@ -333,7 +333,7 @@ class MenuItemCard extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Text(
-            'OUT OF STOCK',//storeIsOpen == false ? 'STORE CLOSED' : 'OUT OF STOCK',
+            AppTranslations.outOfStock,
             style: AppTextStyles.button.copyWith(
               fontWeight: cardWidth != null ? FontWeight.w700 : FontWeight.w500,
               fontSize: cardWidth != null ? 14 : 12,

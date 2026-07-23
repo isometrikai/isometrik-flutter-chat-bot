@@ -1,4 +1,4 @@
-import 'package:chat_bot/utils/app_constants.dart';
+import 'package:chat_bot/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:chat_bot/bloc/product_customization/product_customization_bloc.dart';
@@ -94,9 +94,9 @@ class _ProductCustomizationScreenState extends State<ProductCustomizationScreen>
         child: Container(
           decoration: const BoxDecoration(
             color: Color(0xFFF5F7FF),
-            borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(16),
-              topRight: Radius.circular(16),
+            borderRadius: BorderRadiusDirectional.only(
+              topStart: Radius.circular(16),
+              topEnd: Radius.circular(16),
             ),
           ),
           child: Column(
@@ -166,7 +166,7 @@ class _ProductCustomizationScreenState extends State<ProductCustomizationScreen>
                                         ),
                                         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                                       ),
-                                      child: const Text('Retry'),
+                                      child: Text(AppTranslations.retry),
                                     ),
                                   ],
                                 ),
@@ -195,12 +195,12 @@ class _ProductCustomizationScreenState extends State<ProductCustomizationScreen>
 
   Widget _buildHeader() {
     return Container(
-      padding: const EdgeInsets.only(top: 40, left: 16, right: 16, bottom: 10),
+      padding: const EdgeInsetsDirectional.only(top: 40, start: 16, end: 16, bottom: 10),
       decoration: const BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(16),
-          topRight: Radius.circular(16),
+        borderRadius: BorderRadiusDirectional.only(
+          topStart: Radius.circular(16),
+          topEnd: Radius.circular(16),
         ),
       ),
       child: Column(
@@ -312,8 +312,8 @@ class _ProductCustomizationScreenState extends State<ProductCustomizationScreen>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Choose your size*',
+        Text(
+          AppTranslations.chooseYourSize,
           style: TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w700,
@@ -321,8 +321,8 @@ class _ProductCustomizationScreenState extends State<ProductCustomizationScreen>
           ),
         ),
         const SizedBox(height: 4),
-        const Text(
-          'Required | Select any 1',
+        Text(
+          AppTranslations.requiredSelectAny1,
           style: TextStyle(
             fontSize: 12,
             fontWeight: FontWeight.w400,
@@ -422,8 +422,8 @@ class _ProductCustomizationScreenState extends State<ProductCustomizationScreen>
         const SizedBox(height: 4),
         Text(
           addOnCategory.mandatory 
-              ? 'Required | Select any ${addOnCategory.maximumLimit}'
-              : 'Optional | You can select up to ${addOnCategory.maximumLimit} items',
+              ? AppTranslations.requiredSelectAnyN('${addOnCategory.maximumLimit}')
+              : AppTranslations.optionalSelectUpToN('${addOnCategory.maximumLimit}'),
           style: AppTextStyles.addonDescription.copyWith(
             color: const Color(0xFF6E4185),
           ),
@@ -442,10 +442,10 @@ class _ProductCustomizationScreenState extends State<ProductCustomizationScreen>
                     ...addOnCategory.addOns.map((addOn) => _buildAddOnOption(addOn, addOnCategory, state)),
                   ],
                 )
-              : const Padding(
+              : Padding(
                   padding: EdgeInsets.all(16.0),
                   child: Text(
-                    'No options available',
+                    AppTranslations.noOptionsAvailable,
                     style: TextStyle(
                       color: Color(0xFF979797),
                       fontSize: 14,
@@ -546,7 +546,7 @@ class _ProductCustomizationScreenState extends State<ProductCustomizationScreen>
   bool _validateRequiredOptions(ProductCustomizationLoaded state) {
     // Check if size is selected (always required)
     if (state.selectedVariant == null) {
-      BlackToastView.show(context, 'Please select a size');
+      BlackToastView.show(context, AppTranslations.pleaseSelectSize);
       return false;
     }
 
@@ -556,19 +556,19 @@ class _ProductCustomizationScreenState extends State<ProductCustomizationScreen>
         final selectedItems = state.selectedAddOns[addOnCategory.name] ?? <String>{};
         
         if (selectedItems.isEmpty) {
-          BlackToastView.show(context, 'Please Select Option');
+          BlackToastView.show(context, AppTranslations.pleaseSelectOption);
           return false;
         }
         
         // Check if minimum required items are selected
         if (selectedItems.length < addOnCategory.minimumLimit) {
-          BlackToastView.show(context, 'Please select at least ${addOnCategory.minimumLimit} items from ${addOnCategory.name}');
+          BlackToastView.show(context, AppTranslations.pleaseSelectAtLeastN('${addOnCategory.minimumLimit}', addOnCategory.name));
           return false;
         }
         
         // Check if maximum limit is not exceeded
         if (selectedItems.length > addOnCategory.maximumLimit) {
-          BlackToastView.show(context, 'You can select maximum ${addOnCategory.maximumLimit} items from ${addOnCategory.name}');
+          BlackToastView.show(context, AppTranslations.pleaseSelectMaximumN('${addOnCategory.maximumLimit}', addOnCategory.name));
           return false;
         }
       }
@@ -714,7 +714,7 @@ class _ProductCustomizationScreenState extends State<ProductCustomizationScreen>
                     ),
                   ),
                   child:  Text(
-                    'Add',
+                    AppTranslations.add,
                      style: AppTextStyles.button.copyWith(
                             color: Colors.white,
                             fontWeight: FontWeight.w700,

@@ -48,6 +48,64 @@ const Color _kBorderLight = Color(0xFFE0EBFF);
 const Color _kSectionLabel = Color(0xFF2F3C70);
 const Color _kLabelGray = Color(0xFF979797);
 
+List<String> get _monthFullNames => [
+  AppTranslations.monthJanuary,
+  AppTranslations.monthFebruary,
+  AppTranslations.monthMarch,
+  AppTranslations.monthApril,
+  AppTranslations.monthMay,
+  AppTranslations.monthJune,
+  AppTranslations.monthJuly,
+  AppTranslations.monthAugust,
+  AppTranslations.monthSeptember,
+  AppTranslations.monthOctober,
+  AppTranslations.monthNovember,
+  AppTranslations.monthDecember,
+];
+
+List<String> get _monthShortNames => [
+  AppTranslations.monthJanShort,
+  AppTranslations.monthFebShort,
+  AppTranslations.monthMarShort,
+  AppTranslations.monthAprShort,
+  AppTranslations.monthMayShort,
+  AppTranslations.monthJunShort,
+  AppTranslations.monthJulShort,
+  AppTranslations.monthAugShort,
+  AppTranslations.monthSepShort,
+  AppTranslations.monthOctShort,
+  AppTranslations.monthNovShort,
+  AppTranslations.monthDecShort,
+];
+
+String _relationshipLabel(String api) {
+  switch (api.toUpperCase()) {
+    case 'SPOUSE':
+      return AppTranslations.relationshipSpouse;
+    case 'CHILD':
+      return AppTranslations.relationshipChild;
+    case 'FATHER':
+      return AppTranslations.relationshipFather;
+    case 'MOTHER':
+      return AppTranslations.relationshipMother;
+    case 'OTHER':
+      return AppTranslations.relationshipOther;
+    default:
+      return api;
+  }
+}
+
+String _genderDisplayLabel(String api) {
+  switch (api.toUpperCase()) {
+    case 'MALE':
+      return AppTranslations.male;
+    case 'FEMALE':
+      return AppTranslations.female;
+    default:
+      return api;
+  }
+}
+
 class _SetupChip extends StatelessWidget {
   final String label;
   final bool selected;
@@ -173,12 +231,21 @@ class _Step00ServicesPage extends StatefulWidget {
 }
 
 class _Step00ServicesPageState extends State<_Step00ServicesPage> {
-  static const _labels = [
-    'Food 🍕', 'Services 🔧', 'Travel ✈️', 'Education 🎓', 'Groceries 🛒',
-    'Package 📦', 'Deals 🎁', 'Tickets 🎫️', 'Pharmacy 💊', 'Shopping 🛍️',
-    'Donation ❤️', 'MoneyWiz 💰️',
+  List<String> get _labels => [
+    AppTranslations.serviceFood,
+    AppTranslations.serviceServices,
+    AppTranslations.serviceTravel,
+    AppTranslations.serviceEducation,
+    AppTranslations.serviceGroceries,
+    AppTranslations.servicePackage,
+    AppTranslations.serviceDeals,
+    AppTranslations.serviceTickets,
+    AppTranslations.servicePharmacy,
+    AppTranslations.serviceShopping,
+    AppTranslations.serviceDonation,
+    AppTranslations.serviceMoneywiz,
   ];
-  final Set<int> _selected = {}; 
+  final Set<int> _selected = {};
 
   void _restoreFromBloc() {
     final s = context.read<UserPreferenceBloc>().state.request.services;
@@ -232,13 +299,13 @@ class _Step00ServicesPageState extends State<_Step00ServicesPage> {
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+      padding: const EdgeInsetsDirectional.fromSTEB(16, 16, 16, 24),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const SizedBox(height: 8),
           Text(
-            'Services you use',
+            AppTranslations.servicesYouUse,
             style: AppTextStyles.heading(
               fontSize: 24,
               fontWeight: FontWeight.w700,
@@ -248,7 +315,7 @@ class _Step00ServicesPageState extends State<_Step00ServicesPage> {
           ),
           const SizedBox(height: 12),
           Text(
-            'Select the services you\'re most interested in. This helps me provide better recommendations.',
+            AppTranslations.servicesYouUseSubtitle,
             style: AppTextStyles.body(
               fontSize: 14,
               fontWeight: FontWeight.w400,
@@ -281,7 +348,7 @@ class _Step00ServicesPageState extends State<_Step00ServicesPage> {
               borderRadius: BorderRadius.circular(8),
             ),
             child: Text(
-              '💡 Tip: Select at least 3 services to help me provide personalized recommendations',
+              AppTranslations.tipSelectAtLeast3Services,
               style: AppTextStyles.body(
                 fontSize: 12,
                 fontWeight: FontWeight.w400,
@@ -385,21 +452,19 @@ class _Step01PersonalDetailsPageState extends State<_Step01PersonalDetailsPage> 
 
   String get _dateText {
     if (_dob == null) return '';
-    const m = ['January', 'February', 'March', 'April', 'May', 'June',
-      'July', 'August', 'September', 'October', 'November', 'December'];
-    return '${_dob!.day.toString().padLeft(2, '0')} ${m[_dob!.month - 1]} ${_dob!.year}';
+    return '${_dob!.day.toString().padLeft(2, '0')} ${_monthFullNames[_dob!.month - 1]} ${_dob!.year}';
   }
 
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+      padding: const EdgeInsetsDirectional.fromSTEB(16, 16, 16, 24),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const SizedBox(height: 8),
           Text(
-            'Personal details',
+            AppTranslations.personalDetails,
             style: AppTextStyles.heading(
               fontSize: 24,
               fontWeight: FontWeight.w700,
@@ -409,7 +474,7 @@ class _Step01PersonalDetailsPageState extends State<_Step01PersonalDetailsPage> 
           ),
           const SizedBox(height: 12),
           Text(
-            'Basic information to personalize your experience',
+            AppTranslations.personalDetailsSubtitle,
             style: AppTextStyles.body(
               fontSize: 14,
               fontWeight: FontWeight.w400,
@@ -419,7 +484,7 @@ class _Step01PersonalDetailsPageState extends State<_Step01PersonalDetailsPage> 
           ),
           const SizedBox(height: 24),
           Text(
-            'Date of birth',
+            AppTranslations.dateOfBirth,
             style: AppTextStyles.body(
               fontSize: 12,
               fontWeight: FontWeight.w400,
@@ -445,7 +510,7 @@ class _Step01PersonalDetailsPageState extends State<_Step01PersonalDetailsPage> 
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      _dateText.isEmpty ? 'DD Month YYYY' : _dateText,
+                      _dateText.isEmpty ? AppTranslations.ddMonthYyyy : _dateText,
                       style: AppTextStyles.body(
                         fontSize: 16,
                         fontWeight: FontWeight.w400,
@@ -463,7 +528,7 @@ class _Step01PersonalDetailsPageState extends State<_Step01PersonalDetailsPage> 
           ),
           const SizedBox(height: 16),
           Text(
-            'Gender',
+            AppTranslations.gender,
             style: AppTextStyles.body(
               fontSize: 12,
               fontWeight: FontWeight.w400,
@@ -474,7 +539,7 @@ class _Step01PersonalDetailsPageState extends State<_Step01PersonalDetailsPage> 
           Row(
             children: [
               _SetupRadio<String>(
-                label: 'Male',
+                label: AppTranslations.male,
                 value: 'Male',
                 groupValue: _gender,
                 onChanged: (v) {
@@ -484,7 +549,7 @@ class _Step01PersonalDetailsPageState extends State<_Step01PersonalDetailsPage> 
               ),
               const SizedBox(width: 24),
               _SetupRadio<String>(
-                label: 'Female',
+                label: AppTranslations.female,
                 value: 'Female',
                 groupValue: _gender,
                 onChanged: (v) {
@@ -547,8 +612,7 @@ class _FamilyMemberData {
 }
 
 String _fmtDate(DateTime d) {
-  const m = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-  return '${d.day} ${m[d.month - 1]} ${d.year}';
+  return '${d.day} ${_monthShortNames[d.month - 1]} ${d.year}';
 }
 
 String? _toApiDate(DateTime? d) {
@@ -647,11 +711,11 @@ class _Step02ImportantPeoplePageState extends State<_Step02ImportantPeoplePage> 
     final confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Delete member'),
-        content: Text('Remove ${_members[index].name} from important people?'),
+        title: Text(AppTranslations.deleteMember),
+        content: Text(AppTranslations.removeMemberConfirm(_members[index].name)),
         actions: [
-          TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: const Text('Cancel')),
-          TextButton(onPressed: () => Navigator.of(ctx).pop(true), child: const Text('Delete', style: TextStyle(color: Colors.red))),
+          TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: Text(AppTranslations.cancel)),
+          TextButton(onPressed: () => Navigator.of(ctx).pop(true), child: Text(AppTranslations.delete, style: const TextStyle(color: Colors.red))),
         ],
       ),
     );
@@ -664,14 +728,14 @@ class _Step02ImportantPeoplePageState extends State<_Step02ImportantPeoplePage> 
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+      padding: const EdgeInsetsDirectional.fromSTEB(16, 16, 16, 24),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const SizedBox(height: 8),
-          Text('Important people', style: AppTextStyles.heading(fontSize: 24, fontWeight: FontWeight.w700, height: 1.2, color: _kTextDark)),
+          Text(AppTranslations.importantPeople, style: AppTextStyles.heading(fontSize: 24, fontWeight: FontWeight.w700, height: 1.2, color: _kTextDark)),
           const SizedBox(height: 12),
-          Text('Add family members so I can remind you about birthdays and anniversaries.', style: AppTextStyles.body(fontSize: 14, fontWeight: FontWeight.w400, height: 1.2, color: _kTextMuted)),
+          Text(AppTranslations.importantPeopleSubtitle, style: AppTextStyles.body(fontSize: 14, fontWeight: FontWeight.w400, height: 1.2, color: _kTextMuted)),
           const SizedBox(height: 24),
           ...List.generate(_members.length, (i) {
             final m = _members[i];
@@ -690,16 +754,16 @@ class _Step02ImportantPeoplePageState extends State<_Step02ImportantPeoplePage> 
                   children: [
                     Row(
                       children: [
-                        _Pill(label: m.relationship),
+                        _Pill(label: _relationshipLabel(m.relationship)),
                         const SizedBox(width: 7),
-                        _Pill(label: m.gender),
+                        _Pill(label: _genderDisplayLabel(m.gender)),
                       ],
                     ),
                     const SizedBox(height: 7),
                     Text(m.name, style: AppTextStyles.body(fontSize: 16, fontWeight: FontWeight.w400, height: 1.2, color: _kTextDark)),
                     if (m.birthday != null && m.anniversary != null) ...[
                       const SizedBox(height: 4),
-                      Text('${'Birthday'} : ${_fmtDate(m.birthday!)}', style: AppTextStyles.body(fontSize: 12, fontWeight: FontWeight.w400, color: _kTextMuted)),
+                      Text(AppTranslations.birthdayColon(_fmtDate(m.birthday!)), style: AppTextStyles.body(fontSize: 12, fontWeight: FontWeight.w400, color: _kTextMuted)),
                     ],
                     SizedBox(height: (m.birthday != null || m.anniversary != null) ? 4 : 0),
                     Row(
@@ -709,9 +773,11 @@ class _Step02ImportantPeoplePageState extends State<_Step02ImportantPeoplePage> 
                           child: 
                           Text(
                             m.anniversary != null
-                                ? 'Anniversary : ${_fmtDate(m.anniversary!)}'
+                                ? AppTranslations.anniversaryColon(_fmtDate(m.anniversary!))
                                 : m.birthday != null
-                                    ? '${m.relationship == 'FATHER' ? 'DOB' : 'Birthday'} : ${_fmtDate(m.birthday!)}'
+                                    ? (m.relationship == 'FATHER'
+                                        ? '${AppTranslations.dobLabel} : ${_fmtDate(m.birthday!)}'
+                                        : AppTranslations.birthdayColon(_fmtDate(m.birthday!)))
                                     : '',
                             style: AppTextStyles.body(fontSize: 12, fontWeight: FontWeight.w400, color: _kTextMuted),
                           ),
@@ -750,7 +816,7 @@ class _Step02ImportantPeoplePageState extends State<_Step02ImportantPeoplePage> 
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text('Member', style: AppTextStyles.body(fontSize: 14, fontWeight: FontWeight.w400, color: _kBlue)),
+                    Text(AppTranslations.member, style: AppTextStyles.body(fontSize: 14, fontWeight: FontWeight.w400, color: _kBlue)),
                     const SizedBox(width: 8),
                     Container(
                       width: 18,
@@ -848,7 +914,7 @@ class _AddMemberSheetState extends State<_AddMemberSheet> {
   Widget build(BuildContext context) {
     final bottom = MediaQuery.of(context).padding.bottom;
     return Container(
-      padding: EdgeInsets.fromLTRB(16, 30, 16, 24 + bottom),
+      padding: EdgeInsetsDirectional.fromSTEB(16, 30, 16, 24 + bottom),
       decoration: const BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
@@ -861,7 +927,7 @@ class _AddMemberSheetState extends State<_AddMemberSheet> {
             Row(
               children: [
                 Expanded(
-                  child: Text(widget.initialMember == null ? 'Add member' : 'Edit member', style: AppTextStyles.heading(fontSize: 24, fontWeight: FontWeight.w700, height: 1.2, color: _kTextDark)),
+                  child: Text(widget.initialMember == null ? AppTranslations.addMember : AppTranslations.editMember, style: AppTextStyles.heading(fontSize: 24, fontWeight: FontWeight.w700, height: 1.2, color: _kTextDark)),
                 ),
                 GestureDetector(
                   onTap: widget.onCancel,
@@ -875,12 +941,12 @@ class _AddMemberSheetState extends State<_AddMemberSheet> {
               ],
             ),
             const SizedBox(height: 20),
-            Text('Member name', style: AppTextStyles.body(fontSize: 12, fontWeight: FontWeight.w400, color: _kLabelGray)),
+            Text(AppTranslations.memberName, style: AppTextStyles.body(fontSize: 12, fontWeight: FontWeight.w400, color: _kLabelGray)),
             const SizedBox(height: 8),
             TextField(
               controller: _nameController,
               decoration: InputDecoration(
-                hintText: 'Enter name',
+                hintText: AppTranslations.enterName,
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide:  BorderSide(color: _kBorderLight)),
                 enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide:  BorderSide(color: _kBorderLight)),
                 focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: Colors.black)),
@@ -888,7 +954,7 @@ class _AddMemberSheetState extends State<_AddMemberSheet> {
               ),
             ),
             const SizedBox(height: 20),
-            Text('Relationship', style: AppTextStyles.body(fontSize: 12, fontWeight: FontWeight.w400, color: _kLabelGray)),
+            Text(AppTranslations.relationship, style: AppTextStyles.body(fontSize: 12, fontWeight: FontWeight.w400, color: _kLabelGray)),
             const SizedBox(height: 8),
             Container(
               height: 48,
@@ -903,23 +969,23 @@ class _AddMemberSheetState extends State<_AddMemberSheet> {
                   value: _relationship,
                   isExpanded: true,
                   dropdownColor: Colors.white,
-                  items: _relationships.map((s) => DropdownMenuItem(value: s, child: Text(s))).toList(),
+                  items: _relationships.map((s) => DropdownMenuItem(value: s, child: Text(_relationshipLabel(s)))).toList(),
                   onChanged: (v) => setState(() => _relationship = v ?? _relationship),
                 ),
               ),
             ),
             const SizedBox(height: 16),
-            Text('Gender', style: AppTextStyles.body(fontSize: 12, fontWeight: FontWeight.w400, color: _kLabelGray)),
+            Text(AppTranslations.gender, style: AppTextStyles.body(fontSize: 12, fontWeight: FontWeight.w400, color: _kLabelGray)),
             const SizedBox(height: 8),
             Row(
               children: [
-                _SetupRadio<String>(label: 'Male', value: 'MALE', groupValue: _gender, onChanged: (v) => setState(() => _gender = v ?? _gender)),
+                _SetupRadio<String>(label: AppTranslations.male, value: 'MALE', groupValue: _gender, onChanged: (v) => setState(() => _gender = v ?? _gender)),
                 const SizedBox(width: 24),
-                _SetupRadio<String>(label: 'Female', value: 'FEMALE', groupValue: _gender, onChanged: (v) => setState(() => _gender = v ?? _gender)),
+                _SetupRadio<String>(label: AppTranslations.female, value: 'FEMALE', groupValue: _gender, onChanged: (v) => setState(() => _gender = v ?? _gender)),
               ],
             ),
             const SizedBox(height: 16),
-            Text('Birthday', style: AppTextStyles.body(fontSize: 12, fontWeight: FontWeight.w400, color: _kLabelGray)),
+            Text(AppTranslations.birthday, style: AppTextStyles.body(fontSize: 12, fontWeight: FontWeight.w400, color: _kLabelGray)),
             const SizedBox(height: 8),
             InkWell(
               onTap: () => _pickDate(false),
@@ -930,7 +996,7 @@ class _AddMemberSheetState extends State<_AddMemberSheet> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(_birthday == null ? 'Select' : _fmtDate(_birthday!), style: AppTextStyles.body(fontSize: 16, color: _kTextDark)),
+                    Text(_birthday == null ? AppTranslations.select : _fmtDate(_birthday!), style: AppTextStyles.body(fontSize: 16, color: _kTextDark)),
                     SvgPicture.asset(AssetPath.get('images/ic_calender.svg')
                     , width: 20, height: 20, fit: BoxFit.cover),
                   ],
@@ -938,7 +1004,7 @@ class _AddMemberSheetState extends State<_AddMemberSheet> {
               ),
             ),
             const SizedBox(height: 16),
-            Text('Anniversary', style: AppTextStyles.body(fontSize: 12, fontWeight: FontWeight.w400, color: _kLabelGray)),
+            Text(AppTranslations.anniversary, style: AppTextStyles.body(fontSize: 12, fontWeight: FontWeight.w400, color: _kLabelGray)),
             const SizedBox(height: 8),
             InkWell(
               onTap: () => _pickDate(true),
@@ -949,7 +1015,7 @@ class _AddMemberSheetState extends State<_AddMemberSheet> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(_anniversary == null ? 'Select' : _fmtDate(_anniversary!), style: AppTextStyles.body(fontSize: 16, color: _kTextDark)),
+                    Text(_anniversary == null ? AppTranslations.select : _fmtDate(_anniversary!), style: AppTextStyles.body(fontSize: 16, color: _kTextDark)),
                     SvgPicture.asset(AssetPath.get('images/ic_calender.svg')
                     , width: 20, height: 20, fit: BoxFit.cover),
                   ],
@@ -966,7 +1032,7 @@ class _AddMemberSheetState extends State<_AddMemberSheet> {
                   widget.onSave(_FamilyMemberData(name: name, relationship: _relationship, gender: _gender, birthday: _birthday, anniversary: _anniversary));
                 },
                 style: ElevatedButton.styleFrom(backgroundColor: _kBlue, foregroundColor: Colors.white, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
-                child: const Text('Save'),
+                child: Text(AppTranslations.save),
               ),
             ),
           ],
@@ -986,9 +1052,22 @@ class _Step03FoodPreferencesPage extends StatefulWidget {
 }
 
 class _Step03FoodPreferencesPageState extends State<_Step03FoodPreferencesPage> {
-  static const _cuisines = ['Indian 🇮🇳', 'Chinese 🇨🇳', 'Thai 🇹🇭', 'Mexican 🇲🇽', 'Italian 🇮🇹', 'Continental 🍽️', 'Others 🍽️'];
+  List<String> get _cuisines => [
+    AppTranslations.cuisineIndian,
+    AppTranslations.cuisineChinese,
+    AppTranslations.cuisineThai,
+    AppTranslations.cuisineMexican,
+    AppTranslations.cuisineItalian,
+    AppTranslations.cuisineContinental,
+    AppTranslations.cuisineOthers,
+  ];
   static const _cuisineApi = ['indian', 'chinese', 'thai', 'mexican', 'italian', 'continental', 'others'];
-  static const _dietary = ['Vegetarian 🥗', 'Non-Vegetarian 🍗', 'Vegan 🌱', 'Jain 🙏'];
+  List<String> get _dietary => [
+    AppTranslations.dietaryVegetarian,
+    AppTranslations.dietaryNonVegetarian,
+    AppTranslations.dietaryVegan,
+    AppTranslations.dietaryJain,
+  ];
   static const _dietaryApi = ['vegetarian', 'non-veg', 'vegan', 'jain'];
   final Set<int> _selC = {};
   final Set<int> _selD = {};
@@ -1032,20 +1111,20 @@ class _Step03FoodPreferencesPageState extends State<_Step03FoodPreferencesPage> 
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+      padding: const EdgeInsetsDirectional.fromSTEB(16, 16, 16, 24),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const SizedBox(height: 8),
-          Text('Food preferences', style: AppTextStyles.heading(fontSize: 24, fontWeight: FontWeight.w700, height: 1.2, color: _kTextDark)),
+          Text(AppTranslations.foodPreferences, style: AppTextStyles.heading(fontSize: 24, fontWeight: FontWeight.w700, height: 1.2, color: _kTextDark)),
           const SizedBox(height: 12),
-          Text('Help me recommend restaurants and meals you\'ll love', style: AppTextStyles.body(fontSize: 14, fontWeight: FontWeight.w400, height: 1.2, color: _kTextMuted)),
+          Text(AppTranslations.foodPreferencesSubtitle, style: AppTextStyles.body(fontSize: 14, fontWeight: FontWeight.w400, height: 1.2, color: _kTextMuted)),
           const SizedBox(height: 32),
-          Text('Favorite cuisines', style: AppTextStyles.body(fontSize: 14, fontWeight: FontWeight.w500, height: 1.2, color: _kSectionLabel)),
+          Text(AppTranslations.favoriteCuisines, style: AppTextStyles.body(fontSize: 14, fontWeight: FontWeight.w500, height: 1.2, color: _kSectionLabel)),
           const SizedBox(height: 14),
           Wrap(spacing: 8, runSpacing: 8, children: List.generate(_cuisines.length, (i) => _SetupChip(label: _cuisines[i], selected: _selC.contains(i), onTap: () { setState(() { if (_selC.contains(i)) _selC.remove(i); else _selC.add(i); }); _syncToBloc(); }))),
           const SizedBox(height: 24),
-          Text('Dietary preferences', style: AppTextStyles.body(fontSize: 14, fontWeight: FontWeight.w500, height: 1.2, color: _kSectionLabel)),
+          Text(AppTranslations.dietaryPreferences, style: AppTextStyles.body(fontSize: 14, fontWeight: FontWeight.w500, height: 1.2, color: _kSectionLabel)),
           const SizedBox(height: 14),
           Wrap(spacing: 8, runSpacing: 8, children: List.generate(_dietary.length, (i) => _SetupChip(label: _dietary[i], selected: _selD.contains(i), onTap: () { setState(() { if (_selD.contains(i)) _selD.remove(i); else _selD.add(i); }); _syncToBloc(); }))),
         ],
@@ -1064,9 +1143,20 @@ class _Step04ShoppingHabitsPage extends StatefulWidget {
 }
 
 class _Step04ShoppingHabitsPageState extends State<_Step04ShoppingHabitsPage> {
-  static const _freq = ['Daily', 'Weekly', 'Bi-weekly', 'Monthly'];
+  List<String> get _freq => [
+    AppTranslations.freqDaily,
+    AppTranslations.freqWeekly,
+    AppTranslations.freqBiweekly,
+    AppTranslations.freqMonthly,
+  ];
   static const _freqApi = ['daily', 'weekly', 'bi-weekly', 'monthly'];
-  static const _cats = ['Groceries 🛒', 'Fashion 👕', 'Electronics 📱', 'Home & Living 🏠', 'Beauty 💄'];
+  List<String> get _cats => [
+    AppTranslations.interestGroceries,
+    AppTranslations.interestFashion,
+    AppTranslations.interestElectronics,
+    AppTranslations.interestHomeLiving,
+    AppTranslations.interestBeauty,
+  ];
   static const _catsApi = ['groceries', 'fashion', 'electronics', 'home_living', 'beauty'];
   int _freqIndex = 1;
   final Set<int> _sel = {};//{0};
@@ -1106,23 +1196,23 @@ class _Step04ShoppingHabitsPageState extends State<_Step04ShoppingHabitsPage> {
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+      padding: const EdgeInsetsDirectional.fromSTEB(16, 16, 16, 24),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const SizedBox(height: 8),
-          Text('Shopping habits', style: AppTextStyles.heading(fontSize: 24, fontWeight: FontWeight.w700, height: 1.2, color: _kTextDark)),
+          Text(AppTranslations.shoppingHabits, style: AppTextStyles.heading(fontSize: 24, fontWeight: FontWeight.w700, height: 1.2, color: _kTextDark)),
           const SizedBox(height: 12),
-          Text('Help me understand your shopping needs', style: AppTextStyles.body(fontSize: 14, fontWeight: FontWeight.w400, height: 1.2, color: _kTextMuted)),
+          Text(AppTranslations.shoppingHabitsSubtitle, style: AppTextStyles.body(fontSize: 14, fontWeight: FontWeight.w400, height: 1.2, color: _kTextMuted)),
           const SizedBox(height: 32),
-          Text('How often do you shop for groceries?', style: AppTextStyles.body(fontSize: 14, fontWeight: FontWeight.w500, height: 1.2, color: _kSectionLabel)),
+          Text(AppTranslations.howOftenShopGroceries, style: AppTextStyles.body(fontSize: 14, fontWeight: FontWeight.w500, height: 1.2, color: _kSectionLabel)),
           const SizedBox(height: 16),
           ...List.generate(_freq.length, (i) => Padding(
             padding: const EdgeInsets.only(bottom: 16),
             child: _SetupRadio<int>(label: _freq[i], value: i, groupValue: _freqIndex, onChanged: (v) { setState(() => _freqIndex = v!); _syncToBloc(); }),
           )),
           const SizedBox(height: 24),
-          Text('Shopping Interests', style: AppTextStyles.body(fontSize: 14, fontWeight: FontWeight.w500, height: 1.2, color: _kSectionLabel)),
+          Text(AppTranslations.shoppingInterests, style: AppTextStyles.body(fontSize: 14, fontWeight: FontWeight.w500, height: 1.2, color: _kSectionLabel)),
           const SizedBox(height: 14),
           Wrap(spacing: 8, runSpacing: 8, children: List.generate(_cats.length, (i) => _SetupChip(label: _cats[i], selected: _sel.contains(i), onTap: () { setState(() { if (_sel.contains(i)) _sel.remove(i); else _sel.add(i); }); _syncToBloc(); }))),
         ],
@@ -1142,10 +1232,19 @@ class _Step05HealthPreferencesPage extends StatefulWidget {
 
 class _Step05HealthPreferencesPageState extends State<_Step05HealthPreferencesPage> {
   bool _hasPrescriptions = true;
-  String _freq = 'Weekly';
-  static const _freqOpts = ['Daily', 'Weekly', 'Monthly'];
+  int _freqIndex = 1;
+  List<String> get _freqOpts => [
+    AppTranslations.freqDaily,
+    AppTranslations.freqWeekly,
+    AppTranslations.freqMonthly,
+  ];
   static const _freqApi = ['daily', 'weekly', 'monthly'];
-  static const _interests = ['Fitness 💪', 'Nutrition 🥗', 'Yoga 🧘', 'Wellness ✨'];
+  List<String> get _interests => [
+    AppTranslations.interestFitness,
+    AppTranslations.interestNutrition,
+    AppTranslations.interestYoga,
+    AppTranslations.interestWellness,
+  ];
   static const _interestsApi = ['fitness', 'nutrition', 'yoga', 'wellness'];
   final Set<int> _sel = {};//{0};
 
@@ -1160,7 +1259,7 @@ class _Step05HealthPreferencesPageState extends State<_Step05HealthPreferencesPa
     }
     if (mounted) setState(() {
       _hasPrescriptions = h.hasRecurringPrescriptions;
-      _freq = freqIdx >= 0 ? _freqOpts[freqIdx] : 'Weekly';
+      _freqIndex = freqIdx >= 0 ? freqIdx : 1;
       _sel.clear();
       _sel.addAll(sel);
       // if (_sel.isEmpty) _sel.add(0);
@@ -1171,7 +1270,7 @@ class _Step05HealthPreferencesPageState extends State<_Step05HealthPreferencesPa
     context.read<UserPreferenceBloc>().add(UserPreferenceHealthUpdated(
           UserPreferenceHealthPreferences(
             hasRecurringPrescriptions: _hasPrescriptions,
-            reminderFrequency: _freqApi[_freqOpts.indexOf(_freq).clamp(0, _freqApi.length - 1)],
+            reminderFrequency: _freqApi[_freqIndex.clamp(0, _freqApi.length - 1)],
             interests: _sel.map((i) => _interestsApi[i]).toList(),
           ),
         ));
@@ -1186,23 +1285,23 @@ class _Step05HealthPreferencesPageState extends State<_Step05HealthPreferencesPa
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+      padding: const EdgeInsetsDirectional.fromSTEB(16, 16, 16, 24),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const SizedBox(height: 8),
-          Text('Health preferences', style: AppTextStyles.heading(fontSize: 24, fontWeight: FontWeight.w700, height: 1.2, color: _kTextDark)),
+          Text(AppTranslations.healthPreferences, style: AppTextStyles.heading(fontSize: 24, fontWeight: FontWeight.w700, height: 1.2, color: _kTextDark)),
           const SizedBox(height: 12),
-          Text('For pharmacy and health service recommendations', style: AppTextStyles.body(fontSize: 14, fontWeight: FontWeight.w400, height: 1.2, color: _kTextMuted)),
+          Text(AppTranslations.healthPreferencesSubtitle, style: AppTextStyles.body(fontSize: 14, fontWeight: FontWeight.w400, height: 1.2, color: _kTextMuted)),
           const SizedBox(height: 32),
-          Text('Do you have any recurring prescriptions?', style: AppTextStyles.body(fontSize: 14, fontWeight: FontWeight.w500, height: 1.2, color: _kSectionLabel)),
+          Text(AppTranslations.recurringPrescriptionsQuestion, style: AppTextStyles.body(fontSize: 14, fontWeight: FontWeight.w500, height: 1.2, color: _kSectionLabel)),
           const SizedBox(height: 16),
-          _SetupRadio<bool>(label: 'Yes, I need reminders', value: true, groupValue: _hasPrescriptions, onChanged: (v) { setState(() => _hasPrescriptions = v ?? true); _syncToBloc(); }),
+          _SetupRadio<bool>(label: AppTranslations.yesINeedReminders, value: true, groupValue: _hasPrescriptions, onChanged: (v) { setState(() => _hasPrescriptions = v ?? true); _syncToBloc(); }),
           const SizedBox(height: 16),
-          _SetupRadio<bool>(label: 'No prescriptions', value: false, groupValue: _hasPrescriptions, onChanged: (v) { setState(() => _hasPrescriptions = v ?? false); _syncToBloc(); }),
+          _SetupRadio<bool>(label: AppTranslations.noPrescriptions, value: false, groupValue: _hasPrescriptions, onChanged: (v) { setState(() => _hasPrescriptions = v ?? false); _syncToBloc(); }),
           if (_hasPrescriptions) ...[
             const SizedBox(height: 24),
-            Text('Reminder frequency', style: AppTextStyles.body(fontSize: 12, fontWeight: FontWeight.w400, color: _kLabelGray)),
+            Text(AppTranslations.reminderFrequency, style: AppTextStyles.body(fontSize: 12, fontWeight: FontWeight.w400, color: _kLabelGray)),
             const SizedBox(height: 8),
             Container(
               height: 48,
@@ -1213,18 +1312,18 @@ class _Step05HealthPreferencesPageState extends State<_Step05HealthPreferencesPa
                 borderRadius: BorderRadius.circular(8),
               ),
               child: DropdownButtonHideUnderline(
-                child: DropdownButton<String>(
-                  value: _freq,
+                child: DropdownButton<int>(
+                  value: _freqIndex,
                   isExpanded: true,
                   dropdownColor: Colors.white,
-                  items: _freqOpts.map((s) => DropdownMenuItem(value: s, child: Text(s))).toList(),
-                  onChanged: (v) { setState(() => _freq = v ?? _freq); _syncToBloc(); },
+                  items: List.generate(_freqOpts.length, (i) => DropdownMenuItem(value: i, child: Text(_freqOpts[i]))).toList(),
+                  onChanged: (v) { setState(() => _freqIndex = v ?? _freqIndex); _syncToBloc(); },
                 ),
               ),
             ),
           ],
           const SizedBox(height: 24),
-          Text('Health interests', style: AppTextStyles.body(fontSize: 14, fontWeight: FontWeight.w500, height: 1.2, color: _kSectionLabel)),
+          Text(AppTranslations.healthInterests, style: AppTextStyles.body(fontSize: 14, fontWeight: FontWeight.w500, height: 1.2, color: _kSectionLabel)),
           const SizedBox(height: 14),
           Wrap(spacing: 8, runSpacing: 8, children: List.generate(_interests.length, (i) => _SetupChip(label: _interests[i], selected: _sel.contains(i), onTap: () { setState(() { if (_sel.contains(i)) _sel.remove(i); else _sel.add(i); }); _syncToBloc(); }))),
         ],
@@ -1243,11 +1342,25 @@ class _Step06TravelPreferencesPage extends StatefulWidget {
 }
 
 class _Step06TravelPreferencesPageState extends State<_Step06TravelPreferencesPage> {
-  static const _freq = ['Frequent (Monthly)', 'Occasional (Few times a year)', 'Rarely'];
+  List<String> get _freq => [
+    AppTranslations.travelFreqFrequent,
+    AppTranslations.travelFreqOccasional,
+    AppTranslations.travelFreqRarely,
+  ];
   static const _freqApi = ['frequent', 'occasional', 'rarely'];
-  static const _purposes = ['Business 💼', 'Vacation 🏖️', 'Family Visits 👨‍👩‍👧', 'Adventure 🏔️'];
+  List<String> get _purposes => [
+    AppTranslations.purposeBusiness,
+    AppTranslations.purposeVacation,
+    AppTranslations.purposeFamilyVisits,
+    AppTranslations.purposeAdventure,
+  ];
   static const _purposesApi = ['business', 'vacation', 'family_visits', 'adventure'];
-  static const _entertainment = ['Movies 🎬', 'Concerts 🎵', 'Sports ⚽', 'Events 🎪️'];
+  List<String> get _entertainment => [
+    AppTranslations.entMovies,
+    AppTranslations.entConcerts,
+    AppTranslations.entSports,
+    AppTranslations.entEvents,
+  ];
   static const _entertainmentApi = ['movies', 'concerts', 'sports', 'events'];
   int _freqIndex = 0;
   final Set<int> _selP = {};//{0};
@@ -1297,24 +1410,24 @@ class _Step06TravelPreferencesPageState extends State<_Step06TravelPreferencesPa
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+      padding: const EdgeInsetsDirectional.fromSTEB(16, 16, 16, 24),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const SizedBox(height: 8),
-          Text('Travel preferences', style: AppTextStyles.heading(fontSize: 24, fontWeight: FontWeight.w700, height: 1.2, color: _kTextDark)),
+          Text(AppTranslations.travelPreferences, style: AppTextStyles.heading(fontSize: 24, fontWeight: FontWeight.w700, height: 1.2, color: _kTextDark)),
           const SizedBox(height: 12),
-          Text('For personalized travel & ticket recommendations', style: AppTextStyles.body(fontSize: 14, fontWeight: FontWeight.w400, height: 1.2, color: _kTextMuted)),
+          Text(AppTranslations.travelPreferencesSubtitle, style: AppTextStyles.body(fontSize: 14, fontWeight: FontWeight.w400, height: 1.2, color: _kTextMuted)),
           const SizedBox(height: 32),
-          Text('Travel frequency', style: AppTextStyles.body(fontSize: 14, fontWeight: FontWeight.w500, height: 1.2, color: _kSectionLabel)),
+          Text(AppTranslations.travelFrequency, style: AppTextStyles.body(fontSize: 14, fontWeight: FontWeight.w500, height: 1.2, color: _kSectionLabel)),
           const SizedBox(height: 12),
           ...List.generate(_freq.length, (i) => Padding(padding: const EdgeInsets.only(bottom: 16), child: _SetupRadio<int>(label: _freq[i], value: i, groupValue: _freqIndex, onChanged: (v) { setState(() => _freqIndex = v!); _syncToBloc(); }))),
           const SizedBox(height: 12),
-          Text('Travel purposes', style: AppTextStyles.body(fontSize: 14, fontWeight: FontWeight.w500, height: 1.2, color: _kSectionLabel)),
+          Text(AppTranslations.travelPurposes, style: AppTextStyles.body(fontSize: 14, fontWeight: FontWeight.w500, height: 1.2, color: _kSectionLabel)),
           const SizedBox(height: 14),
           Wrap(spacing: 8, runSpacing: 8, children: List.generate(_purposes.length, (i) => _SetupChip(label: _purposes[i], selected: _selP.contains(i), onTap: () { setState(() { if (_selP.contains(i)) _selP.remove(i); else _selP.add(i); }); _syncToBloc(); }))),
           const SizedBox(height: 24),
-          Text('Entertainment interests', style: AppTextStyles.body(fontSize: 14, fontWeight: FontWeight.w500, height: 1.2, color: _kSectionLabel)),
+          Text(AppTranslations.entertainmentInterests, style: AppTextStyles.body(fontSize: 14, fontWeight: FontWeight.w500, height: 1.2, color: _kSectionLabel)),
           const SizedBox(height: 14),
           Wrap(spacing: 8, runSpacing: 8, children: List.generate(_entertainment.length, (i) => _SetupChip(label: _entertainment[i], selected: _selE.contains(i), onTap: () { setState(() { if (_selE.contains(i)) _selE.remove(i); else _selE.add(i); }); _syncToBloc(); }))),
         ],
@@ -1333,9 +1446,21 @@ class _Step07HomeServicesPage extends StatefulWidget {
 }
 
 class _Step07HomeServicesPageState extends State<_Step07HomeServicesPage> {
-  static const _services = ['Cleaning', 'Plumbing', 'Carpentry', 'Electrical', 'Painting', 'Appliance Repair'];
+  List<String> get _services => [
+    AppTranslations.svcCleaning,
+    AppTranslations.svcPlumbing,
+    AppTranslations.svcCarpentry,
+    AppTranslations.svcElectrical,
+    AppTranslations.svcPainting,
+    AppTranslations.svcApplianceRepair,
+  ];
   static const _servicesApi = ['cleaning', 'plumbing', 'carpentry', 'electrical', 'painting', 'appliance_repair'];
-  static const _times = ['Morning (8 AM - 12 PM)', 'Afternoon (12 PM - 5 PM)', 'Evening (5 PM - 8 PM)', 'Flexible - Anytime'];
+  List<String> get _times => [
+    AppTranslations.timeMorning812,
+    AppTranslations.timeAfternoon125,
+    AppTranslations.timeEvening58,
+    AppTranslations.timeFlexibleAnytime,
+  ];
   static const _timesApi = ['morning', 'afternoon', 'evening', 'flexible'];
   final Set<int> _sel = {0};
   int _timeIndex = 0;
@@ -1375,20 +1500,20 @@ class _Step07HomeServicesPageState extends State<_Step07HomeServicesPage> {
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+      padding: const EdgeInsetsDirectional.fromSTEB(16, 16, 16, 24),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const SizedBox(height: 8),
-          Text('Home services', style: AppTextStyles.heading(fontSize: 24, fontWeight: FontWeight.w700, height: 1.2, color: _kTextDark)),
+          Text(AppTranslations.homeServices, style: AppTextStyles.heading(fontSize: 24, fontWeight: FontWeight.w700, height: 1.2, color: _kTextDark)),
           const SizedBox(height: 12),
-          Text('What services do you typically need?', style: AppTextStyles.body(fontSize: 14, fontWeight: FontWeight.w400, height: 1.2, color: _kTextMuted)),
+          Text(AppTranslations.homeServicesSubtitle, style: AppTextStyles.body(fontSize: 14, fontWeight: FontWeight.w400, height: 1.2, color: _kTextMuted)),
           const SizedBox(height: 32),
-          Text('Select services you use', style: AppTextStyles.body(fontSize: 14, fontWeight: FontWeight.w500, height: 1.2, color: _kSectionLabel)),
+          Text(AppTranslations.selectServicesYouUse, style: AppTextStyles.body(fontSize: 14, fontWeight: FontWeight.w500, height: 1.2, color: _kSectionLabel)),
           const SizedBox(height: 14),
           Wrap(spacing: 8, runSpacing: 8, children: List.generate(_services.length, (i) => _SetupChip(label: _services[i], selected: _sel.contains(i), onTap: () { setState(() { if (_sel.contains(i)) _sel.remove(i); else _sel.add(i); }); _syncToBloc(); }))),
           const SizedBox(height: 24),
-          Text('Preferred service time', style: AppTextStyles.body(fontSize: 14, fontWeight: FontWeight.w500, height: 1.2, color: _kSectionLabel)),
+          Text(AppTranslations.preferredServiceTime, style: AppTextStyles.body(fontSize: 14, fontWeight: FontWeight.w500, height: 1.2, color: _kSectionLabel)),
           const SizedBox(height: 16),
           ...List.generate(_times.length, (i) => Padding(padding: const EdgeInsets.only(bottom: 16), child: _SetupRadio<int>(label: _times[i], value: i, groupValue: _timeIndex, onChanged: (v) { setState(() => _timeIndex = v!); _syncToBloc(); }))),
         ],
@@ -1407,15 +1532,29 @@ class _Step08BudgetDealsPage extends StatefulWidget {
 }
 
 class _Step08BudgetDealsPageState extends State<_Step08BudgetDealsPage> {
-  static const _deals = ['Very Important - Always looking for deals', 'Moderate - Nice to have', 'Low - Convenience first'];
+  List<String> get _deals => [
+    AppTranslations.dealsVeryImportant,
+    AppTranslations.dealsModerate,
+    AppTranslations.dealsLow,
+  ];
   static const _dealsApi = ['very_important', 'moderate', 'low'];
-  static List<String> _getRanges() {
+  List<String> _getRanges() {
     final c = Utility.getCurrencyCode();
-    return ['$c 2,000 - $c 5,000', '$c 5,000 - $c 10,000', '$c 10,000 - $c 20,000', '$c 20,000+'];
+    return [
+      AppTranslations.budgetRange2k5k(c),
+      AppTranslations.budgetRange5k10k(c),
+      AppTranslations.budgetRange10k20k(c),
+      AppTranslations.budgetRange20kPlus(c),
+    ];
   }
   static const _rangeMin = [2000, 5000, 10000, 20000];
   static const _rangeMax = [5000, 10000, 20000, 50000];
-  static const _causes = ['Education', 'Healthcare', 'Environment', 'Animals'];
+  List<String> get _causes => [
+    AppTranslations.causeEducation,
+    AppTranslations.causeHealthcare,
+    AppTranslations.causeEnvironment,
+    AppTranslations.causeAnimals,
+  ];
   static const _causesApi = ['education', 'healthcare', 'environment', 'animals'];
   int _dealsIndex = 0;
   late String _range;
@@ -1470,22 +1609,22 @@ class _Step08BudgetDealsPageState extends State<_Step08BudgetDealsPage> {
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+      padding: const EdgeInsetsDirectional.fromSTEB(16, 16, 16, 24),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const SizedBox(height: 8),
-          Text('Budget & deals', style: AppTextStyles.heading(fontSize: 24, fontWeight: FontWeight.w700, height: 1.2, color: _kTextDark)),
+          Text(AppTranslations.budgetAndDeals, style: AppTextStyles.heading(fontSize: 24, fontWeight: FontWeight.w700, height: 1.2, color: _kTextDark)),
           const SizedBox(height: 12),
-          Text('Help me find the best deals for you', style: AppTextStyles.body(fontSize: 14, fontWeight: FontWeight.w400, height: 1.2, color: _kTextMuted)),
+          Text(AppTranslations.budgetAndDealsSubtitle, style: AppTextStyles.body(fontSize: 14, fontWeight: FontWeight.w400, height: 1.2, color: _kTextMuted)),
           const SizedBox(height: 32),
-          Text('How important are deals/discounts to you?', style: AppTextStyles.body(fontSize: 14, fontWeight: FontWeight.w500, height: 1.2, color: _kSectionLabel)),
+          Text(AppTranslations.howImportantDeals, style: AppTextStyles.body(fontSize: 14, fontWeight: FontWeight.w500, height: 1.2, color: _kSectionLabel)),
           const SizedBox(height: 16),
           ...List.generate(_deals.length, (i) => Padding(padding: const EdgeInsets.only(bottom: 16), child: _SetupRadio<int>(label: _deals[i], value: i, groupValue: _dealsIndex, onChanged: (v) { setState(() => _dealsIndex = v!); _syncToBloc(); }))),
           const SizedBox(height: 24),
-          Text('Monthly budget for online services (approx.)', style: AppTextStyles.body(fontSize: 14, fontWeight: FontWeight.w500, height: 1.2, color: _kSectionLabel)),
+          Text(AppTranslations.monthlyBudgetOnline, style: AppTextStyles.body(fontSize: 14, fontWeight: FontWeight.w500, height: 1.2, color: _kSectionLabel)),
           const SizedBox(height: 8),
-          Text('Select range', style: AppTextStyles.body(fontSize: 12, fontWeight: FontWeight.w400, color: _kLabelGray)),
+          Text(AppTranslations.selectRange, style: AppTextStyles.body(fontSize: 12, fontWeight: FontWeight.w400, color: _kLabelGray)),
           const SizedBox(height: 8),
           Container(
             height: 48,
@@ -1506,7 +1645,7 @@ class _Step08BudgetDealsPageState extends State<_Step08BudgetDealsPage> {
             ),
           ),
           const SizedBox(height: 24),
-          Text('Causes you care about (for donations)', style: AppTextStyles.body(fontSize: 14, fontWeight: FontWeight.w500, height: 1.2, color: _kSectionLabel)),
+          Text(AppTranslations.causesYouCareAbout, style: AppTextStyles.body(fontSize: 14, fontWeight: FontWeight.w500, height: 1.2, color: _kSectionLabel)),
           const SizedBox(height: 14),
           Wrap(spacing: 8, runSpacing: 8, children: List.generate(_causes.length, (i) => _SetupChip(label: _causes[i], selected: _selCauses.contains(i), onTap: () { setState(() { if (_selCauses.contains(i)) _selCauses.remove(i); else _selCauses.add(i); }); _syncToBloc(); }))),
         ],
@@ -1525,14 +1664,27 @@ class _Step09NotificationSettingsPage extends StatefulWidget {
 }
 
 class _Step09NotificationSettingsPageState extends State<_Step09NotificationSettingsPage> {
-  static const _remind = ['1 Week before', '3 Days before', '1 Day before'];
+  List<String> get _remind => [
+    AppTranslations.remind1WeekBefore,
+    AppTranslations.remind3DaysBefore,
+    AppTranslations.remind1DayBefore,
+  ];
   static const _remindApi = ['1_week', '3_days', '1_day'];
-  static const _times = ['Morning (09:00am)', 'Afternoon (02:00pm)', 'Evening (06:00pm)'];
+  List<String> get _times => [
+    AppTranslations.notifyMorning,
+    AppTranslations.notifyAfternoon,
+    AppTranslations.notifyEvening,
+  ];
   static const _timesApi = ['09:00', '14:00', '18:00'];
-  static const _about = ['Birthdays 🎂', 'Deals & Offers 💰', 'Order Updates 📦', 'Service Bookings 🔧'];
+  List<String> get _about => [
+    AppTranslations.remindAboutBirthdays,
+    AppTranslations.remindAboutDeals,
+    AppTranslations.remindAboutOrderUpdates,
+    AppTranslations.remindAboutServiceBookings,
+  ];
   static const _aboutApi = ['birthdays', 'deals', 'order_updates', 'service_bookings'];
   int _remindIndex = 0;
-  String _time = _times[0];
+  int _timeIndex = 0;
   final Set<int> _selAbout = {0};
 
   void _restoreFromBloc() {
@@ -1548,7 +1700,7 @@ class _Step09NotificationSettingsPageState extends State<_Step09NotificationSett
     }
     if (mounted) setState(() {
       _remindIndex = remindIdx >= 0 ? remindIdx : 0;
-      _time = timeIdx < _times.length ? _times[timeIdx] : _times[0];
+      _timeIndex = timeIdx >= 0 ? timeIdx : 0;
       _selAbout.clear();
       _selAbout.addAll(selAbout);
       // if (_selAbout.isEmpty) _selAbout.add(0);
@@ -1559,7 +1711,7 @@ class _Step09NotificationSettingsPageState extends State<_Step09NotificationSett
     context.read<UserPreferenceBloc>().add(UserPreferenceNotificationUpdated(
           UserPreferenceNotificationSettings(
             reminderBefore: _remindApi[_remindIndex],
-            preferredTime: _timesApi[_times.indexOf(_time).clamp(0, _timesApi.length - 1)],
+            preferredTime: _timesApi[_timeIndex.clamp(0, _timesApi.length - 1)],
             reminderTypes: _selAbout.map((i) => _aboutApi[i]).toList(),
           ),
         ));
@@ -1574,22 +1726,22 @@ class _Step09NotificationSettingsPageState extends State<_Step09NotificationSett
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+      padding: const EdgeInsetsDirectional.fromSTEB(16, 16, 16, 24),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const SizedBox(height: 8),
-          Text('Notification settings', style: AppTextStyles.heading(fontSize: 24, fontWeight: FontWeight.w700, height: 1.2, color: _kTextDark)),
+          Text(AppTranslations.notificationSettings, style: AppTextStyles.heading(fontSize: 24, fontWeight: FontWeight.w700, height: 1.2, color: _kTextDark)),
           const SizedBox(height: 12),
-          Text('When should I remind you about important events?', style: AppTextStyles.body(fontSize: 14, fontWeight: FontWeight.w400, height: 1.2, color: _kTextMuted)),
+          Text(AppTranslations.notificationSettingsSubtitle, style: AppTextStyles.body(fontSize: 14, fontWeight: FontWeight.w400, height: 1.2, color: _kTextMuted)),
           const SizedBox(height: 32),
-          Text('Remind me before events', style: AppTextStyles.body(fontSize: 14, fontWeight: FontWeight.w500, height: 1.2, color: _kSectionLabel)),
+          Text(AppTranslations.remindMeBeforeEvents, style: AppTextStyles.body(fontSize: 14, fontWeight: FontWeight.w500, height: 1.2, color: _kSectionLabel)),
           const SizedBox(height: 16),
           ...List.generate(_remind.length, (i) => Padding(padding: const EdgeInsets.only(bottom: 16), child: _SetupRadio<int>(label: _remind[i], value: i, groupValue: _remindIndex, onChanged: (v) { setState(() => _remindIndex = v!); _syncToBloc(); }))),
           const SizedBox(height: 24),
-          Text('Best time to notify you', style: AppTextStyles.body(fontSize: 14, fontWeight: FontWeight.w500, height: 1.2, color: _kSectionLabel)),
+          Text(AppTranslations.bestTimeToNotify, style: AppTextStyles.body(fontSize: 14, fontWeight: FontWeight.w500, height: 1.2, color: _kSectionLabel)),
           const SizedBox(height: 8),
-          Text('Select range', style: AppTextStyles.body(fontSize: 12, fontWeight: FontWeight.w400, color: _kLabelGray)),
+          Text(AppTranslations.select, style: AppTextStyles.body(fontSize: 12, fontWeight: FontWeight.w400, color: _kLabelGray)),
           const SizedBox(height: 8),
           Container(
             height: 48,
@@ -1600,17 +1752,17 @@ class _Step09NotificationSettingsPageState extends State<_Step09NotificationSett
                 borderRadius: BorderRadius.circular(8),
               ),
             child: DropdownButtonHideUnderline(
-              child: DropdownButton<String>(
-                value: _time,
+              child: DropdownButton<int>(
+                value: _timeIndex,
                 isExpanded: true,
                 dropdownColor: Colors.white,
-                items: _times.map((s) => DropdownMenuItem(value: s, child: Text(s))).toList(),
-                onChanged: (v) { setState(() => _time = v ?? _time); _syncToBloc(); },
+                items: List.generate(_times.length, (i) => DropdownMenuItem(value: i, child: Text(_times[i]))).toList(),
+                onChanged: (v) { setState(() => _timeIndex = v ?? _timeIndex); _syncToBloc(); },
               ),
             ),
           ),
           const SizedBox(height: 24),
-          Text('What should I remind you about?', style: AppTextStyles.body(fontSize: 14, fontWeight: FontWeight.w500, height: 1.2, color: _kSectionLabel)),
+          Text(AppTranslations.whatShouldIRemind, style: AppTextStyles.body(fontSize: 14, fontWeight: FontWeight.w500, height: 1.2, color: _kSectionLabel)),
           const SizedBox(height: 14),
           Wrap(spacing: 8, runSpacing: 8, children: List.generate(_about.length, (i) => _SetupChip(label: _about[i], selected: _selAbout.contains(i), onTap: () { setState(() { if (_selAbout.contains(i)) _selAbout.remove(i); else _selAbout.add(i); }); _syncToBloc(); }))),
         ],

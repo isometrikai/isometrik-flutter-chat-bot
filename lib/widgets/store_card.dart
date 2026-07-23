@@ -134,8 +134,8 @@ class StoreCard extends StatelessWidget {
                           if (store.supportedOrderTypes == 4) ...[
                             Text(
                               store.tableReservations
-                                  ? 'Only table booking or preorders are available.'
-                                  : 'Delivery and self-pickup are not available.',
+                                  ? AppTranslations.onlyTableBooking
+                                  : AppTranslations.deliveryPickupUnavailable,
                               maxLines: 1,
                               style: AppTextStyles.restaurantDescription
                                   .copyWith(
@@ -157,7 +157,7 @@ class StoreCard extends StatelessWidget {
                           ],
                         ] else ...[
                           Text(
-                            'Store is closed',
+                            AppTranslations.storeIsClosed,
                             maxLines: 1,
                             style: AppTextStyles.restaurantDescription.copyWith(
                               color: const Color(0xFFF44336),
@@ -200,7 +200,7 @@ class StoreCard extends StatelessWidget {
                           ),
                         ] else ...[
                           Text(
-                            'Store is closed',
+                            AppTranslations.storeIsClosed,
                             maxLines: 1,
                             style: AppTextStyles.restaurantDescription.copyWith(
                               color: const Color(0xFFF44336),
@@ -291,7 +291,7 @@ class StoreCard extends StatelessWidget {
                       ),
                       const SizedBox(width: 5),
                       Text(
-                        'Open in app',
+                        AppTranslations.openInApp,
                         style: AppTextStyles.restaurantDescription.copyWith(
                           color: AppConstants.appThemeColor,
                         ),
@@ -315,7 +315,7 @@ class StoreCard extends StatelessWidget {
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 3),
                       child: Text(
-                        'Book a Table',
+                        AppTranslations.bookATable,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: AppTextStyles.restaurantDescription.copyWith(
@@ -344,7 +344,10 @@ class StoreCard extends StatelessWidget {
       children: [
         if (minFee != null) ...[
         Text(
-                            'Fees: ${currency} ${minFee.toStringAsFixed(0)}',
+                            AppTranslations.feesAmount(
+                              currency,
+                              minFee.toStringAsFixed(0),
+                            ),
                             style: AppTextStyles.productPrice.copyWith(
                               color: const Color(0xFF242424),
                               fontSize: 14,
@@ -378,7 +381,7 @@ class StoreCard extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    'Add',
+                    AppTranslations.add,
                     style: AppTextStyles.restaurantDescription.copyWith(
                       color: Colors.white,
                       fontWeight: FontWeight.w600,
@@ -551,7 +554,10 @@ class _ProductPreviewTile extends StatelessWidget {
                     ]else ...[
                       if (doctor?.rating != null && doctor?.rating != 0.0) ...[
                         Text(
-                            'Fees: ${doctor?.currencySymbol} ${doctor?.consultation_fee?.toStringAsFixed(0)}',
+                            AppTranslations.feesAmount(
+                              doctor?.currencySymbol ?? '',
+                              doctor?.consultation_fee?.toStringAsFixed(0) ?? '',
+                            ),
                             style: AppTextStyles.productPrice.copyWith(
                               color: const Color(0xFF242424),
                               fontSize: 12,
@@ -613,14 +619,14 @@ class _ProductPreviewTile extends StatelessWidget {
                   ),
                   if (((store.storeTypeId ?? store.type) != FoodCategory.food.value) && ((store.storeTypeId ?? store.type) != FoodCategory.services.value)) ...[
                     if (store.storeCategoryId == FoodStoreCategoryId.donation.value) ...[
-                      Positioned(
-                        right: 4,
+                      PositionedDirectional(
+                        end: 4,
                         bottom: 4,
                         child: _buildDonationBadge(isFromChatHistory: isFromChatHistory),
                       ),
                     ] else if (product?.instock == false) ...[
-                      Positioned(
-                        right: 4,
+                      PositionedDirectional(
+                        end: 4,
                         bottom: 4,
                         child: _buildOutOfStockBadge(),
                       ),
@@ -637,22 +643,22 @@ class _ProductPreviewTile extends StatelessWidget {
                 ...[]
               else
                 ...[
-                  Positioned(
-                      right: 0, bottom: -4, child: _buildAddButton(context)),
+                  PositionedDirectional(
+                      end: 0, bottom: -4, child: _buildAddButton(context)),
                 ],
             ] else
               ...[
               ]
           ] else if (((store.storeTypeId ?? store.type) == FoodCategory.services.value)) ...[
-              Positioned(
-                  right: 0, bottom: -4, child: _buildAddButton(context)),
+              PositionedDirectional(
+                  end: 0, bottom: -4, child: _buildAddButton(context)),
           ] else if (((store.storeCategoryId) == FoodStoreCategoryId.healthCare.value)) ...[
-              Positioned(
-                  right: 0, bottom: -4, child: _buildAddButton(context)),
+              PositionedDirectional(
+                  end: 0, bottom: -4, child: _buildAddButton(context)),
           ] else ...[
               if (product != null && product?.instock == true) ...[
-                Positioned(
-                    right: 0, bottom: -4, child: _buildAddButton(context)),
+                PositionedDirectional(
+                    end: 0, bottom: -4, child: _buildAddButton(context)),
               ],
             ],
           ],
@@ -723,7 +729,7 @@ class _ProductPreviewTile extends StatelessWidget {
       ),
       child: Center(
         child: Text(
-          'OUT OF STOCK',
+          AppTranslations.outOfStock,
           style: AppTextStyles.restaurantDescription.copyWith(
             fontWeight: FontWeight.w700,
             fontSize: 8,
@@ -763,7 +769,7 @@ class _ProductPreviewTile extends StatelessWidget {
         ),
         child: Center(
           child: Text(
-            'Select',
+            AppTranslations.select,
             style: AppTextStyles.restaurantDescription.copyWith(
               fontWeight: FontWeight.w700,
               fontSize: 11,
@@ -811,9 +817,9 @@ class _ProductPreviewTile extends StatelessWidget {
                 height: 27,
                 decoration: const BoxDecoration(
                   color: AppConstants.appThemeColor,
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(8),
-                    bottomLeft: Radius.circular(8),
+                  borderRadius: BorderRadiusDirectional.only(
+                    topStart: Radius.circular(8),
+                    bottomStart: Radius.circular(8),
                   ),
                 ),
                 child: const Icon(Icons.remove, size: 16, color: Colors.white),
@@ -841,9 +847,9 @@ class _ProductPreviewTile extends StatelessWidget {
                 height: 27,
                 decoration: const BoxDecoration(
                   color: AppConstants.appThemeColor,
-                  borderRadius: BorderRadius.only(
-                    topRight: Radius.circular(8),
-                    bottomRight: Radius.circular(8),
+                  borderRadius: BorderRadiusDirectional.only(
+                    topEnd: Radius.circular(8),
+                    bottomEnd: Radius.circular(8),
                   ),
                 ),
                 child: const Icon(Icons.add, size: 16, color: Colors.white),
@@ -886,7 +892,7 @@ class _ProductPreviewTile extends StatelessWidget {
           ),
           alignment: Alignment.center,
           child: Text(
-            'Add',
+            AppTranslations.add,
             style: AppTextStyles.button.copyWith(
               color: AppConstants.appThemeColor,
             ),

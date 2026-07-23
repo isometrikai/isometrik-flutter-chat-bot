@@ -1,3 +1,4 @@
+import 'package:chat_bot/utils/utils.dart';
 import 'package:chat_bot/utils/app_constants.dart';
 import 'package:chat_bot/utils/asset_path.dart';
 import 'package:chat_bot/utils/app_theme.dart';
@@ -12,7 +13,7 @@ class ArchivedChatRow extends StatelessWidget {
     required this.onDelete,
     required this.dateStyle,
     required this.trailingWidth,
-    this.chatName = 'Chat name',
+    this.chatName,
     this.dateLabel = 'Jan 4, 2024',
   });
 
@@ -21,7 +22,7 @@ class ArchivedChatRow extends StatelessWidget {
   final VoidCallback onDelete;
   final TextStyle dateStyle;
   final double trailingWidth;
-  final String chatName;
+  final String? chatName;
   final String dateLabel;
 
   @override
@@ -56,7 +57,7 @@ class ArchivedChatRow extends StatelessWidget {
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        chatName,
+                        chatName ?? AppTranslations.chatNameDefault,
                         style: nameStyle,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,

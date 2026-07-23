@@ -58,7 +58,7 @@ class UniversalApiClient {
     return {
       'accept': 'application/json',
       'Content-Type': 'application/json',
-      'language': 'en',
+      'language': Utility.getLanguage(),
       'platform': Utility.getPlatform(),
       if (token.isNotEmpty) 'authorization': token,
     };
@@ -72,7 +72,7 @@ class UniversalApiClient {
     return {
       'accept': 'application/json',
       'Content-Type': 'application/json',
-      'language': 'en',
+      'language': Utility.getLanguage(),
       'platform': platform.isNotEmpty ? platform : '3',
       if (raw.isNotEmpty) 'authorization': raw,
     };
@@ -87,7 +87,7 @@ class UniversalApiClient {
     return {
       'accept': 'application/json',
       'Content-Type': 'application/json',
-      'language': 'en',
+      'language': Utility.getLanguage(),
       'platform': platform.isNotEmpty ? platform : '3',
       'currencysymbol': Utility.getCurrencySymbol(),
       'currencycode': Utility.getCurrencyCode(),
@@ -109,8 +109,8 @@ class UniversalApiClient {
     return {
       // 'Content-Length':'391',
       'Content-Type': 'application/json',
-      'language': 'en',
-      'lan': 'en',
+      'language': Utility.getLanguage(),
+      'lan': Utility.getLanguage(),
       'currencysymbol': Utility.getCurrencySymbol(),//2K8u2KU=
       'currencycode': Utility.getCurrencyCode(),
       'platform': Utility.getPlatform(),
@@ -129,7 +129,7 @@ class UniversalApiClient {
       'storeType': '8',
       'ipAddress': '192.168.5.105',
       'platform': Utility.getPlatform(),
-      'language': 'en',
+      'language': Utility.getLanguage(),
       'currencycode': Utility.getCurrencyCode(),//AED
       'skip': '0',
       'cityId': '5df7b7218798dc2c1114e6bf',
@@ -151,7 +151,7 @@ class UniversalApiClient {
       'storeType': '8',
       'ipAddress': '192.168.5.105',
       'platform': Utility.getPlatform(),
-      'language': 'en',
+      'language': Utility.getLanguage(),
       'currencycode': Utility.getCurrencyCode(),//AED
       'skip': '0',
       'cityId': '5df7b7218798dc2c1114e6bf',
@@ -170,7 +170,7 @@ class UniversalApiClient {
       'Accept-Encoding': 'gzip',
       'Accept-Language': 'en-IN;q=1.0',
       'platform': Utility.getPlatform(),
-      'language': 'en',
+      'language': Utility.getLanguage(),
       'filterType': '1',
       'logintype': '1',
       'searchType': '1',

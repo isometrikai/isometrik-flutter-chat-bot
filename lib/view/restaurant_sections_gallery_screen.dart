@@ -60,12 +60,12 @@ class _RestaurantSectionsGalleryScreenState
         child: Column(
           children: [
             Padding(
-              padding: const EdgeInsets.fromLTRB(16, 10, 16, 10),
+              padding: const EdgeInsetsDirectional.fromSTEB(16, 10, 16, 10),
               child: Row(
                 children: [
                   Expanded(
                     child: Text(
-                      'View Photos',
+                      AppTranslations.viewPhotos,
                       style: AppTextStyles.heading(
                         fontSize: 24,
                         color: const Color(0xFF171212),
@@ -85,7 +85,7 @@ class _RestaurantSectionsGalleryScreenState
                 child: Row(
                   children: [
                     Text(
-                      'From ${widget.storeName}',
+                      AppTranslations.fromStore(widget.storeName ?? ''),
                       style: AppTextStyles.bodyText.copyWith(
                         fontSize: 12,
                         fontWeight: FontWeight.w400,

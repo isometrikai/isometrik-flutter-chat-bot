@@ -705,7 +705,7 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
 
   Widget _buildBottomCartBar(int itemCount) {
     final String itemLabel =
-        itemCount == 1 ? '1 Item added' : '$itemCount Items added';
+        itemCount == 1 ? AppTranslations.oneItemAdded : AppTranslations.itemsAdded(itemCount.toString());
     final double bottomInset = MediaQuery.of(context).padding.bottom;
 
     return Container(
@@ -720,7 +720,7 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
           ),
         ],
       ),
-      padding: EdgeInsets.fromLTRB(16, 15, 16, bottomInset > 0 ? 8 : 16),
+      padding: EdgeInsetsDirectional.fromSTEB(16, 15, 16, bottomInset > 0 ? 8 : 16),
       child: GestureDetector(
         onTap: _onViewCart,
         child: Container(
@@ -757,8 +757,8 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
-                  const Text(
-                    'View cart',
+                  Text(
+                    AppTranslations.viewCart,
                     style: TextStyle(
                       fontWeight: FontWeight.w700,
                       fontSize: 14,
@@ -798,7 +798,7 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
           const SizedBox(height: 24),
           // "Your cart is empty" text
           Text(
-            'No restaurants found!',
+            AppTranslations.noRestaurantsFound,
             style: AppTextStyles.restaurantTitle.copyWith(
               color: const Color(0xFF242424),
               fontWeight: FontWeight.w700,
@@ -837,7 +837,7 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
             child: TextField(
               controller: _searchController,
               decoration: InputDecoration(
-                hintText: 'Search',
+                hintText: AppTranslations.search,
                 hintStyle: AppTextStyles.bodyText.copyWith(
                   color: const Color(0xFF979797),
                 ),
@@ -857,7 +857,7 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
           Container(
             width: 34,
             height: 34,
-            margin: const EdgeInsets.only(right: 10),
+            margin: const EdgeInsetsDirectional.only(end: 10),
             decoration: BoxDecoration(
               color: const Color(0xFFF6F6F6),
               borderRadius: BorderRadius.circular(54),

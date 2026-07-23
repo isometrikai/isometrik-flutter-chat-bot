@@ -1,6 +1,7 @@
 import 'package:chat_bot/utils/enum.dart';
 import 'package:flutter/material.dart';
 import 'package:chat_bot/data/data.dart';
+import '../utils/utils.dart';
 
 class CartDetailsPriceWidget extends StatelessWidget {
   final List<WidgetAction> cartItems;
@@ -50,7 +51,7 @@ class CartDetailsPriceWidget extends StatelessWidget {
     );
 
     return Container(
-      margin: const EdgeInsets.only(left: 0, right: 0, bottom: 8,top: 8),
+      margin: const EdgeInsetsDirectional.only(bottom: 8, top: 8),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
@@ -64,7 +65,7 @@ class CartDetailsPriceWidget extends StatelessWidget {
           // Regular items section
           if (regularItems.isNotEmpty) ...[
             Padding(
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+              padding: const EdgeInsetsDirectional.fromSTEB(16, 16, 16, 0),
               child: Column(
                 children: regularItems.map((item) => _buildCartItem(item)).toList(),
               ),
@@ -181,8 +182,8 @@ class CartDetailsPriceWidget extends StatelessWidget {
                         ),
                       ),
                       if (item.storeCategoryId == FoodStoreCategoryId.healthCare.value && item.productType != 1)
-                        const TextSpan(
-                          text: '(Consultation Fee)',
+                        TextSpan(
+                          text: AppTranslations.consultationFeeParen,
                           style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w400,
@@ -247,7 +248,7 @@ class CartDetailsPriceWidget extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(
-          'Delivery fee',
+          AppTranslations.deliveryFee,
           style: const TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w400,
@@ -274,7 +275,7 @@ class CartDetailsPriceWidget extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(
-          'Service Fee',
+          AppTranslations.serviceFee,
           style: const TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w400,
@@ -327,11 +328,15 @@ class CartDetailsPriceWidget extends StatelessWidget {
     final currency = totalItem.currencySymbol ?? 'د.إ';
     final price = totalItem.productPrice ?? 0;
 
+    final displayName = totalItem.productName == 'Total To Pay'
+        ? AppTranslations.totalToPay
+        : (totalItem.productName ?? '');
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(
-          totalItem.productName ?? '',
+          displayName,
           style: const TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.w700,

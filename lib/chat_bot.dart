@@ -49,6 +49,7 @@ class ChatBot {
     required String emailId,
     required String phoneNumber,
     required String countryCode,
+    required String language,
   }) {
     print('chatBotId: $chatBotId');
     print('appSecret: $appSecret');
@@ -78,6 +79,7 @@ class ChatBot {
     print('emailId: $emailId');
     print('phoneNumber: $phoneNumber');
     print('countryCode: $countryCode');
+    print('language: $language');
     isTutorialShown = needToShowTutorial;
     isCompleteSetupShown = needToShowCompleteSetup;
     ApiService.configure(
@@ -109,6 +111,7 @@ class ChatBot {
       emailId: emailId,
       phoneNumber: phoneNumber,
       countryCode: countryCode,
+      language: language,
     );
   }
 

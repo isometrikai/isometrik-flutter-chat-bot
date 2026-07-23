@@ -110,7 +110,7 @@ class ChooseRoomBottomSheet extends StatelessWidget {
 
         return Container(
           width: double.infinity,
-          padding: const EdgeInsets.fromLTRB(16, 20, 16, 10),
+          padding: const EdgeInsetsDirectional.fromSTEB(16, 20, 16, 10),
           decoration: const BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
@@ -124,7 +124,7 @@ class ChooseRoomBottomSheet extends StatelessWidget {
                   const SizedBox(width: 10),
                   Expanded(
                     child: Text(
-                      name.isNotEmpty ? name : 'Hotel',
+                      name.isNotEmpty ? name : AppTranslations.hotelFallback,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: AppTextStyles.heading(
@@ -143,7 +143,7 @@ class ChooseRoomBottomSheet extends StatelessWidget {
                 Row(
                   children: [
                     Text(
-                      'Date :',
+                      AppTranslations.dateLabel,
                       style: AppTextStyles.bodyText.copyWith(
                         fontSize: 12,
                         height: 1.4,
@@ -201,11 +201,11 @@ class ChooseRoomBottomSheet extends StatelessWidget {
         }
 
         return ListView(
-          padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+          padding: const EdgeInsetsDirectional.fromSTEB(16, 0, 16, 16),
           children: [
             const SizedBox(height: 8),
             Text(
-              'Choose Room',
+              AppTranslations.chooseRoom,
               style: AppTextStyles.bodyText.copyWith(
                 fontSize: 14,
                 fontWeight: FontWeight.w700,
@@ -242,7 +242,7 @@ class ChooseRoomBottomSheet extends StatelessWidget {
 
         return Container(
           width: double.infinity,
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+          padding: const EdgeInsetsDirectional.fromSTEB(16, 8, 16, 24),
           color: _sheetBackground,
           child: _GradientNextButton(
             enabled: enabled,
@@ -335,7 +335,7 @@ class _RoomCard extends StatelessWidget {
         ? ''
         : _formatPrice(rate.currency, rate.totalRate);
     final roomsLabel = room.availability > 0
-        ? 'Total for ${room.availability} room${room.availability == 1 ? '' : 's'}'
+        ? AppTranslations.totalForRooms(room.availability.toString())
         : '';
 
     return GestureDetector(
@@ -514,7 +514,7 @@ class _GradientNextButton extends StatelessWidget {
             ),
           ),
           child: Text(
-            'Next',
+            AppTranslations.next,
             style: AppTextStyles.button.copyWith(
               fontSize: 16,
               color: Colors.white,

@@ -23,7 +23,7 @@ class CarBookingConfirmedWidget extends StatelessWidget {
     if (items.isEmpty) return const SizedBox.shrink();
 
     return Align(
-      alignment: Alignment.centerLeft,
+      alignment: AlignmentDirectional.centerStart,
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 294),
         child: Column(
@@ -54,7 +54,7 @@ class _ConfirmedCard extends StatelessWidget {
 
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(15, 20, 15, 20),
+      padding: const EdgeInsetsDirectional.fromSTEB(15, 20, 15, 20),
       decoration: BoxDecoration(
         color: Colors.white,
         border: Border.all(color: CarBookingConfirmedWidget._borderColor),
@@ -98,11 +98,11 @@ class _ConfirmedCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   if (bookingId.isNotEmpty) ...[
-                    _IdRow(label: 'Booking ID', value: bookingId),
+                    _IdRow(label: AppTranslations.bookingId, value: bookingId),
                     if (orderId.isNotEmpty) const SizedBox(height: 8),
                   ],
                   if (orderId.isNotEmpty)
-                    _IdRow(label: 'Order ID', value: orderId),
+                    _IdRow(label: AppTranslations.orderId, value: orderId),
                 ],
               ),
             ),

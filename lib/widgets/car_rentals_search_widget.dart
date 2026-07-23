@@ -174,7 +174,7 @@ class _CarRentalSearchCard extends StatelessWidget {
         ),
         const SizedBox(width: 4),
         Text(
-          'Or Similar',
+          AppTranslations.orSimilar,
           style: AppTextStyles.bodyText.copyWith(
             fontSize: 10,
             fontWeight: FontWeight.w400,
@@ -274,7 +274,7 @@ class _CarRentalSearchCard extends StatelessWidget {
           ),
           const SizedBox(width: 5),
           Text(
-            'Open in Eazy app',
+            AppTranslations.openInEazyApp,
             style: AppTextStyles.bodyText.copyWith(
               fontSize: 12,
               fontWeight: FontWeight.w400,
@@ -289,7 +289,7 @@ class _CarRentalSearchCard extends StatelessWidget {
 
   String _daysLabel(int? days) {
     if (days == null || days <= 0) return '';
-    return 'for $days day${days == 1 ? '' : 's'}';
+    return AppTranslations.forNDays(days.toString());
   }
 
   static String _formatPrice(String currency, double value) {

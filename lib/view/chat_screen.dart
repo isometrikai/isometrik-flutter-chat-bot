@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -168,7 +169,7 @@ class _ChatScreenState extends State<ChatScreen> {
         if (stripePlaceOrder['isPaymentSuccess'] == true) {
           _needToEndThisChat = true;
           _gotStripePaymentCallback = true;
-          BlackToastView.show(context, 'Payment completed successfully');
+          BlackToastView.show(context, AppTranslations.toastPaymentCompleted);
            context.read<CartBloc>().add(
               CartFetchRequested(needToShowLoader: false),
             );
@@ -478,7 +479,7 @@ class _ChatScreenState extends State<ChatScreen> {
           } else {
             BlackToastView.show(
               context,
-              'We don\'t operate in this location at the moment.',
+              AppTranslations.toastDontOperateLocation,
             );
           }
           if (location.isNotEmpty) {
@@ -1569,7 +1570,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
       // Show user feedback if service is not available
       if (!_isSpeechAvailable) {
-        BlackToastView.show(context, 'Speech recognition is not available');
+        BlackToastView.show(context, AppTranslations.toastSpeechUnavailable);
       }
     }
   }
@@ -1592,7 +1593,7 @@ class _ChatScreenState extends State<ChatScreen> {
       final String recognizedText = _speechService.currentRecognizedText;
 
       if (recognizedText.trim().isEmpty) {
-        BlackToastView.show(context, 'No speech detected. Please try again.');
+        BlackToastView.show(context, AppTranslations.toastNoSpeechDetected);
       }
       // Text is already set in real-time via callback, no need to set it again here
     } catch (e) {
@@ -1600,7 +1601,7 @@ class _ChatScreenState extends State<ChatScreen> {
       setState(() {
         _isRecording = false;
       });
-      BlackToastView.show(context, 'Recording failed. Please try again.');
+      BlackToastView.show(context, AppTranslations.toastRecordingFailed);
     }
   }
 
@@ -1660,9 +1661,9 @@ class _ChatScreenState extends State<ChatScreen> {
         barrierDismissible: false,
         builder: (BuildContext dialogContext) {
           return AlertDialog(
-            title: const Text('Error'),
-            content: const Text(
-              'Something went wrong please try again later',
+            title: Text(AppTranslations.error),
+            content: Text(
+              AppTranslations.somethingWentWrongTryLater,
             ),
             actions: [
               TextButton(
@@ -1670,7 +1671,7 @@ class _ChatScreenState extends State<ChatScreen> {
                   Navigator.of(dialogContext).pop();
                   OrderService().triggerChatDismiss();
                 },
-                child: const Text('OK'),
+                child: Text(AppTranslations.ok),
               ),
             ],
           );
@@ -1752,16 +1753,23 @@ class _ChatScreenState extends State<ChatScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final Widget body;
     if (widget.isFromHistory) {
-      return _buildChatScreenBody();
+      body = _buildChatScreenBody();
+    } else {
+      body = BlocProvider.value(
+        value: _launchBloc,
+        child: BlocListener<LaunchBloc, LaunchState>(
+          listener: _onLaunchState,
+          child: _buildChatScreenBody(),
+        ),
+      );
     }
 
-    return BlocProvider.value(
-      value: _launchBloc,
-      child: BlocListener<LaunchBloc, LaunchState>(
-        listener: _onLaunchState,
-        child: _buildChatScreenBody(),
-      ),
+    // Ensure chat UI follows EasyLocalization locale direction (RTL for Arabic).
+    return Directionality(
+      textDirection: AppLocale.textDirectionOf(context.locale),
+      child: body,
     );
   }
 }

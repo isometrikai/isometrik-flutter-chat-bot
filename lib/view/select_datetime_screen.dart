@@ -133,7 +133,7 @@ class _SelectDateTimeScreenState extends State<SelectDateTimeScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to load store timings: $e'),
+            content: Text(AppTranslations.failedLoadStoreTimings('$e')),
             duration: const Duration(seconds: 4),
           ),
         );
@@ -165,7 +165,7 @@ class _SelectDateTimeScreenState extends State<SelectDateTimeScreen> {
     if (selectedDateTime == null) {
        BlackToastView.show(
                       context,
-                      'Please select a date and time',
+                      AppTranslations.pleaseSelectDateTime,
                     );
       return;
     }
@@ -175,7 +175,7 @@ class _SelectDateTimeScreenState extends State<SelectDateTimeScreen> {
 
       BlackToastView.show(
                       context,
-                      'Selected date and time is not available. Please choose another time slot.',
+                      AppTranslations.selectedDatetimeUnavailable,
                     );
       return;
     }
@@ -189,9 +189,29 @@ class _SelectDateTimeScreenState extends State<SelectDateTimeScreen> {
   }
   
   String _formatDateTime(DateTime dateTime) {
-    final weekdays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-    final months = ['January', 'February', 'March', 'April', 'May', 'June',
-                   'July', 'August', 'September', 'October', 'November', 'December'];
+    final weekdays = [
+      AppTranslations.weekdayMonday,
+      AppTranslations.weekdayTuesday,
+      AppTranslations.weekdayWednesday,
+      AppTranslations.weekdayThursday,
+      AppTranslations.weekdayFriday,
+      AppTranslations.weekdaySaturday,
+      AppTranslations.weekdaySunday,
+    ];
+    final months = [
+      AppTranslations.monthJanuary,
+      AppTranslations.monthFebruary,
+      AppTranslations.monthMarch,
+      AppTranslations.monthApril,
+      AppTranslations.monthMay,
+      AppTranslations.monthJune,
+      AppTranslations.monthJuly,
+      AppTranslations.monthAugust,
+      AppTranslations.monthSeptember,
+      AppTranslations.monthOctober,
+      AppTranslations.monthNovember,
+      AppTranslations.monthDecember,
+    ];
     
     final weekday = weekdays[dateTime.weekday - 1];
     final month = months[dateTime.month - 1];
@@ -200,31 +220,58 @@ class _SelectDateTimeScreenState extends State<SelectDateTimeScreen> {
     
     final hour = dateTime.hour;
     final minute = dateTime.minute.toString().padLeft(2, '0');
-    final period = hour >= 12 ? 'PM' : 'AM';
+    final period = hour >= 12 ? AppTranslations.pm : AppTranslations.am;
     final displayHour = hour > 12 ? hour - 12 : (hour == 0 ? 12 : hour);
     
-    return '$weekday, $month $day, $year at $displayHour:$minute $period';
+    return AppTranslations.dateFormatFull(
+      weekday,
+      month,
+      day.toString(),
+      year.toString(),
+      '$displayHour:$minute',
+      period,
+    );
   }
   
   String _formatDateShort(DateTime dateTime) {
-    final weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-    final months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-                   'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    final weekdays = [
+      AppTranslations.weekdayMonShort,
+      AppTranslations.weekdayTueShort,
+      AppTranslations.weekdayWedShort,
+      AppTranslations.weekdayThuShort,
+      AppTranslations.weekdayFriShort,
+      AppTranslations.weekdaySatShort,
+      AppTranslations.weekdaySunShort,
+    ];
+    final months = [
+      AppTranslations.monthJanShort,
+      AppTranslations.monthFebShort,
+      AppTranslations.monthMarShort,
+      AppTranslations.monthAprShort,
+      AppTranslations.monthMayShort,
+      AppTranslations.monthJunShort,
+      AppTranslations.monthJulShort,
+      AppTranslations.monthAugShort,
+      AppTranslations.monthSepShort,
+      AppTranslations.monthOctShort,
+      AppTranslations.monthNovShort,
+      AppTranslations.monthDecShort,
+    ];
     
     final weekday = weekdays[dateTime.weekday - 1];
     final month = months[dateTime.month - 1];
     final day = dateTime.day;
     
-    return '$weekday, $month $day';
+    return AppTranslations.dateFormatShort(weekday, month, day.toString());
   }
   
   String _formatTime(DateTime dateTime) {
     final hour = dateTime.hour;
     final minute = dateTime.minute.toString().padLeft(2, '0');
-    final period = hour >= 12 ? 'PM' : 'AM';
+    final period = hour >= 12 ? AppTranslations.pm : AppTranslations.am;
     final displayHour = hour > 12 ? hour - 12 : (hour == 0 ? 12 : hour);
     
-    return '$displayHour:$minute $period';
+    return AppTranslations.timeFormatPeriod(displayHour.toString(), minute, period);
   }
 
   @override
@@ -262,9 +309,9 @@ class _SelectDateTimeScreenState extends State<SelectDateTimeScreen> {
       ),
       decoration: const BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(16),
-          topRight: Radius.circular(16),
+        borderRadius: BorderRadiusDirectional.only(
+          topStart: Radius.circular(16),
+          topEnd: Radius.circular(16),
         ),
       ),
       child: SingleChildScrollView(
@@ -276,7 +323,7 @@ class _SelectDateTimeScreenState extends State<SelectDateTimeScreen> {
             children: [
             // Header section
             Padding(
-              padding: const EdgeInsets.fromLTRB(16, 40, 16, 16),
+              padding: const EdgeInsetsDirectional.fromSTEB(16, 40, 16, 16),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -285,7 +332,7 @@ class _SelectDateTimeScreenState extends State<SelectDateTimeScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Select Date & Time',
+                          AppTranslations.selectDateAndTime,
                           style: AppTextStyles.heading(
                             fontSize: 24,
                             fontWeight: FontWeight.w700,
@@ -296,7 +343,7 @@ class _SelectDateTimeScreenState extends State<SelectDateTimeScreen> {
                         ),
                         const SizedBox(height: 12),
                         Text(
-                          'Select a date and time as per your convenience',
+                          AppTranslations.selectDateTimeSubtitle,
                           style: AppTextStyles.body(
                             fontSize: 14,
                             fontWeight: FontWeight.w400,
@@ -467,7 +514,7 @@ class _SelectDateTimeScreenState extends State<SelectDateTimeScreen> {
                               ),
                             )
                           : Text(
-                              'Confirm',
+                              AppTranslations.confirm,
                               style: AppTextStyles.body(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w700,

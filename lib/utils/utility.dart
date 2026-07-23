@@ -20,6 +20,7 @@ class Utility {
   static String zoneId = '';
   static double latitude = 0.0;
   static double longitude = 0.0;
+  static String language = 'en';
 
   /// Fixed UTC offsets for common IANA zones (no DST). Extend as needed.
   static const Map<String, Duration> _ianaUtcOffsets = {
@@ -187,6 +188,14 @@ class Utility {
 
   static void setLongitude(double longitude) {
     Utility.longitude = longitude;
+  }
+
+  static void setLanguage(String language) {
+    Utility.language = language;
+  }
+
+  static String getLanguage() {
+    return language;
   }
 
   static bool getPersonalization() {

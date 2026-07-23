@@ -25,7 +25,7 @@ class HotelOrderSummaryWidget extends StatelessWidget {
     if (items.isEmpty) return const SizedBox.shrink();
 
     return Align(
-      alignment: Alignment.centerLeft,
+      alignment: AlignmentDirectional.centerStart,
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 294),
         child: Column(
@@ -61,7 +61,7 @@ class _BookingSummaryCard extends StatelessWidget {
     final priceLines = _priceLines(nights);
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(0.5, 0.5, 0.5, 1),
+      padding: const EdgeInsetsDirectional.fromSTEB(0.5, 0.5, 0.5, 1),
       child: CustomPaint(
         painter: _ReceiptCardPainter(
           borderColor: HotelOrderSummaryWidget._borderColor,
@@ -70,12 +70,12 @@ class _BookingSummaryCard extends StatelessWidget {
           scallopRadius: 6,
         ),
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(15, 20, 15, 30),
+          padding: const EdgeInsetsDirectional.fromSTEB(15, 20, 15, 30),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
             Text(
-              'Booking summary',
+              AppTranslations.bookingSummary,
               style: AppTextStyles.bodyText.copyWith(
                 fontSize: 14,
                 fontWeight: FontWeight.w700,
@@ -105,7 +105,7 @@ class _BookingSummaryCard extends StatelessWidget {
                   if (nights != null && nights > 0) ...[
                     _SummaryLine(
                       text:
-                          '🌙 $nights night${nights == 1 ? '' : 's'}',
+                          '🌙 ${AppTranslations.forNNights(nights.toString())}',
                     ),
                     const SizedBox(height: 10),
                   ],
@@ -137,7 +137,7 @@ class _BookingSummaryCard extends StatelessWidget {
               children: [
                 Expanded(
                   child: Text(
-                    'Total to pay',
+                    AppTranslations.totalToPay,
                     style: AppTextStyles.bodyText.copyWith(
                       fontSize: 14,
                       fontWeight: FontWeight.w700,
@@ -228,7 +228,7 @@ class _BookingSummaryCard extends StatelessWidget {
     final checkinLabel = Utility.formatHotelDateShort(checkin);
     final checkoutLabel = Utility.formatHotelDateShort(checkout);
     final nightsLabel = nights != null && nights > 0
-        ? ' ($nights night${nights == 1 ? '' : 's'})'
+        ? ' (${AppTranslations.forNNights(nights.toString())})'
         : '';
     return '📅 $checkinLabel → $checkoutLabel$nightsLabel';
   }
@@ -253,7 +253,7 @@ class _BookingSummaryCard extends StatelessWidget {
   List<_PriceLine> _priceLines(int? nights) {
     final lines = <_PriceLine>[];
     final nightsLabel = nights != null && nights > 0
-        ? ' ($nights night${nights == 1 ? '' : 's'})'
+        ? ' (${AppTranslations.forNNights(nights.toString())})'
         : '';
     final roomCount = Utility.hotelBookingRoomCount(hotelBooking);
     final roomLabel = roomCount > 1
@@ -285,7 +285,7 @@ class _BookingSummaryCard extends StatelessWidget {
 
     if (summary.taxAndFees > 0) {
       lines.add(
-        _PriceLine(label: 'Tax and fees', amount: summary.taxAndFees),
+        _PriceLine(label: AppTranslations.taxAndFees, amount: summary.taxAndFees),
       );
     }
 

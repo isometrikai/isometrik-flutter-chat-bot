@@ -14,7 +14,7 @@ class OrderConfirmedWidget extends StatelessWidget {
     return Container(
       width: 294,
       height: 110,
-      padding: const EdgeInsets.fromLTRB(15, 20, 15, 20),
+      padding: const EdgeInsetsDirectional.fromSTEB(15, 20, 15, 20),
       decoration: BoxDecoration(
         color: const Color(0xFFFFFFFF),
         border: Border.all(

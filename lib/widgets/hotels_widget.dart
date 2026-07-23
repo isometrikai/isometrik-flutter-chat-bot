@@ -165,8 +165,8 @@ class _HotelPropertyCard extends StatelessWidget {
           children: [
             _buildPropertyImage(),
             if (ratingLabel.isNotEmpty)
-              Positioned(
-                right: 8,
+              PositionedDirectional(
+                end: 8,
                 bottom: 8,
                 child: _RatingBadge(label: ratingLabel),
               ),
@@ -278,7 +278,7 @@ class _HotelPropertyCard extends StatelessWidget {
           ),
           const SizedBox(width: 5),
           Text(
-            'Open in Eazy app',
+            AppTranslations.openInEazyApp,
             style: AppTextStyles.bodyText.copyWith(
               fontSize: 12,
               fontWeight: FontWeight.w400,
@@ -316,7 +316,7 @@ class _HotelPropertyCard extends StatelessWidget {
   String _nightsLabel() {
     if (nights == null || nights! <= 0) return '';
     final n = nights!;
-    return 'for $n night${n == 1 ? '' : 's'}';
+    return AppTranslations.forNNights(n.toString());
   }
 
   static String _formatPrice(String currency, double value) {

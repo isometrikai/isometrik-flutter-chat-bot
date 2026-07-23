@@ -5,6 +5,7 @@ import 'package:chat_bot/bloc/cart/cart_bloc.dart';
 import 'package:chat_bot/bloc/chat_bloc.dart';
 import 'package:chat_bot/data/data.dart';
 import 'package:chat_bot/utils/app_constants.dart';
+import 'package:chat_bot/utils/utils.dart';
 import 'package:chat_bot/view/chat_screen.dart';
 import 'package:chat_bot/widgets/black_toast_view.dart';
 import 'package:flutter/material.dart';
@@ -54,8 +55,54 @@ class _ChatHistoryContentState extends State<_ChatHistoryContent> {
   String _currentKeyword = '';
   DateTime? _lastQueryAt;
 
-  // final List<String> _categories = ['All', '🍕 Restaurant', '🥑 Grocery', '💊 Pharmacy'];
-  final List<String> _categories = ['All', '🍕 Restaurant', '🥑 Grocery', '💊 Pharmacy', '🛒 Shopping', '💄 Services', "🏥 Health Care", "💰 Donation"];
+  static const List<String> _categories = [
+    'All',
+    '🍕 Restaurant',
+    '🥑 Grocery',
+    '💊 Pharmacy',
+    '🛒 Shopping',
+    '💄 Services',
+    '🏥 Health Care',
+    '💰 Donation',
+  ];
+
+  String _categoryLabel(String category) {
+    switch (category) {
+      case 'All':
+        return AppTranslations.filterAll;
+      case '🍕 Restaurant':
+        return AppTranslations.categoryRestaurant;
+      case '🥑 Grocery':
+        return AppTranslations.categoryGrocery;
+      case '💊 Pharmacy':
+        return AppTranslations.categoryPharmacy;
+      case '🛒 Shopping':
+        return AppTranslations.categoryShopping;
+      case '💄 Services':
+        return AppTranslations.categoryServices;
+      case '🏥 Health Care':
+        return AppTranslations.categoryHealthCare;
+      case '💰 Donation':
+        return AppTranslations.categoryDonation;
+      default:
+        return category;
+    }
+  }
+
+  List<String> get _monthNames => [
+    AppTranslations.monthJanuary,
+    AppTranslations.monthFebruary,
+    AppTranslations.monthMarch,
+    AppTranslations.monthApril,
+    AppTranslations.monthMay,
+    AppTranslations.monthJune,
+    AppTranslations.monthJuly,
+    AppTranslations.monthAugust,
+    AppTranslations.monthSeptember,
+    AppTranslations.monthOctober,
+    AppTranslations.monthNovember,
+    AppTranslations.monthDecember,
+  ];
 
   @override
   void initState() {
@@ -112,18 +159,18 @@ class _ChatHistoryContentState extends State<_ChatHistoryContent> {
         child: BlocListener<ChatHistoryBloc, ChatHistoryState>(
           listener: (context, state) {
             if (state is ChatHistoryDeleteSuccess) {
-              BlackToastView.show(context, 'Chat deleted successfully');
+              BlackToastView.show(context, AppTranslations.toastChatDeleted);
             } else if (state is ChatHistoryDeleteFailure) {
-              BlackToastView.show(context, 'Failed to delete chat: ${state.message}');
+              BlackToastView.show(context, AppTranslations.toastFailedDeleteChat(state.message));
             } else if (state is ChatHistoryArchiveSuccess) {
-              BlackToastView.show(context, 'Chat archived successfully');
+              BlackToastView.show(context, AppTranslations.toastChatArchived);
             } else if (state is ChatHistoryArchiveFailure) {
-              BlackToastView.show(context, 'Failed to archive chat: ${state.message}');
+              BlackToastView.show(context, AppTranslations.toastFailedArchiveChat(state.message));
             } else if (state is ChatHistoryShareSuccess) {
               Clipboard.setData(ClipboardData(text: state.shareUrl));
-              BlackToastView.show(context, 'Share link copied');
+              BlackToastView.show(context, AppTranslations.toastShareLinkCopied);
             } else if (state is ChatHistoryShareFailure) {
-              BlackToastView.show(context, 'Failed to share chat: ${state.message}');
+              BlackToastView.show(context, AppTranslations.toastFailedShareChat(state.message));
             }
           },
           child: Column(
@@ -190,8 +237,8 @@ class _ChatHistoryContentState extends State<_ChatHistoryContent> {
       elevation: 1,
       leadingWidth: 0,
       leading: const SizedBox.shrink(), // Remove leading widget
-      title: const Text(
-        'Chats',
+      title: Text(
+        AppTranslations.chats,
         style: TextStyle(
                     fontWeight: FontWeight.w700,
                     fontSize: 24,
@@ -286,7 +333,7 @@ class _ChatHistoryContentState extends State<_ChatHistoryContent> {
         padding: const EdgeInsets.all(16.0),
         child: Center(
           child: Text(
-            'Scroll down to load more',
+            AppTranslations.scrollDownLoadMore,
             style: AppTextStyles.caption.copyWith(
               color: const Color(0xFF6E4185),
             ),
@@ -312,7 +359,7 @@ class _ChatHistoryContentState extends State<_ChatHistoryContent> {
             child: TextField(
               controller: _searchController,
               decoration: InputDecoration(
-                hintText: 'Search',
+                hintText: AppTranslations.search,
                 hintStyle: AppTextStyles.bodyText.copyWith(
                   color: const Color(0xFF979797),
                 ),
@@ -339,7 +386,7 @@ class _ChatHistoryContentState extends State<_ChatHistoryContent> {
             child: Container(
             width: 25,
             height: 25,
-            margin: const EdgeInsets.only(right: 10),
+            margin: const EdgeInsetsDirectional.only(end: 10),
             decoration: BoxDecoration(
               color: const Color(0xFFF6F6F6),
               borderRadius: BorderRadius.circular(54),
@@ -366,7 +413,7 @@ class _ChatHistoryContentState extends State<_ChatHistoryContent> {
             ..._categories.map((category) {
               final isSelected = _selectedCategory == category;
               return Container(
-                margin: const EdgeInsets.only(right: 8),
+                margin: const EdgeInsetsDirectional.only(end: 8),
                 child: GestureDetector(
                   onTap: () {
                     // Dismiss keyboard when tapping category filter
@@ -397,7 +444,7 @@ class _ChatHistoryContentState extends State<_ChatHistoryContent> {
                     ),
                     child: Center(
                       child: Text(
-                        category,
+                        _categoryLabel(category),
                         style: AppTextStyles.caption.copyWith(
                           fontSize: 14,
                           fontWeight: FontWeight.w400,
@@ -439,7 +486,7 @@ class _ChatHistoryContentState extends State<_ChatHistoryContent> {
           const SizedBox(height: 24),
           // "Your cart is empty" text
           Text(
-            'No conversations yet!',
+            AppTranslations.noConversationsYet,
             style: AppTextStyles.restaurantTitle.copyWith(
               color: const Color(0xFF242424),
               fontWeight: FontWeight.w700,
@@ -474,23 +521,21 @@ class _ChatHistoryContentState extends State<_ChatHistoryContent> {
       
       String label;
       if (difference.inDays == 0) {
-        label = 'Today';
+        label = AppTranslations.today;
       } else if (difference.inDays == 1) {
-        label = '1 day ago';
+        label = AppTranslations.oneDayAgo;
       } else if (difference.inDays < 7) {
-        label = '${difference.inDays} days ago';
+        label = AppTranslations.daysAgo(difference.inDays.toString());
       } else if (difference.inDays < 14) {
-        label = '1 week ago';
+        label = AppTranslations.oneWeekAgo;
       } else if (difference.inDays < 21) {
-        label = '2 weeks ago';
+        label = AppTranslations.twoWeeksAgo;
       } else if (difference.inDays < 30) {
-        label = '3 weeks ago';
+        label = AppTranslations.threeWeeksAgo;
       } else if (difference.inDays < 60) {
-        label = '1 month ago';
+        label = AppTranslations.oneMonthAgo;
       } else {
-        final months = ['January', 'February', 'March', 'April', 'May', 'June', 
-                       'July', 'August', 'September', 'October', 'November', 'December'];
-        label = '${months[sessionDate.month - 1]} ${sessionDate.year}';
+        label = '${_monthNames[sessionDate.month - 1]} ${sessionDate.year}';
       }
       
       if (!grouped.containsKey(label)) {
@@ -532,7 +577,7 @@ class _ChatHistoryContentState extends State<_ChatHistoryContent> {
     // Use title if available, otherwise show session ID
     final displayText = session.title.isNotEmpty 
         ? session.title 
-        : 'Session ${session.sessionId}';
+        : AppTranslations.sessionIdFallback(session.sessionId.toString());
         
     return GestureDetector(
       onTap: () {
@@ -556,7 +601,7 @@ class _ChatHistoryContentState extends State<_ChatHistoryContent> {
       },
       child: Container(
         margin: const EdgeInsets.only(bottom: 10),
-        padding: const EdgeInsets.only(left: 10, right: 10, top: 0, bottom: 0),
+        padding: const EdgeInsetsDirectional.only(start: 10, end: 10, top: 0, bottom: 0),
         decoration: BoxDecoration(
           color: const Color(0xFFF5F7FF),
           border: Border.all(color: const Color(0xFFEEF4FF)),
@@ -576,7 +621,7 @@ class _ChatHistoryContentState extends State<_ChatHistoryContent> {
             ),
             const SizedBox(width: 8),
             IconButton(
-              tooltip: 'More',
+              tooltip: AppTranslations.more,
               padding: EdgeInsets.zero,
               constraints: const BoxConstraints(),
               icon: const Icon(
@@ -650,19 +695,19 @@ class _ChatHistoryContentState extends State<_ChatHistoryContent> {
                 ),
               ),
               const SizedBox(height: 20),
-              const Text(
-                'Chat options',
+              Text(
+                AppTranslations.chatOptions,
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w700,
                   color: Colors.black,
                 ),
-                textAlign: TextAlign.left,
+                textAlign: TextAlign.start,
               ),
               const SizedBox(height: 16),
               optionTile(
                 icon: Icons.share_outlined,
-                title: 'Share Chat',
+                title: AppTranslations.shareChat,
                 onTap: () {
                   Navigator.of(bottomSheetContext).pop();
                   context.read<ChatHistoryBloc>().add(
@@ -672,7 +717,7 @@ class _ChatHistoryContentState extends State<_ChatHistoryContent> {
               ),
               optionTile(
                 icon: Icons.archive_outlined,
-                title: 'Archive Chat',
+                title: AppTranslations.archiveChat,
                 onTap: () {
                   Navigator.of(bottomSheetContext).pop();
                   context.read<ChatHistoryBloc>().add(
@@ -682,7 +727,7 @@ class _ChatHistoryContentState extends State<_ChatHistoryContent> {
               ),
               optionTile(
                 icon: Icons.delete_outline,
-                title: 'Delete Chat',
+                title: AppTranslations.deleteChat,
                 iconColor: Colors.red,
                 textColor: Colors.red,
                 onTap: () {
@@ -726,14 +771,14 @@ class _ChatHistoryContentState extends State<_ChatHistoryContent> {
                 ),
               ),
               const SizedBox(height: 20),
-              const Text(
-                'Are you sure want to start new chat? if you start new chat, you will lose your current chat history.',
+              Text(
+                AppTranslations.confirmNewChatLoseHistory,
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w500,
                   color: Colors.black,
                 ),
-                textAlign: TextAlign.left,
+                textAlign: TextAlign.start,
               ),
               const SizedBox(height: 24),
               Row(
@@ -755,8 +800,8 @@ class _ChatHistoryContentState extends State<_ChatHistoryContent> {
                           ),
                           backgroundColor: Colors.white,
                         ),
-                        child: const Text(
-                          "CANCEL",
+                        child: Text(
+                          AppTranslations.cancelUpper,
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w700,
@@ -799,8 +844,8 @@ class _ChatHistoryContentState extends State<_ChatHistoryContent> {
                           child: Container(
                             height: 62,
                             alignment: Alignment.center,
-                            child: const Text(
-                              "YES",
+                            child: Text(
+                              AppTranslations.yesUpper,
                               style: TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w700,
@@ -853,13 +898,13 @@ class _ChatHistoryContentState extends State<_ChatHistoryContent> {
               ),
               const SizedBox(height: 20),
                Text(
-                'Are you sure you want to delete “$chatTitle”?',
+                AppTranslations.confirmDeleteChat(chatTitle),
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w500,
                   color: Colors.black,
                 ),
-                textAlign: TextAlign.left,
+                textAlign: TextAlign.start,
               ),
               const SizedBox(height: 24),
               Row(
@@ -881,8 +926,8 @@ class _ChatHistoryContentState extends State<_ChatHistoryContent> {
                           ),
                           backgroundColor: Colors.white,
                         ),
-                        child: const Text(
-                          "No, Cancel",
+                        child: Text(
+                          AppTranslations.noCancel,
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w700,
@@ -923,8 +968,8 @@ class _ChatHistoryContentState extends State<_ChatHistoryContent> {
                           child: Container(
                             height: 62,
                             alignment: Alignment.center,
-                            child: const Text(
-                              "Yes, Delete",
+                            child: Text(
+                              AppTranslations.yesDelete,
                               style: TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w700,

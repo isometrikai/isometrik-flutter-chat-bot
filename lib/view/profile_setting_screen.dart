@@ -4,6 +4,7 @@ import 'package:chat_bot/data/services/chat_api_services.dart';
 import 'package:chat_bot/services/callback_manage.dart';
 import 'package:chat_bot/utils/app_constants.dart';
 import 'package:chat_bot/utils/utility.dart';
+import 'package:chat_bot/utils/utils.dart';
 import 'package:chat_bot/view/chat_history_screen.dart';
 import 'package:chat_bot/view/complete_setup/complete_setup_flow_screen.dart';
 import 'package:chat_bot/view/personalization_screen.dart';
@@ -66,7 +67,7 @@ class ProfileSettingScreen extends StatelessWidget {
                       const SizedBox(height: 24),
                       _buildSection(
                         context,
-                        title: 'MY ACCOUNT',
+                        title: AppTranslations.myAccount,
                         items: [
                           _SettingItem(
                             icon: SvgPicture.asset(
@@ -75,7 +76,7 @@ class ProfileSettingScreen extends StatelessWidget {
                               height: 20,
                               fit: BoxFit.cover,
                             ),
-                            label: 'Your Preferences',
+                            label: AppTranslations.yourPreferences,
                             onTap: () {
                                Navigator.of(context).push(
                                 MaterialPageRoute(
@@ -93,7 +94,7 @@ class ProfileSettingScreen extends StatelessWidget {
                               height: 20,
                               fit: BoxFit.cover,
                             ),
-                            label: 'Debit/Credit Card',
+                            label: AppTranslations.debitCreditCard,
                             onTap: () {
                               OrderService().triggerSideMenuOption({'action': 'debit_credit_card'});
                             },
@@ -105,7 +106,7 @@ class ProfileSettingScreen extends StatelessWidget {
                               height: 20,
                               fit: BoxFit.cover,
                             ),
-                            label: 'Manage Addresses',
+                            label: AppTranslations.manageAddresses,
                             onTap: () {
                               OrderService().triggerSideMenuOption({'action': 'manage_addresses'});
                             },
@@ -115,7 +116,7 @@ class ProfileSettingScreen extends StatelessWidget {
                       ),
                       _buildSection(
                         context,
-                        title: 'SETTINGS',
+                        title: AppTranslations.settingsSection,
                         items: [
                           _SettingItem(
                             icon: SvgPicture.asset(
@@ -124,7 +125,7 @@ class ProfileSettingScreen extends StatelessWidget {
                               height: 20,
                               fit: BoxFit.cover,
                             ),
-                            label: 'Data Control',
+                            label: AppTranslations.dataControl,
                             onTap: () {
                               Navigator.of(context).push(
                                 MaterialPageRoute<void>(
@@ -140,7 +141,7 @@ class ProfileSettingScreen extends StatelessWidget {
                               height: 20,
                               fit: BoxFit.cover,
                             ),
-                            label: 'Help center',
+                            label: AppTranslations.helpCenter,
                             onTap: () {
                               OrderService().triggerSideMenuOption({'action': 'help_center'});
                             },
@@ -164,7 +165,7 @@ class ProfileSettingScreen extends StatelessWidget {
                               height: 20,
                               fit: BoxFit.cover,
                             ),
-                            label: 'FAQs',
+                            label: AppTranslations.faqs,
                             onTap: () {
                               OrderService().triggerSideMenuOption({'action': 'faqs'});
                             },
@@ -174,7 +175,7 @@ class ProfileSettingScreen extends StatelessWidget {
                       ),
                       _buildSection(
                         context,
-                        title: 'LEGAL',
+                        title: AppTranslations.legalSection,
                         items: [
                           _SettingItem(
                             icon: SvgPicture.asset(
@@ -183,7 +184,7 @@ class ProfileSettingScreen extends StatelessWidget {
                               height: 20,
                               fit: BoxFit.cover,
                             ),
-                            label: 'Terms & Conditions',
+                            label: AppTranslations.termsAndConditions,
                             onTap: () {
                               OrderService().triggerSideMenuOption({'action': 'terms_and_conditions'});
                             },
@@ -195,7 +196,7 @@ class ProfileSettingScreen extends StatelessWidget {
                               height: 20,
                               fit: BoxFit.cover,
                             ),
-                            label: 'Privacy Policy',
+                            label: AppTranslations.privacyPolicy,
                             onTap: () {
                               OrderService().triggerSideMenuOption({'action': 'privacy_policy'});
                             },
@@ -207,7 +208,7 @@ class ProfileSettingScreen extends StatelessWidget {
                               height: 20,
                               fit: BoxFit.cover,
                             ),
-                            label: 'About Us',
+                            label: AppTranslations.aboutUs,
                             onTap: () {
                               OrderService().triggerSideMenuOption({'action': 'about_us'});
                             },
@@ -276,7 +277,7 @@ class ProfileSettingScreen extends StatelessWidget {
                                 Icon(Icons.card_giftcard_outlined, size: 14, color: _pointsPurple),
                                 const SizedBox(width: 4),
                                 Text(
-                                  'Xtra',
+                                  AppTranslations.xtra,
                                   style: AppTheme.getTextStyle(
                                     fontSize: 16,
                                     fontWeight: FontWeight.w700,
@@ -287,7 +288,7 @@ class ProfileSettingScreen extends StatelessWidget {
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              'Earn while you spend',
+                              AppTranslations.earnWhileYouSpend,
                               style: AppTheme.getTextStyle(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w400,
@@ -346,7 +347,7 @@ class ProfileSettingScreen extends StatelessWidget {
                             Icon(Icons.account_balance_wallet_outlined, size: 20, color: Colors.white),
                             const SizedBox(width: 8),
                             Text(
-                              'Eazy Wallet',
+                              AppTranslations.eazyWallet,
                               style: AppTheme.getTextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w600,
@@ -411,7 +412,7 @@ class ProfileSettingScreen extends StatelessWidget {
       ),
       actions: [
         Padding(
-          padding: const EdgeInsets.only(right: 16),
+          padding: const EdgeInsetsDirectional.only(end: 16),
           child: Center(
             child: Material(
               color: Colors.transparent,
@@ -433,9 +434,9 @@ class ProfileSettingScreen extends StatelessWidget {
                     color: const Color(0xFF2E8AFF),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: const Center(
+                  child: Center(
                     child: Text(
-                      'New Chat',
+                      AppTranslations.newChat,
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 14,
@@ -471,7 +472,7 @@ class ProfileSettingScreen extends StatelessWidget {
                     width: 30,
                     height: 30,
                   ),
-                  label: 'Past Chats',
+                  label: AppTranslations.pastChats,
                   onTap: () async {
           
                       final result = await Navigator.push(
@@ -497,7 +498,7 @@ class ProfileSettingScreen extends StatelessWidget {
                     width: 30,
                     height: 30,
                   ),
-                  label: 'User Persona',
+                  label: AppTranslations.userPersona,
                   onTap: () {
                     Navigator.push(
                             context,
@@ -527,7 +528,7 @@ class ProfileSettingScreen extends StatelessWidget {
                     width: 30,
                     height: 30,
                   ),
-                  label: 'My Orders',
+                  label: AppTranslations.myOrders,
                   onTap: () {
                     OrderService().triggerSideMenuOption({'action': 'my_orders'});
                   },
@@ -541,7 +542,7 @@ class ProfileSettingScreen extends StatelessWidget {
                     width: 30,
                     height: 30,
                   ),
-                  label: 'My Profile',
+                  label: AppTranslations.myProfile,
                   onTap: () {
                     OrderService().triggerSideMenuOption({'action': 'my_profile'});
                   },
@@ -586,7 +587,7 @@ class ProfileSettingScreen extends StatelessWidget {
               return InkWell(
                 onTap: item.onTap,
                 child: Padding(
-                  padding: EdgeInsets.fromLTRB(5, 12, 16, isLast ? 20 : 12),
+                  padding: EdgeInsetsDirectional.fromSTEB(5, 12, 16, isLast ? 20 : 12),
                   child: Row(
                     children: [
                       item.icon,
@@ -632,7 +633,7 @@ class ProfileSettingScreen extends StatelessWidget {
             ),
             const SizedBox(width: 10),
             Text(
-              'Logout',
+              AppTranslations.logout,
               style: AppTheme.getTextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w400,

@@ -50,7 +50,7 @@ class _ChooseAddressWidgetState extends State<ChooseAddressWidget> {
   Widget build(BuildContext context) {
     return Container(
       // margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-      margin: const EdgeInsets.only(left: 0, right: 24, bottom: 8,top: 8),
+      margin: const EdgeInsetsDirectional.only(start: 0, end: 24, bottom: 8, top: 8),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: Colors.white,
@@ -65,7 +65,7 @@ class _ChooseAddressWidgetState extends State<ChooseAddressWidget> {
         children: [
           // Title
            Text(
-            'Choose address',
+            AppTranslations.chooseAddress,
             style: AppTextStyles.restaurantTitle.copyWith(
               fontSize: 16,
               fontWeight: FontWeight.w700,

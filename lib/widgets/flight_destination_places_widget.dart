@@ -25,7 +25,7 @@ class FlightDestinationPlacesWidget extends StatelessWidget {
     if (places.isEmpty) return const SizedBox.shrink();
 
     return Align(
-      alignment: Alignment.centerLeft,
+      alignment: AlignmentDirectional.centerStart,
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 294),
         child: Container(
@@ -74,7 +74,7 @@ class _FlightDestinationPlaceRow extends StatelessWidget {
         color: FlightDestinationPlacesWidget._rowBackground,
         borderRadius: BorderRadius.circular(8),
       ),
-      alignment: Alignment.centerLeft,
+      alignment: AlignmentDirectional.centerStart,
       child: Text(
         label,
         maxLines: 1,

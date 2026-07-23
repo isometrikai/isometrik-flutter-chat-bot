@@ -44,7 +44,7 @@ class CartWidget extends StatelessWidget {
     );
 
     return Container(
-      margin: const EdgeInsets.only(left: 0, right: 24, bottom: 8,top: 8),
+      margin: const EdgeInsetsDirectional.only(start: 0, end: 24, bottom: 8,top: 8),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
@@ -69,13 +69,13 @@ class CartWidget extends StatelessWidget {
                         );
                       },
               child: Container(
-                margin: const EdgeInsets.fromLTRB(16, 18, 16, 0),
+                margin: const EdgeInsetsDirectional.fromSTEB(16, 18, 16, 0),
                 height: 60,
                 decoration: BoxDecoration(
                   color: const Color(0xFFF5F7FF),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                padding: const EdgeInsets.fromLTRB(10, 10, 0, 10),
+                padding: const EdgeInsetsDirectional.fromSTEB(10, 10, 0, 10),
                 child: Row(
                   children: [
                     SvgPicture.asset(
@@ -101,7 +101,7 @@ class CartWidget extends StatelessWidget {
                             ),
                           ),
                           Text(
-                            'Visit Store',
+                            AppTranslations.visitStore,
                             style: AppTextStyles.bodyText.copyWith(
                               fontWeight: FontWeight.w600,
                               fontSize: 12,
@@ -190,8 +190,8 @@ class CartWidget extends StatelessWidget {
                         ),
                       ),
                       if (item.isDoctorFlow == true && quantity.isEmpty && item.addOns != null && item.addOns!.isNotEmpty)
-                        const TextSpan(
-                          text: '(Consultation Fee)',
+                        TextSpan(
+                          text: AppTranslations.consultationFeeParen,
                           style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w400,
@@ -242,11 +242,15 @@ class CartWidget extends StatelessWidget {
     final currencySymbol = totalItem.currencySymbol ?? 'د.إ';
     final price = totalItem.productPrice ?? 0;
 
+    final displayName = totalItem.productName == 'Total To Pay'
+        ? AppTranslations.totalToPay
+        : (totalItem.productName ?? '');
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(
-          totalItem.productName ?? '',
+          displayName,
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.w700,

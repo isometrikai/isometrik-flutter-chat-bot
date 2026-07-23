@@ -30,6 +30,9 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  intl: any
   http: ^1.1.0
 
   # The following adds the Cupertino Icons font to your application.
@@ -50,6 +53,7 @@ dependencies:
   # timezone: ^0.10.0
   cupertino_calendar_picker: ^2.2.6
   flutter_tts: ^4.2.5
+  easy_localization: ^3.0.7
   # url_launcher: ^6.3.1
   # flutter_native_timezone: ^2.0.0
 
@@ -81,6 +85,7 @@ flutter:
   #   - images/a_dot_ham.jpeg
       - assets/lottie/bubble-wave-black.json
       - assets/images/
+      - assets/translations/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

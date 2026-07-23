@@ -168,7 +168,7 @@ class ChatScreenBody extends StatelessWidget {
                         DateTime.now().millisecondsSinceEpoch.toString();
                     final errorMessage = ChatMessage(
                       id: messageId,
-                      text: "Something went wrong please try again latter",
+                      text: AppTranslations.somethingWentWrongTryLatter,
                       isBot: true,
                       showAvatar: true,
                     );
@@ -179,7 +179,7 @@ class ChatScreenBody extends StatelessWidget {
                   } else {
                     BlackToastView.show(
                       context,
-                      'Something went wrong please try again later',
+                      AppTranslations.somethingWentWrongTryLater,
                     );
                   }
                 }
@@ -330,7 +330,7 @@ class ChatScreenBody extends StatelessWidget {
                       if (needToEndThisChat == true)
                         Container(
                           width: double.infinity,
-                          margin: const EdgeInsets.fromLTRB(16, 10, 16, 40),
+                          margin: const EdgeInsetsDirectional.fromSTEB(16, 10, 16, 40),
                           padding: const EdgeInsets.symmetric(
                             horizontal: 10,
                             vertical: 15,
@@ -345,7 +345,7 @@ class ChatScreenBody extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
                               Text(
-                                'This session has ended. Start a new chat to keep going.',
+                                AppTranslations.sessionEnded,
                                 style: AppTextStyles.bodyText.copyWith(
                                   fontSize: 16,
                                   fontWeight: FontWeight.w400,
@@ -383,7 +383,7 @@ class ChatScreenBody extends StatelessWidget {
                                             child: FittedBox(
                                               fit: BoxFit.scaleDown,
                                               child: Text(
-                                                'Start new chat',
+                                                AppTranslations.startNewChat,
                                                 style: AppTextStyles.button.copyWith(
                                                   fontSize: 16,
                                                   fontWeight: FontWeight.w700,
@@ -494,7 +494,7 @@ class ChatScreenBody extends StatelessWidget {
       //   },
       // ),
       title: Align(
-        alignment: Alignment.centerLeft,
+        alignment: AlignmentDirectional.centerStart,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
@@ -510,7 +510,7 @@ class ChatScreenBody extends StatelessWidget {
               builder: (context, locationValue, _) {
                 final displayLocation = locationValue.trim().isNotEmpty
                     ? locationValue.trim()
-                    : 'Select Location';
+                    : AppTranslations.selectLocation;
                 return GestureDetector(
                   onTap: () {
                     OrderService().triggerClickManageScreenOpen({
@@ -615,8 +615,8 @@ class ChatScreenBody extends StatelessWidget {
                                 height: 40,
                               ),
                               if (cartCount > 0 || directCartCount > 0)
-                                Positioned(
-                                  right: 0,
+                                PositionedDirectional(
+                                  end: 0,
                                   top: 0,
                                   child: Container(
                                     padding: const EdgeInsets.symmetric(
@@ -778,14 +778,14 @@ class ChatScreenBody extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 20),
-              const Text(
-                'Are you sure want to start new chat?',
+              Text(
+                AppTranslations.confirmStartNewChat,
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w500,
                   color: Colors.black,
                 ),
-                textAlign: TextAlign.left,
+                textAlign: TextAlign.start,
               ),
               const SizedBox(height: 24),
               Row(
@@ -807,8 +807,8 @@ class ChatScreenBody extends StatelessWidget {
                           ),
                           backgroundColor: Colors.white,
                         ),
-                        child: const Text(
-                          "CANCEL",
+                        child: Text(
+                          AppTranslations.cancelUpper,
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w700,
@@ -848,8 +848,8 @@ class ChatScreenBody extends StatelessWidget {
                           child: Container(
                             height: 62,
                             alignment: Alignment.center,
-                            child: const Text(
-                              "YES",
+                            child: Text(
+                              AppTranslations.yesUpper,
                               style: TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w700,
@@ -881,7 +881,7 @@ class ChatScreenBody extends StatelessWidget {
       builder: (BuildContext context) {
         return Container(
           width: double.infinity,
-          padding: const EdgeInsets.fromLTRB(24, 16, 24, 16),
+          padding: const EdgeInsetsDirectional.fromSTEB(24, 16, 24, 16),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -899,23 +899,23 @@ class ChatScreenBody extends StatelessWidget {
               ),
               const SizedBox(height: 16),
                Text(
-                'Leave Chat?',
+                AppTranslations.leaveChat,
                 style: AppTextStyles.bodyText.copyWith(
                   fontSize: 24,
                   fontWeight: FontWeight.w700,
                   color: Colors.black,
                 ),
-                textAlign: TextAlign.left,
+                textAlign: TextAlign.start,
               ),
               const SizedBox(height: 20),
                Text(
-                'Your current conversation will not be saved.However, you can view your conversation history anytime from the chat menu.',
+                AppTranslations.leaveChatBody,
                 style: AppTextStyles.subtitle.copyWith(
                   fontSize: 14, 
                   color: Color(0xFF242424), 
                   fontWeight: FontWeight.w400
                   ),
-                textAlign: TextAlign.left,
+                textAlign: TextAlign.start,
               ),
               const SizedBox(height: 40),
               Column(
@@ -952,7 +952,7 @@ class ChatScreenBody extends StatelessWidget {
                           ),
                           child: Center(
                             child: Text(
-                              'Yes, Go to Eazy App',
+                              AppTranslations.yesGoToEazyApp,
                               style: TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w700,
@@ -986,7 +986,7 @@ class ChatScreenBody extends StatelessWidget {
                           ),
                         ),
                         child: Text(
-                          'Stay in chat',
+                          AppTranslations.stayInChat,
                           style: AppTextStyles.button.copyWith(
                             fontSize: 16,
                             fontWeight: FontWeight.w700,
@@ -1026,11 +1026,11 @@ class ChatScreenBody extends StatelessWidget {
                           : CrossAxisAlignment.end,
                   children: [
                     Container(
-                      padding: EdgeInsets.only(
+                      padding: EdgeInsetsDirectional.only(
                         top: 10,
                         bottom: 10,
-                        left: message.isBot ? 0 : 14,
-                        right: 14,
+                        start: message.isBot ? 0 : 14,
+                        end: 14,
                       ),
                       decoration: BoxDecoration(
                         color:
@@ -1046,17 +1046,11 @@ class ChatScreenBody extends StatelessWidget {
                         // borderRadius: BorderRadius.circular(16),
                         borderRadius:
                             (message.isBot == false)
-                                ? BorderRadius.only(
-                                  topLeft: const Radius.circular(8),
-                                  topRight: const Radius.circular(8),
-                                  bottomLeft:
-                                      message.isBot
-                                          ? Radius.circular(0)
-                                          : Radius.circular(8),
-                                  bottomRight:
-                                      message.isBot
-                                          ? Radius.circular(8)
-                                          : Radius.circular(0),
+                                ? const BorderRadiusDirectional.only(
+                                  topStart: Radius.circular(8),
+                                  topEnd: Radius.circular(8),
+                                  bottomStart: Radius.circular(8),
+                                  bottomEnd: Radius.circular(0),
                                 )
                                 : null,
                       ),
@@ -1117,7 +1111,7 @@ class ChatScreenBody extends StatelessWidget {
           if (message.hasOptionButtons) ...[
             const SizedBox(height: 4), //12
             Padding(
-              padding: const EdgeInsets.only(left: 50.0),
+              padding: const EdgeInsetsDirectional.only(start: 50.0),
               child: buildOptionButtons(
                 message.optionButtons,
                 message.id,
@@ -1235,9 +1229,9 @@ class ChatScreenBody extends StatelessWidget {
           if (message.text.trim().isNotEmpty && message.isBot) ...[
             const SizedBox(height: 4),
             Padding(
-              padding: EdgeInsets.only(
-                left: message.isBot ? 0 : 50,
-                right: message.isBot ? 50 : 0,
+              padding: EdgeInsetsDirectional.only(
+                start: message.isBot ? 0 : 50,
+                end: message.isBot ? 50 : 0,
               ),
               child: MessageSpeakerButton(
                 messageId: message.id,
@@ -1363,7 +1357,7 @@ class ChatScreenBody extends StatelessWidget {
       child: SingleChildScrollView(
         // keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
         child: Padding(
-          padding: const EdgeInsets.only(left: 20, right: 20, top: 10),
+          padding: const EdgeInsetsDirectional.only(start: 20, end: 20, top: 10),
           child: ConstrainedBox(
             constraints: BoxConstraints(maxWidth: contentWidth),
             child: Column(
@@ -1414,7 +1408,7 @@ class ChatScreenBody extends StatelessWidget {
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Text(
-                                'Complete setup ->',
+                                AppTranslations.completeSetupCta,
                                 style: AppTextStyles.launchSubtitle.copyWith(
                                   fontWeight: FontWeight.w700,
                                   fontSize: 16,
@@ -1476,7 +1470,7 @@ class ChatScreenBody extends StatelessWidget {
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 8),
                       child: Text(
-                        'EXPLORE OUR SERVICES',
+                        AppTranslations.exploreOurServices,
                         style: AppTextStyles.body(
                           fontSize: 10,
                           fontWeight: FontWeight.w400,
@@ -1501,32 +1495,32 @@ class ChatScreenBody extends StatelessWidget {
                     children: [
                       _buildCategoryItem(
                         iconPath: 'ic_H_food.svg',
-                        label: 'Food',
+                        label: AppTranslations.labelFood,
                       ),
                       const SizedBox(width: 15),
                       _buildCategoryItem(
                         iconPath: 'ic_H_services.svg',
-                        label: 'Services',
+                        label: AppTranslations.labelServices,
                       ),
                       const SizedBox(width: 15),
                       _buildCategoryItem(
                         iconPath: 'ic_H_groceries.svg',
-                        label: 'Groceries',
+                        label: AppTranslations.labelGroceries,
                       ),
                       const SizedBox(width: 15),
                       _buildCategoryItem(
                         iconPath: 'ic_H_education.svg',
-                        label: 'Education',
+                        label: AppTranslations.labelEducation,
                       ),
                       const SizedBox(width: 15),
                       _buildCategoryItem(
                         iconPath: 'ic_H_travel.svg',
-                        label: 'Travel',
+                        label: AppTranslations.labelTravel,
                       ),
                       const SizedBox(width: 15),
                       _buildCategoryItem(
                         iconPath: 'ic_H_pharmacy.svg',
-                        label: 'Pharmacy',
+                        label: AppTranslations.labelPharmacy,
                       ),
                     ],
                   ),
@@ -1555,7 +1549,7 @@ class ChatScreenBody extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
                             Text(
-                              'Switch to Classic View',
+                              AppTranslations.switchToClassicView,
                               style: AppTextStyles.body(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w700,
@@ -1566,7 +1560,7 @@ class ChatScreenBody extends StatelessWidget {
                             SizedBox(
                               width: 313,
                               child: Text(
-                                "Prefer browsing? You're always in control",
+                                AppTranslations.preferBrowsing,
                                 textAlign: TextAlign.center,
                                 style: AppTextStyles.body(
                                   fontSize: 12,
@@ -1607,7 +1601,7 @@ class ChatScreenBody extends StatelessWidget {
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 Text(
-                                  'Go To Eazy App',
+                                  AppTranslations.goToEazyApp,
                                   style: AppTextStyles.body(
                                     fontSize: 16,
                                     fontWeight: FontWeight.w700,
@@ -1659,12 +1653,20 @@ class ChatScreenBody extends StatelessWidget {
   }
 
   String _greetingTitleText() {
-    final timeGreeting = Utility.getTimeOfDayGreeting();
+    final hour = Utility.currentHourInTimezone();
+    final String timeGreeting;
+    if (hour >= 5 && hour < 12) {
+      timeGreeting = AppTranslations.goodMorning;
+    } else if (hour >= 12 && hour < 17) {
+      timeGreeting = AppTranslations.goodAfternoon;
+    } else {
+      timeGreeting = AppTranslations.goodEvening;
+    }
     final userName = Utility.getName().trim();
     if (userName.isEmpty) {
-      return '$timeGreeting\nHow can I help you today?';
+      return AppTranslations.greetingWithHelp(timeGreeting);
     }
-    return '$timeGreeting, "$userName"\nHow can I help you today?';
+    return AppTranslations.greetingNamedWithHelp(timeGreeting, userName);
   }
 
   Widget _buildTitleWithHighlightedName(String text) {
@@ -1751,7 +1753,7 @@ class ChatScreenBody extends StatelessWidget {
                 onSendMessage(option.title);
               },
               child: Container(
-                margin: EdgeInsets.only(right: index < opts.length - 1 ? 12 : 0),
+                margin: EdgeInsetsDirectional.only(end: index < opts.length - 1 ? 12 : 0),
                 padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
                 decoration: BoxDecoration(
                   color: Colors.white,
@@ -2711,7 +2713,7 @@ class ChatScreenBody extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             width: double.infinity,
             child: Align(
-              alignment: Alignment.centerLeft,
+              alignment: AlignmentDirectional.centerStart,
               child: SizedBox(
                 // 2-row horizontal grid; tweak if your button style changes.
                 height: 93,
@@ -2737,7 +2739,7 @@ class ChatScreenBody extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           width: double.infinity,
           child: Align(
-            alignment: Alignment.centerLeft,
+            alignment: AlignmentDirectional.centerStart,
             child: Wrap(
               spacing: 10,
               runSpacing: 8,
@@ -2781,9 +2783,9 @@ class ChatScreenBody extends StatelessWidget {
         bool isApiLoading = state is ChatLoading;
 
         return Container(
-          padding: EdgeInsets.only(
-            left: 16,
-            right: 16,
+          padding: EdgeInsetsDirectional.only(
+            start: 16,
+            end: 16,
             top: 10,
             bottom: 16 + MediaQuery.of(context).viewInsets.bottom,
           ),
@@ -2834,7 +2836,7 @@ class ChatScreenBody extends StatelessWidget {
                                     color: const Color(0xFF242424),
                                   ),
                                   decoration: InputDecoration(
-                                    hintText: isRecording ? 'Listening...' : 'Ask me anything...',
+                                    hintText: isRecording ? AppTranslations.listening : AppTranslations.askMeAnything,
                                     border: InputBorder.none,
                                     enabledBorder: InputBorder.none,
                                     focusedBorder: InputBorder.none,
@@ -3736,7 +3738,7 @@ class ChatScreenBody extends StatelessWidget {
       // color: Colors.red,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.only(left: 6),
+        padding: const EdgeInsetsDirectional.only(start: 6),
         clipBehavior: Clip.none,
         itemCount: products.length,
         separatorBuilder: (context, index) => const SizedBox(width: 16),
@@ -3831,7 +3833,7 @@ class ChatScreenBody extends StatelessWidget {
                 print('STORE CLSOSED');
                 BlackToastView.show(
                   context,
-                  'Store is closed. Please try again later',
+                  AppTranslations.toastStoreClosedTryLater,
                 );
                 return;
               } else if (product.instock == false &&
@@ -3840,7 +3842,7 @@ class ChatScreenBody extends StatelessWidget {
                 print('Product is not in stock');
                 BlackToastView.show(
                   context,
-                  'Product is not in stock. Please try again later',
+                  AppTranslations.toastProductNotInStock,
                 );
                 return;
               }
@@ -4318,7 +4320,7 @@ class ChatScreenBody extends StatelessWidget {
   Widget buildPackageTypesWidget(List<SendPackageType> packageTypes) {
     if (packageTypes.isEmpty) return const SizedBox.shrink();
     return Padding(
-      padding: const EdgeInsets.only(left: 0.0),
+      padding: const EdgeInsetsDirectional.only(start: 0.0),
       child: PackageTypesWidget(
         packageTypes: packageTypes,
         isFromChatHistory: isFromHistory,
@@ -4368,7 +4370,7 @@ class ChatScreenBody extends StatelessWidget {
   ) {
     if (restaurantSectionsItems.isEmpty) return const SizedBox.shrink();
     return Padding(
-      padding: const EdgeInsets.only(left: 0.0),
+      padding: const EdgeInsetsDirectional.only(start: 0.0),
       child: RestaurantSectionsWidget(
         restaurantSectionsItems: restaurantSectionsItems,
       ),
@@ -4380,7 +4382,7 @@ class ChatScreenBody extends StatelessWidget {
   ) {
     if (items.isEmpty) return const SizedBox.shrink();
     return Padding(
-      padding: const EdgeInsets.only(left: 0.0),
+      padding: const EdgeInsetsDirectional.only(start: 0.0),
       child: CustomerProfileDetailsWidget(items: items),
     );
   }
@@ -4388,7 +4390,7 @@ class ChatScreenBody extends StatelessWidget {
   Widget buildHotelDestinationWidget(List<HotelDestination> destinations) {
     if (destinations.isEmpty) return const SizedBox.shrink();
     return Padding(
-      padding: const EdgeInsets.only(left: 0.0),
+      padding: const EdgeInsetsDirectional.only(start: 0.0),
       child: HotelDestinationWidget(
         destinations: destinations,
         isFromChatHistory: isFromHistory,
@@ -4454,7 +4456,7 @@ class ChatScreenBody extends StatelessWidget {
   Widget buildFlightOriginPlacesWidget(List<CarPickupPlace> places) {
     if (places.isEmpty) return const SizedBox.shrink();
     return Padding(
-      padding: const EdgeInsets.only(left: 0.0),
+      padding: const EdgeInsetsDirectional.only(start: 0.0),
       child: FlightOriginPlacesWidget(
         places: places,
         isFromChatHistory: isFromHistory,
@@ -4476,7 +4478,7 @@ class ChatScreenBody extends StatelessWidget {
   Widget buildFlightDestinationPlacesWidget(List<CarPickupPlace> places) {
     if (places.isEmpty) return const SizedBox.shrink();
     return Padding(
-      padding: const EdgeInsets.only(left: 0.0),
+      padding: const EdgeInsetsDirectional.only(start: 0.0),
       child: FlightDestinationPlacesWidget(
         places: places,
         isFromChatHistory: isFromHistory,
@@ -4501,7 +4503,7 @@ class ChatScreenBody extends StatelessWidget {
   }) {
     if (places.isEmpty) return const SizedBox.shrink();
     return Padding(
-      padding: const EdgeInsets.only(left: 0.0),
+      padding: const EdgeInsetsDirectional.only(start: 0.0),
       child: CarPickupPlacesWidget(
         places: places,
         isFromChatHistory: isFromHistory,
@@ -4794,7 +4796,7 @@ class ChatScreenBody extends StatelessWidget {
   Widget buildHotelsWidget(List<HotelProperty> hotels) {
     if (hotels.isEmpty) return const SizedBox.shrink();
     return Padding(
-      padding: const EdgeInsets.only(left: 0.0),
+      padding: const EdgeInsetsDirectional.only(start: 0.0),
       child: HotelsWidget(
         properties: hotels,
         nights: HotelsWidget.nightsFromApiData(apiData),
@@ -4839,7 +4841,7 @@ class ChatScreenBody extends StatelessWidget {
   Widget buildCarRentalsSearchWidget(List<CarRentalSearch> rentals) {
     if (rentals.isEmpty) return const SizedBox.shrink();
     return Padding(
-      padding: const EdgeInsets.only(left: 0.0),
+      padding: const EdgeInsetsDirectional.only(start: 0.0),
       child: CarRentalsSearchWidget(
         rentals: rentals,
         isFromChatHistory: isFromHistory,
@@ -4884,7 +4886,7 @@ class ChatScreenBody extends StatelessWidget {
   Widget buildFlightsSearchWidget(List<FlightSearch> flights) {
     if (flights.isEmpty) return const SizedBox.shrink();
     return Padding(
-      padding: const EdgeInsets.only(left: 0.0),
+      padding: const EdgeInsetsDirectional.only(start: 0.0),
       child: FlightsSearchWidget(
         flights: flights,
         isFromChatHistory: isFromHistory,
@@ -4930,7 +4932,7 @@ class ChatScreenBody extends StatelessWidget {
   Widget buildHotelOrderSummaryWidget(List<HotelOrderSummary> items) {
     if (items.isEmpty) return const SizedBox.shrink();
     return Padding(
-      padding: const EdgeInsets.only(left: 0.0),
+      padding: const EdgeInsetsDirectional.only(start: 0.0),
       child: HotelOrderSummaryWidget(
         items: items,
         hotelBooking: _hotelBookingMap(),
@@ -4941,7 +4943,7 @@ class ChatScreenBody extends StatelessWidget {
   Widget buildCarOrderSummaryWidget(List<CarOrderSummary> items) {
     if (items.isEmpty) return const SizedBox.shrink();
     return Padding(
-      padding: const EdgeInsets.only(left: 0.0),
+      padding: const EdgeInsetsDirectional.only(start: 0.0),
       child: CarOrderSummaryWidget(
         items: items,
         carBooking: _carBookingMap(),
@@ -4952,7 +4954,7 @@ class ChatScreenBody extends StatelessWidget {
   Widget buildFlightOrderSummaryWidget(List<FlightOrderSummary> items) {
     if (items.isEmpty) return const SizedBox.shrink();
     return Padding(
-      padding: const EdgeInsets.only(left: 0.0),
+      padding: const EdgeInsetsDirectional.only(start: 0.0),
       child: FlightOrderSummaryWidget(
         items: items,
         flightBooking: _flightBookingMap(),
@@ -4963,7 +4965,7 @@ class ChatScreenBody extends StatelessWidget {
   Widget buildHotelBookingConfirmedWidget(List<WidgetAction> items) {
     if (items.isEmpty) return const SizedBox.shrink();
     return Padding(
-      padding: const EdgeInsets.only(left: 0.0),
+      padding: const EdgeInsetsDirectional.only(start: 0.0),
       child: HotelBookingConfirmedWidget(items: items),
     );
   }
@@ -4971,7 +4973,7 @@ class ChatScreenBody extends StatelessWidget {
   Widget buildCarBookingConfirmedWidget(List<WidgetAction> items) {
     if (items.isEmpty) return const SizedBox.shrink();
     return Padding(
-      padding: const EdgeInsets.only(left: 0.0),
+      padding: const EdgeInsetsDirectional.only(start: 0.0),
       child: CarBookingConfirmedWidget(items: items),
     );
   }
@@ -4979,7 +4981,7 @@ class ChatScreenBody extends StatelessWidget {
   Widget buildFlightBookingConfirmedWidget(List<WidgetAction> items) {
     if (items.isEmpty) return const SizedBox.shrink();
     return Padding(
-      padding: const EdgeInsets.only(left: 0.0),
+      padding: const EdgeInsetsDirectional.only(start: 0.0),
       child: FlightBookingConfirmedWidget(items: items),
     );
   }
@@ -5018,8 +5020,8 @@ class _BirthdayReminderCardState extends State<_BirthdayReminderCard> {
               padding: const EdgeInsets.all(15),
               decoration: BoxDecoration(
                 gradient: const LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
+                  begin: AlignmentDirectional.topStart,
+                  end: AlignmentDirectional.bottomEnd,
                   colors: [
                     Color(0xFFF5E0FF),
                     Color(0xFFD59DFF),
@@ -5113,7 +5115,7 @@ class _BirthdayReminderCardState extends State<_BirthdayReminderCard> {
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: Text(
-                              widget.greetingReminder?.buttons.first ?? 'Book Restaurant',
+                              widget.greetingReminder?.buttons.first ?? AppTranslations.bookRestaurant,
                               style: AppTextStyles.bodyText.copyWith(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w600,
@@ -5139,7 +5141,7 @@ class _BirthdayReminderCardState extends State<_BirthdayReminderCard> {
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: Text(
-                              widget.greetingReminder?.buttons.last ?? 'Browse Gifts',
+                              widget.greetingReminder?.buttons.last ?? AppTranslations.browseGifts,
                               style: AppTextStyles.bodyText.copyWith(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w600,

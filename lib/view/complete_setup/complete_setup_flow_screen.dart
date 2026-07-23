@@ -169,7 +169,7 @@ class _CompleteSetupFlowScreenState extends State<CompleteSetupFlowScreen> {
                 ),
               ),
               Text(
-                ' .10',
+                AppTranslations.setupStepOfTen('10'),
                 style: AppTextStyles.body(
                   fontSize: 12,
                   fontWeight: FontWeight.w500,
@@ -190,7 +190,7 @@ class _CompleteSetupFlowScreenState extends State<CompleteSetupFlowScreen> {
                   borderRadius: BorderRadius.circular(80),
                 ),
                 child: Text(
-                  'Skip',
+                  AppTranslations.skip,
                   style: AppTextStyles.body(
                     fontSize: 12,
                     fontWeight: FontWeight.w400,
@@ -210,7 +210,7 @@ class _CompleteSetupFlowScreenState extends State<CompleteSetupFlowScreen> {
     final isLast = _currentPage == _totalSteps - 1;
 
     return Container(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+      padding: const EdgeInsetsDirectional.fromSTEB(16, 16, 16, 24),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -228,7 +228,7 @@ class _CompleteSetupFlowScreenState extends State<CompleteSetupFlowScreen> {
                 ),
               ),
               Text(
-                ' .10',
+                AppTranslations.setupStepOfTen('10'),
                 style: AppTextStyles.body(
                   fontSize: 12,
                   fontWeight: FontWeight.w500,

@@ -25,7 +25,7 @@ class _ServicesDeliveryOptionsWidgetState extends State<ServicesDeliveryOptionsW
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.only(left: 0, right: 24, bottom: 8, top: 8),
+      margin: const EdgeInsetsDirectional.only(start: 0, end: 24, bottom: 8, top: 8),
       padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 20),
       constraints: const BoxConstraints(
         minWidth: 320,

@@ -6,10 +6,10 @@ class BlackToastView {
     late OverlayEntry overlayEntry;
 
     overlayEntry = OverlayEntry(
-      builder: (context) => Positioned(
+      builder: (context) => PositionedDirectional(
         bottom: MediaQuery.of(context).padding.bottom + 50,
-        left: 20,
-        right: 20,
+        start: 20,
+        end: 20,
         child: Material(
           color: Colors.transparent,
           child: Container(

@@ -10,6 +10,7 @@ import 'package:chat_bot/utils/app_constants.dart';
 import 'package:chat_bot/utils/app_theme.dart';
 import 'package:chat_bot/utils/external_url.dart';
 import 'package:chat_bot/utils/utility.dart';
+import 'package:chat_bot/utils/utils.dart';
 import 'package:chat_bot/widgets/archived_chat_row.dart';
 import 'package:chat_bot/widgets/black_toast_view.dart';
 import 'package:flutter/material.dart';
@@ -61,29 +62,29 @@ class _PersonalizationScreenState extends State<PersonalizationScreen> {
       child: BlocListener<ChatHistoryBloc, ChatHistoryState>(
         listener: (context, state) {
           if (state is ChatHistoryArchiveAllSuccess) {
-            BlackToastView.show(context, 'All chats archived successfully');
+            BlackToastView.show(context, AppTranslations.toastAllChatsArchived);
           } else if (state is ChatHistoryArchiveAllFailure) {
-            BlackToastView.show(context, 'Failed to archive all chats: ${state.message}');
+            BlackToastView.show(context, AppTranslations.toastFailedArchiveAll(state.message));
           } else if (state is ChatHistoryUnarchiveSuccess) {
-            BlackToastView.show(context, 'Chat unarchived successfully');
+            BlackToastView.show(context, AppTranslations.toastChatUnarchived);
           } else if (state is ChatHistoryUnarchiveFailure) {
-            BlackToastView.show(context, 'Failed to unarchive chat: ${state.message}');
+            BlackToastView.show(context, AppTranslations.toastFailedUnarchive(state.message));
           } else if (state is ChatHistoryDeleteSuccess) {
-            BlackToastView.show(context, 'Chat deleted successfully');
+            BlackToastView.show(context, AppTranslations.toastChatDeleted);
           } else if (state is ChatHistoryDeleteFailure) {
-            BlackToastView.show(context, 'Failed to delete chat: ${state.message}');
+            BlackToastView.show(context, AppTranslations.toastFailedDeleteChat(state.message));
           } else if (state is ChatHistorySharedSessionRevokeSuccess) {
-            BlackToastView.show(context, 'Shared link revoked');
+            BlackToastView.show(context, AppTranslations.toastSharedLinkRevoked);
           } else if (state is ChatHistorySharedSessionRevokeFailure) {
-            BlackToastView.show(context, 'Failed to revoke link: ${state.message}');
+            BlackToastView.show(context, AppTranslations.toastFailedRevokeLink(state.message));
           } else if (state is ChatHistoryDeleteAllSuccess) {
-            BlackToastView.show(context, 'All chats deleted successfully');
+            BlackToastView.show(context, AppTranslations.toastAllChatsDeleted);
           } else if (state is ChatHistoryDeleteAllFailure) {
-            BlackToastView.show(context, 'Failed to delete all chats: ${state.message}');
+            BlackToastView.show(context, AppTranslations.toastFailedDeleteAll(state.message));
           } else if (state is ChatHistoryExportDataSuccess) {
-            BlackToastView.show(context, 'The export has been requested. You will receive an email shortly.');
+            BlackToastView.show(context, AppTranslations.toastExportRequested);
           } else if (state is ChatHistoryExportDataFailure) {
-            BlackToastView.show(context, 'Failed to request data export');
+            BlackToastView.show(context, AppTranslations.toastFailedExport);
           }
         },
         child: Builder(
@@ -99,9 +100,9 @@ class _PersonalizationScreenState extends State<PersonalizationScreen> {
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         Padding(
-                          padding: const EdgeInsets.fromLTRB(0, 8, 16, 10),
+                          padding: const EdgeInsetsDirectional.fromSTEB(0, 8, 16, 10),
                           child: Align(
-                            alignment: Alignment.centerLeft,
+                            alignment: AlignmentDirectional.centerStart,
                             child: IconButton(
                               padding: EdgeInsets.zero,
                               constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
@@ -122,34 +123,34 @@ class _PersonalizationScreenState extends State<PersonalizationScreen> {
                             physics: const ClampingScrollPhysics(),
                             children: [
                               _toggleRow(
-                                label: 'Personalized AI',
+                                label: AppTranslations.personalizedAi,
                                 value: _personalizedAiEnabled,
                                 onChanged: _isSavingPersonalization ? null : _onPersonalizedAiChanged,
                               ),
                               _actionRow(
-                                label: 'Shared links',
-                                buttonLabel: 'Manage',
+                                label: AppTranslations.sharedLinks,
+                                buttonLabel: AppTranslations.manage,
                                 onPressed: () => _showSharedLinksManage(innerContext),
                               ),
                               _actionRow(
-                                label: 'Archived chats',
-                                buttonLabel: 'Manage',
+                                label: AppTranslations.archivedChats,
+                                buttonLabel: AppTranslations.manage,
                                 onPressed: () => _showArchivedChatsManage(innerContext),
                               ),
                               _actionRow(
-                                label: 'Archive all chats',
-                                buttonLabel: 'Archive all',
+                                label: AppTranslations.archiveAllChats,
+                                buttonLabel: AppTranslations.archiveAll,
                                 onPressed: () => _confirmArchiveAll(innerContext),
                               ),
                               _actionRow(
-                                label: 'Delete all chats',
-                                buttonLabel: 'Delete all',
+                                label: AppTranslations.deleteAllChats,
+                                buttonLabel: AppTranslations.deleteAll,
                                 destructive: true,
                                 onPressed: () => _confirmDeleteAll(innerContext),
                               ),
                               _actionRow(
-                                label: 'Export data',
-                                buttonLabel: 'Export',
+                                label: AppTranslations.exportData,
+                                buttonLabel: AppTranslations.export,
                                 onPressed: () => _showExportRequestSheet(innerContext),
                                 showDivider: false,
                               ),
@@ -170,14 +171,14 @@ class _PersonalizationScreenState extends State<PersonalizationScreen> {
 
   Widget _titleHeader() {
     return Container(
-      padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+      padding: const EdgeInsetsDirectional.fromSTEB(16, 0, 16, 16),
       decoration: const BoxDecoration(
         border: Border(bottom: BorderSide(color: _divider)),
       ),
       child: Align(
-        alignment: Alignment.centerLeft,
+        alignment: AlignmentDirectional.centerStart,
         child: Text(
-          'Personalization',
+          AppTranslations.personalization,
           style: AppTheme.getTextStyle(
             fontSize: 24,
             fontWeight: FontWeight.w700,
@@ -227,7 +228,7 @@ class _PersonalizationScreenState extends State<PersonalizationScreen> {
           padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(sheetContext).bottom),
           child: SingleChildScrollView(
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(24, 30, 24, 28),
+              padding: const EdgeInsetsDirectional.fromSTEB(24, 30, 24, 28),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -256,7 +257,7 @@ class _PersonalizationScreenState extends State<PersonalizationScreen> {
                         backgroundColor: Colors.white,
                       ),
                       child: Text(
-                        'Cancel',
+                        AppTranslations.cancel,
                         style: AppTheme.getTextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w700,
@@ -341,11 +342,11 @@ class _PersonalizationScreenState extends State<PersonalizationScreen> {
       _isSavingPersonalization = true;
     });
 
-    Utility.showLoader(message: 'Saving...');
+    Utility.showLoader(message: AppTranslations.saving);
     try {
       final res = await CustomerPreferenceRepository().patchZainPersonalization(enabled: v);
       if (!res.isSuccess) {
-        throw Exception(res.message ?? 'Failed to update personalization');
+        throw Exception(res.message ?? AppTranslations.failedUpdatePersonalization);
       }
 
       Utility.setPersonalization(v);
@@ -354,7 +355,7 @@ class _PersonalizationScreenState extends State<PersonalizationScreen> {
       setState(() {
         _personalizedAiEnabled = previous;
       });
-      _showSnack('Failed to update personalization');
+      _showSnack(AppTranslations.failedUpdatePersonalization);
     } finally {
       Utility.closeProgressDialog();
       if (mounted) {
@@ -434,12 +435,12 @@ class _PersonalizationScreenState extends State<PersonalizationScreen> {
   Future<void> _confirmArchiveAll(BuildContext context) async {
     final ok = await _showPersonalizationBottomSheet(
           context: context,
-          title: 'Archive your chat history?',
+          title: AppTranslations.archiveChatHistoryTitle,
           body: (_) => Text(
-            'This will archive all chats, including chats in Projects.',
+            AppTranslations.archiveChatHistoryBody,
             style: _sheetBodyStyle,
           ),
-          confirmLabel: 'Confirm archive',
+          confirmLabel: AppTranslations.confirmArchive,
         ) ??
         false;
     if (!ok || !mounted) return;
@@ -449,12 +450,12 @@ class _PersonalizationScreenState extends State<PersonalizationScreen> {
   Future<void> _confirmDeleteAll(BuildContext context) async {
     final ok = await _showPersonalizationBottomSheet(
           context: context,
-          title: 'Clear your chat history?',
+          title: AppTranslations.clearChatHistoryTitle,
           body: (sheetContext) => Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'This will delete all chats, including chats in Projects.',
+                AppTranslations.clearChatHistoryBody,
                 style: _sheetBodyStyle,
               ),
               const SizedBox(height: 12),
@@ -463,18 +464,18 @@ class _PersonalizationScreenState extends State<PersonalizationScreen> {
                 spacing: 0,
                 runSpacing: 4,
                 children: [
-                  Text('To clear any memories from your chats, visit your ', style: _sheetBodyStyle),
+                  Text(AppTranslations.clearMemoriesPrefix, style: _sheetBodyStyle),
                   GestureDetector(
                     onTap: () {
                       Navigator.pop(sheetContext, false);
                       WidgetsBinding.instance.addPostFrameCallback((_) {
                         if (mounted) {
-                          _showSnack('Open Settings from the profile menu to manage memories.');
+                          _showSnack(AppTranslations.clearMemoriesSnack);
                         }
                       });
                     },
                     child: Text(
-                      'settings',
+                      AppTranslations.settingsLink,
                       style: _sheetBodyStyle.copyWith(
                         decoration: TextDecoration.underline,
                         fontWeight: FontWeight.w600,
@@ -486,7 +487,7 @@ class _PersonalizationScreenState extends State<PersonalizationScreen> {
               ),
             ],
           ),
-          confirmLabel: 'Confirm deletion',
+          confirmLabel: AppTranslations.confirmDeletion,
           confirmIsDestructive: true,
         ) ??
         false;
@@ -495,16 +496,16 @@ class _PersonalizationScreenState extends State<PersonalizationScreen> {
   }
 
   Future<void> _showExportRequestSheet(BuildContext context) async {
-    const bullets = <String>[
-      'Your account details and chats will be included in the export.',
-      'The data will be sent to your registered email in a downloadable file.',
-      'The download link will expire 24 hours after you receive it.',
-      'Processing may take some time. You\'ll be notified when it\'s ready.',
+    final bullets = <String>[
+      AppTranslations.exportBulletAccount,
+      AppTranslations.exportBulletEmail,
+      AppTranslations.exportBulletExpire,
+      AppTranslations.exportBulletProcessing,
     ];
 
     final ok = await _showPersonalizationBottomSheet(
           context: context,
-          title: 'Request data export',
+          title: AppTranslations.requestDataExport,
           body: (_) => Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -520,19 +521,19 @@ class _PersonalizationScreenState extends State<PersonalizationScreen> {
               ],
               const SizedBox(height: 16),
               Text(
-                'To proceed, tap “Confirm export” below.',
+                AppTranslations.exportProceedHint,
                 style: _sheetBodyStyle,
               ),
             ],
           ),
-          confirmLabel: 'Confirm export',
+          confirmLabel: AppTranslations.confirmExport,
         ) ??
         false;
     if (!ok || !mounted) return;
 
     final email = Utility.getEmailId();
     if (email.isEmpty) {
-      _showSnack('No email address configured');
+      _showSnack(AppTranslations.noEmailConfigured);
       return;
     }
 
@@ -672,11 +673,11 @@ class _SharedLinksManageSheet extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Padding(
-          padding: const EdgeInsets.fromLTRB(24, 20, 12, 8),
+          padding: const EdgeInsetsDirectional.fromSTEB(24, 20, 12, 8),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Expanded(child: Text('Shared links', style: _titleStyle())),
+              Expanded(child: Text(AppTranslations.sharedLinks, style: _titleStyle())),
               // _SheetCloseButton(onPressed: () => Navigator.pop(context)),
             ],
           ),
@@ -686,14 +687,14 @@ class _SharedLinksManageSheet extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
           child: Row(
             children: [
-              Expanded(flex: 22, child: Text('Name', style: _headerCellStyle())),
+              Expanded(flex: 22, child: Text(AppTranslations.name, style: _headerCellStyle())),
               // Expanded(flex: 10, child: Center(child: Text('Type', style: _headerCellStyle()))),
               Expanded(
                 flex: 16,
                 child: Text(
-                  'Date shared',
+                  AppTranslations.dateShared,
                   style: _headerCellStyle(),
-                  textAlign: TextAlign.right,
+                  textAlign: TextAlign.end,
                 ),
               ),
               SizedBox(
@@ -701,7 +702,7 @@ class _SharedLinksManageSheet extends StatelessWidget {
                 child: IconButton(
                   padding: EdgeInsets.zero,
                   constraints: const BoxConstraints(minWidth: 40, minHeight: 36),
-                  alignment: Alignment.centerRight,
+                  alignment: AlignmentDirectional.centerEnd,
                   icon: const Icon(Icons.more_horiz, color: _ManageSheetColors.headerLabel, size: 22),
                   onPressed: () => onMessage('Shared links — more options'),
                 ),
@@ -727,7 +728,7 @@ class _SharedLinksManageSheet extends StatelessWidget {
                 if (shares.isEmpty) {
                   return Center(
                     child: Text(
-                      'No Data Found',
+                      AppTranslations.noDataFound,
                       style: _cellStyle(),
                     ),
                   );
@@ -758,7 +759,7 @@ class _SharedLinksManageSheet extends StatelessWidget {
         final s = shares[index];
         return _SharedLinkRow(
           name: s.title ?? s.shareUrl,
-          typeLabel: 'Chat',
+          typeLabel: AppTranslations.typeChat,
           dateSharedLabel: _formatCreatedAt(s.createdAt),
           onOpenLink: () async {
             // try {
@@ -835,7 +836,7 @@ class _SharedLinkRow extends StatelessWidget {
                 child: Text(
                   dateSharedLabel,
                   style: cellStyle,
-                  textAlign: TextAlign.right,
+                  textAlign: TextAlign.end,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -907,13 +908,13 @@ class _ArchivedChatsManageSheet extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Padding(
-          padding: const EdgeInsets.fromLTRB(24, 20, 12, 8),
+          padding: const EdgeInsetsDirectional.fromSTEB(24, 20, 12, 8),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Expanded(
                 child: Text(
-                  'Archived chats',
+                  AppTranslations.archivedChats,
                   style: AppTheme.getTextStyle(
                     fontSize: 22,
                     fontWeight: FontWeight.w700,
@@ -931,11 +932,11 @@ class _ArchivedChatsManageSheet extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
           child: Row(
             children: [
-              Expanded(flex: 24, child: Text('Name', style: _SharedLinksManageSheet._headerCellStyle())),
+              Expanded(flex: 24, child: Text(AppTranslations.name, style: _SharedLinksManageSheet._headerCellStyle())),
               Expanded(
                 flex: 14,
                 child: Text(
-                  'Date created',
+                  AppTranslations.dateCreated,
                   style: _SharedLinksManageSheet._headerCellStyle(),
                   textAlign: TextAlign.center,
                 ),
@@ -945,7 +946,7 @@ class _ArchivedChatsManageSheet extends StatelessWidget {
                 child: IconButton(
                   padding: EdgeInsets.zero,
                   constraints: const BoxConstraints(minWidth: 40, minHeight: 36),
-                  alignment: Alignment.centerRight,
+                  alignment: AlignmentDirectional.centerEnd,
                   icon: const Icon(Icons.more_horiz, color: _ManageSheetColors.headerLabel, size: 22),
                   onPressed: () => onMessage('Archived chats — more options'),
                 ),
@@ -970,7 +971,7 @@ class _ArchivedChatsManageSheet extends StatelessWidget {
 
               final sessions = state.sessions;
               if (sessions.isEmpty) {
-                return const Center(child: Text('No Data Found'));
+                return Center(child: Text(AppTranslations.noDataFound));
               }
 
               return ListView.separated(
@@ -984,7 +985,7 @@ class _ArchivedChatsManageSheet extends StatelessWidget {
                 itemBuilder: (context, index) {
                   final s = sessions[index];
                   return ArchivedChatRow(
-                    chatName: s.title.isNotEmpty ? s.title : 'Session ${s.sessionId}',
+                    chatName: s.title.isNotEmpty ? s.title : AppTranslations.sessionIdFallback(s.sessionId.toString()),
                     dateLabel: _formatDateLabel(s.timestamp),
                     onOpenChat: () => {},//onMessage('Open archived chat ${s.sessionId}'),
                     onUnarchive: () => context.read<ChatHistoryBloc>().add(

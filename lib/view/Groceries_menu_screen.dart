@@ -193,7 +193,7 @@ class _GroceriesMenuScreenState extends State<GroceriesMenuScreen>
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
         Padding(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+          padding: const EdgeInsetsDirectional.fromSTEB(16, 16, 16, 0),
           child: ScreenHeader(
             title: widget.actionData?.title ?? '',
             subtitle: widget.actionData?.subtitle ?? '',
@@ -202,7 +202,7 @@ class _GroceriesMenuScreenState extends State<GroceriesMenuScreen>
         ),
         const SizedBox(height: 8),
         Padding(
-          padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
+          padding: const EdgeInsetsDirectional.fromSTEB(16, 0, 16, 0),
           child: _buildStoreInfoCard(),
         ),
         const SizedBox(height: 8),
@@ -359,7 +359,7 @@ class _GroceriesMenuScreenState extends State<GroceriesMenuScreen>
                       ),
                       const SizedBox(width: 5),
                       Text(
-                        'Open in Eazy app',
+                        AppTranslations.openInEazyApp,
                         style: AppTextStyles.restaurantDescription.copyWith(
                           color: accentPurple,
                         ),
@@ -624,7 +624,7 @@ class _GroceriesMenuScreenState extends State<GroceriesMenuScreen>
             ),
             const SizedBox(height: 16),
             Text(
-              'No products available',
+              AppTranslations.noProductsAvailable,
               style: AppTextStyles.restaurantTitle.copyWith(
                 color: const Color(0xFF979797),
                 fontWeight: FontWeight.w500,
@@ -632,7 +632,7 @@ class _GroceriesMenuScreenState extends State<GroceriesMenuScreen>
             ),
             const SizedBox(height: 8),
             Text(
-              'Try adjusting your search or check back later',
+              AppTranslations.tryAdjustingSearch,
               style: AppTextStyles.restaurantDescription.copyWith(
                 color: const Color(0xFF979797),
               ),
@@ -661,7 +661,7 @@ class _GroceriesMenuScreenState extends State<GroceriesMenuScreen>
         final dimensions = _calculateDynamicDimensions(context);
         return GridView.builder(
           controller: _scrollController,
-          padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
+          padding: const EdgeInsetsDirectional.fromSTEB(16, 0, 16, 20),
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: 2,
             childAspectRatio: dimensions['aspectRatio']!,
@@ -915,7 +915,7 @@ class _GroceriesMenuScreenState extends State<GroceriesMenuScreen>
 
   Widget _buildBottomCartBar(int itemCount) {
     final String itemLabel =
-        itemCount == 1 ? '1 Item added' : '$itemCount Items added';
+        itemCount == 1 ? AppTranslations.oneItemAdded : AppTranslations.itemsAdded(itemCount.toString());
     final double bottomInset = MediaQuery.of(context).padding.bottom;
 
     return Container(
@@ -930,7 +930,7 @@ class _GroceriesMenuScreenState extends State<GroceriesMenuScreen>
           ),
         ],
       ),
-      padding: EdgeInsets.fromLTRB(16, 15, 16, bottomInset > 0 ? 8 : 16),
+      padding: EdgeInsetsDirectional.fromSTEB(16, 15, 16, bottomInset > 0 ? 8 : 16),
       child: GestureDetector(
         onTap: _onViewCart,
         child: Container(
@@ -967,8 +967,8 @@ class _GroceriesMenuScreenState extends State<GroceriesMenuScreen>
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
-                  const Text(
-                    'View cart',
+                  Text(
+                    AppTranslations.viewCart,
                     style: TextStyle(
                       fontWeight: FontWeight.w700,
                       fontSize: 14,

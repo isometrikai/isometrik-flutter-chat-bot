@@ -13,11 +13,11 @@ extension DoctorServiceTypeX on DoctorServiceType {
   String get label {
     switch (this) {
       case DoctorServiceType.inCall:
-        return "Visit at doctor's clinic";
+        return AppTranslations.visitAtDoctorsClinic;
       case DoctorServiceType.outCall:
-        return "Doctor's at home";
+        return AppTranslations.doctorsAtHome;
       case DoctorServiceType.teleCall:
-        return "Tele appointment";
+        return AppTranslations.teleAppointment;
     }
   }
 }
@@ -112,7 +112,7 @@ class _DoctorServiceTypeSheetState extends State<DoctorServiceTypeSheet> {
           color: Colors.white,
           borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
         ),
-        child: const Text('No service options available'),
+        child: Text(AppTranslations.noServiceOptions),
       );
     }
 
@@ -120,7 +120,7 @@ class _DoctorServiceTypeSheetState extends State<DoctorServiceTypeSheet> {
       constraints: BoxConstraints(
         maxHeight: MediaQuery.of(context).size.height * 0.7,
       ),
-      padding: EdgeInsets.fromLTRB(24, 24, 24, 24 + MediaQuery.of(context).padding.bottom),
+      padding: EdgeInsetsDirectional.fromSTEB(24, 24, 24, 24 + MediaQuery.of(context).padding.bottom),
       decoration: const BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
@@ -137,7 +137,7 @@ class _DoctorServiceTypeSheetState extends State<DoctorServiceTypeSheet> {
                   // Section 1: Products (no default selection)
                   if (_products.isNotEmpty) ...[
                     Text(
-                      'Recommended Tests & Procedures',
+                      AppTranslations.recommendedTests,
                       style: AppTextStyles.productTitle.copyWith(
                         fontSize: 18,
                         fontWeight: FontWeight.w600,
@@ -213,7 +213,7 @@ class _DoctorServiceTypeSheetState extends State<DoctorServiceTypeSheet> {
                   ],
                   // Section 2: Doctor service type (first option selected by default)
                   Text(
-                    'How would you like to consult',
+                    AppTranslations.howWouldYouLikeToConsult,
                     style: AppTextStyles.productTitle.copyWith(
                       fontSize: 18,
                       fontWeight: FontWeight.w600,
@@ -252,7 +252,7 @@ class _DoctorServiceTypeSheetState extends State<DoctorServiceTypeSheet> {
                                   color: const Color(0xFF242424),
                                   height: 1.4,
                                 ),
-                                textAlign: TextAlign.left,
+                                textAlign: TextAlign.start,
                               ),
                             ),
                             const SizedBox(width: 8),
@@ -291,7 +291,7 @@ class _DoctorServiceTypeSheetState extends State<DoctorServiceTypeSheet> {
                   borderRadius: BorderRadius.circular(12),
                 ),
               ),
-              child: const Text('Confirm'),
+              child: Text(AppTranslations.confirm),
             ),
           ),
         ],

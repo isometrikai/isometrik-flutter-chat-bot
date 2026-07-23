@@ -44,15 +44,15 @@ class PopupOverlayScreen extends StatelessWidget {
       // margin: const EdgeInsets.only(bottom: 34),
       decoration: const BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(16),
-          topRight: Radius.circular(16),
-          bottomLeft: Radius.circular(0),
-          bottomRight: Radius.circular(0),
+        borderRadius: BorderRadiusDirectional.only(
+          topStart: Radius.circular(16),
+          topEnd: Radius.circular(16),
+          bottomStart: Radius.circular(0),
+          bottomEnd: Radius.circular(0),
         ),
       ),
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 30, 16, 20),
+        padding: const EdgeInsetsDirectional.fromSTEB(16, 30, 16, 20),
         child: _buildPopupContent(),
       ),
     );
@@ -99,7 +99,7 @@ class PopupOverlayScreen extends StatelessWidget {
                         const SizedBox(width: 6),
                         Flexible(
                           child: Text(
-                            'Your shopping persona',
+                            AppTranslations.yourShoppingPersona,
                             style: AppTextStyles.chatMessage.copyWith(
                               fontSize: 14,
                               fontWeight: FontWeight.w600,
@@ -165,7 +165,7 @@ class PopupOverlayScreen extends StatelessWidget {
             borderRadius: BorderRadius.circular(8),
           ),
           child:  Text(
-            'This profile is built from your interactions with AI and helps us provide personalized recommendations tailored to your preferences and habits.',
+            AppTranslations.personaProfileDisclaimer,
             style: AppTextStyles.restaurantDescription.copyWith(
               fontSize: 12,
               fontWeight: FontWeight.w400,
@@ -220,7 +220,7 @@ class PopupOverlayScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Container(
-                margin: const EdgeInsets.only(top: 6, right: 8),
+                margin: const EdgeInsetsDirectional.only(top: 6, end: 8),
                 width: 6,
                 height: 6,
                 decoration: const BoxDecoration(

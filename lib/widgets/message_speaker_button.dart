@@ -23,7 +23,9 @@ class MessageSpeakerButton extends StatelessWidget {
     final textToSpeechService = TextToSpeechService();
 
     return Align(
-      alignment: isBot ? Alignment.centerLeft : Alignment.centerRight,
+      alignment: isBot
+          ? AlignmentDirectional.centerStart
+          : AlignmentDirectional.centerEnd,
       child: ValueListenableBuilder<String?>(
         valueListenable: textToSpeechService.speakingMessageId,
         builder: (context, speakingMessageId, _) {

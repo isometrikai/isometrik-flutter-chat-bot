@@ -1,6 +1,7 @@
 import 'package:chat_bot/data/model/availability_slots_response.dart';
 import 'package:chat_bot/data/services/token_manager.dart';
 import 'package:chat_bot/data/services/universal_api_client.dart';
+import 'package:chat_bot/utils/utility.dart';
 
 class AvailabilitySlotsRepository {
   const AvailabilitySlotsRepository();
@@ -17,7 +18,7 @@ class AvailabilitySlotsRepository {
     final headers = <String, String>{
       'User-Agent': 'Eazy Life/2.0.1 (com.eazy.customerapp; build:77; iOS 26.1.0) Alamofire/5.6.1',
       'Authorization': token ?? '',
-      'language': 'en',
+      'language': Utility.getLanguage(),
       'storeCategoryId': storeCategoryId,
       'Accept-Encoding': 'br;q=1.0, gzip;q=0.9, deflate;q=0.8',
       'Accept-Language': 'en-IN;q=1.0, it-IN;q=0.9',

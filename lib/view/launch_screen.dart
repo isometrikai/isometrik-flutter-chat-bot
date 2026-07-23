@@ -8,6 +8,7 @@ import 'package:chat_bot/bloc/launch/launch_event.dart';
 import 'package:chat_bot/bloc/launch/launch_state.dart';
 import 'package:chat_bot/bloc/chat_bloc.dart';
 import 'package:chat_bot/bloc/cart/cart_bloc.dart';
+import 'package:chat_bot/utils/utils.dart';
 import 'chat_screen.dart';
 
 class LaunchScreen extends StatefulWidget {
@@ -81,8 +82,8 @@ class _LaunchScreenState extends State<LaunchScreen> {
       barrierDismissible: false,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Error'),
-          content: const Text('Something went wrong please try again later'),
+          title: Text(AppTranslations.error),
+          content: Text(AppTranslations.somethingWentWrongTryLater),
           actions: [
             TextButton(
               onPressed: () {
@@ -91,7 +92,7 @@ class _LaunchScreenState extends State<LaunchScreen> {
                 // await platform.invokeMethod('dismissChat');
                 OrderService().triggerChatDismiss();
               },
-              child: const Text('OK'),
+              child: Text(AppTranslations.ok),
             ),
           ],
         );
@@ -137,8 +138,8 @@ class _LaunchScreenState extends State<LaunchScreen> {
                     );
                   },
                   child: Text(
-                    'Loading...',
-                    key: ValueKey<String>('Loading...'),
+                    AppTranslations.loading,
+                    key: ValueKey<String>(AppTranslations.loading),
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 16,

@@ -39,7 +39,7 @@ class _ChooseCardWidgetState extends State<ChooseCardWidget> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.only(left: 0, right: 24, bottom: 8, top: 8),
+      margin: const EdgeInsetsDirectional.only(start: 0, end: 24, bottom: 8, top: 8),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: Colors.white,
@@ -54,7 +54,7 @@ class _ChooseCardWidgetState extends State<ChooseCardWidget> {
         children: [
           // Title
            Text(
-            'Choose payment option',
+            AppTranslations.choosePaymentOption,
             style: AppTextStyles.restaurantTitle.copyWith(
               fontSize: 16,
               fontWeight: FontWeight.w700,

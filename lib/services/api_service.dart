@@ -42,6 +42,7 @@ class ApiService {
     required String emailId,
     required String phoneNumber,
     required String countryCode,
+    required String language,
   }) {
     _isProduction = isProduction;
     _baseApiUrl = baseApiUrl.isNotEmpty 
@@ -118,6 +119,7 @@ class ApiService {
     Utility.setZoneId(zoneId);
     Utility.setLatitude(latitude ?? 0.0);
     Utility.setLongitude(longitude ?? 0.0);
+    Utility.setLanguage(language);
   }
 
   static String removeTrailingSlash(String url) {

@@ -7,14 +7,14 @@ class PackageTypesWidget extends StatelessWidget {
   final List<SendPackageType> packageTypes;
   final void Function(SendPackageType packageType)? onPackageTypeSelected;
   final bool isFromChatHistory;
-  final String headerText;
+  final String? headerText;
 
   const PackageTypesWidget({
     super.key,
     required this.packageTypes,
     this.onPackageTypeSelected,
     this.isFromChatHistory = false,
-    this.headerText = 'Select a category below',
+    this.headerText,
   });
 
   static const Color _borderColor = Color(0xFFE9DFFB);
@@ -27,11 +27,11 @@ class PackageTypesWidget extends StatelessWidget {
     if (packageTypes.isEmpty) return const SizedBox.shrink();
 
     return Align(
-      alignment: Alignment.centerLeft,
+      alignment: AlignmentDirectional.centerStart,
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 294),
         child: Container(
-          padding: const EdgeInsets.fromLTRB(15, 20, 15, 15),
+          padding: const EdgeInsetsDirectional.fromSTEB(15, 20, 15, 15),
           decoration: BoxDecoration(
             color: Colors.white,
             border: Border.all(color: _borderColor),
@@ -42,7 +42,7 @@ class PackageTypesWidget extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                headerText,
+                headerText ?? AppTranslations.selectCategoryBelow,
                 style: AppTextStyles.bodyText.copyWith(
                   fontSize: 14,
                   fontWeight: FontWeight.w400,
@@ -85,7 +85,7 @@ class _PackageTypeRow extends StatelessWidget {
         color: PackageTypesWidget._rowBackground,
         borderRadius: BorderRadius.circular(8),
       ),
-      alignment: Alignment.centerLeft,
+      alignment: AlignmentDirectional.centerStart,
       child: Text(
         label,
         maxLines: 1,

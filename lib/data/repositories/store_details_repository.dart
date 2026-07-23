@@ -28,7 +28,7 @@ class StoreDetailsRepository {
     
     final headers = {
       'Accept-Language': 'en-IN;q=1.0, it-IN;q=0.9',
-      'language': 'en',
+      'language': Utility.getLanguage(),
       'User-Agent': 'Eazy Life/2.0.1 (com.eazy.customerapp; build:77; iOS 26.1.0) Alamofire/5.6.1',
       'Accept-Encoding': 'br;q=1.0, gzip;q=0.9, deflate;q=0.8',
       'currencycode': Utility.getCurrencyCode(),

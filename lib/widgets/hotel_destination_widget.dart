@@ -25,7 +25,7 @@ class HotelDestinationWidget extends StatelessWidget {
     if (destinations.isEmpty) return const SizedBox.shrink();
 
     return Align(
-      alignment: Alignment.centerLeft,
+      alignment: AlignmentDirectional.centerStart,
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 294),
         child: Container(
@@ -82,7 +82,7 @@ class _DestinationRow extends StatelessWidget {
         color: HotelDestinationWidget._rowBackground,
         borderRadius: BorderRadius.circular(8),
       ),
-      alignment: Alignment.centerLeft,
+      alignment: AlignmentDirectional.centerStart,
       child: Text(
         label,
         maxLines: 1,

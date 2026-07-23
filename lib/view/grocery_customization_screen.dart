@@ -1,4 +1,4 @@
-import 'package:chat_bot/utils/app_constants.dart';
+import '../utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:chat_bot/bloc/grocery_customization/grocery_customization_bloc.dart';
@@ -83,9 +83,9 @@ class _GroceryCustomizationScreenState extends State<GroceryCustomizationScreen>
         child: Container(
           decoration: const BoxDecoration(
             color: Color(0xFFF5F7FF),
-            borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(16),
-              topRight: Radius.circular(16),
+            borderRadius: BorderRadiusDirectional.only(
+              topStart: Radius.circular(16),
+              topEnd: Radius.circular(16),
             ),
           ),
           child: Column(
@@ -146,7 +146,7 @@ class _GroceryCustomizationScreenState extends State<GroceryCustomizationScreen>
                                         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                                       ),
                                       child: Text(
-                                        'Retry',
+                                        AppTranslations.retry,
                                         style: AppTextStyles.button.copyWith(
                                           color: Colors.white,
                                         ),
@@ -179,12 +179,12 @@ class _GroceryCustomizationScreenState extends State<GroceryCustomizationScreen>
 
   Widget _buildHeader() {
     return Container(
-      padding: const EdgeInsets.only(top: 40, left: 16, right: 16, bottom: 10),
+      padding: const EdgeInsetsDirectional.only(top: 40, start: 16, end: 16, bottom: 10),
       decoration: const BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(16),
-          topRight: Radius.circular(16),
+        borderRadius: BorderRadiusDirectional.only(
+          topStart: Radius.circular(16),
+          topEnd: Radius.circular(16),
         ),
       ),
       child: Column(
@@ -285,14 +285,14 @@ class _GroceryCustomizationScreenState extends State<GroceryCustomizationScreen>
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Choose your variant*',
+          AppTranslations.chooseYourVariant,
           style: AppTextStyles.productTitle.copyWith(
             color: const Color(0xFF242424),
           ),
         ),
         const SizedBox(height: 4),
         Text(
-          'Required | Select any 1',
+          AppTranslations.requiredSelectAny1,
           style: AppTextStyles.restaurantDescription.copyWith(
             color: const Color(0xFF6E4185),
           ),
@@ -386,14 +386,14 @@ class _GroceryCustomizationScreenState extends State<GroceryCustomizationScreen>
                 ),
                 if (isOutOfStock)
                   Text(
-                    'Out of Stock',
+                    AppTranslations.outOfStockTitle,
                     style: AppTextStyles.restaurantDescription.copyWith(
                       color: Colors.red,
                     ),
                   )
                 else if (sizeData.availableStock < 10)
                   Text(
-                    'Only ${sizeData.availableStock} left',
+                    AppTranslations.onlyNLeft('${sizeData.availableStock}'),
                     style: AppTextStyles.restaurantDescription.copyWith(
                       color: Colors.orange,
                     ),
@@ -484,7 +484,7 @@ class _GroceryCustomizationScreenState extends State<GroceryCustomizationScreen>
                 child: ElevatedButton(
                   onPressed: () {
                     if (state.selectedSizeData == null) {
-                      BlackToastView.show(context, 'Please select a variant');
+                      BlackToastView.show(context, AppTranslations.pleaseSelectVariant);
                       return;
                     }
                     
@@ -513,7 +513,7 @@ class _GroceryCustomizationScreenState extends State<GroceryCustomizationScreen>
                     ),
                   ),
                   child: Text(
-                    'Add',
+                    AppTranslations.add,
                     style: AppTextStyles.button.copyWith(
                             color: Colors.white,
                             fontWeight: FontWeight.w700,

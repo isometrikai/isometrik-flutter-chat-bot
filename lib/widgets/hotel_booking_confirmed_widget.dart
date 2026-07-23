@@ -23,7 +23,7 @@ class HotelBookingConfirmedWidget extends StatelessWidget {
     if (items.isEmpty) return const SizedBox.shrink();
 
     return Align(
-      alignment: Alignment.centerLeft,
+      alignment: AlignmentDirectional.centerStart,
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 294),
         child: Column(
@@ -53,7 +53,7 @@ class _ConfirmedCard extends StatelessWidget {
 
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(15, 20, 15, 20),
+      padding: const EdgeInsetsDirectional.fromSTEB(15, 20, 15, 20),
       decoration: BoxDecoration(
         color: Colors.white,
         border: Border.all(color: HotelBookingConfirmedWidget._borderColor),
@@ -93,7 +93,7 @@ class _ConfirmedCard extends StatelessWidget {
                 color: HotelBookingConfirmedWidget._detailsBackground,
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: _IdRow(label: 'Booking ID', value: bookingId),
+              child: _IdRow(label: AppTranslations.bookingId, value: bookingId),
             ),
           ],
         ],

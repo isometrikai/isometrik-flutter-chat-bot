@@ -21,7 +21,7 @@ class CustomerProfileDetailsWidget extends StatelessWidget {
     if (items.isEmpty) return const SizedBox.shrink();
 
     return Align(
-      alignment: Alignment.centerLeft,
+      alignment: AlignmentDirectional.centerStart,
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 294),
         child: Column(
@@ -46,7 +46,7 @@ class _ProfileDetailsCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final headerTitle =
-        details.title.isNotEmpty ? details.title : 'Your Details';
+        details.title.isNotEmpty ? details.title : AppTranslations.yourDetails;
 
     return Container(
       width: double.infinity,
@@ -80,13 +80,13 @@ class _ProfileDetailsCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 if (details.name.isNotEmpty) ...[
-                  _DetailLine(emoji: '👤', label: 'Name', value: details.name),
+                  _DetailLine(emoji: '👤', label: AppTranslations.name, value: details.name),
                   const SizedBox(height: 10),
                 ],
                 if (details.contact.isNotEmpty) ...[
                   _DetailLine(
                     emoji: '📞',
-                    label: 'Contact',
+                    label: AppTranslations.contact,
                     value: details.contact,
                   ),
                   const SizedBox(height: 10),
@@ -94,7 +94,7 @@ class _ProfileDetailsCard extends StatelessWidget {
                 if (details.email.isNotEmpty)
                   _DetailLine(
                     emoji: '📧',
-                    label: 'Email',
+                    label: AppTranslations.email,
                     value: details.email,
                   ),
               ],

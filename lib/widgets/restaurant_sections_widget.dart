@@ -38,11 +38,11 @@ class RestaurantSectionsWidget extends StatelessWidget {
         ?.storeName;
 
     return Align(
-      alignment: Alignment.centerLeft,
+      alignment: AlignmentDirectional.centerStart,
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 294),
         child: Container(
-          padding: const EdgeInsets.only(left: 15, right: 15, top: 20, bottom: 15),
+          padding: const EdgeInsetsDirectional.only(start: 15, end: 15, top: 20, bottom: 15),
           decoration: BoxDecoration(
             color: Colors.white,
             border: Border.all(color: const Color(0xFFE9DFFB)),
@@ -87,7 +87,7 @@ class RestaurantSectionsWidget extends StatelessWidget {
                       height: 1.2,
                     ),
                   ),
-                  child: const Text('View more Photos'),
+                  child: Text(AppTranslations.viewMorePhotos),
                 ),
               ),
             ],

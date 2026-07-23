@@ -122,13 +122,33 @@ class _SelectTimeScreenState extends State<SelectTimeScreen> {
   }
   
   String _formatDayAbbreviation(DateTime date) {
-    final weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    final weekdays = [
+      AppTranslations.weekdayMonShort,
+      AppTranslations.weekdayTueShort,
+      AppTranslations.weekdayWedShort,
+      AppTranslations.weekdayThuShort,
+      AppTranslations.weekdayFriShort,
+      AppTranslations.weekdaySatShort,
+      AppTranslations.weekdaySunShort,
+    ];
     return weekdays[date.weekday - 1];
   }
   
   String _formatMonthDay(DateTime date) {
-    final months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-                   'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    final months = [
+      AppTranslations.monthJanShort,
+      AppTranslations.monthFebShort,
+      AppTranslations.monthMarShort,
+      AppTranslations.monthAprShort,
+      AppTranslations.monthMayShort,
+      AppTranslations.monthJunShort,
+      AppTranslations.monthJulShort,
+      AppTranslations.monthAugShort,
+      AppTranslations.monthSepShort,
+      AppTranslations.monthOctShort,
+      AppTranslations.monthNovShort,
+      AppTranslations.monthDecShort,
+    ];
     return '${months[date.month - 1]} ${date.day}';
   }
   
@@ -210,12 +230,28 @@ class _SelectTimeScreenState extends State<SelectTimeScreen> {
 
   /// Formats [dateTime] (in local timezone) as "Friday, February 27, 2026 at 3:36 PM".
   String _formatDateTimeLocal(DateTime dateTime) {
-    const weekdays = [
-      'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'
+    final weekdays = [
+      AppTranslations.weekdayMonday,
+      AppTranslations.weekdayTuesday,
+      AppTranslations.weekdayWednesday,
+      AppTranslations.weekdayThursday,
+      AppTranslations.weekdayFriday,
+      AppTranslations.weekdaySaturday,
+      AppTranslations.weekdaySunday,
     ];
-    const months = [
-      'January', 'February', 'March', 'April', 'May', 'June',
-      'July', 'August', 'September', 'October', 'November', 'December'
+    final months = [
+      AppTranslations.monthJanuary,
+      AppTranslations.monthFebruary,
+      AppTranslations.monthMarch,
+      AppTranslations.monthApril,
+      AppTranslations.monthMay,
+      AppTranslations.monthJune,
+      AppTranslations.monthJuly,
+      AppTranslations.monthAugust,
+      AppTranslations.monthSeptember,
+      AppTranslations.monthOctober,
+      AppTranslations.monthNovember,
+      AppTranslations.monthDecember,
     ];
     final weekday = weekdays[dateTime.weekday - 1];
     final month = months[dateTime.month - 1];
@@ -226,8 +262,15 @@ class _SelectTimeScreenState extends State<SelectTimeScreen> {
     final isPm = hour >= 12;
     final hour12 = hour == 0 ? 12 : (hour > 12 ? hour - 12 : hour);
     final minuteStr = minute.toString().padLeft(2, '0');
-    final period = isPm ? 'PM' : 'AM';
-    return '$weekday, $month $day, $year at $hour12:$minuteStr $period';
+    final period = isPm ? AppTranslations.pm : AppTranslations.am;
+    return AppTranslations.dateFormatFull(
+      weekday,
+      month,
+      day.toString(),
+      year.toString(),
+      '$hour12:$minuteStr',
+      period,
+    );
   }
 
   String _formatIsoDate(DateTime date) {
@@ -254,19 +297,19 @@ class _SelectTimeScreenState extends State<SelectTimeScreen> {
   }
 
   String _formatMonthDayOrdinal(DateTime date) {
-    const months = [
-      'January',
-      'February',
-      'March',
-      'April',
-      'May',
-      'June',
-      'July',
-      'August',
-      'September',
-      'October',
-      'November',
-      'December',
+    final months = [
+      AppTranslations.monthJanuary,
+      AppTranslations.monthFebruary,
+      AppTranslations.monthMarch,
+      AppTranslations.monthApril,
+      AppTranslations.monthMay,
+      AppTranslations.monthJune,
+      AppTranslations.monthJuly,
+      AppTranslations.monthAugust,
+      AppTranslations.monthSeptember,
+      AppTranslations.monthOctober,
+      AppTranslations.monthNovember,
+      AppTranslations.monthDecember,
     ];
     final month = months[date.month - 1];
     final suffix = _dayOrdinalSuffix(date.day);
@@ -329,9 +372,9 @@ class _SelectTimeScreenState extends State<SelectTimeScreen> {
       ),
       decoration: const BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(16),
-          topRight: Radius.circular(16),
+        borderRadius: BorderRadiusDirectional.only(
+          topStart: Radius.circular(16),
+          topEnd: Radius.circular(16),
         ),
       ),
       child: Padding(
@@ -341,7 +384,7 @@ class _SelectTimeScreenState extends State<SelectTimeScreen> {
           children: [
             // Header section
             Padding(
-              padding: const EdgeInsets.fromLTRB(16, 40, 16, 16),
+              padding: const EdgeInsetsDirectional.fromSTEB(16, 40, 16, 16),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -350,7 +393,7 @@ class _SelectTimeScreenState extends State<SelectTimeScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Select Date & Time',
+                          AppTranslations.selectDateAndTime,
                           style: AppTextStyles.heading(
                             fontSize: 24,
                             fontWeight: FontWeight.w700,
@@ -361,7 +404,7 @@ class _SelectTimeScreenState extends State<SelectTimeScreen> {
                         ),
                         const SizedBox(height: 12),
                         Text(
-                          'Select a date and time as per your convenience',
+                          AppTranslations.selectDateTimeSubtitle,
                           style: AppTextStyles.body(
                             fontSize: 14,
                             fontWeight: FontWeight.w400,
@@ -414,7 +457,7 @@ class _SelectTimeScreenState extends State<SelectTimeScreen> {
                                       selectedDate?.year == date.year;
                     
                     return Padding(
-                      padding: EdgeInsets.only(right: index < availableDates.length - 1 ? 7 : 0),
+                      padding: EdgeInsetsDirectional.only(end: index < availableDates.length - 1 ? 7 : 0),
                       child: GestureDetector(
                         onTap: () => _onDateSelected(date),
                         child: Container(
@@ -488,7 +531,7 @@ class _SelectTimeScreenState extends State<SelectTimeScreen> {
                 ),
                 child: Container(
                   margin: const EdgeInsets.symmetric(horizontal: 16),
-                  padding: const EdgeInsets.fromLTRB(10, 15, 10, 15),
+                  padding: const EdgeInsetsDirectional.fromSTEB(10, 15, 10, 15),
                   decoration: BoxDecoration(
                     color: Colors.white,
                     border: Border.all(
@@ -506,7 +549,7 @@ class _SelectTimeScreenState extends State<SelectTimeScreen> {
                       : timeSlots.isEmpty
                           ? Center(
                               child: Text(
-                                'No time slots available',
+                                AppTranslations.noTimeSlotsAvailable,
                                 style: AppTextStyles.body(
                                   fontSize: 14,
                                   fontWeight: FontWeight.w400,
@@ -543,7 +586,7 @@ class _SelectTimeScreenState extends State<SelectTimeScreen> {
                                             color: const Color(0xFF242424),
                                             height: 1.4,
                                           ),
-                                          textAlign: TextAlign.left,
+                                          textAlign: TextAlign.start,
                                         ),
                                       ),
                                       const SizedBox(width: 16),
@@ -598,7 +641,7 @@ class _SelectTimeScreenState extends State<SelectTimeScreen> {
                     child: Container(
                       alignment: Alignment.center,
                       child: Text(
-                        'Confirm',
+                        AppTranslations.confirm,
                         style: AppTextStyles.body(
                           fontSize: 16,
                           fontWeight: FontWeight.w700,

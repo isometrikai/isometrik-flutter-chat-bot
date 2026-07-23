@@ -25,7 +25,7 @@ class CarOrderSummaryWidget extends StatelessWidget {
     if (items.isEmpty) return const SizedBox.shrink();
 
     return Align(
-      alignment: Alignment.centerLeft,
+      alignment: AlignmentDirectional.centerStart,
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 294),
         child: Column(
@@ -62,7 +62,7 @@ class _CarBookingSummaryCard extends StatelessWidget {
     final locationLine = _locationLine();
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(0.5, 0.5, 0.5, 1),
+      padding: const EdgeInsetsDirectional.fromSTEB(0.5, 0.5, 0.5, 1),
       child: CustomPaint(
         painter: _ReceiptCardPainter(
           borderColor: CarOrderSummaryWidget._borderColor,
@@ -71,12 +71,12 @@ class _CarBookingSummaryCard extends StatelessWidget {
           scallopRadius: 6,
         ),
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(15, 20, 15, 30),
+          padding: const EdgeInsetsDirectional.fromSTEB(15, 20, 15, 30),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Booking summary',
+                AppTranslations.bookingSummary,
                 style: AppTextStyles.bodyText.copyWith(
                   fontSize: 14,
                   fontWeight: FontWeight.w700,
@@ -116,7 +116,7 @@ class _CarBookingSummaryCard extends StatelessWidget {
                 children: [
                   Expanded(
                     child: Text(
-                      'Total to pay',
+                      AppTranslations.totalToPay,
                       style: AppTextStyles.bodyText.copyWith(
                         fontSize: 14,
                         fontWeight: FontWeight.w700,
@@ -190,7 +190,7 @@ class _CarBookingSummaryCard extends StatelessWidget {
     final returnLabel = Utility.formatHotelDateShort(returnDate);
 
     if (days != null && days > 0) {
-      return '📅 $days day${days == 1 ? '' : 's'} ($pickupLabel - $returnLabel)';
+      return '📅 ${AppTranslations.forNDays(days.toString())} ($pickupLabel - $returnLabel)';
     }
     return '📅 $pickupLabel - $returnLabel';
   }

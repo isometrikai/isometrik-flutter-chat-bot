@@ -25,7 +25,7 @@ class FlightOrderSummaryWidget extends StatelessWidget {
     if (items.isEmpty) return const SizedBox.shrink();
 
     return Align(
-      alignment: Alignment.centerLeft,
+      alignment: AlignmentDirectional.centerStart,
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 294),
         child: Column(
@@ -69,7 +69,7 @@ class _FlightBookingSummaryCard extends StatelessWidget {
     );
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(0.5, 0.5, 0.5, 1),
+      padding: const EdgeInsetsDirectional.fromSTEB(0.5, 0.5, 0.5, 1),
       child: CustomPaint(
         painter: _ReceiptCardPainter(
           borderColor: FlightOrderSummaryWidget._borderColor,
@@ -78,12 +78,12 @@ class _FlightBookingSummaryCard extends StatelessWidget {
           scallopRadius: 6,
         ),
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(15, 20, 15, 30),
+          padding: const EdgeInsetsDirectional.fromSTEB(15, 20, 15, 30),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Booking summary',
+                AppTranslations.bookingSummary,
                 style: AppTextStyles.bodyText.copyWith(
                   fontSize: 14,
                   fontWeight: FontWeight.w700,
@@ -140,7 +140,7 @@ class _FlightBookingSummaryCard extends StatelessWidget {
                 children: [
                   Expanded(
                     child: Text(
-                      'Total to pay',
+                      AppTranslations.totalToPay,
                       style: AppTextStyles.bodyText.copyWith(
                         fontSize: 14,
                         fontWeight: FontWeight.w700,
@@ -282,9 +282,9 @@ class _FlightBookingSummaryCard extends StatelessWidget {
 
     final normalized = route.toLowerCase();
     if (normalized.contains('round') || normalized.contains('return')) {
-      return '🔁 Round Trip';
+      return '🔁 ${AppTranslations.roundTrip}';
     }
-    if (normalized.contains('one')) return '🔁 One Way';
+    if (normalized.contains('one')) return '🔁 ${AppTranslations.oneWay}';
     return '🔁 $route';
   }
 
@@ -317,7 +317,7 @@ class _FlightBookingSummaryCard extends StatelessWidget {
     if (parts.isEmpty) {
       final total = summary.tripInfo.totalTravellers;
       if (total > 0) {
-        parts.add('$total Traveller${total == 1 ? '' : 's'}');
+        parts.add(AppTranslations.travellerCount(total.toString()));
       }
     }
 
@@ -407,14 +407,14 @@ class _FlightBookingSummaryCard extends StatelessWidget {
     } else if (summary.basePrice > 0) {
       final adults = _passengerCount('ADULT');
       final label = adults > 0
-          ? 'Base Fare ($adults Adult${adults == 1 ? '' : 's'})'
-          : 'Base Fare';
+          ? AppTranslations.baseFareAdults(adults.toString())
+          : AppTranslations.baseFare;
       lines.add(_PriceLine(label: label, amount: summary.basePrice));
     }
 
     if (summary.taxAndFees > 0) {
       lines.add(
-        _PriceLine(label: 'Taxes & Fees', amount: summary.taxAndFees),
+        _PriceLine(label: AppTranslations.taxesAndFees, amount: summary.taxAndFees),
       );
     }
 
@@ -435,8 +435,8 @@ class _FlightBookingSummaryCard extends StatelessWidget {
     if (promoAmount == null || promoAmount <= 0) return null;
 
     final label = promoCode.isNotEmpty
-        ? 'Promo Discount ($promoCode)'
-        : 'Promo Discount';
+        ? AppTranslations.promoDiscountCode(promoCode)
+        : AppTranslations.promoDiscount;
     return _PriceLine(label: label, amount: promoAmount);
   }
 
@@ -468,13 +468,13 @@ class _FlightBookingSummaryCard extends StatelessWidget {
     switch (fare.type.toUpperCase()) {
       case 'ADT':
       case 'ADULT':
-        return 'Base Fare (${fare.quantity} Adult${fare.quantity == 1 ? '' : 's'})';
+        return AppTranslations.baseFareAdults(fare.quantity.toString());
       case 'CHD':
       case 'CHILD':
-        return 'Children Fare (${fare.quantity} Child${fare.quantity == 1 ? '' : 'ren'})';
+        return AppTranslations.childrenFare(fare.quantity.toString());
       case 'INF':
       case 'INFANT':
-        return 'Infants Fare (${fare.quantity} Infant${fare.quantity == 1 ? '' : 's'})';
+        return AppTranslations.infantsFare(fare.quantity.toString());
       default:
         return '${fare.type} (${fare.quantity})';
     }

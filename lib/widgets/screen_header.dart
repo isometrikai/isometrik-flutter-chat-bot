@@ -63,7 +63,7 @@ class ScreenHeader extends StatelessWidget {
                 width: 40,
                 height: 40,
               ),
-              padding: EdgeInsets.fromLTRB(0, 0, 0, 0),
+              padding: EdgeInsets.zero,
               // onPressed: onClose ?? () => Navigator.of(context).maybePop(),
               onPressed: onClose,
             ),

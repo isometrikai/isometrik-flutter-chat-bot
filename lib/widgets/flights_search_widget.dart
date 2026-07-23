@@ -98,7 +98,7 @@ class _FlightSearchCard extends StatelessWidget {
     final isRoundTrip = segments.length > 1;
 
     final card = Align(
-      alignment: Alignment.centerLeft,
+      alignment: AlignmentDirectional.centerStart,
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 343),
         child: Container(
@@ -304,13 +304,13 @@ class _FlightSearchCard extends StatelessWidget {
         SizedBox(
           height: 12,
           child: Stack(
-            alignment: Alignment.centerRight,
+            alignment: AlignmentDirectional.centerEnd,
             children: [
               Align(
                 alignment: Alignment.center,
                 child: Container(
                   height: 4,
-                  margin: const EdgeInsets.only(right: 6),
+                  margin: const EdgeInsetsDirectional.only(end: 6),
                   decoration: BoxDecoration(
                     color: _pathLineColor,
                     borderRadius: BorderRadius.circular(10),
@@ -364,7 +364,7 @@ class _FlightSearchCard extends StatelessWidget {
             children: [
               _buildAmenityRow(
                 icon: Icons.restaurant,
-                label: 'Complimentary Cuisine',
+                label: AppTranslations.complimentaryCuisine,
               ),
               if (baggageLabel.isNotEmpty) ...[
                 const SizedBox(height: 3),
@@ -396,7 +396,7 @@ class _FlightSearchCard extends StatelessWidget {
             ),
             const SizedBox(height: 2),
             Text(
-              'Per Adult',
+              AppTranslations.perAdult,
               style: AppTextStyles.bodyText.copyWith(
                 fontSize: 10,
                 fontWeight: FontWeight.w400,
@@ -457,7 +457,7 @@ class _FlightSearchCard extends StatelessWidget {
           ),
           const SizedBox(width: 5),
           Text(
-            'Open in Eazy app',
+            AppTranslations.openInEazyApp,
             style: AppTextStyles.bodyText.copyWith(
               fontSize: 12,
               fontWeight: FontWeight.w400,
@@ -485,9 +485,9 @@ class _FlightSearchCard extends StatelessWidget {
   }
 
   static String _stopsLabel(FlightSearchSegment segment) {
-    if (segment.stops.isEmpty) return 'Non-stop';
-    if (segment.stops.length == 1) return '1 stop';
-    return '${segment.stops.length} stops';
+    if (segment.stops.isEmpty) return AppTranslations.nonStop;
+    if (segment.stops.length == 1) return AppTranslations.oneStop;
+    return AppTranslations.nStops(segment.stops.length.toString());
   }
 
   static String _baggageLabel(FlightSearchCabin cabin) {
@@ -509,17 +509,17 @@ class _FlightSearchCard extends StatelessWidget {
         final cabinBag = int.tryParse(cabinQty ?? '0') ?? 0;
 
         if (checkIn > 0) {
-          return 'Check-in $checkIn kg';
+          return AppTranslations.checkInKg(checkIn.toString());
         }
         if (checkIn <= 0 && cabinBag > 0) {
-          return 'Hand bag only';
+          return AppTranslations.handBagOnly;
         }
         if (cabinBag > 0) {
-          return 'Cabin bag $cabinBag kg';
+          return AppTranslations.cabinBagKg(cabinBag.toString());
         }
       }
     }
-    return 'Hand bag only';
+    return AppTranslations.handBagOnly;
   }
 
   static String _formatPrice(String currency, double value) {

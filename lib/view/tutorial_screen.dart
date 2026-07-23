@@ -121,12 +121,12 @@ class _TutorialScreenState extends State<TutorialScreen> {
         children: [
           if (_currentPage > 0)
             Align(
-              alignment: Alignment.centerLeft,
+              alignment: AlignmentDirectional.centerStart,
               child: GestureDetector(
                 onTap: _previousPage,
                 behavior: HitTestBehavior.opaque,
                 child: Padding(
-                  padding: const EdgeInsets.only(right: 8),
+                  padding: const EdgeInsetsDirectional.only(end: 8),
                   child: SvgPicture.asset(
                     AssetPath.get('images/ic_previous.svg'),
                     width: 24,
@@ -170,7 +170,7 @@ class _TutorialScreenState extends State<TutorialScreen> {
           ),
           if (_currentPage != 4)
             Align(
-              alignment: Alignment.centerRight,
+              alignment: AlignmentDirectional.centerEnd,
               child: GestureDetector(
             onTap: () {
               OrderService().triggerTutorialDismiss();
@@ -195,7 +195,7 @@ class _TutorialScreenState extends State<TutorialScreen> {
                 borderRadius: BorderRadius.circular(80),
               ),
               child:  Text(
-                'Skip',
+                AppTranslations.skip,
                 style:
                 AppTextStyles.restaurantDescription.copyWith(
                   fontSize: 12,
@@ -215,7 +215,7 @@ class _TutorialScreenState extends State<TutorialScreen> {
     return Column(
       children: [
          Text(
-          'Welcome to your\neazy assistant!',
+          AppTranslations.welcomeEazyAssistant,
           textAlign: TextAlign.center,
           style: AppTextStyles.restaurantTitle.copyWith(
             fontSize: 24,
@@ -226,7 +226,7 @@ class _TutorialScreenState extends State<TutorialScreen> {
         ),
         const SizedBox(height: 6),
          Text(
-          'Your AI Personal Assistant for everyday life',
+          AppTranslations.aiPersonalAssistantTagline,
           textAlign: TextAlign.center,
           style: 
           AppTextStyles.restaurantDescription.copyWith(
@@ -333,7 +333,7 @@ class _TutorialScreenState extends State<TutorialScreen> {
     return Column(
       children: [
          Text(
-          'What can I help you with today?',
+          AppTranslations.whatCanIHelpToday,
           textAlign: TextAlign.center,
           style: 
           AppTextStyles.restaurantTitle.copyWith(
@@ -345,7 +345,7 @@ class _TutorialScreenState extends State<TutorialScreen> {
         ),
         const SizedBox(height: 12),
          Text(
-          'Explore all available services',
+          AppTranslations.exploreAllServices,
           textAlign: TextAlign.center,
           style: 
           AppTextStyles.restaurantDescription.copyWith(
@@ -363,36 +363,36 @@ class _TutorialScreenState extends State<TutorialScreen> {
     return Column(
       children: [
         _buildServiceCard(
-          title: 'Food',
-          description: 'Order from 1000+ restaurants',
+          title: AppTranslations.labelFood,
+          description: AppTranslations.svcDescFood,
           emoji: '🍕',
           iconPath: 'ic_food.svg',
         ),
         const SizedBox(height: 16),
         _buildServiceCard(
-          title: 'Groceries',
-          description: 'Fresh produce delivered',
+          title: AppTranslations.labelGroceries,
+          description: AppTranslations.svcDescGroceries,
           emoji: '🥑',
           iconPath: 'ic_Groceries.svg',
         ),
         const SizedBox(height: 16),
         _buildServiceCard(
-          title: 'Pharmacy',
-          description: 'Medicines & health products',
+          title: AppTranslations.labelPharmacy,
+          description: AppTranslations.svcDescPharmacy,
           emoji: '💊',
           iconPath: 'ic_pharmacy.svg',
         ),
         const SizedBox(height: 16),
         _buildServiceCard(
-          title: 'Shopping',
-          description: 'Browse products & deals',
+          title: AppTranslations.labelShopping,
+          description: AppTranslations.svcDescShopping,
           emoji: '🛍️',
           iconPath: 'ic_shopping_s.svg',
         ),
         const SizedBox(height: 16),
         _buildServiceCard(
-          title: 'Services',
-          description: 'Book appointments & more',
+          title: AppTranslations.labelServices,
+          description: AppTranslations.svcDescServices,
           emoji: '🔧',
           iconPath: 'ic_services.svg',
         ),
@@ -534,15 +534,15 @@ class _TutorialScreenState extends State<TutorialScreen> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            _benefitItem(Icons.check_circle, 'Active 24/7'),
+            _benefitItem(Icons.check_circle, AppTranslations.benefitActive247),
             const SizedBox(width: 12),
             _divider(),
             const SizedBox(width: 12),
-            _benefitItem(Icons.schedule, '<2s response'),
+            _benefitItem(Icons.schedule, AppTranslations.benefitUnder2s),
             const SizedBox(width: 12),
             _divider(),
             const SizedBox(width: 12),
-            _benefitItem(Icons.people, '50k+ assisted'),
+            _benefitItem(Icons.people, AppTranslations.benefit50kAssisted),
           ],
         ),
       ),
@@ -576,7 +576,7 @@ class _TutorialScreenState extends State<TutorialScreen> {
     return Column(
       children: [
          Text(
-          'Ask Anything you want',
+          AppTranslations.askAnythingYouWant,
           textAlign: TextAlign.center,
           style: AppTextStyles.restaurantTitle.copyWith(
             fontSize: 20,
@@ -587,7 +587,7 @@ class _TutorialScreenState extends State<TutorialScreen> {
         ),
         const SizedBox(height: 12),
            Text(
-          'Natural conversation, smart answers',
+          AppTranslations.naturalConversation,
           textAlign: TextAlign.center,
           style: AppTextStyles.restaurantDescription.copyWith(
             fontSize: 14,
@@ -598,7 +598,7 @@ class _TutorialScreenState extends State<TutorialScreen> {
         ),
         const SizedBox(height: 12),
            Text(
-          'Just type naturally- ask questions, get recommendations, explore things, or have a friendly chat. Eazy understands context and provided helpful responses.',
+          AppTranslations.askNaturallyBody,
           textAlign: TextAlign.center,
           style: AppTextStyles.restaurantDescription.copyWith(
             fontSize: 14,
@@ -658,17 +658,17 @@ class _TutorialScreenState extends State<TutorialScreen> {
   }
 
   Widget _buildSpeakNaturallyCard() {
-    const bubbleTexts = [
-      'Need groceries for the week',
-      'Book a haircut for tomorrow',
-      'Show me electronics deals',
-      'What are some health dinner ideas?',
-      'I need medicine for headache',
+    final bubbleTexts = [
+      AppTranslations.exampleNeedGroceries,
+      AppTranslations.exampleBookHaircut,
+      AppTranslations.exampleElectronicsDeals,
+      AppTranslations.exampleHealthyDinner,
+      AppTranslations.exampleMedicineHeadache,
     ];
 
     return Container(
       width: 327,
-      padding: const EdgeInsets.fromLTRB(15, 24, 15, 24),
+      padding: const EdgeInsetsDirectional.fromSTEB(15, 24, 15, 24),
       decoration: BoxDecoration(
         color: const Color(0xFFF8FAFF),
         border: Border.all(color: const Color(0xFFE0EBFF), width: 1),
@@ -698,7 +698,7 @@ class _TutorialScreenState extends State<TutorialScreen> {
   Widget _buildPersonalizedHelpCard() {
     return Container(
       width: 327,
-      padding: const EdgeInsets.fromLTRB(24, 24, 15, 24),
+      padding: const EdgeInsetsDirectional.fromSTEB(24, 24, 15, 24),
       decoration: BoxDecoration(
         color: const Color(0xFFF5F7FF),
         borderRadius: BorderRadius.circular(16),
@@ -707,7 +707,7 @@ class _TutorialScreenState extends State<TutorialScreen> {
         mainAxisSize: MainAxisSize.min,
         children: [
            Text(
-            'Get personalized help',
+            AppTranslations.getPersonalizedHelp,
             style: 
             AppTextStyles.restaurantTitle.copyWith(
               fontSize: 16,
@@ -718,7 +718,7 @@ class _TutorialScreenState extends State<TutorialScreen> {
           ),
           const SizedBox(height: 8),
            Text(
-            "I'll ask follow-up questions to understand exactly what you need",
+            AppTranslations.followUpQuestions,
             textAlign: TextAlign.center,
             style: 
             AppTextStyles.restaurantDescription.copyWith(
@@ -743,7 +743,7 @@ class _TutorialScreenState extends State<TutorialScreen> {
       ),
       child: Text(
         text,
-        textAlign: alignRight ? TextAlign.right : TextAlign.left,
+        textAlign: alignRight ? TextAlign.end : TextAlign.start,
         style: AppTextStyles.restaurantDescription.copyWith(
           fontSize: 12,
           fontWeight: FontWeight.w400,
@@ -781,7 +781,7 @@ class _TutorialScreenState extends State<TutorialScreen> {
     return Column(
       children: [
          Text(
-          'Example conversations',
+          AppTranslations.exampleConversations,
           textAlign: TextAlign.center,
           style: AppTextStyles.restaurantTitle.copyWith(
             fontSize: 20,
@@ -792,7 +792,7 @@ class _TutorialScreenState extends State<TutorialScreen> {
         ),
         const SizedBox(height: 12),
          Text(
-          'See how easy it is to get things done',
+          AppTranslations.seeHowEasy,
           textAlign: TextAlign.center,
           style: AppTextStyles.restaurantDescription.copyWith(
             fontSize: 14,
@@ -835,7 +835,7 @@ class _TutorialScreenState extends State<TutorialScreen> {
             mainAxisSize: MainAxisSize.min,
             children: [
                Text(
-                'Food order',
+                AppTranslations.foodOrder,
                 style: AppTextStyles.restaurantTitle.copyWith(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
@@ -854,7 +854,7 @@ class _TutorialScreenState extends State<TutorialScreen> {
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
                       Flexible(
-                        child: _buildUserMessage("I want to order dinner for 4 people"),
+                        child: _buildUserMessage(AppTranslations.demoUserOrderDinner),
                       ),
                     ],
                   ),
@@ -865,7 +865,7 @@ class _TutorialScreenState extends State<TutorialScreen> {
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: [
                       Flexible(
-                        child: _buildBotMessage("Great! What type of cuisine are you in the mood for?"),
+                        child: _buildBotMessage(AppTranslations.demoBotCuisine),
                       ),
                     ],
                   ),
@@ -876,7 +876,7 @@ class _TutorialScreenState extends State<TutorialScreen> {
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
                       Flexible(
-                        child: _buildUserMessage("Something spicy, maybe Arabic"),
+                        child: _buildUserMessage(AppTranslations.demoUserSpicyArabic),
                       ),
                     ],
                   ),
@@ -887,7 +887,7 @@ class _TutorialScreenState extends State<TutorialScreen> {
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: [
                       Flexible(
-                        child: _buildBotMessage("Perfect! I found 5 top-rated Arabic restaurants nearby. Here are your options..."),
+                        child: _buildBotMessage(AppTranslations.demoBotFoundRestaurants),
                       ),
                     ],
                   ),
@@ -898,8 +898,8 @@ class _TutorialScreenState extends State<TutorialScreen> {
         ),
         
         // Pizza emoji decoration (top right)
-        Positioned(
-          right: 2,
+        PositionedDirectional(
+          end: 2,
           top: 65,
           child: Transform.rotate(
             angle: 0.32, // 18.09 degrees in radians
@@ -911,8 +911,8 @@ class _TutorialScreenState extends State<TutorialScreen> {
         ),
         
         // Hamburger emoji decoration (bottom left)
-        Positioned(
-          left: 2,
+        PositionedDirectional(
+          start: 2,
           bottom: 60,
           child: Transform.rotate(
             angle: 0.32, // 18.09 degrees in radians
@@ -942,7 +942,7 @@ class _TutorialScreenState extends State<TutorialScreen> {
             mainAxisSize: MainAxisSize.min,
             children: [
                  Text(
-                'Grocery Shopping',
+                AppTranslations.groceryShopping,
                 style: AppTextStyles.restaurantTitle.copyWith(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
@@ -961,7 +961,7 @@ class _TutorialScreenState extends State<TutorialScreen> {
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
                       Flexible(
-                        child: _buildUserMessage("Need groceries for breakfast this week"),
+                        child: _buildUserMessage(AppTranslations.demoUserBreakfastGroceries),
                       ),
                     ],
                   ),
@@ -972,7 +972,7 @@ class _TutorialScreenState extends State<TutorialScreen> {
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: [
                       Flexible(
-                        child: _buildBotMessage("I can help! What do you usually have for breakfast?"),
+                        child: _buildBotMessage(AppTranslations.demoBotBreakfast),
                       ),
                     ],
                   ),
@@ -983,7 +983,7 @@ class _TutorialScreenState extends State<TutorialScreen> {
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
                       Flexible(
-                        child: _buildUserMessage("Bread, milk, eggs, and some fruits"),
+                        child: _buildUserMessage(AppTranslations.demoUserBreadMilk),
                       ),
                     ],
                   ),
@@ -994,7 +994,7 @@ class _TutorialScreenState extends State<TutorialScreen> {
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: [
                       Flexible(
-                        child: _buildBotMessage("Added to cart: Whole wheat bread, fresh milk, free-range eggs, and seasonal fruits. Total: \$24.99"),
+                        child: _buildBotMessage(AppTranslations.demoBotAddedCart),
                       ),
                     ],
                   ),
@@ -1005,8 +1005,8 @@ class _TutorialScreenState extends State<TutorialScreen> {
         ),
         
         // Cucumber emoji decoration (top right)
-        Positioned(
-          right: 2,
+        PositionedDirectional(
+          end: 2,
           top: 70,
           child: Transform.rotate(
             angle: 0.33, // 18.65 degrees in radians
@@ -1018,8 +1018,8 @@ class _TutorialScreenState extends State<TutorialScreen> {
         ),
         
         // Avocado emoji decoration (bottom left)
-        Positioned(
-          left: 2,
+        PositionedDirectional(
+          start: 2,
           bottom: 60,
           child: Transform.rotate(
             angle: 0.32, // 18.09 degrees in radians
@@ -1050,7 +1050,7 @@ class _TutorialScreenState extends State<TutorialScreen> {
           color: Color(0xFF242424),
           height: 1.3,
         ),
-        textAlign: TextAlign.right,
+        textAlign: TextAlign.end,
         softWrap: true,
         overflow: TextOverflow.visible,
       ),
@@ -1073,7 +1073,7 @@ class _TutorialScreenState extends State<TutorialScreen> {
           height: 1.3,
           color: Color(0xFF242424)
         ),
-        textAlign: TextAlign.left,
+        textAlign: TextAlign.start,
         softWrap: true,
         overflow: TextOverflow.visible,
       ),
@@ -1107,7 +1107,7 @@ class _TutorialScreenState extends State<TutorialScreen> {
     return Column(
       children: [
          Text(
-          'Why choose eazy?',
+          AppTranslations.whyChooseEazy,
           textAlign: TextAlign.center,
           style: AppTextStyles.restaurantTitle.copyWith(
             fontSize: 20,
@@ -1118,7 +1118,7 @@ class _TutorialScreenState extends State<TutorialScreen> {
         ),
         const SizedBox(height: 12),
          Text(
-          'Smart features that make life easier',
+          AppTranslations.smartFeaturesEasier,
           textAlign: TextAlign.center,
           style: AppTextStyles.restaurantDescription.copyWith(
             fontSize: 14,
@@ -1137,38 +1137,38 @@ class _TutorialScreenState extends State<TutorialScreen> {
       children: [
         _buildFeatureCard(
           icon: 'ic_available.svg',
-          title: 'Available 24/7',
-          description: 'Order anytime, day or night. I never sleep!',
+          title: AppTranslations.featureAvailable247,
+          description: AppTranslations.featureAvailable247Desc,
         ),
         const SizedBox(height: 24),
         _buildFeatureCard(
           icon: 'ic_real_time.svg',
-          title: 'Real-time Updates',
-          description: 'Track your orders and get instant notifications',
+          title: AppTranslations.featureRealtimeUpdates,
+          description: AppTranslations.featureRealtimeUpdatesDesc,
         ),
         const SizedBox(height: 24),
         _buildFeatureCard(
           icon: 'ic_location.svg',
-          title: 'Location Smart',
-          description: 'Finds the best options near you automatically',
+          title: AppTranslations.featureLocationSmart,
+          description: AppTranslations.featureLocationSmartDesc,
         ),
         const SizedBox(height: 24),
         _buildFeatureCard(
           icon: 'ic_learns.svg',
-          title: 'Learns Your Preferences',
-          description: 'Remembers your favorite orders and suggests them',
+          title: AppTranslations.featureLearnsPrefs,
+          description: AppTranslations.featureLearnsPrefsDesc,
         ),
         const SizedBox(height: 24),
         _buildFeatureCard(
           icon: 'ic_best_quality.svg',
-          title: 'Best Quality',
-          description: 'Partners with top-rated stores only',
+          title: AppTranslations.featureBestQuality,
+          description: AppTranslations.featureBestQualityDesc,
         ),
         const SizedBox(height: 24),
         _buildFeatureCard(
           icon: 'ic_special_deals.svg',
-          title: 'Special Deals',
-          description: 'Exclusive discounts and offers just for you',
+          title: AppTranslations.featureSpecialDeals,
+          description: AppTranslations.featureSpecialDealsDesc,
         ),
       ],
     );
@@ -1269,7 +1269,7 @@ class _TutorialScreenState extends State<TutorialScreen> {
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Text(
-          'Register and create account',
+          AppTranslations.registerCreateAccount,
           textAlign: TextAlign.center,
           style: AppTextStyles.restaurantTitle.copyWith(
             fontWeight: FontWeight.w700,
@@ -1280,7 +1280,7 @@ class _TutorialScreenState extends State<TutorialScreen> {
         ),
         const SizedBox(height: 6),
         Text(
-          'To get full access!',
+          AppTranslations.toGetFullAccess,
           textAlign: TextAlign.center,
           style: AppTextStyles.restaurantDescription.copyWith(
             fontWeight: FontWeight.w400,
@@ -1294,16 +1294,16 @@ class _TutorialScreenState extends State<TutorialScreen> {
   }
 
   Widget _buildReadyToStartContent() {
-    const features = [
-      'Order from 1000+ restaurants',
-      'Shop groceries & products',
-      'Book appointment & services',
-      'Secure payments & tracking',
+    final features = [
+      AppTranslations.benefitOrderRestaurants,
+      AppTranslations.benefitShopGroceries,
+      AppTranslations.benefitBookAppointments,
+      AppTranslations.benefitSecurePayments,
     ];
 
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(51, 24, 51, 24),
+      padding: const EdgeInsetsDirectional.fromSTEB(51, 24, 51, 24),
       decoration: BoxDecoration(
         color: const Color(0xFFF5F7FF),
         borderRadius: BorderRadius.circular(16),
@@ -1360,11 +1360,11 @@ class _TutorialScreenState extends State<TutorialScreen> {
   Widget _buildExampleMessages() {
     return Column(
       children: [
-        _buildExampleMessage('Order me a healthy lunch'),
+        _buildExampleMessage(AppTranslations.exampleHealthyLunch),
         const SizedBox(height: 4),
-        _buildExampleMessage('I need cleaning service this weekend'),
+        _buildExampleMessage(AppTranslations.exampleCleaningWeekend),
         const SizedBox(height: 4),
-        _buildExampleMessage('Show me electronics deals'),
+        _buildExampleMessage(AppTranslations.exampleElectronicsDeals),
       ],
     );
   }
@@ -1380,7 +1380,7 @@ class _TutorialScreenState extends State<TutorialScreen> {
       ),
       child: Text(
         text,
-        textAlign: TextAlign.right,
+        textAlign: TextAlign.end,
         style: AppTextStyles.restaurantDescription.copyWith(
           fontSize: 12,
           fontWeight: FontWeight.w400,
@@ -1412,7 +1412,7 @@ class _TutorialScreenState extends State<TutorialScreen> {
         // ),
         // const SizedBox(height: 8),
          Text(
-          'Order food, shop groceries, buy medicines, book services, and more — all through simple conversations.',
+          AppTranslations.tutorialHeroBody,
           textAlign: TextAlign.center,
           style: AppTextStyles.restaurantDescription.copyWith(
             fontWeight: FontWeight.w400,
@@ -1452,7 +1452,7 @@ class _TutorialScreenState extends State<TutorialScreen> {
           const SizedBox(width: 11),
            Expanded(
             child: Text(
-              'Just chat naturally -\nI\'ll understand what you need!',
+              AppTranslations.justChatNaturally,
               style: AppTextStyles.restaurantDescription.copyWith(
                 fontWeight: FontWeight.w400,
                 fontSize: 14,
@@ -1471,7 +1471,7 @@ class _TutorialScreenState extends State<TutorialScreen> {
     if (_currentPage == 0) {
       return Container(
         width: double.infinity,
-        padding: const EdgeInsets.fromLTRB(24, 10, 24, 10),
+        padding: const EdgeInsetsDirectional.fromSTEB(24, 10, 24, 10),
         decoration: const BoxDecoration(
           color: Colors.white,
         ),
@@ -1497,7 +1497,7 @@ class _TutorialScreenState extends State<TutorialScreen> {
     // Regular navigation for other pages
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(24, 10, 24, 10),
+      padding: const EdgeInsetsDirectional.fromSTEB(24, 10, 24, 10),
       decoration: const BoxDecoration(
         color: Colors.white,
       ),
@@ -1518,7 +1518,7 @@ class _TutorialScreenState extends State<TutorialScreen> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
-                        'Register',
+                        AppTranslations.register,
                         style: AppTextStyles.restaurantTitle.copyWith(
                           fontSize: 16,
                           fontWeight: FontWeight.w700,

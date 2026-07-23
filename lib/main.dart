@@ -1,5 +1,6 @@
 import 'package:chat_bot/view/chat_screen.dart';
 import 'package:chat_bot/view/tutorial_screen.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:chat_bot/bloc/chat_bloc.dart';
@@ -8,47 +9,55 @@ import 'services/api_service.dart';
 import 'services/callback_manage.dart';
 import 'package:flutter/services.dart';
 import 'utils/asset_path.dart';
+import 'utils/app_locale.dart';
 import 'utils/utility.dart';
 import 'utils/app_theme.dart';
 import 'dart:async';
 
-void main() async {
+Future<void> _bootstrapAndRun() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
-  // Configure asset loading mode
-  // AssetPath.isPackageMode = true; // Set to true for package mode, false for normal project
-  
+  await EasyLocalization.ensureInitialized();
   await PlatformService.initializeFromPlatform();
-  
-  runApp(const MyApp());
+
+  runApp(
+    EasyLocalization(
+      supportedLocales: AppLocale.supportedLocales,
+      path: 'assets/translations',
+      fallbackLocale: const Locale('en'),
+      startLocale: Locale(Utility.getLanguage()),
+      useOnlyLangCode: true,
+      child: const MyApp(),
+    ),
+  );
+}
+
+void main() async {
+  // AssetPath.isPackageMode = true; // Set to true for package mode, false for normal project
+  await _bootstrapAndRun();
 }
 
 @pragma('vm:entry-point')
 void chatMain() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  
-  // Configure for package mode
   AssetPath.isPackageMode = true;
   print('STEP 2');
-  await PlatformService.initializeFromPlatform();
-  
-  runApp(const MyApp());
+  await _bootstrapAndRun();
 }
+
 class MyApp extends StatelessWidget {
   static const platform = MethodChannel('chat_bot/orders');
   const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    // Set up callbacks when app initializes
-    // _setupCallbacks();
     print('STEP 1');
-    // Set current context for fallback when navigator key is not available
     Utility.setCurrentContext(context);
-    
+
     return MaterialApp(
       title: 'Chat Bot',
       navigatorKey: kNavigatorKey,
+      locale: context.locale,
+      supportedLocales: context.supportedLocales,
+      localizationsDelegates: context.localizationDelegates,
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
       themeMode: ThemeMode.system,
@@ -57,12 +66,11 @@ class MyApp extends StatelessWidget {
           BlocProvider(create: (context) => ChatBloc()),
           BlocProvider(create: (context) => CartBloc()),
         ],
-        child: const ChatScreen()//TutorialScreen(currentStep: 1, totalSteps: 5),//const ChatScreen(),
-      ),//TutorialScreen(currentStep: 1, totalSteps: 5),//TutorialScreen(),//LaunchScreen(),//ChatScreen(),
+        child: const ChatScreen(), //TutorialScreen(currentStep: 1, totalSteps: 5),//const ChatScreen(),
+      ), //TutorialScreen(currentStep: 1, totalSteps: 5),//TutorialScreen(),//LaunchScreen(),//ChatScreen(),
       debugShowCheckedModeBanner: false,
     );
   }
-  
 }
 
 
@@ -118,6 +126,7 @@ class PlatformService {
         emailId: config['emailId'] ?? '',
         phoneNumber: config['phoneNumber'] ?? '',
         countryCode: config['countryCode'] ?? '',
+        language: config['language'] ?? 'en',
       );
 
       print('✅ ApiService configured successfully');
@@ -157,6 +166,7 @@ class PlatformService {
             zoneId: '636dfc8c89b6a857b500ccd1',//dubai
              currencycode: 'AED',//dubai
             currencysymbol: "2K8u2KU=",//"د.إ",//dubai
+            language: 'ar',
           );
           
 // in bottom need to set production data for testing

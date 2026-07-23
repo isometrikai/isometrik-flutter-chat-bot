@@ -1,6 +1,5 @@
 import 'package:chat_bot/data/model/universal_cart_response.dart' as cart_models;
-import 'package:chat_bot/utils/app_constants.dart';
-import 'package:chat_bot/utils/enum.dart';
+import '../utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:chat_bot/data/data.dart';
 import '../utils/text_styles.dart';
@@ -38,9 +37,9 @@ class _CustomizationSummaryScreenState extends State<CustomizationSummaryScreen>
   @override
   Widget build(BuildContext context) {
     return ClipRRect(
-      borderRadius: const BorderRadius.only(
-        topLeft: Radius.circular(16),
-        topRight: Radius.circular(16),
+      borderRadius: const BorderRadiusDirectional.only(
+        topStart: Radius.circular(16),
+        topEnd: Radius.circular(16),
       ),
       child: Container(
         constraints: BoxConstraints(
@@ -195,11 +194,11 @@ class _CustomizationSummaryScreenState extends State<CustomizationSummaryScreen>
     }
     
     if (cartProduct == null) {
-      return const Padding(
+      return Padding(
         padding: EdgeInsets.all(16),
         child: Center(
           child: Text(
-            'No customizations found',
+            AppTranslations.noCustomizationsFound,
             style: TextStyle(
               fontSize: 14,
               color: Color(0xFF666666),
@@ -214,11 +213,11 @@ class _CustomizationSummaryScreenState extends State<CustomizationSummaryScreen>
     final attributes = cartProduct.attributes ?? [];
     
     if (selectedAddOns.isEmpty && attributes.isEmpty) {
-      return const Padding(
+      return Padding(
         padding: EdgeInsets.all(16),
         child: Center(
           child: Text(
-            'No customizations available',
+            AppTranslations.noCustomizationsAvailable,
             style: TextStyle(
               fontSize: 14,
               color: Color(0xFF666666),
@@ -347,7 +346,7 @@ class _CustomizationSummaryScreenState extends State<CustomizationSummaryScreen>
                 backgroundColor: Colors.white,
               ),
               child: Text(
-                "I'll choose",
+                AppTranslations.illChoose,
                 style: AppTextStyles.button.copyWith(
                   fontSize: 16,
                   color: AppConstants.appThemeColor,
@@ -389,7 +388,7 @@ class _CustomizationSummaryScreenState extends State<CustomizationSummaryScreen>
                   height: 62,
                   alignment: Alignment.center,
                   child: Text(
-                    "Repeat",
+                    AppTranslations.repeat,
                     style: AppTextStyles.button.copyWith(
                       fontSize: 16,
                       color: Colors.white,

@@ -1,5 +1,4 @@
-import 'package:chat_bot/utils/app_constants.dart';
-import 'package:chat_bot/utils/text_styles.dart';
+import 'package:chat_bot/utils/utils.dart';
 import 'package:flutter/material.dart';
 import '../widgets/screen_header.dart';
 
@@ -19,7 +18,7 @@ class _AddressDetailsScreenState extends State<AddressDetailsScreen> {
   final TextEditingController _buildingController = TextEditingController(text: '');
   final TextEditingController _landmarkController = TextEditingController(text: '');
 
-  String _tag = 'Home';
+  String _tag = AppTranslations.tagHome;
   bool _allFilled = false;
 
   @override
@@ -53,15 +52,15 @@ class _AddressDetailsScreenState extends State<AddressDetailsScreen> {
           children: [
             Positioned.fill(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.fromLTRB(16, 16, 16, 140),
+                padding: const EdgeInsetsDirectional.fromSTEB(16, 16, 16, 140),
                 child: Form(
                   key: _formKey,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                     // const SizedBox(height: 32),
-                    const ScreenHeader(
-                      title: 'Please provide your\ncomplete address',
+                    ScreenHeader(
+                      title: AppTranslations.provideCompleteAddress,
                       showCloseButton: false,
                       padding: EdgeInsets.zero,
                     ),
@@ -70,50 +69,50 @@ class _AddressDetailsScreenState extends State<AddressDetailsScreen> {
                     // const SizedBox(height: 16),
                     _InputField(
                       controller: _countryController,
-                      hint: 'Country*',
+                      hint: AppTranslations.hintCountry,
                       validator: _requiredValidator,
                     ),
                     const SizedBox(height: 16),
                     _InputField(
                       controller: _areaController,
-                      hint: 'Area*',
+                      hint: AppTranslations.hintArea,
                       validator: _requiredValidator,
                     ),
                     const SizedBox(height: 16),
                     _InputField(
                       controller: _cityController,
-                      hint: 'City*',
+                      hint: AppTranslations.hintCity,
                       validator: _requiredValidator,
                     ),
                     const SizedBox(height: 16),
                     _InputField(
                       controller: _buildingController,
-                      hint: 'Building*',
+                      hint: AppTranslations.hintBuilding,
                       validator: _requiredValidator,
                     ),
                     const SizedBox(height: 16),
                     _InputField(
                       controller: _landmarkController,
-                      hint: 'Landmark*',
+                      hint: AppTranslations.hintLandmark,
                       validator: _requiredValidator,
                     ),
                     const SizedBox(height: 16),
                     Row(
                       children: [
                         _TagRadio(
-                          label: 'Home',
+                          label: AppTranslations.tagHome,
                           groupValue: _tag,
                           onChanged: (v) => setState(() => _tag = v!),
                         ),
                         const SizedBox(width: 16),
                         _TagRadio(
-                          label: 'Work',
+                          label: AppTranslations.tagWork,
                           groupValue: _tag,
                           onChanged: (v) => setState(() => _tag = v!),
                         ),
                         const SizedBox(width: 16),
                         _TagRadio(
-                          label: 'Others',
+                          label: AppTranslations.tagOthers,
                           groupValue: _tag,
                           onChanged: (v) => setState(() => _tag = v!),
                         ),
@@ -124,23 +123,23 @@ class _AddressDetailsScreenState extends State<AddressDetailsScreen> {
               ),
             ),
           ),
-            Positioned(
+            PositionedDirectional(
               top: 8,
-              right: 8,
+              end: 8,
               child: IconButton(
                 onPressed: () => Navigator.of(context).maybePop(),
                 icon: const Icon(Icons.close, color: Color(0xFF585C77)),
               ),
             ),
-            Positioned(
-              left: 16,
-              right: 16,
+            PositionedDirectional(
+              start: 16,
+              end: 16,
               bottom: 16,
               child: _GradientButton(
                 enabled: _allFilled,
                 onPressed: _onSubmit,
                 child:  Text(
-                  'Deliver here',
+                  AppTranslations.deliverHere,
                    style: AppTextStyles.button.copyWith(
                             color: Colors.white,
                             fontWeight: FontWeight.w700,
@@ -158,7 +157,7 @@ class _AddressDetailsScreenState extends State<AddressDetailsScreen> {
 
   String? _requiredValidator(String? value) {
     if (value == null || value.trim().isEmpty) {
-      return 'This field is required';
+      return AppTranslations.fieldRequired;
     }
     return null;
   }
@@ -312,8 +311,8 @@ class _GradientButton extends StatelessWidget {
                     Color(0xFFE5E7EB),
                     Color(0xFFD1D5DB),
                   ],
-            begin: Alignment.centerLeft,
-            end: Alignment.centerRight,
+            begin: AlignmentDirectional.centerStart,
+            end: AlignmentDirectional.centerEnd,
           ),
           borderRadius: BorderRadius.circular(16),
         ),

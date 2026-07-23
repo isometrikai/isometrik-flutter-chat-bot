@@ -15,13 +15,13 @@ class SetupCompleteScreen extends StatelessWidget {
   static const Color _textMuted = Color(0xFF7085AE);
   static const Color _cardBg = Color(0xFFF5F7FF);
 
-  static const List<String> _capabilities = [
-    'Remind you about birthdays & events',
-    'Suggest restaurants you\'ll love',
-    'Find the best deals for you',
-    'Book services at your preferred times',
-    'Recommend entertainment options',
-    'Help with groceries & shopping',
+  static List<String> get _capabilities => [
+    AppTranslations.capabilityRemindBirthdays,
+    AppTranslations.capabilitySuggestRestaurants,
+    AppTranslations.capabilityFindDeals,
+    AppTranslations.capabilityBookServices,
+    AppTranslations.capabilityRecommendEntertainment,
+    AppTranslations.capabilityHelpGroceries,
   ];
 
   void _onLetsGetStarted(BuildContext context) {
@@ -61,7 +61,7 @@ class SetupCompleteScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 20),
                 Text(
-                  'You\'re All Set!',
+                  AppTranslations.youreAllSet,
                   style: AppTextStyles.heading(
                     fontSize: 24,
                     fontWeight: FontWeight.w700,
@@ -74,7 +74,7 @@ class SetupCompleteScreen extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 24),
                   child: Text(
-                    'I now understand your preferences and I\'m ready to assist you with personalised recommendations!!',
+                    AppTranslations.setupCompleteSubtitle,
                     style: AppTextStyles.body(
                       fontSize: 14,
                       fontWeight: FontWeight.w400,
@@ -92,7 +92,7 @@ class SetupCompleteScreen extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 24),
               child: Container(
                 width: double.infinity,
-                padding: const EdgeInsets.fromLTRB(20, 24, 20, 24),
+                padding: const EdgeInsetsDirectional.fromSTEB(20, 24, 20, 24),
                 decoration: BoxDecoration(
                   color: _cardBg,
                   borderRadius: BorderRadius.circular(16),
@@ -101,7 +101,7 @@ class SetupCompleteScreen extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'What I can do for you:',
+                      AppTranslations.whatICanDoForYou,
                       style: AppTextStyles.body(
                         fontSize: 14,
                         fontWeight: FontWeight.w500,
@@ -150,7 +150,7 @@ class SetupCompleteScreen extends StatelessWidget {
             const Spacer(flex: 1),
             // Let's get started button
             Padding(
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+              padding: const EdgeInsetsDirectional.fromSTEB(16, 16, 16, 24),
               child: SizedBox(
                 width: double.infinity,
                 height: 56,
@@ -162,7 +162,7 @@ class SetupCompleteScreen extends StatelessWidget {
                     borderRadius: BorderRadius.circular(8),
                     child: Center(
                       child: Text(
-                        'Let\'s get started',
+                        AppTranslations.letsGetStarted,
                         style: AppTextStyles.body(
                           fontSize: 16,
                           fontWeight: FontWeight.w700,

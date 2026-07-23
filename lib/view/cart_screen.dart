@@ -187,7 +187,7 @@ class _CartScreenState extends State<CartScreen> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
-            'Your cart',
+            AppTranslations.yourCart,
             style: AppTextStyles.launchTitle.copyWith(
               color: const Color(0xFF171212),
             ),
@@ -221,13 +221,13 @@ class _CartScreenState extends State<CartScreen> {
         final categoryCounts = _calculateCategoryCounts(state);
         
         final categories = [
-          {'name': '🍕 Restaurant', 'count': categoryCounts['restaurant']},
-          {'name': '🥑 Grocery', 'count': categoryCounts['grocery']},
-          {'name': '💊 Pharmacy', 'count': categoryCounts['pharmacy']},
-          {'name': '🛒 Shopping', 'count': categoryCounts['shopping']},
-          {'name': '💄 Services', 'count': categoryCounts['services']},
-          {'name': '🏥 Health Care', 'count': categoryCounts['healthCare']},
-          {'name': '💰 Donation', 'count': categoryCounts['donation']},
+          {'name': AppTranslations.categoryRestaurant, 'count': categoryCounts['restaurant']},
+          {'name': AppTranslations.categoryGrocery, 'count': categoryCounts['grocery']},
+          {'name': AppTranslations.categoryPharmacy, 'count': categoryCounts['pharmacy']},
+          {'name': AppTranslations.categoryShopping, 'count': categoryCounts['shopping']},
+          {'name': AppTranslations.categoryServices, 'count': categoryCounts['services']},
+          {'name': AppTranslations.categoryHealthCare, 'count': categoryCounts['healthCare']},
+          {'name': AppTranslations.categoryDonation, 'count': categoryCounts['donation']},
         ];
 
         return Container(
@@ -250,7 +250,7 @@ class _CartScreenState extends State<CartScreen> {
                   _scrollToSelectedCategory();
                 },
                 child: Container(
-                  margin: const EdgeInsets.only(right: 8),
+                  margin: const EdgeInsetsDirectional.only(end: 8),
                   child: _buildFilterChip(
                     name: category['name'] as String,
                     count: category['count'] as int,
@@ -423,7 +423,7 @@ class _CartScreenState extends State<CartScreen> {
           const SizedBox(height: 24),
           // "Your cart is empty" text
           Text(
-            'Your cart is empty',
+            AppTranslations.yourCartIsEmpty,
             style: AppTextStyles.restaurantTitle.copyWith(
               color: const Color(0xFF242424),
             ),
@@ -433,7 +433,7 @@ class _CartScreenState extends State<CartScreen> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 40),
             child: Text(
-              'Add items like food, groceries, medicines, services or other products to get started.',
+              AppTranslations.cartEmptySubtitle,
               textAlign: TextAlign.center,
               style: AppTextStyles.restaurantDescription.copyWith(
                 color: const Color(0xFF6E4185),
@@ -586,7 +586,7 @@ class _CartScreenState extends State<CartScreen> {
         if (product.selectedAddOns != null && product.selectedAddOns!.isNotEmpty) {
           formattedAddOns = _formatSelectedAddOns(product.selectedAddOns!);
         }else if (cartData.storeCategoryId == FoodStoreCategoryId.healthCare.value) {
-          formattedAddOns = "Service: ${productName}";
+          formattedAddOns = AppTranslations.servicePrefix(productName);
         }else if (product.attributes != null && product.attributes!.isNotEmpty && cartData.storeTypeId != FoodCategory.food.value) {
           formattedAddOns = _formatProductAttributes(product.attributes!);
         }
@@ -620,7 +620,7 @@ class _CartScreenState extends State<CartScreen> {
         subtitle: '',
         storeCategoryId: cartData.storeCategoryId,
         keyword: '',
-        productName: 'Delivery fee',
+        productName: AppTranslations.deliveryFee,
         currencySymbol: cartData.currencyCode,
         productPrice: deliveryFee,
       ));
@@ -639,7 +639,7 @@ class _CartScreenState extends State<CartScreen> {
         subtitle: '',
         storeCategoryId: cartData.storeCategoryId,
         keyword: '',
-        productName: 'Service Fee',
+        productName: AppTranslations.serviceFee,
         currencySymbol: cartData.currencyCode,
         productPrice: serviceFee,
       ));
@@ -675,7 +675,7 @@ class _CartScreenState extends State<CartScreen> {
       subtitle: '',
       storeCategoryId: cartData.storeCategoryId,
       keyword: '',
-      productName: 'Total To Pay',
+      productName: AppTranslations.totalToPayApi,
       currencySymbol: cartData.currencyCode,
       productPrice: finalTotal,
     ));
@@ -747,7 +747,7 @@ class _CartScreenState extends State<CartScreen> {
                       ),
                     ),
                     Text(
-                      'Visit Store',
+                      AppTranslations.visitStore,
                       style: AppTextStyles.bodyText.copyWith(
                         fontWeight: FontWeight.w600,
                         fontSize: 12,
@@ -763,7 +763,7 @@ class _CartScreenState extends State<CartScreen> {
                 Container(
                   width: 30,
                   height: 30,
-                  alignment: Alignment.centerRight,
+                  alignment: AlignmentDirectional.centerEnd,
                   child: SvgPicture.asset(
                     AssetPath.get('images/ic_info_cart.svg'),
                     width: 20,
@@ -796,7 +796,7 @@ class _CartScreenState extends State<CartScreen> {
                   flex: 2,
                   child: GestureDetector(
                     onTap: () {
-                      widget.onCheckout?.call("Proceed to checkout", categoryData.storeCategoryId);
+                      widget.onCheckout?.call(AppTranslations.proceedToCheckout, categoryData.storeCategoryId);
                       Navigator.of(context).pop();
                     },
                     child: Container(
@@ -807,7 +807,7 @@ class _CartScreenState extends State<CartScreen> {
                       ),
                       child: Center(
                         child: Text(
-                          'Proceed to checkout',
+                          AppTranslations.proceedToCheckout,
                           style: AppTextStyles.button.copyWith(
                             color: Colors.white,
                             fontWeight: FontWeight.w700,

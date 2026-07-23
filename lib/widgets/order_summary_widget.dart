@@ -27,7 +27,7 @@ class OrderSummaryWidget extends StatelessWidget {
       storeCategoryId: '',
       keyword: '',
       storeName: 'Restaurant',
-      address: 'Address not available',
+      address: AppTranslations.addressNotAvailable,
     );
 
     // Separate regular items from total
@@ -55,28 +55,28 @@ class OrderSummaryWidget extends StatelessWidget {
     );
 
     return Container(
-      margin: const EdgeInsets.only(left: 0, right: 24, bottom: 8, top: 8),
+      margin: const EdgeInsetsDirectional.only(start: 0, end: 24, bottom: 8, top: 8),
             child: IntrinsicHeight(
         child: Container(
           width: double.infinity,
           decoration: BoxDecoration(
             color: Colors.white,
             border: Border.all(color: const Color(0xFFE9DFFB), width: 1),
-            borderRadius: const BorderRadius.only(
-              topLeft: Radius.circular(16),
-              topRight: Radius.circular(16),
-              bottomLeft: Radius.circular(16),
-              bottomRight: Radius.circular(16),
+            borderRadius: const BorderRadiusDirectional.only(
+              topStart: Radius.circular(16),
+              topEnd: Radius.circular(16),
+              bottomStart: Radius.circular(16),
+              bottomEnd: Radius.circular(16),
             ),
           ),
                   child: Padding(
-            padding: const EdgeInsets.fromLTRB(15, 15, 15, 20),
+            padding: const EdgeInsetsDirectional.fromSTEB(15, 15, 15, 20),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Header - Order summary
                Text(
-                'Order Summary',
+                AppTranslations.orderSummary,
                 style: 
                 AppTextStyles.restaurantTitle.copyWith(
                   fontSize: 14,
@@ -116,7 +116,7 @@ class OrderSummaryWidget extends StatelessWidget {
                       ),
                       // Content section
                       Padding(
-                        padding: const EdgeInsets.fromLTRB(10, 12, 10, 12),
+                        padding: const EdgeInsetsDirectional.fromSTEB(10, 12, 10, 12),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -166,8 +166,8 @@ class OrderSummaryWidget extends StatelessWidget {
                                 Expanded(
                                   child: Text(
                                     storeInfo.isScheduled == true 
-                                        ? 'Scheduled for ${_formatServiceTime(storeInfo.serviceRequestedTime)}' 
-                                        : 'Book Now',
+                                        ? AppTranslations.scheduledFor(_formatServiceTime(storeInfo.serviceRequestedTime)) 
+                                        : AppTranslations.bookNow,
                                     style: AppTextStyles.restaurantDescription.copyWith(
                                       fontSize: 14,
                                       fontWeight: FontWeight.w400,
@@ -187,7 +187,7 @@ class OrderSummaryWidget extends StatelessWidget {
               // Store information section with light purple background
               Container(
                 width: double.infinity,
-                padding: const EdgeInsets.fromLTRB(10, 10, 0, 10),
+                padding: const EdgeInsetsDirectional.fromSTEB(10, 10, 0, 10),
                 decoration: BoxDecoration(
                   color: const Color(0xFFFBF1FF),
                   borderRadius: BorderRadius.circular(8),
@@ -240,7 +240,7 @@ class OrderSummaryWidget extends StatelessWidget {
                         const Text('🏠 ', style: TextStyle(fontSize: 14)),
                         Expanded(
                           child: Text(
-                            storeInfo.address ?? 'Address not available',
+                            storeInfo.address ?? AppTranslations.addressNotAvailable,
                             style: 
                             AppTextStyles.restaurantDescription.copyWith(
                               fontSize: 14,
@@ -260,8 +260,8 @@ class OrderSummaryWidget extends StatelessWidget {
                                 Expanded(
                                   child: Text(
                                     storeInfo.isScheduled == true 
-                                        ? 'Scheduled for ${_formatServiceTime(storeInfo.serviceRequestedTime)}' 
-                                        : 'Book Now',
+                                        ? AppTranslations.scheduledFor(_formatServiceTime(storeInfo.serviceRequestedTime)) 
+                                        : AppTranslations.bookNow,
                                     style: AppTextStyles.restaurantDescription.copyWith(
                                       fontSize: 14,
                                       fontWeight: FontWeight.w400,
@@ -315,7 +315,7 @@ class OrderSummaryWidget extends StatelessWidget {
                                   fontWeight: FontWeight.w400,
                                   color: Color(0xFF242424),
                                 ),
-                                textAlign: TextAlign.right,
+                                textAlign: TextAlign.end,
                               ),
                             ),
                           ],
@@ -323,7 +323,10 @@ class OrderSummaryWidget extends StatelessWidget {
                         if(storeInfo.isTableBooking == true) ...[
                           const SizedBox(height: 4),
                           Text(
-                            'Booking Date and Time: ${storeInfo.bookingDate} ${storeInfo.bookingTime}',
+                            AppTranslations.bookingDateAndTime(
+                              storeInfo.bookingDate ?? '',
+                              storeInfo.bookingTime ?? '',
+                            ),
                             style: AppTextStyles.restaurantDescription.copyWith(
                               fontSize: 12,
                               fontWeight: FontWeight.w300,
@@ -332,7 +335,9 @@ class OrderSummaryWidget extends StatelessWidget {
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            'Party Size: ${storeInfo.partySize}',
+                            AppTranslations.partySize(
+                              '${storeInfo.partySize ?? ''}',
+                            ),
                             style: AppTextStyles.restaurantDescription.copyWith(
                               fontSize: 12,
                               fontWeight: FontWeight.w300,
@@ -344,7 +349,7 @@ class OrderSummaryWidget extends StatelessWidget {
                         if(item.addOns != null && item.addOns!.isNotEmpty) ...[
                           const SizedBox(height: 4),
                           Padding(
-                            padding: const EdgeInsets.only(left: 0.0),
+                            padding: const EdgeInsetsDirectional.only(start: 0.0),
                             child: Text(
                               '${item.addOns}',
                               maxLines: 5,
@@ -390,7 +395,7 @@ class OrderSummaryWidget extends StatelessWidget {
                     children: [
                        Expanded(
                         child: Text(
-                          'Total to pay',
+                          AppTranslations.totalToPay,
                           style: 
                           AppTextStyles.restaurantTitle.copyWith(
                             fontSize: 14,
@@ -409,7 +414,7 @@ class OrderSummaryWidget extends StatelessWidget {
                             fontWeight: FontWeight.w700,
                             color: Color(0xFF242424),
                           ),  
-                          textAlign: TextAlign.right,
+                          textAlign: TextAlign.end,
                         ),
                       ),
                     ],
@@ -443,6 +448,37 @@ class OrderSummaryWidget extends StatelessWidget {
     );
   }
 
+  String _localizedMonth(int month) {
+    switch (month) {
+      case 1:
+        return AppTranslations.monthJanuary;
+      case 2:
+        return AppTranslations.monthFebruary;
+      case 3:
+        return AppTranslations.monthMarch;
+      case 4:
+        return AppTranslations.monthApril;
+      case 5:
+        return AppTranslations.monthMay;
+      case 6:
+        return AppTranslations.monthJune;
+      case 7:
+        return AppTranslations.monthJuly;
+      case 8:
+        return AppTranslations.monthAugust;
+      case 9:
+        return AppTranslations.monthSeptember;
+      case 10:
+        return AppTranslations.monthOctober;
+      case 11:
+        return AppTranslations.monthNovember;
+      case 12:
+        return AppTranslations.monthDecember;
+      default:
+        return '';
+    }
+  }
+
   String _formatCurrency(String symbol, num value) {
     if (symbol.isNotEmpty) {
       // return '$symbol${value.toStringAsFixed(value.truncateToDouble() == value ? 0 : 2)}';
@@ -468,18 +504,13 @@ class OrderSummaryWidget extends StatelessWidget {
         dateTime = DateTime.parse(trimmed).toLocal();
       }
 
-      const months = [
-        'January', 'February', 'March', 'April', 'May', 'June',
-        'July', 'August', 'September', 'October', 'November', 'December',
-      ];
-
-      final month = months[dateTime.month - 1];
+      final month = _localizedMonth(dateTime.month);
       final day = dateTime.day.toString().padLeft(2, '0');
       final year = dateTime.year;
 
       final hour = dateTime.hour;
       final minute = dateTime.minute;
-      final period = hour >= 12 ? 'PM' : 'AM';
+      final period = hour >= 12 ? AppTranslations.pm : AppTranslations.am;
       final displayHour = hour > 12 ? hour - 12 : (hour == 0 ? 12 : hour);
       final displayMinute = minute.toString().padLeft(2, '0');
 
