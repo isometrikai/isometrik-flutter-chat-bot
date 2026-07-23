@@ -131,13 +131,13 @@ class ChatBot {
         supportedLocales: AppLocale.supportedLocales,
         path: path,
         fallbackLocale: const Locale('en'),
-        startLocale: Locale(lang),
+        startLocale: Locale(lang.isEmpty ? 'en' : lang),
         useOnlyLangCode: true,
         saveLocale: false,
         child: Builder(
-          builder: (ctx) => Localizations.override(
-            context: ctx,
+          builder: (ctx) => Localizations(
             locale: ctx.locale,
+            delegates: ctx.localizationDelegates,
             child: child,
           ),
         ),
