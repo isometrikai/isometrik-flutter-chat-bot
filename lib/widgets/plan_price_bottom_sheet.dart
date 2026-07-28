@@ -1,18 +1,26 @@
+import 'package:chat_bot/bloc/subscription/subscription_bloc.dart';
+import 'package:chat_bot/bloc/subscription/subscription_event.dart';
+import 'package:chat_bot/bloc/subscription/subscription_state.dart';
 import 'package:chat_bot/utils/app_constants.dart';
 import 'package:chat_bot/utils/app_locale.dart';
 import 'package:chat_bot/utils/app_theme.dart';
 import 'package:chat_bot/utils/app_translations.dart';
+import 'package:chat_bot/utils/utility.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
-/// Plan & Price subscription full-screen page.
-class PlanPriceBottomSheet extends StatefulWidget {
+/// Plan & Price subscription full-screen page (In-App Purchase).
+class PlanPriceBottomSheet extends StatelessWidget {
   const PlanPriceBottomSheet({super.key});
 
   static Future<void> show(BuildContext context) {
     return Navigator.of(context).push<void>(
       AppLocale.materialRoute(
         fullscreenDialog: true,
-        builder: (_) => const PlanPriceBottomSheet(),
+        builder: (_) => BlocProvider(
+          create: (_) => SubscriptionBloc()..add(const SubscriptionStarted()),
+          child: const PlanPriceBottomSheet(),
+        ),
       ),
     );
   }
@@ -47,16 +55,8 @@ class PlanPriceBottomSheet extends StatefulWidget {
   );
 
   @override
-  State<PlanPriceBottomSheet> createState() => _PlanPriceBottomSheetState();
-}
-
-class _PlanPriceBottomSheetState extends State<PlanPriceBottomSheet> {
-  bool _autoRenew = true;
-
-  @override
   Widget build(BuildContext context) {
     final media = MediaQuery.of(context);
-    // Prefer viewPadding; fall back when host/embed reports 0 (common in package mode).
     final topInset = media.viewPadding.top > 0
         ? media.viewPadding.top
         : (media.padding.top > 0 ? media.padding.top : 54.0);
@@ -64,36 +64,123 @@ class _PlanPriceBottomSheetState extends State<PlanPriceBottomSheet> {
         ? media.viewPadding.bottom
         : media.padding.bottom;
 
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: Padding(
-        padding: EdgeInsets.fromLTRB(16, topInset + 16, 16, bottomInset + 24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            _buildHeader(context),
-            const SizedBox(height: 16),
-            Expanded(
-              child: SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    _buildPlanCard(),
-                    const SizedBox(height: 16),
-                    _buildAutoRenewRow(),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-            _buildSubscribeButton(),
-          ],
+    return BlocListener<SubscriptionBloc, SubscriptionState>(
+      listenWhen: (prev, next) =>
+          next is SubscriptionPurchaseSuccess || next is SubscriptionFailure,
+      listener: (context, state) {
+        if (state is SubscriptionPurchaseSuccess) {
+          Utility.showErrorBlackToast(AppTranslations.planPricePurchaseSuccess);
+          if (context.mounted) {
+            Navigator.of(context).maybePop();
+          }
+        } else if (state is SubscriptionFailure) {
+          Utility.showErrorBlackToast(state.message);
+        }
+      },
+      child: Scaffold(
+        backgroundColor: Colors.white,
+        body: Padding(
+          padding: EdgeInsets.fromLTRB(16, topInset + 16, 16, bottomInset + 24),
+          child: BlocBuilder<SubscriptionBloc, SubscriptionState>(
+            builder: (context, state) {
+              final ready = state is SubscriptionReady
+                  ? state
+                  : state is SubscriptionLoadInProgress
+                      ? null
+                      : SubscriptionReady(
+                          storeAvailable: false,
+                          autoRenew: true,
+                        );
+
+              if (state is SubscriptionLoadInProgress || ready == null) {
+                return const Center(child: CircularProgressIndicator());
+              }
+
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  _Header(onClose: () => Navigator.of(context).pop()),
+                  const SizedBox(height: 16),
+                  Expanded(
+                    child: SingleChildScrollView(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          _PlanCard(priceLabel: ready.displayPrice),
+                          const SizedBox(height: 16),
+                          _AutoRenewRow(
+                            autoRenew: ready.autoRenew,
+                            enabled: !ready.purchaseInProgress,
+                            onChanged: (value) {
+                              context.read<SubscriptionBloc>().add(
+                                    SubscriptionAutoRenewToggled(value),
+                                  );
+                            },
+                          ),
+                          if (!ready.storeAvailable) ...[
+                            const SizedBox(height: 12),
+                            Text(
+                              AppTranslations.planPriceStoreUnavailable,
+                              style: AppTheme.getTextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w400,
+                                color: Colors.redAccent,
+                              ),
+                            ),
+                          ],
+                          const SizedBox(height: 8),
+                          Align(
+                            alignment: AlignmentDirectional.centerStart,
+                            child: TextButton(
+                              onPressed: ready.purchaseInProgress
+                                  ? null
+                                  : () {
+                                      context.read<SubscriptionBloc>().add(
+                                            const SubscriptionRestoreRequested(),
+                                          );
+                                    },
+                              child: Text(
+                                AppTranslations.planPriceRestore,
+                                style: AppTheme.getTextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppConstants.appThemeColor,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  _SubscribeButton(
+                    priceLabel: ready.displayPrice,
+                    loading: ready.purchaseInProgress,
+                    enabled: ready.storeAvailable && !ready.purchaseInProgress,
+                    onTap: () {
+                      context
+                          .read<SubscriptionBloc>()
+                          .add(const SubscriptionPurchaseRequested());
+                    },
+                  ),
+                ],
+              );
+            },
+          ),
         ),
       ),
     );
   }
+}
 
-  Widget _buildHeader(BuildContext context) {
+class _Header extends StatelessWidget {
+  final VoidCallback onClose;
+
+  const _Header({required this.onClose});
+
+  @override
+  Widget build(BuildContext context) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -133,7 +220,7 @@ class _PlanPriceBottomSheetState extends State<PlanPriceBottomSheet> {
         Material(
           color: Colors.transparent,
           child: InkWell(
-            onTap: () => Navigator.of(context).pop(),
+            onTap: onClose,
             borderRadius: BorderRadius.circular(64),
             child: Container(
               width: 40,
@@ -154,105 +241,82 @@ class _PlanPriceBottomSheetState extends State<PlanPriceBottomSheet> {
       ],
     );
   }
+}
 
-  Widget _buildPlanCard() {
-    return Stack(
-      clipBehavior: Clip.none,
-      children: [
-        Container(
-          width: double.infinity,
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            gradient: PlanPriceBottomSheet._cardGradient,
-            border: Border.all(
-              color: PlanPriceBottomSheet._cardBorder,
-              width: 1.5,
-            ),
-            borderRadius: BorderRadius.circular(20),
-            boxShadow: [
-              BoxShadow(
-                color: AppConstants.appThemeColor.withValues(alpha: 0.06),
-                blurRadius: 32,
-                offset: const Offset(0, 16),
-              ),
-            ],
+class _PlanCard extends StatelessWidget {
+  final String priceLabel;
+
+  const _PlanCard({required this.priceLabel});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        gradient: PlanPriceBottomSheet._cardGradient,
+        border: Border.all(
+          color: PlanPriceBottomSheet._cardBorder,
+          width: 1.5,
+        ),
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: AppConstants.appThemeColor.withValues(alpha: 0.06),
+            blurRadius: 32,
+            offset: const Offset(0, 16),
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            AppTranslations.planPricePlanName,
+            style: AppTheme.getTextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w800,
+              color: AppConstants.appThemeColor,
+            ).copyWith(height: 1.2),
+          ),
+          const SizedBox(height: 8),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.baseline,
+            textBaseline: TextBaseline.alphabetic,
             children: [
               Text(
-                AppTranslations.planPricePlanName,
+                priceLabel,
                 style: AppTheme.getTextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w800,
-                  color: AppConstants.appThemeColor,
+                  fontSize: 32,
+                  fontWeight: FontWeight.w700,
+                  color: PlanPriceBottomSheet._priceColor,
                 ).copyWith(height: 1.2),
               ),
-              const SizedBox(height: 8),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.baseline,
-                textBaseline: TextBaseline.alphabetic,
-                children: [
-                  Text(
-                    AppTranslations.planPriceAmount,
-                    style: AppTheme.getTextStyle(
-                      fontSize: 32,
-                      fontWeight: FontWeight.w700,
-                      color: PlanPriceBottomSheet._priceColor,
-                    ).copyWith(height: 1.2),
-                  ),
-                  const SizedBox(width: 4),
-                  Text(
-                    AppTranslations.planPricePeriod,
-                    style: AppTheme.getTextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w400,
-                      color: PlanPriceBottomSheet._periodColor,
-                    ).copyWith(height: 1.4),
-                  ),
-                ],
+              const SizedBox(width: 4),
+              Text(
+                AppTranslations.planPricePeriod,
+                style: AppTheme.getTextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w400,
+                  color: PlanPriceBottomSheet._periodColor,
+                ).copyWith(height: 1.4),
               ),
-              const SizedBox(height: 16),
-              const Divider(
-                height: 1,
-                thickness: 1,
-                color: PlanPriceBottomSheet._dividerColor,
-              ),
-              const SizedBox(height: 16),
-              ..._buildBenefits(),
             ],
           ),
-        ),
-        // PositionedDirectional(
-        //   top: 20,
-        //   end: 0,
-        //   child: Container(
-        //     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-        //     decoration: const BoxDecoration(
-        //       gradient: PlanPriceBottomSheet._primaryGradient,
-        //       borderRadius: BorderRadiusDirectional.only(
-        //         topStart: Radius.circular(12),
-        //         bottomStart: Radius.circular(12),
-        //       ),
-        //     ),
-        //     child: Text(
-        //       AppTranslations.planPriceSaveBadge,
-        //       style: AppTheme.getTextStyle(
-        //         fontSize: 11,
-        //         fontWeight: FontWeight.w700,
-        //         color: Colors.white,
-        //       ).copyWith(
-        //         height: 1.27,
-        //         letterSpacing: 0.2,
-        //       ),
-        //     ),
-        //   ),
-        // ),
-      ],
+          const SizedBox(height: 16),
+          const Divider(
+            height: 1,
+            thickness: 1,
+            color: PlanPriceBottomSheet._dividerColor,
+          ),
+          const SizedBox(height: 16),
+          ..._benefits(),
+        ],
+      ),
     );
   }
 
-  List<Widget> _buildBenefits() {
+  List<Widget> _benefits() {
     final benefits = [
       AppTranslations.planPriceBenefit1,
       AppTranslations.planPriceBenefit2,
@@ -267,8 +331,21 @@ class _PlanPriceBottomSheetState extends State<PlanPriceBottomSheet> {
         ),
     ];
   }
+}
 
-  Widget _buildAutoRenewRow() {
+class _AutoRenewRow extends StatelessWidget {
+  final bool autoRenew;
+  final bool enabled;
+  final ValueChanged<bool> onChanged;
+
+  const _AutoRenewRow({
+    required this.autoRenew,
+    required this.enabled,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -310,39 +387,67 @@ class _PlanPriceBottomSheetState extends State<PlanPriceBottomSheet> {
             ),
           ),
           const SizedBox(width: 12),
-          _GradientSwitch(
-            value: _autoRenew,
-            onChanged: (value) => setState(() => _autoRenew = value),
+          IgnorePointer(
+            ignoring: !enabled,
+            child: Opacity(
+              opacity: enabled ? 1 : 0.5,
+              child: _GradientSwitch(
+                value: autoRenew,
+                onChanged: onChanged,
+              ),
+            ),
           ),
         ],
       ),
     );
   }
+}
 
-  Widget _buildSubscribeButton() {
+class _SubscribeButton extends StatelessWidget {
+  final String priceLabel;
+  final bool loading;
+  final bool enabled;
+  final VoidCallback onTap;
+
+  const _SubscribeButton({
+    required this.priceLabel,
+    required this.loading,
+    required this.enabled,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        onTap: () {
-          // Subscription flow can be wired later.
-          Navigator.of(context).pop();
-        },
+        onTap: enabled ? onTap : null,
         borderRadius: BorderRadius.circular(16),
         child: Ink(
           height: 62,
           decoration: BoxDecoration(
-            gradient: PlanPriceBottomSheet._primaryGradient,
+            gradient: enabled ? PlanPriceBottomSheet._primaryGradient : null,
+            color: enabled ? null : const Color(0xFFB0B8C9),
             borderRadius: BorderRadius.circular(16),
           ),
           child: Center(
-            child: Text(
-              AppTranslations.planPriceSubscribeCta,
-              style: AppTheme.getTextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w700,
-                color: Colors.white,
-              ).copyWith(height: 1.2),
-            ),
+            child: loading
+                ? const SizedBox(
+                    width: 22,
+                    height: 22,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2.5,
+                      color: Colors.white,
+                    ),
+                  )
+                : Text(
+                    'Subscribe for $priceLabel',
+                    style: AppTheme.getTextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.white,
+                    ).copyWith(height: 1.2),
+                  ),
           ),
         ),
       ),

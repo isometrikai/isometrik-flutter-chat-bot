@@ -37,3 +37,6 @@ export 'car_search/car_search_state.dart';
 export 'flight_search/flight_search_bloc.dart';
 export 'flight_search/flight_search_event.dart';
 export 'flight_search/flight_search_state.dart';
+export 'subscription/subscription_bloc.dart';
+export 'subscription/subscription_event.dart';
+export 'subscription/subscription_state.dart';

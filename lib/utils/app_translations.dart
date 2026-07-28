@@ -259,6 +259,9 @@ class AppTranslations {
   static String get planPriceAutoRenewTitle => 'plan_price_auto_renew_title'.tr();
   static String get planPriceAutoRenewDesc => 'plan_price_auto_renew_desc'.tr();
   static String get planPriceSubscribeCta => 'plan_price_subscribe_cta'.tr();
+  static String get planPricePurchaseSuccess => 'plan_price_purchase_success'.tr();
+  static String get planPriceRestore => 'plan_price_restore'.tr();
+  static String get planPriceStoreUnavailable => 'plan_price_store_unavailable'.tr();
   static String get dataControl => 'data_control'.tr();
   static String get helpCenter => 'help_center'.tr();
   static String get faqs => 'faqs'.tr();
