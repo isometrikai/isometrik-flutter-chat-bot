@@ -185,7 +185,7 @@ class PlatformService {
             zoneId: '636dfc8c89b6a857b500ccd1',//dubai
              currencycode: 'AED',//dubai
             currencysymbol: "2K8u2KU=",//"د.إ",//dubai
-            language: 'ar',
+            language: 'en',
           );
           
 // in bottom need to set production data for testing

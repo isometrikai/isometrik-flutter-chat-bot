@@ -9,6 +9,7 @@ import 'package:chat_bot/view/chat_history_screen.dart';
 import 'package:chat_bot/view/complete_setup/complete_setup_flow_screen.dart';
 import 'package:chat_bot/view/personalization_screen.dart';
 import 'package:chat_bot/view/popup_overlay_screen.dart';
+import 'package:chat_bot/widgets/plan_price_bottom_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -110,6 +111,17 @@ class ProfileSettingScreen extends StatelessWidget {
                             label: AppTranslations.manageAddresses,
                             onTap: () {
                               OrderService().triggerSideMenuOption({'action': 'manage_addresses'});
+                            },
+                          ),
+                          _SettingItem(
+                            icon: Icon(
+                              Icons.workspace_premium_outlined,
+                              size: 20,
+                              color: _primaryText,
+                            ),
+                            label: AppTranslations.planAndPrice,
+                            onTap: () {
+                              PlanPriceBottomSheet.show(context);
                             },
                             isLast: true,
                           ),
