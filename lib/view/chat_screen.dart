@@ -466,8 +466,6 @@ class _ChatScreenState extends State<ChatScreen> {
           final latitude = clickManage['latitude']?.toString() ?? '';
           final longitude = clickManage['longitude']?.toString() ?? '';
 
-          print('ChatScreen: Change country received 1- $clickManage');
-
           if (currency.isNotEmpty) {
             Utility.setCurrencyCode(currency);
           }
@@ -484,15 +482,12 @@ class _ChatScreenState extends State<ChatScreen> {
             );
           }
           if (location.isNotEmpty) {
-            print('ChatScreen: Change country received 2- $location');
             Utility.setLocation(location);
           }
           if (latitude.isNotEmpty) {
-            print('ChatScreen: Change country received 3- $latitude');
             Utility.setLatitude(double.parse(latitude));
           }
           if (longitude.isNotEmpty) {
-            print('ChatScreen: Change country received 4- $longitude');
             Utility.setLongitude(double.parse(longitude));
           }
         } else {
