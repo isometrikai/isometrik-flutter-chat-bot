@@ -257,8 +257,10 @@ class AppTranslations {
   static String get planPriceBenefit3 => 'plan_price_benefit_3'.tr();
   static String get planPriceBenefit4 => 'plan_price_benefit_4'.tr();
   static String get planPriceAutoRenewTitle => 'plan_price_auto_renew_title'.tr();
-  static String get planPriceAutoRenewDesc => 'plan_price_auto_renew_desc'.tr();
-  static String get planPriceSubscribeCta => 'plan_price_subscribe_cta'.tr();
+  static String planPriceAutoRenewDesc(String price) =>
+      'plan_price_auto_renew_desc'.tr(namedArgs: {'price': price});
+  static String planPriceSubscribeCta(String price) =>
+      'plan_price_subscribe_cta'.tr(namedArgs: {'price': price});
   static String get planPricePurchaseSuccess => 'plan_price_purchase_success'.tr();
   static String get planPriceRestore => 'plan_price_restore'.tr();
   static String get planPriceStoreUnavailable => 'plan_price_store_unavailable'.tr();

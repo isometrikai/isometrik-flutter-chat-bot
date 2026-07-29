@@ -110,6 +110,7 @@ class PlanPriceBottomSheet extends StatelessWidget {
                           const SizedBox(height: 16),
                           _AutoRenewRow(
                             autoRenew: ready.autoRenew,
+                            priceLabel: ready.displayPrice,
                             enabled: !ready.purchaseInProgress,
                             onChanged: (value) {
                               context.read<SubscriptionBloc>().add(
@@ -335,11 +336,13 @@ class _PlanCard extends StatelessWidget {
 
 class _AutoRenewRow extends StatelessWidget {
   final bool autoRenew;
+  final String priceLabel;
   final bool enabled;
   final ValueChanged<bool> onChanged;
 
   const _AutoRenewRow({
     required this.autoRenew,
+    required this.priceLabel,
     required this.enabled,
     required this.onChanged,
   });
@@ -376,7 +379,7 @@ class _AutoRenewRow extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  AppTranslations.planPriceAutoRenewDesc,
+                  AppTranslations.planPriceAutoRenewDesc(priceLabel),
                   style: AppTheme.getTextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w400,
@@ -441,7 +444,7 @@ class _SubscribeButton extends StatelessWidget {
                     ),
                   )
                 : Text(
-                    'Subscribe for $priceLabel',
+                    AppTranslations.planPriceSubscribeCta(priceLabel),
                     style: AppTheme.getTextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w700,
