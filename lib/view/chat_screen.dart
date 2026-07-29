@@ -463,8 +463,8 @@ class _ChatScreenState extends State<ChatScreen> {
               (clickManage['currencySymbol']?.toString() ?? '').trim();
           final zoneId = (clickManage['zoneId']?.toString() ?? '').trim();
           final location = (clickManage['location']?.toString() ?? '').trim();
-          final latitude = clickManage['latitude'];
-          final longitude = clickManage['longitude'];
+          final latitude = clickManage['latitude']?.toString() ?? '';
+          final longitude = clickManage['longitude']?.toString() ?? '';
 
           print('ChatScreen: Change country received 1- $clickManage');
 
@@ -489,11 +489,11 @@ class _ChatScreenState extends State<ChatScreen> {
           }
           if (latitude.isNotEmpty) {
             print('ChatScreen: Change country received 3- $latitude');
-            Utility.setLatitude(latitude);
+            Utility.setLatitude(double.parse(latitude));
           }
           if (longitude.isNotEmpty) {
             print('ChatScreen: Change country received 4- $longitude');
-            Utility.setLongitude(longitude);
+            Utility.setLongitude(double.parse(longitude));
           }
         } else {
           _apiData = {
