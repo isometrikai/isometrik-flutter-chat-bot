@@ -5,6 +5,7 @@ import 'dart:io';
 import 'package:chat_bot/services/in_app_purchase/iap_models.dart';
 import 'package:chat_bot/services/in_app_purchase/iap_product_ids.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -245,12 +246,39 @@ class IapService {
         _logSuccess('purchase sheet started for $productId — waiting for stream');
       }
       return started;
+    } on PlatformException catch (e, st) {
+      _purchaseInFlight = false;
+      // StoreKit often reports Sandbox auth cancel/fail as userCancelled.
+      if (_isUserCancelled(e)) {
+        _logInfo('buyNonConsumable() cancelled by user / sandbox auth | $e');
+        _purchaseController.add(
+          IapPurchaseResult(
+            status: IapPurchaseStatus.canceled,
+            productId: productId,
+            errorMessage: e.message,
+          ),
+        );
+        return false;
+      }
+      _logError('buyNonConsumable() PlatformException: $e', st);
+      _emitError(e.message ?? e.toString());
+      return false;
     } catch (e, st) {
       _purchaseInFlight = false;
       _logError('buyNonConsumable() exception: $e', st);
       _emitError(e.toString());
       return false;
     }
+  }
+
+  bool _isUserCancelled(PlatformException e) {
+    final code = e.code.toLowerCase();
+    final message = (e.message ?? '').toLowerCase();
+    return code == 'usercancelled' ||
+        code.contains('cancel') ||
+        message.contains('usercancelled') ||
+        message.contains('cancelled') ||
+        message.contains('canceled');
   }
 
   Future<void> restorePurchases() async {

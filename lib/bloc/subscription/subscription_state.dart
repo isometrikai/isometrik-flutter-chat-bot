@@ -43,7 +43,7 @@ class SubscriptionReady extends SubscriptionState {
     if (product != null && product.price.isNotEmpty) {
       return product.price;
     }
-    return 'AED 19.99';
+    return 'AED 49.99';
   }
 
   SubscriptionReady copyWith({
