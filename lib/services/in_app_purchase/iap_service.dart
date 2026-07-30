@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:chat_bot/data/repositories/subscription_purchase_repository.dart';
 import 'package:chat_bot/services/in_app_purchase/iap_models.dart';
 import 'package:chat_bot/services/in_app_purchase/iap_product_ids.dart';
 import 'package:flutter/foundation.dart';
@@ -17,9 +18,12 @@ typedef IapPurchaseCallback = void Function(IapPurchaseResult result);
 /// - Store availability + product loading
 /// - Purchase / restore
 /// - Completing transactions
-/// - Local entitlement cache (server verification can hook via [onPurchaseVerified])
+/// - Reporting purchases to backend (`/v1/customer/eazysubscription/purchase`)
+/// - Local entitlement cache (server verification can also hook via [onPurchaseVerified])
 class IapService {
-  IapService._();
+  IapService._({SubscriptionPurchaseRepository? purchaseRepository})
+      : _purchaseRepository =
+            purchaseRepository ?? SubscriptionPurchaseRepository();
 
   static final IapService instance = IapService._();
 
@@ -27,6 +31,7 @@ class IapService {
   static const String _tag = 'IAP';
 
   final InAppPurchase _iap = InAppPurchase.instance;
+  final SubscriptionPurchaseRepository _purchaseRepository;
 
   StreamSubscription<List<PurchaseDetails>>? _purchaseSub;
   final _purchaseController = StreamController<IapPurchaseResult>.broadcast();
@@ -376,6 +381,33 @@ class IapService {
       case PurchaseStatus.purchased:
       case PurchaseStatus.restored:
         _purchaseInFlight = false;
+
+        _logSuccess(
+          'status=${purchase.status} — reporting to backend | '
+          '${_purchaseSummary(purchase)}',
+        );
+
+        final backendOk = await _reportPurchaseToBackend(purchase);
+        if (!backendOk) {
+          _logError(
+            'backend purchase API failed — not completing store transaction '
+            '(will retry on next launch)',
+          );
+          _purchaseController.add(
+            IapPurchaseResult(
+              status: IapPurchaseStatus.error,
+              productId: purchase.productID,
+              transactionId: purchase.purchaseID,
+              errorMessage:
+                  'Purchase succeeded in store, but activating plan failed. '
+                  'Please try again.',
+              raw: purchase,
+            ),
+          );
+          // Do not completePurchase — Apple will redeliver so we can retry API.
+          break;
+        }
+
         final result = IapPurchaseResult(
           status: purchase.status == PurchaseStatus.restored
               ? IapPurchaseStatus.restored
@@ -385,10 +417,6 @@ class IapService {
           raw: purchase,
         );
 
-        _logSuccess(
-          'status=${purchase.status} — persisting entitlement | '
-          '${_purchaseSummary(purchase)}',
-        );
         await _persistEntitlement(purchase);
         onPurchaseVerified?.call(result);
         _log('onPurchaseVerified callback '
@@ -471,6 +499,51 @@ class IapService {
       jsonEncode(entitlement.toJson()),
     );
     _logSuccess('_persistEntitlement saved');
+  }
+
+  /// POST purchase details to eazylife backend.
+  Future<bool> _reportPurchaseToBackend(PurchaseDetails purchase) async {
+    final transactionId = (purchase.purchaseID ?? '').trim();
+    final serverReceipt = purchase.verificationData.serverVerificationData;
+    final localReceipt = purchase.verificationData.localVerificationData;
+    final receiptData =
+        serverReceipt.isNotEmpty ? serverReceipt : localReceipt;
+
+    _logInfo(
+      '_reportPurchaseToBackend | '
+      'transactionId=$transactionId | '
+      'serverReceiptLen=${serverReceipt.length} | '
+      'localReceiptLen=${localReceipt.length} | '
+      'using=${serverReceipt.isNotEmpty ? "server" : "local"}',
+    );
+
+    if (transactionId.isEmpty) {
+      _logError('_reportPurchaseToBackend aborted — empty transactionId');
+      return false;
+    }
+    if (receiptData.isEmpty) {
+      _logError('_reportPurchaseToBackend aborted — empty receiptData');
+      return false;
+    }
+
+    try {
+      final result = await _purchaseRepository.reportPurchase(
+        planId: SubscriptionPurchaseRepository.defaultPlanId,
+        transactionId: transactionId,
+        receiptData: receiptData,
+      );
+      if (result.isSuccess) {
+        _logSuccess('_reportPurchaseToBackend OK');
+        return true;
+      }
+      _logError(
+        '_reportPurchaseToBackend failed | message=${result.message}',
+      );
+      return false;
+    } catch (e, st) {
+      _logError('_reportPurchaseToBackend exception: $e', st);
+      return false;
+    }
   }
 
   void _emitError(String message) {

@@ -14,4 +14,5 @@ export 'hotel_availability_repository.dart';
 export 'hotel_search_repository.dart';
 export 'car_search_repository.dart';
 export 'flight_search_repository.dart';
+export 'subscription_purchase_repository.dart';
 
