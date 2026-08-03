@@ -21,20 +21,24 @@ class SubscriptionPurchaseRepository {
   ///
   /// [transactionId] — Apple / Google transaction id  
   /// [receiptData] — App Store receipt / JWS (base64 or JWS string from StoreKit)
+  /// [productId] — Store product id (e.g. plan_autorenew_monthly)
   Future<ApiResult> reportPurchase({
     required String transactionId,
     required String receiptData,
+    required String productId,
     String planId = defaultPlanId,
   }) async {
     final body = <String, dynamic>{
       'planId': planId,
+      'productId': productId,
       'transactionId': transactionId,
       'receiptData': receiptData,
     };
 
     print(
       'IAP-API | POST $_purchaseEndpoint | '
-      'planId=$planId | transactionId=$transactionId | '
+      'planId=$planId | productId=$productId | '
+      'transactionId=$transactionId | '
       'receiptDataLen=${receiptData.length}',
     );
 

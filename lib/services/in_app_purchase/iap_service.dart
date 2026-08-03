@@ -529,6 +529,7 @@ class IapService {
     try {
       final result = await _purchaseRepository.reportPurchase(
         planId: SubscriptionPurchaseRepository.defaultPlanId,
+        productId: purchase.productID,
         transactionId: transactionId,
         receiptData: receiptData,
       );
