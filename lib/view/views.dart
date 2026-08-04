@@ -12,7 +12,7 @@ export 'popup_overlay_screen.dart';
 export 'personalization_screen.dart';
 export 'profile_setting_screen.dart';
 export 'product_customization_screen.dart';
-export 'restaurant_menu_screen.dart';
+export 'restaurant_menu/restaurant_menu.dart';
 export 'restaurant_screen.dart';
 export 'hotel_search_screen.dart';
 export 'car_search_screen.dart';
