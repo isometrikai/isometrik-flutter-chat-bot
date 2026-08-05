@@ -1428,12 +1428,14 @@ class ChatScreenBody extends StatelessWidget {
                   _BirthdayReminderCard(
                     greetingReminder: greetingData?.reminders.first,
                     onBookRestaurant: () {
-                      onSendMessage(
-                        greetingData?.reminders.first.buttons.first ?? '',
-                      );
+                      final buttons = greetingData?.reminders.first.buttons ?? [];
+                      if (buttons.isEmpty) return;
+                      onSendMessage(buttons.first);
                     },
                     onBrowseGifts: () {
-                      onSendMessage(greetingData?.reminders.first.buttons.last ?? '');
+                      final buttons = greetingData?.reminders.first.buttons ?? [];
+                      if (buttons.length < 2) return;
+                      onSendMessage(buttons.last);
                     },
                   ),
                 ],
@@ -5010,6 +5012,8 @@ class _BirthdayReminderCardState extends State<_BirthdayReminderCard> {
   Widget build(BuildContext context) {
     if (!_visible) return const SizedBox.shrink();
 
+    final buttons = widget.greetingReminder?.buttons ?? const <String>[];
+
     return Center(
       child: SizedBox(
         width: 343,
@@ -5097,62 +5101,43 @@ class _BirthdayReminderCardState extends State<_BirthdayReminderCard> {
                       fontWeight: FontWeight.w400,
                     ),
                   ),
-                  const SizedBox(height: 10),
-                  Row(
-                    children: [
-                      Material(
-                        color: Colors.transparent,
-                        child: InkWell(
-                          onTap: widget.onBookRestaurant,
-                          borderRadius: BorderRadius.circular(8),
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 10,
-                              vertical: 12,
-                            ),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
+                  if (buttons.isNotEmpty) ...[
+                    const SizedBox(height: 10),
+                    Row(
+                      children: [
+                        for (int i = 0; i < buttons.length; i++) ...[
+                          if (i > 0) const SizedBox(width: 10),
+                          Material(
+                            color: Colors.transparent,
+                            child: InkWell(
+                              onTap: i == 0
+                                  ? widget.onBookRestaurant
+                                  : widget.onBrowseGifts,
                               borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Text(
-                              widget.greetingReminder?.buttons.first ?? AppTranslations.bookRestaurant,
-                              style: AppTextStyles.bodyText.copyWith(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
-                                color: const Color(0xFF007AFF),
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 10,
+                                  vertical: 12,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Text(
+                                  buttons[i],
+                                  style: AppTextStyles.bodyText.copyWith(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w600,
+                                    color: const Color(0xFF007AFF),
+                                  ),
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      Material(
-                        color: Colors.transparent,
-                        child: InkWell(
-                          onTap: widget.onBrowseGifts,
-                          borderRadius: BorderRadius.circular(8),
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 10,
-                              vertical: 12,
-                            ),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Text(
-                              widget.greetingReminder?.buttons.last ?? AppTranslations.browseGifts,
-                              style: AppTextStyles.bodyText.copyWith(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
-                                color: const Color(0xFF007AFF),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
+                        ],
+                      ],
+                    ),
+                  ],
                 ],
               ),
             ),
