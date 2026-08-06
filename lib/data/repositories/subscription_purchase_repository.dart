@@ -57,7 +57,7 @@ class SubscriptionPurchaseRepository {
     return result;
   }
 
-  /// Reads `data.token.accessToken` and updates [Utility.setUserToken] when present.
+  /// Reads `data.token.accessToken` / `refreshToken` and updates Utility when present.
   void _applyAccessTokenFromResponse(dynamic responseBody) {
     if (responseBody is! Map<String, dynamic>) {
       print('IAP-API | accessToken skip — response is not a map');
@@ -77,19 +77,19 @@ class SubscriptionPurchaseRepository {
     }
 
     final accessToken = token['accessToken'];
-    if (accessToken is! String || accessToken.trim().isEmpty) {
+    if (accessToken is String && accessToken.trim().isNotEmpty) {
+      Utility.setUserToken(accessToken.trim());
+      print('IAP-API | accessToken set via Utility.setUserToken');
+    } else {
       print('IAP-API | accessToken skip — empty or missing');
-      return;
     }
 
     final refreshToken = token['refreshToken'];
-    if (refreshToken is! String || refreshToken.trim().isEmpty) {
+    if (refreshToken is String && refreshToken.trim().isNotEmpty) {
+      Utility.setRefreshToken(refreshToken.trim());
+      print('IAP-API | refreshToken set via Utility.setRefreshToken');
+    } else {
       print('IAP-API | refreshToken skip — empty or missing');
-      return;
     }
-
-    Utility.setUserToken(accessToken);
-    Utility.setRefreshToken(refreshToken);
-    print('IAP-API | accessToken set via Utility.setUserToken');
   }
 }
