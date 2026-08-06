@@ -1,4 +1,6 @@
 
+import 'package:chat_bot/utils/utility.dart';
+
 class OrderService {
   static final OrderService _instance = OrderService._internal();
   factory OrderService() => _instance;
@@ -16,7 +18,7 @@ class OrderService {
   Function(Map<String, dynamic>)? onPrescriptionScreenOpen;
   Function(Map<String, dynamic>)? onStripePlaceOrderScreenOpen;
   Function(Map<String, dynamic>)? onClickManageScreenOpen;
-  Function()? onChatDismiss; // Add dismiss callback
+  Function(Map<String, dynamic>)? onChatDismiss; // Add dismiss callback
   Function()? onTutorialDismiss; // Add tutorial dismiss callback
   Function(bool)? onCartUpdate; // Add cart update callback
   Function(String)? onStripePayment; // Add stripe payment callback
@@ -82,7 +84,7 @@ class OrderService {
   }
 
   // Add dismiss callback setter
-  void setDismissCallback(Function() callback) {
+  void setDismissCallback(Function(Map<String, dynamic>) callback) {
     onChatDismiss = callback;
   }
 
@@ -193,7 +195,12 @@ class OrderService {
 
   // Add dismiss trigger
   void triggerChatDismiss() {
-    onChatDismiss?.call();
+    print('triggerChatDismiss access token: ${Utility.getUserToken()}');
+    print('triggerChatDismiss refresh token: ${Utility.getRefreshToken()}');
+    onChatDismiss?.call({
+      'accessToken': Utility.getUserToken(),
+      'refreshToken': Utility.getRefreshToken(),
+    });
   }
 
   void triggerTutorialDismiss() {

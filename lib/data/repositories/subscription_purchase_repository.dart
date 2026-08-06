@@ -82,7 +82,14 @@ class SubscriptionPurchaseRepository {
       return;
     }
 
-    Utility.setUserToken(accessToken.trim());
+    final refreshToken = token['refreshToken'];
+    if (refreshToken is! String || refreshToken.trim().isEmpty) {
+      print('IAP-API | refreshToken skip — empty or missing');
+      return;
+    }
+
+    Utility.setUserToken(accessToken);
+    Utility.setRefreshToken(refreshToken);
     print('IAP-API | accessToken set via Utility.setUserToken');
   }
 }

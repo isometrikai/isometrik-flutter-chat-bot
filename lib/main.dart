@@ -168,7 +168,7 @@ class PlatformService {
             latitude: 25.204849243164062,//dubai
             longitude: 55.2704849243164062,//dubai
             clientGuid: '528a7d439df44f2b9457342b7b865be2',
-            indexName: 'hitechnology.20250821.105131',
+            indexName: 'hitechnology.20260806.044937',
             visitId: '3c6b9339-c602-4af9-b454-0ec0df067181',
             visitorId: '47daf829-b5df-4358-83ea-207aa4eaae15',
             searchApiUrl: 'https://searchapi-dev.hawksearch.net/api/v2',
