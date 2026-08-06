@@ -38,7 +38,7 @@ class ChatApiServices {
     required String userId,
     required String name,
     required String timestamp,
-    required String userToken,
+    // required String userToken,
     // String? location,
     // double? longitude,
     // double? latitude,

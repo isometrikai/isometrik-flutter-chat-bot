@@ -53,7 +53,7 @@ class UniversalApiClient {
   );
 
   Future<Map<String, String>> _buildUserPreferenceHeaders() async {
-    final raw = TokenManager.instance.userToken ?? '';
+    final raw = Utility.getUserToken();
     final token = raw.isEmpty ? '' : (raw.startsWith('Bearer ') ? raw : 'Bearer $raw');
     return {
       'accept': 'application/json',
@@ -67,7 +67,7 @@ class UniversalApiClient {
   /// Some easyagentapi endpoints expect a JSON string in `authorization` header
   /// (not an `Authorization: Bearer ...` header). We pass through `userToken` verbatim.
   Future<Map<String, String>> _buildCustomerPreferenceHeaders() async {
-    final raw = TokenManager.instance.userToken ?? '';
+    final raw = Utility.getUserToken();
     final platform = Utility.getPlatform();
     return {
       'accept': 'application/json',
@@ -79,7 +79,7 @@ class UniversalApiClient {
   }
 
   Future<Map<String, String>> _buildHotelAvailabilityHeaders() async {
-    final raw = TokenManager.instance.userToken ?? '';
+    final raw = Utility.getUserToken();
     final token = raw.isEmpty
         ? ''
         : (raw.startsWith('Bearer ') ? raw : 'Bearer $raw');
@@ -105,7 +105,7 @@ class UniversalApiClient {
   }
 
   Future<Map<String, String>> _buildAppHeaders() async {
-    final token = TokenManager.instance.userToken;
+    final token = Utility.getUserToken();
     return {
       // 'Content-Length':'391',
       'Content-Type': 'application/json',
@@ -115,17 +115,17 @@ class UniversalApiClient {
       'currencycode': Utility.getCurrencyCode(),
       'platform': Utility.getPlatform(),
       'ipAddress': '192.168.1.3',
-      'Authorization': token ?? '',
+      'Authorization': token,
     };
   }
 
   /// Build headers specifically for grocery API calls
   Future<Map<String, String>> _buildGroceryHeaders() async {
-    final token = TokenManager.instance.userToken;
+    final token = Utility.getUserToken();
     return {
       'currencysymbol': Utility.getCurrencySymbol(),//2K8u2KU=
       'storeId': '', // Default storeId, will be overridden
-      'Authorization': token ?? '',
+      'Authorization': token,
       'storeType': '8',
       'ipAddress': '192.168.5.105',
       'platform': Utility.getPlatform(),
@@ -143,11 +143,11 @@ class UniversalApiClient {
     String storeId,
     String storeCategoryId,
   ) async {
-    final token = TokenManager.instance.userToken;
+    final token = Utility.getUserToken();
     return {
       'currencysymbol': Utility.getCurrencySymbol(),//2K8u2KU=
       'storeId': storeId,
-      'Authorization': '$token',
+      'Authorization': token,
       'storeType': '8',
       'ipAddress': '192.168.5.105',
       'platform': Utility.getPlatform(),
@@ -163,7 +163,7 @@ class UniversalApiClient {
   Future<Map<String, String>> buildServiceGenieHeaders({
     required String storeCategoryId,
   }) async {
-    final token = TokenManager.instance.userToken;
+    final token = Utility.getUserToken();
     final headers = <String, String>{
       'User-Agent':
           'Eazy Life/2.0.1 (com.eazy.customerapp; build:64; iOS 26.0.1)',

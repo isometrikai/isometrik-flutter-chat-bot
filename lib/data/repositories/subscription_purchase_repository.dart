@@ -1,6 +1,7 @@
 import 'package:chat_bot/data/api_client.dart';
 import 'package:chat_bot/data/services/universal_api_client.dart';
 import 'package:chat_bot/utils/api_result.dart';
+import 'package:chat_bot/utils/utility.dart';
 
 /// Reports App Store / Play purchases to the eazylife backend.
 ///
@@ -46,6 +47,7 @@ class SubscriptionPurchaseRepository {
 
     if (result.isSuccess) {
       print('IAP-API | SUCCESS | data=${result.data}');
+      _applyAccessTokenFromResponse(result.data);
     } else {
       print(
         'IAP-API | ERROR | message=${result.message} | data=${result.data}',
@@ -53,5 +55,34 @@ class SubscriptionPurchaseRepository {
     }
 
     return result;
+  }
+
+  /// Reads `data.token.accessToken` and updates [Utility.setUserToken] when present.
+  void _applyAccessTokenFromResponse(dynamic responseBody) {
+    if (responseBody is! Map<String, dynamic>) {
+      print('IAP-API | accessToken skip — response is not a map');
+      return;
+    }
+
+    final data = responseBody['data'];
+    if (data is! Map<String, dynamic>) {
+      print('IAP-API | accessToken skip — data missing');
+      return;
+    }
+
+    final token = data['token'];
+    if (token is! Map<String, dynamic>) {
+      print('IAP-API | accessToken skip — token missing');
+      return;
+    }
+
+    final accessToken = token['accessToken'];
+    if (accessToken is! String || accessToken.trim().isEmpty) {
+      print('IAP-API | accessToken skip — empty or missing');
+      return;
+    }
+
+    Utility.setUserToken(accessToken.trim());
+    print('IAP-API | accessToken set via Utility.setUserToken');
   }
 }

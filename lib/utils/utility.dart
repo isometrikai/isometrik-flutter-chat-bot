@@ -6,6 +6,7 @@ final GlobalKey<NavigatorState> kNavigatorKey = GlobalKey<NavigatorState>();
 
 class Utility {
   static bool isLoading = false;
+  static String userToken = 'empty';
   static String currencySymbol = '';
   static String currencyCode = '';
   static String platform = '';
@@ -139,6 +140,10 @@ class Utility {
     );
   }
 
+  static void setUserToken(String userToken) {
+    Utility.userToken = userToken;
+  }
+
   static void setCurrencySymbol(String currencySymbol) {
     Utility.currencySymbol = currencySymbol;
   }
@@ -201,6 +206,10 @@ class Utility {
     } else {
       Utility.language = raw.split(RegExp(r'[-_]')).first;
     }
+  }
+  
+  static String getUserToken() {
+    return userToken;
   }
 
   static String getLanguage() {

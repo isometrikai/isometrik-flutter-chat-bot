@@ -19,7 +19,7 @@ class StoreDetailsRepository {
     AppLog.info('🏪 Parameters: storeId=$storeId, lat=$latitude, long=$longitude, timezone=$timezone');
     
     // Use custom headers as per the API requirements
-    final token = TokenManager.instance.userToken ?? '';
+    final token = Utility.getUserToken();
     AppLog.info('🏪 Token available: ${token.isNotEmpty ? 'Yes (${token.substring(0, token.length > 20 ? 20 : token.length)}...)' : 'No'}');
     
     final authHeader = token.isNotEmpty 

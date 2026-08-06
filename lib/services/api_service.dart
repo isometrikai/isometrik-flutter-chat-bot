@@ -57,7 +57,7 @@ class ApiService {
       userId: userId,
       name: name,
       timestamp: timestamp,
-      userToken: userToken,
+      // userToken: userToken,
       // location: location,
       // longitude: longitude,
       // latitude: latitude,
@@ -78,7 +78,7 @@ class ApiService {
       userId: userId,
       name: name,
       timestamp: timestamp,
-      userToken: userToken,
+      // userToken: userToken,
       // location: location,
       // longitude: longitude,
       // latitude: latitude,
@@ -106,6 +106,7 @@ class ApiService {
       userId: userId,
     );
 
+    Utility.setUserToken(userToken);
     Utility.setCurrencySymbol(currencysymbol);
     Utility.setCurrencyCode(currencycode);
     Utility.setPlatform(platform);

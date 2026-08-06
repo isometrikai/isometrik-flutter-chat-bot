@@ -27,13 +27,13 @@ class TokenManager {
   void configure({
     required String appSecret,
     required String licenseKey,
-    required String userToken,
+    // required String userToken,
     String? baseUrl,
     String? authEndpoint,
   }) {
     _appSecret = appSecret;
     _licenseKey = licenseKey;
-    _userToken = userToken;
+    // _userToken = userToken;
     if (baseUrl != null) _baseUrl = baseUrl;
     if (authEndpoint != null) _authEndpoint = authEndpoint;
   }
@@ -52,7 +52,7 @@ class TokenManager {
     return _accessToken!.startsWith('Bearer ') ? _accessToken! : 'Bearer $_accessToken';
   }
 
-  String? get userToken => _userToken;
+  // String? get userToken => _userToken;
 
   /// Refresh token with automatic deduplication
   Future<bool> refreshToken() async {

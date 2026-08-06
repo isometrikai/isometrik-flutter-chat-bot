@@ -14,10 +14,10 @@ class AvailabilitySlotsRepository {
     String timeZone = 'Asia/Kolkata',
   }) async {
     // Build headers with storeCategoryId
-    final token = TokenManager.instance.userToken;
+    final token = Utility.getUserToken();
     final headers = <String, String>{
       'User-Agent': 'Eazy Life/2.0.1 (com.eazy.customerapp; build:77; iOS 26.1.0) Alamofire/5.6.1',
-      'Authorization': token ?? '',
+      'Authorization': token,
       'language': Utility.getLanguage(),
       'storeCategoryId': storeCategoryId,
       'Accept-Encoding': 'br;q=1.0, gzip;q=0.9, deflate;q=0.8',

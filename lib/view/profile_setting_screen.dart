@@ -113,18 +113,18 @@ class ProfileSettingScreen extends StatelessWidget {
                               OrderService().triggerSideMenuOption({'action': 'manage_addresses'});
                             },
                           ),
-                          // _SettingItem(
-                          //   icon: Icon(
-                          //     Icons.workspace_premium_outlined,
-                          //     size: 20,
-                          //     color: _primaryText,
-                          //   ),
-                          //   label: AppTranslations.planAndPrice,
-                          //   onTap: () {
-                          //     PlanPriceBottomSheet.show(context);
-                          //   },
-                          //   isLast: true,
-                          // ),
+                          _SettingItem(
+                            icon: Icon(
+                              Icons.workspace_premium_outlined,
+                              size: 20,
+                              color: _primaryText,
+                            ),
+                            label: AppTranslations.planAndPrice,
+                            onTap: () {
+                              PlanPriceBottomSheet.show(context);
+                            },
+                            isLast: true,
+                          ),
                         ],
                       ),
                       _buildSection(

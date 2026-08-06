@@ -45,7 +45,7 @@ class AuthService {
     required String userId,
     required String name,
     required String timestamp,
-    required String userToken,
+    // required String userToken,
     // String? location,
     // double? longitude,
     // double? latitude,
@@ -64,7 +64,7 @@ class AuthService {
     _userId = userId;
     _name = name;
     _timestamp = timestamp;
-    _userToken = userToken;
+    _userToken = Utility.getUserToken();
     // _location = location;
     // _longitude = longitude;
     // _latitude = latitude;
@@ -73,7 +73,7 @@ class AuthService {
     TokenManager.instance.configure(
       appSecret: appSecret,
       licenseKey: licenseKey,
-      userToken: userToken
+      // userToken: Utility.getUserToken()
     );
     
     AppLog.info('Environment: ' + (_isProduction ? 'production' : 'staging'));
