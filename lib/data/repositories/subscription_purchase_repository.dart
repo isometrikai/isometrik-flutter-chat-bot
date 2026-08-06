@@ -1,5 +1,6 @@
 import 'package:chat_bot/data/api_client.dart';
 import 'package:chat_bot/data/services/universal_api_client.dart';
+import 'package:chat_bot/services/callback_manage.dart';
 import 'package:chat_bot/utils/api_result.dart';
 import 'package:chat_bot/utils/utility.dart';
 
@@ -91,5 +92,11 @@ class SubscriptionPurchaseRepository {
     } else {
       print('IAP-API | refreshToken skip — empty or missing');
     }
+
+    OrderService().triggerClickManageScreenOpen({
+                      'action': 'tokenRefresh',
+                      'accessToken': accessToken,
+                      'refreshToken': refreshToken,
+                    });
   }
 }
