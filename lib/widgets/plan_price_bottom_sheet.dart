@@ -11,15 +11,29 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 /// Plan & Price subscription full-screen page (In-App Purchase).
 class PlanPriceBottomSheet extends StatelessWidget {
-  const PlanPriceBottomSheet({super.key});
+  final bool isFromChatScreen;
+  final VoidCallback? onPurchaseSuccess;
 
-  static Future<void> show(BuildContext context) {
+  const PlanPriceBottomSheet({
+    super.key,
+    this.isFromChatScreen = false,
+    this.onPurchaseSuccess,
+  });
+
+  static Future<void> show(
+    BuildContext context, {
+    bool isFromChatScreen = false,
+    VoidCallback? onPurchaseSuccess,
+  }) {
     return Navigator.of(context).push<void>(
       AppLocale.materialRoute(
         fullscreenDialog: true,
         builder: (_) => BlocProvider(
           create: (_) => SubscriptionBloc()..add(const SubscriptionStarted()),
-          child: const PlanPriceBottomSheet(),
+          child: PlanPriceBottomSheet(
+            isFromChatScreen: isFromChatScreen,
+            onPurchaseSuccess: onPurchaseSuccess,
+          ),
         ),
       ),
     );
@@ -70,6 +84,7 @@ class PlanPriceBottomSheet extends StatelessWidget {
       listener: (context, state) {
         if (state is SubscriptionPurchaseSuccess) {
           Utility.showErrorBlackToast(AppTranslations.planPricePurchaseSuccess);
+          onPurchaseSuccess?.call();
           if (context.mounted) {
             Navigator.of(context).maybePop();
           }

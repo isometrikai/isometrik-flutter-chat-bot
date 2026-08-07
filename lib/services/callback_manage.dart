@@ -18,7 +18,7 @@ class OrderService {
   Function(Map<String, dynamic>)? onPrescriptionScreenOpen;
   Function(Map<String, dynamic>)? onStripePlaceOrderScreenOpen;
   Function(Map<String, dynamic>)? onClickManageScreenOpen;
-  Function(Map<String, dynamic>)? onChatDismiss; // Add dismiss callback
+  Function()? onChatDismiss; // Add dismiss callback
   Function()? onTutorialDismiss; // Add tutorial dismiss callback
   Function(bool)? onCartUpdate; // Add cart update callback
   Function(String)? onStripePayment; // Add stripe payment callback
@@ -84,7 +84,7 @@ class OrderService {
   }
 
   // Add dismiss callback setter
-  void setDismissCallback(Function(Map<String, dynamic>) callback) {
+  void setDismissCallback(Function() callback) {
     onChatDismiss = callback;
   }
 
@@ -195,12 +195,7 @@ class OrderService {
 
   // Add dismiss trigger
   void triggerChatDismiss() {
-    print('triggerChatDismiss access token: ${Utility.getUserToken()}');
-    print('triggerChatDismiss refresh token: ${Utility.getRefreshToken()}');
-    onChatDismiss?.call({
-      'accessToken': Utility.getUserToken(),
-      'refreshToken': Utility.getRefreshToken(),
-    });
+    onChatDismiss?.call();
   }
 
   void triggerTutorialDismiss() {

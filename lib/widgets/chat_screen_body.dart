@@ -50,6 +50,8 @@ class ChatScreenBody extends StatelessWidget {
   onCancelSpeechRecording; // Add cancel speech handler
   final bool isRecording; // Add recording state
   final bool needToEndThisChat; // Add needToEndThisChat parameter
+  final bool isTrialPlanEnd; // Add isTrialPlanEnd parameter
+  final VoidCallback? onTrialPlanPurchased;
   final bool gotStripePaymentCallback; // Add gotStripePaymentCallback parameter
   final Function(bool) onUpdateGotStripePaymentCallback; // Add callback to update gotStripePaymentCallback
   final bool isFromHistory; // Add isFromHistory parameter
@@ -87,6 +89,8 @@ class ChatScreenBody extends StatelessWidget {
     required this.onCancelSpeechRecording, // Add the cancel speech handler parameter
     required this.isRecording, // Add the recording state parameter
     required this.needToEndThisChat, // Add the needToEndThisChat parameter
+    required this.isTrialPlanEnd, // Add isTrialPlanEnd parameter
+    this.onTrialPlanPurchased,
     required this.gotStripePaymentCallback, // Add gotStripePaymentCallback parameter
     required this.onUpdateGotStripePaymentCallback, // Add callback to update gotStripePaymentCallback
     required this.isFromHistory, // Add the isFromHistory parameter
@@ -1226,7 +1230,11 @@ class ChatScreenBody extends StatelessWidget {
             const SizedBox(height: 4), //12
             buildPackageTypesWidget(message.packageTypesItems),
           ],
-          if (message.text.trim().isNotEmpty && message.isBot) ...[
+          if (message.hasSubscriptionSectionWidget) ...[
+            const SizedBox(height: 4), //12
+            buildSubscriptionWidget(message.subscriptionItems),
+          ],
+          if (message.text.trim().isNotEmpty && message.isBot && !isTrialPlanEnd) ...[
             const SizedBox(height: 4),
             Padding(
               padding: EdgeInsetsDirectional.only(
@@ -2830,7 +2838,7 @@ class ChatScreenBody extends StatelessWidget {
                                   autofocus: false,
                                   controller: messageController,
                                   focusNode: messageFocusNode,
-                                  enabled: !isApiLoading,
+                                  enabled: !isApiLoading && !isTrialPlanEnd,
                                   textCapitalization: TextCapitalization.sentences,
                                   maxLines: null,
                                   minLines: 1,
@@ -2838,7 +2846,7 @@ class ChatScreenBody extends StatelessWidget {
                                     color: const Color(0xFF242424),
                                   ),
                                   decoration: InputDecoration(
-                                    hintText: isRecording ? AppTranslations.listening : AppTranslations.askMeAnything,
+                                    hintText: isRecording ? AppTranslations.listening : isTrialPlanEnd ? "Message limit reached." : AppTranslations.askMeAnything,
                                     border: InputBorder.none,
                                     enabledBorder: InputBorder.none,
                                     focusedBorder: InputBorder.none,
@@ -2851,7 +2859,7 @@ class ChatScreenBody extends StatelessWidget {
                                     isDense: true,
                                     contentPadding: EdgeInsets.symmetric(vertical: 8),
                                   ),
-                                  onSubmitted: isApiLoading
+                                  onSubmitted: isApiLoading || isTrialPlanEnd
                                       ? null
                                       : (text) {
                                           onSendMessage(text);
@@ -2870,10 +2878,10 @@ class ChatScreenBody extends StatelessWidget {
                           // Speech button - Single tap to start/stop recording
                           if (isRecording) ...[
                             Opacity(
-                              opacity: isApiLoading ? 0.4 : 1.0,
+                              opacity: isApiLoading || isTrialPlanEnd ? 0.4 : 1.0,
                               child: GestureDetector(
                                 onTap:
-                                    isApiLoading
+                                    isApiLoading || isTrialPlanEnd
                                         ? null
                                         : () async {
                                           await onCancelSpeechRecording();
@@ -2890,10 +2898,10 @@ class ChatScreenBody extends StatelessWidget {
                             const SizedBox(width: 10),
                             // Send button
                             Opacity(
-                              opacity: isApiLoading ? 0.4 : 1.0,
+                              opacity: isApiLoading || isTrialPlanEnd ? 0.4 : 1.0,
                               child: GestureDetector(
                                 onTap:
-                                    isApiLoading
+                                    isApiLoading || isTrialPlanEnd
                                         ? null
                                         : () async {
                                           await onStopSpeechRecording();
@@ -2923,10 +2931,10 @@ class ChatScreenBody extends StatelessWidget {
                             ),
                           ] else ...[
                             Opacity(
-                              opacity: isApiLoading ? 0.4 : 1.0,
+                              opacity: isApiLoading || isTrialPlanEnd ? 0.4 : 1.0,
                               child: GestureDetector(
                                 onTap:
-                                    isApiLoading
+                                    isApiLoading || isTrialPlanEnd
                                         ? null
                                         : () async {
                                           if (isRecording) {
@@ -2949,10 +2957,10 @@ class ChatScreenBody extends StatelessWidget {
                             const SizedBox(width: 10),
                             // Send button
                             Opacity(
-                              opacity: isApiLoading ? 0.4 : 1.0,
+                              opacity: isApiLoading || isTrialPlanEnd ? 0.4 : 1.0,
                               child: GestureDetector(
                                 onTap:
-                                    isApiLoading
+                                    isApiLoading || isTrialPlanEnd
                                         ? null
                                         : () {
                                           onSendMessage(messageController.text);
@@ -4354,6 +4362,15 @@ class ChatScreenBody extends StatelessWidget {
       return OrderConfirmedWidget(title: title);
     }
     return const SizedBox.shrink();
+  }
+
+  Widget buildSubscriptionWidget(List<WidgetAction> subscriptionItems) {
+    if (subscriptionItems.isEmpty) return const SizedBox.shrink();
+    return SubscriptionLimitWidget(
+      items: subscriptionItems,
+      isFromChatHistory: isFromHistory,
+      onPurchaseSuccess: onTrialPlanPurchased,
+    );
   }
 
   Widget buildServicesDeliveryOptionsWidget(List<WidgetAction> servicesDeliveryOptions) {

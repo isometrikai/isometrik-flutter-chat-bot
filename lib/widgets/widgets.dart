@@ -27,5 +27,6 @@ export 'hotel_booking_confirmed_widget.dart';
 export 'car_booking_confirmed_widget.dart';
 export 'flight_booking_confirmed_widget.dart';
 export 'package_types_widget.dart';
+export 'subscription_limit_widget.dart';
 export 'choose_room_bottom_sheet.dart';
 export 'screen_header.dart';

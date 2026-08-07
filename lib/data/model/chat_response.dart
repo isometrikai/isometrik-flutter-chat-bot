@@ -11,6 +11,7 @@ class ChatResponse {
   final List<ChatWidget> widgets;
   final int? cartCount;
   final bool needToEndThisChat;
+  final bool isTrialPlanEnd;
   final bool isOnlinePayment;
 
   ChatResponse({
@@ -19,6 +20,7 @@ class ChatResponse {
     required this.widgets,
     this.cartCount,
     this.needToEndThisChat = false,
+    this.isTrialPlanEnd = false,
     this.isOnlinePayment = false,
   });
 
@@ -47,6 +49,7 @@ class ChatResponse {
       widgets: widgetsList,
       cartCount: json['cartCount'] ?? -1,
       needToEndThisChat: json['needToEndThisChat'] ?? false,
+      isTrialPlanEnd: json['isTrialPlanEnd'] ?? false,
       isOnlinePayment: json['isOnlinePayment'] ?? false,
     );
   }
@@ -58,6 +61,7 @@ class ChatResponse {
       'widgets': widgets.map((widget) => widget.toJson()).toList(),
       'cartCount': cartCount,
       'needToEndThisChat': needToEndThisChat,
+      'isTrialPlanEnd': isTrialPlanEnd,
       'isOnlinePayment': isOnlinePayment,
     };
   }
@@ -162,6 +166,7 @@ class ChatWidget {
   bool get isOptionsWidget => type == WidgetEnum.options.value;
   bool get isStoresWidget => type == WidgetEnum.stores.value;
   bool get isProductsWidget => type == WidgetEnum.products.value;
+  bool get isSubscriptionWidget => type == WidgetEnum.subscription.value;
   bool get isSeeMoreWidget => type == WidgetEnum.see_more.value;
   bool get isMenuWidget => type == WidgetEnum.menu.value;
   bool get isCartWidget => type == WidgetEnum.cart.value;
@@ -566,6 +571,14 @@ class ChatWidget {
   List<HotelProperty> getHotelsItems() {
     if (isHotelsWidget) {
       return widget.map((item) => HotelProperty.fromJson(item as Map<String, dynamic>)).toList();
+    }
+    return [];
+  }
+
+  // Helper method to get subscription items
+  List<WidgetAction> getSubscriptionItems() {
+    if (isSubscriptionWidget) {
+      return widget.map((item) => WidgetAction.fromJson(item as Map<String, dynamic>)).toList();
     }
     return [];
   }
@@ -3329,6 +3342,9 @@ class WidgetAction {
   final String? propertyId;
   final bool? isDoctorFlow;
   final num? productType;
+  final num? current_messages;
+  final num? max_messages;
+  final String? footer;
 
   WidgetAction({
     required this.buttonText,
@@ -3403,6 +3419,9 @@ class WidgetAction {
     this.propertyId,
     this.isDoctorFlow,
     this.productType,
+    this.current_messages,
+    this.max_messages,
+    this.footer,
   });
 
   factory WidgetAction.fromJson(Map<String, dynamic> json) {
@@ -3483,6 +3502,9 @@ class WidgetAction {
         propertyId: json['propertyId']?.toString(),
         isDoctorFlow: json['isDoctorFlow'] ?? false,
         productType: json['productType'] ?? 0,
+        current_messages: json['current_messages'] ?? 0,
+        max_messages: json['max_messages'] ?? 0,
+        footer: json['footer']?.toString(),
     );
   }
 
@@ -3561,6 +3583,9 @@ class WidgetAction {
       'propertyId': propertyId,
       'isDoctorFlow': isDoctorFlow,
       'productType': productType,
+      'current_messages': current_messages,
+      'max_messages': max_messages,
+      'footer': footer,
     };
   }
 }

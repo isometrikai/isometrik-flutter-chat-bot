@@ -20,6 +20,7 @@ class ChatMessage {
   final bool hasCarRentalsSearchSectionWidget;
   final bool hasFlightsSearchSectionWidget;
   final bool hasHotelsSectionWidget;
+  final bool hasSubscriptionSectionWidget;
   final bool hasCustomerProfileDetailsSectionWidget;
   final bool hasHotelOrderSummarySectionWidget;
   final bool hasCarOrderSummarySectionWidget;
@@ -49,6 +50,7 @@ class ChatMessage {
   final List<FlightSearch> flightsSearchItems;
   final List<HotelDestination> customerProfileDetailsItems;
   final List<HotelProperty> hotelsItems;
+  final List<WidgetAction> subscriptionItems;
   final List<HotelOrderSummary> hotelOrderSummaryItems;
   final List<CarOrderSummary> carOrderSummaryItems;
   final List<FlightOrderSummary> flightOrderSummaryItems;
@@ -77,6 +79,7 @@ class ChatMessage {
   final ChatWidget? carRentalsSearchWidget;
   final ChatWidget? flightsSearchWidget;
   final ChatWidget? hotelsWidget;
+  final ChatWidget? subscriptionWidget;
   final ChatWidget? customerProfileDetailsWidget;
   final ChatWidget? hotelOrderSummaryWidget;
   final ChatWidget? carOrderSummaryWidget;
@@ -103,6 +106,7 @@ class ChatMessage {
     this.hasCarRentalsSearchSectionWidget = false,
     this.hasFlightsSearchSectionWidget = false,
     this.hasHotelsSectionWidget = false,
+    this.hasSubscriptionSectionWidget = false,
     this.hasCustomerProfileDetailsSectionWidget = false,
     this.hasHotelOrderSummarySectionWidget = false,
     this.hasCarOrderSummarySectionWidget = false,
@@ -132,6 +136,7 @@ class ChatMessage {
     this.flightsSearchItems = const [],
     this.customerProfileDetailsItems = const [],
     this.hotelsItems = const [],
+    this.subscriptionItems = const [],
     this.hotelOrderSummaryItems = const [],
     this.carOrderSummaryItems = const [],
     this.flightOrderSummaryItems = const [],
@@ -161,6 +166,7 @@ class ChatMessage {
     this.flightsSearchWidget,
     this.customerProfileDetailsWidget,
     this.hotelsWidget,
+    this.subscriptionWidget,
     this.hotelOrderSummaryWidget,
     this.carOrderSummaryWidget,
     this.flightOrderSummaryWidget,
@@ -187,6 +193,7 @@ class ChatMessage {
     bool? hasCarRentalsSearchSectionWidget,
     bool? hasFlightsSearchSectionWidget,
     bool? hasHotelsSectionWidget,
+    bool? hasSubscriptionSectionWidget,
     bool? hasCustomerProfileDetailsSectionWidget,
     bool? hasHotelOrderSummarySectionWidget,
     bool? hasCarOrderSummarySectionWidget,
@@ -216,6 +223,7 @@ class ChatMessage {
     List<FlightSearch>? flightsSearchItems,
     List<HotelDestination>? customerProfileDetailsItems,
     List<HotelProperty>? hotelsItems,
+    List<WidgetAction>? subscriptionItems,
     List<HotelOrderSummary>? hotelOrderSummaryItems,
     List<CarOrderSummary>? carOrderSummaryItems,
     List<FlightOrderSummary>? flightOrderSummaryItems,
@@ -244,6 +252,7 @@ class ChatMessage {
     ChatWidget? carRentalsSearchWidget,
     ChatWidget? flightsSearchWidget,
     ChatWidget? hotelsWidget,
+    ChatWidget? subscriptionWidget,
     ChatWidget? customerProfileDetailsWidget,
     ChatWidget? hotelOrderSummaryWidget,
     ChatWidget? carOrderSummaryWidget,
@@ -267,6 +276,7 @@ class ChatMessage {
       hasCarRentalsSearchSectionWidget: hasCarRentalsSearchSectionWidget ?? this.hasCarRentalsSearchSectionWidget,
       hasFlightsSearchSectionWidget: hasFlightsSearchSectionWidget ?? this.hasFlightsSearchSectionWidget,
       hasHotelsSectionWidget: hasHotelsSectionWidget ?? this.hasHotelsSectionWidget,
+      hasSubscriptionSectionWidget: hasSubscriptionSectionWidget ?? this.hasSubscriptionSectionWidget,
       hasCustomerProfileDetailsSectionWidget: hasCustomerProfileDetailsSectionWidget ?? this.hasCustomerProfileDetailsSectionWidget,
       hasHotelOrderSummarySectionWidget: hasHotelOrderSummarySectionWidget ?? this.hasHotelOrderSummarySectionWidget,
       hasCarOrderSummarySectionWidget: hasCarOrderSummarySectionWidget ?? this.hasCarOrderSummarySectionWidget,
@@ -296,6 +306,7 @@ class ChatMessage {
       flightsSearchItems: flightsSearchItems ?? this.flightsSearchItems,
       customerProfileDetailsItems: customerProfileDetailsItems ?? this.customerProfileDetailsItems,
       hotelsItems: hotelsItems ?? this.hotelsItems,
+      subscriptionItems: subscriptionItems ?? this.subscriptionItems,
       hotelOrderSummaryItems: hotelOrderSummaryItems ?? this.hotelOrderSummaryItems,
       carOrderSummaryItems: carOrderSummaryItems ?? this.carOrderSummaryItems,
       flightOrderSummaryItems: flightOrderSummaryItems ?? this.flightOrderSummaryItems,
@@ -323,6 +334,7 @@ class ChatMessage {
         carRentalsSearchWidget: carRentalsSearchWidget ?? this.carRentalsSearchWidget,
         flightsSearchWidget: flightsSearchWidget ?? this.flightsSearchWidget,
         hotelsWidget: hotelsWidget ?? this.hotelsWidget,
+        subscriptionWidget: subscriptionWidget ?? this.subscriptionWidget,
         customerProfileDetailsWidget: customerProfileDetailsWidget ?? this.customerProfileDetailsWidget,
         hotelOrderSummaryWidget: hotelOrderSummaryWidget ?? this.hotelOrderSummaryWidget,
         carOrderSummaryWidget: carOrderSummaryWidget ?? this.carOrderSummaryWidget,

@@ -35,6 +35,7 @@ class _ChatScreenState extends State<ChatScreen> {
   int _totalCartCount = 0; // Track total cart count
   List<ChatMessage> messages = [];
   bool _needToEndThisChat = false; // Track if chat should be ended
+  bool _isTrialPlanEnd = false; // Track if trial plan has ended
   bool _gotStripePaymentCallback = false;
   late final CartBloc _cartBloc;
   final SpeechService _speechService = SpeechService();
@@ -548,6 +549,7 @@ class _ChatScreenState extends State<ChatScreen> {
               message.hasCarRentalsSearchSectionWidget ||
               message.hasFlightsSearchSectionWidget ||
               message.hasHotelsSectionWidget ||
+              message.hasSubscriptionSectionWidget ||
               message.hasPackageTypesSectionWidget)) {
         return i;
       }
@@ -573,6 +575,7 @@ class _ChatScreenState extends State<ChatScreen> {
         message.hasCarRentalsSearchSectionWidget ||
         message.hasFlightsSearchSectionWidget ||
         message.hasHotelsSectionWidget ||
+        message.hasSubscriptionSectionWidget ||
         message.hasPackageTypesSectionWidget))
       return message;
     return message.copyWith(
@@ -593,6 +596,7 @@ class _ChatScreenState extends State<ChatScreen> {
       hasCarRentalsSearchSectionWidget: false,
       hasFlightsSearchSectionWidget: false,
       hasHotelsSectionWidget: false,
+      hasSubscriptionSectionWidget: false,
       hasPackageTypesSectionWidget: false,
     );
   }
@@ -745,6 +749,7 @@ class _ChatScreenState extends State<ChatScreen> {
         ChatWidget? carRentalsSearchWidget;
         ChatWidget? flightsSearchWidget;
         ChatWidget? hotelsWidget;
+        ChatWidget? subscriptionWidget;
         ChatWidget? customerProfileDetailsWidget;
         ChatWidget? hotelOrderSummaryWidget;
         ChatWidget? carOrderSummaryWidget;
@@ -878,6 +883,12 @@ class _ChatScreenState extends State<ChatScreen> {
         }
 
         try {
+          subscriptionWidget = botResponse.widgets.firstWhere((widget) => widget.isSubscriptionWidget);
+        } catch (e) {
+          subscriptionWidget = null;
+        }
+
+        try {
           servicesDeliveryOptionsWidget = botResponse.widgets.firstWhere((widget) => widget.isServicesDeliveryOptionsWidget);
         } catch (e) {
           servicesDeliveryOptionsWidget = null;
@@ -936,6 +947,7 @@ class _ChatScreenState extends State<ChatScreen> {
         bool hasFlightBookingConfirmedSection = flightBookingConfirmedWidget != null;
         bool hasPackageTypesSection = packageTypesWidget != null;
         bool hasHotelsSection = hotelsWidget != null;
+        bool hasSubscriptionSection = subscriptionWidget != null;
         bool hasServicesDeliveryOptions = servicesDeliveryOptionsWidget != null;
         bool hasChooseAddress = chooseAddressWidget != null;
         bool hasChooseCard = chooseCardWidget != null;
@@ -960,6 +972,7 @@ class _ChatScreenState extends State<ChatScreen> {
             hasCarRentalsSearchSectionWidget: hasCarRentalsSearchSection,
             hasFlightsSearchSectionWidget: hasFlightsSearchSection,
             hasHotelsSectionWidget: hasHotelsSection,
+            hasSubscriptionSectionWidget: hasSubscriptionSection,
             hasCustomerProfileDetailsSectionWidget: hasCustomerProfileDetailsSection,
             hasHotelOrderSummarySectionWidget: hasHotelOrderSummarySection,
             hasCarOrderSummarySectionWidget: hasCarOrderSummarySection,
@@ -998,6 +1011,7 @@ class _ChatScreenState extends State<ChatScreen> {
                         !hasFlightsSearchSection &&
                         !hasCustomerProfileDetailsSection &&
                         !hasHotelsSection &&
+                        !hasSubscriptionSection &&
                         !hasHotelOrderSummarySection &&
                         !hasCarOrderSummarySection &&
                         !hasFlightOrderSummarySection &&
@@ -1026,6 +1040,7 @@ class _ChatScreenState extends State<ChatScreen> {
             flightsSearchItems: flightsSearchWidget?.getFlightsSearchItems() ?? [],
             customerProfileDetailsItems: customerProfileDetailsWidget?.getCustomerProfileDetailsItems() ?? [],
             hotelsItems: hotelsWidget?.getHotelsItems() ?? [],
+            subscriptionItems: subscriptionWidget?.getSubscriptionItems() ?? [],
             hotelOrderSummaryItems: hotelOrderSummaryWidget?.getHotelOrderSummaryItems() ?? [],
             carOrderSummaryItems: carOrderSummaryWidget?.getCarOrderSummaryItems() ?? [],
             flightOrderSummaryItems: flightOrderSummaryWidget?.getFlightOrderSummaryItems() ?? [],
@@ -1098,6 +1113,7 @@ class _ChatScreenState extends State<ChatScreen> {
     ChatWidget? carRentalsSearchWidget;
     ChatWidget? flightsSearchWidget;
     ChatWidget? hotelsWidget;
+    ChatWidget? subscriptionWidget;
     ChatWidget? customerProfileDetailsWidget;
     ChatWidget? hotelOrderSummaryWidget;
     ChatWidget? carOrderSummaryWidget;
@@ -1108,6 +1124,7 @@ class _ChatScreenState extends State<ChatScreen> {
     ChatWidget? packageTypesWidget;
     // Capture needToEndThisChat from API response
     _needToEndThisChat = response.needToEndThisChat;
+    _isTrialPlanEnd = response.isTrialPlanEnd;
     try {
       storesWidget = response.widgets.firstWhere(
         (widget) => widget.isStoresWidget,
@@ -1232,6 +1249,12 @@ class _ChatScreenState extends State<ChatScreen> {
       hotelsWidget = null;
     }
 
+    try {
+      subscriptionWidget = response.widgets.firstWhere((widget) => widget.isSubscriptionWidget);
+    } catch (e) {
+      subscriptionWidget = null;
+    }
+
      try {
       servicesDeliveryOptionsWidget = response.widgets.firstWhere((widget) => widget.isServicesDeliveryOptionsWidget);
     } catch (e) {
@@ -1288,6 +1311,7 @@ class _ChatScreenState extends State<ChatScreen> {
     bool hasCarRentalsSearchSection = carRentalsSearchWidget != null;
     bool hasFlightsSearchSection = flightsSearchWidget != null;
     bool hasHotelsSection = hotelsWidget != null;
+    bool hasSubscriptionSection = subscriptionWidget != null;
     bool hasCustomerProfileDetailsSection = customerProfileDetailsWidget != null;
     bool hasHotelOrderSummarySection = hotelOrderSummaryWidget != null;
     bool hasCarOrderSummarySection = carOrderSummaryWidget != null;
@@ -1323,6 +1347,7 @@ class _ChatScreenState extends State<ChatScreen> {
           hasFlightBookingConfirmedSectionWidget: hasFlightBookingConfirmedSection,
           hasPackageTypesSectionWidget: hasPackageTypesSection,
           hasHotelsSectionWidget: hasHotelsSection,
+          hasSubscriptionSectionWidget: hasSubscriptionSection,
           hasServicesDeliveryOptionsWidget: hasServicesDeliveryOptions,
           hasChooseAddressWidget: hasChooseAddress,
           hasChooseCardWidget: hasChooseCard,
@@ -1343,6 +1368,7 @@ class _ChatScreenState extends State<ChatScreen> {
               !hasFlightsSearchSection &&
               !hasCustomerProfileDetailsSection &&
               !hasHotelsSection &&
+              !hasSubscriptionSection &&
               !hasHotelOrderSummarySection &&
               !hasCarOrderSummarySection &&
               !hasFlightOrderSummarySection &&
@@ -1371,6 +1397,7 @@ class _ChatScreenState extends State<ChatScreen> {
                       !hasFlightsSearchSection &&
                       !hasCustomerProfileDetailsSection &&
                       !hasHotelsSection &&
+                      !hasSubscriptionSection &&
                       !hasHotelOrderSummarySection &&
                       !hasCarOrderSummarySection &&
                       !hasFlightOrderSummarySection &&
@@ -1400,6 +1427,7 @@ class _ChatScreenState extends State<ChatScreen> {
           flightsSearchItems: flightsSearchWidget?.getFlightsSearchItems() ?? [],
           customerProfileDetailsItems: customerProfileDetailsWidget?.getCustomerProfileDetailsItems() ?? [],
           hotelsItems: hotelsWidget?.getHotelsItems() ?? [],
+          subscriptionItems: subscriptionWidget?.getSubscriptionItems() ?? [],
           hotelOrderSummaryItems: hotelOrderSummaryWidget?.getHotelOrderSummaryItems() ?? [],
           carOrderSummaryItems: carOrderSummaryWidget?.getCarOrderSummaryItems() ?? [],
           flightOrderSummaryItems: flightOrderSummaryWidget?.getFlightOrderSummaryItems() ?? [],
@@ -1424,6 +1452,7 @@ class _ChatScreenState extends State<ChatScreen> {
           flightsSearchWidget: flightsSearchWidget,
           customerProfileDetailsWidget: customerProfileDetailsWidget,
           hotelsWidget: hotelsWidget,
+          subscriptionWidget: subscriptionWidget,
           hotelOrderSummaryWidget: hotelOrderSummaryWidget,
           carOrderSummaryWidget: carOrderSummaryWidget,
           flightOrderSummaryWidget: flightOrderSummaryWidget,
@@ -1719,6 +1748,12 @@ class _ChatScreenState extends State<ChatScreen> {
       onCancelSpeechRecording: _cancelSpeechRecording,
       isRecording: _isRecording,
       needToEndThisChat: _needToEndThisChat,
+      isTrialPlanEnd: _isTrialPlanEnd,
+      onTrialPlanPurchased: () {
+        setState(() {
+          _isTrialPlanEnd = false;
+        });
+      },
       gotStripePaymentCallback: _gotStripePaymentCallback,
       onUpdateGotStripePaymentCallback: (bool value) {
         if (_gotStripePaymentCallback == true) {
