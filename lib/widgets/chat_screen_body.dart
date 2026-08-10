@@ -503,11 +503,28 @@ class ChatScreenBody extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
-            SvgPicture.asset(
-              AssetPath.get('images/ic_header_logo.svg'),
-              width: 55,
-              height: 24,
-              fit: BoxFit.cover,
+            Stack(
+              clipBehavior: Clip.none,
+              children: [
+                Row(
+                  children: [
+                    SvgPicture.asset(
+                      AssetPath.get('images/ic_header_logo.svg'),
+                      width: 55,
+                      height: 24,
+                      fit: BoxFit.cover,
+                    ),
+                    if (Utility.getIsProPlan()) ...[
+                      const SizedBox(width: 5),
+                      SvgPicture.asset(
+                        AssetPath.get('images/img_pro.svg'),
+                        width: 25,
+                        height: 25,
+                      ),
+                    ]
+                  ],
+                ),
+              ],
             ),
             ValueListenableBuilder<String>(
               valueListenable: Utility.locationNotifier,

@@ -114,10 +114,11 @@ class ProfileSettingScreen extends StatelessWidget {
                             },
                           ),
                           _SettingItem(
-                            icon: Icon(
-                              Icons.workspace_premium_outlined,
-                              size: 20,
-                              color: _primaryText,
+                            icon: SvgPicture.asset(
+                              AssetPath.get('images/img_plan.svg'),
+                              width: 20,
+                              height: 20,
+                              fit: BoxFit.cover,
                             ),
                             label: AppTranslations.planAndPrice,
                             onTap: () {

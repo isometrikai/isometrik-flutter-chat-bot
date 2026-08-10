@@ -88,6 +88,7 @@ class PlanPriceBottomSheet extends StatelessWidget {
       },
       listener: (context, state) {
         if (state is SubscriptionPurchaseSuccess) {
+          Utility.setIsProPlan(true);
           Utility.showErrorBlackToast(AppTranslations.planPricePurchaseSuccess);
           if (isFromChatScreen) {
             onPurchaseSuccess?.call();
