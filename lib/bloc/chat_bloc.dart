@@ -58,7 +58,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
         StoreCategoryRegistry.update(response.storeCategories);
         final isProPlan = await ChatService.instance.fetchCustomerProfileIsProPlan();
         if (isProPlan != null) {
-          Utility.setIsProPlan(true);
+          Utility.setIsProPlan(isProPlan);
         }
         final zainPersonalization =
             await ChatService.instance.fetchCustomerProfilePersonalization();
