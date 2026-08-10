@@ -384,6 +384,7 @@ class AppTranslations {
   static String get stayInChat => 'stay_in_chat'.tr();
   static String get completeSetupCta => 'complete_setup_cta'.tr();
   static String get exploreOurServices => 'explore_our_services'.tr();
+  static String get jumpRightIn => 'jump_right_in'.tr();
   static String get labelFood => 'label_food'.tr();
   static String get labelServices => 'label_services'.tr();
   static String get labelGroceries => 'label_groceries'.tr();
@@ -397,6 +398,7 @@ class AppTranslations {
   static String get askMeAnything => 'ask_me_anything'.tr();
   static String get listening => 'listening'.tr();
   static String get howCanIHelpToday => 'how_can_i_help_today'.tr();
+  static String get eazyDayTagline => 'eazy_day_tagline'.tr();
   static String greetingWithHelp(String greeting) => 'greeting_with_help'.tr(namedArgs: {'greeting': greeting});
   static String greetingNamedWithHelp(String greeting, String name) => 'greeting_named_with_help'.tr(namedArgs: {'greeting': greeting, 'name': name});
   static String get goodMorning => 'good_morning'.tr();

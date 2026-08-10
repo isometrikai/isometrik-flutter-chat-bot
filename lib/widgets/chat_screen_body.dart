@@ -129,12 +129,42 @@ class ChatScreenBody extends StatelessWidget {
     return '$hh:$mm:00';
   }
 
+  static const LinearGradient _homeBackgroundGradient = LinearGradient(
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+    colors: [
+      Color(0xFFCEEDFF),
+      Color(0xFFFFFFFF),
+      Color(0xFFFFFFFF),
+    ],
+    stops: [0.0, 0.33, 1.0],
+  );
+
   @override
   Widget build(BuildContext context) {
     return PopScope(
       canPop: false,
-      child: Scaffold(
-        backgroundColor: Colors.white,
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          const DecoratedBox(
+            decoration: BoxDecoration(gradient: _homeBackgroundGradient),
+          ),
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            height: MediaQuery.sizeOf(context).height * 0.8,
+            child: IgnorePointer(
+              child: Image.asset(
+                AssetPath.get('images/img_home_bg.png'),
+                fit: BoxFit.cover,
+                alignment: Alignment.topCenter,
+              ),
+            ),
+          ),
+          Scaffold(
+        backgroundColor: Colors.transparent,
         resizeToAvoidBottomInset: true,
         appBar: isFromHistory ? buildAppBarForHistory(context) : buildAppBar(context),
         body: MultiBlocListener(
@@ -424,6 +454,8 @@ class ChatScreenBody extends StatelessWidget {
             },
           ),
         ),
+          ),
+        ],
       ),
     );
   }
@@ -435,11 +467,11 @@ class ChatScreenBody extends StatelessWidget {
 
   PreferredSizeWidget buildAppBar(BuildContext context) {
     return  AppBar(
-      backgroundColor: Colors.white,
+      backgroundColor: Colors.transparent,
       surfaceTintColor: Colors.transparent,
       scrolledUnderElevation: 0,
       systemOverlayStyle: SystemUiOverlayStyle.dark,
-      elevation: 1,
+      elevation: 0,
       // toolbarHeight: 64,
       leadingWidth: 48,
       titleSpacing: 0,
@@ -733,11 +765,11 @@ class ChatScreenBody extends StatelessWidget {
 
   PreferredSizeWidget buildAppBarForHistory(BuildContext context) {
     return AppBar(
-      backgroundColor: Colors.white,
+      backgroundColor: Colors.transparent,
       surfaceTintColor: Colors.transparent,
       scrolledUnderElevation: 0,
       systemOverlayStyle: SystemUiOverlayStyle.dark,
-      elevation: 1,
+      elevation: 0,
       leadingWidth: 0,
       leading: const SizedBox.shrink(), // Remove leading widget
       title:  Text(
@@ -1056,7 +1088,7 @@ class ChatScreenBody extends StatelessWidget {
                       decoration: BoxDecoration(
                         color:
                             message.isBot
-                                ? Color(int.parse('0xFFFFFFFF'))
+                                ? Colors.transparent
                                 : Color(int.parse('0xFFEDF3FF')),
                         border: message.isBot == false
                             ? Border.all(
@@ -1324,6 +1356,8 @@ class ChatScreenBody extends StatelessWidget {
           textAlign: TextAlign.center,
           style: AppTextStyles.launchSubtitle.copyWith(
             color: const Color(0xFF7085AE),
+            fontStyle: FontStyle.italic,
+            fontSize: 13,
           ),
         ),
       );
@@ -1382,21 +1416,13 @@ class ChatScreenBody extends StatelessWidget {
       child: SingleChildScrollView(
         // keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
         child: Padding(
-          padding: const EdgeInsetsDirectional.only(start: 20, end: 20, top: 10),
+          padding: const EdgeInsetsDirectional.only(start: 20, end: 20, top: 100),
           child: ConstrainedBox(
             constraints: BoxConstraints(maxWidth: contentWidth),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                SizedBox(
-                  height: 75,
-                  width: 75,
-                  child: SvgPicture.asset(
-                        AssetPath.get('images/ic_LogoTutorial.svg'),
-                        fit: BoxFit.contain,
-                      ),
-                ),
                 SizedBox(
                   width: contentWidth,
                   child: _buildTitleWithHighlightedName(_greetingTitleText()),
@@ -1464,213 +1490,11 @@ class ChatScreenBody extends StatelessWidget {
                     },
                   ),
                 ],
-                // const SizedBox(height: 16),
-                // // Weather information view
-                // Container(
-                //   width: contentWidth,
-                //   padding: const EdgeInsets.symmetric(
-                //     horizontal: 20,
-                //     vertical: 16,
-                //   ),
-                //   decoration: BoxDecoration(
-                //     color: const Color(0xFFF5F7FF),// Light purple background
-                //     borderRadius: BorderRadius.circular(8),
-                //   ),
-                //   child: Text(
-                //     weatherText,
-                //     textAlign: TextAlign.center,
-                //     style: AppTextStyles.launchWeather.copyWith(
-                //       color: const Color(0xFF2F3C70), // Darker purple text
-                //     ),
-                //   ),
-                // ),
-                const SizedBox(height: 40),
-                //Explore Our Services
-                Row(
-                  children: [
-                    Expanded(
-                      child: Container(
-                        height: 1,
-                        color: const Color(0xFFE0EBFF),
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 8),
-                      child: Text(
-                        AppTranslations.exploreOurServices,
-                        style: AppTextStyles.body(
-                          fontSize: 10,
-                          fontWeight: FontWeight.w400,
-                          color: const Color(0xFF7085AE),
-                        ),
-                      ),
-                    ),
-                    Expanded(
-                      child: Container(
-                        height: 1,
-                        color: const Color(0xFFE0EBFF),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 40),
-
-                //SET EXPLORE OPTIONS
-                SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Row(
-                    children: [
-                      _buildCategoryItem(
-                        iconPath: 'ic_H_food.svg',
-                        label: AppTranslations.labelFood,
-                      ),
-                      const SizedBox(width: 15),
-                      _buildCategoryItem(
-                        iconPath: 'ic_H_services.svg',
-                        label: AppTranslations.labelServices,
-                      ),
-                      const SizedBox(width: 15),
-                      _buildCategoryItem(
-                        iconPath: 'ic_H_groceries.svg',
-                        label: AppTranslations.labelGroceries,
-                      ),
-                      const SizedBox(width: 15),
-                      _buildCategoryItem(
-                        iconPath: 'ic_H_education.svg',
-                        label: AppTranslations.labelEducation,
-                      ),
-                      const SizedBox(width: 15),
-                      _buildCategoryItem(
-                        iconPath: 'ic_H_travel.svg',
-                        label: AppTranslations.labelTravel,
-                      ),
-                      const SizedBox(width: 15),
-                      _buildCategoryItem(
-                        iconPath: 'ic_H_pharmacy.svg',
-                        label: AppTranslations.labelPharmacy,
-                      ),
-                    ],
-                  ),
-                ),
-
-                const SizedBox(height: 40),
-                //Switch to Classic View
-                Container(
+                const SizedBox(height: 60),
+                SizedBox(
                   width: contentWidth,
-                  height: 138,
-                  padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFF5F7FF),
-                    border: Border.all(color: const Color(0xFFEEF4FF), width: 1),
-                    borderRadius: BorderRadius.circular(26),
-                  ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      // Text Block
-                      Flexible(
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Text(
-                              AppTranslations.switchToClassicView,
-                              style: AppTextStyles.body(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w700,
-                                color: const Color(0xFF2F3C70),
-                              ).copyWith(height: 1.2),
-                            ),
-                            const SizedBox(height: 2),
-                            SizedBox(
-                              width: 313,
-                              child: Text(
-                                AppTranslations.preferBrowsing,
-                                textAlign: TextAlign.center,
-                                style: AppTextStyles.body(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w400,
-                                  color: const Color(0xFF8294B8),
-                                ).copyWith(height: 1.4),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      // Button
-                      SizedBox(
-                        width: 313,
-                        height: 56,
-                        child: ElevatedButton(
-                          onPressed: () {
-                            // TODO: Handle button tap
-                            OrderService().triggerChatDismiss();
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppConstants.appThemeColor,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            padding: EdgeInsets.zero,
-                            minimumSize: const Size(313, 56),
-                            maximumSize: const Size(313, 56),
-                            fixedSize: const Size(313, 56),
-                            elevation: 0,
-                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                          ),
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 40),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text(
-                                  AppTranslations.goToEazyApp,
-                                  style: AppTextStyles.body(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w700,
-                                    color: Colors.white,
-                                  ).copyWith(height: 1.2),
-                                ),
-                                const SizedBox(width: 8),
-                                Transform.rotate(
-                                  angle: 3.14159, // 180 degrees in radians
-                                  child: const Icon(
-                                    Icons.arrow_back,
-                                    color: Colors.white,
-                                    size: 14,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
+                  child: _buildTitleWithHighlightedName(AppTranslations.eazyDayTagline),
                 ),
-                
-                // Options grid 1x1
-                // ConstrainedBox(
-                //   constraints: BoxConstraints(maxWidth: contentWidth),
-                //   child: Column(
-                //     children:
-                //         opts.map((opt) {
-                //           return Padding(
-                //             padding: const EdgeInsets.only(bottom: 10),
-                //             child: GreetingOptionTile(
-                //               option: opt,
-                //               onTap: () {
-                //                 onSendMessage(opt.title);
-                //               },
-                //             ),
-                //           );
-                //         }).toList(),
-                //   ),
-                // ),
               ],
             ),
           ),
@@ -1700,9 +1524,11 @@ class ChatScreenBody extends StatelessWidget {
     // Parse text to find name between quotes (handles both \"name\" and "name")
     final baseStyle = AppTextStyles.launchTitle.copyWith(
       color: const Color(0xFF171212),
+      fontSize: 20,
     );
     final highlightedStyle = AppTextStyles.launchTitle.copyWith(
       color: AppConstants.appThemeColor,
+      fontSize: 20,
     );
 
     final List<TextSpan> spans = [];
@@ -1755,55 +1581,125 @@ class ChatScreenBody extends StatelessWidget {
 
   Widget _buildGreetingOptions() {
     final List<GreetingOption> opts = (greetingData?.options ?? []).toList();
-    print('Options count: ${opts.length}');
     if (opts.isEmpty) {
-      print('Options list is empty');
       return const SizedBox.shrink();
     }
-    print('Rendering ${opts.length} options');
+    final rows = _jumpInRows(opts);
+
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: SizedBox(
-        height: 38,
-        child: ListView.builder(
-          scrollDirection: Axis.horizontal,
-          itemCount: opts.length,
-          itemBuilder: (context, index) {
-            final option = opts[index];
-            print('Rendering option $index: ${option.title}');
-            final displayText = option.emoji.isNotEmpty
-                ? '${option.emoji} ${option.title}'
-                : option.title;
-            return GestureDetector(
-              onTap: () {
-                print('Selected option title: ${option.title}');
-                onSendMessage(option.title);
-              },
-              child: Container(
-                margin: EdgeInsetsDirectional.only(end: index < opts.length - 1 ? 12 : 0),
-                padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(
-                    color: const Color(0xFFE0EBFF),
-                    width: 1,
-                  ),
-                ),
-                child: Center(
-                  child: Text(
-                    displayText,
-                    style: AppTextStyles.restaurantDescription.copyWith(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w400,
-                      color: const Color(0xFF2F3C70),
-                      height: 1.4,
-                    ),
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Row(
+            children: [
+              const Expanded(
+                child: Divider(color: Color(0xFFD8DEF3), thickness: 1),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 10),
+                child: Text(
+                  AppTranslations.jumpRightIn,
+                  style: AppTextStyles.launchSubtitle.copyWith(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w400,
+                    letterSpacing: 0.2 * 12,
+                    color: const Color(0xFF7085AE),
+                    height: 1.2,
                   ),
                 ),
               ),
-            );
-          },
+              const Expanded(
+                child: Divider(color: Color(0xFFD8DEF3), thickness: 1),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          for (var r = 0; r < rows.length; r++)
+            Padding(
+              padding: EdgeInsets.only(bottom: r < rows.length - 1 ? 8 : 0),
+              child: _buildJumpInRow(rows[r]),
+            ),
+        ],
+      ),
+    );
+  }
+
+  /// Splits options into rows: up to 3 stay on one scrollable row, an even
+  /// count pairs up (2x2), and an odd count leads with a row of 3.
+  List<List<GreetingOption>> _jumpInRows(List<GreetingOption> opts) {
+    if (opts.length <= 3) return [opts];
+
+    final rows = <List<GreetingOption>>[];
+    var rest = opts;
+    if (rest.length.isOdd) {
+      rows.add(rest.sublist(0, 3));
+      rest = rest.sublist(3);
+    }
+    for (var i = 0; i < rest.length; i += 2) {
+      rows.add(rest.sublist(i, (i + 2).clamp(0, rest.length)));
+    }
+    return rows;
+  }
+
+  Widget _buildJumpInRow(List<GreetingOption> row) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: ConstrainedBox(
+            constraints: BoxConstraints(minWidth: constraints.maxWidth),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                for (var i = 0; i < row.length; i++) ...[
+                  if (i > 0) const SizedBox(width: 8),
+                  _buildJumpInChip(row[i]),
+                ],
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildJumpInChip(GreetingOption option) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () => onSendMessage(option.title),
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
+          decoration: BoxDecoration(
+            color: const Color(0xFFF3F7FF),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (option.emoji.isNotEmpty) ...[
+                Text(
+                  option.emoji,
+                  style: const TextStyle(fontSize: 16, height: 1.2),
+                ),
+                const SizedBox(width: 6),
+              ],
+              Text(
+                option.title,
+                maxLines: 1,
+                softWrap: false,
+                style: AppTextStyles.restaurantDescription.copyWith(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w500,
+                  color: const Color(0xFF2F3C70),
+                  height: 1.2,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
