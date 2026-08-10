@@ -279,6 +279,24 @@ class AppTranslations {
   static String get myOrders => 'my_orders'.tr();
   static String get myProfile => 'my_profile'.tr();
   static String get logout => 'logout'.tr();
+  static String get finishYourSetup => 'finish_your_setup'.tr();
+  static String setupStepsLeft(String count) =>
+      'setup_steps_left'.tr(namedArgs: {'count': count});
+  static String get continueLabel => 'continue'.tr();
+  static String get pastChatsSubtitle => 'past_chats_subtitle'.tr();
+  static String get userPersonaSubtitle => 'user_persona_subtitle'.tr();
+  static String get myOrdersSubtitle => 'my_orders_subtitle'.tr();
+  static String get myProfileSubtitle => 'my_profile_subtitle'.tr();
+  static String get rewards => 'rewards'.tr();
+  static String get wallet => 'wallet'.tr();
+  static String ptsSuffix(String count) =>
+      'pts_suffix'.tr(namedArgs: {'count': count});
+  static String get language => 'language'.tr();
+  static String get activeStatus => 'active_status'.tr();
+  static String planRenews(String date) =>
+      'plan_renews'.tr(namedArgs: {'date': date});
+  static String get poweredBy => 'powered_by'.tr();
+  static String get eazyXtra => 'eazy_xtra'.tr();
   static String get personalization => 'personalization'.tr();
   static String get personalizedAi => 'personalized_ai'.tr();
   static String get sharedLinks => 'shared_links'.tr();

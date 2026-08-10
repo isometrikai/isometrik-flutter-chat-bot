@@ -75,6 +75,9 @@ class CustomerSubscription {
 
   static DateTime? _parseDate(dynamic value) {
     if (value == null) return null;
-    return DateTime.tryParse(value.toString());
+    final raw = value.toString().trim();
+    if (raw.isEmpty) return null;
+    final parsed = DateTime.tryParse(raw);
+    return parsed?.toLocal();
   }
 }
