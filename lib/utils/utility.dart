@@ -23,7 +23,7 @@ class Utility {
   static double latitude = 0.0;
   static double longitude = 0.0;
   static String language = 'en';
-  static bool isProPlan = true;
+  static bool isProPlan = false;
 
   /// Fixed UTC offsets for common IANA zones (no DST). Extend as needed.
   static const Map<String, Duration> _ianaUtcOffsets = {
