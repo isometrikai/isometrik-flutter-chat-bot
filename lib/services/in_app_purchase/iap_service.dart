@@ -37,6 +37,7 @@ class IapService {
   final _purchaseController = StreamController<IapPurchaseResult>.broadcast();
 
   final Map<String, ProductDetails> _products = {};
+  final Set<String> _handledSuccessKeys = {};
   bool _initialized = false;
   bool _storeAvailable = false;
   bool _purchaseInFlight = false;
@@ -382,6 +383,19 @@ class IapService {
       case PurchaseStatus.restored:
         _purchaseInFlight = false;
 
+        final successKey = _successKey(purchase);
+        if (_handledSuccessKeys.contains(successKey)) {
+          _logInfo(
+            'skip duplicate ${purchase.status} | key=$successKey '
+            '(Apple often emits purchased + restored for one buy)',
+          );
+          if (purchase.pendingCompletePurchase) {
+            await _iap.completePurchase(purchase);
+          }
+          break;
+        }
+        _handledSuccessKeys.add(successKey);
+
         _logSuccess(
           'status=${purchase.status} — reporting to backend | '
           '${_purchaseSummary(purchase)}',
@@ -499,6 +513,17 @@ class IapService {
       jsonEncode(entitlement.toJson()),
     );
     _logSuccess('_persistEntitlement saved');
+  }
+
+  String _successKey(PurchaseDetails purchase) {
+    final transactionId = (purchase.purchaseID ?? '').trim();
+    if (transactionId.isNotEmpty) {
+      return '${purchase.productID}|$transactionId';
+    }
+    final receipt = purchase.verificationData.serverVerificationData.isNotEmpty
+        ? purchase.verificationData.serverVerificationData
+        : purchase.verificationData.localVerificationData;
+    return '${purchase.productID}|$receipt';
   }
 
   /// POST purchase details to eazylife backend.

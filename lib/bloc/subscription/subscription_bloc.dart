@@ -21,6 +21,7 @@ class SubscriptionBloc extends Bloc<SubscriptionEvent, SubscriptionState> {
   final IapService _iap;
   StreamSubscription<IapPurchaseResult>? _purchaseSub;
   bool _autoRenew = true;
+  String? _lastSuccessKey;
 
   void _log(String message) => print('$_tag | $message');
 
@@ -149,6 +150,13 @@ class SubscriptionBloc extends Bloc<SubscriptionEvent, SubscriptionState> {
 
       case IapPurchaseStatus.purchased:
       case IapPurchaseStatus.restored:
+        final successKey =
+            '${result.productId ?? ''}|${result.transactionId ?? ''}';
+        if (_lastSuccessKey == successKey && successKey != '|') {
+          _logInfo('skip duplicate success emit | key=$successKey');
+          break;
+        }
+        _lastSuccessKey = successKey;
         _logSuccess('purchase ${result.status.name} — emitting success');
         final entitlement = await _iap.getEntitlement();
         emit(

@@ -79,8 +79,13 @@ class PlanPriceBottomSheet extends StatelessWidget {
         : media.padding.bottom;
 
     return BlocListener<SubscriptionBloc, SubscriptionState>(
-      listenWhen: (prev, next) =>
-          next is SubscriptionPurchaseSuccess || next is SubscriptionFailure,
+      listenWhen: (prev, next) {
+        if (next is SubscriptionFailure) return true;
+        if (next is SubscriptionPurchaseSuccess) {
+          return prev is! SubscriptionPurchaseSuccess;
+        }
+        return false;
+      },
       listener: (context, state) {
         if (state is SubscriptionPurchaseSuccess) {
           Utility.showErrorBlackToast(AppTranslations.planPricePurchaseSuccess);
