@@ -22,6 +22,7 @@ class ApiService {
     required String name,
     required String timestamp,
     required String userToken,
+    String? refreshToken,
     String? location,
     double? longitude,
     double? latitude,
@@ -48,6 +49,8 @@ class ApiService {
     _baseApiUrl = baseApiUrl.isNotEmpty 
         ? removeTrailingSlash(baseApiUrl) 
         : 'https://apisuperapp-staging.eazy-online.com';
+    UserTokenRefreshManager.instance.configure(baseApiUrl: _baseApiUrl);
+    ApiClient.resetLogoutGuard();
     // Configure AuthService (legacy support)
     AuthService.instance.configure(
       chatBotId: chatBotId,
@@ -107,6 +110,9 @@ class ApiService {
     );
 
     Utility.setUserToken(userToken);
+    if (refreshToken != null && refreshToken.trim().isNotEmpty) {
+      Utility.setRefreshToken(refreshToken);
+    }
     Utility.setCurrencySymbol(currencysymbol);
     Utility.setCurrencyCode(currencycode);
     Utility.setPlatform(platform);

@@ -6,8 +6,8 @@ final GlobalKey<NavigatorState> kNavigatorKey = GlobalKey<NavigatorState>();
 
 class Utility {
   static bool isLoading = false;
-  static String userToken = 'empty';
-  static String refreshToken = 'empty';
+  static String userToken = '';
+  static String refreshToken = '';
   static String currencySymbol = '';
   static String currencyCode = '';
   static String platform = '';

@@ -198,8 +198,15 @@ class ChatApiServices {
   }
 
 
-  ApiClient createCustomClient(String baseUrl) {
-    return UniversalApiClient.instance.createClient(baseUrl);
+  /// [enableTokenRefresh] — set false for HawkSearch (no eazylife/isometrik refresh).
+  ApiClient createCustomClient(
+    String baseUrl, {
+    bool enableTokenRefresh = true,
+  }) {
+    return UniversalApiClient.instance.createClient(
+      baseUrl,
+      enableTokenRefresh: enableTokenRefresh,
+    );
   }
 
   /// Get order details and extract only the required fields

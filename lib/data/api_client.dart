@@ -10,15 +10,25 @@ class ApiClient {
     required this.baseUrl,
     required this.buildHeaders,
     this.onUnauthorizedRefresh,
+    this.onTokenExpiredLogout,
     this.timeout = const Duration(seconds: 120),
   });
 
   final String baseUrl;
   final Future<Map<String, String>> Function() buildHeaders;
   final Future<bool> Function()? onUnauthorizedRefresh;
+
+  /// Called once when an eazylife API returns 401 — host should logout.
+  final void Function()? onTokenExpiredLogout;
   final Duration timeout;
 
-  static const _maxRetryCount = 2; // refresh twice on 401/400/406
+  static const _maxRetryCount = 2; // refresh twice on 406
+  static bool _logoutTriggered = false;
+
+  /// Reset logout guard (e.g. after a fresh configure / login).
+  static void resetLogoutGuard() {
+    _logoutTriggered = false;
+  }
 
   Future<ApiResult> get(
     String endpoint, {
@@ -104,7 +114,26 @@ class ApiClient {
     int retryCount = 0,
   }) async {
     final result = await requestFn();
-    
+
+    // 401 → logout from host app (eazylife clients only).
+    if (result.isTokenExpired) {
+      if (onTokenExpiredLogout != null) {
+        _triggerLogoutOnce();
+        return result;
+      }
+      // Isometrik / clients without logout handler: try existing refresh path.
+      if (onUnauthorizedRefresh != null && retryCount < _maxRetryCount) {
+        AppLog.info('🔄 Token expired (401), attempting refresh...');
+        final canRefresh = await onUnauthorizedRefresh!.call();
+        if (canRefresh) {
+          AppLog.info('🔄 Token refreshed, retrying request...');
+          return _requestWithRetry(requestFn, retryCount: retryCount + 1);
+        }
+      }
+      return result;
+    }
+
+    // 406 (and other Unauthorized) → refresh + retry.
     if (result.isUnauthorized && retryCount < _maxRetryCount) {
       AppLog.info('🔄 Token expired, attempting refresh...');
       bool canRefresh = false;
@@ -117,6 +146,13 @@ class ApiClient {
       }
     }
     return result;
+  }
+
+  void _triggerLogoutOnce() {
+    if (_logoutTriggered) return;
+    _logoutTriggered = true;
+    AppLog.info('🚪 Token expired (401), triggering token_expired_logout...');
+    onTokenExpiredLogout!.call();
   }
 
   ApiResult _processResponse(http.Response response) {
@@ -134,18 +170,30 @@ class ApiClient {
         return '';
       })();
 
+      final dynamic bodyStatus =
+          body is Map<String, dynamic> ? body['status'] : null;
+      final bool is406ByBody =
+          bodyStatus == 406 || bodyStatus == '406';
+      final bool is401ByBody =
+          bodyStatus == 401 || bodyStatus == '401';
+
       final bool isUnauthorizedByMessage = messageField.contains('Token Not found') ||
           messageField.contains('Unauthorized') ||
           messageField.contains('Token Expired');
 
-      if (statusCode >= 200 && statusCode < 300) {
+      if (statusCode >= 200 && statusCode < 300 && !is406ByBody && !is401ByBody) {
         return ApiResult.success(body);
-      } else if (statusCode == 401 || statusCode == 400 || statusCode == 406 || isUnauthorizedByMessage) {
-        return ApiResult.error('Unauthorized', body);
+      } else if (statusCode == 401 || is401ByBody) {
+        return ApiResult.error('TokenExpired', body, 401);
+      } else if (statusCode == 400 ||
+          statusCode == 406 ||
+          is406ByBody ||
+          isUnauthorizedByMessage) {
+        return ApiResult.error('Unauthorized', body, statusCode);
       } else if (statusCode == 404) {
-        return ApiResult.error('Not Found', body);
+        return ApiResult.error('Not Found', body, statusCode);
       } else {
-        return ApiResult.error('Error: $statusCode', body);
+        return ApiResult.error('Error: $statusCode', body, statusCode);
       }
     } catch (e) {
       return ApiResult.error(e.toString());

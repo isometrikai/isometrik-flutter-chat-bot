@@ -45,8 +45,11 @@ class HawkSearchService {
     String storeCategoryName = '',
     String storeCategoryId = '',
   }) async {
-    final client = ChatApiServices.instance
-        .createCustomClient(_searchApiUrl);
+    // HawkSearch must not trigger eazylife/isometrik token refresh on 406.
+    final client = ChatApiServices.instance.createCustomClient(
+      _searchApiUrl,
+      enableTokenRefresh: false,
+    );
 
     final body = {
       // 'FacetSelections': {

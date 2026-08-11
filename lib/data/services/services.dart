@@ -4,5 +4,6 @@ export 'hawksearch_service.dart';
 export 'auth_service.dart';
 export 'payment_service.dart';
 export 'token_manager.dart';
+export 'user_token_refresh_manager.dart';
 export 'universal_api_client.dart';
 export 'chat_api_services.dart';

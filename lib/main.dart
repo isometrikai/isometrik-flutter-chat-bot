@@ -126,6 +126,7 @@ class PlatformService {
         name: config['name'] ?? '',
         timestamp: config['timestamp'] ?? '',
         userToken: config['userToken'] ?? '',
+        refreshToken: config['refreshToken'] ?? config['refToken'],
         location: config['location'],
         longitude: longitude,
         latitude: latitude,
