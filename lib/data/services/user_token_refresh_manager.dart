@@ -34,7 +34,7 @@ class UserTokenRefreshManager {
     }
 
     _isRefreshing = true;
-    AppLog.info('🔄 Refreshing eazylife user token via generateToken...');
+    print('🔄 Refreshing eazylife user token via generateToken...');
 
     try {
       final refToken = Utility.getRefreshToken().trim();
@@ -42,13 +42,13 @@ class UserTokenRefreshManager {
       final baseUrl = _baseApiUrl.trim();
 
       if (baseUrl.isEmpty) {
-        AppLog.info('❌ User token refresh skipped: baseApiUrl not configured');
+        print('❌ User token refresh skipped: baseApiUrl not configured');
         _completeRefreshRequests(false);
         return false;
       }
 
       if (refToken.isEmpty || accessToken.isEmpty) {
-        AppLog.info(
+        print(
           '❌ User token refresh skipped: missing refToken or accessToken',
         );
         _completeRefreshRequests(false);
@@ -80,7 +80,7 @@ class UserTokenRefreshManager {
         if (newAccessToken is String && newAccessToken.trim().isNotEmpty) {
           final tokenToStore = _formatAccessToken(newAccessToken.trim());
           Utility.setUserToken(tokenToStore);
-          AppLog.info('✅ Eazylife user token refresh successful');
+          print('✅ Eazylife user token refresh successful');
 
           // Notify host so it can persist the updated access token.
           OrderService().triggerClickManageScreenOpen({
@@ -94,13 +94,13 @@ class UserTokenRefreshManager {
         }
       }
 
-      AppLog.info(
+      print(
         '❌ User token refresh failed: ${response.statusCode} ${response.body}',
       );
       _completeRefreshRequests(false);
       return false;
     } catch (e) {
-      AppLog.info('❌ User token refresh error: $e');
+      print('❌ User token refresh error: $e');
       _completeRefreshRequests(false);
       return false;
     } finally {
