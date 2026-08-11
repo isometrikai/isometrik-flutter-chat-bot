@@ -61,7 +61,15 @@ class UserTokenRefreshManager {
       });
 
       final uri = Uri.parse('$baseUrl$_endpoint');
-      final headers = {'Content-Type': 'application/json'};
+      final language = Utility.getLanguage().trim();
+      final headers = <String, String>{
+        'Content-Type': 'application/json',
+        'accept': 'application/json',
+        'language': language.isNotEmpty ? language : 'en',
+        'platform': Utility.getPlatform(),
+        'currencysymbol': Utility.getCurrencySymbol(),
+        'currencycode': Utility.getCurrencyCode(),
+      };
 
       AppLog.curl('POST', uri.toString(), headers, requestBody);
 
