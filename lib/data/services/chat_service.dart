@@ -46,14 +46,8 @@ class ChatService {
     return ChatApiServices.instance.getSessionId();
   }
 
-  Future<bool?> fetchCustomerProfilePersonalization() async {
-    final profile = await ChatApiServices.instance.fetchCustomerProfile();
-    return profile?.zainPersonalization;
-  }
-
-  Future<bool?> fetchCustomerProfileIsProPlan() async {
-    final profile = await ChatApiServices.instance.fetchCustomerProfile();
-    return profile?.subscription?.isActive;
+  Future<CustomerProfileResponse?> fetchCustomerProfile() {
+    return ChatApiServices.instance.fetchCustomerProfile();
   }
 
   Future<List<ChatHistoryDetail>> fetchChatHistory(String sessionId) {

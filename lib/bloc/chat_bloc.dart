@@ -56,14 +56,13 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
       if (response != null) {
         sessionId = response.sessionId.toString();
         StoreCategoryRegistry.update(response.storeCategories);
-        final isProPlan = await ChatService.instance.fetchCustomerProfileIsProPlan();
-        if (isProPlan != null) {
-          Utility.setIsProPlan(isProPlan);
-        }
-        final zainPersonalization =
-            await ChatService.instance.fetchCustomerProfilePersonalization();
-        if (zainPersonalization != null) {
-          Utility.setPersonalization(zainPersonalization);
+        final profile = await ChatService.instance.fetchCustomerProfile();
+        if (profile != null) {
+          final isProPlan = profile.subscription?.isActive;
+          if (isProPlan != null) {
+            Utility.setIsProPlan(isProPlan);
+          }
+          Utility.setPersonalization(profile.zainPersonalization);
         }
         // emit(ChatLoadedWithSessionId(response.sessionId.toString()));
       }

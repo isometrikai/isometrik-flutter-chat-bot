@@ -1,11 +1,13 @@
 import 'package:chat_bot/bloc/subscription/subscription_bloc.dart';
 import 'package:chat_bot/bloc/subscription/subscription_event.dart';
 import 'package:chat_bot/bloc/subscription/subscription_state.dart';
+import 'package:chat_bot/services/in_app_purchase/iap_service.dart';
 import 'package:chat_bot/utils/app_constants.dart';
 import 'package:chat_bot/utils/app_locale.dart';
 import 'package:chat_bot/utils/app_theme.dart';
 import 'package:chat_bot/utils/app_translations.dart';
 import 'package:chat_bot/utils/utility.dart';
+import 'package:chat_bot/widgets/pro_plan_success_bottom_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -68,6 +70,16 @@ class PlanPriceBottomSheet extends StatelessWidget {
     ],
   );
 
+  String _priceLabelForSuccess(SubscriptionPurchaseSuccess state) {
+    final product = state.autoRenew
+        ? IapService.instance.autoRenewProduct
+        : IapService.instance.manualProduct;
+    if (product != null && product.price.isNotEmpty) {
+      return product.price;
+    }
+    return AppTranslations.planPriceAmount;
+  }
+
   @override
   Widget build(BuildContext context) {
     final media = MediaQuery.of(context);
@@ -89,13 +101,18 @@ class PlanPriceBottomSheet extends StatelessWidget {
       listener: (context, state) {
         if (state is SubscriptionPurchaseSuccess) {
           Utility.setIsProPlan(true);
-          Utility.showErrorBlackToast(AppTranslations.planPricePurchaseSuccess);
-          if (isFromChatScreen) {
-            onPurchaseSuccess?.call();
-            if (context.mounted) {
-              Navigator.of(context).maybePop();
-            }
-          }
+          onPurchaseSuccess?.call();
+
+          final priceLabel = _priceLabelForSuccess(state);
+          final navigator = Navigator.of(context);
+          navigator.maybePop().then((_) {
+            final sheetContext = kNavigatorKey.currentContext;
+            if (sheetContext == null) return;
+            ProPlanSuccessBottomSheet.show(
+              sheetContext,
+              priceLabel: priceLabel,
+            );
+          });
         } else if (state is SubscriptionFailure) {
           Utility.showErrorBlackToast(state.message);
         }

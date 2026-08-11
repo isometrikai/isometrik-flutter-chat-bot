@@ -95,7 +95,8 @@ class _ProfileSettingViewState extends State<_ProfileSettingView> {
   Future<void> _loadProfile() async {
     final profile = await ChatApiServices.instance.fetchCustomerProfile();
     if (!mounted) return;
-    final subscription = profile?.subscription;
+    if (profile == null) return;
+    final subscription = profile.subscription;
     if (subscription != null) {
       Utility.setIsProPlan(subscription.isActive);
     }
@@ -163,7 +164,10 @@ class _ProfileSettingViewState extends State<_ProfileSettingView> {
                         badge: _isPlanActive
                             ? AppTranslations.activeStatus
                             : null,
-                        onTap: () => PlanPriceBottomSheet.show(context),
+                        onTap: () => PlanPriceBottomSheet.show(
+                          context,
+                          onPurchaseSuccess: _loadProfile,
+                        ),
                       ),
                       _SettingItem(
                         icon: const Icon(
@@ -318,7 +322,7 @@ class _ProfileSettingViewState extends State<_ProfileSettingView> {
                   const SizedBox(height: 8),
                   _buildLogoutRow(context),
                   const SizedBox(height: 8),
-                  _buildPoweredBy(),
+                  // _buildPoweredBy(),
                 ],
               ),
             ),
@@ -449,15 +453,15 @@ class _ProfileSettingViewState extends State<_ProfileSettingView> {
                         color: Colors.white,
                       ).copyWith(height: 1.2),
                     ),
-                    const SizedBox(height: 2),
-                    Text(
-                      AppTranslations.setupStepsLeft('2'),
-                      style: AppTheme.getTextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w400,
-                        color: Colors.white.withValues(alpha: 0.8),
-                      ).copyWith(height: 1.4),
-                    ),
+                    // const SizedBox(height: 2),
+                    // Text(
+                    //   AppTranslations.setupStepsLeft('2'),
+                    //   style: AppTheme.getTextStyle(
+                    //     fontSize: 12,
+                    //     fontWeight: FontWeight.w400,
+                    //     color: Colors.white.withValues(alpha: 0.8),
+                    //   ).copyWith(height: 1.4),
+                    // ),
                   ],
                 ),
               ),
