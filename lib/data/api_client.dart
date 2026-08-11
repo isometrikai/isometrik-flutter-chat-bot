@@ -123,10 +123,10 @@ class ApiClient {
       }
       // Isometrik / clients without logout handler: try existing refresh path.
       if (onUnauthorizedRefresh != null && retryCount < _maxRetryCount) {
-        AppLog.info('🔄 Token expired (401), attempting refresh...');
+        print('🔄 Token expired (401), attempting refresh...');
         final canRefresh = await onUnauthorizedRefresh!.call();
         if (canRefresh) {
-          AppLog.info('🔄 Token refreshed, retrying request...');
+          print('🔄 Token refreshed, retrying request...');
           return _requestWithRetry(requestFn, retryCount: retryCount + 1);
         }
       }
@@ -135,13 +135,13 @@ class ApiClient {
 
     // 406 (and other Unauthorized) → refresh + retry.
     if (result.isUnauthorized && retryCount < _maxRetryCount) {
-      AppLog.info('🔄 Token expired, attempting refresh...');
+      print('🔄 Token expired, attempting refresh...');
       bool canRefresh = false;
       if (onUnauthorizedRefresh != null) {
         canRefresh = await onUnauthorizedRefresh!.call();
       }
       if (canRefresh) {
-        AppLog.info('🔄 Token refreshed, retrying request...');
+        print('🔄 Token refreshed, retrying request...');
         return _requestWithRetry(requestFn, retryCount: retryCount + 1);
       }
     }
@@ -151,7 +151,7 @@ class ApiClient {
   void _triggerLogoutOnce() {
     if (_logoutTriggered) return;
     _logoutTriggered = true;
-    AppLog.info('🚪 Token expired (401), triggering token_expired_logout...');
+    print('🚪 Token expired (401), triggering token_expired_logout...');
     onTokenExpiredLogout!.call();
   }
 
@@ -206,10 +206,10 @@ class ApiClient {
     Map<String, String> headers, [
     dynamic body,
   ]) {
-    AppLog.info('API Request -> $method $url');
-    AppLog.info('Headers: ${jsonEncode(headers)}');
+    print('API Request -> $method $url');
+    print('Headers: ${jsonEncode(headers)}');
     if (body == null) return;
-    AppLog.info('Body: ${jsonEncode(body)}');
+    print('Body: ${jsonEncode(body)}');
   }
 
   void _logResponse(
@@ -218,8 +218,8 @@ class ApiClient {
     int statusCode,
     String responseBody,
   ) {
-    AppLog.info('API Response <- $method $url');
-    AppLog.info('Status Code: $statusCode');
-    AppLog.info('Response: $responseBody');
+    print('API Response <- $method $url');
+    print('Status Code: $statusCode');
+    print('Response: $responseBody');
   }
 }
