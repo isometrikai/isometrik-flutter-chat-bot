@@ -164,7 +164,26 @@ class AppLog {
     dynamic body,
   ]) {
     final cmd = buildCurl(method, url, headers, body);
-    AppLog.highlight('cURL: ' + cmd);
+    printLong('cURL: $cmd');
+  }
+
+  /// Platform consoles truncate long single lines (~1KB). Split into chunks.
+  static void printLong(String message, {int chunkSize = 800}) {
+    if (message.length <= chunkSize) {
+      print(message);
+      return;
+    }
+    var start = 0;
+    var part = 1;
+    final total = (message.length / chunkSize).ceil();
+    while (start < message.length) {
+      final end = (start + chunkSize < message.length)
+          ? start + chunkSize
+          : message.length;
+      print('[$part/$total] ${message.substring(start, end)}');
+      start = end;
+      part++;
+    }
   }
 
   final dynamic message;

@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:chat_bot/utils/api_result.dart';
 import 'package:chat_bot/utils/log.dart';
+import 'package:chat_bot/utils/utility.dart';
 
 class ApiClient {
   ApiClient({
@@ -207,9 +208,11 @@ class ApiClient {
     dynamic body,
   ]) {
     print('API Request -> $method $url');
-    print('Headers: ${jsonEncode(headers)}');
+    AppLog.printLong('Headers: ${jsonEncode(headers)}');
+    // TODO(TEMP): Remove debug access-token popup after debugging.
+    Utility.showDebugAccessTokenAlert(apiLabel: '$method $url');
     if (body == null) return;
-    print('Body: ${jsonEncode(body)}');
+    AppLog.printLong('Body: ${jsonEncode(body)}');
   }
 
   void _logResponse(

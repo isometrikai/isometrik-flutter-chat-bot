@@ -1,6 +1,7 @@
 import 'package:chat_bot/utils/app_constants.dart';
 import 'package:chat_bot/widgets/black_toast_view.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 final GlobalKey<NavigatorState> kNavigatorKey = GlobalKey<NavigatorState>();
 
@@ -107,6 +108,59 @@ class Utility {
                   message,
                 );
     }
+  }
+
+  // TODO(TEMP): Remove this debug access-token alert after debugging.
+  static bool _isShowingDebugAccessTokenAlert = false;
+
+  /// Temporary debug popup to inspect the full access token (JWT is too long for console).
+  static void showDebugAccessTokenAlert({String? apiLabel}) {
+    if (_isShowingDebugAccessTokenAlert) return;
+
+    final context = kNavigatorKey.currentContext ?? _currentContext;
+    if (context == null) return;
+
+    final token = getUserToken();
+    if (token.isEmpty) return;
+
+    _isShowingDebugAccessTokenAlert = true;
+    showDialog<void>(
+      context: context,
+      barrierDismissible: true,
+      builder: (ctx) {
+        return AlertDialog(
+          title: Text(
+            apiLabel == null || apiLabel.isEmpty
+                ? 'DEBUG Access Token'
+                : 'DEBUG Access Token\n$apiLabel',
+            style: const TextStyle(fontSize: 14),
+          ),
+          content: SizedBox(
+            width: double.maxFinite,
+            child: SingleChildScrollView(
+              child: SelectableText(
+                token,
+                style: const TextStyle(fontSize: 11),
+              ),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Clipboard.setData(ClipboardData(text: token));
+              },
+              child: const Text('Copy'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(),
+              child: const Text('Close'),
+            ),
+          ],
+        );
+      },
+    ).whenComplete(() {
+      _isShowingDebugAccessTokenAlert = false;
+    });
   }
 
   /// Show a confirmation dialog with two options
