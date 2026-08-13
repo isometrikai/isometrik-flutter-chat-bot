@@ -161,7 +161,7 @@ class _ProfileSettingViewState extends State<_ProfileSettingView> {
                           fit: BoxFit.cover,
                         ),
                         label: AppTranslations.planAndPrice,
-                        subtitle: _planPeriodLabel(),
+                        subtitle: _isPlanActive ? _planPeriodLabel() : null,
                         badge: _isPlanActive
                             ? AppTranslations.activeStatus
                             : null,

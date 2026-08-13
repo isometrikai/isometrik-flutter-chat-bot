@@ -369,7 +369,7 @@ class _CurrentPlanCard extends StatelessWidget {
                 child: Row(
                   children: [
                     SvgPicture.asset(
-                      AssetPath.get('images/ic_eazy_app.svg'),
+                      AssetPath.get('images/ic_eazy_app_price_logo.svg'),
                       width: 24,
                       height: 24,
                       colorFilter: ColorFilter.mode(
