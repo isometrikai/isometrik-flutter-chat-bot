@@ -8,6 +8,7 @@ import 'package:chat_bot/view/chat_history_screen.dart';
 import 'package:chat_bot/view/complete_setup/complete_setup_flow_screen.dart';
 import 'package:chat_bot/view/personalization_screen.dart';
 import 'package:chat_bot/view/popup_overlay_screen.dart';
+import 'package:chat_bot/view/subscriptions_screen.dart';
 import 'package:chat_bot/widgets/plan_price_bottom_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -160,14 +161,24 @@ class _ProfileSettingViewState extends State<_ProfileSettingView> {
                           fit: BoxFit.cover,
                         ),
                         label: AppTranslations.planAndPrice,
-                        subtitle: _planRenewsLabel(),
+                        subtitle: _planPeriodLabel(),
                         badge: _isPlanActive
                             ? AppTranslations.activeStatus
                             : null,
-                        onTap: () => PlanPriceBottomSheet.show(
-                          context,
-                          onPurchaseSuccess: _loadProfile,
-                        ),
+                        onTap: () {
+                          // if (_isPlanActive) {
+                            SubscriptionsScreen.show(
+                              context,
+                              subscription: _subscription,
+                              onPurchaseSuccess: _loadProfile,
+                            );
+                          // } else {
+                            // PlanPriceBottomSheet.show(
+                            //   context,
+                            //   onPurchaseSuccess: _loadProfile,
+                            // );
+                          }
+                        // },
                       ),
                       _SettingItem(
                         icon: const Icon(
@@ -976,7 +987,7 @@ class _ProfileSettingViewState extends State<_ProfileSettingView> {
     );
   }
 
-  String? _planRenewsLabel() {
+  String? _planPeriodLabel() {
     final end = _subscription?.currentPeriodEnd?.toLocal();
     if (end == null) return null;
     final months = [
@@ -994,7 +1005,11 @@ class _ProfileSettingViewState extends State<_ProfileSettingView> {
       AppTranslations.monthDecShort,
     ];
     final month = months[end.month - 1];
-    return AppTranslations.planRenews('${end.day} $month ${end.year}');
+    final dateLabel = '${end.day} $month ${end.year}';
+    if (_subscription?.isAutorenew == true) {
+      return AppTranslations.planRenews(dateLabel);
+    }
+    return AppTranslations.planEnds(dateLabel);
   }
 }
 

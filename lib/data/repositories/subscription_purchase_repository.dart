@@ -1,13 +1,14 @@
 import 'package:chat_bot/data/api_client.dart';
+import 'package:chat_bot/data/model/subscription_history_response.dart';
 import 'package:chat_bot/data/services/universal_api_client.dart';
 import 'package:chat_bot/services/callback_manage.dart';
 import 'package:chat_bot/utils/api_result.dart';
 import 'package:chat_bot/utils/utility.dart';
-import 'package:chat_bot/widgets/widgets.dart';
 
-/// Reports App Store / Play purchases to the eazylife backend.
+/// Subscription purchase + history APIs (eazylife `appClient` base URL).
 ///
-/// POST `/v1/customer/eazysubscription/purchase`
+/// - POST `/v1/customer/eazysubscription/purchase`
+/// - GET  `/v1/customer/eazysubscription/apple/history`
 class SubscriptionPurchaseRepository {
   SubscriptionPurchaseRepository({ApiClient? apiClient})
       : _client = apiClient ?? UniversalApiClient.instance.appClient;
@@ -16,15 +17,15 @@ class SubscriptionPurchaseRepository {
 
   static const String _purchaseEndpoint =
       '/v1/customer/eazysubscription/purchase';
+  static const String _historyEndpoint =
+      '/v1/customer/eazysubscription/apple/history';
+
+  static const int defaultHistoryLimit = 20;
 
   /// Backend plan id (static for now).
   static const String defaultPlanId = 'premium';
 
   /// Notify backend of a successful store purchase.
-  ///
-  /// [transactionId] — Apple / Google transaction id  
-  /// [receiptData] — App Store receipt / JWS (base64 or JWS string from StoreKit)
-  /// [productId] — Store product id (e.g. plan_autorenew_monthly)
   Future<ApiResult> reportPurchase({
     required String transactionId,
     required String receiptData,
@@ -44,7 +45,7 @@ class SubscriptionPurchaseRepository {
       'transactionId=$transactionId | '
       'receiptDataLen=${receiptData.length}',
     );
-print("$_purchaseEndpoint, $_purchaseEndpoint, $_purchaseEndpoint, $_purchaseEndpoint, $_purchaseEndpoint");
+
     final result = await _client.post(_purchaseEndpoint, body);
 
     if (result.isSuccess) {
@@ -57,6 +58,47 @@ print("$_purchaseEndpoint, $_purchaseEndpoint, $_purchaseEndpoint, $_purchaseEnd
     }
 
     return result;
+  }
+
+  /// GET Apple subscription history with pagination.
+  Future<ApiResult> fetchAppleHistory({
+    int limit = defaultHistoryLimit,
+    int skip = 0,
+  }) async {
+    print('IAP-API | GET $_historyEndpoint | limit=$limit | skip=$skip');
+
+    final result = await _client.get(
+      _historyEndpoint,
+      queryParameters: {
+        'limit': '$limit',
+        'skip': '$skip',
+      },
+    );
+
+    if (!result.isSuccess) {
+      print('IAP-API | HISTORY ERROR | message=${result.message}');
+      return ApiResult.error(
+        result.message ?? 'Failed to load subscription history',
+        result.data,
+        result.statusCode,
+      );
+    }
+
+    final data = result.data;
+    if (data is! Map<String, dynamic>) {
+      return ApiResult.error('Invalid subscription history response');
+    }
+
+    try {
+      final parsed = SubscriptionHistoryResponse.fromJson(data);
+      print(
+        'IAP-API | HISTORY SUCCESS | '
+        'total=${parsed.total} | pageItems=${parsed.items.length} | skip=$skip',
+      );
+      return ApiResult.success(parsed);
+    } catch (e) {
+      return ApiResult.error('Parse error: $e');
+    }
   }
 
   /// Reads `data.token.accessToken` / `refreshToken` and updates Utility when present.
@@ -95,9 +137,9 @@ print("$_purchaseEndpoint, $_purchaseEndpoint, $_purchaseEndpoint, $_purchaseEnd
     }
 
     OrderService().triggerClickManageScreenOpen({
-                      'action': 'tokenRefresh',
-                      'accessToken': accessToken,
-                      'refreshToken': refreshToken,
-                    });
+      'action': 'tokenRefresh',
+      'accessToken': accessToken,
+      'refreshToken': refreshToken,
+    });
   }
 }

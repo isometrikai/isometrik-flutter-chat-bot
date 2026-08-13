@@ -32,6 +32,8 @@ class CustomerSubscription {
     this.currentPeriodEnd,
     this.createdAt,
     this.updatedAt,
+    this.isAutorenew,
+    this.subscriptionType,
   });
 
   final String subscriptionId;
@@ -44,6 +46,8 @@ class CustomerSubscription {
   final DateTime? currentPeriodEnd;
   final DateTime? createdAt;
   final DateTime? updatedAt;
+  final bool? isAutorenew;
+  final String? subscriptionType;
 
   bool get isActive => (status.toLowerCase() == 'active' && planId == "premium");
 
@@ -64,6 +68,8 @@ class CustomerSubscription {
       currentPeriodEnd: _parseDate(json['currentPeriodEnd']),
       createdAt: _parseDate(json['createdAt']),
       updatedAt: _parseDate(json['updatedAt']),
+      isAutorenew: json['isAutorenew'] == true,
+      subscriptionType: json['subscriptionType']?.toString(),
     );
   }
 

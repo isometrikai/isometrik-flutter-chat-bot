@@ -299,6 +299,33 @@ class AppTranslations {
   static String get activeStatus => 'active_status'.tr();
   static String planRenews(String date) =>
       'plan_renews'.tr(namedArgs: {'date': date});
+  static String planEnds(String date) =>
+      'plan_ends'.tr(namedArgs: {'date': date});
+  static String get subscriptionsTitle => 'subscriptions_title'.tr();
+  static String get subscriptionsPlanName => 'subscriptions_plan_name'.tr();
+  static String subscriptionsPriceLine(String price, String autoRenew) =>
+      'subscriptions_price_line'.tr(
+        namedArgs: {'price': price, 'autoRenew': autoRenew},
+      );
+  static String get subscriptionsAutoRenewOn =>
+      'subscriptions_auto_renew_on'.tr();
+  static String get subscriptionsAutoRenewOff =>
+      'subscriptions_auto_renew_off'.tr();
+  static String get subscriptionsStarted => 'subscriptions_started'.tr();
+  static String get subscriptionsRenewsOn => 'subscriptions_renews_on'.tr();
+  static String get subscriptionsEndsOn => 'subscriptions_ends_on'.tr();
+  static String get subscriptionsManagePlan =>
+      'subscriptions_manage_plan'.tr();
+  static String get pastSubscriptions => 'past_subscriptions'.tr();
+  static String get pastSubscriptionsEmpty =>
+      'past_subscriptions_empty'.tr();
+  static String get endedStatus => 'ended_status'.tr();
+  static String get subscriptionsPastPlanMonthly =>
+      'subscriptions_past_plan_monthly'.tr();
+  static String subscriptionsDateRange(String start, String end) =>
+      'subscriptions_date_range'.tr(
+        namedArgs: {'start': start, 'end': end},
+      );
   static String get poweredBy => 'powered_by'.tr();
   static String get eazyXtra => 'eazy_xtra'.tr();
   static String get personalization => 'personalization'.tr();
