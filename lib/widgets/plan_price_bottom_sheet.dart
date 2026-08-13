@@ -100,6 +100,7 @@ class PlanPriceBottomSheet extends StatelessWidget {
       },
       listener: (context, state) {
         if (state is SubscriptionPurchaseSuccess) {
+          print('SubscriptionPurchaseSuccess SubscriptionPurchaseSuccess SubscriptionPurchaseSuccess SubscriptionPurchaseSuccess');
           Utility.setIsProPlan(true);
           onPurchaseSuccess?.call();
 

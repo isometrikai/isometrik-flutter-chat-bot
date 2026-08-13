@@ -11,13 +11,12 @@ class ApiResult {
   factory ApiResult.error(String message, [dynamic data, int? statusCode]) =>
       ApiResult._(false, message, data, statusCode);
 
-  /// Whether the request failed due to an expired or invalid token (406 refresh path)
-  bool get isUnauthorized => message == "Unauthorized";
+  /// 406 — the access token expired and can be refreshed, then the request retried.
+  bool get isUnauthorized => !isSuccess && statusCode == 406;
 
-  /// Whether the request failed with HTTP/body status 401 (logout path)
-  bool get isTokenExpired =>
-      statusCode == 401 || message == "TokenExpired";
+  /// 401 — the session is no longer valid and the user must be logged out.
+  bool get isTokenExpired => !isSuccess && statusCode == 401;
 
-  /// Whether the request failed and was not unauthorized / token-expired
+  /// Any other failure (validation, server or network error).
   bool get isFailure => !isSuccess && !isUnauthorized && !isTokenExpired;
 }
