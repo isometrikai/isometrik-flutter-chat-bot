@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:chat_bot/data/api_client.dart';
 import 'package:chat_bot/data/model/subscription_history_response.dart';
 import 'package:chat_bot/data/services/universal_api_client.dart';
@@ -7,8 +9,10 @@ import 'package:chat_bot/utils/utility.dart';
 
 /// Subscription purchase + history APIs (eazylife `appClient` base URL).
 ///
-/// - POST `/v1/customer/eazysubscription/purchase`
-/// - GET  `/v1/customer/eazysubscription/apple/history`
+/// - POST `/v1/customer/eazysubscription/purchase` (Apple)
+/// - POST `/v1/customer/eazysubscription/android/purchase` (Google Play)
+/// - GET  `/v1/customer/eazysubscription/apple/history` (Apple)
+/// - GET  `/v1/customer/eazysubscription/google/history` (Google Play)
 class SubscriptionPurchaseRepository {
   SubscriptionPurchaseRepository({ApiClient? apiClient})
       : _client = apiClient ?? UniversalApiClient.instance.appClient;
@@ -17,15 +21,22 @@ class SubscriptionPurchaseRepository {
 
   static const String _purchaseEndpoint =
       '/v1/customer/eazysubscription/purchase';
-  static const String _historyEndpoint =
+  static const String _appleHistoryEndpoint =
       '/v1/customer/eazysubscription/apple/history';
+  static const String _googleHistoryEndpoint =
+      '/v1/customer/eazysubscription/google/history';
+  static const String _androidPurchaseEndpoint =
+      '/v1/customer/eazysubscription/android/purchase';
+
+  static String get _historyEndpoint =>
+      Platform.isAndroid ? _googleHistoryEndpoint : _appleHistoryEndpoint;
 
   static const int defaultHistoryLimit = 20;
 
   /// Backend plan id (static for now).
   static const String defaultPlanId = 'premium';
 
-  /// Notify backend of a successful store purchase.
+  /// Notify backend of a successful App Store purchase.
   Future<ApiResult> reportPurchase({
     required String transactionId,
     required String receiptData,
@@ -60,8 +71,50 @@ class SubscriptionPurchaseRepository {
     return result;
   }
 
-  /// GET Apple subscription history with pagination.
-  Future<ApiResult> fetchAppleHistory({
+  /// Notify backend of a successful Google Play purchase.
+  ///
+  /// [purchaseToken] — Play purchase token
+  /// [productId] — Play subscription product id (e.g. zain_pro)
+  /// [orderId] — optional Play order id
+  Future<ApiResult> reportAndroidPurchase({
+    required String purchaseToken,
+    required String productId,
+    String orderId = '',
+    String planId = defaultPlanId,
+  }) async {
+    final body = <String, dynamic>{
+      'planId': planId,
+      'purchaseToken': purchaseToken,
+      'productId': productId,
+      'orderId': orderId,
+    };
+
+    print(
+      'IAP-API | POST $_androidPurchaseEndpoint | '
+      'planId=$planId | productId=$productId | '
+      'orderId=${orderId.isEmpty ? "(empty)" : orderId} | '
+      'purchaseTokenLen=${purchaseToken.length}',
+    );
+
+    final result = await _client.post(_androidPurchaseEndpoint, body);
+
+    if (result.isSuccess) {
+      print('IAP-API | ANDROID SUCCESS | data=${result.data}');
+      _applyAccessTokenFromResponse(result.data);
+    } else {
+      print(
+        'IAP-API | ANDROID ERROR | message=${result.message} | '
+        'data=${result.data}',
+      );
+    }
+
+    return result;
+  }
+
+  /// GET store subscription history with pagination.
+  ///
+  /// Uses the Apple endpoint on iOS and the Google endpoint on Android.
+  Future<ApiResult> fetchPurchaseHistory({
     int limit = defaultHistoryLimit,
     int skip = 0,
   }) async {

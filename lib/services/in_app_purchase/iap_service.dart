@@ -8,6 +8,8 @@ import 'package:chat_bot/services/in_app_purchase/iap_product_ids.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
+import 'package:in_app_purchase_android/billing_client_wrappers.dart';
+import 'package:in_app_purchase_android/in_app_purchase_android.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 typedef IapPurchaseCallback = void Function(IapPurchaseResult result);
@@ -16,9 +18,11 @@ typedef IapPurchaseCallback = void Function(IapPurchaseResult result);
 ///
 /// Responsibilities:
 /// - Store availability + product loading
-/// - Purchase / restore
+/// - Purchase / restore (iOS products, Android base plans)
 /// - Completing transactions
-/// - Reporting purchases to backend (`/v1/customer/eazysubscription/purchase`)
+/// - Reporting purchases to backend
+///   (`/v1/customer/eazysubscription/purchase` on iOS,
+///   `/v1/customer/eazysubscription/android/purchase` on Android)
 /// - Local entitlement cache (server verification can also hook via [onPurchaseVerified])
 class IapService {
   IapService._({SubscriptionPurchaseRepository? purchaseRepository})
@@ -37,10 +41,19 @@ class IapService {
   final _purchaseController = StreamController<IapPurchaseResult>.broadcast();
 
   final Map<String, ProductDetails> _products = {};
+
+  /// Every product/offer returned by the store. On Android a subscription
+  /// product yields one entry per base plan, all sharing the same product id.
+  final List<ProductDetails> _storeProducts = [];
+
   final Set<String> _handledSuccessKeys = {};
   bool _initialized = false;
   bool _storeAvailable = false;
   bool _purchaseInFlight = false;
+
+  /// Plan the user selected for the in-flight purchase. On Android the product
+  /// id is the same for both base plans, so this is how we tell them apart.
+  bool _pendingAutoRenew = false;
 
   /// Optional host/backend verification hook after a successful store purchase.
   IapPurchaseCallback? onPurchaseVerified;
@@ -53,14 +66,13 @@ class IapService {
 
   bool get isPurchaseInFlight => _purchaseInFlight;
 
-  List<ProductDetails> get products => _products.values.toList(growable: false);
+  List<ProductDetails> get products => List.unmodifiable(_storeProducts);
 
   ProductDetails? productFor(String productId) => _products[productId];
 
-  ProductDetails? get autoRenewProduct =>
-      _products[IapProductIds.autoRenewMonthly];
+  ProductDetails? get autoRenewProduct => _productForPlan(autoRenew: true);
 
-  ProductDetails? get manualProduct => _products[IapProductIds.manual30Days];
+  ProductDetails? get manualProduct => _productForPlan(autoRenew: false);
 
   void _log(String message) => print('$_tag | $message');
 
@@ -75,10 +87,16 @@ class IapService {
     }
   }
 
-  String _productSummary(ProductDetails p) =>
-      'id=${p.id}, title=${p.title}, description=${p.description}, '
-      'price=${p.price}, rawPrice=${p.rawPrice}, currencyCode=${p.currencyCode}, '
-      'currencySymbol=${p.currencySymbol}';
+  String _productSummary(ProductDetails p) {
+    final base = 'id=${p.id}, title=${p.title}, description=${p.description}, '
+        'price=${p.price}, rawPrice=${p.rawPrice}, '
+        'currencyCode=${p.currencyCode}, currencySymbol=${p.currencySymbol}';
+    if (p is GooglePlayProductDetails) {
+      return '$base, basePlanId=${_basePlanIdOf(p)}, '
+          'offerId=${_offerIdOf(p)}, hasOfferToken=${p.offerToken != null}';
+    }
+    return base;
+  }
 
   String _purchaseSummary(PurchaseDetails p) =>
       'productID=${p.productID}, purchaseID=${p.purchaseID}, '
@@ -186,9 +204,13 @@ class IapService {
         ..addEntries(
           response.productDetails.map((p) => MapEntry(p.id, p)),
         );
+      _storeProducts
+        ..clear()
+        ..addAll(response.productDetails);
 
       _logInfo(
         'loadProducts() done | cached=${_products.keys.toList()} | '
+        'offers=${_storeProducts.length} | '
         'autoRenew=${autoRenewProduct != null} | '
         'manual=${manualProduct != null}',
       );
@@ -200,10 +222,47 @@ class IapService {
   }
 
   /// Buy auto-renew or manual plan based on [autoRenew].
-  Future<bool> purchaseSelectedPlan({required bool autoRenew}) {
+  ///
+  /// iOS buys a dedicated product, Android buys the matching base plan of the
+  /// single `zain_pro` subscription product.
+  Future<bool> purchaseSelectedPlan({required bool autoRenew}) async {
     final productId = IapProductIds.forAutoRenew(autoRenew);
-    _logInfo('purchaseSelectedPlan(autoRenew=$autoRenew) → productId=$productId');
-    return purchaseProduct(productId);
+    _logInfo(
+      'purchaseSelectedPlan(autoRenew=$autoRenew) → productId=$productId'
+      '${Platform.isAndroid ? " | basePlanId=${IapProductIds.basePlanForAutoRenew(autoRenew)}" : ""}',
+    );
+    _pendingAutoRenew = autoRenew;
+
+    await _ensureInitialized();
+
+    if (!_storeAvailable) {
+      _logError('purchaseSelectedPlan() aborted — store not available');
+      _emitError('In-app purchases are not available on this device.');
+      return false;
+    }
+    if (_purchaseInFlight) {
+      _logError('purchaseSelectedPlan() aborted — purchase already in flight');
+      _emitError('A purchase is already in progress.');
+      return false;
+    }
+
+    var product = _productForPlan(autoRenew: autoRenew);
+    if (product == null) {
+      _log('plan not in cache (autoRenew=$autoRenew) — reloading products...');
+      await loadProducts();
+      product = _productForPlan(autoRenew: autoRenew);
+    }
+
+    if (product == null) {
+      _logError(
+        'purchaseSelectedPlan() aborted — plan not available | '
+        'productId=$productId | cached=${_products.keys.toList()}',
+      );
+      _emitError('Plan is not available. Please try again later.');
+      return false;
+    }
+
+    return _startPurchase(product);
   }
 
   /// Start purchase for [productId]. Returns false if purchase could not start.
@@ -237,9 +296,24 @@ class IapService {
       return false;
     }
 
+    return _startPurchase(product);
+  }
+
+  Future<bool> _startPurchase(ProductDetails product) async {
     _log('buying non-consumable → ${_productSummary(product)}');
     _purchaseInFlight = true;
-    final param = PurchaseParam(productDetails: product);
+
+    final param = product is GooglePlayProductDetails
+        ? GooglePlayPurchaseParam(
+            productDetails: product,
+            offerToken: product.offerToken,
+          )
+        : PurchaseParam(productDetails: product);
+
+    if (product is GooglePlayProductDetails) {
+      _log('using GooglePlayPurchaseParam | basePlanId=${_basePlanIdOf(product)} '
+          '| offerTokenLen=${product.offerToken?.length ?? 0}');
+    }
 
     try {
       final started = await _iap.buyNonConsumable(purchaseParam: param);
@@ -249,7 +323,9 @@ class IapService {
         _logError('buyNonConsumable() failed to start');
         _emitError('Unable to start purchase.');
       } else {
-        _logSuccess('purchase sheet started for $productId — waiting for stream');
+        _logSuccess(
+          'purchase sheet started for ${product.id} — waiting for stream',
+        );
       }
       return started;
     } on PlatformException catch (e, st) {
@@ -260,7 +336,7 @@ class IapService {
         _purchaseController.add(
           IapPurchaseResult(
             status: IapPurchaseStatus.canceled,
-            productId: productId,
+            productId: product.id,
             errorMessage: e.message,
           ),
         );
@@ -275,6 +351,43 @@ class IapService {
       _emitError(e.toString());
       return false;
     }
+  }
+
+  /// Resolve the store product for a plan.
+  ///
+  /// Android: matches the base plan of the `zain_pro` subscription, preferring
+  /// the plain base plan over discounted offers.
+  ProductDetails? _productForPlan({required bool autoRenew}) {
+    if (!Platform.isAndroid) {
+      return _products[IapProductIds.forAutoRenew(autoRenew)];
+    }
+
+    final basePlanId = IapProductIds.basePlanForAutoRenew(autoRenew);
+    final matches = _storeProducts
+        .whereType<GooglePlayProductDetails>()
+        .where((p) => _basePlanIdOf(p) == basePlanId)
+        .toList(growable: false);
+
+    if (matches.isEmpty) return null;
+    return matches.firstWhere(
+      (p) => _offerIdOf(p) == null,
+      orElse: () => matches.first,
+    );
+  }
+
+  String? _basePlanIdOf(GooglePlayProductDetails product) =>
+      _offerDetailsOf(product)?.basePlanId;
+
+  String? _offerIdOf(GooglePlayProductDetails product) =>
+      _offerDetailsOf(product)?.offerId;
+
+  SubscriptionOfferDetailsWrapper? _offerDetailsOf(
+    GooglePlayProductDetails product,
+  ) {
+    final index = product.subscriptionIndex;
+    final offers = product.productDetails.subscriptionOfferDetails;
+    if (index == null || offers == null || index >= offers.length) return null;
+    return offers[index];
   }
 
   bool _isUserCancelled(PlatformException e) {
@@ -489,7 +602,11 @@ class IapService {
       return;
     }
 
-    final autoRenew = purchase.productID == IapProductIds.autoRenewMonthly;
+    // Android uses one product id for both base plans, so fall back to the
+    // plan the user selected for this purchase.
+    final autoRenew = Platform.isAndroid
+        ? _pendingAutoRenew
+        : purchase.productID == IapProductIds.autoRenewMonthly;
     final purchasedAt = DateTime.now();
     final expiresAt = autoRenew
         ? null
@@ -526,8 +643,14 @@ class IapService {
     return '${purchase.productID}|$receipt';
   }
 
-  /// POST purchase details to eazylife backend.
-  Future<bool> _reportPurchaseToBackend(PurchaseDetails purchase) async {
+  /// POST purchase details to eazylife backend (platform specific endpoint).
+  Future<bool> _reportPurchaseToBackend(PurchaseDetails purchase) {
+    return Platform.isAndroid
+        ? _reportAndroidPurchase(purchase)
+        : _reportApplePurchase(purchase);
+  }
+
+  Future<bool> _reportApplePurchase(PurchaseDetails purchase) async {
     final transactionId = (purchase.purchaseID ?? '').trim();
     final serverReceipt = purchase.verificationData.serverVerificationData;
     final localReceipt = purchase.verificationData.localVerificationData;
@@ -535,7 +658,7 @@ class IapService {
         serverReceipt.isNotEmpty ? serverReceipt : localReceipt;
 
     _logInfo(
-      '_reportPurchaseToBackend | '
+      '_reportApplePurchase | '
       'transactionId=$transactionId | '
       'serverReceiptLen=${serverReceipt.length} | '
       'localReceiptLen=${localReceipt.length} | '
@@ -543,11 +666,11 @@ class IapService {
     );
 
     if (transactionId.isEmpty) {
-      _logError('_reportPurchaseToBackend aborted — empty transactionId');
+      _logError('_reportApplePurchase aborted — empty transactionId');
       return false;
     }
     if (receiptData.isEmpty) {
-      _logError('_reportPurchaseToBackend aborted — empty receiptData');
+      _logError('_reportApplePurchase aborted — empty receiptData');
       return false;
     }
 
@@ -559,15 +682,52 @@ class IapService {
         receiptData: receiptData,
       );
       if (result.isSuccess) {
-        _logSuccess('_reportPurchaseToBackend OK');
+        _logSuccess('_reportApplePurchase OK');
         return true;
       }
-      _logError(
-        '_reportPurchaseToBackend failed | message=${result.message}',
-      );
+      _logError('_reportApplePurchase failed | message=${result.message}');
       return false;
     } catch (e, st) {
-      _logError('_reportPurchaseToBackend exception: $e', st);
+      _logError('_reportApplePurchase exception: $e', st);
+      return false;
+    }
+  }
+
+  Future<bool> _reportAndroidPurchase(PurchaseDetails purchase) async {
+    // On Android serverVerificationData is the Play purchase token and
+    // purchaseID is the Play order id (can be empty for test purchases).
+    final purchaseToken =
+        purchase.verificationData.serverVerificationData.trim();
+    final orderId = (purchase.purchaseID ?? '').trim();
+
+    _logInfo(
+      '_reportAndroidPurchase | '
+      'productId=${purchase.productID} | '
+      'orderId=${orderId.isEmpty ? "(empty)" : orderId} | '
+      'purchaseTokenLen=${purchaseToken.length} | '
+      'autoRenew=$_pendingAutoRenew',
+    );
+
+    if (purchaseToken.isEmpty) {
+      _logError('_reportAndroidPurchase aborted — empty purchaseToken');
+      return false;
+    }
+
+    try {
+      final result = await _purchaseRepository.reportAndroidPurchase(
+        planId: SubscriptionPurchaseRepository.defaultPlanId,
+        productId: purchase.productID,
+        purchaseToken: purchaseToken,
+        orderId: orderId,
+      );
+      if (result.isSuccess) {
+        _logSuccess('_reportAndroidPurchase OK');
+        return true;
+      }
+      _logError('_reportAndroidPurchase failed | message=${result.message}');
+      return false;
+    } catch (e, st) {
+      _logError('_reportAndroidPurchase exception: $e', st);
       return false;
     }
   }

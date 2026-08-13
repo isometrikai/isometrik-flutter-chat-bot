@@ -109,7 +109,7 @@ class _SubscriptionsScreenState extends State<SubscriptionsScreen> {
     });
 
     final skip = reset ? 0 : _historyItems.length;
-    final result = await _repository.fetchAppleHistory(
+    final result = await _repository.fetchPurchaseHistory(
       limit: _pageSize,
       skip: skip,
     );
