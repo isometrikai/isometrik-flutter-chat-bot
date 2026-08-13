@@ -129,7 +129,7 @@ class PlanPriceBottomSheet extends StatelessWidget {
                       ? null
                       : SubscriptionReady(
                           storeAvailable: false,
-                          autoRenew: true,
+                          autoRenew: false,
                         );
 
               if (state is SubscriptionLoadInProgress || ready == null) {

@@ -20,7 +20,7 @@ class SubscriptionBloc extends Bloc<SubscriptionEvent, SubscriptionState> {
 
   final IapService _iap;
   StreamSubscription<IapPurchaseResult>? _purchaseSub;
-  bool _autoRenew = true;
+  bool _autoRenew = false;
   String? _lastSuccessKey;
 
   void _log(String message) => print('$_tag | $message');
