@@ -104,14 +104,19 @@ class PlanPriceBottomSheet extends StatelessWidget {
           onPurchaseSuccess?.call();
 
           final priceLabel = _priceLabelForSuccess(state);
-          final navigator = Navigator.of(context);
-          navigator.maybePop().then((_) {
-            final sheetContext = kNavigatorKey.currentContext;
-            if (sheetContext == null) return;
-            ProPlanSuccessBottomSheet.show(
-              sheetContext,
-              priceLabel: priceLabel,
-            );
+          Navigator.of(context).maybePop().then((_) {
+            // Wait until the plan route is fully removed. Using the
+            // Navigator's own context fails for showModalBottomSheet
+            // (it looks for an ancestor Navigator, not itself).
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              final sheetContext =
+                  kNavigatorKey.currentState?.overlay?.context;
+              if (sheetContext == null || !sheetContext.mounted) return;
+              ProPlanSuccessBottomSheet.show(
+                sheetContext,
+                priceLabel: priceLabel,
+              );
+            });
           });
         } else if (state is SubscriptionFailure) {
           Utility.showErrorBlackToast(state.message);
