@@ -210,7 +210,7 @@ class ApiClient {
     print('API Request -> $method $url');
     AppLog.printLong('Headers: ${jsonEncode(headers)}');
     // TODO(TEMP): Remove debug access-token popup after debugging.
-    Utility.showDebugAccessTokenAlert(apiLabel: '$method $url');
+    // Utility.showDebugAccessTokenAlert(apiLabel: '$method $url');
     if (body == null) return;
     AppLog.printLong('Body: ${jsonEncode(body)}');
   }
