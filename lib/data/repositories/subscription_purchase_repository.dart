@@ -3,6 +3,7 @@ import 'package:chat_bot/data/services/universal_api_client.dart';
 import 'package:chat_bot/services/callback_manage.dart';
 import 'package:chat_bot/utils/api_result.dart';
 import 'package:chat_bot/utils/utility.dart';
+import 'package:chat_bot/widgets/widgets.dart';
 
 /// Reports App Store / Play purchases to the eazylife backend.
 ///
@@ -43,7 +44,7 @@ class SubscriptionPurchaseRepository {
       'transactionId=$transactionId | '
       'receiptDataLen=${receiptData.length}',
     );
-
+print("$_purchaseEndpoint, $_purchaseEndpoint, $_purchaseEndpoint, $_purchaseEndpoint, $_purchaseEndpoint");
     final result = await _client.post(_purchaseEndpoint, body);
 
     if (result.isSuccess) {
