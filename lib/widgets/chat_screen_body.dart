@@ -1279,7 +1279,7 @@ class ChatScreenBody extends StatelessWidget {
             const SizedBox(height: 4), //12
             buildPackageTypesWidget(message.packageTypesItems),
           ],
-          if (message.hasSubscriptionSectionWidget) ...[
+          if (message.hasSubscriptionSectionWidget && !Utility.getIsProPlan()) ...[
             const SizedBox(height: 4), //12
             buildSubscriptionWidget(message.subscriptionItems),
           ],

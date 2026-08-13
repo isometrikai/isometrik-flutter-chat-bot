@@ -1312,6 +1312,10 @@ class _ChatScreenState extends State<ChatScreen> {
     bool hasFlightsSearchSection = flightsSearchWidget != null;
     bool hasHotelsSection = hotelsWidget != null;
     bool hasSubscriptionSection = subscriptionWidget != null;
+    if (hasSubscriptionSection) {
+      print('hasSubscriptionSection hasSubscriptionSection hasSubscriptionSection hasSubscriptionSection: $hasSubscriptionSection');
+      Utility.setIsProPlan(false);
+    }
     bool hasCustomerProfileDetailsSection = customerProfileDetailsWidget != null;
     bool hasHotelOrderSummarySection = hotelOrderSummaryWidget != null;
     bool hasCarOrderSummarySection = carOrderSummaryWidget != null;
