@@ -166,19 +166,19 @@ class _ProfileSettingViewState extends State<_ProfileSettingView> {
                             ? AppTranslations.activeStatus
                             : null,
                         onTap: () {
-                          // if (_isPlanActive) {
+                          if (_isPlanActive) {
                             SubscriptionsScreen.show(
                               context,
                               subscription: _subscription,
                               onPurchaseSuccess: _loadProfile,
                             );
-                          // } else {
-                            // PlanPriceBottomSheet.show(
-                            //   context,
-                            //   onPurchaseSuccess: _loadProfile,
-                            // );
+                          } else {
+                            PlanPriceBottomSheet.show(
+                              context,
+                              onPurchaseSuccess: _loadProfile,
+                            );
                           }
-                        // },
+                        },
                       ),
                       _SettingItem(
                         icon: const Icon(
