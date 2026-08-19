@@ -61,7 +61,7 @@ class SubscriptionPurchaseRepository {
 
     if (result.isSuccess) {
       print('IAP-API | SUCCESS | data=${result.data}');
-      _applyAccessTokenFromResponse(result.data);
+      // _applyAccessTokenFromResponse(result.data);
     } else {
       print(
         'IAP-API | ERROR | message=${result.message} | data=${result.data}',
@@ -100,7 +100,7 @@ class SubscriptionPurchaseRepository {
 
     if (result.isSuccess) {
       print('IAP-API | ANDROID SUCCESS | data=${result.data}');
-      _applyAccessTokenFromResponse(result.data);
+      // _applyAccessTokenFromResponse(result.data);
     } else {
       print(
         'IAP-API | ANDROID ERROR | message=${result.message} | '

@@ -39,7 +39,7 @@ class ApiClient {
           queryParameters: queryParameters,
         );
         final headers = await buildHeaders();
-        _logRequest('GET', uri.toString(), headers);
+        _logRequest('GET', uri.toString());
         // Print curl for every request
         AppLog.curl('GET', uri.toString(), headers);
         final response = await http.get(uri, headers: headers).timeout(timeout);
@@ -52,7 +52,7 @@ class ApiClient {
         final uri = Uri.parse('$baseUrl$endpoint');
         final headers = await buildHeaders();
         final encodedBody = jsonEncode(body);
-        _logRequest('POST', uri.toString(), headers, body);
+        _logRequest('POST', uri.toString(), body);
         AppLog.curl('POST', uri.toString(), headers, encodedBody);
         final response = await http
             .post(uri, headers: headers, body: encodedBody)
@@ -66,7 +66,7 @@ class ApiClient {
         final uri = Uri.parse('$baseUrl$endpoint');
         final headers = await buildHeaders();
         final encodedBody = jsonEncode(body);
-        _logRequest('PATCH', uri.toString(), headers, body);
+        _logRequest('PATCH', uri.toString(), body);
         AppLog.curl('PATCH', uri.toString(), headers, encodedBody);
         final response = await http
             .patch(uri, headers: headers, body: encodedBody)
@@ -83,7 +83,7 @@ class ApiClient {
   Future<ApiResult> delete(String endpoint) => _requestWithRetry(() async {
         final uri = Uri.parse('$baseUrl$endpoint');
         final headers = await buildHeaders();
-        _logRequest('DELETE', uri.toString(), headers);
+        _logRequest('DELETE', uri.toString());
         AppLog.curl('DELETE', uri.toString(), headers);
         final response = await http.delete(uri, headers: headers).timeout(timeout);
         _logResponse(
@@ -100,7 +100,7 @@ class ApiClient {
         final uri = Uri.parse('$baseUrl$endpoint');
         final headers = await buildHeaders();
         final encodedBody = jsonEncode(body);
-        _logRequest('PUT', uri.toString(), headers, body);
+        _logRequest('PUT', uri.toString(), body);
         AppLog.curl('PUT', uri.toString(), headers, encodedBody);
         final response = await http
             .put(uri, headers: headers, body: encodedBody)
@@ -187,14 +187,10 @@ class ApiClient {
 
   void _logRequest(
     String method,
-    String url,
-    Map<String, String> headers, [
+    String url, [
     dynamic body,
   ]) {
-    print('API Request -> $method $url');
-    AppLog.printLong('Headers: ${jsonEncode(headers)}');
-    // TODO(TEMP): Remove debug access-token popup after debugging.
-    // Utility.showDebugAccessTokenAlert(apiLabel: '$method $url');
+    // print('API Request -> $method $url');
     if (body == null) return;
     AppLog.printLong('Body: ${jsonEncode(body)}');
   }
