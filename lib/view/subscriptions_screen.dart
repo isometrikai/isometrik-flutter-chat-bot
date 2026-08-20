@@ -187,12 +187,14 @@ class _SubscriptionsScreenState extends State<SubscriptionsScreen> {
                               _CurrentPlanCard(
                                 subscription: widget.subscription,
                               ),
-                              const SizedBox(height: 16),
-                              _ManagePlanButton(
-                                onTap: () {
-                                  openStoreSubscriptions();
-                                },
-                              ),
+                              if (widget.subscription?.subscriptionType != "manual") ...[
+                                 const SizedBox(height: 16),
+                                  _ManagePlanButton(
+                                    onTap: () {
+                                      openStoreSubscriptions();
+                                    },
+                                  ),
+                              ],
                               const SizedBox(height: 24),
                               Text(
                                 AppTranslations.pastSubscriptions,
