@@ -55,5 +55,7 @@
             <action android:name="android.intent.action.VIEW" />
             <data android:scheme="http" />
         </intent>
+        <!-- Play Store app for subscription management deep links. -->
+        <package android:name="com.android.vending" />
     </queries>
 </manifest>
