@@ -612,4 +612,5 @@ class AppTranslations {
   static String get tutorialHeroBody => 'tutorial_hero_body'.tr();
   static String get justChatNaturally => 'just_chat_naturally'.tr();
   static String get appTitle => 'app_title'.tr();
+  static String get aroundYou => 'around_you'.tr();
 }
