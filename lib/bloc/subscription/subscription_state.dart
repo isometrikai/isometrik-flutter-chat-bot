@@ -98,7 +98,7 @@ class SubscriptionFailure extends SubscriptionState {
 
   const SubscriptionFailure({
     required this.message,
-    this.autoRenew = true,
+    this.autoRenew = false,
   });
 
   @override

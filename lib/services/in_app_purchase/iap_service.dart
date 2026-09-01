@@ -50,6 +50,8 @@ class IapService {
   bool _initialized = false;
   bool _storeAvailable = false;
   bool _purchaseInFlight = false;
+  int _inFlightPurchaseHandlers = 0;
+  bool _restoreSession = false;
 
   /// Plan the user selected for the in-flight purchase. On Android the product
   /// id is the same for both base plans, so this is how we tell them apart.
@@ -408,13 +410,52 @@ class IapService {
       _emitError('In-app purchases are not available on this device.');
       return;
     }
+    _restoreSession = true;
     try {
-      await _iap.restorePurchases();
-      _logSuccess('restorePurchases() request sent — waiting for stream');
+      if (Platform.isAndroid) {
+        await _restoreAndroidPurchases();
+      } else {
+        await _iap.restorePurchases();
+        _logSuccess('restorePurchases() request sent — waiting for stream');
+      }
     } catch (e, st) {
       _logError('restorePurchases() exception: $e', st);
       _emitError(e.toString());
+    } finally {
+      _restoreSession = false;
     }
+  }
+
+  /// Android Restore does not always push a stream event. Query Play directly
+  /// so the paywall always gets success, empty, or error — iOS is unchanged.
+  Future<void> _restoreAndroidPurchases() async {
+    _logInfo('_restoreAndroidPurchases() queryPastPurchases');
+    final addition =
+        _iap.getPlatformAddition<InAppPurchaseAndroidPlatformAddition>();
+    final response = await addition.queryPastPurchases();
+    if (response.error != null) {
+      final err = response.error!;
+      _logError(
+        'queryPastPurchases ERROR | code=${err.code} | message=${err.message}',
+      );
+      _emitError(err.message ?? 'Failed to restore purchases.');
+      return;
+    }
+
+    final past = response.pastPurchases;
+    _logInfo('queryPastPurchases found=${past.length}');
+    if (past.isEmpty) {
+      _emitPurchaseUpdate(
+        const IapPurchaseResult(status: IapPurchaseStatus.restoreEmpty),
+      );
+      return;
+    }
+
+    await _onPurchaseUpdated(past);
+  }
+
+  void _emitPurchaseUpdate(IapPurchaseResult result) {
+    _purchaseController.add(result);
   }
 
   Future<IapEntitlement?> getEntitlement() async {
@@ -469,9 +510,14 @@ class IapService {
 
   Future<void> _onPurchaseUpdated(List<PurchaseDetails> purchases) async {
     _logInfo('_onPurchaseUpdated | count=${purchases.length}');
-    for (var i = 0; i < purchases.length; i++) {
-      _log('purchase[$i] → ${_purchaseSummary(purchases[i])}');
-      await _handlePurchase(purchases[i]);
+    _inFlightPurchaseHandlers++;
+    try {
+      for (var i = 0; i < purchases.length; i++) {
+        _log('purchase[$i] → ${_purchaseSummary(purchases[i])}');
+        await _handlePurchase(purchases[i]);
+      }
+    } finally {
+      _inFlightPurchaseHandlers--;
     }
   }
 
@@ -482,7 +528,7 @@ class IapService {
     switch (purchase.status) {
       case PurchaseStatus.pending:
         _log('status=pending — showing pending UI');
-        _purchaseController.add(
+        _emitPurchaseUpdate(
           IapPurchaseResult(
             status: IapPurchaseStatus.pending,
             productId: purchase.productID,
@@ -500,14 +546,25 @@ class IapService {
         if (_handledSuccessKeys.contains(successKey)) {
           _logInfo(
             'skip duplicate ${purchase.status} | key=$successKey '
-            '(Apple often emits purchased + restored for one buy)',
+            '(already activated)',
           );
           if (purchase.pendingCompletePurchase) {
             await _iap.completePurchase(purchase);
           }
+          // Restore must still finish the loader; Subscribe must not open
+          // a second success sheet for Apple's purchased+restored pair.
+          if (_restoreSession) {
+            _emitPurchaseUpdate(
+              IapPurchaseResult(
+                status: IapPurchaseStatus.restored,
+                productId: purchase.productID,
+                transactionId: purchase.purchaseID,
+                raw: purchase,
+              ),
+            );
+          }
           break;
         }
-        _handledSuccessKeys.add(successKey);
 
         _logSuccess(
           'status=${purchase.status} — reporting to backend | '
@@ -520,7 +577,7 @@ class IapService {
             'backend purchase API failed — not completing store transaction '
             '(will retry on next launch)',
           );
-          _purchaseController.add(
+          _emitPurchaseUpdate(
             IapPurchaseResult(
               status: IapPurchaseStatus.error,
               productId: purchase.productID,
@@ -535,6 +592,8 @@ class IapService {
           break;
         }
 
+        _handledSuccessKeys.add(successKey);
+
         final result = IapPurchaseResult(
           status: purchase.status == PurchaseStatus.restored
               ? IapPurchaseStatus.restored
@@ -548,7 +607,7 @@ class IapService {
         onPurchaseVerified?.call(result);
         _log('onPurchaseVerified callback '
             '${onPurchaseVerified == null ? "NOT set" : "invoked"}');
-        _purchaseController.add(result);
+        _emitPurchaseUpdate(result);
 
         if (purchase.pendingCompletePurchase) {
           _log('completePurchase() for ${purchase.productID}');
@@ -565,7 +624,7 @@ class IapService {
           'message=${purchase.error?.message} | '
           'details=${purchase.error?.details}',
         );
-        _purchaseController.add(
+        _emitPurchaseUpdate(
           IapPurchaseResult(
             status: IapPurchaseStatus.error,
             productId: purchase.productID,
@@ -583,7 +642,7 @@ class IapService {
       case PurchaseStatus.canceled:
         _purchaseInFlight = false;
         _logInfo('status=canceled | productID=${purchase.productID}');
-        _purchaseController.add(
+        _emitPurchaseUpdate(
           IapPurchaseResult(
             status: IapPurchaseStatus.canceled,
             productId: purchase.productID,

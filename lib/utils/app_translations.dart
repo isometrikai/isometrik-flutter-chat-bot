@@ -267,6 +267,7 @@ class AppTranslations {
   static String get proPlanSuccessDescSuffix => 'pro_plan_success_desc_suffix'.tr();
   static String get proPlanSuccessContinue => 'pro_plan_success_continue'.tr();
   static String get planPriceRestore => 'plan_price_restore'.tr();
+  static String get planPriceRestoreEmpty => 'plan_price_restore_empty'.tr();
   static String get planPriceStoreUnavailable => 'plan_price_store_unavailable'.tr();
   static String get dataControl => 'data_control'.tr();
   static String get helpCenter => 'help_center'.tr();

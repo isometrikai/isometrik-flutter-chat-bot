@@ -260,6 +260,7 @@
   "pro_plan_success_desc_suffix": " — يمكنك الإدارة أو الإلغاء في أي وقت من حسابك.",
   "pro_plan_success_continue": "متابعة المحادثة ✨",
   "plan_price_restore": "استعادة المشتريات",
+  "plan_price_restore_empty": "لا توجد مشتريات لاستعادتها.",
   "plan_price_store_unavailable": "المشتريات داخل التطبيق غير متاحة على هذا الجهاز.",
   "data_control": "التحكم في البيانات",
   "help_center": "مركز المساعدة",

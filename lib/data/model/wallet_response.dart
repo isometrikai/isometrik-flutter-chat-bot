@@ -124,7 +124,9 @@ class WalletResponse {
     if (wallet == null) return '—';
     final sym = wallet.currency ?? '';
     final bal = wallet.balance ?? '0';
-    return '$sym $bal';
+    final parsed = double.tryParse(bal);
+    final formatted = parsed != null ? parsed.toStringAsFixed(2) : bal;
+    return '$sym $formatted';
   }
 
   /// First earning balance for Xtra (e.g. "2186.22").

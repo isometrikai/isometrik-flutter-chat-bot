@@ -114,7 +114,14 @@ class PlanPriceBottomSheet extends StatelessWidget {
             }
           });
         } else if (state is SubscriptionFailure) {
-          Utility.showErrorBlackToast(state.message);
+          // TODO: show this again once backend plan activation is stable.
+          // Utility.showErrorBlackToast(state.message);
+          const activationFailed =
+              'Purchase succeeded in store, but activating plan failed. '
+              'Please try again.';
+          if (state.message != activationFailed) {
+            Utility.showErrorBlackToast(state.message);
+          }
         }
       },
       child: Scaffold(
@@ -122,17 +129,13 @@ class PlanPriceBottomSheet extends StatelessWidget {
         body: Padding(
           padding: EdgeInsets.fromLTRB(16, topInset + 16, 16, bottomInset + 24),
           child: BlocBuilder<SubscriptionBloc, SubscriptionState>(
+            buildWhen: (prev, next) =>
+                next is SubscriptionLoadInProgress ||
+                next is SubscriptionReady,
             builder: (context, state) {
-              final ready = state is SubscriptionReady
-                  ? state
-                  : state is SubscriptionLoadInProgress
-                      ? null
-                      : SubscriptionReady(
-                          storeAvailable: false,
-                          autoRenew: false,
-                        );
+              final ready = state is SubscriptionReady ? state : null;
 
-              if (state is SubscriptionLoadInProgress || ready == null) {
+              if (ready == null) {
                 return const Center(child: CircularProgressIndicator());
               }
 
@@ -538,7 +541,7 @@ class _BenefitRow extends StatelessWidget {
   }
 }
 
-class _GradientSwitch extends StatelessWidget {
+class _GradientSwitch extends StatefulWidget {
   final bool value;
   final ValueChanged<bool> onChanged;
 
@@ -548,20 +551,49 @@ class _GradientSwitch extends StatelessWidget {
   });
 
   @override
+  State<_GradientSwitch> createState() => _GradientSwitchState();
+}
+
+class _GradientSwitchState extends State<_GradientSwitch> {
+  bool _animate = false;
+  bool _acceptTaps = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // Drop the opening pointer so a tap that pushed this route cannot toggle.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) setState(() => _acceptTaps = true);
+    });
+  }
+
+  @override
+  void didUpdateWidget(_GradientSwitch oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.value != widget.value) {
+      _animate = true;
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => onChanged(!value),
+      onTap: _acceptTaps ? () => widget.onChanged(!widget.value) : null,
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 180),
+        duration: _animate
+            ? const Duration(milliseconds: 180)
+            : Duration.zero,
         width: 39,
         height: 24,
         padding: const EdgeInsets.all(2),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(24),
-          gradient: value ? PlanPriceBottomSheet._primaryGradient : null,
-          color: value ? null : const Color(0xFFD1D5DB),
+          gradient:
+              widget.value ? PlanPriceBottomSheet._primaryGradient : null,
+          color: widget.value ? null : const Color(0xFFD1D5DB),
         ),
-        alignment: value ? Alignment.centerRight : Alignment.centerLeft,
+        alignment:
+            widget.value ? Alignment.centerRight : Alignment.centerLeft,
         child: Container(
           width: 18,
           height: 18,

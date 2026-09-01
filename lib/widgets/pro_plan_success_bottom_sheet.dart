@@ -18,6 +18,8 @@ class ProPlanSuccessBottomSheet extends StatelessWidget {
     BuildContext context, {
     required String priceLabel,
   }) {
+    if (_isShowing) return Future.value();
+    _isShowing = true;
     return showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
@@ -25,8 +27,10 @@ class ProPlanSuccessBottomSheet extends StatelessWidget {
       isDismissible: true,
       enableDrag: true,
       builder: (_) => ProPlanSuccessBottomSheet(priceLabel: priceLabel),
-    );
+    ).whenComplete(() => _isShowing = false);
   }
+
+  static bool _isShowing = false;
 
   static const Color _titleColor = Color(0xFF242424);
   static const Color _bodyColor = Color(0xFF6B7280);

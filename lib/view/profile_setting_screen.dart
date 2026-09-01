@@ -1107,15 +1107,18 @@ class _XtraMetric extends StatelessWidget {
           Row(
             children: [
               Flexible(
-                child: Text(
-                  value,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: AppTheme.getTextStyle(
-                    fontSize: valueSize,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.white,
-                  ).copyWith(height: 1.2),
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    value,
+                    maxLines: 1,
+                    style: AppTheme.getTextStyle(
+                      fontSize: valueSize,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white,
+                    ).copyWith(height: 1.2),
+                  ),
                 ),
               ),
               const SizedBox(width: 6),
