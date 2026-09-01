@@ -2,6 +2,7 @@ import 'package:chat_bot/utils/app_constants.dart';
 import 'package:chat_bot/widgets/black_toast_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:intl/intl.dart';
 
 final GlobalKey<NavigatorState> kNavigatorKey = GlobalKey<NavigatorState>();
 
@@ -387,6 +388,30 @@ static bool getIsProPlan() {
 
   static String getCurrencyCode() {
     return currencyCode;
+  }
+
+  /// Formats a numeric string with thousand separators (e.g. 16915909 → 16,915,909).
+  static String formatNumberWithCommas(
+    String value, {
+    int? fixedDecimalPlaces,
+  }) {
+    final trimmed = value.trim();
+    if (trimmed.isEmpty) return value;
+
+    final parsed = double.tryParse(trimmed);
+    if (parsed == null) return value;
+
+    if (fixedDecimalPlaces != null) {
+      final fraction =
+          fixedDecimalPlaces > 0 ? '.${'0' * fixedDecimalPlaces}' : '';
+      return NumberFormat('#,##0$fraction', 'en_US').format(parsed);
+    }
+
+    if (parsed.truncateToDouble() == parsed) {
+      return NumberFormat('#,##0', 'en_US').format(parsed.toInt());
+    }
+
+    return NumberFormat('#,##0.##', 'en_US').format(parsed);
   }
 
   static String getPlatform() {

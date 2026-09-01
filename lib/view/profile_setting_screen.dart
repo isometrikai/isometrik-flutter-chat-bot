@@ -586,7 +586,9 @@ class _ProfileSettingViewState extends State<_ProfileSettingView> {
       builder: (context, state) {
         final xtraBalance = state is WalletLoadSuccess
             ? (state.availablePoints != null
-                ? state.availablePoints.toString()
+                ? Utility.formatNumberWithCommas(
+                    state.availablePoints.toString(),
+                  )
                 : state.response.displayEarningBalance)
             : '---';
         final walletBalance = state is WalletLoadSuccess

@@ -20,26 +20,31 @@ class WalletBloc extends Bloc<WalletEvent, WalletState> {
   ) async {
     emit(WalletLoadInProgress());
     try {
+      final pointsFuture = _repository.fetchMemberPoints();
       final result = await _repository.fetchWallet(
         userId: event.userId,
         userType: event.userType,
       );
-      if (result.isSuccess && result.data is WalletResponse) {
-        final walletResponse = result.data as WalletResponse;
-        emit(WalletLoadSuccess(walletResponse));
-        // Fetch member points after wallet (no loader).
-        try {
-          final pointsResult = await _repository.fetchMemberPoints();
-          if (pointsResult.isSuccess && pointsResult.data is MemberPointsResponse) {
-            final points = (pointsResult.data as MemberPointsResponse).availablePoints;
-            emit(WalletLoadSuccess(walletResponse, availablePoints: points));
-          }
-        } catch (_) {
-          // Keep wallet success state; points stay null
-        }
-      } else {
+      if (!result.isSuccess || result.data is! WalletResponse) {
         emit(WalletLoadFailure(result.message ?? 'Failed to load wallet'));
+        return;
       }
+
+      final walletResponse = result.data as WalletResponse;
+
+      int? availablePoints;
+      try {
+        final pointsResult = await pointsFuture;
+        if (pointsResult.isSuccess &&
+            pointsResult.data is MemberPointsResponse) {
+          availablePoints =
+              (pointsResult.data as MemberPointsResponse).availablePoints;
+        }
+      } catch (_) {
+        // Fall back to wallet earning balance in UI when points are unavailable.
+      }
+
+      emit(WalletLoadSuccess(walletResponse, availablePoints: availablePoints));
     } catch (e) {
       emit(WalletLoadFailure(e.toString()));
     }
