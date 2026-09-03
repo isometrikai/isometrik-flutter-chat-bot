@@ -131,14 +131,9 @@ class SubscriptionBloc extends Bloc<SubscriptionEvent, SubscriptionState> {
     final started =
         await _iap.purchaseSelectedPlan(autoRenew: _autoRenew);
     _log('purchaseSelectedPlan started=$started');
-    if (!started) {
-      _awaitingStoreResult = false;
-      if (state is SubscriptionReady) {
-        emit(
-          (state as SubscriptionReady).copyWith(purchaseInProgress: false),
-        );
-      }
-    }
+    // Do not clear _awaitingStoreResult here. buyNonConsumable can emit
+    // canceled/error and return false; clearing the flag drops that event
+    // (iOS duplicate pending transaction). PurchaseUpdate owns the flag.
   }
 
   Future<void> _onRestoreRequested(
