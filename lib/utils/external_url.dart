@@ -36,35 +36,30 @@ Future<bool> openStoreSubscriptions() async {
 }
 
 Future<bool> _openAndroidStoreSubscriptions() async {
-  final packageInfo = await PackageInfo.fromPlatform();
-  final packageName = packageInfo.packageName;
+  String packageName = '';
+  try {
+    packageName = (await PackageInfo.fromPlatform()).packageName;
+  } catch (e) {
+    print('Could not read package name: $e');
+  }
   final productId = IapProductIds.androidSubscription;
 
-  final subscriptionUri = Uri.https(
+  // Play Store does not handle this URL with externalNonBrowserApplication.
+  final specificUri = Uri.https(
     'play.google.com',
     '/store/account/subscriptions',
-    {'sku': productId, 'package': packageName},
+    {
+      if (productId.isNotEmpty) 'sku': productId,
+      if (packageName.isNotEmpty) 'package': packageName,
+    },
   );
   final allSubscriptionsUri = Uri.https(
     'play.google.com',
     '/store/account/subscriptions',
   );
-  final playStoreIntentUri = Uri.parse(
-    'intent://play.google.com/store/account/subscriptions'
-    '?sku=$productId&package=$packageName'
-    '#Intent;scheme=https;package=com.android.vending;end',
-  );
 
-  // Prefer Play Store app over browser (Android 11+ needs manifest queries).
-  for (final uri in [
-    subscriptionUri,
-    playStoreIntentUri,
-    allSubscriptionsUri,
-  ]) {
-    if (await _launchUri(uri, LaunchMode.externalNonBrowserApplication)) {
-      return true;
-    }
+  if (await _launchUri(specificUri, LaunchMode.externalApplication)) {
+    return true;
   }
-
-  return _launchUri(subscriptionUri, LaunchMode.externalApplication);
+  return _launchUri(allSubscriptionsUri, LaunchMode.externalApplication);
 }
