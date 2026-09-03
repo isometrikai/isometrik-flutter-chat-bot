@@ -131,9 +131,14 @@ class SubscriptionBloc extends Bloc<SubscriptionEvent, SubscriptionState> {
     final started =
         await _iap.purchaseSelectedPlan(autoRenew: _autoRenew);
     _log('purchaseSelectedPlan started=$started');
-    // Do not clear _awaitingStoreResult here. Errors from buyNonConsumable are
-    // pushed on the purchase stream before this returns; clearing the flag
-    // caused the bloc to ignore them (pending StoreKit transaction, etc.).
+    if (!started) {
+      _awaitingStoreResult = false;
+      if (state is SubscriptionReady) {
+        emit(
+          (state as SubscriptionReady).copyWith(purchaseInProgress: false),
+        );
+      }
+    }
   }
 
   Future<void> _onRestoreRequested(
