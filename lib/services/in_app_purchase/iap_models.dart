@@ -9,7 +9,7 @@ enum IapPurchaseStatus {
   canceled,
   error,
   /// Store restore finished with no purchases delivered (typical on Android).
-  restoreEmpty,
+  // restoreEmpty,
 }
 
 /// Normalized purchase result from the store stream.

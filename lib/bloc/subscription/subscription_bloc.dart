@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:chat_bot/bloc/subscription/subscription_event.dart';
 import 'package:chat_bot/bloc/subscription/subscription_state.dart';
 import 'package:chat_bot/services/in_app_purchase/iap.dart';
-import 'package:chat_bot/utils/app_translations.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class SubscriptionBloc extends Bloc<SubscriptionEvent, SubscriptionState> {
@@ -14,10 +13,7 @@ class SubscriptionBloc extends Bloc<SubscriptionEvent, SubscriptionState> {
     on<SubscriptionAutoRenewToggled>(_onAutoRenewToggled);
     on<SubscriptionPurchaseRequested>(_onPurchaseRequested);
     on<SubscriptionRestoreRequested>(_onRestoreRequested);
-    on<_SubscriptionPurchaseUpdate>(
-      _onPurchaseUpdate,
-      transformer: (events, mapper) => events.asyncExpand(mapper),
-    );
+    on<_SubscriptionPurchaseUpdate>(_onPurchaseUpdate);
   }
 
   static const String _tag = 'IAP-BLOC';
@@ -26,14 +22,6 @@ class SubscriptionBloc extends Bloc<SubscriptionEvent, SubscriptionState> {
   StreamSubscription<IapPurchaseResult>? _purchaseSub;
   bool _autoRenew = false;
   String? _lastSuccessKey;
-
-  /// True after the user taps Subscribe or Restore on this paywall.
-  /// Startup Play Billing replays must not drive UI (toggle / toasts / success).
-  bool _awaitingStoreResult = false;
-
-  /// Restore/Subscribe can yield several store events (iOS: purchased+restored
-  /// per product). Show the success sheet only once per user action.
-  bool _didShowSuccessForCurrentAction = false;
 
   void _log(String message) => print('$_tag | $message');
 
@@ -50,11 +38,6 @@ class SubscriptionBloc extends Bloc<SubscriptionEvent, SubscriptionState> {
     _logInfo('event=SubscriptionStarted');
     emit(const SubscriptionLoadInProgress());
 
-    // Paywall always starts on the manual plan. Do not copy entitlement.autoRenew
-    // — on Android that cache is often true from a previous auto-renew buy, which
-    // paints the toggle ON and then snaps it OFF.
-    _autoRenew = false;
-
     await _iap.initialize();
     await _purchaseSub?.cancel();
     _purchaseSub = _iap.purchaseUpdates.listen((result) {
@@ -67,8 +50,8 @@ class SubscriptionBloc extends Bloc<SubscriptionEvent, SubscriptionState> {
 
     final entitlement = await _iap.getEntitlement();
     if (entitlement != null) {
-      _log('existing entitlement found | autoRenew=${entitlement.autoRenew} '
-          '(ignored for toggle; paywall default is manual)');
+      _autoRenew = entitlement.autoRenew;
+      _log('existing entitlement found | autoRenew=$_autoRenew');
     } else {
       _log('no existing entitlement');
     }
@@ -121,8 +104,6 @@ class SubscriptionBloc extends Bloc<SubscriptionEvent, SubscriptionState> {
   ) async {
     _logInfo('event=PurchaseRequested | autoRenew=$_autoRenew | '
         'productId=${IapProductIds.forAutoRenew(_autoRenew)}');
-    _awaitingStoreResult = true;
-    _didShowSuccessForCurrentAction = false;
     final current = state;
     if (current is SubscriptionReady) {
       emit(current.copyWith(purchaseInProgress: true));
@@ -131,9 +112,11 @@ class SubscriptionBloc extends Bloc<SubscriptionEvent, SubscriptionState> {
     final started =
         await _iap.purchaseSelectedPlan(autoRenew: _autoRenew);
     _log('purchaseSelectedPlan started=$started');
-    // Do not clear _awaitingStoreResult here. Errors from buyNonConsumable are
-    // pushed on the purchase stream before this returns; clearing the flag
-    // caused the bloc to ignore them (pending StoreKit transaction, etc.).
+    if (!started && state is SubscriptionReady) {
+      emit(
+        (state as SubscriptionReady).copyWith(purchaseInProgress: false),
+      );
+    }
   }
 
   Future<void> _onRestoreRequested(
@@ -141,8 +124,6 @@ class SubscriptionBloc extends Bloc<SubscriptionEvent, SubscriptionState> {
     Emitter<SubscriptionState> emit,
   ) async {
     _logInfo('event=RestoreRequested');
-    _awaitingStoreResult = true;
-    _didShowSuccessForCurrentAction = false;
     final current = state;
     if (current is SubscriptionReady) {
       emit(current.copyWith(purchaseInProgress: true));
@@ -158,14 +139,10 @@ class SubscriptionBloc extends Bloc<SubscriptionEvent, SubscriptionState> {
     _logInfo('event=PurchaseUpdate | status=${result.status} | '
         'productId=${result.productId} | error=${result.errorMessage}');
 
-    if (!_awaitingStoreResult && !_iap.isPurchaseInFlight) {
-      _logInfo(
-        'ignore store update (no user Subscribe/Restore on this screen)',
-      );
-      return;
-    }
-
     switch (result.status) {
+      // case IapPurchaseStatus.restoreEmpty:
+      //   _log('store restore finished with no purchases');
+      //   break;
       case IapPurchaseStatus.pending:
         if (state is SubscriptionReady) {
           emit(
@@ -176,13 +153,6 @@ class SubscriptionBloc extends Bloc<SubscriptionEvent, SubscriptionState> {
 
       case IapPurchaseStatus.purchased:
       case IapPurchaseStatus.restored:
-        if (_didShowSuccessForCurrentAction) {
-          _logInfo(
-            'skip extra ${result.status.name} UI — success already shown '
-            'for this Subscribe/Restore',
-          );
-          break;
-        }
         final successKey =
             '${result.productId ?? ''}|${result.transactionId ?? ''}';
         if (_lastSuccessKey == successKey && successKey != '|') {
@@ -190,8 +160,6 @@ class SubscriptionBloc extends Bloc<SubscriptionEvent, SubscriptionState> {
           break;
         }
         _lastSuccessKey = successKey;
-        _didShowSuccessForCurrentAction = true;
-        _awaitingStoreResult = false;
         _logSuccess('purchase ${result.status.name} — emitting success');
         final entitlement = await _iap.getEntitlement();
         emit(
@@ -213,7 +181,6 @@ class SubscriptionBloc extends Bloc<SubscriptionEvent, SubscriptionState> {
 
       case IapPurchaseStatus.canceled:
         _log('purchase canceled');
-        _awaitingStoreResult = false;
         if (state is SubscriptionReady) {
           emit(
             (state as SubscriptionReady).copyWith(purchaseInProgress: false),
@@ -223,31 +190,9 @@ class SubscriptionBloc extends Bloc<SubscriptionEvent, SubscriptionState> {
 
       case IapPurchaseStatus.error:
         _logError('purchase error: ${result.errorMessage}');
-        _awaitingStoreResult = false;
         emit(
           SubscriptionFailure(
             message: result.errorMessage ?? 'Purchase failed.',
-            autoRenew: _autoRenew,
-          ),
-        );
-        emit(
-          SubscriptionReady(
-            storeAvailable: _iap.isAvailable,
-            autoRenew: _autoRenew,
-            autoRenewProduct: _iap.autoRenewProduct,
-            manualProduct: _iap.manualProduct,
-            entitlement: await _iap.getEntitlement(),
-          ),
-        );
-        break;
-
-      case IapPurchaseStatus.restoreEmpty:
-        _log('restore finished with no purchases');
-        _awaitingStoreResult = false;
-        if (_didShowSuccessForCurrentAction) break;
-        emit(
-          SubscriptionFailure(
-            message: AppTranslations.planPriceRestoreEmpty,
             autoRenew: _autoRenew,
           ),
         );

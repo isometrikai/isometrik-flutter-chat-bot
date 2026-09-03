@@ -190,8 +190,8 @@ class _SubscriptionsScreenState extends State<SubscriptionsScreen> {
                               if (widget.subscription?.subscriptionType != "manual") ...[
                                  const SizedBox(height: 16),
                                   _ManagePlanButton(
-                                    onTap: () async {
-                                      await openStoreSubscriptions();
+                                    onTap: () {
+                                      openStoreSubscriptions();
                                     },
                                   ),
                               ],

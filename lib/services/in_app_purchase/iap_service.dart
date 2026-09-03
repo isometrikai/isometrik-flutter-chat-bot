@@ -10,8 +10,6 @@ import 'package:flutter/services.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:in_app_purchase_android/billing_client_wrappers.dart';
 import 'package:in_app_purchase_android/in_app_purchase_android.dart';
-import 'package:in_app_purchase_storekit/store_kit_2_wrappers.dart';
-import 'package:in_app_purchase_storekit/store_kit_wrappers.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 typedef IapPurchaseCallback = void Function(IapPurchaseResult result);
@@ -52,8 +50,6 @@ class IapService {
   bool _initialized = false;
   bool _storeAvailable = false;
   bool _purchaseInFlight = false;
-  int _inFlightPurchaseHandlers = 0;
-  bool _restoreSession = false;
 
   /// Plan the user selected for the in-flight purchase. On Android the product
   /// id is the same for both base plans, so this is how we tell them apart.
@@ -139,7 +135,7 @@ class IapService {
     _purchaseSub = _iap.purchaseStream.listen(
       (purchases) {
         _logInfo('purchaseStream event | count=${purchases.length}');
-        _enqueuePurchaseUpdate(purchases);
+        _onPurchaseUpdated(purchases);
       },
       onDone: () {
         _log('purchaseStream onDone');
@@ -266,17 +262,6 @@ class IapService {
       return false;
     }
 
-    if (Platform.isIOS) {
-      final claimed = await _claimUnfinishedIosPurchase(productId);
-      if (claimed) {
-        _logSuccess(
-          'claimed unfinished StoreKit transaction for $productId — '
-          'not starting a new buy',
-        );
-        return true;
-      }
-    }
-
     return _startPurchase(product);
   }
 
@@ -357,17 +342,6 @@ class IapService {
         );
         return false;
       }
-      if (_isDuplicatePendingTransaction(e)) {
-        _logInfo(
-          'pending StoreKit transaction for ${product.id} — '
-          'finishing it then retrying buy',
-        );
-        final claimed = await _claimUnfinishedIosPurchase(product.id);
-        if (claimed) {
-          return true;
-        }
-        return _retryBuyAfterFinishingPending(product, param);
-      }
       _logError('buyNonConsumable() PlatformException: $e', st);
       _emitError(e.message ?? e.toString());
       return false;
@@ -426,134 +400,6 @@ class IapService {
         message.contains('canceled');
   }
 
-  bool _isDuplicatePendingTransaction(PlatformException e) {
-    final code = e.code.toLowerCase();
-    final message = (e.message ?? '').toLowerCase();
-    return code == 'storekit_duplicate_product_object' ||
-        message.contains('pending transaction') ||
-        message.contains('duplicate_product');
-  }
-
-  Future<bool> _retryBuyAfterFinishingPending(
-    ProductDetails product,
-    PurchaseParam param,
-  ) async {
-    _purchaseInFlight = true;
-    try {
-      final started = await _iap.buyNonConsumable(purchaseParam: param);
-      _logInfo('retry buyNonConsumable() returned started=$started');
-      if (!started) {
-        _purchaseInFlight = false;
-        _emitError('Unable to start purchase.');
-      }
-      return started;
-    } on PlatformException catch (e, st) {
-      _purchaseInFlight = false;
-      if (_isUserCancelled(e)) {
-        _purchaseController.add(
-          IapPurchaseResult(
-            status: IapPurchaseStatus.canceled,
-            productId: product.id,
-            errorMessage: e.message,
-          ),
-        );
-        return false;
-      }
-      _logError('retry buyNonConsumable() PlatformException: $e', st);
-      _emitError(e.message ?? e.toString());
-      return false;
-    } catch (e, st) {
-      _purchaseInFlight = false;
-      _logError('retry buyNonConsumable() exception: $e', st);
-      _emitError(e.toString());
-      return false;
-    }
-  }
-
-  /// Finishes leftover StoreKit transactions for [productId].
-  ///
-  /// If the unfinished buy can be reported to the backend, emits success so
-  /// the user does not have to pay again. Always finishes the transaction so
-  /// a later Subscribe is not blocked by `storekit_duplicate_product_object`.
-  Future<bool> _claimUnfinishedIosPurchase(String productId) async {
-    if (!Platform.isIOS) return false;
-    var claimed = false;
-    try {
-      final unfinished = await SK2Transaction.unfinishedTransactions();
-      final matches =
-          unfinished.where((tx) => tx.productId == productId).toList();
-      _logInfo(
-        'SK2 unfinished transactions=${unfinished.length} | '
-        'matching $productId=${matches.length}',
-      );
-      for (final tx in matches) {
-        final txId = tx.id.trim();
-        final receipt = (tx.receiptData ?? '').trim();
-        var backendOk = false;
-        if (txId.isNotEmpty && receipt.isNotEmpty) {
-          try {
-            final result = await _purchaseRepository.reportPurchase(
-              planId: SubscriptionPurchaseRepository.defaultPlanId,
-              productId: productId,
-              transactionId: txId,
-              receiptData: receipt,
-            );
-            backendOk = result.isSuccess;
-            _log(
-              'unfinished $productId report backendOk=$backendOk | '
-              'message=${result.message}',
-            );
-          } catch (e, st) {
-            _logError('unfinished $productId backend exception: $e', st);
-          }
-        }
-
-        final idNum = int.tryParse(txId);
-        if (idNum != null) {
-          await SK2Transaction.finish(idNum);
-          _logSuccess('SK2Transaction.finish($idNum) for $productId');
-        }
-
-        if (backendOk) {
-          _handledSuccessKeys.add('$productId|$txId');
-          await _persistEntitlementFields(
-            productId: productId,
-            autoRenew: productId == IapProductIds.autoRenewMonthly,
-            transactionId: txId,
-          );
-          _emitPurchaseUpdate(
-            IapPurchaseResult(
-              status: IapPurchaseStatus.purchased,
-              productId: productId,
-              transactionId: txId,
-            ),
-          );
-          claimed = true;
-        }
-      }
-    } catch (e, st) {
-      _logError('SK2 unfinishedTransactions failed: $e', st);
-    }
-
-    await _finishSk1Unfinished(productId);
-    return claimed;
-  }
-
-  Future<void> _finishSk1Unfinished(String productId) async {
-    try {
-      final transactions = await SKPaymentQueueWrapper().transactions();
-      for (final tx in transactions) {
-        if (tx.payment.productIdentifier != productId) continue;
-        await SKPaymentQueueWrapper().finishTransaction(tx);
-        _logSuccess(
-          'SK1 finishTransaction ${tx.transactionIdentifier} for $productId',
-        );
-      }
-    } catch (e, st) {
-      _logError('SK1 finish unfinished failed: $e', st);
-    }
-  }
-
   Future<void> restorePurchases() async {
     _logInfo('restorePurchases() start');
     await _ensureInitialized();
@@ -562,52 +408,13 @@ class IapService {
       _emitError('In-app purchases are not available on this device.');
       return;
     }
-    _restoreSession = true;
     try {
-      if (Platform.isAndroid) {
-        await _restoreAndroidPurchases();
-      } else {
-        await _iap.restorePurchases();
-        _logSuccess('restorePurchases() request sent — waiting for stream');
-      }
+      await _iap.restorePurchases();
+      _logSuccess('restorePurchases() request sent — waiting for stream');
     } catch (e, st) {
       _logError('restorePurchases() exception: $e', st);
       _emitError(e.toString());
-    } finally {
-      _restoreSession = false;
     }
-  }
-
-  /// Android Restore does not always push a stream event. Query Play directly
-  /// so the paywall always gets success, empty, or error — iOS is unchanged.
-  Future<void> _restoreAndroidPurchases() async {
-    _logInfo('_restoreAndroidPurchases() queryPastPurchases');
-    final addition =
-        _iap.getPlatformAddition<InAppPurchaseAndroidPlatformAddition>();
-    final response = await addition.queryPastPurchases();
-    if (response.error != null) {
-      final err = response.error!;
-      _logError(
-        'queryPastPurchases ERROR | code=${err.code} | message=${err.message}',
-      );
-      _emitError(err.message ?? 'Failed to restore purchases.');
-      return;
-    }
-
-    final past = response.pastPurchases;
-    _logInfo('queryPastPurchases found=${past.length}');
-    if (past.isEmpty) {
-      _emitPurchaseUpdate(
-        const IapPurchaseResult(status: IapPurchaseStatus.restoreEmpty),
-      );
-      return;
-    }
-
-    await _onPurchaseUpdated(past);
-  }
-
-  void _emitPurchaseUpdate(IapPurchaseResult result) {
-    _purchaseController.add(result);
   }
 
   Future<IapEntitlement?> getEntitlement() async {
@@ -660,26 +467,11 @@ class IapService {
     }
   }
 
-  Future<void> _purchaseHandleQueue = Future<void>.value();
-
-  void _enqueuePurchaseUpdate(List<PurchaseDetails> purchases) {
-    _purchaseHandleQueue = _purchaseHandleQueue
-        .then((_) => _onPurchaseUpdated(purchases))
-        .catchError((Object e, StackTrace st) {
-      _logError('purchase handler queue: $e', st);
-    });
-  }
-
   Future<void> _onPurchaseUpdated(List<PurchaseDetails> purchases) async {
     _logInfo('_onPurchaseUpdated | count=${purchases.length}');
-    _inFlightPurchaseHandlers++;
-    try {
-      for (var i = 0; i < purchases.length; i++) {
-        _log('purchase[$i] → ${_purchaseSummary(purchases[i])}');
-        await _handlePurchase(purchases[i]);
-      }
-    } finally {
-      _inFlightPurchaseHandlers--;
+    for (var i = 0; i < purchases.length; i++) {
+      _log('purchase[$i] → ${_purchaseSummary(purchases[i])}');
+      await _handlePurchase(purchases[i]);
     }
   }
 
@@ -690,7 +482,7 @@ class IapService {
     switch (purchase.status) {
       case PurchaseStatus.pending:
         _log('status=pending — showing pending UI');
-        _emitPurchaseUpdate(
+        _purchaseController.add(
           IapPurchaseResult(
             status: IapPurchaseStatus.pending,
             productId: purchase.productID,
@@ -708,24 +500,14 @@ class IapService {
         if (_handledSuccessKeys.contains(successKey)) {
           _logInfo(
             'skip duplicate ${purchase.status} | key=$successKey '
-            '(already activated)',
+            '(Apple often emits purchased + restored for one buy)',
           );
           if (purchase.pendingCompletePurchase) {
             await _iap.completePurchase(purchase);
           }
-          // Always notify UI. Restore (iOS + Android) must stop the loader even
-          // when the purchase was already activated. Subscribe ignores extras
-          // via SubscriptionBloc._didShowSuccessForCurrentAction.
-          _emitPurchaseUpdate(
-            IapPurchaseResult(
-              status: IapPurchaseStatus.restored,
-              productId: purchase.productID,
-              transactionId: purchase.purchaseID,
-              raw: purchase,
-            ),
-          );
           break;
         }
+        _handledSuccessKeys.add(successKey);
 
         _logSuccess(
           'status=${purchase.status} — reporting to backend | '
@@ -738,7 +520,7 @@ class IapService {
             'backend purchase API failed — not completing store transaction '
             '(will retry on next launch)',
           );
-          _emitPurchaseUpdate(
+          _purchaseController.add(
             IapPurchaseResult(
               status: IapPurchaseStatus.error,
               productId: purchase.productID,
@@ -753,8 +535,6 @@ class IapService {
           break;
         }
 
-        _handledSuccessKeys.add(successKey);
-
         final result = IapPurchaseResult(
           status: purchase.status == PurchaseStatus.restored
               ? IapPurchaseStatus.restored
@@ -768,7 +548,7 @@ class IapService {
         onPurchaseVerified?.call(result);
         _log('onPurchaseVerified callback '
             '${onPurchaseVerified == null ? "NOT set" : "invoked"}');
-        _emitPurchaseUpdate(result);
+        _purchaseController.add(result);
 
         if (purchase.pendingCompletePurchase) {
           _log('completePurchase() for ${purchase.productID}');
@@ -785,7 +565,7 @@ class IapService {
           'message=${purchase.error?.message} | '
           'details=${purchase.error?.details}',
         );
-        _emitPurchaseUpdate(
+        _purchaseController.add(
           IapPurchaseResult(
             status: IapPurchaseStatus.error,
             productId: purchase.productID,
@@ -803,7 +583,7 @@ class IapService {
       case PurchaseStatus.canceled:
         _purchaseInFlight = false;
         _logInfo('status=canceled | productID=${purchase.productID}');
-        _emitPurchaseUpdate(
+        _purchaseController.add(
           IapPurchaseResult(
             status: IapPurchaseStatus.canceled,
             productId: purchase.productID,
@@ -821,35 +601,28 @@ class IapService {
           '${purchase.productID}');
       return;
     }
+
+    // Android uses one product id for both base plans, so fall back to the
+    // plan the user selected for this purchase.
     final autoRenew = Platform.isAndroid
         ? _pendingAutoRenew
         : purchase.productID == IapProductIds.autoRenewMonthly;
-    await _persistEntitlementFields(
-      productId: purchase.productID,
-      autoRenew: autoRenew,
-      transactionId: purchase.purchaseID,
-    );
-  }
-
-  Future<void> _persistEntitlementFields({
-    required String productId,
-    required bool autoRenew,
-    String? transactionId,
-  }) async {
     final purchasedAt = DateTime.now();
     final expiresAt = autoRenew
         ? null
         : purchasedAt.add(const Duration(days: 30));
 
     final entitlement = IapEntitlement(
-      productId: productId,
+      productId: purchase.productID,
       autoRenew: autoRenew,
-      transactionId: transactionId,
+      transactionId: purchase.purchaseID,
       purchasedAt: purchasedAt,
       expiresAt: expiresAt,
     );
 
-    _log('_persistEntitlement → ${jsonEncode(entitlement.toJson())}');
+    _log(
+      '_persistEntitlement → ${jsonEncode(entitlement.toJson())}',
+    );
 
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(
