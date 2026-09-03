@@ -255,6 +255,7 @@
   "plan_price_auto_renew_desc": "Renews automatically at {price}/month. Turn off anytime.",
   "plan_price_subscribe_cta": "Subscribe for {price}",
   "plan_price_purchase_success": "You're subscribed to EAZY Pro.",
+  "plan_price_already_subscribed": "You're already subscribed.",
   "pro_plan_success_title": "🎉 You're on EAZY Pro",
   "pro_plan_success_desc_prefix": "Unlimited chats unlocked. ",
   "pro_plan_success_desc_suffix": " — manage or cancel anytime from your account.",

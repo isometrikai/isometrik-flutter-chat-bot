@@ -43,6 +43,11 @@ class SubscriptionBloc extends Bloc<SubscriptionEvent, SubscriptionState> {
 
   void _logError(String message) => print('$_tag | ERROR | $message');
 
+  String _sessionContext() =>
+      'awaiting=$_awaitingStoreResult | inFlight=${_iap.isPurchaseInFlight} | '
+      'subscribe=${_iap.isSubscribeSessionActive} | '
+      'didShowSuccess=$_didShowSuccessForCurrentAction';
+
   Future<void> _onStarted(
     SubscriptionStarted event,
     Emitter<SubscriptionState> emit,
@@ -123,6 +128,7 @@ class SubscriptionBloc extends Bloc<SubscriptionEvent, SubscriptionState> {
         'productId=${IapProductIds.forAutoRenew(_autoRenew)}');
     _awaitingStoreResult = true;
     _didShowSuccessForCurrentAction = false;
+    _logInfo('paywall session START | Subscribe | ${_sessionContext()}');
     final current = state;
     if (current is SubscriptionReady) {
       emit(current.copyWith(purchaseInProgress: true));
@@ -143,6 +149,7 @@ class SubscriptionBloc extends Bloc<SubscriptionEvent, SubscriptionState> {
     _logInfo('event=RestoreRequested');
     _awaitingStoreResult = true;
     _didShowSuccessForCurrentAction = false;
+    _logInfo('paywall session START | Restore | ${_sessionContext()}');
     final current = state;
     if (current is SubscriptionReady) {
       emit(current.copyWith(purchaseInProgress: true));
@@ -156,11 +163,13 @@ class SubscriptionBloc extends Bloc<SubscriptionEvent, SubscriptionState> {
   ) async {
     final result = event.result;
     _logInfo('event=PurchaseUpdate | status=${result.status} | '
-        'productId=${result.productId} | error=${result.errorMessage}');
+        'productId=${result.productId} | tx=${result.transactionId} | '
+        'error=${result.errorMessage} | ${_sessionContext()}');
 
     if (!_awaitingStoreResult && !_iap.isPurchaseInFlight) {
       _logInfo(
-        'ignore store update (no user Subscribe/Restore on this screen)',
+        'ignore store update (background replay) | status=${result.status} | '
+        'productId=${result.productId} | tx=${result.transactionId}',
       );
       return;
     }
@@ -192,7 +201,10 @@ class SubscriptionBloc extends Bloc<SubscriptionEvent, SubscriptionState> {
         _lastSuccessKey = successKey;
         _didShowSuccessForCurrentAction = true;
         _awaitingStoreResult = false;
-        _logSuccess('purchase ${result.status.name} — emitting success');
+        _logSuccess(
+          'paywall session END | success | tx=${result.transactionId} | '
+          '${_sessionContext()}',
+        );
         final entitlement = await _iap.getEntitlement();
         emit(
           SubscriptionPurchaseSuccess(
@@ -211,9 +223,34 @@ class SubscriptionBloc extends Bloc<SubscriptionEvent, SubscriptionState> {
         );
         break;
 
-      case IapPurchaseStatus.canceled:
-        _log('purchase canceled');
+      case IapPurchaseStatus.alreadySubscribed:
         _awaitingStoreResult = false;
+        _logInfo(
+          'paywall session END | alreadySubscribed | tx=${result.transactionId} | '
+          '${_sessionContext()}',
+        );
+        emit(
+          SubscriptionAlreadySubscribed(
+            result: result,
+            autoRenew: _autoRenew,
+          ),
+        );
+        emit(
+          SubscriptionReady(
+            storeAvailable: _iap.isAvailable,
+            autoRenew: _autoRenew,
+            autoRenewProduct: _iap.autoRenewProduct,
+            manualProduct: _iap.manualProduct,
+            entitlement: await _iap.getEntitlement(),
+          ),
+        );
+        break;
+
+      case IapPurchaseStatus.canceled:
+        _log('purchase canceled | ${_sessionContext()}');
+        _awaitingStoreResult = false;
+        _iap.abandonSubscribeSession();
+        _logInfo('paywall session END | canceled');
         if (state is SubscriptionReady) {
           emit(
             (state as SubscriptionReady).copyWith(purchaseInProgress: false),
@@ -223,7 +260,26 @@ class SubscriptionBloc extends Bloc<SubscriptionEvent, SubscriptionState> {
 
       case IapPurchaseStatus.error:
         _logError('purchase error: ${result.errorMessage}');
+        // Stale sandbox renewals can surface as activation errors while a new
+        // Subscribe is still in flight — do not drop the paywall session yet.
+        const activationFailed =
+            'Purchase succeeded in store, but activating plan failed. '
+            'Please try again.';
+        if (_awaitingStoreResult &&
+            result.errorMessage == activationFailed &&
+            (_iap.isPurchaseInFlight || _iap.isSubscribeSessionActive)) {
+          _logInfo(
+            'ignore transient activation error while subscribe in flight | '
+            'tx=${result.transactionId} | ${_sessionContext()}',
+          );
+          break;
+        }
         _awaitingStoreResult = false;
+        _iap.abandonSubscribeSession();
+        _logInfo(
+          'paywall session END | error | message=${result.errorMessage} | '
+          'tx=${result.transactionId}',
+        );
         emit(
           SubscriptionFailure(
             message: result.errorMessage ?? 'Purchase failed.',
@@ -242,8 +298,9 @@ class SubscriptionBloc extends Bloc<SubscriptionEvent, SubscriptionState> {
         break;
 
       case IapPurchaseStatus.restoreEmpty:
-        _log('restore finished with no purchases');
+        _log('restore finished with no purchases | ${_sessionContext()}');
         _awaitingStoreResult = false;
+        _logInfo('paywall session END | restoreEmpty');
         if (_didShowSuccessForCurrentAction) break;
         emit(
           SubscriptionFailure(

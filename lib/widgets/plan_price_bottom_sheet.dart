@@ -93,6 +93,9 @@ class PlanPriceBottomSheet extends StatelessWidget {
     return BlocListener<SubscriptionBloc, SubscriptionState>(
       listenWhen: (prev, next) {
         if (next is SubscriptionFailure) return true;
+        if (next is SubscriptionAlreadySubscribed) {
+          return prev is! SubscriptionAlreadySubscribed;
+        }
         if (next is SubscriptionPurchaseSuccess) {
           return prev is! SubscriptionPurchaseSuccess;
         }
@@ -113,6 +116,13 @@ class PlanPriceBottomSheet extends StatelessWidget {
               navigator.pop();
             }
           });
+        } else if (state is SubscriptionAlreadySubscribed) {
+          Utility.setIsProPlan(true);
+          onPurchaseSuccess?.call();
+          Utility.showErrorBlackToast(AppTranslations.planPriceAlreadySubscribed);
+          if (context.mounted) {
+            Navigator.of(context).pop();
+          }
         } else if (state is SubscriptionFailure) {
           // TODO: show this again once backend plan activation is stable.
           // Utility.showErrorBlackToast(state.message);

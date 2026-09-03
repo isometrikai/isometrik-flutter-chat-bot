@@ -255,6 +255,7 @@
   "plan_price_auto_renew_desc": "يُجدد تلقائيًا بـ {price}/شهر. يمكنك الإيقاف في أي وقت.",
   "plan_price_subscribe_cta": "اشترك مقابل {price}",
   "plan_price_purchase_success": "تم اشتراكك في zAIn Pro.",
+  "plan_price_already_subscribed": "أنت مشترك بالفعل.",
   "pro_plan_success_title": "🎉 أنت الآن على EAZY Pro",
   "pro_plan_success_desc_prefix": "تم فتح المحادثات غير المحدودة. ",
   "pro_plan_success_desc_suffix": " — يمكنك الإدارة أو الإلغاء في أي وقت من حسابك.",

@@ -8,6 +8,8 @@ enum IapPurchaseStatus {
   restored,
   canceled,
   error,
+  /// User tapped Subscribe but StoreKit returned an already-activated tx.
+  alreadySubscribed,
   /// Store restore finished with no purchases delivered (typical on Android).
   restoreEmpty,
 }

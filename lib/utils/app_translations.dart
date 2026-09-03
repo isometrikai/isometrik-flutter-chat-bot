@@ -262,6 +262,8 @@ class AppTranslations {
   static String planPriceSubscribeCta(String price) =>
       'plan_price_subscribe_cta'.tr(namedArgs: {'price': price});
   static String get planPricePurchaseSuccess => 'plan_price_purchase_success'.tr();
+  static String get planPriceAlreadySubscribed =>
+      'plan_price_already_subscribed'.tr();
   static String get proPlanSuccessTitle => 'pro_plan_success_title'.tr();
   static String get proPlanSuccessDescPrefix => 'pro_plan_success_desc_prefix'.tr();
   static String get proPlanSuccessDescSuffix => 'pro_plan_success_desc_suffix'.tr();
