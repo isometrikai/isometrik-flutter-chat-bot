@@ -183,11 +183,20 @@ class SubscriptionBloc extends Bloc<SubscriptionEvent, SubscriptionState> {
         'error=${result.errorMessage} | ${_sessionContext()}');
 
     if (!_awaitingStoreResult && !_iap.isPurchaseInFlight) {
-      _logInfo(
-        'ignore store update (background replay) | status=${result.status} | '
-        'productId=${result.productId} | tx=${result.transactionId}',
-      );
-      return;
+      final ready = state is SubscriptionReady ? state as SubscriptionReady : null;
+      final terminalWhileLoading = ready?.purchaseInProgress == true &&
+          (result.status == IapPurchaseStatus.error ||
+              result.status == IapPurchaseStatus.purchased ||
+              result.status == IapPurchaseStatus.restored ||
+              result.status == IapPurchaseStatus.alreadySubscribed ||
+              result.status == IapPurchaseStatus.canceled);
+      if (!terminalWhileLoading) {
+        _logInfo(
+          'ignore store update (background replay) | status=${result.status} | '
+          'productId=${result.productId} | tx=${result.transactionId}',
+        );
+        return;
+      }
     }
 
     switch (result.status) {
@@ -339,6 +348,8 @@ class SubscriptionBloc extends Bloc<SubscriptionEvent, SubscriptionState> {
   @override
   Future<void> close() async {
     _log('bloc close()');
+    _awaitingStoreResult = false;
+    _iap.abandonSubscribeSession();
     await _purchaseSub?.cancel();
     return super.close();
   }

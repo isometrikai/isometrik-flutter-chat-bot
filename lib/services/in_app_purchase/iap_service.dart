@@ -1023,6 +1023,20 @@ class IapService {
             break;
           }
 
+          if (_subscribeSessionProductId == purchase.productID) {
+            _logInfo(
+              'duplicate tx during Subscribe — re-resolving with backend | '
+              'key=$successKey | tx=${purchase.purchaseID}',
+            );
+            final outcome = await _reportPurchaseToBackend(purchase);
+            await _applyBackendOutcomeToPurchase(
+              purchase,
+              outcome,
+              successKey,
+            );
+            break;
+          }
+
           if (purchase.pendingCompletePurchase) {
             await _iap.completePurchase(purchase);
           }
@@ -1035,109 +1049,7 @@ class IapService {
         );
 
         final outcome = await _reportPurchaseToBackend(purchase);
-        _logInfo(
-          'backend report | product=${purchase.productID} | '
-          'tx=${purchase.purchaseID} | outcome=${_outcomeLabel(outcome)}',
-        );
-        if (outcome == _BackendReportOutcome.expired) {
-          _handledSuccessKeys.add(successKey);
-          await _clearLocalEntitlement(
-            reason: 'Apple/backend subscription expired',
-          );
-          if (purchase.pendingCompletePurchase) {
-            await _iap.completePurchase(purchase);
-          }
-          final inUserSession =
-              _subscribeSessionProductId != null || _restoreSession;
-          if (inUserSession) {
-            _logError(
-              'backend expired during subscribe/restore | '
-              'product=${purchase.productID} | tx=${purchase.purchaseID}',
-            );
-            _clearSubscribeSessionFor(purchase.productID);
-            _emitPurchaseUpdate(
-              IapPurchaseResult(
-                status: IapPurchaseStatus.error,
-                productId: purchase.productID,
-                transactionId: purchase.purchaseID,
-                errorMessage:
-                    'Purchase could not be activated. Please try again.',
-                raw: purchase,
-              ),
-            );
-          } else {
-            _logInfo(
-              'stale StoreKit renewal — finish quietly | '
-              'product=${purchase.productID} | tx=${purchase.purchaseID}',
-            );
-          }
-          break;
-        }
-        if (outcome == _BackendReportOutcome.linkedOtherAccount) {
-          _handledSuccessKeys.add(successKey);
-          _unfinishedPurchases.remove(purchase.productID);
-          _clearSubscribeSessionFor(purchase.productID);
-          if (purchase.pendingCompletePurchase) {
-            await _iap.completePurchase(purchase);
-          }
-          _logError(
-            'store subscription linked to another account | '
-            'platform=${Platform.operatingSystem} | '
-            'product=${purchase.productID} | tx=${purchase.purchaseID}',
-          );
-          _emitPurchaseUpdate(
-            IapPurchaseResult(
-              status: IapPurchaseStatus.error,
-              productId: purchase.productID,
-              transactionId: purchase.purchaseID,
-              errorMessage: _linkedOtherAccountUserMessage,
-              raw: purchase,
-            ),
-          );
-          break;
-        }
-        if (outcome != _BackendReportOutcome.success) {
-          _logError(
-            'backend activation FAILED — keeping StoreKit open for retry | '
-            'product=${purchase.productID} | tx=${purchase.purchaseID}',
-          );
-          _unfinishedPurchases[purchase.productID] = purchase;
-          _clearSubscribeSessionFor(purchase.productID);
-          _emitPurchaseUpdate(
-            IapPurchaseResult(
-              status: IapPurchaseStatus.error,
-              productId: purchase.productID,
-              transactionId: purchase.purchaseID,
-              errorMessage: IapErrorMessages.activationFailed,
-              raw: purchase,
-            ),
-          );
-          break;
-        }
-
-        _unfinishedPurchases.remove(purchase.productID);
-        _handledSuccessKeys.add(successKey);
-
-        final result = IapPurchaseResult(
-          status: purchase.status == PurchaseStatus.restored
-              ? IapPurchaseStatus.restored
-              : IapPurchaseStatus.purchased,
-          productId: purchase.productID,
-          transactionId: purchase.purchaseID,
-          raw: purchase,
-        );
-
-        await _persistEntitlement(purchase);
-        onPurchaseVerified?.call(result);
-        _log('onPurchaseVerified callback '
-            '${onPurchaseVerified == null ? "NOT set" : "invoked"}');
-        _emitPurchaseUpdate(result);
-
-        if (purchase.pendingCompletePurchase) {
-          _log('completePurchase() for ${purchase.productID}');
-          await _iap.completePurchase(purchase);
-          _logSuccess('completePurchase() done');
-        }
+        await _applyBackendOutcomeToPurchase(purchase, outcome, successKey);
         break;
 
       case PurchaseStatus.error:
@@ -1177,6 +1089,119 @@ class IapService {
           ),
         );
         break;
+    }
+  }
+
+  Future<void> _applyBackendOutcomeToPurchase(
+    PurchaseDetails purchase,
+    _BackendReportOutcome outcome,
+    String successKey,
+  ) async {
+    _logInfo(
+      'backend report | product=${purchase.productID} | '
+      'tx=${purchase.purchaseID} | outcome=${_outcomeLabel(outcome)}',
+    );
+
+    if (outcome == _BackendReportOutcome.expired) {
+      _handledSuccessKeys.add(successKey);
+      await _clearLocalEntitlement(
+        reason: 'Apple/backend subscription expired',
+      );
+      if (purchase.pendingCompletePurchase) {
+        await _iap.completePurchase(purchase);
+      }
+      final inUserSession =
+          _subscribeSessionProductId != null || _restoreSession;
+      if (inUserSession) {
+        _logError(
+          'backend expired during subscribe/restore | '
+          'product=${purchase.productID} | tx=${purchase.purchaseID}',
+        );
+        _clearSubscribeSessionFor(purchase.productID);
+        _emitPurchaseUpdate(
+          IapPurchaseResult(
+            status: IapPurchaseStatus.error,
+            productId: purchase.productID,
+            transactionId: purchase.purchaseID,
+            errorMessage:
+                'Purchase could not be activated. Please try again.',
+            raw: purchase,
+          ),
+        );
+      } else {
+        _logInfo(
+          'stale StoreKit renewal — finish quietly | '
+          'product=${purchase.productID} | tx=${purchase.purchaseID}',
+        );
+      }
+      return;
+    }
+
+    if (outcome == _BackendReportOutcome.linkedOtherAccount) {
+      _handledSuccessKeys.add(successKey);
+      _unfinishedPurchases.remove(purchase.productID);
+      _clearSubscribeSessionFor(purchase.productID);
+      if (purchase.pendingCompletePurchase) {
+        await _iap.completePurchase(purchase);
+      }
+      _logError(
+        'store subscription linked to another account | '
+        'platform=${Platform.operatingSystem} | '
+        'product=${purchase.productID} | tx=${purchase.purchaseID}',
+      );
+      _emitPurchaseUpdate(
+        IapPurchaseResult(
+          status: IapPurchaseStatus.error,
+          productId: purchase.productID,
+          transactionId: purchase.purchaseID,
+          errorMessage: _linkedOtherAccountUserMessage,
+          raw: purchase,
+        ),
+      );
+      return;
+    }
+
+    if (outcome != _BackendReportOutcome.success) {
+      _logError(
+        'backend activation FAILED — keeping StoreKit open for retry | '
+        'product=${purchase.productID} | tx=${purchase.purchaseID}',
+      );
+      _unfinishedPurchases[purchase.productID] = purchase;
+      _clearSubscribeSessionFor(purchase.productID);
+      _emitPurchaseUpdate(
+        IapPurchaseResult(
+          status: IapPurchaseStatus.error,
+          productId: purchase.productID,
+          transactionId: purchase.purchaseID,
+          errorMessage: IapErrorMessages.activationFailed,
+          raw: purchase,
+        ),
+      );
+      return;
+    }
+
+    _unfinishedPurchases.remove(purchase.productID);
+    _handledSuccessKeys.add(successKey);
+
+    final result = IapPurchaseResult(
+      status: purchase.status == PurchaseStatus.restored
+          ? IapPurchaseStatus.restored
+          : IapPurchaseStatus.purchased,
+      productId: purchase.productID,
+      transactionId: purchase.purchaseID,
+      raw: purchase,
+    );
+
+    await _persistEntitlement(purchase);
+    onPurchaseVerified?.call(result);
+    _log('onPurchaseVerified callback '
+        '${onPurchaseVerified == null ? "NOT set" : "invoked"}');
+    _emitPurchaseUpdate(result);
+
+    if (purchase.pendingCompletePurchase) {
+      _log('completePurchase() for ${purchase.productID}');
+      await _iap.completePurchase(purchase);
+      _logSuccess('completePurchase() done');
     }
   }
 
