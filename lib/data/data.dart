@@ -3,6 +3,7 @@ export 'model/chat_history_response.dart';
 export 'model/chat_message.dart';
 export 'model/chat_response.dart';
 export 'model/customer_profile_response.dart';
+export 'model/subscription_history_response.dart';
 export 'model/greeting_response.dart';
 export 'model/grocery_product_details_response.dart';
 export 'model/mygpts_model.dart' hide JsonParsingExtension;

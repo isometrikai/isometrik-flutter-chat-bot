@@ -2,6 +2,7 @@ import 'package:chat_bot/data/api_client.dart';
 import 'package:chat_bot/data/model/chat_response.dart';
 import 'package:chat_bot/data/model/chat_history_response.dart';
 import 'package:chat_bot/data/model/customer_profile_response.dart';
+import 'package:chat_bot/data/model/hawksearch_config_response.dart';
 import 'package:chat_bot/data/model/session_id_response.dart';
 import 'package:chat_bot/data/services/universal_api_client.dart';
 import 'package:chat_bot/utils/log.dart';
@@ -28,6 +29,9 @@ class ChatApiServices {
   String? _searchApiUrl;
   // String? _zoneId;
   String? _timezone;
+
+  HawkSearchConfigData? _hawkSearchConfig;
+  Future<HawkSearchConfigData?>? _hawkSearchConfigFuture;
 
   late final ApiClient _chatClient = UniversalApiClient.instance.chatClient;
   late final ApiClient _appClient = UniversalApiClient.instance.appClient;
@@ -64,6 +68,66 @@ class ChatApiServices {
     _searchApiUrl = searchApiUrl;
     // _zoneId = zoneId;
     _timezone = timezone;
+
+    fetchHawkSearchConfigInBackground();
+  }
+
+  bool _isEmpty(String? value) => value == null || value.trim().isEmpty;
+
+  bool get _needsHawkSearchConfig =>
+      _isEmpty(_clientGuid) ||
+      _isEmpty(_indexName) ||
+      _isEmpty(_visitId) ||
+      _isEmpty(_visitorId) ||
+      _isEmpty(_searchApiUrl);
+
+  String _effective(String? configured, String? fallback) {
+    if (!_isEmpty(configured)) return configured!.trim();
+    if (!_isEmpty(fallback)) return fallback!.trim();
+    return '';
+  }
+
+  /// Fetches HawkSearch config without blocking configure.
+  void fetchHawkSearchConfigInBackground() {
+    if (!_needsHawkSearchConfig) return;
+    _hawkSearchConfigFuture ??= _fetchHawkSearchConfig();
+  }
+
+  /// Ensures HawkSearch config is available when configured values are missing.
+  Future<void> ensureHawkSearchConfigReady() async {
+    if (!_needsHawkSearchConfig) return;
+    await (_hawkSearchConfigFuture ??= _fetchHawkSearchConfig());
+  }
+
+  String get effectiveClientGuid =>
+      _effective(_clientGuid, _hawkSearchConfig?.clientGuid);
+
+  String get effectiveIndexName =>
+      _effective(_indexName, _hawkSearchConfig?.indexName);
+
+  String get effectiveVisitId =>
+      _effective(_visitId, _hawkSearchConfig?.visitId);
+
+  String get effectiveVisitorId =>
+      _effective(_visitorId, _hawkSearchConfig?.visitorId);
+
+  String get effectiveSearchApiUrl =>
+      _effective(_searchApiUrl, _hawkSearchConfig?.searchApiUrl);
+
+  Future<HawkSearchConfigData?> _fetchHawkSearchConfig() async {
+    try {
+      final res = await _appClient.get('/python/hawksearch/config');
+      if (res.isSuccess && res.data is Map<String, dynamic>) {
+        final response = HawkSearchConfigResponse.fromJson(
+          res.data as Map<String, dynamic>,
+        );
+        _hawkSearchConfig = response.data;
+        return _hawkSearchConfig;
+      }
+    } catch (e) {
+      AppLog.error('Error fetching HawkSearch config: $e');
+    }
+    return null;
   }
 
   // /// Initialize the API service
@@ -100,16 +164,18 @@ class ChatApiServices {
     Map<String, dynamic> flightBookingData = const {},
     Map<String, dynamic> packageDeliveryData = const {},
   }) async {
+    await ensureHawkSearchConfigReady();
+
     final body = {
       'user_id': _userId,
       'device_id': fingerPrintId,
       'query': message,
       'session_id': sessionId,
-      'client_guid': _clientGuid ?? '',
-      'index_name': _indexName ?? '',
-      'visit_id': _visitId ?? '',
-      'visitor_id': _visitorId ?? '',
-      'search_api_url': _searchApiUrl ?? '',
+      'client_guid': effectiveClientGuid,
+      'index_name': effectiveIndexName,
+      'visit_id': effectiveVisitId,
+      'visitor_id': effectiveVisitorId,
+      'search_api_url': effectiveSearchApiUrl,
       'zone_id': Utility.getZoneId(),
       'location': {
         'latitude': Utility.getLatitude().toString(),
@@ -198,8 +264,15 @@ class ChatApiServices {
   }
 
 
-  ApiClient createCustomClient(String baseUrl) {
-    return UniversalApiClient.instance.createClient(baseUrl);
+  /// [enableTokenRefresh] — set false for HawkSearch (no eazylife/isometrik refresh).
+  ApiClient createCustomClient(
+    String baseUrl, {
+    bool enableTokenRefresh = true,
+  }) {
+    return UniversalApiClient.instance.createClient(
+      baseUrl,
+      enableTokenRefresh: enableTokenRefresh,
+    );
   }
 
   /// Get order details and extract only the required fields

@@ -262,11 +262,14 @@ class AppTranslations {
   static String planPriceSubscribeCta(String price) =>
       'plan_price_subscribe_cta'.tr(namedArgs: {'price': price});
   static String get planPricePurchaseSuccess => 'plan_price_purchase_success'.tr();
+  static String get planPriceAlreadySubscribed =>
+      'plan_price_already_subscribed'.tr();
   static String get proPlanSuccessTitle => 'pro_plan_success_title'.tr();
   static String get proPlanSuccessDescPrefix => 'pro_plan_success_desc_prefix'.tr();
   static String get proPlanSuccessDescSuffix => 'pro_plan_success_desc_suffix'.tr();
   static String get proPlanSuccessContinue => 'pro_plan_success_continue'.tr();
   static String get planPriceRestore => 'plan_price_restore'.tr();
+  static String get planPriceRestoreEmpty => 'plan_price_restore_empty'.tr();
   static String get planPriceStoreUnavailable => 'plan_price_store_unavailable'.tr();
   static String get dataControl => 'data_control'.tr();
   static String get helpCenter => 'help_center'.tr();
@@ -299,6 +302,33 @@ class AppTranslations {
   static String get activeStatus => 'active_status'.tr();
   static String planRenews(String date) =>
       'plan_renews'.tr(namedArgs: {'date': date});
+  static String planEnds(String date) =>
+      'plan_ends'.tr(namedArgs: {'date': date});
+  static String get subscriptionsTitle => 'subscriptions_title'.tr();
+  static String get subscriptionsPlanName => 'subscriptions_plan_name'.tr();
+  static String subscriptionsPriceLine(String price, String autoRenew) =>
+      'subscriptions_price_line'.tr(
+        namedArgs: {'price': price, 'autoRenew': autoRenew},
+      );
+  static String get subscriptionsAutoRenewOn =>
+      'subscriptions_auto_renew_on'.tr();
+  static String get subscriptionsAutoRenewOff =>
+      'subscriptions_auto_renew_off'.tr();
+  static String get subscriptionsStarted => 'subscriptions_started'.tr();
+  static String get subscriptionsRenewsOn => 'subscriptions_renews_on'.tr();
+  static String get subscriptionsEndsOn => 'subscriptions_ends_on'.tr();
+  static String get subscriptionsManagePlan =>
+      'subscriptions_manage_plan'.tr();
+  static String get pastSubscriptions => 'past_subscriptions'.tr();
+  static String get pastSubscriptionsEmpty =>
+      'past_subscriptions_empty'.tr();
+  static String get endedStatus => 'ended_status'.tr();
+  static String get subscriptionsPastPlanMonthly =>
+      'subscriptions_past_plan_monthly'.tr();
+  static String subscriptionsDateRange(String start, String end) =>
+      'subscriptions_date_range'.tr(
+        namedArgs: {'start': start, 'end': end},
+      );
   static String get poweredBy => 'powered_by'.tr();
   static String get eazyXtra => 'eazy_xtra'.tr();
   static String get personalization => 'personalization'.tr();
@@ -585,4 +615,5 @@ class AppTranslations {
   static String get tutorialHeroBody => 'tutorial_hero_body'.tr();
   static String get justChatNaturally => 'just_chat_naturally'.tr();
   static String get appTitle => 'app_title'.tr();
+  static String get aroundYou => 'around_you'.tr();
 }

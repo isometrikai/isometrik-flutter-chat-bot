@@ -1,3 +1,5 @@
+import 'package:chat_bot/utils/utility.dart';
+
 /// Response model for GET /v1/wallet (walletData & walletEarningData).
 class WalletData {
   const WalletData({
@@ -124,14 +126,15 @@ class WalletResponse {
     if (wallet == null) return '—';
     final sym = wallet.currency ?? '';
     final bal = wallet.balance ?? '0';
-    return '$sym $bal';
+    final formatted = Utility.formatNumberWithCommas(bal, fixedDecimalPlaces: 2);
+    return '$sym $formatted';
   }
 
-  /// First earning balance for Xtra (e.g. "2186.22").
+  /// First earning balance for Xtra (e.g. "2,186.22").
   String get displayEarningBalance {
     final earning =
         walletEarningData?.isNotEmpty == true ? walletEarningData!.first : null;
     if (earning == null) return '0';
-    return earning.balance ?? '0';
+    return Utility.formatNumberWithCommas(earning.balance ?? '0');
   }
 }

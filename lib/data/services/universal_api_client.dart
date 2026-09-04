@@ -1,7 +1,9 @@
 import 'package:chat_bot/data/api_client.dart';
 import 'package:chat_bot/data/services/token_manager.dart';
+import 'package:chat_bot/data/services/user_token_refresh_manager.dart';
 import 'package:chat_bot/utils/api_result.dart';
 import 'package:chat_bot/services/api_service.dart';
+import 'package:chat_bot/services/callback_manage.dart';
 import 'package:chat_bot/utils/app_constants.dart';
 import 'package:chat_bot/utils/utility.dart';
 
@@ -13,30 +15,37 @@ class UniversalApiClient {
   late final ApiClient _serviceClient = ApiClient(
     baseUrl: 'https://service-apis.isometrik.io',
     buildHeaders: _buildHeaders,
-    onUnauthorizedRefresh: _handleTokenRefresh,
+    onUnauthorizedRefresh: _handleIsometrikTokenRefresh,
   );
 
   /// Chat client - uses dynamic base URL based on isProduction flag
   ApiClient get _chatClient => ApiClient(
     baseUrl: AppConstants.chatBaseUrl,
     buildHeaders: _buildAppHeaders,//_buildHeaders,
-    // onUnauthorizedRefresh: _handleTokenRefresh,
+    onUnauthorizedRefresh: _handleUserTokenRefresh,
+    onTokenExpiredLogout: _handleTokenExpiredLogout,
   );
 
   ApiClient get _appClient => ApiClient(
     baseUrl: ApiService.baseApiUrl,
     buildHeaders: _buildAppHeaders,
+    onUnauthorizedRefresh: _handleUserTokenRefresh,
+    onTokenExpiredLogout: _handleTokenExpiredLogout,
   );
 
   ApiClient get _groceryClient => ApiClient(
     baseUrl: ApiService.baseApiUrl,
     buildHeaders: _buildGroceryHeaders,
+    onUnauthorizedRefresh: _handleUserTokenRefresh,
+    onTokenExpiredLogout: _handleTokenExpiredLogout,
   );
 
   /// User preference API (eazylife): accept, authorization Bearer, language, platform 3
   ApiClient get _userPreferenceClient => ApiClient(
     baseUrl: ApiService.baseApiUrl,
     buildHeaders: _buildUserPreferenceHeaders,
+    onUnauthorizedRefresh: _handleUserTokenRefresh,
+    onTokenExpiredLogout: _handleTokenExpiredLogout,
   );
 
   /// Customer preference API: PATCH /v1/customer/* with JSON `authorization` header
@@ -44,12 +53,16 @@ class UniversalApiClient {
     // Uses same baseApiUrl configured via ApiService.configure (e.g. https://api-stage.eazylife-online.com)
     baseUrl: ApiService.baseApiUrl,
     buildHeaders: _buildCustomerPreferenceHeaders,
+    onUnauthorizedRefresh: _handleUserTokenRefresh,
+    onTokenExpiredLogout: _handleTokenExpiredLogout,
   );
 
   /// Xeni hotel APIs (availability, etc.)
   ApiClient get _hotelAvailabilityClient => ApiClient(
     baseUrl: ApiService.baseApiUrl,
     buildHeaders: _buildHotelAvailabilityHeaders,
+    onUnauthorizedRefresh: _handleUserTokenRefresh,
+    onTokenExpiredLogout: _handleTokenExpiredLogout,
   );
 
   Future<Map<String, String>> _buildUserPreferenceHeaders() async {
@@ -187,9 +200,19 @@ class UniversalApiClient {
     return headers;
   }
 
-  /// Handle token refresh when unauthorized
-  Future<bool> _handleTokenRefresh() async {
+  /// Isometrik guestAuth refresh (service-apis only).
+  Future<bool> _handleIsometrikTokenRefresh() async {
     return await TokenManager.instance.refreshToken();
+  }
+
+  /// Eazylife user token refresh via `/v1/generateToken` (not used by HawkSearch).
+  Future<bool> _handleUserTokenRefresh() async {
+    return await UserTokenRefreshManager.instance.refreshToken();
+  }
+
+  /// 401 from eazylife APIs → host app logout.
+  void _handleTokenExpiredLogout() {
+    OrderService().triggerSideMenuOption({'action': 'token_expired_logout'});
   }
 
   /// Get service API client (for isometrik.io APIs)
@@ -212,12 +235,18 @@ class UniversalApiClient {
   /// Xeni hotel availability client
   ApiClient get hotelAvailabilityClient => _hotelAvailabilityClient;
 
-  /// Create a custom API client for any base URL
-  ApiClient createClient(String baseUrl) {
+  /// Create a custom API client for any base URL.
+  /// [enableTokenRefresh] defaults to true for Isometrik-style clients.
+  /// Pass false for HawkSearch (and any other non-eazylife/non-isometrik APIs).
+  ApiClient createClient(
+    String baseUrl, {
+    bool enableTokenRefresh = true,
+  }) {
     return ApiClient(
       baseUrl: baseUrl,
       buildHeaders: _buildHeaders,
-      onUnauthorizedRefresh: _handleTokenRefresh,
+      onUnauthorizedRefresh:
+          enableTokenRefresh ? _handleIsometrikTokenRefresh : null,
     );
   }
 
@@ -227,10 +256,24 @@ class UniversalApiClient {
     Map<String, String>? queryParameters,
     Map<String, String>? customHeaders,
   }) async {
-    // Create a custom client with the specific headers
+    // Create a custom client with the specific headers + eazylife refresh
     final client = ApiClient(
       baseUrl: ApiService.baseApiUrl,
-      buildHeaders: () async => customHeaders ?? {},
+      buildHeaders: () async {
+        final headers = Map<String, String>.from(customHeaders ?? {});
+        // Ensure Authorization uses the latest token after a refresh retry.
+        final token = Utility.getUserToken();
+        if (token.isNotEmpty) {
+          if (headers.containsKey('Authorization')) {
+            headers['Authorization'] = token;
+          } else if (headers.containsKey('authorization')) {
+            headers['authorization'] = token;
+          }
+        }
+        return headers;
+      },
+      onUnauthorizedRefresh: _handleUserTokenRefresh,
+      onTokenExpiredLogout: _handleTokenExpiredLogout,
     );
     
     return await client.get(endpoint, queryParameters: queryParameters);

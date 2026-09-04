@@ -156,7 +156,11 @@ class AppLog {
     return parts.join(' ');
   }
 
-  /// Print a cURL command with highlight formatting
+  /// Print a copy-pastable cURL command.
+  ///
+  /// iOS/Xcode truncates `print()` around 1KB, so the full command is also
+  /// sent through [log] (shows complete in DevTools / Console) and split into
+  /// joinable chunks for the debug console.
   static void curl(
     String method,
     String url,
@@ -164,7 +168,34 @@ class AppLog {
     dynamic body,
   ]) {
     final cmd = buildCurl(method, url, headers, body);
-    AppLog.highlight('cURL: ' + cmd);
+    log(cmd, name: 'cURL');
+    // print('========== cURL $method $url ==========');
+    // printLong(cmd, chunkSize: 700, prefix: 'cURL');
+    // print('========== END cURL ==========');
+  }
+
+  /// Platform consoles truncate long single lines (~1KB). Split into chunks.
+  static void printLong(
+    String message, {
+    int chunkSize = 700,
+    String? prefix,
+  }) {
+    if (message.length <= chunkSize) {
+      print(prefix == null ? message : '$prefix $message');
+      return;
+    }
+    var start = 0;
+    var part = 1;
+    final total = (message.length / chunkSize).ceil();
+    while (start < message.length) {
+      final end = (start + chunkSize < message.length)
+          ? start + chunkSize
+          : message.length;
+      final tag = prefix == null ? '[$part/$total]' : '$prefix[$part/$total]';
+      print('$tag ${message.substring(start, end)}');
+      start = end;
+      part++;
+    }
   }
 
   final dynamic message;

@@ -20,6 +20,7 @@ export 'flight_search_screen.dart';
 export 'restaurant_sections_gallery_screen.dart';
 export 'select_time_screen.dart';
 export 'select_datetime_screen.dart';
+export 'subscriptions_screen.dart';
 export 'tutorial_screen.dart';
 export 'complete_setup/complete_setup.dart';
 

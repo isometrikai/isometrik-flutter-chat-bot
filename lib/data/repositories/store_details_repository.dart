@@ -1,8 +1,9 @@
 import 'package:chat_bot/data/model/store_details_response.dart';
 import 'package:chat_bot/utils/api_result.dart';
-import 'package:chat_bot/data/services/token_manager.dart';
+import 'package:chat_bot/data/services/user_token_refresh_manager.dart';
 import 'package:chat_bot/data/api_client.dart';
 import 'package:chat_bot/services/api_service.dart';
+import 'package:chat_bot/services/callback_manage.dart';
 import 'package:chat_bot/utils/log.dart';
 import 'package:chat_bot/utils/utility.dart';
 
@@ -18,30 +19,38 @@ class StoreDetailsRepository {
     AppLog.info('🏪 StoreDetailsRepository: Starting fetchStoreDetails');
     AppLog.info('🏪 Parameters: storeId=$storeId, lat=$latitude, long=$longitude, timezone=$timezone');
     
-    // Use custom headers as per the API requirements
-    final token = Utility.getUserToken();
-    AppLog.info('🏪 Token available: ${token.isNotEmpty ? 'Yes (${token.substring(0, token.length > 20 ? 20 : token.length)}...)' : 'No'}');
-    
-    final authHeader = token.isNotEmpty 
-        ? (token.startsWith('Bearer ') ? token : 'Bearer $token')
-        : '';
-    
-    final headers = {
-      'Accept-Language': 'en-IN;q=1.0, it-IN;q=0.9',
-      'language': Utility.getLanguage(),
-      'User-Agent': 'Eazy Life/2.0.1 (com.eazy.customerapp; build:77; iOS 26.1.0) Alamofire/5.6.1',
-      'Accept-Encoding': 'br;q=1.0, gzip;q=0.9, deflate;q=0.8',
-      'currencycode': Utility.getCurrencyCode(),
-      'currencysymbol': Utility.getCurrencySymbol(),
-      if (authHeader.isNotEmpty) 'Authorization': authHeader,
-    };
-
     final baseUrl = ApiService.baseApiUrl;
     AppLog.info('🏪 Base URL: $baseUrl');
     
     final client = ApiClient(
       baseUrl: baseUrl,
-      buildHeaders: () async => headers,
+      buildHeaders: () async {
+        // Rebuild headers each attempt so retries use the refreshed token.
+        final token = Utility.getUserToken();
+        AppLog.info(
+          '🏪 Token available: ${token.isNotEmpty ? 'Yes (${token.substring(0, token.length > 20 ? 20 : token.length)}...)' : 'No'}',
+        );
+        final authHeader = token.isNotEmpty
+            ? (token.startsWith('Bearer ') ? token : 'Bearer $token')
+            : '';
+        return {
+          'Accept-Language': 'en-IN;q=1.0, it-IN;q=0.9',
+          'language': Utility.getLanguage(),
+          'User-Agent':
+              'Eazy Life/2.0.1 (com.eazy.customerapp; build:77; iOS 26.1.0) Alamofire/5.6.1',
+          'Accept-Encoding': 'br;q=1.0, gzip;q=0.9, deflate;q=0.8',
+          'currencycode': Utility.getCurrencyCode(),
+          'currencysymbol': Utility.getCurrencySymbol(),
+          if (authHeader.isNotEmpty) 'Authorization': authHeader,
+        };
+      },
+      onUnauthorizedRefresh: () =>
+          UserTokenRefreshManager.instance.refreshToken(),
+      onTokenExpiredLogout: () {
+        OrderService().triggerSideMenuOption(
+          {'action': 'token_expired_logout'},
+        );
+      },
     );
 
     final Map<String, String> queryParams = {

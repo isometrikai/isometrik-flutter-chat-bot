@@ -45,8 +45,29 @@ class HawkSearchService {
     String storeCategoryName = '',
     String storeCategoryId = '',
   }) async {
-    final client = ChatApiServices.instance
-        .createCustomClient(_searchApiUrl);
+    await ChatApiServices.instance.ensureHawkSearchConfigReady();
+
+    final searchApiUrl = _searchApiUrl.isNotEmpty
+        ? _searchApiUrl
+        : ChatApiServices.instance.effectiveSearchApiUrl;
+    final clientGuid = _clientGuid.isNotEmpty
+        ? _clientGuid
+        : ChatApiServices.instance.effectiveClientGuid;
+    final indexName = _indexName.isNotEmpty
+        ? _indexName
+        : ChatApiServices.instance.effectiveIndexName;
+    final visitId = _visitId.isNotEmpty
+        ? _visitId
+        : ChatApiServices.instance.effectiveVisitId;
+    final visitorId = _visitorId.isNotEmpty
+        ? _visitorId
+        : ChatApiServices.instance.effectiveVisitorId;
+
+    // HawkSearch must not trigger eazylife/isometrik token refresh on 406.
+    final client = ChatApiServices.instance.createCustomClient(
+      searchApiUrl,
+      enableTokenRefresh: false,
+    );
 
     final body = {
       // 'FacetSelections': {
@@ -58,15 +79,15 @@ class HawkSearchService {
           'Latitude': Utility.getLatitude(),
           'Longitude': Utility.getLongitude(),
         },
-        'VisitId': _visitId,
-        'VisitorId': _visitorId,
+        'VisitId': visitId,
+        'VisitorId': visitorId,
         'UserAgent':
             'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
         'PreviewBuckets': [],
       },
-      'ClientGuid': _clientGuid,
+      'ClientGuid': clientGuid,
       'Keyword': keyword,
-      'IndexName': _indexName,
+      'IndexName': indexName,
       "FacetSelections": {
         "storeLocation": [
             "4"

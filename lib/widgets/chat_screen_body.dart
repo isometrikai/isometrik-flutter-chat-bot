@@ -473,32 +473,93 @@ class ChatScreenBody extends StatelessWidget {
       systemOverlayStyle: SystemUiOverlayStyle.dark,
       elevation: 0,
       // toolbarHeight: 64,
-      leadingWidth: 48,
+      automaticallyImplyLeading: false,
+      leadingWidth: 0,
       titleSpacing: 0,
       centerTitle: false,
-      leading: IconButton(
-        icon: SvgPicture.asset(
-          AssetPath.get('images/ic_sideMeu.svg'),
-          width: 40,
-          height: 40,
-          fit: BoxFit.cover,
-        ),
-        onPressed: () async {
-         final result = await Navigator.push(
-            context,
-            AppLocale.materialRoute(
-              builder: (context) => ProfileSettingScreen(greetingData: greetingData),
+      title: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          IconButton(
+            icon: SvgPicture.asset(
+              AssetPath.get('images/ic_sideMeu.svg'),
+              width: 40,
+              height: 40,
+              fit: BoxFit.cover,
             ),
-          );
+            onPressed: () async {
+              final result = await Navigator.push(
+                context,
+                AppLocale.materialRoute(
+                  builder: (context) => ProfileSettingScreen(greetingData: greetingData),
+                ),
+              );
 
-                if (result != null && result is Map) {
-            final action = result['action'];
-            
-            if (action == 'new_chat_selected') {
-              onRestartChatAPI();
-            }
-          }
-        },
+              if (result != null && result is Map) {
+                final action = result['action'];
+
+                if (action == 'new_chat_selected') {
+                  onRestartChatAPI();
+                }
+              }
+            },
+          ),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  AppTranslations.aroundYou,
+                  style: AppTextStyles.body(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w300,
+                    color: const Color(0xFF242424),
+                  ),
+                ),
+                ValueListenableBuilder<String>(
+                  valueListenable: Utility.locationNotifier,
+                  builder: (context, locationValue, _) {
+                    final displayLocation = locationValue.trim().isNotEmpty
+                        ? locationValue.trim()
+                        : AppTranslations.selectLocation;
+                    return GestureDetector(
+                      onTap: () {
+                        OrderService().triggerClickManageScreenOpen({
+                          'flow': 'ChangeCountry',
+                          'screenName': 'ChangeCountryScreen',
+                          'action': 'ChangeCountryScreen',
+                        });
+                      },
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Flexible(
+                            child: Text(
+                              displayLocation,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: AppTextStyles.caption.copyWith(
+                                color: const Color(0xFF8E2FFD),
+                              ),
+                            ),
+                          ),
+                          const Icon(
+                            Icons.arrow_drop_down,
+                            color: Color(0xFF8E2FFD),
+                            size: 25,
+                          ),
+                          const SizedBox(width: 15),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
       //  IconButton(
       //   icon: SvgPicture.asset(
@@ -529,76 +590,6 @@ class ChatScreenBody extends StatelessWidget {
       //     // }
       //   },
       // ),
-      title: Align(
-        alignment: AlignmentDirectional.centerStart,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Stack(
-              clipBehavior: Clip.none,
-              children: [
-                Row(
-                  children: [
-                    SvgPicture.asset(
-                      AssetPath.get('images/ic_header_logo.svg'),
-                      width: 55,
-                      height: 24,
-                      fit: BoxFit.cover,
-                    ),
-                    if (Utility.getIsProPlan()) ...[
-                      const SizedBox(width: 5),
-                      SvgPicture.asset(
-                        AssetPath.get('images/img_pro.svg'),
-                        width: 25,
-                        height: 25,
-                      ),
-                    ]
-                  ],
-                ),
-              ],
-            ),
-            ValueListenableBuilder<String>(
-              valueListenable: Utility.locationNotifier,
-              builder: (context, locationValue, _) {
-                final displayLocation = locationValue.trim().isNotEmpty
-                    ? locationValue.trim()
-                    : AppTranslations.selectLocation;
-                return GestureDetector(
-                  onTap: () {
-                    OrderService().triggerClickManageScreenOpen({
-                      'flow': 'ChangeCountry',
-                      'screenName': 'ChangeCountryScreen',
-                      'action': 'ChangeCountryScreen',
-                    });
-                  },
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Flexible(
-                        child: Text(
-                          displayLocation,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: AppTextStyles.caption.copyWith(
-                            color: const Color(0xFF8E2FFD),
-                          ),
-                        ),
-                      ),
-                      const Icon(
-                        Icons.arrow_drop_down,
-                        color: Color(0xFF8E2FFD),
-                        size: 25,
-                      ),
-                      const SizedBox(width: 15),
-                    ],
-                  ),
-                );
-              },
-            ),
-          ],
-        ),
-      ),
       actions: [
         BlocBuilder<CartBloc, CartState>(
           builder: (context, cartState) {
@@ -1279,7 +1270,7 @@ class ChatScreenBody extends StatelessWidget {
             const SizedBox(height: 4), //12
             buildPackageTypesWidget(message.packageTypesItems),
           ],
-          if (message.hasSubscriptionSectionWidget) ...[
+          if (message.hasSubscriptionSectionWidget && !Utility.getIsProPlan()) ...[
             const SizedBox(height: 4), //12
             buildSubscriptionWidget(message.subscriptionItems),
           ],
@@ -1416,13 +1407,24 @@ class ChatScreenBody extends StatelessWidget {
       child: SingleChildScrollView(
         // keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
         child: Padding(
-          padding: const EdgeInsetsDirectional.only(start: 20, end: 20, top: 100),
+          padding: const EdgeInsetsDirectional.only(start: 20, end: 20, top: 60),
           child: ConstrainedBox(
             constraints: BoxConstraints(maxWidth: contentWidth),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
+                SvgPicture.asset(
+                  AssetPath.get(
+                    Utility.getIsProPlan()
+                        ? 'images/ic_with_pro.svg'
+                        : 'images/ic_without_pro.svg',
+                  ),
+                  width: 70,
+                  height: 70,
+                  fit: BoxFit.contain,
+                ),
+                const SizedBox(height: 24),
                 SizedBox(
                   width: contentWidth,
                   child: _buildTitleWithHighlightedName(_greetingTitleText()),

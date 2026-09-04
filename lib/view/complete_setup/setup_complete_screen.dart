@@ -29,8 +29,12 @@ class SetupCompleteScreen extends StatelessWidget {
       OrderService().triggerChatDismiss();
     } else {
       onCallback("Data from Screen Complete Setup");
-      Navigator.popUntil(context, ModalRoute.withName(ChatScreen.routeName));
-      // Navigator.of(context).pop();
+      Navigator.of(context).popUntil((route) {
+        final name = route.settings.name;
+        return name == ChatScreen.routeName ||
+            name == Navigator.defaultRouteName ||
+            route.isFirst;
+      });
     }
   }
 

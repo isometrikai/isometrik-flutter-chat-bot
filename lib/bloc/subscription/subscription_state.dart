@@ -98,9 +98,23 @@ class SubscriptionFailure extends SubscriptionState {
 
   const SubscriptionFailure({
     required this.message,
-    this.autoRenew = true,
+    this.autoRenew = false,
   });
 
   @override
   List<Object?> get props => [message, autoRenew];
+}
+
+/// User tapped Subscribe but already has an active store entitlement for that plan.
+class SubscriptionAlreadySubscribed extends SubscriptionState {
+  final IapPurchaseResult result;
+  final bool autoRenew;
+
+  const SubscriptionAlreadySubscribed({
+    required this.result,
+    required this.autoRenew,
+  });
+
+  @override
+  List<Object?> get props => [result, autoRenew];
 }
