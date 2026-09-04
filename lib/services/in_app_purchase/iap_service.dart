@@ -17,7 +17,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 typedef IapPurchaseCallback = void Function(IapPurchaseResult result);
 
-enum _BackendReportOutcome { success, expired, failed }
+enum _BackendReportOutcome { success, expired, failed, linkedOtherAccount }
 
 /// Central In-App Purchase service.
 ///
@@ -68,6 +68,8 @@ class IapService {
   /// Product id for an in-flight user Subscribe tap (not Restore). Cleared on
   /// terminal purchase outcomes for that plan.
   String? _subscribeSessionProductId;
+
+  bool _iosStartupCleanupDone = false;
 
   /// Plan the user selected for the in-flight purchase. On Android the product
   /// id is the same for both base plans, so this is how we tell them apart.
@@ -138,6 +140,7 @@ class IapService {
         _BackendReportOutcome.success => 'SUCCESS',
         _BackendReportOutcome.expired => 'EXPIRED_STALE',
         _BackendReportOutcome.failed => 'FAILED',
+        _BackendReportOutcome.linkedOtherAccount => 'LINKED_OTHER_ACCOUNT',
       };
 
   String _productSummary(ProductDetails p) {
@@ -265,6 +268,7 @@ class IapService {
       _logError('iOS startup SK2 cleanup failed: $e', st);
     } finally {
       _suppressPurchaseUi--;
+      _iosStartupCleanupDone = true;
       _logInfo('iOS startup SK2 cleanup end');
     }
   }
@@ -711,6 +715,7 @@ class IapService {
               }
               claimed = true;
             case _BackendReportOutcome.expired:
+            case _BackendReportOutcome.linkedOtherAccount:
               expiredCount++;
               _handledSuccessKeys.add(successKey);
             case _BackendReportOutcome.failed:
@@ -769,6 +774,14 @@ class IapService {
         await _iap.completePurchase(purchase);
         _logInfo('discarded stale cached tx | product=${purchase.productID} | '
             'tx=$txId');
+      }
+      return false;
+    }
+
+    if (outcome == _BackendReportOutcome.linkedOtherAccount) {
+      _handledSuccessKeys.add(_successKey(purchase));
+      if (purchase.pendingCompletePurchase) {
+        await _iap.completePurchase(purchase);
       }
       return false;
     }
@@ -1053,20 +1066,41 @@ class IapService {
           }
           break;
         }
+        if (outcome == _BackendReportOutcome.linkedOtherAccount) {
+          _handledSuccessKeys.add(successKey);
+          _unfinishedPurchases.remove(purchase.productID);
+          _clearSubscribeSessionFor(purchase.productID);
+          if (purchase.pendingCompletePurchase) {
+            await _iap.completePurchase(purchase);
+          }
+          _logError(
+            'Apple subscription linked to another account | '
+            'product=${purchase.productID} | tx=${purchase.purchaseID}',
+          );
+          _emitPurchaseUpdate(
+            IapPurchaseResult(
+              status: IapPurchaseStatus.error,
+              productId: purchase.productID,
+              transactionId: purchase.purchaseID,
+              errorMessage: IapErrorMessages.linkedOtherAccount,
+              raw: purchase,
+            ),
+          );
+          break;
+        }
         if (outcome != _BackendReportOutcome.success) {
           _logError(
             'backend activation FAILED — keeping StoreKit open for retry | '
             'product=${purchase.productID} | tx=${purchase.purchaseID}',
           );
           _unfinishedPurchases[purchase.productID] = purchase;
+          _clearSubscribeSessionFor(purchase.productID);
           _emitPurchaseUpdate(
             IapPurchaseResult(
               status: IapPurchaseStatus.error,
               productId: purchase.productID,
               transactionId: purchase.purchaseID,
-              errorMessage:
-                  'Purchase succeeded in store, but activating plan failed. '
-                  'Please try again.',
+              errorMessage: IapErrorMessages.activationFailed,
               raw: purchase,
             ),
           );
@@ -1177,6 +1211,18 @@ class IapService {
       return;
     }
 
+    if (!_iosStartupCleanupDone) {
+      _logInfo(
+        'background replay — finish only (startup cleanup pending) | '
+        'product=${purchase.productID} | tx=${purchase.purchaseID}',
+      );
+      _handledSuccessKeys.add(successKey);
+      if (purchase.pendingCompletePurchase) {
+        await _iap.completePurchase(purchase);
+      }
+      return;
+    }
+
     _logInfo(
       'background iOS purchase replay — no paywall UI | '
       'product=${purchase.productID} | tx=${purchase.purchaseID}',
@@ -1192,11 +1238,14 @@ class IapService {
       _handledSuccessKeys.add(successKey);
       _unfinishedPurchases.remove(purchase.productID);
       await _persistEntitlement(purchase);
-    } else if (outcome == _BackendReportOutcome.expired) {
+    } else if (outcome == _BackendReportOutcome.expired ||
+        outcome == _BackendReportOutcome.linkedOtherAccount) {
       _handledSuccessKeys.add(successKey);
-      await _clearLocalEntitlement(
-        reason: 'Apple/backend subscription expired (background replay)',
-      );
+      if (outcome == _BackendReportOutcome.expired) {
+        await _clearLocalEntitlement(
+          reason: 'Apple/backend subscription expired (background replay)',
+        );
+      }
       if (purchase.pendingCompletePurchase) {
         await _iap.completePurchase(purchase);
       }
@@ -1273,6 +1322,14 @@ class IapService {
     return map;
   }
 
+  bool _isLinkedOtherAccountBackendResult(ApiResult result) {
+    if (result.statusCode == 409) return true;
+    final payload = _extractSubscriptionPayload(result.data);
+    final code = (payload?['code'] ?? '').toString();
+    return code == 'APPLE_SUBSCRIPTION_LINKED_OTHER_ACCOUNT' ||
+        code == 'APPLE_TRANSACTION_LINKED_OTHER_ACCOUNT';
+  }
+
   bool _isStaleOrNonPremiumBackendPayload(Map<String, dynamic>? payload) {
     if (payload == null) return false;
 
@@ -1289,6 +1346,9 @@ class IapService {
 
   _BackendReportOutcome _classifyBackendPurchaseResult(ApiResult result) {
     if (!result.isSuccess) {
+      if (_isLinkedOtherAccountBackendResult(result)) {
+        return _BackendReportOutcome.linkedOtherAccount;
+      }
       if (_isExpiredSubscriptionBackendMessage(result.message, result.data)) {
         return _BackendReportOutcome.expired;
       }
@@ -1351,6 +1411,10 @@ class IapService {
           _logSuccess('_reportAppleReceipt OK | tx=$transactionId');
         case _BackendReportOutcome.expired:
           _logInfo('_reportAppleReceipt EXPIRED_STALE | tx=$transactionId');
+        case _BackendReportOutcome.linkedOtherAccount:
+          _logInfo(
+            '_reportAppleReceipt LINKED_OTHER_ACCOUNT | tx=$transactionId',
+          );
         case _BackendReportOutcome.failed:
           _logError(
             '_reportAppleReceipt FAILED | tx=$transactionId | '
@@ -1403,6 +1467,10 @@ class IapService {
           _logSuccess('_reportApplePurchase OK | tx=$transactionId');
         case _BackendReportOutcome.expired:
           _logInfo('_reportApplePurchase EXPIRED_STALE | tx=$transactionId');
+        case _BackendReportOutcome.linkedOtherAccount:
+          _logInfo(
+            '_reportApplePurchase LINKED_OTHER_ACCOUNT | tx=$transactionId',
+          );
         case _BackendReportOutcome.failed:
           _logError(
             '_reportApplePurchase FAILED | tx=$transactionId | '
@@ -1451,6 +1519,8 @@ class IapService {
           _logSuccess('_reportAndroidPurchase OK');
         case _BackendReportOutcome.expired:
           _logInfo('_reportAndroidPurchase EXPIRED_STALE');
+        case _BackendReportOutcome.linkedOtherAccount:
+          _logInfo('_reportAndroidPurchase LINKED_OTHER_ACCOUNT');
         case _BackendReportOutcome.failed:
           _logError(
             '_reportAndroidPurchase failed | message=${result.message}',

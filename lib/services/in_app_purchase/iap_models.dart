@@ -1,6 +1,17 @@
 import 'package:equatable/equatable.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 
+/// User-facing IAP error copy shared between service and paywall bloc.
+abstract final class IapErrorMessages {
+  static const String activationFailed =
+      'Purchase succeeded in store, but activating plan failed. '
+      'Please try again.';
+
+  static const String linkedOtherAccount =
+      'This Apple subscription is linked to another EAZY account. '
+      'Please sign in with that account or use a different Apple ID.';
+}
+
 /// High-level purchase outcome for UI / host callbacks.
 enum IapPurchaseStatus {
   pending,

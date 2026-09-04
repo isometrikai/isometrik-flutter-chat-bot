@@ -2,6 +2,7 @@ import 'package:chat_bot/bloc/subscription/subscription_bloc.dart';
 import 'package:chat_bot/bloc/subscription/subscription_event.dart';
 import 'package:chat_bot/bloc/subscription/subscription_state.dart';
 import 'package:chat_bot/services/in_app_purchase/iap_log_collector.dart';
+import 'package:chat_bot/services/in_app_purchase/iap_models.dart';
 import 'package:chat_bot/services/in_app_purchase/iap_service.dart';
 import 'package:chat_bot/utils/app_constants.dart';
 import 'package:chat_bot/utils/app_locale.dart';
@@ -147,12 +148,8 @@ class PlanPriceBottomSheet extends StatelessWidget {
             Navigator.of(context).pop();
           }
         } else if (state is SubscriptionFailure) {
-          // TODO: show this again once backend plan activation is stable.
-          // Utility.showErrorBlackToast(state.message);
-          const activationFailed =
-              'Purchase succeeded in store, but activating plan failed. '
-              'Please try again.';
-          if (state.message != activationFailed) {
+          // Suppress generic activation retry noise; show actionable errors.
+          if (state.message != IapErrorMessages.activationFailed) {
             Utility.showErrorBlackToast(state.message);
           }
         }

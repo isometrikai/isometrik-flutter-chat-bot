@@ -1,8 +1,11 @@
 import 'dart:io';
 
 import 'package:chat_bot/services/in_app_purchase/iap_product_ids.dart';
+import 'package:flutter/services.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
+
+const MethodChannel _nativeUrlChannel = MethodChannel('flutterToNative');
 
 /// Opens [url] in the device's default browser / external app.
 Future<bool> openUrl(String url, {LaunchMode? mode}) async {
@@ -17,12 +20,26 @@ Future<bool> openUrl(String url, {LaunchMode? mode}) async {
 Future<bool> _launchUri(Uri uri, LaunchMode mode) async {
   try {
     final launched = await launchUrl(uri, mode: mode);
-    if (!launched) {
-      print('Could not launch $uri (mode=$mode)');
+    if (launched) {
+      return true;
     }
-    return launched;
+    print('Could not launch $uri (mode=$mode)');
   } catch (e) {
     print('Could not launch $uri: $e');
+  }
+  // Add-to-app hosts often fail url_launcher Pigeon channels; native Intent works.
+  return _launchViaNative(uri);
+}
+
+Future<bool> _launchViaNative(Uri uri) async {
+  try {
+    final result = await _nativeUrlChannel.invokeMethod<bool>(
+      'openExternalUrl',
+      {'url': uri.toString()},
+    );
+    return result == true;
+  } catch (e) {
+    print('Native openExternalUrl failed for $uri: $e');
     return false;
   }
 }

@@ -276,14 +276,11 @@ class SubscriptionBloc extends Bloc<SubscriptionEvent, SubscriptionState> {
 
       case IapPurchaseStatus.error:
         _logError('purchase error: ${result.errorMessage}');
-        // Stale sandbox renewals can surface as activation errors while a new
-        // Subscribe is still in flight — do not drop the paywall session yet.
-        const activationFailed =
-            'Purchase succeeded in store, but activating plan failed. '
-            'Please try again.';
+        // Stale sandbox renewals can surface as activation errors while StoreKit
+        // is still processing — do not drop the paywall session yet.
         if (_awaitingStoreResult &&
-            result.errorMessage == activationFailed &&
-            (_iap.isPurchaseInFlight || _iap.isSubscribeSessionActive)) {
+            result.errorMessage == IapErrorMessages.activationFailed &&
+            _iap.isPurchaseInFlight) {
           _logInfo(
             'ignore transient activation error while subscribe in flight | '
             'tx=${result.transactionId} | ${_sessionContext()}',
@@ -309,6 +306,7 @@ class SubscriptionBloc extends Bloc<SubscriptionEvent, SubscriptionState> {
             autoRenewProduct: _iap.autoRenewProduct,
             manualProduct: _iap.manualProduct,
             entitlement: await _iap.getEntitlement(),
+            purchaseInProgress: false,
           ),
         );
         break;
