@@ -136,6 +136,10 @@ class IapService {
       'unfinished=${_unfinishedPurchases.length} | '
       'handledKeys=${_handledSuccessKeys.length}';
 
+  String get _linkedOtherAccountUserMessage => Platform.isAndroid
+      ? IapErrorMessages.linkedOtherAccountGoogle
+      : IapErrorMessages.linkedOtherAccountApple;
+
   String _outcomeLabel(_BackendReportOutcome outcome) => switch (outcome) {
         _BackendReportOutcome.success => 'SUCCESS',
         _BackendReportOutcome.expired => 'EXPIRED_STALE',
@@ -253,6 +257,9 @@ class IapService {
     await loadProducts();
     if (Platform.isIOS) {
       unawaited(_quietIosStartupCleanup());
+    } else {
+      // iOS-only startup replay cleanup; Android never reads this flag otherwise.
+      _iosStartupCleanupDone = true;
     }
   }
 
@@ -1074,7 +1081,8 @@ class IapService {
             await _iap.completePurchase(purchase);
           }
           _logError(
-            'Apple subscription linked to another account | '
+            'store subscription linked to another account | '
+            'platform=${Platform.operatingSystem} | '
             'product=${purchase.productID} | tx=${purchase.purchaseID}',
           );
           _emitPurchaseUpdate(
@@ -1082,7 +1090,7 @@ class IapService {
               status: IapPurchaseStatus.error,
               productId: purchase.productID,
               transactionId: purchase.purchaseID,
-              errorMessage: IapErrorMessages.linkedOtherAccount,
+              errorMessage: _linkedOtherAccountUserMessage,
               raw: purchase,
             ),
           );
@@ -1322,12 +1330,21 @@ class IapService {
     return map;
   }
 
+  /// Platform-specific only — never treat every HTTP 409 as linked-account
+  /// (Android may use 409 for unrelated conflicts).
   bool _isLinkedOtherAccountBackendResult(ApiResult result) {
-    if (result.statusCode == 409) return true;
     final payload = _extractSubscriptionPayload(result.data);
     final code = (payload?['code'] ?? '').toString();
-    return code == 'APPLE_SUBSCRIPTION_LINKED_OTHER_ACCOUNT' ||
-        code == 'APPLE_TRANSACTION_LINKED_OTHER_ACCOUNT';
+    if (Platform.isIOS) {
+      return code == 'APPLE_SUBSCRIPTION_LINKED_OTHER_ACCOUNT' ||
+          code == 'APPLE_TRANSACTION_LINKED_OTHER_ACCOUNT';
+    }
+    if (Platform.isAndroid) {
+      return code == 'GOOGLE_SUBSCRIPTION_LINKED_OTHER_ACCOUNT' ||
+          code == 'GOOGLE_TRANSACTION_LINKED_OTHER_ACCOUNT' ||
+          code == 'ANDROID_SUBSCRIPTION_LINKED_OTHER_ACCOUNT';
+    }
+    return false;
   }
 
   bool _isStaleOrNonPremiumBackendPayload(Map<String, dynamic>? payload) {

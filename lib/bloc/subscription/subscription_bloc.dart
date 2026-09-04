@@ -276,8 +276,9 @@ class SubscriptionBloc extends Bloc<SubscriptionEvent, SubscriptionState> {
 
       case IapPurchaseStatus.error:
         _logError('purchase error: ${result.errorMessage}');
-        // Stale sandbox renewals can surface as activation errors while StoreKit
-        // is still processing — do not drop the paywall session yet.
+        // iOS sandbox renewal replays can surface activation errors while
+        // StoreKit is still processing. Android uses the same guard via
+        // [IapService.isPurchaseInFlight] — no Android-specific branch needed.
         if (_awaitingStoreResult &&
             result.errorMessage == IapErrorMessages.activationFailed &&
             _iap.isPurchaseInFlight) {

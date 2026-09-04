@@ -7,9 +7,16 @@ abstract final class IapErrorMessages {
       'Purchase succeeded in store, but activating plan failed. '
       'Please try again.';
 
-  static const String linkedOtherAccount =
+  static const String linkedOtherAccountApple =
       'This Apple subscription is linked to another EAZY account. '
       'Please sign in with that account or use a different Apple ID.';
+
+  static const String linkedOtherAccountGoogle =
+      'This Google Play subscription is linked to another EAZY account. '
+      'Please sign in with that account or use a different Google account.';
+
+  /// iOS-specific copy; prefer [linkedOtherAccountForPlatform] in shared code.
+  static const String linkedOtherAccount = linkedOtherAccountApple;
 }
 
 /// High-level purchase outcome for UI / host callbacks.
