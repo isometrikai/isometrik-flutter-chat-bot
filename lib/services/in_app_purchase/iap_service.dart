@@ -1020,16 +1020,36 @@ class IapService {
           'tx=${purchase.purchaseID} | outcome=${_outcomeLabel(outcome)}',
         );
         if (outcome == _BackendReportOutcome.expired) {
-          _logInfo(
-            'stale StoreKit renewal — finish quietly | '
-            'product=${purchase.productID} | tx=${purchase.purchaseID}',
-          );
           _handledSuccessKeys.add(successKey);
           await _clearLocalEntitlement(
             reason: 'Apple/backend subscription expired',
           );
           if (purchase.pendingCompletePurchase) {
             await _iap.completePurchase(purchase);
+          }
+          final inUserSession =
+              _subscribeSessionProductId != null || _restoreSession;
+          if (inUserSession) {
+            _logError(
+              'backend expired during subscribe/restore | '
+              'product=${purchase.productID} | tx=${purchase.purchaseID}',
+            );
+            _clearSubscribeSessionFor(purchase.productID);
+            _emitPurchaseUpdate(
+              IapPurchaseResult(
+                status: IapPurchaseStatus.error,
+                productId: purchase.productID,
+                transactionId: purchase.purchaseID,
+                errorMessage:
+                    'Purchase could not be activated. Please try again.',
+                raw: purchase,
+              ),
+            );
+          } else {
+            _logInfo(
+              'stale StoreKit renewal — finish quietly | '
+              'product=${purchase.productID} | tx=${purchase.purchaseID}',
+            );
           }
           break;
         }
@@ -1259,15 +1279,11 @@ class IapService {
     final planId = (payload['planId'] ?? '').toString().toLowerCase().trim();
     final subscriptionStatus =
         (payload['subscriptionStatus'] ?? '').toString().toLowerCase().trim();
-    final downgradedReason =
-        (payload['downgradedReason'] ?? '').toString().toLowerCase();
 
+    // Trust plan + subscriptionStatus only. downgradedReason (e.g.
+    // APPLE_REDIS_TTL) can remain set on successful premium activations.
     if (subscriptionStatus == 'expired') return true;
     if (planId == 'free') return true;
-    if (downgradedReason.contains('expired') ||
-        downgradedReason.contains('apple_redis')) {
-      return true;
-    }
     return false;
   }
 
@@ -1297,17 +1313,15 @@ class IapService {
     if (data is Map) {
       final nested = data['message'];
       if (nested != null) buffer.write(' $nested');
-      final payload = _extractSubscriptionPayload(data);
-      if (_isStaleOrNonPremiumBackendPayload(payload)) {
-        buffer.write(' stale backend payload');
-      }
     } else if (data != null) {
       buffer.write(' $data');
     }
     final text = buffer.toString().toLowerCase();
-    return text.contains('subscription has expired') ||
-        text.contains('apple subscription has expired') ||
-        text.contains('stale backend payload');
+    if (text.contains('subscription has expired') ||
+        text.contains('apple subscription has expired')) {
+      return true;
+    }
+    return _isStaleOrNonPremiumBackendPayload(_extractSubscriptionPayload(data));
   }
 
   /// POST purchase details to eazylife backend (platform specific endpoint).
