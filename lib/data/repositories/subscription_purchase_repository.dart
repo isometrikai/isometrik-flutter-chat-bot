@@ -4,6 +4,7 @@ import 'package:chat_bot/data/api_client.dart';
 import 'package:chat_bot/data/model/subscription_history_response.dart';
 import 'package:chat_bot/data/services/universal_api_client.dart';
 import 'package:chat_bot/services/callback_manage.dart';
+import 'package:chat_bot/services/in_app_purchase/iap_log_collector.dart';
 import 'package:chat_bot/utils/api_result.dart';
 import 'package:chat_bot/utils/utility.dart';
 
@@ -36,6 +37,11 @@ class SubscriptionPurchaseRepository {
   /// Backend plan id (static for now).
   static const String defaultPlanId = 'premium';
 
+  void _apiLog(String message) {
+    print(message);
+    IapLogCollector.instance.log(message);
+  }
+
   /// Notify backend of a successful App Store purchase.
   Future<ApiResult> reportPurchase({
     required String transactionId,
@@ -50,7 +56,7 @@ class SubscriptionPurchaseRepository {
       'receiptData': receiptData,
     };
 
-    print(
+    _apiLog(
       'IAP-API | POST $_purchaseEndpoint | '
       'planId=$planId | productId=$productId | '
       'transactionId=$transactionId | '
@@ -60,10 +66,10 @@ class SubscriptionPurchaseRepository {
     final result = await _client.post(_purchaseEndpoint, body);
 
     if (result.isSuccess) {
-      print('IAP-API | SUCCESS | data=${result.data}');
+      _apiLog('IAP-API | SUCCESS | data=${result.data}');
       // _applyAccessTokenFromResponse(result.data);
     } else {
-      print(
+      _apiLog(
         'IAP-API | ERROR | message=${result.message} | data=${result.data}',
       );
     }
@@ -89,7 +95,7 @@ class SubscriptionPurchaseRepository {
       'orderId': orderId,
     };
 
-    print(
+    _apiLog(
       'IAP-API | POST $_androidPurchaseEndpoint | '
       'planId=$planId | productId=$productId | '
       'orderId=${orderId.isEmpty ? "(empty)" : orderId} | '
@@ -99,10 +105,10 @@ class SubscriptionPurchaseRepository {
     final result = await _client.post(_androidPurchaseEndpoint, body);
 
     if (result.isSuccess) {
-      print('IAP-API | ANDROID SUCCESS | data=${result.data}');
+      _apiLog('IAP-API | ANDROID SUCCESS | data=${result.data}');
       // _applyAccessTokenFromResponse(result.data);
     } else {
-      print(
+      _apiLog(
         'IAP-API | ANDROID ERROR | message=${result.message} | '
         'data=${result.data}',
       );
@@ -118,7 +124,7 @@ class SubscriptionPurchaseRepository {
     int limit = defaultHistoryLimit,
     int skip = 0,
   }) async {
-    print('IAP-API | GET $_historyEndpoint | limit=$limit | skip=$skip');
+    _apiLog('IAP-API | GET $_historyEndpoint | limit=$limit | skip=$skip');
 
     final result = await _client.get(
       _historyEndpoint,
@@ -129,7 +135,7 @@ class SubscriptionPurchaseRepository {
     );
 
     if (!result.isSuccess) {
-      print('IAP-API | HISTORY ERROR | message=${result.message}');
+      _apiLog('IAP-API | HISTORY ERROR | message=${result.message}');
       return ApiResult.error(
         result.message ?? 'Failed to load subscription history',
         result.data,
@@ -144,7 +150,7 @@ class SubscriptionPurchaseRepository {
 
     try {
       final parsed = SubscriptionHistoryResponse.fromJson(data);
-      print(
+      _apiLog(
         'IAP-API | HISTORY SUCCESS | '
         'total=${parsed.total} | pageItems=${parsed.items.length} | skip=$skip',
       );

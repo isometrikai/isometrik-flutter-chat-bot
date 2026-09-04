@@ -1,6 +1,7 @@
 import 'package:chat_bot/bloc/subscription/subscription_bloc.dart';
 import 'package:chat_bot/bloc/subscription/subscription_event.dart';
 import 'package:chat_bot/bloc/subscription/subscription_state.dart';
+import 'package:chat_bot/services/in_app_purchase/iap_log_collector.dart';
 import 'package:chat_bot/services/in_app_purchase/iap_service.dart';
 import 'package:chat_bot/utils/app_constants.dart';
 import 'package:chat_bot/utils/app_locale.dart';
@@ -78,6 +79,28 @@ class PlanPriceBottomSheet extends StatelessWidget {
       return product.price;
     }
     return AppTranslations.planPriceAmount;
+  }
+
+  Future<void> _sendSubscriptionLog(BuildContext context) async {
+    Rect? shareOrigin;
+    final renderBox = context.findRenderObject();
+    if (renderBox is RenderBox && renderBox.hasSize) {
+      shareOrigin = renderBox.localToGlobal(Offset.zero) & renderBox.size;
+    }
+
+    IapLogCollector.instance.log('IAP | INFO | Send Log tapped from paywall');
+    await IapLogCollector.instance.flush();
+
+    final shared = await IapLogCollector.instance.shareLogs(
+      sharePositionOrigin: shareOrigin,
+    );
+
+    if (!context.mounted) return;
+    Utility.showErrorBlackToast(
+      shared
+          ? AppTranslations.planPriceSendLogOpened
+          : AppTranslations.planPriceSendLogEmpty,
+    );
   }
 
   @override
@@ -185,22 +208,48 @@ class PlanPriceBottomSheet extends StatelessWidget {
                           const SizedBox(height: 8),
                           Align(
                             alignment: AlignmentDirectional.centerStart,
-                            child: TextButton(
-                              onPressed: ready.purchaseInProgress
-                                  ? null
-                                  : () {
-                                      context.read<SubscriptionBloc>().add(
-                                            const SubscriptionRestoreRequested(),
-                                          );
-                                    },
-                              child: Text(
-                                AppTranslations.planPriceRestore,
-                                style: AppTheme.getTextStyle(
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w600,
-                                  color: AppConstants.appThemeColor,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                TextButton(
+                                  onPressed: ready.purchaseInProgress
+                                      ? null
+                                      : () {
+                                          context
+                                              .read<SubscriptionBloc>()
+                                              .add(
+                                                const SubscriptionRestoreRequested(),
+                                              );
+                                        },
+                                  child: Text(
+                                    AppTranslations.planPriceRestore,
+                                    style: AppTheme.getTextStyle(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w600,
+                                      color: AppConstants.appThemeColor,
+                                    ),
+                                  ),
                                 ),
-                              ),
+                                Builder(
+                                  builder: (buttonContext) {
+                                    return TextButton(
+                                      onPressed: ready.purchaseInProgress
+                                          ? null
+                                          : () => _sendSubscriptionLog(
+                                                buttonContext,
+                                              ),
+                                      child: Text(
+                                        AppTranslations.planPriceSendLog,
+                                        style: AppTheme.getTextStyle(
+                                          fontSize: 13,
+                                          fontWeight: FontWeight.w600,
+                                          color: AppConstants.appThemeColor,
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ],
                             ),
                           ),
                         ],

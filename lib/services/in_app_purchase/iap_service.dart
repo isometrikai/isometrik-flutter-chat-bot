@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:chat_bot/data/repositories/subscription_purchase_repository.dart';
+import 'package:chat_bot/services/in_app_purchase/iap_log_collector.dart';
 import 'package:chat_bot/services/in_app_purchase/iap_models.dart';
 import 'package:chat_bot/services/in_app_purchase/iap_product_ids.dart';
 import 'package:flutter/foundation.dart';
@@ -96,16 +97,32 @@ class IapService {
 
   ProductDetails? get manualProduct => _productForPlan(autoRenew: false);
 
-  void _log(String message) => print('$_tag | $message');
+  void _log(String message) {
+    final line = '$_tag | $message';
+    print(line);
+    IapLogCollector.instance.log(line);
+  }
 
-  void _logInfo(String message) => print('$_tag | INFO | $message');
+  void _logInfo(String message) {
+    final line = '$_tag | INFO | $message';
+    print(line);
+    IapLogCollector.instance.log(line);
+  }
 
-  void _logSuccess(String message) => print('$_tag | SUCCESS | $message');
+  void _logSuccess(String message) {
+    final line = '$_tag | SUCCESS | $message';
+    print(line);
+    IapLogCollector.instance.log(line);
+  }
 
   void _logError(String message, [StackTrace? stackTrace]) {
-    print('$_tag | ERROR | $message');
+    final line = '$_tag | ERROR | $message';
+    print(line);
+    IapLogCollector.instance.log(line);
     if (stackTrace != null) {
-      print('$_tag | ERROR STACK | $stackTrace');
+      final stackLine = '$_tag | ERROR STACK | $stackTrace';
+      print(stackLine);
+      IapLogCollector.instance.log(stackLine);
     }
   }
 
@@ -181,6 +198,7 @@ class IapService {
   }
 
   Future<void> initialize() async {
+    await IapLogCollector.instance.ensureLoaded();
     _logInfo('initialize() called | alreadyInitialized=$_initialized');
     if (_initialized) {
       _log('initialize() skipped — already initialized | '

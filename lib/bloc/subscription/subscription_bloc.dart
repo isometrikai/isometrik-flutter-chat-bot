@@ -35,13 +35,29 @@ class SubscriptionBloc extends Bloc<SubscriptionEvent, SubscriptionState> {
   /// per product). Show the success sheet only once per user action.
   bool _didShowSuccessForCurrentAction = false;
 
-  void _log(String message) => print('$_tag | $message');
+  void _log(String message) {
+    final line = '$_tag | $message';
+    print(line);
+    IapLogCollector.instance.log(line);
+  }
 
-  void _logInfo(String message) => print('$_tag | INFO | $message');
+  void _logInfo(String message) {
+    final line = '$_tag | INFO | $message';
+    print(line);
+    IapLogCollector.instance.log(line);
+  }
 
-  void _logSuccess(String message) => print('$_tag | SUCCESS | $message');
+  void _logSuccess(String message) {
+    final line = '$_tag | SUCCESS | $message';
+    print(line);
+    IapLogCollector.instance.log(line);
+  }
 
-  void _logError(String message) => print('$_tag | ERROR | $message');
+  void _logError(String message) {
+    final line = '$_tag | ERROR | $message';
+    print(line);
+    IapLogCollector.instance.log(line);
+  }
 
   String _sessionContext() =>
       'awaiting=$_awaitingStoreResult | inFlight=${_iap.isPurchaseInFlight} | '
