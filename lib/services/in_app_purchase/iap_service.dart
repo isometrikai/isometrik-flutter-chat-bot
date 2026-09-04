@@ -6,6 +6,7 @@ import 'package:chat_bot/data/repositories/subscription_purchase_repository.dart
 import 'package:chat_bot/services/in_app_purchase/iap_log_collector.dart';
 import 'package:chat_bot/services/in_app_purchase/iap_models.dart';
 import 'package:chat_bot/services/in_app_purchase/iap_product_ids.dart';
+import 'package:chat_bot/utils/api_result.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
@@ -247,6 +248,25 @@ class IapService {
     _initialized = true;
     _logSuccess('initialize() complete — loading products next');
     await loadProducts();
+    if (Platform.isIOS) {
+      unawaited(_quietIosStartupCleanup());
+    }
+  }
+
+  /// Finishes queued StoreKit renewals on cold start without paywall UI.
+  Future<void> _quietIosStartupCleanup() async {
+    _logInfo('iOS startup SK2 cleanup begin');
+    _suppressPurchaseUi++;
+    try {
+      for (final productId in IapProductIds.all) {
+        await _finishStoreKit2Unfinished(productId);
+      }
+    } catch (e, st) {
+      _logError('iOS startup SK2 cleanup failed: $e', st);
+    } finally {
+      _suppressPurchaseUi--;
+      _logInfo('iOS startup SK2 cleanup end');
+    }
   }
 
   /// Query App Store / Play Store for configured product IDs.
@@ -742,6 +762,9 @@ class IapService {
 
     if (outcome == _BackendReportOutcome.expired) {
       _handledSuccessKeys.add(_successKey(purchase));
+      await _clearLocalEntitlement(
+        reason: 'Apple/backend subscription expired (unfinished tx)',
+      );
       if (purchase.pendingCompletePurchase) {
         await _iap.completePurchase(purchase);
         _logInfo('discarded stale cached tx | product=${purchase.productID} | '
@@ -810,17 +833,32 @@ class IapService {
   }
 
   void _emitPurchaseUpdate(IapPurchaseResult result) {
-    if (_suppressPurchaseUi > 0 &&
-        !_restoreSession &&
-        result.status != IapPurchaseStatus.purchased &&
-        result.status != IapPurchaseStatus.restored &&
-        result.status != IapPurchaseStatus.alreadySubscribed) {
-      _logInfo(
-        'UI suppressed | status=${result.status} | '
-        'productId=${result.productId} | tx=${result.transactionId} | '
-        '${_sessionContext()}',
-      );
-      return;
+    if (_suppressPurchaseUi > 0 && !_restoreSession) {
+      final isTerminalSuccess =
+          result.status == IapPurchaseStatus.purchased ||
+              result.status == IapPurchaseStatus.restored ||
+              result.status == IapPurchaseStatus.alreadySubscribed;
+
+      if (isTerminalSuccess) {
+        final productId = result.productId;
+        if (_subscribeSessionProductId == null ||
+            productId == null ||
+            productId != _subscribeSessionProductId) {
+          _logInfo(
+            'UI success suppressed during cleanup | status=${result.status} | '
+            'productId=$productId | tx=${result.transactionId} | '
+            '${_sessionContext()}',
+          );
+          return;
+        }
+      } else {
+        _logInfo(
+          'UI suppressed | status=${result.status} | '
+          'productId=${result.productId} | tx=${result.transactionId} | '
+          '${_sessionContext()}',
+        );
+        return;
+      }
     }
     if (result.status == IapPurchaseStatus.purchased ||
         result.status == IapPurchaseStatus.alreadySubscribed) {
@@ -923,6 +961,11 @@ class IapService {
       case PurchaseStatus.restored:
         _purchaseInFlight = false;
 
+        if (_isBackgroundIosPurchaseReplay(purchase)) {
+          await _handleBackgroundIosPurchase(purchase);
+          break;
+        }
+
         final successKey = _successKey(purchase);
         if (_handledSuccessKeys.contains(successKey)) {
           _logInfo(
@@ -982,6 +1025,9 @@ class IapService {
             'product=${purchase.productID} | tx=${purchase.purchaseID}',
           );
           _handledSuccessKeys.add(successKey);
+          await _clearLocalEntitlement(
+            reason: 'Apple/backend subscription expired',
+          );
           if (purchase.pendingCompletePurchase) {
             await _iap.completePurchase(purchase);
           }
@@ -1092,6 +1138,72 @@ class IapService {
     );
   }
 
+  bool _isBackgroundIosPurchaseReplay(PurchaseDetails purchase) {
+    if (!Platform.isIOS) return false;
+    if (_restoreSession) return false;
+    if (_subscribeSessionProductId != null) return false;
+    if (_purchaseInFlight) return false;
+    return true;
+  }
+
+  /// StoreKit renewal replays on paywall open — sync quietly, never toast success.
+  Future<void> _handleBackgroundIosPurchase(PurchaseDetails purchase) async {
+    final successKey = _successKey(purchase);
+    if (_handledSuccessKeys.contains(successKey)) {
+      _logInfo('background replay duplicate | key=$successKey');
+      if (purchase.pendingCompletePurchase) {
+        await _iap.completePurchase(purchase);
+      }
+      return;
+    }
+
+    _logInfo(
+      'background iOS purchase replay — no paywall UI | '
+      'product=${purchase.productID} | tx=${purchase.purchaseID}',
+    );
+
+    final outcome = await _reportPurchaseToBackend(purchase);
+    _logInfo(
+      'background backend report | product=${purchase.productID} | '
+      'tx=${purchase.purchaseID} | outcome=${_outcomeLabel(outcome)}',
+    );
+
+    if (outcome == _BackendReportOutcome.success) {
+      _handledSuccessKeys.add(successKey);
+      _unfinishedPurchases.remove(purchase.productID);
+      await _persistEntitlement(purchase);
+    } else if (outcome == _BackendReportOutcome.expired) {
+      _handledSuccessKeys.add(successKey);
+      await _clearLocalEntitlement(
+        reason: 'Apple/backend subscription expired (background replay)',
+      );
+      if (purchase.pendingCompletePurchase) {
+        await _iap.completePurchase(purchase);
+      }
+      return;
+    } else {
+      _unfinishedPurchases[purchase.productID] = purchase;
+      return;
+    }
+
+    if (purchase.pendingCompletePurchase) {
+      await _iap.completePurchase(purchase);
+      _logSuccess('background replay completePurchase done');
+    }
+  }
+
+  Future<void> _clearLocalEntitlement({String? reason}) async {
+    final prefs = await SharedPreferences.getInstance();
+    final had = prefs.containsKey(_entitlementPrefsKey);
+    await prefs.remove(_entitlementPrefsKey);
+    if (had) {
+      _logInfo(
+        'local entitlement cleared'
+        '${reason == null ? "" : " | $reason"}',
+      );
+    }
+  }
+
   Future<void> _persistEntitlementFields({
     required String productId,
     required bool autoRenew,
@@ -1131,17 +1243,71 @@ class IapService {
     return '${purchase.productID}|$receipt';
   }
 
+  Map<String, dynamic>? _extractSubscriptionPayload(dynamic data) {
+    if (data is! Map) return null;
+    final map = Map<String, dynamic>.from(data);
+    final nested = map['data'];
+    if (nested is Map) {
+      return Map<String, dynamic>.from(nested);
+    }
+    return map;
+  }
+
+  bool _isStaleOrNonPremiumBackendPayload(Map<String, dynamic>? payload) {
+    if (payload == null) return false;
+
+    final planId = (payload['planId'] ?? '').toString().toLowerCase().trim();
+    final subscriptionStatus =
+        (payload['subscriptionStatus'] ?? '').toString().toLowerCase().trim();
+    final downgradedReason =
+        (payload['downgradedReason'] ?? '').toString().toLowerCase();
+
+    if (subscriptionStatus == 'expired') return true;
+    if (planId == 'free') return true;
+    if (downgradedReason.contains('expired') ||
+        downgradedReason.contains('apple_redis')) {
+      return true;
+    }
+    return false;
+  }
+
+  _BackendReportOutcome _classifyBackendPurchaseResult(ApiResult result) {
+    if (!result.isSuccess) {
+      if (_isExpiredSubscriptionBackendMessage(result.message, result.data)) {
+        return _BackendReportOutcome.expired;
+      }
+      return _BackendReportOutcome.failed;
+    }
+
+    final payload = _extractSubscriptionPayload(result.data);
+    if (_isStaleOrNonPremiumBackendPayload(payload)) {
+      _logInfo(
+        'backend HTTP success but premium not activated | '
+        'planId=${payload?['planId']} | '
+        'subscriptionStatus=${payload?['subscriptionStatus']} | '
+        'downgradedReason=${payload?['downgradedReason']}',
+      );
+      return _BackendReportOutcome.expired;
+    }
+    return _BackendReportOutcome.success;
+  }
+
   bool _isExpiredSubscriptionBackendMessage(String? message, [dynamic data]) {
     final buffer = StringBuffer(message ?? '');
     if (data is Map) {
       final nested = data['message'];
       if (nested != null) buffer.write(' $nested');
+      final payload = _extractSubscriptionPayload(data);
+      if (_isStaleOrNonPremiumBackendPayload(payload)) {
+        buffer.write(' stale backend payload');
+      }
     } else if (data != null) {
       buffer.write(' $data');
     }
     final text = buffer.toString().toLowerCase();
     return text.contains('subscription has expired') ||
-        text.contains('apple subscription has expired');
+        text.contains('apple subscription has expired') ||
+        text.contains('stale backend payload');
   }
 
   /// POST purchase details to eazylife backend (platform specific endpoint).
@@ -1165,22 +1331,19 @@ class IapService {
         transactionId: transactionId,
         receiptData: receiptData,
       );
-      if (result.isSuccess) {
-        _logSuccess('_reportAppleReceipt OK | tx=$transactionId');
-        return _BackendReportOutcome.success;
+      final outcome = _classifyBackendPurchaseResult(result);
+      switch (outcome) {
+        case _BackendReportOutcome.success:
+          _logSuccess('_reportAppleReceipt OK | tx=$transactionId');
+        case _BackendReportOutcome.expired:
+          _logInfo('_reportAppleReceipt EXPIRED_STALE | tx=$transactionId');
+        case _BackendReportOutcome.failed:
+          _logError(
+            '_reportAppleReceipt FAILED | tx=$transactionId | '
+            'message=${result.message}',
+          );
       }
-      if (_isExpiredSubscriptionBackendMessage(result.message, result.data)) {
-        _logInfo(
-          '_reportAppleReceipt EXPIRED_STALE | tx=$transactionId | '
-          'message=${result.message}',
-        );
-        return _BackendReportOutcome.expired;
-      }
-      _logError(
-        '_reportAppleReceipt FAILED | tx=$transactionId | '
-        'message=${result.message}',
-      );
-      return _BackendReportOutcome.failed;
+      return outcome;
     } catch (e, st) {
       _logError('_reportAppleReceipt exception: $e', st);
       return _BackendReportOutcome.failed;
@@ -1220,22 +1383,19 @@ class IapService {
         transactionId: transactionId,
         receiptData: receiptData,
       );
-      if (result.isSuccess) {
-        _logSuccess('_reportApplePurchase OK | tx=$transactionId');
-        return _BackendReportOutcome.success;
+      final outcome = _classifyBackendPurchaseResult(result);
+      switch (outcome) {
+        case _BackendReportOutcome.success:
+          _logSuccess('_reportApplePurchase OK | tx=$transactionId');
+        case _BackendReportOutcome.expired:
+          _logInfo('_reportApplePurchase EXPIRED_STALE | tx=$transactionId');
+        case _BackendReportOutcome.failed:
+          _logError(
+            '_reportApplePurchase FAILED | tx=$transactionId | '
+            'message=${result.message}',
+          );
       }
-      if (_isExpiredSubscriptionBackendMessage(result.message, result.data)) {
-        _logInfo(
-          '_reportApplePurchase EXPIRED_STALE | tx=$transactionId | '
-          'message=${result.message}',
-        );
-        return _BackendReportOutcome.expired;
-      }
-      _logError(
-        '_reportApplePurchase FAILED | tx=$transactionId | '
-        'message=${result.message}',
-      );
-      return _BackendReportOutcome.failed;
+      return outcome;
     } catch (e, st) {
       _logError('_reportApplePurchase exception: $e', st);
       return _BackendReportOutcome.failed;
@@ -1271,12 +1431,18 @@ class IapService {
         purchaseToken: purchaseToken,
         orderId: orderId,
       );
-      if (result.isSuccess) {
-        _logSuccess('_reportAndroidPurchase OK');
-        return _BackendReportOutcome.success;
+      final outcome = _classifyBackendPurchaseResult(result);
+      switch (outcome) {
+        case _BackendReportOutcome.success:
+          _logSuccess('_reportAndroidPurchase OK');
+        case _BackendReportOutcome.expired:
+          _logInfo('_reportAndroidPurchase EXPIRED_STALE');
+        case _BackendReportOutcome.failed:
+          _logError(
+            '_reportAndroidPurchase failed | message=${result.message}',
+          );
       }
-      _logError('_reportAndroidPurchase failed | message=${result.message}');
-      return _BackendReportOutcome.failed;
+      return outcome;
     } catch (e, st) {
       _logError('_reportAndroidPurchase exception: $e', st);
       return _BackendReportOutcome.failed;
