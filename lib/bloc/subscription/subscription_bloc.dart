@@ -339,6 +339,7 @@ class SubscriptionBloc extends Bloc<SubscriptionEvent, SubscriptionState> {
             autoRenewProduct: _iap.autoRenewProduct,
             manualProduct: _iap.manualProduct,
             entitlement: await _iap.getEntitlement(),
+            purchaseInProgress: false,
           ),
         );
         break;

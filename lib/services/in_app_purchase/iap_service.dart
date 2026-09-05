@@ -60,6 +60,7 @@ class IapService {
   bool _purchaseInFlight = false;
   int _inFlightPurchaseHandlers = 0;
   bool _restoreSession = false;
+  bool _restoreTerminalEmitted = false;
 
   /// While clearing stale iOS StoreKit transactions, do not push errors to the
   /// paywall — sandbox renewal replays would clear Subscribe state early.
@@ -809,18 +810,45 @@ class IapService {
       return;
     }
     _restoreSession = true;
+    _restoreTerminalEmitted = false;
     try {
       if (Platform.isAndroid) {
         await _restoreAndroidPurchases();
       } else {
-        await _iap.restorePurchases();
-        _logSuccess('restorePurchases() request sent — waiting for stream');
+        await _restoreIosPurchases();
       }
     } catch (e, st) {
       _logError('restorePurchases() exception: $e', st);
       _emitError(e.toString());
     } finally {
       _restoreSession = false;
+    }
+  }
+
+  /// iOS [InAppPurchase.restorePurchases] often delivers an empty purchase batch
+  /// when nothing is restorable — emit [IapPurchaseStatus.restoreEmpty] so the
+  /// paywall loader stops (same as Android [queryPastPurchases] empty path).
+  Future<void> _restoreIosPurchases() async {
+    _logInfo('_restoreIosPurchases() start');
+    await _iap.restorePurchases();
+    _logSuccess('restorePurchases() request sent — waiting for stream');
+
+    // Stream callback is not awaited; give it time to deliver purchases/empty.
+    for (var i = 0; i < 15; i++) {
+      if (_restoreTerminalEmitted) {
+        _logInfo('_restoreIosPurchases() terminal outcome received');
+        return;
+      }
+      await Future<void>.delayed(const Duration(milliseconds: 100));
+    }
+
+    if (!_restoreTerminalEmitted) {
+      _logInfo(
+        '_restoreIosPurchases() no terminal outcome — treating as restoreEmpty',
+      );
+      _emitPurchaseUpdate(
+        const IapPurchaseResult(status: IapPurchaseStatus.restoreEmpty),
+      );
     }
   }
 
@@ -850,6 +878,21 @@ class IapService {
     }
 
     await _onPurchaseUpdated(past);
+  }
+
+  void _markRestoreTerminalIfNeeded(IapPurchaseResult result) {
+    if (!_restoreSession) return;
+    switch (result.status) {
+      case IapPurchaseStatus.purchased:
+      case IapPurchaseStatus.restored:
+      case IapPurchaseStatus.alreadySubscribed:
+      case IapPurchaseStatus.restoreEmpty:
+      case IapPurchaseStatus.error:
+      case IapPurchaseStatus.canceled:
+        _restoreTerminalEmitted = true;
+      case IapPurchaseStatus.pending:
+        break;
+    }
   }
 
   void _emitPurchaseUpdate(IapPurchaseResult result) {
@@ -889,6 +932,7 @@ class IapService {
       'tx=${result.transactionId} | error=${result.errorMessage} | '
       '${_sessionContext()}',
     );
+    _markRestoreTerminalIfNeeded(result);
     _purchaseController.add(result);
   }
 
@@ -946,6 +990,17 @@ class IapService {
     _logInfo(
       '_onPurchaseUpdated | count=${purchases.length} | ${_sessionContext()}',
     );
+
+    if (purchases.isEmpty) {
+      if (_restoreSession && !_restoreTerminalEmitted) {
+        _logInfo('restore stream batch empty — no purchases to restore');
+        _emitPurchaseUpdate(
+          const IapPurchaseResult(status: IapPurchaseStatus.restoreEmpty),
+        );
+      }
+      return;
+    }
+
     _inFlightPurchaseHandlers++;
     try {
       for (var i = 0; i < purchases.length; i++) {
@@ -1587,11 +1642,11 @@ class IapService {
       return;
     }
     _logInfo('UI error emit | message=$message | ${_sessionContext()}');
-    _purchaseController.add(
-      IapPurchaseResult(
-        status: IapPurchaseStatus.error,
-        errorMessage: message,
-      ),
+    final result = IapPurchaseResult(
+      status: IapPurchaseStatus.error,
+      errorMessage: message,
     );
+    _markRestoreTerminalIfNeeded(result);
+    _purchaseController.add(result);
   }
 }
