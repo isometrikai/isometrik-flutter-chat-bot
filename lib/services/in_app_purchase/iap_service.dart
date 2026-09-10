@@ -710,7 +710,7 @@ class IapService {
                 _handledSuccessKeys.add(successKey);
                 await _persistEntitlementFields(
                   productId: productId,
-                  autoRenew: productId == IapProductIds.autoRenewMonthly,
+                  autoRenew: IapProductIds.isAutoRenewProduct(productId),
                   transactionId: txId,
                 );
                 _emitPurchaseUpdate(
@@ -1271,7 +1271,7 @@ class IapService {
     // plan the user selected for this purchase.
     final autoRenew = Platform.isAndroid
         ? _pendingAutoRenew
-        : purchase.productID == IapProductIds.autoRenewMonthly;
+        : IapProductIds.isAutoRenewProduct(purchase.productID);
 
     await _persistEntitlementFields(
       productId: purchase.productID,
