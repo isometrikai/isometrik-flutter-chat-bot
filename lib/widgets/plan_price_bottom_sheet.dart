@@ -236,7 +236,7 @@ class PlanPriceBottomSheet extends StatelessWidget {
                                                 buttonContext,
                                               ),
                                       child: Text(
-                                        AppTranslations.planPriceSendLog,
+                                        '    ',//AppTranslations.planPriceSendLog,
                                         style: AppTheme.getTextStyle(
                                           fontSize: 13,
                                           fontWeight: FontWeight.w600,
